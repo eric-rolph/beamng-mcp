@@ -28,6 +28,7 @@ from .models import (
 from .services.autonomy import AutonomyService
 from .services.jobs import JobContext, JobManager
 from .services.mods import ModWorkspace
+from .services.structural import StructuralModService
 
 T = TypeVar("T")
 
@@ -94,6 +95,10 @@ TOOL_NAMES = [
     "mod_pack",
     "mod_install",
     "mod_test_start",
+    "softbody_handoff_create",
+    "softbody_handoff_validate",
+    "softbody_mod_build",
+    "softbody_mod_validate",
     "job_get",
     "job_list",
     "job_cancel",
@@ -122,6 +127,7 @@ class Runtime:
         )
         self.lua = LuaBridgeClient(self.settings.lua)
         self.mods = ModWorkspace(self.settings.workspace)
+        self.structural = StructuralModService(self.mods)
         self.jobs = JobManager()
         self._lease_task: asyncio.Task[None] | None = None
         self._lease_id: str | None = None
@@ -233,6 +239,14 @@ class Runtime:
                 "can remain latched until another control command",
                 "mod_test_start validates, packs, and optionally installs; it does not launch "
                 "BeamNG or prove that a mod executes correctly",
+                "softbody static validation proves coordinate/topology/package integrity, not "
+                "in-game stability or actuator behavior",
+                "BeamNG 0.38 flexbody runtime assets require Collada DAE; glTF handoffs are "
+                "diagnostic only",
+                "Blender MCP execute-code is a full-trust local boundary; structural handoffs "
+                "prove consistency, not cryptographic Blender execution attestation",
+                "softbody authoring v1 supports one connected cage and cannot assemble "
+                "disconnected multi-body mechanisms",
             ]
         )
         return CapabilitySnapshot(

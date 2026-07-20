@@ -103,6 +103,12 @@ class WorkspaceSettings(BaseModel):
     max_file_bytes: int = Field(default=2_097_152, ge=1024, le=67_108_864)
     max_mod_files: int = Field(default=4096, ge=1, le=100_000)
     max_mod_bytes: int = Field(default=536_870_912, ge=1024, le=17_179_869_184)
+    asset_staging_ttl_seconds: int = Field(default=3600, ge=60, le=86_400)
+    max_asset_staging_slots: int = Field(default=16, ge=1, le=128)
+    max_structural_nodes: int = Field(default=512, ge=4, le=512)
+    max_structural_beams: int = Field(default=4096, ge=6, le=4096)
+    max_structural_triangles: int = Field(default=2048, ge=4, le=2048)
+    max_structural_actuators: int = Field(default=128, ge=0, le=256)
 
     @model_validator(mode="after")
     def default_artifacts(self) -> WorkspaceSettings:

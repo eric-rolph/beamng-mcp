@@ -72,6 +72,39 @@ controls; the server still enforces gates itself.
 | `job_list` | Recent jobs with stage and cancellability metadata |
 | `job_cancel` | Cancel cooperative work; blocking stages return retry guidance |
 
+## Blender-evidenced soft-body authoring
+
+| Tool | Purpose |
+| --- | --- |
+| `softbody_handoff_create` | Create a capped, expiring, one-use Blender inbox and return the exact `blender_execute_code` string to run verbatim |
+| `softbody_handoff_validate` | Stable-read and verify raw `beamng-blender-handoff-v1` DAE/hash/axis/bounds/cage-vertex/topology evidence; return measured volume, node/base IDs, and refnodes without writing a mod |
+| `softbody_mod_build` | Convert to canonical `beamng-structure-v1`, apply reviewed mass/material/mechanism policy, compile deterministic JBeam/configuration metadata, consume the slot, and transactionally commit the bundle |
+| `softbody_mod_validate` | Recompile an assembled bundle from embedded provenance and compare every generated file and hash |
+
+The Blender and BeamNG servers are peers; the MCP client executes the exact generated runner
+through Blender MCP by passing the returned `blender_execute_code` verbatim, not by reconstructing
+code from `blender_runner_path`. The BeamNG tools never accept arbitrary source paths,
+model-authored node coordinates, or separate control-object nodes. V1 requires
+`asset_name == mod_name`, asset-namespaced visual/cage/material names, exactly one visual
+mesh/material/flexbody and structural asset per mod, a connected normal-beam cage, and no external
+textures. Consequently, the public path cannot represent a disconnected moving crusher plate;
+hydros and rails/slidenodes do not substitute for a structural connection during validation.
+
+`softbody_mod_build` supports typed hydros and rails/slidenodes; a BeamNG hinge is a tested
+node/beam/rail/torsion pattern, not a literal `hinges` section. A volume-based mass input must equal
+the measured Blender volume returned by validation. Replacing any existing generated target
+requires `overwrite=true` and a complete `expected_sha256` map for every target that currently
+exists. The slot is consumed before commit, so a commit failure requires a new handoff. V1 runtime
+builds require Collada DAE and generate `<asset>.jbeam`, `<asset>.dae`, `main.materials.json`,
+`info.json`, `<asset>.pc`, `info_<asset>.json`, and `<asset>.structure.json`.
+
+Slots bind the exact structured request and reviewed helper/runner digests in the current server
+session, fail closed after restart, and are capped/pruned. Those hashes are consistency evidence,
+not cryptographic attestation. Blender MCP 1.6.4's unauthenticated loopback execute-code interface
+is full-trust local code execution and may capture code telemetry; set
+`BLENDER_MCP_DISABLE_TELEMETRY=1` before launching it for private assets. See
+[Soft-Body Authoring](SOFTBODY_AUTHORING.md).
+
 ## Autonomous driving and safety
 
 | Tool | Purpose |
@@ -103,6 +136,7 @@ Resources:
 - `beamng://vehicles`
 - `beamng://autonomy`
 - `beamng://jobs/{job_id}`
+- `beamng://authoring/softbody/v1`
 
 Job resources expose the same `stage` and `cancellable` state as the job tools.
 
@@ -110,4 +144,5 @@ Prompts:
 
 - `inspect_current_scene`
 - `build_and_test_mod`
+- `build_softbody_mod`
 - `cautious_autonomous_run`

@@ -5,6 +5,22 @@ uses semantic versioning after the initial alpha series.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-19
+
+### Added
+
+- Four soft-body authoring tools, one schema resource, and a guided Blender-to-BeamNG prompt
+- Version-controlled Blender exporter for evaluated world-space vertices, explicit coordinate
+  transforms, sparse cage topology, roles, bounds, volume, and hash-bound DAE evidence
+- Expiring single-use Blender inboxes with fixed paths, stable reads, Collada security checks, and
+  transactional binary/text mod bundle commits
+- Deterministic JBeam compiler for exact nodes, explicit beams and X-braces, collision triangles,
+  heavy/fixed bases, mass distribution, four starting material baselines, hydros, and
+  rails/slidenodes
+- Full canonical build provenance and assembled-mod recompilation/hash validation
+- End-to-end soft-body methodology, Blender 5.2/DAE compatibility notes, and manual physics smoke
+  checklist
+
 ## [0.1.0] - 2026-07-19
 
 ### Added

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+import json
 from datetime import timedelta
 from pathlib import Path
 
@@ -17,8 +19,16 @@ async def test_mcp_exposes_curated_typed_surface(tmp_path: Path) -> None:
     mcp, runtime = create_mcp_server(settings)
     tools = await mcp.list_tools()
     names = {tool.name for tool in tools}
-    assert len(tools) == 47
-    assert {"simulator_connect", "mod_validate", "autonomy_start", "emergency_stop"} <= names
+    assert len(tools) == 51
+    assert {
+        "simulator_connect",
+        "mod_validate",
+        "softbody_handoff_create",
+        "softbody_mod_build",
+        "softbody_mod_validate",
+        "autonomy_start",
+        "emergency_stop",
+    } <= names
     assert not any("eval" in name or "shell" in name for name in names)
     delete = next(tool for tool in tools if tool.name == "map_object_delete")
     save = next(tool for tool in tools if tool.name == "map_save")
@@ -30,6 +40,16 @@ async def test_mcp_exposes_curated_typed_surface(tmp_path: Path) -> None:
     assert create.inputSchema["properties"]["overwrite"]["default"] is False
     assert create.inputSchema["properties"]["confirm_overwrite"]["default"] is False
     assert "level" in save.inputSchema["required"]
+    softbody_build = next(tool for tool in tools if tool.name == "softbody_mod_build")
+    assert softbody_build.annotations is not None
+    assert softbody_build.annotations.destructiveHint is True
+    assert "request" in softbody_build.inputSchema["required"]
+    resources = await mcp.list_resources()
+    prompts = await mcp.list_prompts()
+    assert len(resources) == 4
+    assert len(prompts) == 4
+    assert any(str(resource.uri) == "beamng://authoring/softbody/v1" for resource in resources)
+    assert any(prompt.name == "build_softbody_mod" for prompt in prompts)
     await runtime.shutdown()
 
 
@@ -43,9 +63,72 @@ async def test_official_in_memory_client_can_call_structured_tool(tmp_path: Path
         result = await session.call_tool("capabilities_get", {})
         assert result.isError is False
         assert result.structuredContent is not None
-        assert result.structuredContent["server_version"] == "0.1.0"
+        assert result.structuredContent["server_version"] == "0.2.0"
         assert result.structuredContent["mode"] == "offline"
     # Lifespan owns shutdown; a second shutdown remains safe.
+    await runtime.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_mcp_creates_a_reviewed_blender_softbody_handoff(tmp_path: Path) -> None:
+    settings = Settings(workspace={"root": tmp_path / "workspace"})
+    mcp, runtime = create_mcp_server(settings)
+    async with create_connected_server_and_client_session(mcp) as session:
+        result = await session.call_tool(
+            "softbody_handoff_create",
+            {
+                "request": {
+                    "mod_name": "demo",
+                    "asset_name": "demo",
+                    "visual_object": "demo_mesh",
+                    "cage_object": "demo_cage",
+                    "coordinates": {
+                        "source_origin_world": [0.0, 0.0, 0.0],
+                        "source_world_to_beamng_vehicle": [
+                            [1.0, 0.0, 0.0, 0.0],
+                            [0.0, 1.0, 0.0, 0.0],
+                            [0.0, 0.0, 1.0, 0.0],
+                            [0.0, 0.0, 0.0, 1.0],
+                        ],
+                    },
+                }
+            },
+        )
+        assert result.isError is False
+        assert result.structuredContent is not None
+        assert set(result.structuredContent) == {
+            "asset_name",
+            "blender_execute_code",
+            "blender_runner_path",
+            "directory",
+            "expires_at",
+            "manifest_path",
+            "mod_name",
+            "slot_id",
+            "visual_path",
+        }
+        slot_id = result.structuredContent["slot_id"]
+        assert isinstance(slot_id, str)
+        assert len(slot_id) == 32 and set(slot_id) <= set("0123456789abcdef")
+        runner = Path(result.structuredContent["blender_runner_path"])
+        helper = runner.parent / "beamng_softbody_export.py"
+        runner_exists, helper_exists, runner_text = await asyncio.gather(
+            asyncio.to_thread(runner.is_file),
+            asyncio.to_thread(helper.is_file),
+            asyncio.to_thread(runner.read_text, encoding="utf-8"),
+        )
+        assert runner_exists
+        assert helper_exists
+        assert "export_beamng_softbody" in runner_text
+        assert "demo_mesh" in runner_text
+        assert result.structuredContent["blender_execute_code"] == (
+            f"import runpy\nrunpy.run_path({json.dumps(str(runner))}, run_name='__main__')"
+        )
+        assert Path(result.structuredContent["directory"]) == runner.parent
+        assert Path(result.structuredContent["manifest_path"]) == (
+            runner.parent / "structure.manifest.json"
+        )
+        assert Path(result.structuredContent["visual_path"]) == runner.parent / "visual.dae"
     await runtime.shutdown()
 
 

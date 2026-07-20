@@ -7,6 +7,7 @@ import hmac
 import json
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from dataclasses import asdict
 from typing import Any, Literal, ParamSpec, TypeVar, cast
 
 from mcp.server.fastmcp import FastMCP
@@ -42,6 +43,16 @@ from .models import (
     VehicleTeleport,
 )
 from .runtime import Runtime
+from .services.jbeam import MATERIAL_CATALOG_VERSION, MATERIAL_PRESETS
+from .structural_models import (
+    AssetStage,
+    AssetStageRequest,
+    AssetStageValidation,
+    BlenderStructuralManifest,
+    StructuralBuildRequest,
+    StructuralBuildResult,
+    StructuralValidation,
+)
 
 F = TypeVar("F", bound=Callable[..., Awaitable[Any]])
 P = ParamSpec("P")
@@ -98,8 +109,9 @@ def create_mcp_server(
         instructions=(
             "Control BeamNG through typed, loopback-only tools. Query status and "
             "capabilities first. Use emergency_stop on stale perception, lost control, "
-            "or unexpected motion. Persistent map "
-            "saves, deletes, and mod installation require explicit confirmation."
+            "or unexpected motion. Blender and BeamNG MCP are peer servers: use the "
+            "evidence-bound softbody handoff instead of inventing JBeam coordinates. "
+            "Persistent map saves, deletes, and mod installation require explicit confirmation."
         ),
         website_url="https://github.com/eric-rolph/beamng-mcp",
         host=settings.mcp.host,
@@ -518,6 +530,34 @@ def create_mcp_server(
 
         return await _to_thread(app_runtime.mods.write_file, request)
 
+    @mcp.tool(annotations=ACTION)
+    @tool_guard
+    async def softbody_handoff_create(request: AssetStageRequest) -> AssetStage:
+        """Create an expiring Blender export slot with a reviewed, exact-coordinate runner."""
+
+        return await _to_thread(app_runtime.structural.create_handoff, request)
+
+    @mcp.tool(annotations=READ_ONLY)
+    @tool_guard
+    async def softbody_handoff_validate(slot_id: str) -> AssetStageValidation:
+        """Validate staged DAE hashes, axes, bounds, vertices, topology, refs, and base evidence."""
+
+        return await _to_thread(app_runtime.structural.validate_handoff, slot_id)
+
+    @mcp.tool(annotations=DESTRUCTIVE)
+    @tool_guard
+    async def softbody_mod_build(request: StructuralBuildRequest) -> StructuralBuildResult:
+        """Compile and transactionally assemble one validated Blender handoff as a JBeam prop."""
+
+        return await _to_thread(app_runtime.structural.build, request)
+
+    @mcp.tool(annotations=READ_ONLY)
+    @tool_guard
+    async def softbody_mod_validate(mod_name: str, asset_name: str) -> StructuralValidation:
+        """Recompile and hash-check an assembled DAE/JBeam/material/provenance bundle."""
+
+        return await _to_thread(app_runtime.structural.validate_mod, mod_name, asset_name)
+
     @mcp.tool(annotations=READ_ONLY)
     @tool_guard
     async def mod_validate(mod_name: str) -> ModValidation:
@@ -641,6 +681,36 @@ def create_mcp_server(
 
         return app_runtime.jobs.get(job_id).model_dump_json(indent=2)
 
+    @mcp.resource("beamng://authoring/softbody/v1", mime_type="application/json")
+    def softbody_contract_resource() -> str:
+        """Return versioned authoring schemas and explicitly non-authoritative presets."""
+
+        return json.dumps(
+            {
+                "schema": "beamng-softbody-authoring-resource-v1",
+                "raw_handoff_schema": "beamng-blender-handoff-v1",
+                "canonical_manifest_version": "beamng-structure-v1",
+                "runtime_visual_format": "dae",
+                "gltf_status": "diagnostic_only",
+                "v1_limits": [
+                    "one connected physics-cage graph",
+                    "one visual mesh, material, flexbody, structural asset, and mod",
+                    "cage vertices only; no separate control-object nodes",
+                    "no generated actuator controller or input action",
+                    "Blender MCP execute-code remains a full-trust local boundary",
+                ],
+                "material_catalog": MATERIAL_CATALOG_VERSION,
+                "material_presets": {
+                    name: asdict(preset) for name, preset in MATERIAL_PRESETS.items()
+                },
+                "handoff_request_schema": AssetStageRequest.model_json_schema(),
+                "build_request_schema": StructuralBuildRequest.model_json_schema(),
+                "canonical_manifest_schema": BlenderStructuralManifest.model_json_schema(),
+            },
+            indent=2,
+            sort_keys=True,
+        )
+
     @mcp.prompt()
     def inspect_current_scene() -> str:
         return (
@@ -655,6 +725,25 @@ def create_mcp_server(
             f"Build mod {mod_name!r} for this goal: {goal}. Scaffold it, inspect every "
             "file revision before writing, validate, start a pack-only test job, and "
             "report issues. Do not install unless the user explicitly confirms installation."
+        )
+
+    @mcp.prompt()
+    def build_softbody_mod(mod_name: str, asset_name: str, goal: str) -> str:
+        return (
+            f"Create BeamNG soft-body asset {asset_name!r} in mod {mod_name!r}: {goal}. "
+            "Treat Blender MCP and BeamNG MCP as peers. Author a low-poly visual shell and a "
+            "separate sparse physics cage in Blender; assign unique beamng_node_id POINT strings "
+            "and the beamng_ref/back/left/up/base vertex groups. Choose and state an explicit "
+            "proper-rigid Blender-world to BeamNG-vehicle transform (+X left, +Y backward, +Z "
+            "up). Call softbody_handoff_create, then pass its returned blender_execute_code "
+            "verbatim to Blender MCP. Call softbody_handoff_validate and stop on any error. Build "
+            "with reviewed mass/material/mechanism inputs using softbody_mod_build, then call "
+            "softbody_mod_validate and mod_test_start(pack=true). Never invent or hand-edit node "
+            "coordinates. Do not install without explicit operator confirmation, and do not call "
+            "the asset physically correct until the documented in-game spawn, settle, collision, "
+            "actuator-limit, reset, reload, and log checks pass. v1 requires one connected cage; "
+            "use a manually reviewed/v2 multi-part assembly for disconnected crusher plates or "
+            "other mechanism bodies."
         )
 
     @mcp.prompt()

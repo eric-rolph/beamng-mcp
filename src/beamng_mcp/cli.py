@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import sys
 from collections.abc import Sequence
+from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
@@ -109,6 +110,7 @@ def _doctor(args: argparse.Namespace) -> int:
     token = discover_lua_token(installation.user)
     gpu = _gpu_info()
     vision_runtime = _vision_runtime_info()
+    blender_helper = files("beamng_mcp").joinpath("assets", "blender", "softbody_export.py")
     report: dict[str, Any] = {
         "beamng_mcp": __version__,
         "python": sys.version.split()[0],
@@ -129,6 +131,13 @@ def _doctor(args: argparse.Namespace) -> int:
         },
         "gpu": gpu,
         "vision_runtime": vision_runtime,
+        "softbody_authoring": {
+            "blender_mcp_executable": shutil.which("blender-mcp"),
+            "blender_mcp_package": _package_version("blender-mcp"),
+            "reviewed_helper_packaged": blender_helper.is_file(),
+            "runtime_visual_format": "dae",
+            "dae_operator_status": "verify in live Blender; helper fails closed if absent",
+        },
         "workspace": str(settings.workspace.root.expanduser().resolve()),
         "full_feature_tier": "BeamNG.tech + BeamNGpy",
         "retail_drive_tier": "experimental GELua bridge",
@@ -156,6 +165,13 @@ def _doctor(args: argparse.Namespace) -> int:
         onnx_runtime = vision_runtime.get("onnxruntime", {})
         if onnx_runtime:
             print("ONNX providers: " + ", ".join(onnx_runtime.get("providers", [])))
+        helper_status = (
+            "packaged" if report["softbody_authoring"]["reviewed_helper_packaged"] else "missing"
+        )
+        print(
+            f"Soft-body Blender helper: {helper_status}; "
+            "live Collada operator verification required"
+        )
         print(f"BeamNGpy {report['beamngpy']} / MCP SDK {report['mcp_sdk']}")
     return 0 if installation.executable is not None else 1
 

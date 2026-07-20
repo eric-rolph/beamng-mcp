@@ -88,7 +88,7 @@ def test_protocol_has_strict_v1_envelope_and_authentication() -> None:
     assert "peer.authenticated = true" in source
     assert "peer.authenticated = false" in source
     assert "heartbeat_timeout_seconds" in source
-    assert 'local BRIDGE_VERSION = "0.1.0"' in source
+    assert 'local BRIDGE_VERSION = "0.2.0"' in source
     assert "bridge_version = BRIDGE_VERSION" in source
     assert "game_version = tostring" in source
 

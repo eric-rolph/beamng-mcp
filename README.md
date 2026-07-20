@@ -29,6 +29,7 @@ never placed inside the 10–30 Hz steering/braking loop.
 | Live scene-object creation/update/delete | Supported through GELua | Experimental through GELua |
 | Persistent level save | Explicitly gated; World Editor required | Explicitly gated; World Editor required |
 | Mod scaffold/validate/pack/install | Supported; install is operator-gated | Supported; install is operator-gated |
+| Blender-evidenced soft-body authoring and deterministic JBeam assembly | Offline authoring supported; in-game validation required | Offline authoring supported; in-game validation required |
 | Native AI and real-time vision driving | Supported | Depends on available camera/control path |
 
 BeamNGpy's official support contract is for BeamNG.tech. Retail Drive support is useful, but this
@@ -37,9 +38,10 @@ repository labels it honestly as experimental. The pinned compatibility baseline
 
 ## What is included
 
-- 47 typed MCP tools across simulator, scenario, traffic, environment, vehicle, sensor, map, Lua,
-  mod, job, and autonomous-driving domains.
-- Read-only MCP resources for status, vehicles, jobs, and autonomy plus guided workflow prompts.
+- 51 typed MCP tools across simulator, scenario, traffic, environment, vehicle, sensor, map, Lua,
+  mod, soft-body authoring, job, and autonomous-driving domains.
+- Read-only MCP resources for status, vehicles, jobs, autonomy, and the soft-body authoring
+  contract, plus guided workflow prompts.
 - A loopback-only GELua WebSocket server with a per-install secret, bounded messages and queues,
   correlation IDs, heartbeats, an explicit method allowlist, and no dynamic Lua evaluation.
 - Vehicle control, native AI, deterministic stepping, scenario creation, road-network queries,
@@ -48,6 +50,10 @@ repository labels it honestly as experimental. The pinned compatibility baseline
 - Path-confined, quota-bounded mod workspaces with atomic writes, SHA-256 optimistic concurrency,
   validation, correctly rooted zip packages, and recoverable install backups. Installation is
   disabled until the operator opts in.
+- A peer-MCP Blender workflow with expiring one-use inboxes, a version-controlled exporter,
+  exact evaluated-cage-vertex evidence, explicit coordinate transforms, deterministic JBeam nodes,
+  beams/X-braces/triangles, typed hydros and rails/slidenodes, mass-preserving heavy bases, and
+  full build provenance. JBeam coordinates are never accepted from prose.
 - Live map object changes through GELua. Existing level objects and persistent saves have separate,
   default-off operator gates; deletes and saves also require explicit confirmation.
 - Three driving modes: BeamNG native AI, vision lane keeping, and a hybrid state/vision mode.
@@ -67,6 +73,9 @@ flowchart LR
   APP --> BNGPY["BeamNGpy adapter\nserialized worker thread"]
   APP -->|"arm / renew / disarm safety lease"| WS["Private WebSocket client\nJSON schema v1"]
   APP --> MODS["Confined mod workspace\nand job manager"]
+  AI -->|"orchestrates peer MCP"| BLENDER["Blender MCP\nreviewed exporter only"]
+  BLENDER --> STAGE["Expiring one-use handoff\nDAE + hashed structure evidence"]
+  STAGE --> APP
   BNGPY <-->|"MessagePack + shared memory"| GAME["BeamNG.tech / BeamNG.drive"]
   WS <-->|"127.0.0.1 only"| LUA["Custom GELua extension"]
   LUA <-->|"commands + telemetry"| GAME
@@ -142,7 +151,7 @@ Ask the AI client to follow this sequence:
 6. Poll `autonomy_status`, including the `engine_deadman_*` fields; call `emergency_stop` on stale
    frames, unexpected motion, or operator request.
 
-The server also provides `inspect_current_scene`, `build_and_test_mod`, and
+The server also provides `inspect_current_scene`, `build_and_test_mod`, `build_softbody_mod`, and
 `cautious_autonomous_run` MCP prompts.
 
 ## Vision on an RTX 5090
@@ -198,6 +207,49 @@ does not activate the mod, launch a scenario, or prove runtime behavior. Determi
 smoke execution and log collection remain roadmap work; use a disposable BeamNG user folder for
 manual runtime testing in this release.
 
+### Blender to functional soft body
+
+The two MCP servers are peers coordinated by the AI client; neither server receives a general tool
+for calling the other. The safe sequence is:
+
+```text
+softbody_handoff_create
+→ execute the returned blender_execute_code string verbatim through Blender MCP
+→ softbody_handoff_validate
+→ softbody_mod_build
+→ softbody_mod_validate
+→ mod_test_start(pack=true) → job_get
+→ manual in-game spawn/settle/collision/mechanism tests
+```
+
+`softbody_handoff_create` returns absolute paths for review and a `blender_execute_code` program;
+clients must send that exact program to Blender MCP instead of reconstructing a call from
+`blender_runner_path`. The public v1 coordinator requires `asset_name == mod_name`, and the visual
+mesh, physics cage, and single DAE material must equal that asset name or begin with
+`<asset_name>_`. It assembles one structural asset, one visual mesh, one material, and one flexbody
+per mod; texture references are rejected.
+
+The Blender physics cage must provide stable `beamng_node_id` POINT-string attributes and explicit
+`beamng_ref`, `beamng_back`, `beamng_left`, and `beamng_up` vertex groups. Every public-handoff node
+is an evaluated vertex of that one cage; separate control-object nodes are not supported.
+Ground-standing objects also use at least three non-collinear minimum-Z `beamng_base` nodes. The
+exporter evaluates the dependency graph, bakes the reviewed Blender-world → BeamNG-vehicle rigid
+transform into both the visual and physics evidence, and records exact unrounded coordinates. The
+raw `beamng-blender-handoff-v1` document is verified and converted server-side into the canonical
+`beamng-structure-v1` build manifest. The compiler refuses hash, transform, bounds, topology,
+rail-alignment, reference-frame, base, or visual-vertex mismatches.
+
+The generated vehicle folder includes `<asset>.jbeam`, `<asset>.dae`, `main.materials.json`,
+`info.json`, `<asset>.pc`, `info_<asset>.json`, and `<asset>.structure.json`. Before building,
+review the validation summary's measured volume, exact node IDs, base IDs, and refnodes. A
+volume-derived mass request must repeat that measured volume exactly.
+
+BeamNG 0.38's documented vehicle/flexbody runtime format is Collada DAE. glTF export is available
+only for diagnostic interchange and cannot be assembled as a runtime soft body. Blender 5.2 on
+this workstation has no Collada operator installed, so a tested Collada exporter or a supported
+Blender version must be configured before a DAE handoff can complete; the helper fails closed when
+none is available. See the complete [Soft-Body Authoring guide](docs/SOFTBODY_AUTHORING.md).
+
 Zip archives place `lua`, `levels`, `vehicles`, and other BeamNG roots directly at the archive
 root, matching the official [mod packing rules](https://documentation.beamng.com/modding/mod-support/mod_packing/).
 Installing an authored Lua mod executes that mod's Lua inside BeamNG. Validation catches structural
@@ -237,6 +289,17 @@ Work on cloned/user-folder levels; do not edit shipped game content.
   short engine lease is armed. Direct `vehicle_control` calls remain one-shot, may latch until a
   follow-up command, and are rejected while an automated run is starting or active.
 - Mod paths are canonicalized beneath one workspace; traversal and symlinks are rejected.
+- Blender handoffs use random, capped, expiring, single-use directories with fixed filenames,
+  stable reads, DAE XML/external-reference checks, SHA-256 binding, and transactional bundle
+  writes. The structured handoff request and reviewed helper/runner digests are also held in the
+  current server session; slots fail closed after a restart and stale/consumed slots are pruned.
+- Blender MCP 1.6.4's execute-code bridge is unauthenticated loopback, full-trust local code
+  execution and may capture code telemetry. Set `BLENDER_MCP_DISABLE_TELEMETRY=1` before launching
+  it when private assets or paths are involved. The handoff hashes provide consistency evidence,
+  not cryptographic attestation of Blender or its host.
+- A structural build reserves (consumes) its slot before any mod commit. If the transactional
+  commit fails, create a fresh handoff. Replacing existing bundle files requires `overwrite=true`
+  and an `expected_sha256` entry for every generated target that already exists.
 - Mod file count, total bytes, and individual file size are bounded. Overwrites use optimistic
   hashes or backups. Destructive operations expose accurate MCP hints and enforce operator gates
   where a model-supplied confirmation alone is insufficient.

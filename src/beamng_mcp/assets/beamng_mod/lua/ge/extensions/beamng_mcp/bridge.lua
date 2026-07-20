@@ -8,7 +8,7 @@ local M = {}
 M.dependencies = {"core_gamestate"}
 
 local LOG_TAG = "beamng_mcp_bridge"
-local BRIDGE_VERSION = "0.1.0"
+local BRIDGE_VERSION = "0.2.0"
 local SCHEMA_VERSION = 1
 local LOOPBACK_ADDRESS = "127.0.0.1"
 local WEBSOCKET_PATH = ""

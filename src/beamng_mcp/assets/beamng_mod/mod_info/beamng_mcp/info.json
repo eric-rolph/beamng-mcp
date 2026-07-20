@@ -2,7 +2,7 @@
   "title": "BeamNG MCP Bridge",
   "tag_line": "Loopback-only typed control bridge for beamng-mcp",
   "description": "Original GELua extension providing an authenticated local WebSocket control and telemetry channel.",
-  "version_string": "0.1.0",
+  "version_string": "0.2.0",
   "author": "beamng-mcp contributors",
   "type": "Other"
 }

@@ -111,6 +111,58 @@ Lua authored through the workspace is inert until BeamNG activates an installed 
 installed, it executes with the privileges of BeamNG's Lua VM. Static validation is useful QA, not
 a sandbox or proof that authored code is safe.
 
+### Blender soft-body evidence pipeline
+
+Blender MCP and BeamNG MCP remain peer servers coordinated by the MCP client. BeamNG MCP creates a
+random, expiring, single-use directory below `<workspace>/imports/<slot_id>` and writes a
+version-controlled Blender helper plus a configured runner into it. The returned `AssetStage`
+contains a `blender_execute_code` string; the MCP client sends that string verbatim to Blender MCP
+instead of constructing code from the returned path. Blender may write only the fixed `visual.dae`
+and `structure.manifest.json` outputs. The server rejects unexpected entries, links/reparse points,
+expired/replayed slots, unstable reads, digest mismatches, XML entities, external Collada
+references, non-Z-up/non-metre assets, and non-identity emitted scene transforms.
+
+The reviewed Blender helper emits the raw `beamng-blender-handoff-v1` schema. The coordinator
+verifies it against the exact structured handoff request plus helper and runner hashes retained in
+server-session memory, then creates the canonical `beamng-structure-v1` manifest used by the pure
+compiler and provenance file. A slot therefore fails closed after a server restart even if its
+files remain on disk. Creation is capped; later creates prune safely verified expired and consumed
+slots. These digests are consistency and replay controls, not cryptographic attestation of the
+Blender process or workstation.
+
+The Blender helper evaluates a sparse physics cage and visual mesh through the dependency graph.
+It requires stable `beamng_node_id` POINT strings, records exact source object/vertex provenance,
+and bakes the same explicit proper-rigid Blender-world → BeamNG-vehicle transform into both the DAE
+visual and physics coordinates. Surface nodes must equal emitted DAE vertices within 1 µm; interior
+nodes are explicitly tagged. Physics-cage and DAE bounds must match. The public handoff maps every
+node to a contiguous evaluated vertex of one cage; it does not accept separate control-object
+nodes. `asset_name` must equal `mod_name`, while the visual mesh, cage, and one material are
+asset-namespaced. V1 emits one flexbody and effectively supports one structural asset per mod.
+
+The JBeam compiler is pure and deterministic. It accepts only explicit cage edges, quad panels,
+triangles, reference nodes, base nodes, and typed mechanisms. Quad panels generate both X
+diagonals; it never performs nearest-neighbor topology or coordinate inference. The staged normal
+beam graph must already be connected before build-time hydros, rails, or slidenodes are applied.
+Because v1 has no actuator-only edge tag, its public path cannot model a disconnected moving
+crusher plate: adding a normal edge would permanently connect it, while omitting one fails graph
+validation. A target mass or measured closed-volume/density route is distributed across nodes
+while preserving total mass and applying the reviewed base weighting. A volume-based build must
+repeat the Blender-measured volume exactly. The output includes strict-JSON JBeam,
+`main.materials.json`, vehicle `info.json`, `<asset>.pc`, `info_<asset>.json`, and a full canonical
+provenance sidecar. Texture references are not accepted. A later validation recompiles that
+sidecar and byte-compares generated files.
+
+The DAE and all generated files are staged before a transactional multi-file replace with rollback.
+For a replacement, `overwrite=true` must carry a complete `expected_sha256` map for every bundle
+target that currently exists (and no entry for a target that does not). The coordinator consumes
+the one-use slot before attempting the workspace commit. This prevents a retry from producing two
+policy bundles from one evidence set, but it also means a commit failure requires a fresh Blender
+handoff.
+
+This proves evidence, topology, and packaging consistency only. It does not prove spawn stability,
+collision quality, material tuning, or actuator behavior; those require the documented in-game
+smoke sequence. BeamNG 0.38 runtime builds use DAE. glTF is diagnostic only.
+
 ### Map mutation boundaries
 
 Objects created through the bridge are recorded as bridge-managed and can be updated or deleted.
@@ -188,6 +240,8 @@ The bridge and BeamNGpy are complementary, not redundant:
 - GELua: retail Drive fallback, asynchronous telemetry, editor/scene mutations, an engine-real-time
   autonomy lease, and an independent emergency-stop path.
 - Python workspace: mod content and packages, avoiding unstable internal mod-manager APIs.
+- Blender peer: reviewed, version-controlled extraction/export code through a one-use file handoff;
+  never a direct MCP-to-MCP trust escalation.
 
 ## Trust boundaries
 
@@ -198,8 +252,15 @@ The bridge and BeamNGpy are complementary, not redundant:
 | Python → BeamNGpy | loopback only, one serialized connection, no exposed Lua queue tool |
 | Python → GELua | loopback, shared token, allowlist, correlation IDs, heartbeat, bounded queues, vehicle-scoped lease |
 | AI → filesystem | one canonical workspace, quotas, no symlinks/traversal, atomic writes, hashes/backups, default-off install |
+| Blender → mod compiler | capped expiring fixed-name inbox, session-bound request/helper/runner hashes, exact cage-vertex provenance, explicit rigid transform, DAE parser, pre-commit one-use consume |
 | AI → map | managed objects by default; separate existing-object and exact-level save gates |
 | Model → actuation | clamps, speed governor, stale-frame/command watchdog, engine lease, emergency brake |
+
+Blender MCP 1.6.4's loopback execute-code interface is unauthenticated, grants full code execution
+inside Blender, and may capture executed-code telemetry. For private assets, set
+`BLENDER_MCP_DISABLE_TELEMETRY=1` before starting Blender MCP. Loopback binding and handoff hashes
+reduce accidental exposure and detect inconsistent artifacts; they do not turn Blender MCP into a
+sandbox or attest the exporter execution cryptographically.
 
 ## Failure behavior
 
@@ -216,12 +277,19 @@ The bridge and BeamNGpy are complementary, not redundant:
 - Lua heartbeat loss: peer authentication expires; an armed vehicle lease has its own shorter
   real-time expiry.
 - Simulator disconnect: sensor cleanup is attempted and autonomy stops.
+- Invalid Blender evidence discovered before build: no mod files are written and the handoff stays
+  available until expiry. Once a valid build reaches commit, the handoff is consumed first; any
+  later commit failure requires a fresh export.
 
 ## Deliberate non-features
 
 - No direct arbitrary Lua-eval, Python, or shell tool. Installing an authored Lua mod is a separate,
   explicit code-execution boundary and is disabled by default.
 - No generic unrestricted file reader/writer.
+- No arbitrary Blender source path, prompt-authored JBeam coordinate, inferred nearest-neighbor
+  cage, or fictional JBeam `hinges` section.
+- No v1 external textures, multiple visual meshes/materials/flexbodies, multiple structural assets
+  in one mod, separate control-object nodes, or disconnected moving subassemblies.
 - No video streaming through MCP or JSON WebSocket.
 - No LLM sampling inside the driving loop.
 - No dependency on experimental MCP Tasks; jobs are application-level records.

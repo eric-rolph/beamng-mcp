@@ -166,6 +166,56 @@ sets throttle to zero with full service and parking brake. This protects against
 process or control path while the game engine is still updating; it cannot act if BeamNG itself is
 frozen. Keep an independent manual emergency-stop path available.
 
+## Blender soft-body authoring
+
+The soft-body workflow uses an existing Blender MCP as a peer server. BeamNG MCP does not embed or
+patch Blender MCP. `softbody_handoff_create` returns a random slot containing
+`beamng_softbody_export.py` and `run_export.py`, plus a `blender_execute_code` string. After
+reviewing the returned paths and selected Blender objects, send that exact string verbatim to
+Blender MCP's execute-code tool. Do not retype the runner path or construct a different invocation.
+
+Requirements:
+
+- Blender scene units are Metric with scale 1.0 and Z up.
+- V1 requires `asset_name == mod_name`. The visual object, physics cage, and sole DAE material must
+  equal the asset name or start with `<asset_name>_`.
+- The handoff contains exactly one visual mesh, one physics cage, and one material, producing one
+  flexbody and effectively one structural asset per mod. It accepts no external textures.
+- Every physics-cage vertex has a unique string POINT attribute named `beamng_node_id`; all public
+  handoff nodes come from those contiguous evaluated cage vertices. Separate control-object nodes
+  are not supported.
+- Four single-node vertex groups define `beamng_ref`, `beamng_back`, `beamng_left`, and
+  `beamng_up`; ground-standing assets also define at least three non-collinear `beamng_base`
+  nodes.
+- Cage edges and X-braces must form one connected normal-beam graph. Build-time hydros,
+  rails/slidenodes, and the current schema cannot join otherwise disconnected moving bodies.
+- The handoff supplies an explicit proper-rigid world-to-BeamNG transform that preserves +Z and
+  maps the chosen asset origin to `(0, 0, 0)`.
+- A tested selection-only Collada exporter is registered in Blender. BeamNG 0.38 flexbodies use
+  DAE; glTF is diagnostic only. The helper refuses DAE export if it cannot find an unambiguous
+  exporter with a selection-only option.
+
+Blender 5.2 does not bundle the older Collada exporter. Install and test a compatible Blender
+Collada extension or use an appropriate Blender version before starting a runtime handoff. Also
+verify that the Blender MCP add-on is installed and enabled in the profile for the Blender version
+you actually launch. `beamng-mcp doctor --json` confirms the reviewed helper is packaged, but a
+Collada operator can be verified only inside the live Blender process.
+
+Blender MCP 1.6.4 exposes an unauthenticated loopback execute-code interface with the authority of
+the Blender process and may capture executed-code telemetry. Keep it on loopback, review the
+returned code, and set `BLENDER_MCP_DISABLE_TELEMETRY=1` before launching Blender MCP when working
+with private models or paths. Handoff hashes detect consistency changes; they are not
+cryptographic attestation.
+
+Slots are capped, expire, are single-use, and are bound to the exact structured request plus the
+reviewed helper/runner hashes in the current BeamNG MCP process. A server restart invalidates all
+outstanding slots even when their directories still exist; create a new handoff. Before a build,
+review the validation summary's measured volume, node IDs, base-node IDs, and refnodes. If using
+the volume/density mass route, submit that measured volume unchanged.
+
+See [Soft-Body Authoring](SOFTBODY_AUTHORING.md) for the complete model/cage convention, tool
+sequence, mechanical rigging rules, and in-game acceptance checklist.
+
 ## Mod installation
 
 Writing, validating, and packing a mod stays available with the safe defaults. Copying a package
@@ -185,7 +235,7 @@ configuration gate and requires `confirm_install=true`.
 
 Despite its historical tool name, `mod_test_start` performs static package checks and an optional
 copy only. It does not activate the mod or run BeamNG. Use a disposable user folder and inspect the
-game log for the runtime smoke test; automated in-game activation is not part of 0.1.0.
+game log for the runtime smoke test; automated in-game activation is not part of this release.
 
 An authored mod containing Lua is code that BeamNG will execute when the mod is activated. The
 validator checks paths, quotas, JSON, symlinks, and some suspicious Lua patterns, but it is not a

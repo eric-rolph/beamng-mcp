@@ -8,6 +8,10 @@
 - Cloned-level workflow with World Editor undo transactions and save previews
 - Artifact-hash review manifests and one-shot operator approvals for executable mod installation
 - Mod-specific deterministic smoke scenarios, BeamNG log collection, and disposable user folders
+- Texture-hashed multi-material/multi-flexbody Blender handoffs and selector-preview generation
+- A versioned multi-body mechanism schema with actuator-only connectivity, separate evidenced
+  subassemblies, and more than one structural asset per mod
+- Automated soft-body spawn/settle/impulse and actuator-limit sweeps with debug-data capture
 - TensorRT-RTX standalone EP ABI integration and cache management
 - Low-rate asynchronous VLM advisor that cannot issue direct actuation
 - Multi-vehicle engine-side lease telemetry and deterministic lease-expiry fault injection

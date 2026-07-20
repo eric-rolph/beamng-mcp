@@ -395,6 +395,188 @@ class ModWorkspace:
             (root / "README.md").write_bytes(readme_bytes)
             return self.list_files(mod_name)
 
+    def exists(self, mod_name: str) -> bool:
+        """Return whether a regular, confined mod workspace already exists."""
+
+        with self._lock:
+            try:
+                self._mod_root(mod_name)
+            except NotFoundError:
+                return False
+            return True
+
+    def write_bundle(
+        self,
+        mod_name: str,
+        contents: dict[str, bytes],
+        *,
+        overwrite: bool = False,
+        expected_sha256: dict[str, str] | None = None,
+    ) -> list[ModFileInfo]:
+        """Atomically stage and transactionally replace a bounded binary/text file bundle.
+
+        The filesystem cannot make several paths globally atomic. This method stages every
+        byte first, verifies all optimistic preconditions, then uses same-directory replaces
+        with recovery copies so a failed commit restores the previous bundle.
+        """
+
+        with self._lock:
+            if not contents:
+                raise WorkspaceError("A mod bundle must contain at least one file")
+
+            root = self._mod_root(mod_name)
+            files = self.list_files(mod_name)
+            by_path = {info.path: info for info in files}
+            normalized: dict[str, tuple[Path, bytes]] = {}
+            for supplied_path, data in contents.items():
+                if not isinstance(data, bytes):
+                    raise WorkspaceError("Bundle contents must be bytes")
+                if len(data) > self.settings.max_file_bytes:
+                    raise WorkspaceError(
+                        f"File {supplied_path!r} is {len(data)} bytes; "
+                        f"limit is {self.settings.max_file_bytes}"
+                    )
+                target = self._file(mod_name, supplied_path)
+                relative = target.relative_to(root).as_posix()
+                if relative in normalized:
+                    raise WorkspaceError(f"Duplicate normalized bundle path: {relative}")
+                normalized[relative] = (target, data)
+
+            existing = {path: by_path[path] for path in normalized if path in by_path}
+            expected_normalized: dict[str, str] = {}
+            for supplied_path, digest in (expected_sha256 or {}).items():
+                if not re.fullmatch(r"[a-f0-9]{64}", digest):
+                    raise WorkspaceError("Bundle expected hashes must be lowercase SHA-256")
+                expected_target = self._file(mod_name, supplied_path)
+                expected_relative = expected_target.relative_to(root).as_posix()
+                if expected_relative in expected_normalized:
+                    raise WorkspaceError(
+                        f"Duplicate normalized expected-hash path: {expected_relative}"
+                    )
+                if expected_relative not in normalized:
+                    raise WorkspaceError(
+                        f"Expected-hash path is not part of this bundle: {expected_relative}"
+                    )
+                expected_normalized[expected_relative] = digest
+            if existing and not overwrite:
+                conflicts = ", ".join(sorted(existing))
+                raise ConflictError(
+                    f"Generated bundle would replace existing files: {conflicts}; "
+                    "set overwrite=true after reviewing their hashes"
+                )
+            if expected_normalized and not overwrite:
+                raise WorkspaceError("Bundle expected hashes require overwrite=true")
+            if overwrite and set(expected_normalized) != set(existing):
+                missing = sorted(set(existing) - set(expected_normalized))
+                unexpected = sorted(set(expected_normalized) - set(existing))
+                details: list[str] = []
+                if missing:
+                    details.append(f"missing expected hashes for: {', '.join(missing)}")
+                if unexpected:
+                    details.append(f"expected paths do not exist: {', '.join(unexpected)}")
+                raise ConflictError(
+                    "Bundle overwrite authorization mismatch (" + "; ".join(details) + ")"
+                )
+            for relative, previous in existing.items():
+                if expected_normalized.get(relative) != previous.sha256:
+                    raise ConflictError(f"Bundle expected hash mismatch for {relative}")
+
+            projected_files = len(files) + sum(path not in by_path for path in normalized)
+            projected_bytes = sum(info.size for info in files)
+            projected_bytes -= sum(info.size for info in existing.values())
+            projected_bytes += sum(len(data) for _target, data in normalized.values())
+            self._check_projected_quota(files=projected_files, total_bytes=projected_bytes)
+
+            staged: dict[str, Path] = {}
+            backups: dict[str, Path] = {}
+            committed: set[str] = set()
+            commit_succeeded = False
+            try:
+                for relative, (target, data) in sorted(normalized.items()):
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    self._assert_no_reparse_components(target)
+                    descriptor, temporary_name = tempfile.mkstemp(
+                        prefix=f".{target.name}.", suffix=".bundle.tmp", dir=target.parent
+                    )
+                    temporary = Path(temporary_name)
+                    staged[relative] = temporary
+                    with os.fdopen(descriptor, "wb") as handle:
+                        handle.write(data)
+                        handle.flush()
+                        os.fsync(handle.fileno())
+
+                for relative, (target, _data) in sorted(normalized.items()):
+                    prior_file = existing.get(relative)
+                    if prior_file is not None:
+                        current_digest, current_size, _ = self._stable_file(
+                            target,
+                            max_bytes=self.settings.max_file_bytes,
+                        )
+                        if (current_digest, current_size) != (
+                            prior_file.sha256,
+                            prior_file.size,
+                        ):
+                            raise ConflictError(
+                                f"File changed while the bundle was staged: {relative}"
+                            )
+                        backup = target.with_name(
+                            f".{target.name}.{secrets.token_hex(8)}.bundle.backup"
+                        )
+                        self._assert_no_reparse_components(backup)
+                        if os.path.lexists(backup):
+                            raise ConflictError(f"Recovery path unexpectedly exists for {relative}")
+                        target.replace(backup)
+                        backups[relative] = backup
+                    elif os.path.lexists(target):
+                        raise ConflictError(
+                            f"Bundle target appeared while the bundle was staged: {relative}"
+                        )
+
+                    self._assert_no_reparse_components(staged[relative])
+                    self._assert_no_reparse_components(target)
+                    staged[relative].replace(target)
+                    committed.add(relative)
+
+                final_files = self.list_files(mod_name)
+                final_by_path = {info.path: info for info in final_files}
+                for relative, (_target, data) in normalized.items():
+                    result = final_by_path.get(relative)
+                    expected = hashlib.sha256(data).hexdigest()
+                    if result is None or result.size != len(data) or result.sha256 != expected:
+                        raise WorkspaceError(
+                            f"Committed bundle file did not match staged bytes: {relative}"
+                        )
+                commit_succeeded = True
+            except Exception as commit_error:
+                rollback_errors: list[str] = []
+                for relative, (target, _data) in reversed(list(sorted(normalized.items()))):
+                    recovery = backups.get(relative)
+                    try:
+                        if relative in committed and os.path.lexists(target):
+                            self._assert_no_reparse_components(target)
+                            target.unlink()
+                        if recovery is not None and os.path.lexists(recovery):
+                            self._assert_no_reparse_components(recovery)
+                            self._assert_no_reparse_components(target)
+                            recovery.replace(target)
+                    except OSError as rollback_error:
+                        rollback_errors.append(f"{relative}: {rollback_error}")
+                if rollback_errors:
+                    rollback_details = "; ".join(rollback_errors)
+                    raise WorkspaceError(
+                        f"Bundle commit failed and rollback was incomplete ({rollback_details})"
+                    ) from commit_error
+                raise
+            finally:
+                for temporary in staged.values():
+                    temporary.unlink(missing_ok=True)
+                if commit_succeeded:
+                    for backup in backups.values():
+                        backup.unlink(missing_ok=True)
+
+            final_by_path = {info.path: info for info in self.list_files(mod_name)}
+            return [final_by_path[path] for path in sorted(normalized)]
+
     def write_file(self, request: ModFileWrite) -> ModFileInfo:
         with self._lock:
             encoded = request.content.encode("utf-8")
