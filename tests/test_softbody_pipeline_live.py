@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import threading
@@ -210,6 +211,25 @@ def test_real_blender_ramp_builds_installs_and_loads_in_isolated_beamng(
             ramp.sensors.poll("state")
             state = ramp.sensors.data["state"]
             assert len(state["pos"]) == 3
+            topology = json.loads(
+                ramp.queue_lua_command(
+                    "local mass = 0; "
+                    "for nodeId = 0, obj:getNodeCount() - 1 do "
+                    "mass = mass + obj:getNodeMass(nodeId); "
+                    "end; "
+                    "return jsonEncode({"
+                    "node_count = obj:getNodeCount(), "
+                    "beam_count = obj:getBeamCount(), "
+                    "total_mass_kg = mass, "
+                    "vehicle_directory = v.data.vehicleDirectory"
+                    "})",
+                    response=True,
+                )
+            )
+            assert topology["node_count"] == handoff.manifest.node_count
+            assert topology["beam_count"] >= handoff.manifest.edge_count
+            assert topology["total_mass_kg"] == pytest.approx(build.total_mass_kg, rel=1e-5)
+            assert topology["vehicle_directory"] == "/vehicles/live_ramp/"
         finally:
             try:
                 if bng is not None:

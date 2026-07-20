@@ -6,7 +6,15 @@ import math
 from datetime import UTC, datetime
 from typing import Annotated, Any, Literal
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictBool,
+    field_validator,
+    model_validator,
+)
 
 MAX_ABSOLUTE_COORDINATE = 1_000_000.0
 MAX_SENSOR_PIXELS = 16_777_216
@@ -61,6 +69,26 @@ ColorComponent = Annotated[float, Field(ge=0.0, le=1.0)]
 RGBColor = tuple[ColorComponent, ColorComponent, ColorComponent]
 RGBAColor = tuple[ColorComponent, ColorComponent, ColorComponent, ColorComponent]
 MapFieldValue = str | float | bool | RGBColor | RGBAColor
+TriggerHandle = Annotated[
+    str,
+    Field(strict=True, pattern=r"^trg_[a-f0-9]{32}$"),
+]
+TriggerEventName = Literal["enter", "exit"]
+TriggerMode = Literal["center", "contains", "overlaps"]
+TriggerTestType = Literal["race_corners", "bounding_box"]
+TriggerScalar = Annotated[
+    float,
+    Field(strict=True, ge=-MAX_ABSOLUTE_COORDINATE, le=MAX_ABSOLUTE_COORDINATE),
+]
+TriggerScaleScalar = Annotated[float, Field(strict=True, ge=0.0001, le=10_000.0)]
+TriggerPositiveInt = Annotated[int, Field(strict=True, ge=1)]
+TriggerNonNegativeInt = Annotated[int, Field(strict=True, ge=0)]
+TriggerCursor = TriggerNonNegativeInt
+TriggerListLimit = Annotated[int, Field(strict=True, ge=1, le=100)]
+
+
+def _default_trigger_events() -> list[TriggerEventName]:
+    return ["enter", "exit"]
 
 
 def utc_now() -> datetime:
@@ -253,6 +281,280 @@ class MapObjectInfo(StrictModel):
     rotation: Quaternion | None = None
     scale: Vector3 | None = None
     fields: dict[str, Any] = Field(default_factory=dict)
+
+
+class MapTriggerVector3(StrictModel):
+    """Object-shaped vector used by the dedicated trigger wire protocol."""
+
+    x: TriggerScalar
+    y: TriggerScalar
+    z: TriggerScalar
+
+
+class MapTriggerScale3(StrictModel):
+    x: TriggerScaleScalar
+    y: TriggerScaleScalar
+    z: TriggerScaleScalar
+
+
+class MapTriggerQuaternion(StrictModel):
+    """Finite, nonzero XYZW quaternion normalized at the API boundary."""
+
+    x: Annotated[float, Field(strict=True, ge=-1.0, le=1.0)]
+    y: Annotated[float, Field(strict=True, ge=-1.0, le=1.0)]
+    z: Annotated[float, Field(strict=True, ge=-1.0, le=1.0)]
+    w: Annotated[float, Field(strict=True, ge=-1.0, le=1.0)]
+
+    @model_validator(mode="after")
+    def normalize_nonzero_quaternion(self) -> MapTriggerQuaternion:
+        magnitude_squared = math.fsum(
+            component * component for component in (self.x, self.y, self.z, self.w)
+        )
+        if magnitude_squared < 1e-12:
+            raise ValueError("trigger rotation quaternion must be nonzero")
+        magnitude = math.sqrt(magnitude_squared)
+        object.__setattr__(self, "x", self.x / magnitude)
+        object.__setattr__(self, "y", self.y / magnitude)
+        object.__setattr__(self, "z", self.z / magnitude)
+        object.__setattr__(self, "w", self.w / magnitude)
+        return self
+
+
+class MapTriggerAction(StrictModel):
+    """The only V1 trigger action: publish a bounded, typed bridge event."""
+
+    type: Literal["emit_bridge_event"] = "emit_bridge_event"
+    events: list[TriggerEventName] = Field(
+        default_factory=_default_trigger_events, min_length=1, max_length=2
+    )
+
+    @field_validator("events")
+    @classmethod
+    def require_unique_events(cls, value: list[TriggerEventName]) -> list[TriggerEventName]:
+        if len(set(value)) != len(value):
+            raise ValueError("trigger action events must be unique")
+        return value
+
+
+class MapTriggerCreate(StrictModel):
+    """Create one disabled, bridge-owned box trigger draft."""
+
+    shape: Literal["box"] = "box"
+    position: MapTriggerVector3
+    rotation: MapTriggerQuaternion = Field(
+        default_factory=lambda: MapTriggerQuaternion(x=0.0, y=0.0, z=0.0, w=1.0)
+    )
+    scale: MapTriggerScale3
+    mode: TriggerMode = "center"
+    test_type: TriggerTestType = "bounding_box"
+    debug: StrictBool = False
+    action: MapTriggerAction = Field(default_factory=MapTriggerAction)
+
+
+class MapTriggerPatch(StrictModel):
+    """Patch a bridge-owned trigger; enabled is the sole lifecycle switch."""
+
+    handle: TriggerHandle
+    position: MapTriggerVector3 | None = None
+    rotation: MapTriggerQuaternion | None = None
+    scale: MapTriggerScale3 | None = None
+    mode: TriggerMode | None = None
+    test_type: TriggerTestType | None = None
+    debug: StrictBool | None = None
+    action: MapTriggerAction | None = None
+    enabled: StrictBool | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def reject_null_patch_values(cls, value: Any) -> Any:
+        if isinstance(value, dict):
+            null_fields = sorted(
+                key for key, item in value.items() if key != "handle" and item is None
+            )
+            if null_fields:
+                raise ValueError("trigger patch fields cannot be null: " + ", ".join(null_fields))
+        return value
+
+    @model_validator(mode="after")
+    def require_change(self) -> MapTriggerPatch:
+        if not (self.model_fields_set - {"handle"}):
+            raise ValueError("trigger update requires at least one changed field")
+        return self
+
+
+class MapTriggerLastEvent(StrictModel):
+    sequence: TriggerPositiveInt
+    event: TriggerEventName
+    subject_id: TriggerPositiveInt
+    subject_name: Annotated[str, Field(strict=True, max_length=128)]
+    time_seconds: Annotated[float, Field(strict=True, ge=0.0)]
+
+
+class MapTriggerInfo(StrictModel):
+    handle: TriggerHandle
+    engine_name: Annotated[
+        str,
+        Field(strict=True, pattern=r"^beamng_mcp_trigger_[a-f0-9]{32}$"),
+    ]
+    shape: Literal["box"]
+    position: MapTriggerVector3
+    rotation: MapTriggerQuaternion
+    scale: MapTriggerScale3
+    mode: TriggerMode
+    test_type: TriggerTestType
+    debug: StrictBool
+    action: MapTriggerAction
+    enabled: StrictBool
+    persistent: Literal[False]
+    object_id: TriggerPositiveInt | None = None
+    sequence: TriggerNonNegativeInt
+    count: TriggerNonNegativeInt
+    last_event: MapTriggerLastEvent | None = None
+
+    @field_validator("persistent", mode="before")
+    @classmethod
+    def require_literal_false(cls, value: Any) -> Any:
+        if value is not False:
+            raise ValueError("trigger persistence must be the boolean false")
+        return value
+
+    @model_validator(mode="after")
+    def validate_descriptor_consistency(self) -> MapTriggerInfo:
+        expected_name = "beamng_mcp_trigger_" + self.handle.removeprefix("trg_")
+        if self.engine_name != expected_name:
+            raise ValueError("trigger engine name does not match its opaque handle")
+        if self.enabled != (self.object_id is not None):
+            raise ValueError("trigger enabled state does not match its object ID")
+        if self.sequence != self.count:
+            raise ValueError("trigger sequence does not match its event count")
+        if self.count == 0 and self.last_event is not None:
+            raise ValueError("unused trigger cannot have a last event")
+        if self.count > 0 and (
+            self.last_event is None or self.last_event.sequence != self.sequence
+        ):
+            raise ValueError("trigger last event does not match its sequence")
+        return self
+
+
+class MapTriggerList(StrictModel):
+    triggers: list[MapTriggerInfo] = Field(max_length=100)
+    count: TriggerNonNegativeInt
+    limit: TriggerListLimit
+
+    @model_validator(mode="after")
+    def count_matches_payload(self) -> MapTriggerList:
+        if self.count != len(self.triggers):
+            raise ValueError("trigger list count does not match trigger payload")
+        if self.count > self.limit:
+            raise ValueError("trigger list count exceeds its requested limit")
+        handles = [trigger.handle for trigger in self.triggers]
+        if len(handles) != len(set(handles)):
+            raise ValueError("trigger list contains duplicate handles")
+        return self
+
+
+class MapTriggerDeleteResult(StrictModel):
+    deleted: Literal[True]
+    handle: TriggerHandle
+
+    @field_validator("deleted", mode="before")
+    @classmethod
+    def require_literal_true(cls, value: Any) -> Any:
+        if value is not True:
+            raise ValueError("trigger deletion result must be the boolean true")
+        return value
+
+
+class MapTriggerEvent(StrictModel):
+    """Sanitized event payload accepted from the authenticated Lua bridge."""
+
+    handle: TriggerHandle
+    event: TriggerEventName
+    subject_id: TriggerPositiveInt
+    subject_name: Annotated[str, Field(strict=True, max_length=128)]
+    trigger_id: TriggerPositiveInt
+    trigger_name: Annotated[
+        str,
+        Field(strict=True, pattern=r"^beamng_mcp_trigger_[a-f0-9]{32}$"),
+    ]
+    sequence: TriggerPositiveInt
+    count: TriggerNonNegativeInt
+    time_seconds: Annotated[float, Field(strict=True, ge=0.0)]
+
+    @model_validator(mode="after")
+    def validate_event_identity(self) -> MapTriggerEvent:
+        expected_name = "beamng_mcp_trigger_" + self.handle.removeprefix("trg_")
+        if self.trigger_name != expected_name:
+            raise ValueError("trigger event name does not match its opaque handle")
+        if self.sequence != self.count:
+            raise ValueError("trigger event sequence does not match its count")
+        return self
+
+
+class MapTriggerEventPage(StrictModel):
+    """Bounded cursor page over the client's sanitized trigger-event buffer."""
+
+    handle: TriggerHandle
+    events: list[MapTriggerEvent] = Field(max_length=100)
+    after_sequence: TriggerCursor
+    next_sequence: TriggerCursor
+    latest_sequence: TriggerCursor
+    current_count: TriggerCursor
+    oldest_available_sequence: TriggerPositiveInt | None = None
+    truncated: StrictBool = Field(
+        description="True when one or more requested events were lost or a sequence gap exists"
+    )
+    has_more: StrictBool
+    limit: TriggerListLimit
+
+    @model_validator(mode="after")
+    def validate_cursor_page(self) -> MapTriggerEventPage:
+        if self.current_count != self.latest_sequence:
+            raise ValueError("trigger event count does not match its latest sequence")
+        if self.next_sequence < self.after_sequence:
+            raise ValueError("trigger event cursor cannot move backward")
+        if self.oldest_available_sequence is not None:
+            if self.latest_sequence == 0:
+                raise ValueError("empty trigger history cannot have an oldest buffered event")
+            if self.oldest_available_sequence > self.latest_sequence:
+                raise ValueError("oldest buffered event exceeds the current trigger sequence")
+        if len(self.events) > self.limit:
+            raise ValueError("trigger event page exceeds its requested limit")
+        if self.events and (
+            self.oldest_available_sequence is None
+            or self.oldest_available_sequence > self.events[0].sequence
+        ):
+            raise ValueError("trigger event page has inconsistent buffer bounds")
+
+        previous = self.after_sequence
+        for event in self.events:
+            if event.handle != self.handle:
+                raise ValueError("trigger event page contains a different handle")
+            if event.sequence <= previous:
+                raise ValueError("trigger event page sequences must be strictly increasing")
+            if event.sequence > self.latest_sequence:
+                raise ValueError("trigger event page contains an event beyond current state")
+            if not self.truncated and event.sequence != previous + 1:
+                raise ValueError("non-truncated trigger event page contains a sequence gap")
+            previous = event.sequence
+
+        expected_next = self.events[-1].sequence if self.events else self.next_sequence
+        if self.events and self.next_sequence != expected_next:
+            raise ValueError("next trigger event cursor does not match the final returned event")
+        if not self.events and self.latest_sequence > self.after_sequence:
+            if not self.truncated or self.next_sequence != self.latest_sequence:
+                raise ValueError("lost trigger events must advance the cursor to current state")
+        if (
+            not self.events
+            and self.latest_sequence <= self.after_sequence
+            and self.next_sequence != self.after_sequence
+        ):
+            raise ValueError("empty trigger event page must preserve its requested cursor")
+        if self.truncated and self.latest_sequence <= self.after_sequence:
+            raise ValueError("trigger event page cannot be truncated beyond current state")
+        if self.has_more != (self.next_sequence < self.latest_sequence):
+            raise ValueError("trigger event has_more flag does not match its cursor")
+        return self
 
 
 class BridgeStatus(StrictModel):

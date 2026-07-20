@@ -27,6 +27,7 @@ never placed inside the 10–30 Hz steering/braking loop.
 | Cameras, lidar, radar, GPS, IMU, shared memory | Supported | Camera is license-gated in tested 0.38.6; other sensors build-dependent |
 | Custom GELua WebSocket, telemetry, engine safety lease, emergency stop | Supported | Experimental, targets 0.38.6 |
 | Live scene-object creation/update/delete | Supported through GELua | Experimental through GELua |
+| Typed ephemeral BeamNGTrigger drafts, lifecycle, and enter/exit events | Supported through GELua | Experimental, live-tested against 0.38.6 |
 | Persistent level save | Explicitly gated; World Editor required | Explicitly gated; World Editor required |
 | Mod scaffold/validate/pack/install | Supported; install is operator-gated | Supported; install is operator-gated |
 | Blender-evidenced soft-body authoring and deterministic JBeam assembly | Offline authoring supported; in-game validation required | Offline authoring supported; in-game validation required |
@@ -38,7 +39,7 @@ repository labels it honestly as experimental. The pinned compatibility baseline
 
 ## What is included
 
-- 51 typed MCP tools across simulator, scenario, traffic, environment, vehicle, sensor, map, Lua,
+- 57 typed MCP tools across simulator, scenario, traffic, environment, vehicle, sensor, map, Lua,
   mod, soft-body authoring, job, and autonomous-driving domains.
 - Read-only MCP resources for status, vehicles, jobs, autonomy, and the soft-body authoring
   contract, plus guided workflow prompts.
@@ -56,7 +57,11 @@ repository labels it honestly as experimental. The pinned compatibility baseline
   full build provenance. JBeam coordinates are never accepted from prose.
 - Live map object changes through GELua. Existing level objects and persistent saves have separate,
   default-off operator gates; deletes and saves also require explicit confirmation.
-- Three driving modes: BeamNG native AI, vision lane keeping, and a hybrid state/vision mode.
+- A dedicated `BeamNGTrigger` lifecycle that creates connection-owned drafts, instantiates only on
+  explicit enable, emits bounded typed enter/exit events, and never accepts Lua or command fields.
+- Three selectable driving modes: BeamNG native AI, vision lane keeping, and a reserved hybrid
+  mode. In the current alpha, `hybrid` uses the same camera-plus-vehicle-state supervisor as
+  `vision-lane`; route-planner fusion remains roadmap work.
 - OpenCV lane perception, lazy Hugging Face SegFormer, and ONNX Runtime with TensorRT → CUDA →
   CPU provider fallback and bounded GPU/workspace memory.
 - An engine-side real-time safety lease that must arm before autonomy starts. GELua disables AI and
@@ -171,10 +176,15 @@ uv sync --extra vision --extra dev
 ```
 
 On Windows, this repository pins `torch` to PyTorch's official CUDA 12.8 wheel index through
-uv, so the vision extra does not silently install a CPU-only PyPI build. Run
-`uv run beamng-mcp doctor --json` and require `vision_runtime.torch.cuda_available=true` before
-selecting SegFormer. ONNX Runtime reports its available providers separately; TensorRT is an
-optional preference and must be verified on the actual machine/model rather than assumed.
+uv, so the vision extra does not silently install a CPU-only PyPI build. ONNX Runtime GPU is
+constrained below 1.27 because 1.27 removed CUDA 12 support while this profile uses CUDA 12.8.
+Run `uv run beamng-mcp doctor --json` and require
+`vision_runtime.torch.cuda_available=true` before selecting SegFormer. For ONNX/CUDA, also require
+`vision_runtime.onnxruntime.provider_libraries.CUDAExecutionProvider.loadable=true`; an advertised
+provider alone does not prove that its DLL dependencies load. TensorRT is optional and should be
+treated as unavailable when its corresponding `loadable` field is false. The ONNX backend preloads
+the CUDA/cuDNN libraries shipped with the compatible PyTorch installation before creating a GPU
+session.
 
 The default `classical` backend is small and deterministic. For semantic road/hazard perception,
 configure `segformer` or provide a segmentation ONNX model:
@@ -192,7 +202,9 @@ max_gpu_memory_mb = 4096
 ONNX Runtime prefers `TensorrtExecutionProvider`, then CUDA, then CPU. Engine caches are not
 committed because TensorRT engines are specific to the runtime/GPU combination. On an RTX 5090,
 start at 640×360, cap BeamNG's frame rate, reserve 4–6 GB for inference, use FP16, and measure
-end-to-end observation-to-actuation latency before increasing resolution. NVIDIA's
+end-to-end observation-to-actuation latency before increasing resolution. Confirm the session's
+actual provider in `autonomy_status`; provider-library readiness is necessary but does not prove a
+particular model initialized. NVIDIA's
 [simultaneous compute and graphics guidance](https://docs.nvidia.com/deeplearning/tensorrt-rtx/latest/inference-library/compute-graphics.html)
 is especially relevant when the game and inference share the same GPU.
 
@@ -276,6 +288,35 @@ Newly created map objects are bridge-managed. Updating or deleting pre-existing 
 disabled unless `workspace.allow_existing_map_object_edits = true` is set and the Lua bridge is
 reinstalled so its independent gate agrees.
 
+Triggers use a stricter, separate path:
+
+```text
+map_trigger_create (draft only)
+→ map_trigger_update(enabled=true)
+→ map_trigger_get / map_trigger_list
+→ map_trigger_events(after_sequence=...)
+→ map_trigger_update(enabled=false)
+→ map_trigger_delete(confirm=true)
+```
+
+V1 triggers are ephemeral Box volumes with typed `center`, `contains`, or `overlaps` modes and
+`race_corners` or `bounding_box` tests. Their only action is to emit selected `enter`/`exit`
+events for real vehicles to the authenticated connection that owns the draft. The bridge derives
+the scene-object name internally, fixes the callback to BeamNG's `onBeamNGTrigger`, disables
+ticking and saving, makes enabled triggers immutable, and deletes them on disable, disconnect,
+mission transition, or extension unload. If exact identity verification or engine deletion fails,
+the bridge fails closed instead of forgetting the possibly live object: it makes the record
+ownerless and event-silent, retains its exact object/ID/name/generation evidence for cleanup retry,
+and retires that quarantine only after an exact deletion retry succeeds or mission teardown proves
+both registered ID and name absent.
+Quarantined records continue to consume the bridge's global 64-trigger cap. Re-run
+`beamng-mcp install-lua --force` after upgrading; the Python client rejects trigger mutations when
+the installed bridge does not advertise the new methods.
+
+`map_trigger_events` exposes only events that passed the Python client's strict authenticated
+event schema. Its bounded cursor page reports the current sequence, the oldest buffered sequence,
+and `truncated=true` when deque loss or any sequence gap means events were missed.
+
 Live map edits are ephemeral until `map_save`. Persistent saves require all of:
 
 - `workspace.allow_persistent_map_edits = true`
@@ -298,6 +339,9 @@ Work on cloned/user-folder levels; do not edit shipped game content.
 - BeamNGpy and Lua WebSocket endpoints are loopback-only.
 - The Lua bridge exposes no direct arbitrary Lua-eval, unrestricted extension-load, shell, or file
   tool. Separately, installing an authored Lua mod is code execution and is disabled by default.
+- `BeamNGTrigger` is excluded from the generic object API. Trigger names, callbacks, command
+  fields, ticks, and arbitrary actions are not client-controlled; live objects are ephemeral and
+  tied to exact bridge ownership records.
 - Every `autonomy_start` mode requires an authenticated engine-side real-time lease. The Python
   supervisor and GELua expiry brake are separate safety layers; neither replaces an operator's
   manual stop path.

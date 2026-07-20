@@ -19,7 +19,8 @@ and hazards.
 
 Uses camera perception together with BeamNG vehicle state and the simulator control path. The
 current alpha controller disables native AI before applying direct controls so two controllers do
-not fight. Route-planner fusion is on the roadmap.
+not fight. It currently instantiates the same camera/state supervisor as `vision-lane`; the separate
+mode name reserves a compatibility point for route-planner fusion, which is still on the roadmap.
 
 Both camera-driven modes use BeamNGpy's production `Camera` path and therefore require BeamNG.tech
 on the tested 0.38 generation. Retail BeamNG.drive 0.38.6 rejects that sensor with an explicit Tech
@@ -58,9 +59,14 @@ particular BeamNG map is expected; fine-tune or replace the model for serious ev
 - configurable GPU memory and TensorRT workspace ceilings
 - engine/cache files intentionally excluded from git
 
-`beamng-mcp doctor --json` reports the installed PyTorch CUDA status and ONNX Runtime provider
-list. Provider preference is not proof that TensorRT initialized for a given model; confirm the
-active provider in `autonomy_status` after backend warmup.
+`beamng-mcp doctor --json` reports the installed PyTorch CUDA status, ONNX Runtime's advertised
+providers, and whether the installed CUDA/TensorRT provider libraries can actually load their
+dependencies. The CUDA 12.8 Windows profile constrains `onnxruntime-gpu` below 1.27 because ONNX
+Runtime 1.27 removed CUDA 12 support. Require
+`provider_libraries.CUDAExecutionProvider.loadable=true` before a CUDA run. Provider-library
+readiness still does not prove that a particular model initialized; confirm the active provider in
+`autonomy_status` after backend warmup. TensorRT commonly remains advertised but not loadable until
+its separate runtime dependencies are installed.
 
 The backend accepts common NCHW/NHWC input and output layouts, normalizes RGB data, and converts
 class logits/labels into drivable and hazard masks.
@@ -172,6 +178,8 @@ Relevant primary references:
 - [BeamNGpy camera and sensor API](https://documentation.beamng.com/api/beamngpy/v1.35/beamngpy.html)
 - [TensorRT-RTX simultaneous compute and graphics](https://docs.nvidia.com/deeplearning/tensorrt-rtx/latest/inference-library/compute-graphics.html)
 - [TensorRT-RTX RTX 5090 precision support](https://docs.nvidia.com/deeplearning/tensorrt-rtx/latest/getting-started/support-matrix-1/1.0.html)
+- [ONNX Runtime releases](https://github.com/microsoft/onnxruntime/releases)
+- [ONNX Runtime CUDA execution provider compatibility](https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html)
 - [ONNX Runtime TensorRT execution provider](https://onnxruntime.ai/docs/execution-providers/TensorRT-ExecutionProvider.html)
 - [CUDA Blackwell compatibility](https://docs.nvidia.com/cuda/blackwell-compatibility-guide/)
 

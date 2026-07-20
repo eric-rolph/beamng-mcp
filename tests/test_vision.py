@@ -326,6 +326,79 @@ def test_onnx_gpu_provider_options_bound_memory() -> None:
     assert specs[-1] == "CPUExecutionProvider"
 
 
+def test_onnx_imports_torch_dependencies_before_onnx_runtime_provider_discovery(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    events: list[str] = []
+    model_path = tmp_path / "segmentation.onnx"
+    model_path.write_bytes(b"test model placeholder")
+
+    class FakeSessionOptions:
+        graph_optimization_level: object | None = None
+
+    class FakeTensorMetadata:
+        def __init__(self, name: str) -> None:
+            self.name = name
+            self.shape = (1, 3, 8, 8)
+
+    class FakeSession:
+        def get_inputs(self) -> list[FakeTensorMetadata]:
+            return [FakeTensorMetadata("image")]
+
+        def get_outputs(self) -> list[FakeTensorMetadata]:
+            return [FakeTensorMetadata("logits")]
+
+        def get_providers(self) -> list[str]:
+            return ["CUDAExecutionProvider"]
+
+    fake_ort = ModuleType("onnxruntime")
+    fake_ort.GraphOptimizationLevel = ModuleType("GraphOptimizationLevel")
+    fake_ort.GraphOptimizationLevel.ORT_ENABLE_ALL = object()
+    fake_ort.SessionOptions = FakeSessionOptions
+
+    def get_available_providers() -> list[str]:
+        events.append("providers")
+        return ["CUDAExecutionProvider"]
+
+    def create_session(*_args: object, **_kwargs: object) -> FakeSession:
+        events.append("session")
+        return FakeSession()
+
+    fake_ort.get_available_providers = get_available_providers
+    fake_ort.InferenceSession = create_session
+
+    def import_optional_runtime(name: str) -> ModuleType:
+        events.append(name)
+        if name == "torch":
+            return ModuleType("torch")
+        if name == "onnxruntime":
+            return fake_ort
+        raise AssertionError(f"unexpected optional runtime import: {name}")
+
+    monkeypatch.setattr(
+        "beamng_mcp.vision.backends.onnx.importlib.import_module",
+        import_optional_runtime,
+    )
+
+    backend = ONNXRuntimeSegmentationBackend(
+        ONNXRuntimeSegmentationConfig(
+            model_path=model_path,
+            class_map=SegmentationClassMap(drivable_class_ids=(1,)),
+            provider_preference=("CUDAExecutionProvider",),
+        )
+    )
+
+    backend._ensure_session()
+
+    assert events == ["torch", "onnxruntime", "providers", "session"]
+    assert backend.active_providers == ("CUDAExecutionProvider",)
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == ""
+
+
 def test_lane_controller_steers_toward_lane_and_rate_limits() -> None:
     controller = LaneCenterController(
         LaneCenterControllerConfig(

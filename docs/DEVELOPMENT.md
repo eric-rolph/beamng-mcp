@@ -107,7 +107,10 @@ uv run pytest -q -m beamng_gpu tests/test_beamng_vision_live.py
 ```
 
 The same three `BEAMNG_MCP_TEST_BEAMNG_*` variables and isolated-user sentinel are mandatory. The
-OpenCV leg requires no model. To opt into the learned CUDA leg, first review the
+OpenCV leg requires no model. When ONNX Runtime GPU is installed, the test also creates a tiny
+local identity graph, runs it through the project backend, and requires the active session to
+report `CUDAExecutionProvider` while BeamNG still owns the GPU. To opt into the learned CUDA leg,
+first review the
 [model card and files at the pinned revision](https://huggingface.co/nvidia/segformer-b0-finetuned-cityscapes-512-1024/tree/7a91500a7086b805eeb868719ea5542a3e0bdeb3),
 including its license, then cache it outside the repository with the Hugging Face CLI:
 
@@ -152,9 +155,12 @@ At minimum verify:
    after expiry. Independently delay frames and confirm the Python watchdog brakes.
 10. Create a managed ephemeral object in a cloned test level. Verify pre-existing object edits are
     rejected until their operator gate is enabled.
-11. Verify `map_save` rejects a missing or mismatched level ID; exercise a confirmed exact-level
+11. Create a typed trigger draft and verify no scene object or event exists before enable. Enable
+    it, move a real vehicle out → in → out, verify one typed enter and exit, then disable/delete it.
+    Confirm generic trigger creation and callback/command/name injection are rejected.
+12. Verify `map_save` rejects a missing or mismatched level ID; exercise a confirmed exact-level
     save only on disposable cloned content.
-12. Leave mod installation disabled for pack-only tests. In a dedicated user folder, verify that
+13. Leave mod installation disabled for pack-only tests. In a dedicated user folder, verify that
     enabling `allow_mod_install` plus confirmation installs the reviewed artifact and that disabling
     the gate blocks both direct and job-based installation.
 

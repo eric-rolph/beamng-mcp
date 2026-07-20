@@ -71,6 +71,8 @@ class BeamNGpyAdapter:
         self._pending_sensors: set[str] = set()
         self._pending_sensor_removals: set[str] = set()
         self._executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="beamngpy")
+        self._lifecycle_lock = asyncio.Lock()
+        self._closed = False
         self._connected = False
         self._last_error: str | None = None
 
@@ -85,6 +87,18 @@ class BeamNGpyAdapter:
             self._last_error = f"{type(exc).__name__}: {exc}"
             raise SimulatorConnectionError(self._last_error) from exc
 
+    @staticmethod
+    async def _join_task_resiliently(task: asyncio.Task[T]) -> tuple[T, bool]:
+        """Join a lifecycle task without allowing caller cancellation to detach it."""
+
+        cancellation_requested = False
+        while not task.done():
+            try:
+                await asyncio.shield(task)
+            except asyncio.CancelledError:
+                cancellation_requested = True
+        return task.result(), cancellation_requested
+
     def _require(self) -> BeamNGpy:
         if self._bng is None or not self._connected:
             raise SimulatorConnectionError(
@@ -92,9 +106,111 @@ class BeamNGpyAdapter:
             )
         return self._bng
 
+    @staticmethod
+    def _close_failed_connection(bng: BeamNGpy) -> None:
+        """Dispose of a connection that never became usable, or report why not."""
+
+        owns_process = getattr(bng, "process", None) is not None
+        if not owns_process:
+            try:
+                bng.disconnect()
+            except Exception as exc:
+                raise RuntimeError(
+                    f"failed to disconnect provisional BeamNGpy session: "
+                    f"{type(exc).__name__}: {exc}"
+                ) from exc
+            return
+
+        # Normal adapter disconnects deliberately leave BeamNG running. A
+        # process launched by this failed attempt has no owner, however, so
+        # exhaust BeamNGpy and raw-process termination paths before returning.
+        failures: list[str] = []
+
+        def clear_exited_process() -> bool:
+            process = getattr(bng, "process", None)
+            if process is None:
+                return True
+            poll = getattr(process, "poll", None)
+            if not callable(poll):
+                return False
+            try:
+                return_code = poll()
+            except Exception as exc:
+                failures.append(f"raw process poll: {type(exc).__name__}: {exc}")
+                return False
+            if return_code is None:
+                return False
+            bng.process = None
+            return True
+
+        bng.quit_on_close = True
+        try:
+            bng.close()
+        except Exception as exc:
+            failures.append(f"close: {type(exc).__name__}: {exc}")
+
+        clear_exited_process()
+        if getattr(bng, "process", None) is not None:
+            kill_process = getattr(bng, "_kill_beamng", None)
+            if callable(kill_process):
+                try:
+                    kill_process()
+                except Exception as exc:
+                    failures.append(f"BeamNGpy kill: {type(exc).__name__}: {exc}")
+
+        clear_exited_process()
+        process = getattr(bng, "process", None)
+        if process is not None:
+            raw_kill = getattr(process, "kill", None)
+            if not callable(raw_kill):
+                failures.append("raw process handle exposes no kill() method")
+            else:
+                try:
+                    raw_kill()
+                    wait = getattr(process, "wait", None)
+                    if callable(wait):
+                        wait(timeout=5.0)
+                    bng.process = None
+                except Exception as exc:
+                    failures.append(f"raw process kill: {type(exc).__name__}: {exc}")
+                    clear_exited_process()
+
+        if getattr(bng, "process", None) is not None:
+            detail = "; ".join(failures) or "process remained live after cleanup"
+            raise RuntimeError(detail)
+
+    def _retain_provisional_connection(self, bng: BeamNGpy) -> None:
+        """Keep an unclosed provisional handle available for a shutdown retry."""
+
+        self._connected = False
+        self._bng = bng
+        self._vehicles.clear()
+        self._sensors.clear()
+        self._pending_sensors.clear()
+        self._pending_sensor_removals.clear()
+
+    def _forget_connection(self) -> None:
+        self._connected = False
+        self._bng = None
+        self._vehicles.clear()
+        self._sensors.clear()
+        self._pending_sensors.clear()
+        self._pending_sensor_removals.clear()
+
     async def connect(self, *, launch: bool | None = None) -> ConnectionStatus:
+        async with self._lifecycle_lock:
+            if self._closed:
+                raise SimulatorConnectionError("BeamNGpy adapter has been shut down")
+            return await self._connect_unlocked(launch=launch)
+
+    async def _connect_unlocked(self, *, launch: bool | None = None) -> ConnectionStatus:
         if self._connected:
-            return await self.status()
+            return await self._status_unlocked()
+        if self._bng is not None:
+            raise SimulatorConnectionError(
+                "A failed provisional BeamNGpy session is still owned by the adapter; "
+                "call simulator_disconnect or shut down the server to retry cleanup"
+            )
         should_launch = self.settings.launch if launch is None else launch
         home = str(self.settings.home) if self.settings.home else None
         binary = str(self.settings.binary) if self.settings.binary else None
@@ -106,8 +222,11 @@ class BeamNGpyAdapter:
             user_path = user_path.parent
         user = str(user_path) if user_path else None
 
+        provisional: BeamNGpy | None = None
+
         def open_connection() -> BeamNGpy:
-            bng = BeamNGpy(
+            nonlocal provisional
+            provisional = BeamNGpy(
                 self.settings.host,
                 self.settings.port,
                 home=home,
@@ -115,19 +234,115 @@ class BeamNGpyAdapter:
                 user=user,
                 quit_on_close=False,
             )
-            return bng.open(
+            return provisional.open(
                 extensions=self.extensions or None,
                 launch=should_launch,
                 listen_ip="127.0.0.1",
             )
 
-        self._bng = await self._call(open_connection)
+        opening = asyncio.create_task(self._call(open_connection))
+        try:
+            self._bng = await asyncio.shield(opening)
+        except asyncio.CancelledError:
+            # Cancelling run_in_executor does not stop its worker. Wait for the
+            # bounded BeamNGpy open attempt to return, then dispose of any
+            # process it launched before propagating cancellation.
+            candidate = provisional
+            try:
+                opened, _ = await self._join_task_resiliently(opening)
+            except Exception as exc:
+                self._last_error = self._last_error or f"{type(exc).__name__}: {exc}"
+                candidate = provisional
+            else:
+                candidate = opened
+            if candidate is not None:
+                cleanup = asyncio.create_task(self._call(self._close_failed_connection, candidate))
+                try:
+                    await self._join_task_resiliently(cleanup)
+                except Exception as exc:
+                    self._last_error = self._last_error or (
+                        f"provisional connection cleanup failed: {type(exc).__name__}: {exc}"
+                    )
+                    self._retain_provisional_connection(candidate)
+                else:
+                    self._forget_connection()
+            else:
+                self._forget_connection()
+            raise
+        except Exception as exc:
+            original_error = self._last_error or f"{type(exc).__name__}: {exc}"
+            cleanup_error: str | None = None
+            cleanup_cancelled = False
+            if provisional is not None:
+                cleanup = asyncio.create_task(
+                    self._call(self._close_failed_connection, provisional)
+                )
+                try:
+                    _, cleanup_cancelled = await self._join_task_resiliently(cleanup)
+                except Exception as cleanup_exc:
+                    cleanup_error = f"{type(cleanup_exc).__name__}: {cleanup_exc}"
+                    self._retain_provisional_connection(provisional)
+                else:
+                    self._forget_connection()
+            if cleanup_error is not None:
+                original_error += f"; provisional connection cleanup failed: {cleanup_error}"
+            self._last_error = original_error
+            if cleanup_cancelled:
+                raise asyncio.CancelledError from exc
+            if cleanup_error is not None:
+                raise SimulatorConnectionError(original_error) from exc
+            raise
         self._connected = True
         self._last_error = None
-        return await self.status()
+        try:
+            return await self._status_unlocked()
+        except BaseException as exc:
+            last_error = self._last_error or f"{type(exc).__name__}: {exc}"
+            bng = self._bng
+            cleanup_cancelled = False
+            if bng is not None:
+                cleanup = asyncio.create_task(self._call(self._close_failed_connection, bng))
+                try:
+                    _, cleanup_cancelled = await self._join_task_resiliently(cleanup)
+                except Exception as cleanup_exc:
+                    last_error += (
+                        "; provisional connection cleanup failed: "
+                        f"{type(cleanup_exc).__name__}: {cleanup_exc}"
+                    )
+                    self._retain_provisional_connection(bng)
+                else:
+                    self._forget_connection()
+            else:
+                self._forget_connection()
+            self._last_error = last_error
+            if cleanup_cancelled and not isinstance(exc, asyncio.CancelledError):
+                raise asyncio.CancelledError from exc
+            if "provisional connection cleanup failed:" in last_error:
+                raise SimulatorConnectionError(last_error) from exc
+            raise
 
     async def disconnect(self) -> None:
+        async with self._lifecycle_lock:
+            if self._closed:
+                return
+            operation = asyncio.create_task(self._disconnect_unlocked())
+            _, cancellation_requested = await self._join_task_resiliently(operation)
+            if cancellation_requested:
+                raise asyncio.CancelledError
+
+    async def _disconnect_unlocked(self) -> None:
         if self._bng is None:
+            return
+        if not self._connected:
+            bng = self._bng
+            try:
+                await self._call(self._close_failed_connection, bng)
+            except Exception as exc:
+                raise SimulatorConnectionError(
+                    "Failed to dispose retained provisional BeamNGpy session: "
+                    f"{type(exc).__name__}: {exc}"
+                ) from exc
+            self._forget_connection()
             return
         failures: list[str] = []
         for name in list(self._sensors):
@@ -144,24 +359,38 @@ class BeamNGpyAdapter:
             except Exception as exc:
                 failures.append(f"connection: {type(exc).__name__}: {exc}")
         if disconnected:
-            self._connected = False
-            self._bng = None
-            self._vehicles.clear()
-            self._sensors.clear()
-            self._pending_sensors.clear()
-            self._pending_sensor_removals.clear()
+            self._forget_connection()
         if failures:
             raise SimulatorConnectionError(
                 "BeamNGpy disconnect completed with cleanup failures: " + "; ".join(failures)
             )
 
     async def shutdown(self) -> None:
-        try:
-            await self.disconnect()
-        finally:
-            self._executor.shutdown(wait=False, cancel_futures=True)
+        async def finish_shutdown() -> None:
+            async with self._lifecycle_lock:
+                if self._closed:
+                    return
+                try:
+                    await self._disconnect_unlocked()
+                except Exception:
+                    if self._bng is None:
+                        self._closed = True
+                        self._executor.shutdown(wait=False, cancel_futures=True)
+                    raise
+                else:
+                    self._closed = True
+                    self._executor.shutdown(wait=False, cancel_futures=True)
+
+        operation = asyncio.create_task(finish_shutdown())
+        _, cancellation_requested = await self._join_task_resiliently(operation)
+        if cancellation_requested:
+            raise asyncio.CancelledError
 
     async def status(self) -> ConnectionStatus:
+        async with self._lifecycle_lock:
+            return await self._status_unlocked()
+
+    async def _status_unlocked(self) -> ConnectionStatus:
         tech_enabled: bool | None = None
         version: str | None = None
         mode: str = "offline"

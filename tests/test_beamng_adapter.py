@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+import threading
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -73,6 +75,657 @@ async def test_connect_uses_the_configured_direct_simulator_binary(
         }
     finally:
         await adapter.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_connect_closes_a_launched_process_when_open_fails(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    class FailingConnection:
+        def __init__(self) -> None:
+            self.process: object | None = object()
+            self.quit_on_close = False
+            self.close_calls = 0
+            self.quit_on_close_when_closed: bool | None = None
+
+        def open(self, **_kwargs: object) -> FailingConnection:
+            raise RuntimeError("open failed after launch")
+
+        def close(self) -> None:
+            self.close_calls += 1
+            self.quit_on_close_when_closed = self.quit_on_close
+            self.process = None
+
+    connection = FailingConnection()
+    monkeypatch.setattr(
+        "beamng_mcp.adapters.beamngpy_adapter.BeamNGpy",
+        lambda *_args, **_kwargs: connection,
+    )
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+
+    try:
+        with pytest.raises(SimulatorConnectionError, match="open failed after launch"):
+            await adapter.connect(launch=True)
+
+        assert connection.close_calls == 1
+        assert connection.quit_on_close_when_closed is True
+        status = await adapter.status()
+        assert status.connected is False
+        assert status.last_error == "RuntimeError: open failed after launch"
+    finally:
+        await adapter.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_connect_uses_the_raw_process_handle_when_beamngpy_cleanup_fails(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    class RawProcess:
+        def __init__(self) -> None:
+            self.running = True
+            self.kill_calls = 0
+            self.wait_calls = 0
+
+        def poll(self) -> int | None:
+            return None if self.running else 1
+
+        def kill(self) -> None:
+            self.kill_calls += 1
+            self.running = False
+
+        def wait(self, timeout: float) -> int:
+            assert timeout == 5.0
+            self.wait_calls += 1
+            return 1
+
+    class FailingConnection:
+        def __init__(self) -> None:
+            self.process: RawProcess | None = RawProcess()
+            self.quit_on_close = False
+
+        def open(self, **_kwargs: object) -> FailingConnection:
+            raise RuntimeError("open failed after launch")
+
+        def close(self) -> None:
+            raise RuntimeError("close failed")
+
+        def _kill_beamng(self) -> None:
+            raise RuntimeError("BeamNGpy kill failed")
+
+    connection = FailingConnection()
+    process = connection.process
+    assert process is not None
+    monkeypatch.setattr(
+        "beamng_mcp.adapters.beamngpy_adapter.BeamNGpy",
+        lambda *_args, **_kwargs: connection,
+    )
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+
+    try:
+        with pytest.raises(SimulatorConnectionError, match="open failed after launch"):
+            await adapter.connect(launch=True)
+
+        assert process.kill_calls == 1
+        assert process.wait_calls == 1
+        assert process.running is False
+        assert connection.process is None
+        assert adapter._bng is None
+    finally:
+        await adapter.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_connect_recognizes_an_already_exited_provisional_process(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    class ExitedProcess:
+        def __init__(self) -> None:
+            self.kill_calls = 0
+
+        def poll(self) -> int:
+            return 7
+
+        def kill(self) -> None:
+            self.kill_calls += 1
+            raise RuntimeError("process already exited")
+
+    class FailingConnection:
+        def __init__(self) -> None:
+            self.process: ExitedProcess | None = ExitedProcess()
+            self.quit_on_close = False
+
+        def open(self, **_kwargs: object) -> FailingConnection:
+            raise RuntimeError("open failed after child exit")
+
+        def close(self) -> None:
+            raise RuntimeError("close failed")
+
+        def _kill_beamng(self) -> None:
+            raise RuntimeError("BeamNGpy kill failed")
+
+    connection = FailingConnection()
+    process = connection.process
+    assert process is not None
+    monkeypatch.setattr(
+        "beamng_mcp.adapters.beamngpy_adapter.BeamNGpy",
+        lambda *_args, **_kwargs: connection,
+    )
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+
+    try:
+        with pytest.raises(SimulatorConnectionError) as raised:
+            await adapter.connect(launch=True)
+
+        assert "open failed after child exit" in str(raised.value)
+        assert "provisional connection cleanup failed" not in str(raised.value)
+        assert process.kill_calls == 0
+        assert connection.process is None
+        assert adapter._bng is None
+    finally:
+        await adapter.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_connect_retains_and_reports_an_unterminated_provisional_process(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    class RawProcess:
+        def __init__(self) -> None:
+            self.allow_kill = False
+
+        def poll(self) -> None:
+            return None
+
+        def kill(self) -> None:
+            if not self.allow_kill:
+                raise RuntimeError("raw kill failed")
+
+        def wait(self, timeout: float) -> int:
+            assert timeout == 5.0
+            return 1
+
+    class FailingConnection:
+        def __init__(self) -> None:
+            self.process: RawProcess | None = RawProcess()
+            self.quit_on_close = False
+
+        def open(self, **_kwargs: object) -> FailingConnection:
+            raise RuntimeError("open failed after launch")
+
+        def close(self) -> None:
+            raise RuntimeError("close failed")
+
+        def _kill_beamng(self) -> None:
+            raise RuntimeError("BeamNGpy kill failed")
+
+    connection = FailingConnection()
+    process = connection.process
+    assert process is not None
+    monkeypatch.setattr(
+        "beamng_mcp.adapters.beamngpy_adapter.BeamNGpy",
+        lambda *_args, **_kwargs: connection,
+    )
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+
+    with pytest.raises(SimulatorConnectionError) as raised:
+        await adapter.connect(launch=True)
+
+    assert "open failed after launch" in str(raised.value)
+    assert "provisional connection cleanup failed" in str(raised.value)
+    assert "raw kill failed" in str(raised.value)
+    assert adapter._bng is connection
+    assert adapter._connected is False
+
+    process.allow_kill = True
+    await adapter.shutdown()
+    assert adapter._bng is None
+    assert adapter._closed is True
+
+
+@pytest.mark.asyncio
+async def test_connect_closes_a_launched_process_when_initial_status_fails(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    class FailingConnection:
+        system = SimpleNamespace(get_info=lambda **_kwargs: {"version": "0.38.6"})
+
+        def __init__(self) -> None:
+            self.process: object | None = object()
+            self.quit_on_close = False
+            self.close_calls = 0
+            self.quit_on_close_when_closed: bool | None = None
+            self.tech_probe_calls = 0
+
+        def open(self, **_kwargs: object) -> FailingConnection:
+            return self
+
+        def tech_enabled(self) -> bool:
+            self.tech_probe_calls += 1
+            if self.tech_probe_calls == 1:
+                raise RuntimeError("status failed after launch")
+            return False
+
+        def close(self) -> None:
+            self.close_calls += 1
+            self.quit_on_close_when_closed = self.quit_on_close
+            self.process = None
+
+    connection = FailingConnection()
+    monkeypatch.setattr(
+        "beamng_mcp.adapters.beamngpy_adapter.BeamNGpy",
+        lambda *_args, **_kwargs: connection,
+    )
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+
+    try:
+        with pytest.raises(SimulatorConnectionError, match="status failed after launch"):
+            await adapter.connect(launch=True)
+
+        assert connection.close_calls == 1
+        assert connection.quit_on_close_when_closed is True
+        status = await adapter.status()
+        assert status.connected is False
+        assert status.last_error == "RuntimeError: status failed after launch"
+    finally:
+        await adapter.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_connect_records_a_direct_initial_status_validation_failure(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    class InvalidConnection:
+        system = SimpleNamespace(get_info=lambda **_kwargs: {"version": "0.38.6"})
+
+        def __init__(self) -> None:
+            self.process: object | None = object()
+            self.quit_on_close = False
+
+        def open(self, **_kwargs: object) -> InvalidConnection:
+            return self
+
+        def tech_enabled(self) -> str:
+            return "invalid"
+
+        def close(self) -> None:
+            self.process = None
+
+    connection = InvalidConnection()
+    monkeypatch.setattr(
+        "beamng_mcp.adapters.beamngpy_adapter.BeamNGpy",
+        lambda *_args, **_kwargs: connection,
+    )
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+
+    try:
+        with pytest.raises(SimulatorConnectionError, match="invalid capability value"):
+            await adapter.connect(launch=True)
+
+        status = await adapter.status()
+        assert status.connected is False
+        assert status.last_error == (
+            "SimulatorConnectionError: BeamNGpy tech_enabled() returned an invalid capability value"
+        )
+    finally:
+        await adapter.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_connect_cancellation_waits_for_launch_and_closes_the_provisional_process(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    launch_started = threading.Event()
+    release_launch = threading.Event()
+
+    class SlowConnection:
+        def __init__(self) -> None:
+            self.process: object | None = None
+            self.quit_on_close = False
+            self.close_calls = 0
+
+        def open(self, **_kwargs: object) -> SlowConnection:
+            self.process = object()
+            launch_started.set()
+            if not release_launch.wait(timeout=5.0):
+                raise TimeoutError("test did not release the simulated launch")
+            return self
+
+        def close(self) -> None:
+            self.close_calls += 1
+            self.process = None
+
+    connection = SlowConnection()
+    monkeypatch.setattr(
+        "beamng_mcp.adapters.beamngpy_adapter.BeamNGpy",
+        lambda *_args, **_kwargs: connection,
+    )
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+    connecting = asyncio.create_task(adapter.connect(launch=True))
+
+    try:
+        assert await asyncio.to_thread(launch_started.wait, 2.0)
+        connecting.cancel()
+        await asyncio.sleep(0)
+        connecting.cancel()
+        release_launch.set()
+
+        with pytest.raises(asyncio.CancelledError):
+            await connecting
+
+        assert connection.close_calls == 1
+        assert connection.process is None
+        assert adapter._bng is None
+    finally:
+        release_launch.set()
+        await adapter.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_connect_cancellation_cleans_an_open_queued_behind_executor_work(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    executor_busy = threading.Event()
+    release_executor = threading.Event()
+    open_queued = asyncio.Event()
+
+    class FailingConnection:
+        def __init__(self) -> None:
+            self.process: object | None = None
+            self.quit_on_close = False
+            self.close_calls = 0
+
+        def open(self, **_kwargs: object) -> FailingConnection:
+            self.process = object()
+            raise RuntimeError("queued open failed after launch")
+
+        def close(self) -> None:
+            self.close_calls += 1
+            self.process = None
+
+    connection = FailingConnection()
+    monkeypatch.setattr(
+        "beamng_mcp.adapters.beamngpy_adapter.BeamNGpy",
+        lambda *_args, **_kwargs: connection,
+    )
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+    original_call = adapter._call
+
+    async def observed_call(function: object, *args: object, **kwargs: object) -> object:
+        if getattr(function, "__name__", None) == "open_connection":
+            open_queued.set()
+        return await original_call(function, *args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(adapter, "_call", observed_call)
+
+    def occupy_executor() -> None:
+        executor_busy.set()
+        if not release_executor.wait(timeout=5.0):
+            raise TimeoutError("test did not release the occupied executor")
+
+    loop = asyncio.get_running_loop()
+    occupying = loop.run_in_executor(adapter._executor, occupy_executor)
+    assert await asyncio.to_thread(executor_busy.wait, 2.0)
+    connecting = asyncio.create_task(adapter.connect(launch=True))
+
+    try:
+        await asyncio.wait_for(open_queued.wait(), timeout=2.0)
+        connecting.cancel()
+        release_executor.set()
+
+        with pytest.raises(asyncio.CancelledError):
+            await connecting
+        await occupying
+
+        assert connection.close_calls == 1
+        assert connection.process is None
+        assert adapter._bng is None
+    finally:
+        release_executor.set()
+        await adapter.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_concurrent_connect_calls_share_one_serialized_session(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    launch_started = threading.Event()
+    release_launch = threading.Event()
+    construction_count = 0
+
+    class SlowConnection:
+        system = SimpleNamespace(get_info=lambda **_kwargs: {"version": "0.38.6"})
+
+        def open(self, **_kwargs: object) -> SlowConnection:
+            launch_started.set()
+            if not release_launch.wait(timeout=5.0):
+                raise TimeoutError("test did not release the simulated launch")
+            return self
+
+        def tech_enabled(self) -> bool:
+            return False
+
+        def disconnect(self) -> None:
+            return None
+
+    connection = SlowConnection()
+
+    def create_connection(*_args: object, **_kwargs: object) -> SlowConnection:
+        nonlocal construction_count
+        construction_count += 1
+        return connection
+
+    monkeypatch.setattr(
+        "beamng_mcp.adapters.beamngpy_adapter.BeamNGpy",
+        create_connection,
+    )
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+    first = asyncio.create_task(adapter.connect(launch=True))
+    second = asyncio.create_task(adapter.connect(launch=True))
+
+    try:
+        assert await asyncio.to_thread(launch_started.wait, 2.0)
+        release_launch.set()
+        first_status, second_status = await asyncio.gather(first, second)
+
+        assert first_status.connected is True
+        assert second_status.connected is True
+        assert construction_count == 1
+        assert adapter._bng is connection
+    finally:
+        release_launch.set()
+        await adapter.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_shutdown_waits_for_an_inflight_connect_before_disconnecting(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    launch_started = threading.Event()
+    release_launch = threading.Event()
+
+    class SlowConnection:
+        system = SimpleNamespace(get_info=lambda **_kwargs: {"version": "0.38.6"})
+
+        def __init__(self) -> None:
+            self.disconnect_calls = 0
+
+        def open(self, **_kwargs: object) -> SlowConnection:
+            launch_started.set()
+            if not release_launch.wait(timeout=5.0):
+                raise TimeoutError("test did not release the simulated launch")
+            return self
+
+        def tech_enabled(self) -> bool:
+            return False
+
+        def disconnect(self) -> None:
+            self.disconnect_calls += 1
+
+    connection = SlowConnection()
+    monkeypatch.setattr(
+        "beamng_mcp.adapters.beamngpy_adapter.BeamNGpy",
+        lambda *_args, **_kwargs: connection,
+    )
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+    connecting = asyncio.create_task(adapter.connect(launch=True))
+
+    assert await asyncio.to_thread(launch_started.wait, 2.0)
+    shutting_down = asyncio.create_task(adapter.shutdown())
+    release_launch.set()
+    status = await connecting
+    await shutting_down
+
+    assert status.connected is True
+    assert connection.disconnect_calls == 1
+    assert adapter._bng is None
+    assert adapter._closed is True
+
+
+@pytest.mark.asyncio
+async def test_repeated_shutdown_cancellation_finishes_blocking_disconnect(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    disconnect_started = threading.Event()
+    release_disconnect = threading.Event()
+
+    class SlowConnection:
+        system = SimpleNamespace(get_info=lambda **_kwargs: {"version": "0.38.6"})
+
+        def open(self, **_kwargs: object) -> SlowConnection:
+            return self
+
+        def tech_enabled(self) -> bool:
+            return False
+
+        def disconnect(self) -> None:
+            disconnect_started.set()
+            if not release_disconnect.wait(timeout=5.0):
+                raise TimeoutError("test did not release the simulated disconnect")
+
+    connection = SlowConnection()
+    monkeypatch.setattr(
+        "beamng_mcp.adapters.beamngpy_adapter.BeamNGpy",
+        lambda *_args, **_kwargs: connection,
+    )
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+    await adapter.connect(launch=True)
+    shutting_down = asyncio.create_task(adapter.shutdown())
+
+    try:
+        assert await asyncio.to_thread(disconnect_started.wait, 2.0)
+        shutting_down.cancel()
+        await asyncio.sleep(0)
+        shutting_down.cancel()
+        release_disconnect.set()
+
+        with pytest.raises(asyncio.CancelledError):
+            await shutting_down
+
+        assert adapter._bng is None
+        assert adapter._connected is False
+        assert adapter._closed is True
+    finally:
+        release_disconnect.set()
+        if not adapter._closed:
+            await adapter.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_failed_shutdown_remains_retryable_with_a_live_executor(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    class FlakyConnection:
+        system = SimpleNamespace(get_info=lambda **_kwargs: {"version": "0.38.6"})
+
+        def __init__(self) -> None:
+            self.disconnect_calls = 0
+
+        def open(self, **_kwargs: object) -> FlakyConnection:
+            return self
+
+        def tech_enabled(self) -> bool:
+            return False
+
+        def disconnect(self) -> None:
+            self.disconnect_calls += 1
+            if self.disconnect_calls == 1:
+                raise RuntimeError("disconnect failed")
+
+    connection = FlakyConnection()
+    monkeypatch.setattr(
+        "beamng_mcp.adapters.beamngpy_adapter.BeamNGpy",
+        lambda *_args, **_kwargs: connection,
+    )
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+    await adapter.connect(launch=True)
+
+    with pytest.raises(SimulatorConnectionError, match="disconnect failed"):
+        await adapter.shutdown()
+
+    assert adapter._closed is False
+    assert adapter._connected is True
+    assert adapter._bng is connection
+    assert (await adapter.status()).connected is True
+
+    await adapter.shutdown()
+    assert connection.disconnect_calls == 2
+    assert adapter._closed is True
+    assert adapter._connected is False
+    assert adapter._bng is None
+
+
+@pytest.mark.asyncio
+async def test_status_waits_for_shutdown_and_returns_a_coherent_offline_snapshot(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    disconnect_started = threading.Event()
+    release_disconnect = threading.Event()
+
+    class SlowConnection:
+        system = SimpleNamespace(get_info=lambda **_kwargs: {"version": "0.38.6"})
+
+        def __init__(self) -> None:
+            self.probe_calls = 0
+
+        def open(self, **_kwargs: object) -> SlowConnection:
+            return self
+
+        def tech_enabled(self) -> bool:
+            self.probe_calls += 1
+            return False
+
+        def disconnect(self) -> None:
+            disconnect_started.set()
+            if not release_disconnect.wait(timeout=5.0):
+                raise TimeoutError("test did not release the simulated disconnect")
+
+    connection = SlowConnection()
+    monkeypatch.setattr(
+        "beamng_mcp.adapters.beamngpy_adapter.BeamNGpy",
+        lambda *_args, **_kwargs: connection,
+    )
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+    await adapter.connect(launch=True)
+    initial_probe_calls = connection.probe_calls
+    shutting_down = asyncio.create_task(adapter.shutdown())
+
+    try:
+        assert await asyncio.to_thread(disconnect_started.wait, 2.0)
+        checking_status = asyncio.create_task(adapter.status())
+        await asyncio.sleep(0)
+        release_disconnect.set()
+        await shutting_down
+        status = await checking_status
+
+        assert status.connected is False
+        assert status.mode == "offline"
+        assert status.tech_enabled is None
+        assert status.version is None
+        assert connection.probe_calls == initial_probe_calls
+    finally:
+        release_disconnect.set()
+        if not adapter._closed:
+            await adapter.shutdown()
 
 
 class FakeAI:

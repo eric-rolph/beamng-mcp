@@ -332,7 +332,13 @@ def _atomic_private_write(path: Path, data: bytes, mode: int) -> None:
 
 
 @contextmanager
-def temporary_lua_bridge_config(user: Path, port: int) -> Iterator[TemporaryLuaEndpoint]:
+def temporary_lua_bridge_config(
+    user: Path,
+    port: int,
+    *,
+    heartbeat_interval_seconds: float | None = None,
+    heartbeat_timeout_seconds: float | None = None,
+) -> Iterator[TemporaryLuaEndpoint]:
     """Rotate the isolated bridge endpoint, then restore the exact original config."""
 
     if not 1024 <= port <= 65535:
@@ -351,6 +357,14 @@ def temporary_lua_bridge_config(user: Path, port: int) -> Iterator[TemporaryLuaE
     token = SecretStr(secrets.token_urlsafe(32))
     raw["port"] = port
     raw["token"] = token.get_secret_value()
+    if heartbeat_interval_seconds is not None:
+        if heartbeat_interval_seconds <= 0:
+            raise ValueError("heartbeat_interval_seconds must be positive")
+        raw["heartbeat_interval_seconds"] = heartbeat_interval_seconds
+    if heartbeat_timeout_seconds is not None:
+        if heartbeat_timeout_seconds <= 0:
+            raise ValueError("heartbeat_timeout_seconds must be positive")
+        raw["heartbeat_timeout_seconds"] = heartbeat_timeout_seconds
     updated = (json.dumps(raw, indent=2) + "\n").encode("utf-8")
     _atomic_private_write(config_path, updated, mode)
     try:

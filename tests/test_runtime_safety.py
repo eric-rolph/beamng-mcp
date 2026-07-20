@@ -401,6 +401,45 @@ async def test_cancelled_thread_mutation_holds_lock_until_worker_finishes() -> N
 
 
 @pytest.mark.asyncio
+async def test_fail_closed_mutation_propagates_cancellation_into_peer_cleanup() -> None:
+    runtime, _lua, _autonomy, _simulator, _events = await lease_runtime()
+    mutation_sent = asyncio.Event()
+    peer_closed = asyncio.Event()
+
+    async def mutate() -> None:
+        mutation_sent.set()
+        try:
+            await asyncio.Future()
+        except asyncio.CancelledError:
+            peer_closed.set()
+            raise
+
+    mutation_task = asyncio.create_task(
+        runtime.while_autonomy_inactive(
+            "create a map trigger",
+            mutate,
+            propagate_cancellation=True,
+        )
+    )
+    await asyncio.wait_for(mutation_sent.wait(), timeout=0.5)
+    mutation_task.cancel()
+
+    with pytest.raises(asyncio.CancelledError):
+        await mutation_task
+    assert peer_closed.is_set()
+
+    # Cancellation cleanup completes before the transition lock becomes available.
+    followup_completed = False
+
+    async def followup() -> None:
+        nonlocal followup_completed
+        followup_completed = True
+
+    await runtime.while_autonomy_inactive("run a follow-up mutation", followup)
+    assert followup_completed is True
+
+
+@pytest.mark.asyncio
 async def test_cancelled_start_during_lease_arm_brakes_and_disarms() -> None:
     runtime, lua, autonomy, _simulator, events = await lease_runtime()
     lua.block_arm = True

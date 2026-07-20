@@ -165,12 +165,83 @@ smoke sequence. BeamNG 0.38 runtime builds use DAE. glTF is diagnostic only.
 
 ### Map mutation boundaries
 
-Objects created through the bridge are recorded as bridge-managed and can be updated or deleted.
+Objects created through the bridge are recorded with their exact engine reference, ID, name, and
+class and can be updated or deleted only while all four values and both scene lookups still match.
+Renames refresh that evidence; mission transitions clear it. A recycled numeric ID therefore never
+inherits mutation authority from an object that disappeared in an earlier level. An identity or
+lookup mismatch revokes mutation authority without deleting the evidence record: the retained,
+non-authorizing tombstone continues to block bridge reload until an exact managed deletion proves
+the recorded ID and name absent or a mission transition clears the level-scoped registry.
 Pre-existing level objects require the independent, default-off
 `workspace.allow_existing_map_object_edits` gate in both Python and installed GELua configuration.
 Persistent saving has a separate `workspace.allow_persistent_map_edits` gate and requires both
 `confirm=true` and the exact currently loaded level identifier. These controls prevent an untrusted
 model from converting an advisory confirmation flag into operator authorization.
+
+### Typed trigger lifecycle
+
+BeamNG's [BeamNGTrigger reference](https://documentation.beamng.com/modding/levels/level_classes/beamngtrigger/)
+defines the underlying volume, mode, test, callback, and tick fields. `BeamNGTrigger` is
+deliberately absent from this project's generic scene-object class and field allowlists.
+Trigger callback and command fields are executable or globally observable engine surfaces, and a
+caller-chosen trigger name could collide with mission, career, or gameplay listeners.
+
+The dedicated trigger protocol therefore uses a two-state lifecycle:
+
+```mermaid
+stateDiagram-v2
+  [*] --> Draft: trigger.create
+  Draft --> Draft: trigger.update(spec)
+  Draft --> Enabled: trigger.update(enabled=true) / create engine object
+  Enabled --> Draft: trigger.update(enabled=false) / delete engine object
+  Enabled --> Quarantined: identity or deletion cannot be proven
+  Quarantined --> [*]: exact retry succeeds or mission teardown proves absence
+  Draft --> [*]: trigger.delete(confirm=true)
+  Enabled --> [*]: trigger.delete(confirm=true) / delete engine object
+```
+
+The bridge owns each opaque handle, derives a reserved engine name, records the exact object
+reference/ID/name/class and bridge generation, and sets `canSave=false`. Disabled means no engine
+object exists; this is required because BeamNG 0.38.6 has no supported universal trigger
+enable/disable API. Enabled geometry is immutable. Peer disconnect or authentication expiry,
+mission transitions, and extension unload normally delete both live objects and drafts.
+
+Cleanup is fail-closed under exceptional engine identity tampering or deletion failure. The bridge
+does not drop a possibly live trigger's registry entry: it removes the owner, suppresses every
+callback, and preserves the exact object reference, ID, reserved name, class, and generation for a
+later cleanup retry. Bulk cleanup likewise retains failed quarantine records. A mission teardown
+may retire that evidence only after independent ID and name lookups both prove the object absent.
+Retained quarantines remain in the registry and consume the global 64-trigger cap in addition to
+the normal 32-trigger per-peer cap, preventing cleanup failures from opening an unbounded-retention
+path.
+An explicit bridge-extension reload is rejected while any bridge-managed scene record remains,
+including generic map objects, trigger drafts, live triggers, and quarantines. Once reload is
+scheduled, every scene mutation is rejected and both registries are checked again at the final
+unload boundary. This closes the same-event-batch window and prevents reload from discarding
+authorization, ownership, or cleanup evidence that the bridge has not proved safe to release.
+This guarantee covers reloads requested through the MCP API. A manual forced unload through the
+BeamNG console or extension manager remains unsafe: exact generic-object authorization is lost,
+and although `onExtensionUnloaded` attempts trigger cleanup, module-local quarantine evidence
+cannot survive if BeamNG proceeds with unloading after a cleanup failure. Operators must not
+force-unload the bridge while managed scene records remain.
+
+V1 creates only Box triggers, fixes `luaFunction` to `onBeamNGTrigger`, disables ticking, and
+supports only a typed event-emission action. The callback ignores all non-owned trigger traffic,
+revalidates the exact live object and real vehicle subject, copies only bounded enter/exit scalar
+fields, and emits only to the authenticated owner. Python also requires each requested trigger
+method to appear among the five bridge trigger methods in the capability response before sending
+that request, so an upgraded MCP server cannot mutate through a stale installed extension.
+Enablement commits only after the bridge reads back finite position, rotation, and scale values
+that match the requested collision volume within float-safe tolerances; quaternion sign inversion
+is accepted because `q` and `-q` represent the same rotation.
+Once a trigger mutation send begins, a response timeout or caller cancellation makes its outcome
+uncertain. The client closes that exact WebSocket before propagating the failure, invoking the
+bridge's peer-disconnect cleanup instead of leaving an unobserved draft or live trigger behind.
+
+The local HavocNG transcript corpus informed adversarial cases such as rotated/thin volumes,
+terrain overlap, spheres, moving triggers, and raw command fields. It is test inspiration rather
+than API authority: several videos target older builds or use unrestricted Lua and shipped-archive
+editing, so those techniques are intentionally not reproduced by this protocol.
 
 ### Vision and control
 
@@ -249,8 +320,8 @@ The bridge and BeamNGpy are complementary, not redundant:
 | --- | --- |
 | AI client → MCP | typed schemas, curated tools, destructive hints, confirmations |
 | HTTP → MCP | loopback bind, bearer auth, Host/Origin checks, body limits inherited from SDK |
-| Python → BeamNGpy | loopback only, one serialized connection, no exposed Lua queue tool |
-| Python → GELua | loopback, shared token, allowlist, correlation IDs, heartbeat, bounded queues, vehicle-scoped lease |
+| Python → BeamNGpy | loopback only, one serialized connection, no arbitrary command or raw queue tool |
+| Python → GELua | loopback, shared token, allowlist, correlation IDs, heartbeat, bounded queues, typed loss-aware trigger event pages, vehicle-scoped lease |
 | AI → filesystem | one canonical workspace, quotas, no symlinks/traversal, atomic writes, hashes/backups, default-off install |
 | Blender → mod compiler | capped expiring fixed-name inbox, session-bound request/helper/runner hashes, exact cage-vertex provenance, explicit rigid transform, DAE parser, pre-commit one-use consume |
 | AI → map | managed objects by default; separate existing-object and exact-level save gates |

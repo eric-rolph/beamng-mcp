@@ -41,7 +41,7 @@ body:
     attributes:
       label: Version details
       description: Include BeamNG, beamng-mcp, BeamNGpy, Python, Windows, and GPU driver versions where relevant.
-      placeholder: "BeamNG 0.38.x; beamng-mcp 0.1.0; BeamNGpy 1.35.1; Python 3.13; Windows 11; NVIDIA 610.xx"
+      placeholder: "BeamNG 0.38.x; beamng-mcp 0.3.0; BeamNGpy 1.35.1; Python 3.13; Windows 11; NVIDIA 610.xx"
     validations:
       required: true
 

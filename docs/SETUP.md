@@ -312,6 +312,29 @@ were already part of the loaded level is disabled by default. To opt in for a cl
 This gate is independent from persistent saving. Enabling existing-object edits does not enable
 `map_save`.
 
+## Ephemeral typed triggers
+
+Typed triggers do not use either map-edit operator gate because they cannot adopt or persist
+existing level objects. Create a disabled draft, inspect it, explicitly enable it, then disable and
+delete it when the test finishes:
+
+```text
+map_trigger_create
+map_trigger_update(enabled=true)
+map_trigger_get
+map_trigger_events(after_sequence=0)
+map_trigger_update(enabled=false)
+map_trigger_delete(confirm=true)
+```
+
+The v1 bridge creates Box volumes only and reports selected vehicle `enter`/`exit` events through
+its authenticated connection. It does not accept a scene name, Lua callback, command, tick, or
+arbitrary action. Drafts are connection-local and are discarded on disconnect or mission change.
+Use each event page's `next_sequence` for the next `map_trigger_events` call, and treat
+`truncated=true` as an explicit observation gap rather than assuming no trigger activity occurred.
+After upgrading beamng-mcp, run `uv run beamng-mcp install-lua --force`; the Python client refuses
+trigger calls if the installed extension does not advertise the matching typed handlers.
+
 ## Persistent map editing
 
 Leave it disabled for normal operation. To enable it:
@@ -378,6 +401,12 @@ commands in [Development](DEVELOPMENT.md) before running them.
 - Install `.[vision]`.
 - For SegFormer, cache the model locally or explicitly set `allow_model_downloads = true`.
 - For ONNX, confirm the path, input/output layouts, class IDs, and available execution providers.
+- In `doctor --json`, require
+  `vision_runtime.onnxruntime.provider_libraries.CUDAExecutionProvider.loadable=true`; the provider
+  list by itself can advertise a DLL whose CUDA dependencies cannot load.
+- Keep `onnxruntime-gpu<1.27` with this CUDA 12.8 profile. ONNX Runtime 1.27 removed CUDA 12 support.
+- Treat a non-loadable TensorRT provider as unavailable until the matching TensorRT runtime is
+  installed; CUDA remains the supported GPU fallback.
 - On Blackwell, use CUDA 12.8+ compatible packages.
 
 ### Blender handoff reports Collada unavailable

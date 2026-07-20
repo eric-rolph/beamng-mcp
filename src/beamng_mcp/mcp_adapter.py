@@ -14,6 +14,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp.server.fastmcp.exceptions import ToolError
 from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import ToolAnnotations
+from pydantic import StrictBool
 from starlette.responses import JSONResponse
 
 from .config import Settings
@@ -27,6 +28,12 @@ from .models import (
     JobInfo,
     MapObjectMutation,
     MapObjectPatch,
+    MapTriggerCreate,
+    MapTriggerDeleteResult,
+    MapTriggerEventPage,
+    MapTriggerInfo,
+    MapTriggerList,
+    MapTriggerPatch,
     ModArtifact,
     ModFileInfo,
     ModFileWrite,
@@ -36,6 +43,9 @@ from .models import (
     ScenarioRef,
     SensorReading,
     SensorSpec,
+    TriggerCursor,
+    TriggerHandle,
+    TriggerListLimit,
     VehicleAIConfig,
     VehicleControl,
     VehicleInfo,
@@ -463,6 +473,70 @@ def create_mcp_server(
         return await app_runtime.while_autonomy_inactive(
             "delete a map object",
             lambda: app_runtime.map_delete_object(object_id, confirm=confirm),
+        )
+
+    @mcp.tool(annotations=ACTION)
+    @tool_guard
+    async def map_trigger_create(request: MapTriggerCreate) -> MapTriggerInfo:
+        """Create a disabled, ephemeral box-trigger draft with bridge-event actions only."""
+
+        return await app_runtime.while_autonomy_inactive(
+            "create a map trigger",
+            lambda: app_runtime.map_trigger_create(request),
+            propagate_cancellation=True,
+        )
+
+    @mcp.tool(annotations=READ_ONLY)
+    @tool_guard
+    async def map_trigger_get(handle: TriggerHandle) -> MapTriggerInfo:
+        """Read one bridge-owned trigger by its opaque handle."""
+
+        return await app_runtime.map_trigger_get(handle)
+
+    @mcp.tool(annotations=DESTRUCTIVE)
+    @tool_guard
+    async def map_trigger_update(patch: MapTriggerPatch) -> MapTriggerInfo:
+        """Update a trigger draft or explicitly enable/disable it."""
+
+        return await app_runtime.while_autonomy_inactive(
+            "update a map trigger",
+            lambda: app_runtime.map_trigger_update(patch),
+            propagate_cancellation=True,
+        )
+
+    @mcp.tool(annotations=READ_ONLY)
+    @tool_guard
+    async def map_trigger_list(limit: TriggerListLimit = 100) -> MapTriggerList:
+        """List a bounded set of bridge-owned ephemeral triggers."""
+
+        return await app_runtime.map_trigger_list(limit=limit)
+
+    @mcp.tool(annotations=READ_ONLY)
+    @tool_guard
+    async def map_trigger_events(
+        handle: TriggerHandle,
+        after_sequence: TriggerCursor = 0,
+        limit: TriggerListLimit = 50,
+    ) -> MapTriggerEventPage:
+        """Page sanitized bridge events for one currently owned trigger handle."""
+
+        return await app_runtime.map_trigger_events(
+            handle,
+            after_sequence=after_sequence,
+            limit=limit,
+        )
+
+    @mcp.tool(annotations=DESTRUCTIVE)
+    @tool_guard
+    async def map_trigger_delete(
+        handle: TriggerHandle, confirm: StrictBool = False
+    ) -> MapTriggerDeleteResult:
+        """Delete a bridge-owned trigger; confirm=true is required."""
+
+        return await app_runtime.while_autonomy_inactive(
+            "delete a map trigger",
+            lambda: app_runtime.map_trigger_delete(handle, confirm=confirm),
+            propagate_cancellation=True,
         )
 
     @mcp.tool(annotations=DESTRUCTIVE)
