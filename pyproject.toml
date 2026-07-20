@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "beamng-mcp"
+version = "0.1.0"
+description = "Local-first MCP server for BeamNG.drive and BeamNG.tech"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [{ name = "Eric Rolph" }]
+dependencies = [
+  "beamngpy>=1.35,<2",
+  "mcp>=1.26,<2",
+  "numpy>=2.0,<3",
+  "pillow>=11,<13",
+  "pydantic>=2.10,<3",
+  "pydantic-settings>=2.7,<3",
+  "websockets>=15,<17",
+]
+
+[project.optional-dependencies]
+vision = [
+  "opencv-python-headless>=4.10,<5",
+  "torch>=2.8,<3",
+  "transformers>=4.55,<6",
+  "ultralytics>=8.3,<9",
+]
+dev = ["pytest>=8.3,<10", "pytest-asyncio>=0.25,<2", "ruff>=0.9,<1", "mypy>=1.14,<2"]
+
+[project.scripts]
+beamng-mcp = "beamng_mcp.server:main"
+beamng-mcp-bridge = "beamng_mcp.bridge:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/beamng_mcp"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["beamng_mcp"]
+
