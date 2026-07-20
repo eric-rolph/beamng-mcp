@@ -9,13 +9,14 @@ from pathlib import Path
 import bpy
 
 
-def _runner_path() -> Path:
+def _arguments() -> tuple[Path, str]:
     try:
         separator = sys.argv.index("--")
         value = sys.argv[separator + 1]
     except (ValueError, IndexError) as exc:
         raise RuntimeError("expected -- <staged-runner.py>") from exc
-    return Path(value).resolve()
+    asset_name = sys.argv[separator + 2] if len(sys.argv) > separator + 2 else "live_ramp"
+    return Path(value).resolve(), asset_name
 
 
 def _add_group(obj: bpy.types.Object, name: str, indices: list[int]) -> None:
@@ -46,17 +47,17 @@ def _ramp_mesh(name: str) -> bpy.types.Mesh:
 
 
 def main() -> None:
-    runner = _runner_path()
+    runner, asset_name = _arguments()
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
     scene.unit_settings.system = "METRIC"
     scene.unit_settings.scale_length = 1.0
 
-    cage_mesh = _ramp_mesh("live_ramp_physics_mesh")
+    cage_mesh = _ramp_mesh(f"{asset_name}_physics_mesh")
     node_ids = cage_mesh.attributes.new("beamng_node_id", "STRING", "POINT")
     for index, item in enumerate(node_ids.data):
         item.value = f"ramp_{index}".encode()
-    cage = bpy.data.objects.new("live_ramp_physics", cage_mesh)
+    cage = bpy.data.objects.new(f"{asset_name}_physics", cage_mesh)
     scene.collection.objects.link(cage)
     _add_group(cage, "beamng_base", [0, 1, 2, 3])
     _add_group(cage, "beamng_ref", [0])
@@ -64,11 +65,11 @@ def main() -> None:
     _add_group(cage, "beamng_left", [1])
     _add_group(cage, "beamng_up", [4])
 
-    visual_mesh = _ramp_mesh("live_ramp_visual_mesh")
-    material = bpy.data.materials.new("live_ramp_material")
+    visual_mesh = _ramp_mesh(f"{asset_name}_visual_mesh")
+    material = bpy.data.materials.new(f"{asset_name}_material")
     material.diffuse_color = (0.45, 0.47, 0.5, 1.0)
     visual_mesh.materials.append(material)
-    visual = bpy.data.objects.new("live_ramp_visual", visual_mesh)
+    visual = bpy.data.objects.new(f"{asset_name}_visual", visual_mesh)
     scene.collection.objects.link(visual)
 
     runpy.run_path(str(runner), run_name="__main__")

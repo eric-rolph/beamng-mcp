@@ -127,19 +127,41 @@ class ConnectionStatus(StrictModel):
     last_error: str | None = None
 
 
-class ScenarioRef(StrictModel):
+class ScenarioSelector(StrictModel):
+    """Exact selector for an existing BeamNG scenario returned by the engine."""
+
     level: str = Field(min_length=1, max_length=128, pattern=r"^[A-Za-z0-9_][A-Za-z0-9_.-]*$")
+    name: str = Field(min_length=1, max_length=256)
+
+    @field_validator("level")
+    @classmethod
+    def reject_level_dot_segments(cls, value: str) -> str:
+        if ".." in value:
+            raise ValueError("scenario level identifiers must not contain dot segments")
+        return value
+
+    @field_validator("name")
+    @classmethod
+    def reject_control_characters(cls, value: str) -> str:
+        if any(ord(character) < 32 or ord(character) == 127 for character in value):
+            raise ValueError("scenario names must not contain control characters")
+        return value
+
+
+class ScenarioRef(ScenarioSelector):
+    """Filesystem-safe identifier for creating a scenario."""
+
     name: str = Field(min_length=1, max_length=128, pattern=r"^[A-Za-z0-9_][A-Za-z0-9_.-]*$")
 
-    @field_validator("level", "name")
+    @field_validator("name")
     @classmethod
-    def reject_dot_segments(cls, value: str) -> str:
+    def reject_name_dot_segments(cls, value: str) -> str:
         if ".." in value:
             raise ValueError("scenario identifiers must not contain dot segments")
         return value
 
 
-class ScenarioInfo(ScenarioRef):
+class ScenarioInfo(ScenarioSelector):
     description: str | None = None
     source_file: str | None = None
 
@@ -147,12 +169,46 @@ class ScenarioInfo(ScenarioRef):
 class VehicleSpawn(StrictModel):
     vehicle_id: str = Field(min_length=1, max_length=64, pattern=r"^[A-Za-z0-9_-]+$")
     model: str = Field(min_length=1, max_length=64, pattern=r"^[A-Za-z0-9_-]+$")
-    position: Vector3 = (0.0, 0.0, 0.0)
+    position: Vector3 = Field(
+        description=(
+            "Required BeamNG world-space starting point; derive a nearby surface position "
+            "from map_road_edges because runtime cling has a limited projection range"
+        )
+    )
     rotation: Quaternion = (0.0, 0.0, 0.0, 1.0)
     configuration: str | None = Field(default=None, max_length=128)
     license_plate: str = Field(default="MCP", max_length=16)
     color: str | None = Field(default=None, max_length=64)
-    cling: bool = True
+    cling: bool = Field(
+        default=False,
+        description=(
+            "Opt in only for a nearby engine-side ground projection; false preserves the "
+            "explicit model-origin clearance in position"
+        ),
+    )
+
+
+class ScenarioVehiclePlacement(VehicleSpawn):
+    """Persistent placement with an explicit, reviewed surface-relative Z.
+
+    BeamNGpy cannot currently apply ``cling`` while serializing vehicles into a
+    scenario prefab. Runtime ``vehicle_spawn`` retains true engine-side cling.
+    """
+
+    position: Vector3 = Field(
+        description=(
+            "Required BeamNG world-space placement derived from measured surface Z and the "
+            "model origin; base-origin props can use the surface Z while cars need clearance"
+        )
+    )
+
+    cling: Literal[False] = Field(
+        default=False,
+        description=(
+            "Must remain false: BeamNGpy cannot ground-cling Scenario.add_vehicle; "
+            "provide an explicit surface-relative Z or spawn after scenario start"
+        ),
+    )
 
 
 class VehicleControl(StrictModel):

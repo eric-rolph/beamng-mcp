@@ -83,6 +83,10 @@ uv run pytest -q -m beamng_live tests/test_beamng_live.py
 
 # Full real Blender → exact evidence → JBeam/material/package → install → spawn/step regression.
 uv run pytest -q -m "blender and beamng_live" tests/test_softbody_pipeline_live.py
+
+# Official MCP client → every tool/resource/prompt → grounded mod/vehicle/map/trigger/autonomy run.
+$env:BEAMNG_MCP_TEST_BLENDER = "C:\Program Files\Blender Foundation\Blender 4.5\blender.exe"
+uv run pytest -q -m "blender and beamng_live" tests/test_mcp_capability_gauntlet_live.py
 ```
 
 The adapter preserves the active `current` folder for mod/token operations but passes its parent to
@@ -95,6 +99,13 @@ original bridge configuration. A narrow bind-then-close race remains, so process
 fresh bridge authentication are both checked.
 Tests use unique disposable scenario names, never save a level, and clean their generated
 scenario/package. Retail BeamNG.drive results remain experimental even when this smoke passes.
+The capability gauntlet samples four well-separated positions from actual road edges, rebuilds the
+scenario with a base-origin ramp at one exact XYZ, and adds model-origin clearance to the other
+measured surfaces before placing runtime vehicles. It disables AI, selects neutral, holds the
+brakes, steps physics until each object settles, checks model-specific clearance and velocity, and
+proves persistent/transient restart behavior. Do not use guessed Z values: BeamNGpy 1.35.1
+still cannot apply `cling` when `Scenario.add_vehicle` serializes a prefab, and retail runtime
+cling behavior is distance/build dependent.
 
 ### GPU camera and perception smoke
 

@@ -15,6 +15,7 @@ from beamng_mcp.models import (
     MapObjectMutation,
     MapObjectPatch,
     ScenarioRef,
+    ScenarioSelector,
     SensorSpec,
     VehicleAIConfig,
     VehicleSpawn,
@@ -83,6 +84,20 @@ def test_scenario_ref_accepts_typical_beamng_identifiers() -> None:
     ref = ScenarioRef(level="west_coast_usa", name="mcp-test.v2")
     assert ref.level == "west_coast_usa"
     assert ref.name == "mcp-test.v2"
+
+
+def test_scenario_selector_accepts_display_names_but_rejects_controls() -> None:
+    selector = ScenarioSelector(
+        level="gridmap_v2", name="A built-in scenario (delivery / training)"
+    )
+    assert selector.name == "A built-in scenario (delivery / training)"
+    with pytest.raises(ValidationError):
+        ScenarioSelector(level="gridmap_v2", name="unsafe\nname")
+
+
+def test_vehicle_spawn_requires_an_explicit_world_position() -> None:
+    with pytest.raises(ValidationError, match="position"):
+        VehicleSpawn(vehicle_id="ego", model="etk800")
 
 
 def test_vehicle_ai_uses_beamngpy_modes_and_matching_targets() -> None:
@@ -208,7 +223,7 @@ def test_strict_models_reject_non_finite_numbers_globally(non_finite: float) -> 
 @pytest.mark.parametrize(
     "model",
     [
-        VehicleSpawn(vehicle_id="ego", model="etk800").model_copy(
+        VehicleSpawn(vehicle_id="ego", model="etk800", position=(0, 0, 0)).model_copy(
             update={"rotation": (0.0, 0.0, 0.0, 0.0)}
         ),
         VehicleTeleport(vehicle_id="ego", position=(0, 0, 0)).model_copy(
@@ -225,7 +240,7 @@ def test_geometry_inputs_are_bounded_and_scale_is_positive() -> None:
     with pytest.raises(ValidationError):
         VehicleTeleport(vehicle_id="ego", position=(1_000_001, 0, 0))
     with pytest.raises(ValidationError):
-        VehicleSpawn(vehicle_id="ego", model="etk800", rotation=(2, 0, 0, 1))
+        VehicleSpawn(vehicle_id="ego", model="etk800", position=(0, 0, 0), rotation=(2, 0, 0, 1))
     with pytest.raises(ValidationError, match=r"greater than or equal to 0\.0001"):
         MapObjectMutation(name="box", class_name="TSStatic", scale=(0, 1, 1))
     with pytest.raises(ValidationError):

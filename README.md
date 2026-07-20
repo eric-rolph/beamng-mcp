@@ -158,10 +158,15 @@ Ask the AI client to follow this sequence:
 1. Call `capabilities_get`, `simulator_status`, and `lua_bridge_status`.
 2. Call `simulator_connect` only after checking the configured installation.
 3. List scenarios and vehicles before choosing or creating anything.
-4. Confirm the installed GELua bridge is authenticated; `autonomy_start` fails closed if its
+4. For a new level, read `map_road_network`/`map_road_edges`, then add the model's origin clearance
+   to measured surface Z before every `vehicle_spawn`. The validated default is `cling=false` so
+   BeamNG preserves that clearance; opt-in cling cannot reliably project from an arbitrary height.
+   BeamNGpy does not apply cling to `Scenario.add_vehicle`, so persistent placements need the same
+   explicit surface-relative calculation (base-origin static props can use the surface Z directly).
+5. Confirm the installed GELua bridge is authenticated; `autonomy_start` fails closed if its
    engine safety lease cannot arm for the selected vehicle.
-5. Start with BeamNG native AI at a low target speed.
-6. Poll `autonomy_status`, including the `engine_deadman_*` fields; call `emergency_stop` on stale
+6. Start with BeamNG native AI at a low target speed.
+7. Poll `autonomy_status`, including the `engine_deadman_*` fields; call `emergency_stop` on stale
    frames, unexpected motion, or operator request.
 
 The server also provides `inspect_current_scene`, `build_and_test_mod`, `build_softbody_mod`, and

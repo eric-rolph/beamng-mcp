@@ -5,10 +5,22 @@ uses semantic versioning after the initial alpha series.
 
 ## [Unreleased]
 
+### Added
+
+- Add an opt-in official-client capability gauntlet that exercises all 57 tools, every MCP
+  resource and prompt, Blender-evidenced ramp authoring, grounded in-game placement, map objects,
+  triggers, leased native AI, emergency-stop idempotence, retail vision refusal, and mission reset
+
 ### Changed
 
 - Constrain `onnxruntime-gpu` below 1.27 for the CUDA 12.8 Windows profile because ONNX Runtime
   1.27 removed CUDA 12 support
+- Require every `vehicle_spawn` request to provide measured surface coordinates plus model-origin
+  clearance; `cling` now defaults false so BeamNG preserves that explicit placement instead of
+  masking an omitted position as world origin or snapping a chassis origin onto the road
+- Require persistent `scenario_create` vehicles to provide explicit surface-relative coordinates with
+  `cling=false`, reflecting BeamNGpy's non-functional prefab cling. This is an MCP input migration
+  for clients that previously omitted `position`, relied on default cling, or sent `cling=true`
 
 ### Fixed
 
@@ -31,6 +43,15 @@ uses semantic versioning after the initial alpha series.
   and vehicle directory loaded in BeamNG
 - Cover positive hydro, rail, and slidenode serialization and remove the unsupported claim that v1
   compiles a tested hinge/torsion composition
+- Serialize numeric BeamNG road IDs as MCP object keys; preserve built-in scenario display names
+  and accept their exact enumerated names through a separate load selector
+- Register MCP-spawned/despawned vehicles in BeamNGpy's active scenario bookkeeping, compensate a
+  spawn that cannot be verified, and clear transient location records across mission restart
+- Reject duplicate vehicle IDs against both BeamNGpy bookkeeping and the live simulator inventory,
+  validate colors before remote mutation, and finish in-flight despawn bookkeeping before
+  propagating cancellation
+- Correct the static tool annotations for destructive `mod_test_start` and idempotent
+  `emergency_stop`
 
 ## [0.3.0] - 2026-07-20
 

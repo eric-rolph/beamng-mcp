@@ -13,6 +13,7 @@ from typing import Any, TypeVar
 
 import numpy as np
 from beamngpy import BeamNGpy, Scenario, Vehicle  # type: ignore[import-untyped]
+from beamngpy.misc.colors import coerce_color  # type: ignore[import-untyped]
 from beamngpy.sensors import (  # type: ignore[import-untyped]
     GPS,
     AdvancedIMU,
@@ -29,11 +30,19 @@ from beamngpy.sensors import (  # type: ignore[import-untyped]
 from PIL import Image
 
 from ..config import BeamNGSettings
-from ..errors import BeamNGMCPError, NotFoundError, SafetyInterlockError, SimulatorConnectionError
+from ..errors import (
+    BeamNGMCPError,
+    ConflictError,
+    NotFoundError,
+    SafetyInterlockError,
+    SimulatorConnectionError,
+)
 from ..models import (
     ConnectionStatus,
     ScenarioInfo,
     ScenarioRef,
+    ScenarioSelector,
+    ScenarioVehiclePlacement,
     SensorReading,
     SensorSpec,
     VehicleAIConfig,
@@ -98,6 +107,27 @@ class BeamNGpyAdapter:
             except asyncio.CancelledError:
                 cancellation_requested = True
         return task.result(), cancellation_requested
+
+    @staticmethod
+    async def _settle_task_resiliently(
+        task: asyncio.Task[T],
+    ) -> tuple[T | None, BaseException | None, bool]:
+        """Join a task and capture its outcome without detaching it on cancellation."""
+
+        cancellation_requested = False
+        while not task.done():
+            try:
+                await asyncio.shield(task)
+            except asyncio.CancelledError:
+                cancellation_requested = True
+            except BaseException:
+                # Read the completed task's exception below so callers can
+                # perform compensation before deciding which error to raise.
+                break
+        try:
+            return task.result(), None, cancellation_requested
+        except BaseException as exc:
+            return None, exc, cancellation_requested
 
     def _require(self) -> BeamNGpy:
         if self._bng is None or not self._connected:
@@ -518,12 +548,14 @@ class BeamNGpyAdapter:
         result: list[ScenarioInfo] = []
         for level_name, scenarios in raw.items():
             for scenario in scenarios:
+                description = getattr(scenario, "description", None)
+                source_file = getattr(scenario, "path", None)
                 result.append(
                     ScenarioInfo(
                         level=str(getattr(scenario, "level", level_name)),
                         name=str(getattr(scenario, "name", "unknown")),
-                        description=getattr(scenario, "description", None),
-                        source_file=getattr(scenario, "path", None),
+                        description=None if description is None else str(description),
+                        source_file=None if source_file is None else str(source_file),
                     )
                 )
         return result
@@ -540,7 +572,7 @@ class BeamNGpyAdapter:
                 f"Cannot {reason} until attached sensors are released: " + "; ".join(failures)
             )
 
-    async def load_scenario(self, ref: ScenarioRef) -> ScenarioInfo:
+    async def load_scenario(self, ref: ScenarioSelector) -> ScenarioInfo:
         bng = self._require()
         scenarios = await self._call(bng.scenario.get_level_scenarios, ref.level)
         match = next((item for item in scenarios if item.name == ref.name), None)
@@ -563,7 +595,7 @@ class BeamNGpyAdapter:
     async def create_scenario(
         self,
         ref: ScenarioRef,
-        vehicles: list[VehicleSpawn],
+        vehicles: list[ScenarioVehiclePlacement],
         *,
         description: str | None = None,
         load: bool = True,
@@ -572,6 +604,11 @@ class BeamNGpyAdapter:
         bng = self._require()
         if len(vehicles) > 64:
             raise ValueError("A scenario may contain at most 64 requested vehicles")
+        if any(not isinstance(spec, ScenarioVehiclePlacement) for spec in vehicles):
+            raise ValueError(
+                "Scenario vehicles require ScenarioVehiclePlacement with an explicit "
+                "surface position and cling=false"
+            )
         vehicle_ids = [spec.vehicle_id for spec in vehicles]
         if len(vehicle_ids) != len(set(vehicle_ids)):
             raise ValueError("Scenario vehicle IDs must be unique")
@@ -620,15 +657,54 @@ class BeamNGpyAdapter:
             source_file=getattr(scenario, "path", None),
         )
 
+    @staticmethod
+    def _scenario_vehicle_bookkeeping(
+        bng: Any,
+    ) -> tuple[Any, dict[str, Any], dict[str, Any], dict[str, Any]]:
+        scenario = getattr(bng, "_scenario", None)
+        if scenario is None:
+            raise SimulatorConnectionError(
+                "Loaded BeamNGpy scenario cannot track a transient vehicle"
+            )
+        records: list[dict[str, Any]] = []
+        for attribute in ("vehicles", "transient_vehicles", "_vehicle_locations"):
+            value = getattr(scenario, attribute, None)
+            if not isinstance(value, dict):
+                raise SimulatorConnectionError(
+                    "Loaded BeamNGpy scenario cannot track a transient vehicle"
+                )
+            records.append(value)
+        return scenario, records[0], records[1], records[2]
+
     async def scenario_start(self) -> None:
         await self._call(self._require().scenario.start)
 
     async def scenario_restart(self) -> None:
+        bng = self._require()
+        _, scenario_vehicles, transient_vehicles, vehicle_locations = await self._call(
+            self._scenario_vehicle_bookkeeping, bng
+        )
+        original_transient_vehicles = dict(transient_vehicles)
+
+        def reconcile_transient_locations() -> None:
+            for vehicle_id in original_transient_vehicles:
+                if vehicle_id not in scenario_vehicles and vehicle_id not in transient_vehicles:
+                    vehicle_locations.pop(vehicle_id, None)
+
         await self._remove_all_sensors(reason="restart the scenario")
-        try:
-            await self._call(self._require().scenario.restart)
-        finally:
-            self._vehicles.clear()
+        restarting = asyncio.create_task(self._call(bng.scenario.restart))
+        _, restart_error, restart_cancelled = await self._settle_task_resiliently(restarting)
+        reconciling = asyncio.create_task(self._call(reconcile_transient_locations))
+        _, reconciliation_error, reconciliation_cancelled = await self._settle_task_resiliently(
+            reconciling
+        )
+        self._vehicles.clear()
+        if restart_cancelled or reconciliation_cancelled:
+            raise asyncio.CancelledError from restart_error
+        if reconciliation_error is not None:
+            raise reconciliation_error
+        if restart_error is not None:
+            raise restart_error
 
     async def scenario_stop(self) -> None:
         await self._remove_all_sensors(reason="stop the scenario")
@@ -727,21 +803,171 @@ class BeamNGpyAdapter:
             color=spec.color,
             part_config=spec.configuration,
         )
-        spawned = await self._call(
-            bng.vehicles.spawn,
-            vehicle,
-            spec.position,
-            spec.rotation,
-            spec.cling,
-            True,
-        )
+        bookkeeping: tuple[Any, dict[str, Any], dict[str, Any], dict[str, Any]] | None = None
+        spawn_attempted = False
+
+        def spawn_and_register() -> bool:
+            nonlocal bookkeeping, spawn_attempted
+            bookkeeping = self._scenario_vehicle_bookkeeping(bng)
+            _, scenario_vehicles, transient_vehicles, vehicle_locations = bookkeeping
+            if (
+                spec.vehicle_id in self._vehicles
+                or spec.vehicle_id in scenario_vehicles
+                or spec.vehicle_id in transient_vehicles
+            ):
+                raise ConflictError(
+                    f"Vehicle {spec.vehicle_id!r} already exists; remove it explicitly "
+                    "or choose another vehicle_id"
+                )
+            current_vehicles = bng.vehicles.get_current_info(False)
+            if spec.vehicle_id in current_vehicles:
+                raise ConflictError(
+                    f"Vehicle {spec.vehicle_id!r} already exists; remove it explicitly "
+                    "or choose another vehicle_id"
+                )
+            if spec.color is not None:
+                # BeamNGpy otherwise validates colors inside spawn(), before it
+                # sends SpawnVehicle. Keep local validation outside the range
+                # that requires compensating for an uncertain remote mutation.
+                coerce_color(spec.color)
+            spawn_attempted = True
+            spawned = bng.vehicles.spawn(
+                vehicle,
+                spec.position,
+                spec.rotation,
+                spec.cling,
+                True,
+            )
+            if spawned:
+                scenario_vehicles[spec.vehicle_id] = vehicle
+                transient_vehicles[spec.vehicle_id] = vehicle
+                vehicle_locations[spec.vehicle_id] = (
+                    spec.position,
+                    spec.rotation,
+                )
+            return bool(spawned)
+
+        def rollback_spawn() -> tuple[bool, list[str]]:
+            failures: list[str] = []
+            if bookkeeping is None:
+                return False, ["scenario bookkeeping was not captured before spawning"]
+            _, scenario_vehicles, transient_vehicles, vehicle_locations = bookkeeping
+            try:
+                bng.vehicles.despawn(vehicle)
+            except Exception as exc:
+                despawned = False
+                failures.append(f"despawn: {type(exc).__name__}: {exc}")
+            else:
+                despawned = True
+
+            tracked_vehicle_maps = (
+                ("vehicles", scenario_vehicles),
+                ("transient_vehicles", transient_vehicles),
+            )
+            replacement_present = False
+            if despawned:
+                for label, records in tracked_vehicle_maps:
+                    tracked = records.get(spec.vehicle_id)
+                    if tracked is vehicle:
+                        records.pop(spec.vehicle_id, None)
+                    elif tracked is not None:
+                        replacement_present = True
+                        failures.append(f"scenario.{label} contains a replacement vehicle")
+                if not replacement_present:
+                    expected_location = (spec.position, spec.rotation)
+                    location = vehicle_locations.get(spec.vehicle_id)
+                    if location == expected_location:
+                        vehicle_locations.pop(spec.vehicle_id, None)
+                    elif location is not None:
+                        failures.append("scenario._vehicle_locations contains a replacement entry")
+            else:
+                for label, records in tracked_vehicle_maps:
+                    tracked = records.get(spec.vehicle_id)
+                    if tracked is None:
+                        records[spec.vehicle_id] = vehicle
+                    elif tracked is not vehicle:
+                        replacement_present = True
+                        failures.append(f"scenario.{label} contains a replacement vehicle")
+                if not replacement_present:
+                    expected_location = (spec.position, spec.rotation)
+                    location = vehicle_locations.get(spec.vehicle_id)
+                    if location is None:
+                        vehicle_locations[spec.vehicle_id] = expected_location
+                    elif location != expected_location:
+                        failures.append("scenario._vehicle_locations contains a replacement entry")
+            return despawned, failures
+
+        async def rollback_spawn_resiliently() -> tuple[list[str], bool]:
+            rollback = asyncio.create_task(self._call(rollback_spawn))
+            result, rollback_error, rollback_cancelled = await self._settle_task_resiliently(
+                rollback
+            )
+            if rollback_error is not None:
+                despawned = False
+                failures = [f"cleanup: {type(rollback_error).__name__}: {rollback_error}"]
+            else:
+                assert result is not None
+                despawned, failures = result
+            cached = self._vehicles.get(spec.vehicle_id)
+            if despawned:
+                if cached is vehicle:
+                    self._vehicles.pop(spec.vehicle_id, None)
+                elif cached is not None:
+                    failures.append("adapter cache contains a replacement vehicle")
+            elif cached is None:
+                self._vehicles[spec.vehicle_id] = vehicle
+            elif cached is not vehicle:
+                failures.append("adapter cache contains a replacement vehicle")
+            return failures, rollback_cancelled
+
+        spawning = asyncio.create_task(self._call(spawn_and_register))
+        spawned, spawn_error, spawn_cancelled = await self._settle_task_resiliently(spawning)
+        rollback_failures: list[str] = []
+        rollback_cancelled = False
+        if spawn_attempted and (spawn_error is not None or (spawn_cancelled and bool(spawned))):
+            rollback_failures, rollback_cancelled = await rollback_spawn_resiliently()
+
+        if spawn_cancelled or rollback_cancelled:
+            if rollback_failures:
+                self._last_error = (
+                    f"Vehicle {spec.vehicle_id!r} spawn was cancelled; rollback was incomplete: "
+                    + "; ".join(rollback_failures)
+                )
+            raise asyncio.CancelledError from spawn_error
+        if spawn_error is not None:
+            if rollback_failures:
+                message = (
+                    f"Vehicle {spec.vehicle_id!r} spawn failed ({spawn_error}); "
+                    "rollback was incomplete: " + "; ".join(rollback_failures)
+                )
+                self._last_error = message
+                raise SimulatorConnectionError(message) from spawn_error
+            raise spawn_error
+        assert spawned is not None
         if not spawned:
             raise SimulatorConnectionError(f"BeamNG rejected vehicle spawn for {spec.vehicle_id}")
         self._vehicles[spec.vehicle_id] = vehicle
-        return await self.vehicle_state(spec.vehicle_id)
+        try:
+            return await self.vehicle_state(spec.vehicle_id)
+        except BaseException as verification_error:
+            rollback_failures, rollback_cancelled = await rollback_spawn_resiliently()
+            if rollback_failures:
+                message = (
+                    f"Vehicle {spec.vehicle_id!r} post-spawn verification failed "
+                    f"({verification_error}); "
+                    "rollback was incomplete: " + "; ".join(rollback_failures)
+                )
+                self._last_error = message
+                if isinstance(verification_error, asyncio.CancelledError) or rollback_cancelled:
+                    raise asyncio.CancelledError from verification_error
+                raise SimulatorConnectionError(message) from verification_error
+            if rollback_cancelled and not isinstance(verification_error, asyncio.CancelledError):
+                raise asyncio.CancelledError from verification_error
+            raise
 
     async def remove_vehicle(self, vehicle_id: str) -> None:
         bng = self._require()
+        await self._call(self._scenario_vehicle_bookkeeping, bng)
         failures: list[str] = []
         for name, handle in list(self._sensors.items()):
             if handle.vehicle_id != vehicle_id:
@@ -756,8 +982,24 @@ class BeamNGpyAdapter:
                 + "; ".join(failures)
             )
         vehicle = await self._vehicle(vehicle_id)
-        await self._call(bng.vehicles.despawn, vehicle)
-        self._vehicles.pop(vehicle_id, None)
+
+        def despawn_and_unregister() -> None:
+            _, scenario_vehicles, transient_vehicles, vehicle_locations = (
+                self._scenario_vehicle_bookkeeping(bng)
+            )
+            bng.vehicles.despawn(vehicle)
+            scenario_vehicles.pop(vehicle_id, None)
+            transient_vehicles.pop(vehicle_id, None)
+            vehicle_locations.pop(vehicle_id, None)
+
+        removing = asyncio.create_task(self._call(despawn_and_unregister))
+        _, removal_error, removal_cancelled = await self._settle_task_resiliently(removing)
+        if removal_error is None and self._vehicles.get(vehicle_id) is vehicle:
+            self._vehicles.pop(vehicle_id, None)
+        if removal_cancelled:
+            raise asyncio.CancelledError from removal_error
+        if removal_error is not None:
+            raise removal_error
 
     async def control_vehicle(self, command: VehicleControl) -> None:
         vehicle = await self._vehicle(command.vehicle_id)

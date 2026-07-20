@@ -271,6 +271,12 @@ class Runtime:
                 "confirmation to the bridge",
                 "vehicle_control is an explicit one-shot input outside the engine deadman and "
                 "can remain latched until another control command",
+                "BeamNGpy Scenario.add_vehicle cannot apply ground cling while serializing a "
+                "prefab; scenario_create requires measured surface Z plus model-origin clearance, "
+                "or create an "
+                "empty scenario and use map_road_edges before vehicle_spawn",
+                "vehicle_spawn requires measured surface Z plus model-origin clearance and "
+                "defaults cling=false; opt-in cling cannot reliably recover from arbitrary height",
                 "mod_test_start validates, packs, and optionally installs; it does not launch "
                 "BeamNG or prove that a mod executes correctly",
                 "softbody static validation proves coordinate/topology/package integrity, not "
