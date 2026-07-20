@@ -5,6 +5,48 @@ uses semantic versioning after the initial alpha series.
 
 ## [Unreleased]
 
+### Added
+
+- Runtime Blender discovery and a fail-closed `doctor` capability probe that reports the exact
+  executable/version, selection-only Collada operator, and glTF availability
+- Opt-in real-runtime regressions for transformed Blender exports, Blender MCP profile registration,
+  isolated BeamNG/Lua/vehicle control, an end-to-end concrete-ramp build/install/load, and rendered
+  GPU perception through a test-only retail RenderView fixture with an optional downloads-disabled
+  CUDA SegFormer baseline
+- BeamNGpy 1.35 call-signature compatibility coverage and loopback WebSocket fault-injection tests
+
+### Changed
+
+- BeamNG launch configuration accepts an explicit direct `beamng.binary`; an active user folder
+  named `current` is preserved for mod/token operations while its parent is passed to `-userpath`
+- Soft-body setup now documents the validated side-by-side Blender 4.5.4 LTS/Blender MCP 1.6.4
+  profile, capability-first checks, and transcript-derived visual-animation/JBeam collision boundary
+- Retail BeamNG.drive 0.38.6 is documented as rejecting BeamNGpy `Camera`; production
+  camera-driven autonomy remains in the BeamNG.tech tier
+- Live regressions lock the sentinel-marked profile, reserve random tcom/WebSocket ports, rotate
+  its bridge credentials, require process ownership before mutation, and restore bridge config
+
+### Fixed
+
+- Probe Blender Doctor capabilities against the active Blender MCP user/add-on profile, rejecting
+  duplicate DAE exporters, and require all four deterministic glTF export options before reporting
+  glTF available
+- Decode Blender STRING point attributes as UTF-8 bytes and reject invalid encodings instead of
+  emitting Python byte-literal node IDs
+- Discover only DAE export operators, avoiding ambiguity with the matching Collada import operator
+- Call BeamNGpy's `tech_enabled()` method instead of treating its method object as true, and fall
+  back to each connected vehicle's State sensor when retail Drive rejects batched state requests
+- Accept BeamNG's validated one-time native WebSocket information preamble while preserving strict
+  malformed-message, correlation-ID, expected-method, authentication, and subprotocol checks
+- Flag whitespace-obfuscated and member-qualified Lua `load`, `loadstring`, and `dostring`
+  dynamic evaluation while ignoring longer identifiers such as `preload`
+- Reject relative Blender visual/manifest output paths before normalization and report the bounded
+  active-profile DAE operator set when capability probing finds a missing or ambiguous exporter
+- Make post-swap mod-install recovery identity-bound and no-clobber: remove only proven-owned new
+  files, restore overwritten files safely, and preserve concurrent replacements plus recovery data
+- Confine every live-test mutation to a sentinel profile without junction/reparse traversal, defer
+  extension loads until process ownership is proven, and bound terminate/kill/wait cleanup
+
 ## [0.2.0] - 2026-07-19
 
 ### Added

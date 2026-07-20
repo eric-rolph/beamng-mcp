@@ -20,6 +20,7 @@ from ..errors import ConflictError, NotFoundError, SafetyInterlockError, Workspa
 from ..models import ModArtifact, ModFileInfo, ModFileWrite, ModValidation, ValidationIssue
 
 MOD_NAME = re.compile(r"^[a-z][a-z0-9_-]{0,63}$")
+DYNAMIC_LUA_EVAL = re.compile(r"\b(?:load(?:string)?|dostring)\s*\(")
 ALLOWED_TOP_LEVEL = frozenset(
     {
         "art",
@@ -73,6 +74,24 @@ def _same_file_state(left: os.stat_result, right: os.stat_result) -> bool:
     left_identity = (left.st_dev, left.st_ino)
     right_identity = (right.st_dev, right.st_ino)
     return not all(left_identity) or not all(right_identity) or left_identity == right_identity
+
+
+def _has_strict_regular_identity(value: os.stat_result) -> bool:
+    return (
+        stat.S_ISREG(value.st_mode)
+        and not _is_reparse_stat(value)
+        and bool(value.st_dev)
+        and bool(value.st_ino)
+    )
+
+
+def _same_strict_file_state(left: os.stat_result, right: os.stat_result) -> bool:
+    return (
+        _has_strict_regular_identity(left)
+        and _has_strict_regular_identity(right)
+        and (left.st_dev, left.st_ino) == (right.st_dev, right.st_ino)
+        and _same_file_state(left, right)
+    )
 
 
 class _QuotaExceeded(WorkspaceError):
@@ -730,7 +749,7 @@ class ModWorkspace:
                         )
                 if suffix == ".lua":
                     text = self._read_stable_bytes(root, file).decode("utf-8", errors="replace")
-                    if "loadstring(" in text or "dostring(" in text:
+                    if DYNAMIC_LUA_EVAL.search(text):
                         issues.append(
                             ValidationIssue(
                                 severity="warning",
@@ -791,6 +810,180 @@ class ModWorkspace:
                 sha256=digest,
                 size=size,
             )
+
+    def _restore_quarantined_regular_file(
+        self,
+        quarantine: Path,
+        destination: Path,
+        expected: os.stat_result,
+    ) -> bool:
+        """Best-effort no-clobber restoration of a raced-in regular file."""
+
+        if not _has_strict_regular_identity(expected):
+            return False
+        try:
+            self._assert_no_reparse_components(quarantine.parent)
+            current = os.lstat(quarantine)
+            if not _same_strict_file_state(expected, current):
+                return False
+            self._assert_no_reparse_components(destination)
+            os.link(quarantine, destination, follow_symlinks=False)
+            self._assert_no_reparse_components(destination)
+            restored = os.lstat(destination)
+            current = os.lstat(quarantine)
+            if not _same_strict_file_state(expected, restored) or not _same_strict_file_state(
+                expected, current
+            ):
+                return False
+            quarantine.unlink()
+        except (OSError, WorkspaceError):
+            return False
+        return True
+
+    def _quarantine_owned_destination(
+        self,
+        destination: Path,
+        expected: os.stat_result,
+        *,
+        operation: str,
+    ) -> Path:
+        """Move an owned destination aside without losing a raced-in replacement."""
+
+        quarantine = destination.with_name(
+            f".{destination.name}.{secrets.token_hex(16)}.rollback.tmp"
+        )
+        if not quarantine.is_relative_to(destination.parent):
+            raise SafetyInterlockError(f"{operation}; rollback quarantine escaped the repository")
+        self._assert_no_reparse_components(quarantine)
+        if os.path.lexists(quarantine):
+            raise SafetyInterlockError(f"{operation}; rollback quarantine already exists")
+
+        try:
+            self._assert_no_reparse_components(destination)
+            current = os.lstat(destination)
+        except (OSError, WorkspaceError) as exc:
+            raise SafetyInterlockError(
+                f"{operation}; destination identity could not be confirmed, refusing to remove "
+                f"or replace {destination}: {exc}"
+            ) from exc
+        if not _same_strict_file_state(expected, current):
+            raise SafetyInterlockError(
+                f"{operation}; destination identity changed, refusing to remove or replace "
+                f"{destination}"
+            )
+
+        try:
+            destination.replace(quarantine)
+            self._assert_no_reparse_components(quarantine.parent)
+            quarantined_state = os.lstat(quarantine)
+        except OSError as exc:
+            raise SafetyInterlockError(
+                f"{operation}; could not quarantine the installed file safely: {exc}"
+            ) from exc
+
+        if _same_strict_file_state(expected, quarantined_state):
+            return quarantine
+
+        restored = self._restore_quarantined_regular_file(
+            quarantine,
+            destination,
+            quarantined_state,
+        )
+        preserved_at = destination if restored else quarantine
+        raise SafetyInterlockError(
+            f"{operation}; destination identity changed during quarantine, so the concurrent "
+            f"replacement was preserved at {preserved_at}"
+        )
+
+    def _remove_owned_private_file(
+        self,
+        path: Path,
+        expected: os.stat_result,
+        *,
+        operation: str,
+        label: str,
+    ) -> None:
+        try:
+            self._assert_no_reparse_components(path)
+            current = os.lstat(path)
+        except (OSError, WorkspaceError) as exc:
+            raise SafetyInterlockError(
+                f"{operation}; {label} could not be confirmed at {path}: {exc}"
+            ) from exc
+        if not _same_strict_file_state(expected, current):
+            raise SafetyInterlockError(
+                f"{operation}; {label} identity changed and was preserved at {path}"
+            )
+        try:
+            path.unlink()
+        except OSError as exc:
+            raise SafetyInterlockError(f"{operation}; {label} remains at {path}: {exc}") from exc
+
+    def _restore_backup_without_clobber(
+        self,
+        destination: Path,
+        backup: Path,
+        installed_state: os.stat_result,
+    ) -> None:
+        operation = "Installed mod verification failed"
+        try:
+            self._assert_no_reparse_components(backup)
+            backup_state = os.lstat(backup)
+        except (OSError, WorkspaceError) as exc:
+            raise SafetyInterlockError(
+                f"{operation}; recovery backup could not be confirmed at {backup}: {exc}"
+            ) from exc
+        if not _has_strict_regular_identity(backup_state):
+            raise SafetyInterlockError(
+                f"{operation}; recovery backup has no stable regular-file identity at {backup}"
+            )
+
+        quarantine = self._quarantine_owned_destination(
+            destination,
+            installed_state,
+            operation=operation,
+        )
+        try:
+            self._assert_no_reparse_components(destination)
+            os.link(backup, destination, follow_symlinks=False)
+            self._assert_no_reparse_components(destination)
+            restored_state = os.lstat(destination)
+        except (OSError, WorkspaceError) as exc:
+            raise SafetyInterlockError(
+                f"{operation}; automatic no-clobber restore failed. Recovery backup remains at "
+                f"{backup} and the unverified install remains at {quarantine}: {exc}"
+            ) from exc
+        if not _same_strict_file_state(backup_state, restored_state):
+            raise SafetyInterlockError(
+                f"{operation}; restored destination identity changed. Recovery backup remains "
+                f"at {backup} and the unverified install remains at {quarantine}"
+            )
+
+        self._remove_owned_private_file(
+            quarantine,
+            installed_state,
+            operation=operation,
+            label="rollback quarantine",
+        )
+        try:
+            self._assert_no_reparse_components(destination)
+            restored_state = os.lstat(destination)
+        except (OSError, WorkspaceError) as exc:
+            raise SafetyInterlockError(
+                f"{operation}; restored destination could not be reconfirmed. Recovery backup "
+                f"remains at {backup}: {exc}"
+            ) from exc
+        if not _same_strict_file_state(backup_state, restored_state):
+            raise SafetyInterlockError(
+                f"{operation}; restored destination identity changed. Recovery backup remains "
+                f"at {backup}"
+            )
+        self._remove_owned_private_file(
+            backup,
+            backup_state,
+            operation=operation,
+            label="recovery backup",
+        )
 
     def install(self, mod_name: str, user_path: Path, *, overwrite: bool = False) -> ModArtifact:
         with self._lock:
@@ -866,6 +1059,11 @@ class ModWorkspace:
                 )
                 if (verified_sha256, verified_size) != (staged_sha256, staged_size):
                     raise WorkspaceError("Staged mod changed before installation")
+                staged_state = os.lstat(staged)
+                if not _has_strict_regular_identity(staged_state):
+                    raise SafetyInterlockError(
+                        "Staged mod has no stable regular-file identity; refusing installation"
+                    )
 
                 if destination_state is not None:
                     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
@@ -908,35 +1106,59 @@ class ModWorkspace:
                 self._assert_no_reparse_components(destination)
                 staged.replace(destination)
 
+                installed_state: os.stat_result | None = None
                 try:
+                    self._assert_no_reparse_components(destination)
+                    candidate_state = os.lstat(destination)
+                    if not _same_strict_file_state(staged_state, candidate_state):
+                        raise SafetyInterlockError(
+                            "Installed mod destination identity changed before verification"
+                        )
+                    installed_state = candidate_state
                     installed_sha256, installed_size, _ = self._stable_file(
                         destination,
+                        initial=installed_state,
                         max_bytes=maximum_artifact_bytes,
                     )
                     if (installed_sha256, installed_size) != (staged_sha256, staged_size):
                         raise WorkspaceError("Installed mod did not match the staged artifact")
                 except Exception as install_error:
                     if backup is not None:
-                        if not os.path.lexists(backup):
+                        if installed_state is None:
                             raise SafetyInterlockError(
-                                "Installed mod verification failed and the recovery backup "
-                                f"disappeared from {backup}"
+                                "Installed mod verification failed before destination ownership "
+                                f"could be established; recovery backup remains at {backup}"
                             ) from install_error
-                        try:
-                            self._assert_no_reparse_components(backup)
-                            self._assert_no_reparse_components(destination)
-                            backup.replace(destination)
-                            backup = None
-                        except Exception as rollback_error:
-                            raise SafetyInterlockError(
-                                "Installed mod verification failed and automatic rollback failed; "
-                                f"the recovery backup remains at {backup}: {rollback_error}"
-                            ) from install_error
+                        self._restore_backup_without_clobber(
+                            destination,
+                            backup,
+                            installed_state,
+                        )
+                        backup = None
                         raise WorkspaceError(
-                            "Installed mod verification failed; the previous file was restored"
+                            "Installed mod verification failed; the previous file was restored "
+                            "and its recovery backup was consumed"
                         ) from install_error
+                    if installed_state is None:
+                        raise SafetyInterlockError(
+                            "New mod installation could not be verified because destination "
+                            "ownership could not be established; refusing to remove it"
+                        ) from install_error
+                    operation = "New mod installation verification failed"
+                    quarantine = self._quarantine_owned_destination(
+                        destination,
+                        installed_state,
+                        operation=operation,
+                    )
+                    self._remove_owned_private_file(
+                        quarantine,
+                        installed_state,
+                        operation=operation,
+                        label="rollback quarantine",
+                    )
                     raise WorkspaceError(
-                        "New mod installation could not be verified after its atomic replacement"
+                        "New mod installation could not be verified after its atomic replacement; "
+                        "the unverified file was removed"
                     ) from install_error
             except (SafetyInterlockError, WorkspaceError):
                 raise

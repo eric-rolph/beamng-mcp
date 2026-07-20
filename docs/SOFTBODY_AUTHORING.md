@@ -250,35 +250,59 @@ Recalibrate when any of the following changes:
 - an intermediate conversion program; or
 - the scene origin or collection transform.
 
-### Blender 5.2 limitation
+### Capability-tested Blender runtime
 
-The installed application is Blender 5.2, but the audited Blender MCP add-on is currently present
-only in the Blender 5.1 user profile and no bridge was listening on port `9876` during the audit.
-Before authoring, migrate or reinstall and enable the add-on for 5.2, launch Blender, and confirm
-the loopback bridge responds. Do not interpret an installed MCP Python package as a connected
-Blender instance.
+Blender installations and their user/add-on profiles are version-specific and can coexist. The
+validated Windows reference uses portable Blender 4.5.4 LTS with the Blender MCP 1.6.4 add-on
+enabled in its 4.5 profile. The live active-profile probe reports Blender 4.5.4,
+`wm.collada_export`, selection-only support, and a glTF operator with every deterministic option;
+separate factory-startup fixtures verify identity/transformed DAE bounds and the active-profile
+fixture verifies Blender MCP registration.
+Blender 5.2 remains useful for unrelated work, but its stock runtime is not the validated DAE route.
 
-Blender 5.2 has a glTF export operator but no built-in COLLADA importer/exporter, and no DAE
-exporter was installed during the audit. BeamNG 0.38, meanwhile, uses COLLADA `.dae` for vehicle
-visual meshes; the installed 0.38 vehicle and level archives contain no `.gltf` or `.glb` runtime
-assets.
+Configure the exact executable instead of making a version-only assumption:
 
-Consequently, Blender 5.2 can perform modeling, measurement, evidence generation, and save the
-source `.blend`, but it cannot complete the required DAE export with stock Blender. Do not rename a
-glTF file to `.dae`, package glTF as if it were verified, or silently use an unreviewed converter.
+```toml
+[blender]
+executable = "C:/Users/you/Applications/Blender/4.5.4/blender.exe"
+probe_timeout_seconds = 20.0
+```
 
-Choose one reviewed route:
+`beamng-mcp doctor --json` briefly runs that binary with `--background`, loading its active
+user/add-on profile, and requires exactly one DAE export operator with a selection-only property.
+This prevents an extra profile exporter from being hidden by a factory-startup probe. Its
+`gltf_export` flag additionally requires `filepath`, `export_format`, `use_selection`, and
+`export_yup`, exactly matching the reviewed helper. An installed Blender MCP Python package does
+not prove that Blender is connected or that its add-on is enabled in this profile. Conversely,
+Blender MCP registration does not prove that a compatible DAE exporter is present. With no
+explicit executable, common side-by-side candidates are probed until one is compatible; an
+explicit path probes only that requested runtime. Run both reference checks from
+[Development](DEVELOPMENT.md). The supplied factory-startup export fixture validates the built-in
+`wm.collada_export` route only; an add-on exporter requires an equivalent active-profile fixture
+with a reviewed expected operator.
 
-- install and pin an operator-reviewed Blender 5.2-compatible DAE exporter;
-- use a separately installed, pinned Blender version that still has a tested COLLADA operator; or
-- use another pinned converter that preserves object names, material slots, units, orientation,
-  normals, UVs, and transforms.
+Do not rename a glTF file to `.dae`, package glTF as if it were verified, or silently use an
+unreviewed converter. Any alternate exporter/runtime becomes part of the calibrated toolchain:
+record it, compare emitted DAE landmarks and bounds, and run the in-game visual/material smoke.
+Until a route passes the capability probe, known-fixture export, DAE inspection, and BeamNG smoke,
+the workflow must stop at an export-blocked state; a `.blend` or glTF intermediate is not a
+complete BeamNG mod.
 
-Whichever route is selected becomes part of the calibrated toolchain. Record it in the evidence,
-compare the emitted DAE landmarks and bounds, and run the in-game visual/material smoke test. Until
-a route passes a doctor check, a known-fixture export check, DAE inspection, and a BeamNG game
-smoke test, the peer workflow must stop at an export-blocked state; a `.blend` or glTF intermediate
-is not a complete BeamNG mod.
+### Transcript-informed workflow boundary
+
+The reviewed HavocNG tutorial transcripts reinforce a distinction that this coordinator enforces:
+visual animation and physics collision are different systems. A DAE animation or animated scene
+prop is not a substitute for a JBeam skeleton. Any functional moving/contact surface—crusher
+plate, gate, pendulum, roller, or ramp mechanism—must receive evidenced JBeam nodes, beams,
+collision triangles, and supported actuators. Static non-deforming level geometry belongs to a
+separate TSStatic/Visible Mesh workflow, which v1 does not author.
+
+Tutorial shortcuts that modify shipped archives are also intentionally excluded. Never edit or
+repack BeamNG's installed `content/*.zip` files; build under the confined workspace and install an
+unpacked/ZIP overlay only into a disposable or operator-selected user folder. External GLTF/model
+marketplace assets require independent source, license, attribution, texture, and conversion
+provenance. V1's textureless single-material handoff does not ingest or preserve that metadata, so
+such assets must not be treated as ready inputs merely because Blender can import them.
 
 ## Phase 0: Define the engineering brief
 
@@ -654,8 +678,10 @@ Before packaging, validate all of the following:
 - source `.blend`, temporary interchange files, caches, absolute local paths, and proprietary
   BeamNG assets are excluded.
 
-`mod_validate` and `mod_test_start` are static operations in the current release. They do not load
-the vehicle, run BeamNG physics, activate authored Lua, or prove that the packaged artifact works.
+`mod_validate` and `mod_test_start` are static MCP operations. They do not load the vehicle, run
+BeamNG physics, activate authored Lua, or prove that the packaged artifact works. The repository's
+opt-in end-to-end developer regression does load one generated ramp in an isolated profile, but it
+is a narrow harness rather than an MCP capability or general physics proof.
 
 ## Manual in-game smoke test
 
@@ -714,11 +740,13 @@ vehicle-mod packaging and remains separately gated.
 
 - BeamNGpy is officially supported with BeamNG.tech; retail BeamNG.drive integration remains
   experimental and build-dependent.
-- The audited Blender MCP add-on still needs to be installed/enabled in Blender 5.2 and its local
-  loopback bridge has no authentication. Keep it bound to loopback, treat it as full-trust code
-  execution, and disable telemetry with `BLENDER_MCP_DISABLE_TELEMETRY=1` for private assets.
-- Blender 5.2 stock builds cannot export the DAE required by this BeamNG 0.38 workflow; no reviewed
-  Collada operator was configured at audit time.
+- The validated Blender 4.5.4 profile has Blender MCP 1.6.4 enabled, but its loopback bridge has no
+  authentication. Keep it on loopback, treat it as full-trust code execution, and disable telemetry
+  with `BLENDER_MCP_DISABLE_TELEMETRY=1` for private assets.
+- Blender capability is profile/runtime-specific. The 4.5.4 reference exposes the required DAE
+  operator; stock Blender 5.2 is not the validated route. An alternate runtime/exporter must pass
+  the live probe plus an adapted active-profile export fixture; the supplied factory-startup
+  fixture deliberately tests only built-in `wm.collada_export`.
 - Coordinate evidence proves provenance and transform consistency, not good engineering judgment.
 - Sparse cage generation cannot infer load paths, hinge behavior, or safe actuator limits from a
   render mesh alone.
@@ -732,9 +760,15 @@ vehicle-mod packaging and remains separately gated.
   plate or a general multi-body mechanism.
 - V1 generates edges/X-braces, triangles, hydros, rails, and slidenodes only. It does not generate
   fictional `hinges`, torsion elements, rotators, couplers, custom controllers, or arbitrary Lua.
-- Static validation does not execute JBeam physics or authored vehicle Lua.
+- Visual DAE animation does not create collision physics. Functional animated/moving contact
+  surfaces must use an evidenced JBeam mechanism; level TSStatic/Visible Mesh authoring and
+  animation preservation are outside v1.
+- V1 does not import external asset licenses/attribution, textures, multi-material mappings, or
+  semantic scene paths. It is not a general Sketchfab/GLTF-to-BeamNG conversion pipeline.
+- Static validation does not execute JBeam physics or authored vehicle Lua. The opt-in ramp smoke
+  proves one fixture can spawn and step, not deformation, impact, or actuator correctness.
 - The current `mod_test_start` job validates, packs, and optionally installs; it does not run the
-  manual in-game smoke checklist.
+  manual in-game smoke checklist or collect BeamNG logs.
 - BeamNG's node/triangle collision model is not a general triangle-mesh rigid-body collider.
 - A successful unpacked test is not package proof; missing assets can be supplied accidentally by
   the working tree or cache.
@@ -761,3 +795,11 @@ vehicle-mod packaging and remains separately gated.
 - BeamNG [material JSON](https://documentation.beamng.com/modding/file_formats/materials/)
 - BeamNG [correct mod packing](https://documentation.beamng.com/modding/mod-support/mod_packing/)
 - Blender 4.4 [legacy COLLADA documentation](https://docs.blender.org/manual/en/4.4/files/import_export/collada.html)
+
+## Contextual workflow source
+
+The local transcript review used the [HavocNG tutorial channel](https://www.youtube.com/@havocng)
+to identify practical authoring boundaries and future typed-tool opportunities. Tutorial commands,
+raw Lua examples, and archive-editing shortcuts are not treated as API authority; implemented
+behavior must still match BeamNG/Blender documentation, inspected runtime APIs, and regression
+tests.

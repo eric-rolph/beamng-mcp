@@ -40,13 +40,12 @@ def _steam_roots() -> list[Path]:
 
 
 def find_home(explicit: Path | None = None) -> Path | None:
-    candidates: list[Path] = []
     if explicit is not None:
-        candidates.append(explicit.expanduser())
-    if os.getenv("BNG_HOME"):
-        candidates.append(Path(os.environ["BNG_HOME"]).expanduser())
-    for root in _steam_roots():
-        candidates.append(root / "steamapps" / "common" / "BeamNG.drive")
+        candidates = [explicit.expanduser()]
+    elif os.getenv("BNG_HOME"):
+        candidates = [Path(os.environ["BNG_HOME"]).expanduser()]
+    else:
+        candidates = [root / "steamapps" / "common" / "BeamNG.drive" for root in _steam_roots()]
 
     executable_names = (
         Path("Bin64/BeamNG.drive.x64.exe"),
@@ -108,14 +107,36 @@ def _launcher_user_folder(launcher_ini: Path) -> Path | None:
 
 
 def detect_installation(settings: Settings) -> Installation:
-    home = find_home(settings.beamng.home)
     user = find_user(settings.beamng.target_version, settings.beamng.user)
     executable = None
-    if home is not None:
+    configured_binary = settings.beamng.binary
+    configured_home = (
+        settings.beamng.home.expanduser().resolve() if settings.beamng.home is not None else None
+    )
+    home: Path | None
+    candidate: Path | None
+    if configured_binary is not None:
+        expanded_binary = configured_binary.expanduser()
+        if expanded_binary.is_absolute():
+            candidate = expanded_binary.resolve()
+            if configured_home is not None:
+                home = configured_home
+            elif candidate.parent.name.casefold() == "bin64":
+                home = candidate.parent.parent
+            else:
+                home = candidate.parent
+        else:
+            home = configured_home or find_home(None)
+            candidate = (home / expanded_binary).resolve() if home is not None else None
+        if candidate is not None and candidate.is_file():
+            executable = candidate
+    else:
+        home = find_home(settings.beamng.home)
+    if configured_binary is None and home is not None:
         for relative in ("Bin64/BeamNG.drive.x64.exe", "Bin64/BeamNG.tech.x64.exe"):
             candidate = home / relative
             if candidate.is_file():
-                executable = candidate
+                executable = candidate.resolve()
                 break
     return Installation(
         home=home,

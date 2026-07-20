@@ -1,0 +1,8 @@
+{
+  "title": "BeamNG MCP Vision Live Test",
+  "tag_line": "Disposable retail RenderView integration fixture",
+  "description": "Test-only fixture installed into a sentinel-marked isolated user profile.",
+  "version_string": "0.0.0-test",
+  "author": "beamng-mcp contributors",
+  "type": "Other"
+}

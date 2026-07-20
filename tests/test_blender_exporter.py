@@ -3,6 +3,7 @@ from __future__ import annotations
 import ast
 import importlib
 from importlib.resources import files
+from types import SimpleNamespace
 
 import pytest
 
@@ -57,3 +58,57 @@ def test_blender_exporter_fails_closed_outside_blender() -> None:
     module = exporter_module()
     with pytest.raises(module.SoftbodyExportError, match="inside Blender"):
         module.export_beamng_softbody({})
+
+
+@pytest.mark.parametrize(
+    ("key", "value", "suffixes"),
+    [
+        ("visual_path", "relative-output.dae", {".dae", ".gltf"}),
+        ("manifest_path", "relative-manifest.json", {".json"}),
+    ],
+)
+def test_blender_exporter_rejects_relative_output_paths(
+    key: str, value: str, suffixes: set[str]
+) -> None:
+    module = exporter_module()
+
+    with pytest.raises(module.SoftbodyExportError, match=rf"{key} must be an absolute path"):
+        module._absolute_output_path({key: value}, key, suffixes)
+
+
+def test_blender_exporter_accepts_real_blender_string_attribute_bytes() -> None:
+    module = exporter_module()
+    attribute = SimpleNamespace(
+        domain="POINT",
+        data_type="STRING",
+        data=[SimpleNamespace(value=b"node_a"), SimpleNamespace(value=b"node_b")],
+    )
+    mesh = SimpleNamespace(
+        attributes={module.NODE_ATTRIBUTE: attribute},
+        vertices=[object(), object()],
+    )
+
+    assert module._mesh_node_ids(mesh) == ["node_a", "node_b"]
+
+
+def test_blender_exporter_discovers_export_but_not_import_operators() -> None:
+    module = exporter_module()
+
+    def operator(*property_names: str) -> SimpleNamespace:
+        rna = SimpleNamespace(
+            properties=[SimpleNamespace(identifier=name) for name in property_names]
+        )
+        return SimpleNamespace(get_rna_type=lambda: rna)
+
+    collada_export = operator("filepath", "selected")
+    collada_import = operator("filepath")
+    blender = SimpleNamespace(
+        ops=SimpleNamespace(
+            wm=SimpleNamespace(
+                collada_export=collada_export,
+                collada_import=collada_import,
+            )
+        )
+    )
+
+    assert module._discover_dae_operators(blender) == {"wm.collada_export": collada_export}

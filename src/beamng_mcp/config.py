@@ -36,6 +36,7 @@ class BeamNGSettings(BaseModel):
     host: str = "127.0.0.1"
     port: int = Field(default=25252, ge=1, le=65535)
     home: Path | None = None
+    binary: Path | None = None
     user: Path | None = None
     launch: bool = True
     target_version: str = "0.38"
@@ -117,6 +118,13 @@ class WorkspaceSettings(BaseModel):
         return self
 
 
+class BlenderSettings(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    executable: Path | None = None
+    probe_timeout_seconds: float = Field(default=20.0, ge=1.0, le=120.0)
+
+
 class VisionSettings(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -138,6 +146,7 @@ class Settings(BaseModel):
 
     mcp: MCPSettings = Field(default_factory=MCPSettings)
     beamng: BeamNGSettings = Field(default_factory=BeamNGSettings)
+    blender: BlenderSettings = Field(default_factory=BlenderSettings)
     lua: LuaSettings = Field(default_factory=LuaSettings)
     workspace: WorkspaceSettings = Field(default_factory=WorkspaceSettings)
     vision: VisionSettings = Field(default_factory=VisionSettings)
@@ -159,9 +168,11 @@ class Settings(BaseModel):
         merged = copy.deepcopy(raw)
         overrides: tuple[tuple[str, tuple[str, ...], Any], ...] = (
             ("BEAMNG_MCP_BEAMNG_HOME", ("beamng", "home"), Path),
+            ("BEAMNG_MCP_BEAMNG_BINARY", ("beamng", "binary"), Path),
             ("BEAMNG_MCP_BEAMNG_USER", ("beamng", "user"), Path),
             ("BEAMNG_MCP_BEAMNG_HOST", ("beamng", "host"), str),
             ("BEAMNG_MCP_BEAMNG_PORT", ("beamng", "port"), int),
+            ("BEAMNG_MCP_BLENDER_EXECUTABLE", ("blender", "executable"), Path),
             ("BEAMNG_MCP_LUA_URL", ("lua", "url"), str),
             ("BEAMNG_MCP_LUA_TOKEN", ("lua", "token"), str),
             ("BEAMNG_MCP_SAFETY_LEASE_SECONDS", ("lua", "safety_lease_seconds"), float),

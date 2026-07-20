@@ -7,9 +7,21 @@ port = 8766
 host = "127.0.0.1"
 port = 25252
 # home = "C:/Games/BeamNG.drive"
+# Prefer the direct 64-bit simulator executable. A path relative to `home` avoids
+# launcher rediscovery; use BeamNG.tech.x64.exe for a licensed Tech installation.
+# binary = "Bin64/BeamNG.drive.x64.exe"
 # BeamNG 0.37+ default; a custom userFolder in BeamNG.drive.ini takes precedence.
+# Configure the exact active folder. When launching a folder named `current`,
+# beamng-mcp passes its parent to BeamNG's `-userpath` argument automatically.
 # user = "C:/Users/you/AppData/Local/BeamNG/BeamNG.drive/current"
 launch = true
+
+[blender]
+# Side-by-side portable installs are supported. `doctor` executes this binary in
+# background mode with its active user/add-on profile, then verifies an unambiguous
+# selection-only DAE exporter and the deterministic glTF option contract.
+# executable = "C:/Users/you/Applications/Blender/4.5.4/blender.exe"
+probe_timeout_seconds = 20.0
 
 [lua]
 url = "ws://127.0.0.1:8765"
@@ -36,6 +48,7 @@ max_structural_triangles = 2048
 max_structural_actuators = 128
 
 [vision]
+# Production camera-driven modes require BeamNG.tech in the tested 0.38 generation.
 backend = "classical"
 target_fps = 15.0
 frame_timeout_seconds = 0.35

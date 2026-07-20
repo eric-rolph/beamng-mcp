@@ -21,6 +21,12 @@ Uses camera perception together with BeamNG vehicle state and the simulator cont
 current alpha controller disables native AI before applying direct controls so two controllers do
 not fight. Route-planner fusion is on the roadmap.
 
+Both camera-driven modes use BeamNGpy's production `Camera` path and therefore require BeamNG.tech
+on the tested 0.38 generation. Retail BeamNG.drive 0.38.6 rejects that sensor with an explicit Tech
+license error. The repository's opt-in retail GPU smoke uses a test-only Lua RenderView fixture to
+exercise rendering plus local inference; it is removed afterward and is not a supported retail
+fallback for `vision-lane` or `hybrid` control.
+
 ## Backends
 
 ### Classical OpenCV

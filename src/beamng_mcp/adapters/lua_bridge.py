@@ -49,7 +49,7 @@ class LuaBridgeClient:
         self._ws: ClientConnection | None = None
         self._reader_task: asyncio.Task[None] | None = None
         self._heartbeat_task: asyncio.Task[None] | None = None
-        self._pending: dict[str, asyncio.Future[dict[str, Any]]] = {}
+        self._pending: dict[str, tuple[str, asyncio.Future[dict[str, Any]]]] = {}
         self._connect_lock = asyncio.Lock()
         self._send_lock = asyncio.Lock()
         self._events: deque[dict[str, Any]] = deque(maxlen=256)
@@ -60,6 +60,7 @@ class LuaBridgeClient:
         self._last_message_at: datetime | None = None
         self._last_error: str | None = None
         self._latency_ms: float | None = None
+        self._native_preamble_received = False
 
     @property
     def connected(self) -> bool:
@@ -75,10 +76,10 @@ class LuaBridgeClient:
                 "BEAMNG_MCP_LUA_TOKEN"
             )
         async with self._connect_lock:
-            if self.connected:
+            if self.connected and self._authenticated:
                 return
-            await self._close_socket()
             try:
+                await self._close_socket()
                 self._ws = await connect(
                     self.settings.url,
                     subprotocols=[Subprotocol(BRIDGE_SUBPROTOCOL)],
@@ -90,17 +91,26 @@ class LuaBridgeClient:
                     ping_timeout=5,
                     compression=None,
                 )
+                if self._ws.subprotocol != BRIDGE_SUBPROTOCOL:
+                    raise LuaBridgeError(
+                        "Lua bridge did not negotiate the required "
+                        f"{BRIDGE_SUBPROTOCOL!r} subprotocol"
+                    )
+                ws = self._ws
                 self._reader_task = asyncio.create_task(
-                    self._reader(), name="beamng-lua-bridge-reader"
+                    self._reader(ws), name="beamng-lua-bridge-reader"
                 )
                 result = await self._call_connected("capabilities", {})
                 self._authenticated = True
                 self._bridge_version = _string_or_none(result.get("bridge_version"))
                 self._game_version = _string_or_none(result.get("game_version"))
                 self._heartbeat_task = asyncio.create_task(
-                    self._heartbeat_loop(), name="beamng-lua-bridge-heartbeat"
+                    self._heartbeat_loop(ws), name="beamng-lua-bridge-heartbeat"
                 )
                 self._last_error = None
+            except asyncio.CancelledError:
+                await self._close_socket()
+                raise
             except Exception as exc:
                 await self._close_socket()
                 self._last_error = f"{type(exc).__name__}: {exc}"
@@ -109,54 +119,66 @@ class LuaBridgeClient:
                 raise LuaBridgeError(f"Cannot connect to {self.settings.url}: {exc}") from exc
 
     async def close(self) -> None:
-        await self._close_socket()
+        async with self._connect_lock:
+            await self._close_socket()
 
-    async def _close_socket(self) -> None:
+    async def _close_socket(self, *, expected_ws: ClientConnection | None = None) -> None:
+        if expected_ws is not None and self._ws is not expected_ws:
+            return
         heartbeat = self._heartbeat_task
         self._heartbeat_task = None
+        reader = self._reader_task
+        self._reader_task = None
+        ws = self._ws
+        self._ws = None
+        pending = tuple(self._pending.values())
+        self._pending.clear()
+        self._authenticated = False
+        self._native_preamble_received = False
+
+        for _, future in pending:
+            if not future.done():
+                future.set_exception(LuaBridgeError("Lua bridge connection closed"))
         if heartbeat is not None and heartbeat is not asyncio.current_task():
             heartbeat.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await heartbeat
-        reader = self._reader_task
-        self._reader_task = None
         if reader is not None and reader is not asyncio.current_task():
             reader.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await reader
-        ws = self._ws
-        self._ws = None
         if ws is not None:
             with contextlib.suppress(Exception):
                 await ws.close()
-        self._authenticated = False
-        for future in self._pending.values():
-            if not future.done():
-                future.set_exception(LuaBridgeError("Lua bridge connection closed"))
-        self._pending.clear()
 
-    async def _heartbeat_loop(self) -> None:
+    async def _heartbeat_loop(self, ws: ClientConnection) -> None:
         try:
             while True:
                 await asyncio.sleep(5.0)
+                if self._ws is not ws:
+                    return
                 await self._call_connected("ping", {})
         except asyncio.CancelledError:
             raise
         except Exception as exc:
+            if self._ws is not ws:
+                return
             self._last_error = f"heartbeat failed: {type(exc).__name__}: {exc}"
             self._authenticated = False
-            await self._close_socket()
+            await self._close_socket(expected_ws=ws)
 
     async def call(self, method: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         if method not in ALLOWED_METHODS:
             raise LuaBridgeError(f"Lua bridge method {method!r} is not allowlisted")
-        if not self.connected:
+        if not self.connected or not self._authenticated:
             await self.connect()
+        ws = self._ws
         try:
             return await self._call_connected(method, params or {})
         except (ConnectionClosed, OSError) as exc:
-            self._last_error = f"{type(exc).__name__}: {exc}"
-            await self._close_socket()
+            if self._ws is ws:
+                self._last_error = f"{type(exc).__name__}: {exc}"
+            await self._close_socket(expected_ws=ws)
             raise LuaBridgeError(f"Lua bridge disconnected during {method}") from exc
 
     async def _call_connected(self, method: str, params: dict[str, Any]) -> dict[str, Any]:
@@ -180,7 +202,7 @@ class LuaBridgeClient:
             raise LuaBridgeError("Lua bridge request exceeds configured max_message_bytes")
 
         future: asyncio.Future[dict[str, Any]] = asyncio.get_running_loop().create_future()
-        self._pending[request_id] = future
+        self._pending[request_id] = (method, future)
         started = time.perf_counter()
         try:
             async with self._send_lock:
@@ -203,23 +225,33 @@ class LuaBridgeClient:
         result = response.get("result", {})
         return result if isinstance(result, dict) else {"result": result}
 
-    async def _reader(self) -> None:
-        ws = self._ws
-        if ws is None:
-            return
+    async def _reader(self, ws: ClientConnection) -> None:
         try:
             async for raw in ws:
                 if not isinstance(raw, str):
                     continue
                 if len(raw.encode("utf-8")) > self.settings.max_message_bytes:
                     raise LuaBridgeError("Lua bridge response exceeded max_message_bytes")
+                if self._consume_native_preamble(raw):
+                    continue
                 message = json.loads(raw)
                 if not isinstance(message, dict) or message.get("schema") != BRIDGE_SCHEMA:
                     continue
                 self._last_message_at = datetime.now(UTC)
                 if message.get("type") == "response" and isinstance(message.get("id"), str):
-                    future = self._pending.get(message["id"])
-                    if future is not None and not future.done():
+                    pending = self._pending.get(message["id"])
+                    if pending is None:
+                        continue
+                    expected_method, future = pending
+                    if message.get("method") != expected_method:
+                        error = LuaBridgeError(
+                            "Lua bridge response method mismatch: "
+                            f"expected {expected_method!r}, received {message.get('method')!r}"
+                        )
+                        if not future.done():
+                            future.set_exception(error)
+                        raise error
+                    if not future.done():
                         future.set_result(message)
                 elif message.get("type") == "event":
                     self._events.append(message)
@@ -230,14 +262,31 @@ class LuaBridgeClient:
         except asyncio.CancelledError:
             raise
         except Exception as exc:
-            self._last_error = f"{type(exc).__name__}: {exc}"
+            if self._ws is ws:
+                self._last_error = f"{type(exc).__name__}: {exc}"
         finally:
             if self._reader_task is asyncio.current_task():
-                self._reader_task = None
-            self._authenticated = False
-            for future in self._pending.values():
-                if not future.done():
-                    future.set_exception(LuaBridgeError("Lua bridge reader stopped"))
+                await self._close_socket(expected_ws=ws)
+
+    def _consume_native_preamble(self, raw: str) -> bool:
+        """Validate BeamNG's one-time native ``I#`` WebSocket information frame."""
+
+        if not raw.startswith("I#"):
+            return False
+        if self._native_preamble_received:
+            raise LuaBridgeError("Lua bridge sent more than one native product-info preamble")
+        try:
+            payload = json.loads(raw[2:])
+        except json.JSONDecodeError as exc:
+            raise LuaBridgeError("Lua bridge sent an invalid native product-info preamble") from exc
+        if not isinstance(payload, dict) or payload.get("product") not in {"drive", "tech"}:
+            raise LuaBridgeError("Lua bridge sent an invalid native product-info preamble")
+        version = payload.get("version")
+        if not isinstance(version, str) or not 1 <= len(version) <= 64:
+            raise LuaBridgeError("Lua bridge native product-info preamble has no valid version")
+        self._native_preamble_received = True
+        self._game_version = version
+        return True
 
     async def probe(self) -> BridgeStatus:
         if not self.connected:

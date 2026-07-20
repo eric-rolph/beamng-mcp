@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -20,6 +21,58 @@ from beamng_mcp.models import (
     VehicleControl,
     VehicleSpawn,
 )
+
+
+@pytest.mark.asyncio
+async def test_connect_uses_the_configured_direct_simulator_binary(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    captured: dict[str, object] = {}
+
+    class FakeConnection:
+        system = SimpleNamespace(get_info=lambda **_kwargs: {"version": "0.38.6"})
+
+        def tech_enabled(self) -> bool:
+            return False
+
+        def open(self, **kwargs: object) -> FakeConnection:
+            captured["open"] = kwargs
+            return self
+
+        def disconnect(self) -> None:
+            return None
+
+    def fake_beamngpy(host: str, port: int, **kwargs: object) -> FakeConnection:
+        captured["host"] = host
+        captured["port"] = port
+        captured["constructor"] = kwargs
+        return FakeConnection()
+
+    monkeypatch.setattr("beamng_mcp.adapters.beamngpy_adapter.BeamNGpy", fake_beamngpy)
+    settings = BeamNGSettings(
+        home=tmp_path / "BeamNG.drive",
+        binary=Path("Bin64/BeamNG.drive.x64.exe"),
+        user=tmp_path / "BeamNG-user" / "current",
+    )
+    adapter = BeamNGpyAdapter(settings, tmp_path / "artifacts")
+
+    try:
+        status = await adapter.connect(launch=True)
+
+        assert status.connected is True
+        assert captured["constructor"] == {
+            "home": str(settings.home),
+            "binary": "Bin64\\BeamNG.drive.x64.exe",
+            "user": str(settings.user.parent),
+            "quit_on_close": False,
+        }
+        assert captured["open"] == {
+            "extensions": None,
+            "launch": True,
+            "listen_ip": "127.0.0.1",
+        }
+    finally:
+        await adapter.shutdown()
 
 
 class FakeAI:
@@ -95,6 +148,63 @@ class FakeBng:
         self.vehicles = vehicles or FakeVehiclesApi()
 
 
+@pytest.mark.asyncio
+async def test_status_calls_the_sdk_tech_capability_probe(tmp_path: Path) -> None:
+    class FakeSystem:
+        def get_info(self, **_kwargs: object) -> dict[str, str]:
+            return {"version": "0.38.6"}
+
+    class FakeDriveBng:
+        system = FakeSystem()
+
+        def __init__(self) -> None:
+            self.probe_calls = 0
+
+        def tech_enabled(self) -> bool:
+            self.probe_calls += 1
+            return False
+
+    bng = FakeDriveBng()
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+    adapter._connected = True
+    adapter._bng = bng  # type: ignore[assignment]
+
+    try:
+        status = await adapter.status()
+
+        assert status.mode == "drive"
+        assert status.tech_enabled is False
+        assert status.version == "0.38.6"
+        assert bng.probe_calls == 1
+    finally:
+        adapter._executor.shutdown(wait=True)
+
+
+@pytest.mark.asyncio
+async def test_status_preserves_an_unknown_sdk_tech_capability(tmp_path: Path) -> None:
+    class FakeSystem:
+        def get_info(self, **_kwargs: object) -> dict[str, str]:
+            return {"version": "0.38.6"}
+
+    class FakeUnknownBng:
+        system = FakeSystem()
+
+        def tech_enabled(self) -> None:
+            return None
+
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+    adapter._connected = True
+    adapter._bng = FakeUnknownBng()  # type: ignore[assignment]
+
+    try:
+        status = await adapter.status()
+
+        assert status.mode == "unknown"
+        assert status.tech_enabled is None
+    finally:
+        adapter._executor.shutdown(wait=True)
+
+
 class FakeSensor:
     def __init__(self, *, fail: bool = False) -> None:
         self.fail = fail
@@ -104,6 +214,49 @@ class FakeSensor:
         self.remove_calls += 1
         if self.fail:
             raise RuntimeError("sensor remove failed")
+
+
+@pytest.mark.asyncio
+async def test_vehicle_state_falls_back_to_the_builtin_state_sensor(
+    tmp_path: Path,
+) -> None:
+    class FailingStateApi(FakeVehiclesApi):
+        def get_states(self, _vehicle_ids: list[str]) -> dict[str, dict]:
+            raise RuntimeError("ScenarioUpdate is unavailable in retail Drive")
+
+    class BuiltinSensors:
+        def __init__(self) -> None:
+            self.data = {
+                "state": {
+                    "pos": (1.0, 2.0, 3.0),
+                    "dir": (0.0, 1.0, 0.0),
+                    "vel": (3.0, 4.0, 0.0),
+                }
+            }
+            self.poll_calls: list[str] = []
+
+        def poll(self, name: str) -> None:
+            self.poll_calls.append(name)
+
+    vehicle = FakeVehicle()
+    vehicle.sensors = BuiltinSensors()  # type: ignore[attr-defined]
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+    adapter._connected = True
+    adapter._bng = FakeBng(  # type: ignore[assignment]
+        scenario=FakeScenarioApi(vehicle),
+        vehicles=FailingStateApi(),
+    )
+
+    try:
+        state = await adapter.vehicle_state("ego")
+
+        assert state.position == (1.0, 2.0, 3.0)
+        assert state.velocity == (3.0, 4.0, 0.0)
+        assert state.speed_mps == 5.0
+        assert vehicle.sensors.poll_calls == ["state"]  # type: ignore[attr-defined]
+        assert adapter._last_error is None
+    finally:
+        adapter._executor.shutdown(wait=True)
 
 
 @pytest.mark.asyncio

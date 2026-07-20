@@ -95,6 +95,7 @@ class HuggingFaceSegFormerBackend:
             processor_factory: Any = AutoImageProcessor
             processor = processor_factory.from_pretrained(
                 self.config.model_id_or_path,
+                use_fast=False,
                 **load_options,
             )
             model = SegformerForSemanticSegmentation.from_pretrained(
