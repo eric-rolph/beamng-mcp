@@ -102,6 +102,84 @@ def test_validate_reports_and_pack_rejects_an_externally_over_quota_mod(tmp_path
         mods.pack("overfull_mod")
 
 
+def test_validate_warns_on_plain_lua_load_call(tmp_path: Path) -> None:
+    mods = make_workspace(tmp_path)
+    mods.scaffold("dynamic_lua", title="Dynamic Lua", author="Test")
+    mods.write_file(
+        ModFileWrite(
+            mod_name="dynamic_lua",
+            path="lua/ge/extensions/dynamic.lua",
+            content="local callback = load(source)\nreturn callback\n",
+        )
+    )
+
+    validation = mods.validate("dynamic_lua")
+
+    assert any(
+        issue.path == "lua/ge/extensions/dynamic.lua"
+        and issue.message == "Dynamic Lua evaluation found; review before installing"
+        for issue in validation.issues
+    )
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        "local callback = loadstring (source)\nreturn callback\n",
+        "dostring \t(source)\n",
+        "local callback = _G.load(source)\nreturn callback\n",
+        "local callback = sandbox.load (source)\nreturn callback\n",
+        "local callback = sandbox:load(source)\nreturn callback\n",
+    ],
+    ids=[
+        "loadstring-whitespace",
+        "dostring-whitespace",
+        "global-table-load",
+        "member-load",
+        "method-load",
+    ],
+)
+def test_validate_warns_on_qualified_or_whitespace_dynamic_lua_calls(
+    content: str, tmp_path: Path
+) -> None:
+    mods = make_workspace(tmp_path)
+    mods.scaffold("dynamic_lua", title="Dynamic Lua", author="Test")
+    mods.write_file(
+        ModFileWrite(
+            mod_name="dynamic_lua",
+            path="lua/ge/extensions/dynamic.lua",
+            content=content,
+        )
+    )
+
+    validation = mods.validate("dynamic_lua")
+
+    assert any(
+        issue.path == "lua/ge/extensions/dynamic.lua"
+        and issue.message == "Dynamic Lua evaluation found; review before installing"
+        for issue in validation.issues
+    )
+
+
+def test_validate_does_not_warn_for_identifiers_containing_load(tmp_path: Path) -> None:
+    mods = make_workspace(tmp_path)
+    mods.scaffold("static_lua", title="Static Lua", author="Test")
+    mods.write_file(
+        ModFileWrite(
+            mod_name="static_lua",
+            path="lua/ge/extensions/static.lua",
+            content="local function preload(source)\n  return source\nend\nreturn preload\n",
+        )
+    )
+
+    validation = mods.validate("static_lua")
+
+    assert not any(
+        issue.message == "Dynamic Lua evaluation found; review before installing"
+        for issue in validation.issues
+    )
+
+
 def test_internal_symlink_is_rejected_for_listing_and_writes(tmp_path: Path) -> None:
     mods = make_workspace(tmp_path)
     mods.scaffold("linked_mod", title="Linked", author="Test")
@@ -285,3 +363,106 @@ def test_install_restores_previous_file_if_post_swap_verification_fails(
     assert destination.read_bytes() == previous
     assert not list(destination.parent.glob("*.install.tmp"))
     assert not list(destination.parent.glob("*.backup.tmp"))
+    assert not list(destination.parent.glob("rollback.zip.backup-*"))
+    assert not list(destination.parent.glob("*.rollback.tmp"))
+
+
+def test_install_preserves_concurrent_replacement_and_backup_during_rollback_race(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    mods = make_workspace(tmp_path, allow_mod_install=True)
+    mods.scaffold("raced_rollback", title="Raced rollback", author="Test")
+    user = tmp_path / "user"
+    destination = Path(mods.install("raced_rollback", user).path)
+    previous = b"previous installed artifact"
+    destination.write_bytes(previous)
+    replacement_bytes = b"installed independently by another process"
+    stable_file = mods._stable_file
+    original_replace = Path.replace
+
+    def fail_new_destination(path: Path, **kwargs: object):
+        if path == destination and path.read_bytes() != previous:
+            raise WorkspaceError("simulated post-swap verification failure")
+        return stable_file(path, **kwargs)  # type: ignore[arg-type]
+
+    def replace_destination_before_quarantine(path: Path, target: Path) -> Path:
+        if path == destination and target.name.endswith(".rollback.tmp"):
+            replacement = destination.with_name("other-process.zip.tmp")
+            replacement.write_bytes(replacement_bytes)
+            original_replace(replacement, destination)
+        return original_replace(path, target)
+
+    monkeypatch.setattr(mods, "_stable_file", fail_new_destination)
+    monkeypatch.setattr(Path, "replace", replace_destination_before_quarantine)
+
+    with pytest.raises(SafetyInterlockError, match="identity changed during quarantine"):
+        mods.install("raced_rollback", user, overwrite=True)
+
+    assert destination.read_bytes() == replacement_bytes
+    backups = list(destination.parent.glob("raced_rollback.zip.backup-*"))
+    assert len(backups) == 1
+    assert backups[0].read_bytes() == previous
+    assert not list(destination.parent.glob("*.install.tmp"))
+    assert not list(destination.parent.glob("*.backup.tmp"))
+    assert not list(destination.parent.glob("*.rollback.tmp"))
+
+
+def test_install_removes_new_file_if_post_swap_verification_fails(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    mods = make_workspace(tmp_path, allow_mod_install=True)
+    mods.scaffold("new_rollback", title="New rollback", author="Test")
+    user = tmp_path / "user"
+    destination = user / "mods" / "repo" / "new_rollback.zip"
+    stable_file = mods._stable_file
+
+    def fail_new_destination(path: Path, **kwargs: object):
+        if path == destination:
+            raise WorkspaceError("simulated post-swap verification failure")
+        return stable_file(path, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(mods, "_stable_file", fail_new_destination)
+
+    with pytest.raises(WorkspaceError, match="could not be verified"):
+        mods.install("new_rollback", user)
+
+    assert not destination.exists()
+    assert not list(destination.parent.glob("*.install.tmp"))
+    assert not list(destination.parent.glob("*.backup.tmp"))
+    assert not list(destination.parent.glob("new_rollback.zip.backup-*"))
+    assert not list(destination.parent.glob("*.rollback.tmp"))
+
+
+def test_install_preserves_concurrent_replacement_if_new_file_verification_fails(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    mods = make_workspace(tmp_path, allow_mod_install=True)
+    mods.scaffold("raced_cleanup", title="Raced cleanup", author="Test")
+    user = tmp_path / "user"
+    destination = user / "mods" / "repo" / "raced_cleanup.zip"
+    replacement_bytes = b"installed independently by another process"
+    stable_file = mods._stable_file
+    original_replace = Path.replace
+
+    def fail_destination_verification(path: Path, **kwargs: object):
+        if path == destination and "initial" in kwargs:
+            raise WorkspaceError("simulated post-swap replacement race")
+        return stable_file(path, **kwargs)  # type: ignore[arg-type]
+
+    def replace_destination_before_quarantine(path: Path, target: Path) -> Path:
+        if path == destination and target.name.endswith(".rollback.tmp"):
+            replacement = destination.with_name("other-process.zip.tmp")
+            replacement.write_bytes(replacement_bytes)
+            original_replace(replacement, destination)
+        return original_replace(path, target)
+
+    monkeypatch.setattr(mods, "_stable_file", fail_destination_verification)
+    monkeypatch.setattr(Path, "replace", replace_destination_before_quarantine)
+
+    with pytest.raises(SafetyInterlockError, match=r"identity changed|refusing to remove"):
+        mods.install("raced_cleanup", user)
+
+    assert destination.read_bytes() == replacement_bytes
+    assert not list(destination.parent.glob("*.install.tmp"))
+    assert not list(destination.parent.glob("*.backup.tmp"))
+    assert not list(destination.parent.glob("*.rollback.tmp"))

@@ -21,6 +21,7 @@ from .config import Settings
 from .errors import BeamNGMCPError, ConfigurationError
 from .installer import BRIDGE_CONFIG, MOD_DIRECTORY, discover_lua_token, install_lua_bridge
 from .mcp_adapter import BearerAuthMiddleware, create_mcp_server
+from .services.blender import probe_blender_runtime
 from .services.mods import ModWorkspace
 
 
@@ -111,6 +112,10 @@ def _doctor(args: argparse.Namespace) -> int:
     gpu = _gpu_info()
     vision_runtime = _vision_runtime_info()
     blender_helper = files("beamng_mcp").joinpath("assets", "blender", "softbody_export.py")
+    blender_runtime = probe_blender_runtime(
+        settings.blender.executable,
+        timeout_seconds=settings.blender.probe_timeout_seconds,
+    )
     report: dict[str, Any] = {
         "beamng_mcp": __version__,
         "python": sys.version.split()[0],
@@ -136,7 +141,8 @@ def _doctor(args: argparse.Namespace) -> int:
             "blender_mcp_package": _package_version("blender-mcp"),
             "reviewed_helper_packaged": blender_helper.is_file(),
             "runtime_visual_format": "dae",
-            "dae_operator_status": "verify in live Blender; helper fails closed if absent",
+            "dae_operator_status": ("available" if blender_runtime.compatible else "unavailable"),
+            "blender_runtime": blender_runtime.public_snapshot(),
         },
         "workspace": str(settings.workspace.root.expanduser().resolve()),
         "full_feature_tier": "BeamNG.tech + BeamNGpy",
@@ -170,7 +176,11 @@ def _doctor(args: argparse.Namespace) -> int:
         )
         print(
             f"Soft-body Blender helper: {helper_status}; "
-            "live Collada operator verification required"
+            + (
+                f"Collada ready in Blender {blender_runtime.version}"
+                if blender_runtime.compatible
+                else f"Collada unavailable ({blender_runtime.error or 'capability missing'})"
+            )
         )
         print(f"BeamNGpy {report['beamngpy']} / MCP SDK {report['mcp_sdk']}")
     return 0 if installation.executable is not None else 1

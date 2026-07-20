@@ -251,6 +251,7 @@ def test_segformer_is_lazy_and_disables_downloads_by_default(
     assert backend.device == "cpu"
     assert len(calls) == 2
     assert all(call["local_files_only"] is True for call in calls)
+    assert calls[0]["use_fast"] is False
 
 
 def test_segformer_moves_floating_inputs_at_model_precision() -> None:

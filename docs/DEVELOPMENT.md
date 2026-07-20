@@ -34,11 +34,107 @@ The unit suite covers:
 - classical/model backend contracts, lane geometry, speed control, and watchdog timing
 - engine-lease arm-before-start, healthy-control renewal, fail-closed renewal errors, MCP adapter
   routing, status telemetry, and stop-before-disarm ordering
+- BeamNGpy 1.35 call-signature compatibility for every adapter surface
+- Blender capability discovery plus fail-closed DAE operator probing
+- WebSocket timeout, reconnect, malformed/oversized response, correlation, method-binding,
+  authentication, subprotocol, and BeamNG-native preamble behavior
+
+## Real Blender checks
+
+The Blender tests are opt-in and execute only the explicitly configured binary. Use the same path
+for both variables when its user profile contains the enabled Blender MCP add-on:
+
+```powershell
+$env:BEAMNG_MCP_TEST_BLENDER = "C:\Users\you\Applications\Blender\4.5.4\blender.exe"
+$env:BEAMNG_MCP_TEST_BLENDER_ADDON = $env:BEAMNG_MCP_TEST_BLENDER
+uv run pytest -q -m blender tests/test_blender_headless.py
+```
+
+The fixture runs Blender with `--factory-startup` to test identity and transformed visual/cage
+exports, exact bounds, byte-decoded node IDs, source-state restoration, and the selection-only DAE
+operator. This supplied export fixture is specifically the built-in `wm.collada_export` reference
+route; `--factory-startup` intentionally disables profile add-ons. An alternate profile-installed
+exporter needs its own active-profile fixture with an explicitly reviewed expected operator and
+equivalent bounds/state-restoration assertions before it is considered calibrated. The separate
+profile check does not use factory startup; it verifies the Blender MCP
+panel/start operator is registered in the actual profile and confirms that the background guard
+has not opened its server. The Doctor capability probe also uses the actual profile so add-on
+operators participate in ambiguity checks; its glTF result requires the same four deterministic
+options as the exporter.
 
 ## Simulator integration tests
 
-Do not run BeamNG in shared CI. Local integration should use a dedicated user folder and a known
-scenario. At minimum verify:
+Do not run BeamNG in shared CI. Local integration must use a dedicated active user folder containing
+the `.beamng-mcp-test-user` sentinel described in [Setup](SETUP.md). Set explicit installation,
+binary, and active-user paths:
+
+Run these commands serially. Do not use pytest-xdist or launch two live files concurrently against
+the same profile; the harness takes an exclusive profile lock because each test temporarily owns
+that profile's bridge configuration and one BeamNG process.
+
+```powershell
+$env:BEAMNG_MCP_TEST_BEAMNG_HOME = "C:\Games\BeamNG.drive"
+$env:BEAMNG_MCP_TEST_BEAMNG_BINARY = "Bin64\BeamNG.drive.x64.exe"
+$env:BEAMNG_MCP_TEST_BEAMNG_USER = "$env:LOCALAPPDATA\beamng-mcp\test-users\BeamNG-0.38.6\current"
+
+# Retail/Tech classification, scenario lifecycle, deterministic stepping, vehicle state,
+# authenticated Lua bridge, road graph, and create/update/list/delete of an ephemeral PointLight.
+uv run pytest -q -m beamng_live tests/test_beamng_live.py
+
+# Full real Blender → exact evidence → JBeam/material/package → install → spawn/step regression.
+uv run pytest -q -m "blender and beamng_live" tests/test_softbody_pipeline_live.py
+```
+
+The adapter preserves the active `current` folder for mod/token operations but passes its parent to
+BeamNG's `-userpath` launch argument. The harness reserves a random loopback BeamNG tcom port; where
+Lua is exercised, it also reserves a random WebSocket port and applies a temporary bridge
+configuration only in the sentinel-marked profile. It requires proof that BeamNGpy launched/owns
+the process before any scenario or Lua mutation. Attachment to an existing listener causes a
+disconnect without quit; cleanup and the watchdog terminate only an owned process, then restore the
+original bridge configuration. A narrow bind-then-close race remains, so process ownership and
+fresh bridge authentication are both checked.
+Tests use unique disposable scenario names, never save a level, and clean their generated
+scenario/package. Retail BeamNG.drive results remain experimental even when this smoke passes.
+
+### GPU camera and perception smoke
+
+The GPU test starts retail BeamNG with DX11 rendering enabled, installs a test-only Lua RenderView
+fixture into the isolated profile, captures a non-blank 640×360 frame, and runs the deterministic
+OpenCV backend while the simulator still owns the GPU:
+
+```powershell
+uv run pytest -q -m beamng_gpu tests/test_beamng_vision_live.py
+```
+
+The same three `BEAMNG_MCP_TEST_BEAMNG_*` variables and isolated-user sentinel are mandatory. The
+OpenCV leg requires no model. To opt into the learned CUDA leg, first review the
+[model card and files at the pinned revision](https://huggingface.co/nvidia/segformer-b0-finetuned-cityscapes-512-1024/tree/7a91500a7086b805eeb868719ea5542a3e0bdeb3),
+including its license, then cache it outside the repository with the Hugging Face CLI:
+
+```powershell
+$modelRoot = Join-Path $env:LOCALAPPDATA "beamng-mcp\models\segformer-b0-cityscapes"
+hf download nvidia/segformer-b0-finetuned-cityscapes-512-1024 `
+  --revision 7a91500a7086b805eeb868719ea5542a3e0bdeb3 `
+  --local-dir $modelRoot
+(Get-FileHash (Join-Path $modelRoot "pytorch_model.bin") -Algorithm SHA256).Hash
+# Expected: EC0A4AD8388261A33E9FAD6045FEABF8B0F764BBA6FC5511397FE39714400A91
+$env:BEAMNG_MCP_TEST_VISION_MODEL = $modelRoot
+uv run pytest -q -m beamng_gpu tests/test_beamng_vision_live.py
+```
+
+The test forces `cuda:0`, FP16, and `allow_downloads=false`; setting the variable therefore never
+causes a network fetch. This small SegFormer-B0 model is a repeatable CUDA integration baseline,
+not a claim of state-of-the-art driving perception. Keep model weights, caches, and any datasets
+outside git.
+
+This harness is not a production retail vision fallback. The tested BeamNG.drive 0.38.6 build
+rejects BeamNGpy `Camera` with a BeamNG.tech-license error, so production `vision-lane` and `hybrid`
+modes still require BeamNG.tech's supported camera path. The Lua fixture exists only inside the
+sentinel-marked test profile and is removed after the test.
+
+### Broader manual matrix
+
+At minimum verify:
 
 1. `doctor` resolves the active `userFolder` from `BeamNG.drive.ini`, including relative and
    default `current` cases.

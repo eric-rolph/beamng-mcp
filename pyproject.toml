@@ -90,6 +90,11 @@ include = [
 addopts = "-ra --strict-config --strict-markers"
 asyncio_mode = "auto"
 testpaths = ["tests"]
+markers = [
+  "blender: opt-in tests that execute a configured local Blender binary",
+  "beamng_live: opt-in tests that launch BeamNG against an isolated user directory",
+  "beamng_gpu: opt-in tests that require BeamNG GPU rendering",
+]
 
 [tool.ruff]
 line-length = 100

@@ -115,6 +115,14 @@ class Runtime:
         self.installation: Installation = detect_installation(settings)
         if self.settings.beamng.home is None and self.installation.home is not None:
             self.settings.beamng.home = self.installation.home
+        if self.settings.beamng.binary is None and self.installation.executable is not None:
+            binary = self.installation.executable
+            if self.installation.home is not None:
+                try:
+                    binary = binary.relative_to(self.installation.home)
+                except ValueError:
+                    pass
+            self.settings.beamng.binary = binary
         if self.settings.beamng.user is None:
             self.settings.beamng.user = self.installation.user
         if self.settings.lua.token is None:
@@ -212,9 +220,13 @@ class Runtime:
         simulator_status = await self.simulator.status()
         lua_status = self.lua.status()
         if simulator_status.connected:
-            mode: Literal["offline", "drive", "tech"] = (
-                "tech" if simulator_status.tech_enabled else "drive"
-            )
+            mode: Literal["offline", "drive", "tech", "unknown"]
+            if simulator_status.tech_enabled is True:
+                mode = "tech"
+            elif simulator_status.tech_enabled is False:
+                mode = "drive"
+            else:
+                mode = "unknown"
         elif lua_status.connected:
             mode = "drive"
         else:
@@ -254,7 +266,7 @@ class Runtime:
             mode=mode,
             beamngpy_connected=simulator_status.connected,
             lua_connected=lua_status.connected,
-            beamngpy_officially_supported=bool(simulator_status.tech_enabled),
+            beamngpy_officially_supported=simulator_status.tech_enabled is True,
             tools=TOOL_NAMES,
             limitations=limitations,
         )

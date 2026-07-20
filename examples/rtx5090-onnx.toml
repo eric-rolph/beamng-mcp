@@ -5,9 +5,17 @@ transport = "stdio"
 host = "127.0.0.1"
 port = 25252
 target_version = "0.38"
+# home = "C:/Games/BeamNG.drive"
+# Use the direct simulator binary so BeamNGpy does not rediscover the launcher.
+# binary = "Bin64/BeamNG.drive.x64.exe"
 # BeamNG 0.37+ default; omit to resolve userFolder from BeamNG.drive.ini.
 # user = "C:/Users/you/AppData/Local/BeamNG/BeamNG.drive/current"
 launch = true
+
+[blender]
+# Optional for soft-body authoring; a side-by-side Blender 4.5.x install can coexist with 5.x.
+# executable = "C:/Users/you/Applications/Blender/4.5.4/blender.exe"
+probe_timeout_seconds = 20.0
 
 [lua]
 url = "ws://127.0.0.1:8765"
@@ -26,6 +34,8 @@ max_mod_files = 4096
 max_mod_bytes = 536870912
 
 [vision]
+# Camera-driven vision/hybrid autonomy uses BeamNGpy Camera and requires BeamNG.tech in the
+# tested 0.38 generation; retail RenderView is used only by the developer GPU smoke fixture.
 backend = "onnx"
 onnx_path = "C:/models/drivable-area.onnx"
 target_fps = 20.0

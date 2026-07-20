@@ -79,7 +79,7 @@ class OperationResult(StrictModel):
 
 class CapabilitySnapshot(StrictModel):
     server_version: str
-    mode: Literal["offline", "drive", "tech"]
+    mode: Literal["offline", "drive", "tech", "unknown"]
     beamngpy_connected: bool
     lua_connected: bool
     beamngpy_officially_supported: bool

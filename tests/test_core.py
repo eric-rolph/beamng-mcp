@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 from pydantic import SecretStr, ValidationError
 
-from beamng_mcp.autodetect import find_user
+from beamng_mcp.autodetect import Installation, find_user
 from beamng_mcp.config import Settings, WorkspaceSettings
 from beamng_mcp.errors import ConflictError, SafetyInterlockError, WorkspaceError
 from beamng_mcp.installer import discover_lua_token, install_lua_bridge
@@ -77,6 +77,31 @@ def test_user_folder_uses_post_037_current_layout_even_before_first_launch(
     old = tmp_path / "BeamNG.drive" / "0.36"
     old.mkdir(parents=True)
     assert find_user("0.38") == (tmp_path / "BeamNG" / "BeamNG.drive" / "current").resolve()
+
+
+@pytest.mark.asyncio
+async def test_runtime_uses_the_detected_direct_simulator_binary(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    home = tmp_path / "BeamNG.drive"
+    executable = home / "Bin64" / "BeamNG.drive.x64.exe"
+    user = tmp_path / "isolated-user"
+    installation = Installation(
+        home=home,
+        user=user,
+        executable=executable,
+        version="0.38",
+    )
+    monkeypatch.setattr("beamng_mcp.runtime.detect_installation", lambda _settings: installation)
+    settings = Settings(workspace={"root": tmp_path / "workspace"})
+    runtime = Runtime(settings)
+
+    try:
+        assert settings.beamng.home == home
+        assert settings.beamng.user == user
+        assert settings.beamng.binary == Path("Bin64/BeamNG.drive.x64.exe")
+    finally:
+        await runtime.shutdown()
 
 
 def test_mod_workspace_confines_paths_and_uses_optimistic_writes(tmp_path: Path) -> None:

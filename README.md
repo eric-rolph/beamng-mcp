@@ -24,13 +24,13 @@ never placed inside the 10–30 Hz steering/braking loop.
 | Capability | BeamNG.tech 0.38 | Retail BeamNG.drive 0.38 |
 | --- | --- | --- |
 | BeamNGpy vehicles, scenarios, traffic, timing, environment | Supported | Experimental / build-dependent |
-| Cameras, lidar, radar, GPS, IMU, shared memory | Supported | Experimental / build-dependent |
+| Cameras, lidar, radar, GPS, IMU, shared memory | Supported | Camera is license-gated in tested 0.38.6; other sensors build-dependent |
 | Custom GELua WebSocket, telemetry, engine safety lease, emergency stop | Supported | Experimental, targets 0.38.6 |
 | Live scene-object creation/update/delete | Supported through GELua | Experimental through GELua |
 | Persistent level save | Explicitly gated; World Editor required | Explicitly gated; World Editor required |
 | Mod scaffold/validate/pack/install | Supported; install is operator-gated | Supported; install is operator-gated |
 | Blender-evidenced soft-body authoring and deterministic JBeam assembly | Offline authoring supported; in-game validation required | Offline authoring supported; in-game validation required |
-| Native AI and real-time vision driving | Supported | Depends on available camera/control path |
+| Native AI and real-time vision driving | Supported | Native AI experimental; production vision/hybrid requires Tech camera in tested 0.38.6 |
 
 BeamNGpy's official support contract is for BeamNG.tech. Retail Drive support is useful, but this
 repository labels it honestly as experimental. The pinned compatibility baseline is BeamNGpy
@@ -96,6 +96,8 @@ Prerequisites:
 - Python 3.11–3.13
 - [`uv`](https://docs.astral.sh/uv/)
 - An MCP-capable AI client
+- Optional for soft-body builds: a Blender runtime with a selection-only Collada exporter and the
+  Blender MCP add-on enabled in that exact version profile
 
 ```powershell
 git clone https://github.com/eric-rolph/beamng-mcp.git
@@ -115,6 +117,12 @@ local secret without printing it. For BeamNG 0.37 and later, the Windows default
 The installed `modScript.lua` loads `beamng_mcp/bridge` when the mod is activated. BeamNGpy also
 requests the extension during `simulator_connect`, and it may be loaded manually from GELua for
 troubleshooting.
+
+When multiple simulator or Blender versions are installed, copy `beamng-mcp.example.toml` and set
+the direct `beamng.binary` plus `blender.executable`. `doctor --json` reports the exact Blender
+runtime and active user/add-on profile's Collada operator set, selection-only capability, and
+deterministic glTF availability without launching BeamNG. With no explicit Blender path, it probes
+common side-by-side candidates until it finds a compatible DAE runtime.
 
 Start the default stdio server:
 
@@ -190,6 +198,11 @@ is especially relevant when the game and inference share the same GPU.
 
 The SegFormer backend does not download weights unless `allow_model_downloads = true`; this
 prevents surprise network traffic. See [Autonomy and Vision](https://github.com/eric-rolph/beamng-mcp/blob/main/docs/AUTONOMY.md).
+The opt-in GPU regression captures a real rendered BeamNG frame through a test-only retail
+RenderView fixture and runs OpenCV, with an optional pre-cached SegFormer-B0 CUDA leg. It is not a
+production retail camera fallback: BeamNG.drive 0.38.6 rejects BeamNGpy `Camera` without a Tech
+license. The small model is a repeatable runtime smoke baseline, not a state-of-the-art driving
+claim; see [Development](docs/DEVELOPMENT.md) for the pinned, downloads-off test procedure.
 
 ## Mod and map workflows
 
@@ -204,8 +217,9 @@ mod_scaffold → mod_file_read/list → mod_file_write(expected_sha256=...)
 
 `mod_test_start` is a static build job: it validates, packs, and can copy an approved archive. It
 does not activate the mod, launch a scenario, or prove runtime behavior. Deterministic in-game mod
-smoke execution and log collection remain roadmap work; use a disposable BeamNG user folder for
-manual runtime testing in this release.
+execution is available only as an opt-in developer regression against a sentinel-marked disposable
+BeamNG profile; comprehensive collision, deformation, actuator, and log collection remain manual
+acceptance work.
 
 ### Blender to functional soft body
 
@@ -245,10 +259,12 @@ review the validation summary's measured volume, exact node IDs, base IDs, and r
 volume-derived mass request must repeat that measured volume exactly.
 
 BeamNG 0.38's documented vehicle/flexbody runtime format is Collada DAE. glTF export is available
-only for diagnostic interchange and cannot be assembled as a runtime soft body. Blender 5.2 on
-this workstation has no Collada operator installed, so a tested Collada exporter or a supported
-Blender version must be configured before a DAE handoff can complete; the helper fails closed when
-none is available. See the complete [Soft-Body Authoring guide](docs/SOFTBODY_AUTHORING.md).
+only for diagnostic interchange and cannot be assembled as a runtime soft body. Blender versions
+can coexist: the validated Windows reference uses portable Blender 4.5.4 LTS with
+`wm.collada_export`, while Blender 5.2 may remain installed for other work. Configure the exact
+binary and let the live capability probe decide; the helper fails closed when no unambiguous
+selection-only DAE exporter is available. See the complete
+[Soft-Body Authoring guide](docs/SOFTBODY_AUTHORING.md).
 
 Zip archives place `lua`, `levels`, `vehicles`, and other BeamNG roots directly at the archive
 root, matching the official [mod packing rules](https://documentation.beamng.com/modding/mod-support/mod_packing/).
@@ -319,7 +335,9 @@ uv run pytest -q
 
 Simulator integration tests are opt-in because CI cannot redistribute or launch BeamNG. The
 mocked suite validates protocol contracts, tool schemas, path confinement, packaging, auth,
-watchdogs, controls, and perception geometry. See [Development](https://github.com/eric-rolph/beamng-mcp/blob/main/docs/DEVELOPMENT.md).
+watchdogs, controls, and perception geometry. Local opt-in tests cover the real Blender exporter,
+Blender MCP profile, isolated BeamNG/Lua/vehicle lifecycle, an end-to-end ramp build/load, and GPU
+camera perception. See [Development](https://github.com/eric-rolph/beamng-mcp/blob/main/docs/DEVELOPMENT.md).
 
 ## Project status and licensing
 

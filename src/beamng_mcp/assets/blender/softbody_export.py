@@ -65,6 +65,20 @@ SINGLE_NODE_ROLES: Final = frozenset({"beamng_ref", "beamng_back", "beamng_left"
 RIGID_TOLERANCE: Final = 1.0e-6
 NODE_ID_PATTERN: Final = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{0,63}$")
 _FILE_ATTRIBUTE_REPARSE_POINT: Final = 0x400
+DAE_EXPORT_NAME_MARKERS: Final = ("collada", ".dae", "_dae")
+DAE_SELECTION_OPTIONS: Final = (
+    "selected",
+    "use_selection",
+    "selected_only",
+    "selection_only",
+    "export_selected",
+)
+GLTF_REQUIRED_OPTIONS: Final = (
+    "filepath",
+    "export_format",
+    "use_selection",
+    "export_yup",
+)
 
 JsonObject = dict[str, Any]
 Vector3 = tuple[float, float, float]
@@ -256,9 +270,10 @@ def _assert_no_reparse_components(path: Path, *, allow_missing_leaf: bool = Fals
 
 
 def _absolute_output_path(config: Mapping[str, object], key: str, suffixes: set[str]) -> Path:
-    path = Path(os.path.abspath(Path(_required_string(config, key)).expanduser()))
-    if not path.is_absolute():
+    requested = Path(_required_string(config, key)).expanduser()
+    if not requested.is_absolute():
         raise SoftbodyExportError(f"{key} must be an absolute path")
+    path = Path(os.path.abspath(requested))
     if path.suffix.lower() not in suffixes:
         expected = ", ".join(sorted(suffixes))
         raise SoftbodyExportError(f"{key} must end in one of: {expected}")
@@ -351,7 +366,14 @@ def _mesh_node_ids(mesh: Any) -> list[str]:
 
     result: list[str] = []
     for index, item in enumerate(attribute.data):
-        node_id = str(item.value).strip()
+        raw_value = item.value
+        if isinstance(raw_value, bytes):
+            try:
+                node_id = raw_value.decode("utf-8").strip()
+            except UnicodeDecodeError as exc:
+                raise SoftbodyExportError(f"{NODE_ATTRIBUTE}[{index}] must be valid UTF-8") from exc
+        else:
+            node_id = str(raw_value).strip()
         if not NODE_ID_PATTERN.fullmatch(node_id):
             raise SoftbodyExportError(
                 f"{NODE_ATTRIBUTE}[{index}] must match {NODE_ID_PATTERN.pattern!r}"
@@ -554,9 +576,9 @@ def _discover_dae_operators(blender: Any) -> dict[str, Any]:
         for operator_name in sorted(name for name in dir(namespace) if not name.startswith("_")):
             qualified = f"{namespace_name}.{operator_name}"
             lowered = qualified.lower()
-            if "collada" not in lowered and not (
-                "export" in lowered and (".dae" in lowered or "_dae" in lowered)
-            ):
+            if "export" not in lowered:
+                continue
+            if not any(marker in lowered for marker in DAE_EXPORT_NAME_MARKERS):
                 continue
             operator = getattr(namespace, operator_name)
             if "filepath" in _operator_properties(operator):
@@ -730,7 +752,7 @@ def _run_export(
             operator_name = "export_scene.gltf"
             operator = blender.ops.export_scene.gltf
             properties = _operator_properties(operator)
-            required = {"filepath", "export_format", "use_selection", "export_yup"}
+            required = set(GLTF_REQUIRED_OPTIONS)
             if not required.issubset(properties):
                 raise SoftbodyExportError(
                     "registered glTF operator lacks required deterministic options"
@@ -768,15 +790,8 @@ def _run_export(
                 )
             operator = discovered[operator_name]
             properties = _operator_properties(operator)
-            selection_options = (
-                "selected",
-                "use_selection",
-                "selected_only",
-                "selection_only",
-                "export_selected",
-            )
             selection_property = next(
-                (name for name in selection_options if name in properties), None
+                (name for name in DAE_SELECTION_OPTIONS if name in properties), None
             )
             if selection_property is None:
                 raise SoftbodyExportError(

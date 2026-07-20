@@ -97,13 +97,21 @@ class BeamNGpyAdapter:
             return await self.status()
         should_launch = self.settings.launch if launch is None else launch
         home = str(self.settings.home) if self.settings.home else None
-        user = str(self.settings.user) if self.settings.user else None
+        binary = str(self.settings.binary) if self.settings.binary else None
+        user_path = self.settings.user
+        # BeamNG's ``-userpath`` expects the root and appends ``current`` for
+        # modern releases, while the rest of this project stores the resolved
+        # active folder so mod installation and token discovery are exact.
+        if should_launch and user_path is not None and user_path.name.casefold() == "current":
+            user_path = user_path.parent
+        user = str(user_path) if user_path else None
 
         def open_connection() -> BeamNGpy:
             bng = BeamNGpy(
                 self.settings.host,
                 self.settings.port,
                 home=home,
+                binary=binary,
                 user=user,
                 quit_on_close=False,
             )
@@ -159,8 +167,17 @@ class BeamNGpyAdapter:
         mode: str = "offline"
         if self._connected and self._bng is not None:
             bng = self._bng
-            tech_enabled = bool(bng.tech_enabled)
-            mode = "tech" if tech_enabled else "drive"
+            capability = await self._call(bng.tech_enabled)
+            if capability is None:
+                tech_enabled = None
+                mode = "unknown"
+            elif isinstance(capability, bool):
+                tech_enabled = capability
+                mode = "tech" if capability else "drive"
+            else:
+                raise SimulatorConnectionError(
+                    "BeamNGpy tech_enabled() returned an invalid capability value"
+                )
             try:
                 info = await self._call(
                     bng.system.get_info, os=True, cpu=False, gpu=False, power=False
@@ -413,7 +430,7 @@ class BeamNGpyAdapter:
     async def list_vehicles(self) -> list[VehicleInfo]:
         bng = self._require()
         info = await self._call(bng.vehicles.get_current_info, True)
-        states = await self._call(bng.vehicles.get_states, list(info)) if info else {}
+        states = await self._vehicle_states(list(info))
         result: list[VehicleInfo] = []
         for vehicle_id, vehicle_data in info.items():
             state = states.get(vehicle_id, {})
@@ -443,12 +460,33 @@ class BeamNGpyAdapter:
             },
         )
 
+    async def _vehicle_states(self, vehicle_ids: list[str]) -> dict[str, dict[str, Any]]:
+        """Use the batch Tech API, falling back to each vehicle's built-in State sensor."""
+
+        if not vehicle_ids:
+            return {}
+        bng = self._require()
+        try:
+            return await self._call(bng.vehicles.get_states, vehicle_ids)
+        except SimulatorConnectionError as batch_error:
+            states: dict[str, dict[str, Any]] = {}
+            try:
+                for vehicle_id in vehicle_ids:
+                    vehicle = await self._vehicle(vehicle_id)
+                    await self._call(vehicle.sensors.poll, "state")
+                    state = vehicle.sensors.data.get("state", {})
+                    states[vehicle_id] = dict(state) if isinstance(state, dict) else {}
+            except Exception as fallback_error:
+                raise batch_error from fallback_error
+            self._last_error = None
+            return states
+
     async def vehicle_state(self, vehicle_id: str) -> VehicleInfo:
         bng = self._require()
         vehicles = await self._call(bng.vehicles.get_current_info, True)
         if vehicle_id not in vehicles:
             raise NotFoundError(f"Vehicle {vehicle_id!r} was not found")
-        states = await self._call(bng.vehicles.get_states, [vehicle_id])
+        states = await self._vehicle_states([vehicle_id])
         return self._vehicle_info(vehicle_id, vehicles[vehicle_id], states.get(vehicle_id, {}))
 
     async def spawn_vehicle(self, spec: VehicleSpawn) -> VehicleInfo:
