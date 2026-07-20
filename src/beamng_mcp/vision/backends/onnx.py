@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import time
 from collections.abc import Sequence
 from dataclasses import dataclass, field
@@ -176,8 +177,22 @@ class ONNXRuntimeSegmentationBackend:
     def _ensure_session(self) -> None:
         if self._session is not None:
             return
+        gpu_requested = any(
+            provider in {"CUDAExecutionProvider", "TensorrtExecutionProvider"}
+            for provider in self.config.provider_preference
+        )
+        if gpu_requested:
+            try:
+                # Importing compatible PyTorch first loads its CUDA/cuDNN DLLs
+                # without ONNX Runtime's stdout-printing preload helper. Stdout
+                # must remain exclusively available to the MCP stdio transport.
+                importlib.import_module("torch")
+            except ImportError:
+                # A standalone ONNX installation may instead provide native
+                # dependencies through its normal DLL search path.
+                pass
         try:
-            import onnxruntime as ort
+            ort = importlib.import_module("onnxruntime")
         except ImportError as exc:  # pragma: no cover - environment dependent
             raise BackendUnavailableError(
                 "ONNX backend requires optional 'onnxruntime' or 'onnxruntime-gpu'"

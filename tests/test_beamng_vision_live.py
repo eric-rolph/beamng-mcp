@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import base64
 import os
+import tempfile
 import threading
 import time
 import uuid
@@ -19,6 +21,8 @@ from PIL import Image
 from beamng_mcp.vision import (
     ColorSpace,
     HuggingFaceSegFormerBackend,
+    ONNXRuntimeSegmentationBackend,
+    ONNXRuntimeSegmentationConfig,
     OpenCVLaneBackend,
     SegFormerConfig,
     SegmentationClassMap,
@@ -31,6 +35,12 @@ from tests.live_support import (
     isolated_profile_lock,
     require_confined_profile_target,
     reserve_loopback_ports,
+)
+
+ONNX_CUDA_SMOKE_MODEL = base64.b64decode(
+    "CAo6egoZCgVpbWFnZRIGbG9naXRzIghJZGVudGl0eRIaY3VkYV9pZGVudGl0eV9zZWdtZW50YXRpb25a"
+    "HwoFaW1hZ2USFgoUCAESEAoCCAEKAggDCgIICAoCCAhiIAoGbG9naXRzEhYKFAgBEhAKAggBCgIIAwoC"
+    "CAgKAggIQgQKABAR"
 )
 
 CITYSCAPES_CLASSES = SegmentationClassMap(
@@ -146,6 +156,33 @@ def _exercise_optional_segformer(frame: SensorFrame) -> None:
     assert result.metadata["downloads_allowed"] is False
 
 
+def _exercise_onnx_cuda(frame: SensorFrame) -> None:
+    try:
+        import onnxruntime as ort
+    except ImportError:
+        return
+    if "CUDAExecutionProvider" not in ort.get_available_providers():
+        return
+
+    with tempfile.TemporaryDirectory(prefix="beamng-mcp-onnx-") as root:
+        model_path = Path(root) / "identity-segmentation.onnx"
+        model_path.write_bytes(ONNX_CUDA_SMOKE_MODEL)
+        backend = ONNXRuntimeSegmentationBackend(
+            ONNXRuntimeSegmentationConfig(
+                model_path=model_path,
+                class_map=SegmentationClassMap(drivable_class_ids=(1,)),
+                provider_preference=("CUDAExecutionProvider",),
+            )
+        )
+        result = backend.infer(frame)
+
+    assert backend.active_providers[0] == "CUDAExecutionProvider"
+    assert result.backend == "onnxruntime_segmentation"
+    assert result.image_shape == (frame.height, frame.width)
+    assert result.drivable_mask is not None
+    assert result.drivable_mask.shape == (frame.height, frame.width)
+
+
 def _run_live_vision_test(
     home: Path,
     user: Path,
@@ -254,6 +291,7 @@ def _run_live_vision_test(
         assert classical.lane_mask.shape == (360, 640)
         assert classical.inference_ms >= 0.0
 
+        _exercise_onnx_cuda(frame)
         _exercise_optional_segformer(frame)
     finally:
         try:

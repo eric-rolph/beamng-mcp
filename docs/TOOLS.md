@@ -144,9 +144,10 @@ mesh/material/flexbody and structural asset per mod, a connected normal-beam cag
 textures. Consequently, the public path cannot represent a disconnected moving crusher plate;
 hydros and rails/slidenodes do not substitute for a structural connection during validation.
 
-`softbody_mod_build` supports typed hydros and rails/slidenodes; a BeamNG hinge is a tested
-node/beam/rail/torsion pattern, not a literal `hinges` section. A volume-based mass input must equal
-the measured Blender volume returned by validation. Replacing any existing generated target
+`softbody_mod_build` supports typed hydros and rails/slidenodes. BeamNG has no literal `hinges`
+section; pivot/torsion compositions require manual review and are outside the v1 compiler. A
+volume-based mass input must equal the measured Blender volume returned by validation. Replacing
+any existing generated target
 requires `overwrite=true` and a complete `expected_sha256` map for every target that currently
 exists. The slot is consumed before commit, so a commit failure requires a new handoff. V1 runtime
 builds require Collada DAE and generate `<asset>.jbeam`, `<asset>.dae`, `main.materials.json`,

@@ -36,7 +36,7 @@ dependencies = [
 [project.optional-dependencies]
 vision = [
   "opencv-python-headless>=4.11,<5",
-  "onnxruntime-gpu>=1.22,<2",
+  "onnxruntime-gpu>=1.22,<1.27",
   "torch>=2.8,<3",
   "transformers>=4.53,<5",
 ]

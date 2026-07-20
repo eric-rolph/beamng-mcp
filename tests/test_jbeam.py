@@ -404,6 +404,101 @@ def test_compiler_rejects_coordinate_and_dae_tampering() -> None:
     )
 
 
+def test_compiler_serializes_guided_hydraulic_carriage_mechanics() -> None:
+    original = tetra_manifest()
+    carriage = StructuralNode(
+        id="n_carriage",
+        source_object="demo_cage",
+        source_vertex_index=None,
+        source_world_position=(0.0, 0.5, 0.0),
+        beamng_position=(0.0, 0.5, 0.0),
+        group="demo_group",
+        surface=False,
+    )
+    manifest = original.model_copy(
+        update={
+            "nodes": (*original.nodes, carriage),
+            "edges": (*original.edges, StructuralEdge(node_a="n_carriage", node_b="n_left")),
+            "hydros": (
+                HydroSpec(
+                    node_a="n_carriage",
+                    node_b="n_up",
+                    input_source="crusher_extend",
+                    factor=-0.5,
+                    in_rate=2.5,
+                    out_rate=1.25,
+                    spring_scale=0.5,
+                    damp_scale=1.5,
+                ),
+            ),
+            "rails": (RailSpec(name="carriage_guide", node_ids=("n_ref", "n_back")),),
+            "slidenodes": (
+                SlideNodeSpec(
+                    node_id="n_carriage",
+                    rail_name="carriage_guide",
+                    fix_to_rail=False,
+                    tolerance_m=0.01,
+                    spring=2_000_000.0,
+                    strength=12_000_000.0,
+                    cap_strength=15_000_000.0,
+                ),
+            ),
+        }
+    )
+
+    compiled = JBeamCompiler().compile(JBeamBuildRequest(manifest=manifest, dae=evidence(manifest)))
+
+    part = json.loads(compiled.jbeam.content)["demo"]
+    assert part["hydros"] == [
+        ["id1:", "id2:"],
+        [
+            "n_carriage",
+            "n_up",
+            {
+                "beamDamp": 1_200.0,
+                "beamSpring": 4_000_000.0,
+                "factor": -0.5,
+                "inRate": 2.5,
+                "inputSource": "crusher_extend",
+                "outRate": 1.25,
+            },
+        ],
+    ]
+    assert part["rails"] == {
+        "carriage_guide": {
+            "broken:": [],
+            "capped": True,
+            "links:": ["n_ref", "n_back"],
+            "looped": False,
+        }
+    }
+    assert part["slidenodes"] == [
+        [
+            "id:",
+            "railName",
+            "attached",
+            "fixToRail",
+            "tolerance",
+            "spring",
+            "strength",
+            "capStrength",
+        ],
+        [
+            "n_carriage",
+            "carriage_guide",
+            True,
+            False,
+            0.01,
+            2_000_000.0,
+            12_000_000.0,
+            15_000_000.0,
+        ],
+    ]
+    assert compiled.summary.hydro_count == 1
+    assert compiled.summary.rail_count == 1
+    assert compiled.summary.slidenode_count == 1
+
+
 def test_validator_rejects_a_slidenode_that_is_not_on_its_explicit_rail() -> None:
     manifest = tetra_manifest().model_copy(
         update={

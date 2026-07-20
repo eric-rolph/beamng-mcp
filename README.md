@@ -59,7 +59,9 @@ repository labels it honestly as experimental. The pinned compatibility baseline
   default-off operator gates; deletes and saves also require explicit confirmation.
 - A dedicated `BeamNGTrigger` lifecycle that creates connection-owned drafts, instantiates only on
   explicit enable, emits bounded typed enter/exit events, and never accepts Lua or command fields.
-- Three driving modes: BeamNG native AI, vision lane keeping, and a hybrid state/vision mode.
+- Three selectable driving modes: BeamNG native AI, vision lane keeping, and a reserved hybrid
+  mode. In the current alpha, `hybrid` uses the same camera-plus-vehicle-state supervisor as
+  `vision-lane`; route-planner fusion remains roadmap work.
 - OpenCV lane perception, lazy Hugging Face SegFormer, and ONNX Runtime with TensorRT → CUDA →
   CPU provider fallback and bounded GPU/workspace memory.
 - An engine-side real-time safety lease that must arm before autonomy starts. GELua disables AI and
@@ -174,10 +176,15 @@ uv sync --extra vision --extra dev
 ```
 
 On Windows, this repository pins `torch` to PyTorch's official CUDA 12.8 wheel index through
-uv, so the vision extra does not silently install a CPU-only PyPI build. Run
-`uv run beamng-mcp doctor --json` and require `vision_runtime.torch.cuda_available=true` before
-selecting SegFormer. ONNX Runtime reports its available providers separately; TensorRT is an
-optional preference and must be verified on the actual machine/model rather than assumed.
+uv, so the vision extra does not silently install a CPU-only PyPI build. ONNX Runtime GPU is
+constrained below 1.27 because 1.27 removed CUDA 12 support while this profile uses CUDA 12.8.
+Run `uv run beamng-mcp doctor --json` and require
+`vision_runtime.torch.cuda_available=true` before selecting SegFormer. For ONNX/CUDA, also require
+`vision_runtime.onnxruntime.provider_libraries.CUDAExecutionProvider.loadable=true`; an advertised
+provider alone does not prove that its DLL dependencies load. TensorRT is optional and should be
+treated as unavailable when its corresponding `loadable` field is false. The ONNX backend preloads
+the CUDA/cuDNN libraries shipped with the compatible PyTorch installation before creating a GPU
+session.
 
 The default `classical` backend is small and deterministic. For semantic road/hazard perception,
 configure `segformer` or provide a segmentation ONNX model:
@@ -195,7 +202,9 @@ max_gpu_memory_mb = 4096
 ONNX Runtime prefers `TensorrtExecutionProvider`, then CUDA, then CPU. Engine caches are not
 committed because TensorRT engines are specific to the runtime/GPU combination. On an RTX 5090,
 start at 640×360, cap BeamNG's frame rate, reserve 4–6 GB for inference, use FP16, and measure
-end-to-end observation-to-actuation latency before increasing resolution. NVIDIA's
+end-to-end observation-to-actuation latency before increasing resolution. Confirm the session's
+actual provider in `autonomy_status`; provider-library readiness is necessary but does not prove a
+particular model initialized. NVIDIA's
 [simultaneous compute and graphics guidance](https://docs.nvidia.com/deeplearning/tensorrt-rtx/latest/inference-library/compute-graphics.html)
 is especially relevant when the game and inference share the same GPU.
 

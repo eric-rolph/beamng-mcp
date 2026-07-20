@@ -19,6 +19,7 @@ local TOKEN_PLACEHOLDER = "__BEAMNG_MCP_TOKEN__"
 
 local HARD_MAX_PAYLOAD_BYTES = 1048576
 local MAX_EVENTS_PER_UPDATE = 64
+local MAX_DATA_BYTES_PER_UPDATE = HARD_MAX_PAYLOAD_BYTES * 4
 local MAX_OBJECT_RESULTS = 200
 local MAX_IDENTIFIER_LENGTH = 96
 local MAX_MANAGED_TRIGGERS_PER_PEER = 32
@@ -46,6 +47,7 @@ local telemetryElapsed = 0
 local heartbeatElapsed = 0
 local pendingReload = nil
 local safetyLease = nil
+local restartServerRequested = false
 
 local DEFAULT_CONFIG = {
   marker = CONFIG_MARKER,
@@ -2285,16 +2287,8 @@ local function expireStaleAuthentication()
   end
 end
 
-local function onExtensionLoaded()
-  local resolved, configError = readConfig()
-  if configError then
-    log("E", LOG_TAG, "Bridge disabled: " .. configError)
-    return
-  end
-  config = resolved
-
-  if setExtensionUnloadMode then setExtensionUnloadMode(M, "manual") end
-
+local function startWebSocketServer()
+  if server or not config then return server ~= nil end
   local createOk, createdServer, chosenAddress = pcall(
     wsUtils.createOrGetWS,
     LOOPBACK_ADDRESS,
@@ -2307,7 +2301,7 @@ local function onExtensionLoaded()
   if not createOk or not createdServer then
     log("E", LOG_TAG, "Unable to start the loopback WebSocket server")
     server = nil
-    return
+    return false
   end
   server = createdServer
   log(
@@ -2315,6 +2309,20 @@ local function onExtensionLoaded()
     LOG_TAG,
     "BeamNG MCP bridge listening on " .. tostring(chosenAddress) .. ":" .. tostring(config.port)
   )
+  return true
+end
+
+local function onExtensionLoaded()
+  local resolved, configError = readConfig()
+  if configError then
+    log("E", LOG_TAG, "Bridge disabled: " .. configError)
+    return
+  end
+  config = resolved
+  restartServerRequested = false
+
+  if setExtensionUnloadMode then setExtensionUnloadMode(M, "manual") end
+  startWebSocketServer()
 end
 
 local function onExtensionUnloaded()
@@ -2325,19 +2333,43 @@ local function onExtensionUnloaded()
     server = nil
   end
   peers = {}
+  restartServerRequested = false
   managedObjects = {}
   pendingReload = nil
   log("I", LOG_TAG, "BeamNG MCP bridge stopped")
 end
 
+local function resetWebSocketServer(reason)
+  if safetyLease then expireSafetyLease(reason) end
+  cleanupAllTriggers(reason)
+  if server then
+    pcall(BNGWebWSServer.destroy, server)
+    server = nil
+  end
+  peers = {}
+  restartServerRequested = true
+end
+
+local function resetOverloadedServer(eventCount, dataBytes)
+  resetWebSocketServer("bridge_event_overload")
+  log(
+    "W",
+    LOG_TAG,
+    "Resetting overloaded WebSocket server before processing batch: events="
+      .. tostring(eventCount)
+      .. ", data_bytes="
+      .. tostring(dataBytes)
+  )
+end
+
 local function onClientStartMission()
-  cleanupAllTriggers("mission_started")
+  resetWebSocketServer("mission_started")
   releaseGoneQuarantinedTriggers("mission_started")
   managedObjects = {}
 end
 
 local function onClientEndMission()
-  cleanupAllTriggers("mission_ended")
+  resetWebSocketServer("mission_ended")
   releaseGoneQuarantinedTriggers("mission_ended")
   managedObjects = {}
 end
@@ -2356,14 +2388,33 @@ local function onUpdate(dtReal, dtSim, dtRaw)
     expireSafetyLease("lease_expired")
   end
 
-  if not server or not config then return end
+  if not config then return end
+  if not server then
+    if restartServerRequested and startWebSocketServer() then
+      restartServerRequested = false
+    end
+    return
+  end
 
   local eventsOk, events = pcall(function() return server:getPeerEvents() end)
   if eventsOk and type(events) == "table" then
-    local processed = 0
+    if #events > MAX_EVENTS_PER_UPDATE then
+      resetOverloadedServer(#events, 0)
+      return
+    end
+    local dataBytes = 0
     for _, event in ipairs(events) do
-      if processed >= MAX_EVENTS_PER_UPDATE then break end
-      processed = processed + 1
+      if event.type == "D" and type(event.msg) == "string" then
+        dataBytes = dataBytes + #event.msg
+      end
+    end
+    local byteLimit = math.min(MAX_DATA_BYTES_PER_UPDATE, config.max_payload_bytes * 4)
+    if dataBytes > byteLimit then
+      resetOverloadedServer(#events, dataBytes)
+      return
+    end
+
+    for _, event in ipairs(events) do
       if event.type == "C" then
         cleanupTriggersForPeer(event.peerId, "peer_reconnected")
         peers[event.peerId] = {

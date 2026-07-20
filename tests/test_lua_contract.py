@@ -155,9 +155,52 @@ def test_payload_and_frame_work_are_bounded() -> None:
 
     assert "HARD_MAX_PAYLOAD_BYTES = 1048576" in source
     assert "MAX_EVENTS_PER_UPDATE" in source
+    assert "MAX_DATA_BYTES_PER_UPDATE" in source
     assert "MAX_OBJECT_RESULTS" in source
     assert "#message > config.max_payload_bytes" in source
     assert "#encoded > config.max_payload_bytes" in source
+
+
+def test_saturated_native_event_batch_resets_instead_of_discarding_tail_events() -> None:
+    source = bridge_source()
+    update = source.split("local function onUpdate", maxsplit=1)[1]
+    update = update.split("M.onExtensionLoaded = onExtensionLoaded", maxsplit=1)[0]
+    peer_events = update.split('if eventsOk and type(events) == "table" then', maxsplit=1)[1].split(
+        "if telemetryElapsed", maxsplit=1
+    )[0]
+    server_reset = source.split("local function resetWebSocketServer", maxsplit=1)[1].split(
+        "local function resetOverloadedServer", maxsplit=1
+    )[0]
+    overload_reset = source.split("local function resetOverloadedServer", maxsplit=1)[1].split(
+        "local function onClientStartMission", maxsplit=1
+    )[0]
+    mission_start = source.split("local function onClientStartMission", maxsplit=1)[1].split(
+        "local function onClientEndMission", maxsplit=1
+    )[0]
+    mission_end = source.split("local function onClientEndMission", maxsplit=1)[1].split(
+        "local function onUpdate", maxsplit=1
+    )[0]
+
+    # getPeerEvents drains its native queue. A batch beyond the count/byte work
+    # budget must therefore close every peer and restart the listener; breaking
+    # or deferring a tail could preserve stale peer state or cross a mission.
+    assert "break" not in peer_events
+    assert "if #events > MAX_EVENTS_PER_UPDATE then" in peer_events
+    assert "dataBytes > byteLimit" in peer_events
+    assert "resetOverloadedServer(#events, dataBytes)" in peer_events
+    assert 'event.type == "C"' in peer_events
+    assert 'event.type == "DC"' in peer_events
+    assert 'event.type == "D"' in peer_events
+
+    assert 'resetWebSocketServer("bridge_event_overload")' in overload_reset
+    assert "expireSafetyLease(reason)" in server_reset
+    assert "cleanupAllTriggers(reason)" in server_reset
+    assert "pcall(BNGWebWSServer.destroy, server)" in server_reset
+    assert "peers = {}" in server_reset
+    assert "restartServerRequested = true" in server_reset
+    assert "pendingDataEvents" not in source
+    assert 'resetWebSocketServer("mission_started")' in mission_start
+    assert 'resetWebSocketServer("mission_ended")' in mission_end
 
 
 def test_world_mutations_validate_classes_fields_and_transforms() -> None:
@@ -518,8 +561,8 @@ def test_trigger_registry_is_cleaned_at_every_ownership_boundary() -> None:
     assert 'cleanupTriggersForPeer(peerId, "authentication_expired")' in source
     assert 'cleanupTriggersForPeer(event.peerId, "peer_reconnected")' in source
     assert 'cleanupTriggersForPeer(event.peerId, "peer_disconnected")' in source
-    assert 'cleanupAllTriggers("mission_started")' in source
-    assert 'cleanupAllTriggers("mission_ended")' in source
+    assert 'resetWebSocketServer("mission_started")' in source
+    assert 'resetWebSocketServer("mission_ended")' in source
     assert 'cleanupAllTriggers("extension_unloaded")' in source
     assert "M.onClientStartMission" in source
     assert "M.onClientEndMission" in source

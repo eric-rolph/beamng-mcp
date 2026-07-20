@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
 import importlib
 import importlib.metadata
 import json
@@ -283,9 +284,11 @@ def _vision_runtime_info() -> dict[str, Any]:
 
     try:
         onnxruntime = importlib.import_module("onnxruntime")
+        providers = [str(item) for item in onnxruntime.get_available_providers()]
         result["onnxruntime"] = {
             "version": str(onnxruntime.__version__),
-            "providers": [str(item) for item in onnxruntime.get_available_providers()],
+            "providers": providers,
+            "provider_libraries": _onnx_provider_library_readiness(onnxruntime, providers),
         }
     except (ImportError, OSError, RuntimeError, AttributeError) as exc:
         result["onnxruntime"] = {"available": False, "error": type(exc).__name__}
@@ -296,6 +299,66 @@ def _vision_runtime_info() -> dict[str, Any]:
     except (ImportError, OSError, RuntimeError, AttributeError) as exc:
         result["opencv"] = {"available": False, "error": type(exc).__name__}
     return result
+
+
+def _onnx_provider_library_readiness(
+    onnxruntime: Any,
+    providers: Sequence[str],
+) -> dict[str, dict[str, Any]]:
+    """Prove that each advertised NVIDIA provider library can load its dependencies."""
+
+    if sys.platform == "win32":
+        library_names = {
+            "CUDAExecutionProvider": "onnxruntime_providers_cuda.dll",
+            "TensorrtExecutionProvider": "onnxruntime_providers_tensorrt.dll",
+        }
+        loader = getattr(ctypes, "WinDLL", ctypes.CDLL)
+    elif sys.platform.startswith("linux"):
+        library_names = {
+            "CUDAExecutionProvider": "libonnxruntime_providers_cuda.so",
+            "TensorrtExecutionProvider": "libonnxruntime_providers_tensorrt.so",
+        }
+        loader = ctypes.CDLL
+    else:
+        return {}
+
+    module_file = getattr(onnxruntime, "__file__", None)
+    if not isinstance(module_file, str):
+        return {
+            provider: {
+                "library": library_names[provider],
+                "present": False,
+                "loadable": False,
+                "error": "module_path_unavailable",
+            }
+            for provider in providers
+            if provider in library_names
+        }
+
+    capi = Path(module_file).resolve().parent / "capi"
+    readiness: dict[str, dict[str, Any]] = {}
+    for provider in providers:
+        library_name = library_names.get(provider)
+        if library_name is None:
+            continue
+        library = capi / library_name
+        status: dict[str, Any] = {
+            "library": library_name,
+            "present": library.is_file(),
+            "loadable": False,
+            "error": None,
+        }
+        if not library.is_file():
+            status["error"] = "library_not_found"
+        else:
+            try:
+                loader(str(library))
+            except OSError as exc:
+                status["error"] = type(exc).__name__
+            else:
+                status["loadable"] = True
+        readiness[provider] = status
+    return readiness
 
 
 def main(argv: Sequence[str] | None = None) -> int:

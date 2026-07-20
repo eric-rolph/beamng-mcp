@@ -5,6 +5,33 @@ uses semantic versioning after the initial alpha series.
 
 ## [Unreleased]
 
+### Changed
+
+- Constrain `onnxruntime-gpu` below 1.27 for the CUDA 12.8 Windows profile because ONNX Runtime
+  1.27 removed CUDA 12 support
+
+### Fixed
+
+- Make `doctor --json` distinguish advertised ONNX CUDA/TensorRT providers from provider libraries
+  whose native dependencies actually load
+- Import PyTorch's compatible CUDA/cuDNN runtime before ONNX session creation and exercise a
+  session that reports active CUDA inference beside BeamNG; CPU fallback remains explicit in
+  runtime status
+- Serialize BeamNGpy connect, status, disconnect, and shutdown transitions; make cancellation wait
+  for in-flight worker cleanup; and keep failed shutdowns retryable instead of closing the executor
+  around a live session
+- Dispose of provisional BeamNGpy sessions and launched processes when setup or the initial
+  capability probe fails, including raw-process fallback, exited-process detection, and retained
+  ownership when every termination path fails
+- Reset and automatically restart the Lua WebSocket listener before processing a native event batch
+  that exceeds strict count/byte work bounds, closing peers and fail-safe braking instead of
+  silently discarding or deferring tail commands; mission transitions use the same reset boundary
+  so stale native events cannot execute in the next mission
+- Strengthen the real soft-body regression to prove the generated node/beam topology, total mass,
+  and vehicle directory loaded in BeamNG
+- Cover positive hydro, rail, and slidenode serialization and remove the unsupported claim that v1
+  compiles a tested hinge/torsion composition
+
 ## [0.3.0] - 2026-07-20
 
 ### Added

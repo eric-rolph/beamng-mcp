@@ -401,6 +401,12 @@ commands in [Development](DEVELOPMENT.md) before running them.
 - Install `.[vision]`.
 - For SegFormer, cache the model locally or explicitly set `allow_model_downloads = true`.
 - For ONNX, confirm the path, input/output layouts, class IDs, and available execution providers.
+- In `doctor --json`, require
+  `vision_runtime.onnxruntime.provider_libraries.CUDAExecutionProvider.loadable=true`; the provider
+  list by itself can advertise a DLL whose CUDA dependencies cannot load.
+- Keep `onnxruntime-gpu<1.27` with this CUDA 12.8 profile. ONNX Runtime 1.27 removed CUDA 12 support.
+- Treat a non-loadable TensorRT provider as unavailable until the matching TensorRT runtime is
+  installed; CUDA remains the supported GPU fallback.
 - On Blackwell, use CUDA 12.8+ compatible packages.
 
 ### Blender handoff reports Collada unavailable

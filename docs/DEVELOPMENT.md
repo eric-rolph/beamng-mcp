@@ -107,7 +107,10 @@ uv run pytest -q -m beamng_gpu tests/test_beamng_vision_live.py
 ```
 
 The same three `BEAMNG_MCP_TEST_BEAMNG_*` variables and isolated-user sentinel are mandatory. The
-OpenCV leg requires no model. To opt into the learned CUDA leg, first review the
+OpenCV leg requires no model. When ONNX Runtime GPU is installed, the test also creates a tiny
+local identity graph, runs it through the project backend, and requires the active session to
+report `CUDAExecutionProvider` while BeamNG still owns the GPU. To opt into the learned CUDA leg,
+first review the
 [model card and files at the pinned revision](https://huggingface.co/nvidia/segformer-b0-finetuned-cityscapes-512-1024/tree/7a91500a7086b805eeb868719ea5542a3e0bdeb3),
 including its license, then cache it outside the repository with the Hugging Face CLI:
 
