@@ -35,16 +35,16 @@ dependencies = [
 
 [project.optional-dependencies]
 vision = [
-  "opencv-python-headless>=4.11,<5",
-  "onnxruntime-gpu>=1.22,<1.27",
+  "opencv-python-headless>=4.11,<6",
+  "onnxruntime-gpu>=1.22,<1.28",
   "torch>=2.8,<3",
-  "transformers>=4.53,<5",
+  "transformers>=4.53,<6",
 ]
 dev = [
-  "mypy>=1.15,<2",
-  "pytest>=8.3,<9",
-  "pytest-asyncio>=0.25,<1",
-  "pytest-cov>=6,<7",
+  "mypy>=1.15,<3",
+  "pytest>=8.3,<10",
+  "pytest-asyncio>=0.25,<2",
+  "pytest-cov>=6,<8",
   "ruff>=0.11,<1",
 ]
 
