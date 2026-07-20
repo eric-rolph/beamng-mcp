@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "beamng": {
+      "command": "C:/absolute/path/to/beamng-mcp/.venv/Scripts/beamng-mcp.exe",
+      "args": ["serve", "--transport", "stdio"],
+      "env": {
+        "BEAMNG_MCP_CONFIG": "C:/absolute/path/to/beamng-mcp/beamng-mcp.toml"
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability privately
+    url: https://github.com/eric-rolph/beamng-mcp/security/advisories/new
+    about: Use a private advisory for authentication, code-execution, path-escape, or unsafe-actuation flaws.
+  - name: BeamNG support
+    url: https://support.beamng.com/
+    about: Use BeamNG support for game installation, licensing, and engine issues unrelated to this project.

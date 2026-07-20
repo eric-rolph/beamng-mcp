@@ -5,50 +5,109 @@ build-backend = "hatchling.build"
 [project]
 name = "beamng-mcp"
 version = "0.1.0"
-description = "Local-first MCP server for BeamNG.drive and BeamNG.tech"
+description = "A safety-gated MCP control plane for BeamNG.drive and BeamNG.tech"
 readme = "README.md"
-license = "MIT"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.14"
+license = { text = "MIT" }
 authors = [{ name = "Eric Rolph" }]
+keywords = ["beamng", "mcp", "autonomous-driving", "simulation", "beamngpy"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Win32 (MS Windows)",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: Microsoft :: Windows",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
-  "beamngpy>=1.35,<2",
-  "mcp>=1.26,<2",
-  "numpy>=2.0,<3",
-  "pillow>=11,<13",
+  "anyio>=4.8,<5",
+  "beamngpy>=1.35.1,<1.36",
+  "mcp[cli]>=1.28.1,<2",
+  "numpy>=1.26,<3",
+  "pillow>=11.3,<13",
+  "platformdirs>=4.3,<5",
   "pydantic>=2.10,<3",
-  "pydantic-settings>=2.7,<3",
-  "websockets>=15,<17",
+  "websockets>=16.1,<17",
 ]
 
 [project.optional-dependencies]
 vision = [
-  "opencv-python-headless>=4.10,<5",
+  "opencv-python-headless>=4.11,<5",
+  "onnxruntime-gpu>=1.22,<2",
   "torch>=2.8,<3",
-  "transformers>=4.55,<6",
-  "ultralytics>=8.3,<9",
+  "transformers>=4.53,<5",
 ]
-dev = ["pytest>=8.3,<10", "pytest-asyncio>=0.25,<2", "ruff>=0.9,<1", "mypy>=1.14,<2"]
+dev = [
+  "mypy>=1.15,<2",
+  "pytest>=8.3,<9",
+  "pytest-asyncio>=0.25,<1",
+  "pytest-cov>=6,<7",
+  "ruff>=0.11,<1",
+]
+
+[project.urls]
+Homepage = "https://github.com/eric-rolph/beamng-mcp"
+Documentation = "https://github.com/eric-rolph/beamng-mcp/tree/main/docs"
+Issues = "https://github.com/eric-rolph/beamng-mcp/issues"
+Source = "https://github.com/eric-rolph/beamng-mcp"
 
 [project.scripts]
-beamng-mcp = "beamng_mcp.server:main"
-beamng-mcp-bridge = "beamng_mcp.bridge:main"
+beamng-mcp = "beamng_mcp.cli:main"
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cu128", marker = "sys_platform == 'win32'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/beamng_mcp"]
 
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src",
+  "/tests",
+  "/docs",
+  "/examples",
+  "/README.md",
+  "/LICENSE",
+  "/CHANGELOG.md",
+  "/CONTRIBUTING.md",
+  "/SECURITY.md",
+  "/.env.example",
+  "/server.json",
+  "/beamng-mcp.example.toml",
+]
+
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+addopts = "-ra --strict-config --strict-markers"
 asyncio_mode = "auto"
+testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "ASYNC"]
+select = ["E", "F", "I", "UP", "B", "ASYNC", "S", "RUF"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "S105", "S106"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.13"
 strict = true
 packages = ["beamng_mcp"]
+warn_unreachable = true
 
+[[tool.mypy.overrides]]
+module = ["cv2", "onnxruntime", "torch", "transformers", "transformers.*"]
+ignore_missing_imports = true

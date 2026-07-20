@@ -1,0 +1,86 @@
+name: Bug report
+description: Report a reproducible defect in the MCP server, Lua bridge, mod tooling, or autonomy stack.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve BeamNG MCP. Remove tokens, credentials, personal paths, and proprietary game or mod assets from all logs and attachments.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - MCP server or transport
+        - BeamNGpy adapter
+        - Lua WebSocket bridge
+        - Vehicle or sensor control
+        - Map editing
+        - Mod creation or testing
+        - Vision or autonomous driving
+        - Installation or configuration
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: product
+    attributes:
+      label: BeamNG product
+      options:
+        - BeamNG.tech
+        - BeamNG.drive (experimental)
+        - Not applicable
+    validations:
+      required: true
+
+  - type: input
+    id: versions
+    attributes:
+      label: Version details
+      description: Include BeamNG, beamng-mcp, BeamNGpy, Python, Windows, and GPU driver versions where relevant.
+      placeholder: "BeamNG 0.38.x; beamng-mcp 0.1.0; BeamNGpy 1.35.1; Python 3.13; Windows 11; NVIDIA 610.xx"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Provide the smallest deterministic sequence of setup and MCP tool calls that reproduces the problem.
+      placeholder: |
+        1. Start the server with ...
+        2. Load scenario ...
+        3. Call tool ...
+        4. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs or diagnostics
+      description: Paste relevant output or attach a file after removing tokens, credentials, personal paths, and proprietary assets.
+      render: text
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Safety and duplicate checks
+      options:
+        - label: I searched existing issues for a duplicate.
+          required: true
+        - label: I removed secrets, per-install bridge tokens, personal paths, and proprietary assets.
+          required: true
+        - label: I can reproduce this with a safely stopped or simulated vehicle.
+          required: true

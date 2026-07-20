@@ -1,0 +1,62 @@
+name: Feature request
+description: Propose a focused capability or safety improvement.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - MCP tools or resources
+        - BeamNGpy integration
+        - Lua bridge
+        - Vehicle or sensor control
+        - Map editing
+        - Mod creation or testing
+        - Vision or autonomous driving
+        - Developer experience
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: Explain the user need or limitation without prescribing the implementation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe inputs, outputs, failure behavior, and how an AI client would use it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety and security considerations
+      description: Note actuation, file access, authentication, privacy, model-weight, or resource-exhaustion risks and proposed gates.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include existing BeamNGpy, GELua, MCP, or local-model capabilities that may already address the need.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and documentation for this capability.
+          required: true
+        - label: This request does not require exposing arbitrary Lua, Python, shell, or unrestricted file access to the model.
+          required: true

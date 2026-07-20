@@ -1,0 +1,27 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.eric-rolph/beamng-mcp",
+  "description": "Safety-gated control, modding, mapping, sensors, and autonomous driving for BeamNG.",
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "beamng-mcp",
+      "version": "0.1.0",
+      "transport": { "type": "stdio" },
+      "runtimeHint": "uvx",
+      "runtimeArguments": [
+        { "type": "named", "name": "--from", "value": "beamng-mcp" }
+      ],
+      "packageArguments": [
+        { "type": "positional", "value": "beamng-mcp" },
+        { "type": "positional", "value": "serve" },
+        { "type": "named", "name": "--transport", "value": "stdio" }
+      ]
+    }
+  ],
+  "repository": {
+    "url": "https://github.com/eric-rolph/beamng-mcp",
+    "source": "github"
+  }
+}

@@ -1,0 +1,36 @@
+[mcp]
+transport = "stdio"
+
+[beamng]
+host = "127.0.0.1"
+port = 25252
+target_version = "0.38"
+# BeamNG 0.37+ default; omit to resolve userFolder from BeamNG.drive.ini.
+# user = "C:/Users/you/AppData/Local/BeamNG/BeamNG.drive/current"
+launch = true
+
+[lua]
+url = "ws://127.0.0.1:8765"
+request_timeout_seconds = 5.0
+max_message_bytes = 1048576
+# Engine-side autonomy deadman: renew within each lease window; allow bounded startup time.
+safety_lease_seconds = 1.0
+safety_startup_grace_seconds = 5.0
+
+[workspace]
+allow_persistent_map_edits = false
+allow_existing_map_object_edits = false
+allow_mod_install = false
+max_file_bytes = 2097152
+max_mod_files = 4096
+max_mod_bytes = 536870912
+
+[vision]
+backend = "onnx"
+onnx_path = "C:/models/drivable-area.onnx"
+target_fps = 20.0
+frame_timeout_seconds = 0.30
+input_width = 640
+input_height = 360
+max_gpu_memory_mb = 4096
+allow_model_downloads = false

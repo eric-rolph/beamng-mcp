@@ -1,0 +1,12 @@
+{
+  "port": 8765,
+  "token": "__BEAMNG_MCP_TOKEN__",
+  "max_payload_bytes": 1048576,
+  "telemetry_interval_seconds": 0.5,
+  "heartbeat_interval_seconds": 5.0,
+  "heartbeat_timeout_seconds": 20.0,
+  "safety_lease_seconds": 1.0,
+  "safety_startup_grace_seconds": 5.0,
+  "allow_persistent_map_edits": false,
+  "allow_existing_map_object_edits": false
+}
