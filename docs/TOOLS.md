@@ -21,13 +21,13 @@ controls; the server still enforces gates itself.
 
 | Tool | Purpose |
 | --- | --- |
-| `scenario_list` | Enumerate scenarios, optionally by level |
-| `scenario_load` | Load an existing scenario |
-| `scenario_create` | Generate scenario files with vehicles |
+| `scenario_list` | Enumerate scenarios, including built-in display names, optionally by level |
+| `scenario_load` | Load an existing scenario by the exact name returned from `scenario_list` |
+| `scenario_create` | Generate scenario files; placements require measured surface Z plus model-origin clearance because BeamNGpy cannot cling prefabs |
 | `scenario_control` | Start, restart, or stop loaded scenario |
 | `vehicle_list` | Current vehicle inventory and kinematics |
 | `vehicle_state` | One vehicle's position/direction/velocity/speed |
-| `vehicle_spawn` | Spawn and connect a vehicle |
+| `vehicle_spawn` | Spawn and connect a vehicle; explicit measured surface + model-origin clearance is required and `cling` defaults false |
 | `vehicle_remove` | Despawn with explicit confirmation |
 | `vehicle_control` | Complete one-shot normalized actuation; may remain latched until a follow-up |
 | `vehicle_teleport` | Position/quaternion teleport |

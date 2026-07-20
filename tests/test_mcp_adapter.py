@@ -39,12 +39,26 @@ async def test_mcp_exposes_curated_typed_surface(tmp_path: Path) -> None:
     delete = next(tool for tool in tools if tool.name == "map_object_delete")
     save = next(tool for tool in tools if tool.name == "map_save")
     create = next(tool for tool in tools if tool.name == "scenario_create")
+    spawn = next(tool for tool in tools if tool.name == "vehicle_spawn")
     status = next(tool for tool in tools if tool.name == "simulator_status")
+    mod_test = next(tool for tool in tools if tool.name == "mod_test_start")
+    emergency_stop = next(tool for tool in tools if tool.name == "emergency_stop")
     assert delete.annotations is not None and delete.annotations.destructiveHint is True
     assert status.annotations is not None and status.annotations.readOnlyHint is True
+    assert mod_test.annotations is not None and mod_test.annotations.destructiveHint is True
+    assert emergency_stop.annotations is not None
+    assert emergency_stop.annotations.idempotentHint is True
     assert delete.inputSchema["properties"]["confirm"]["default"] is False
     assert create.inputSchema["properties"]["overwrite"]["default"] is False
     assert create.inputSchema["properties"]["confirm_overwrite"]["default"] is False
+    scenario_vehicle_schema = create.inputSchema["$defs"]["ScenarioVehiclePlacement"]
+    scenario_vehicle_cling = scenario_vehicle_schema["properties"]["cling"]
+    assert scenario_vehicle_cling["default"] is False
+    assert scenario_vehicle_cling["const"] is False
+    assert "position" in scenario_vehicle_schema["required"]
+    runtime_vehicle_schema = spawn.inputSchema["$defs"]["VehicleSpawn"]
+    assert "position" in runtime_vehicle_schema["required"]
+    assert runtime_vehicle_schema["properties"]["cling"]["default"] is False
     assert "level" in save.inputSchema["required"]
     trigger_create = next(tool for tool in tools if tool.name == "map_trigger_create")
     trigger_update = next(tool for tool in tools if tool.name == "map_trigger_update")
@@ -99,6 +113,10 @@ async def test_official_in_memory_client_can_call_structured_tool(tmp_path: Path
         assert result.structuredContent is not None
         assert result.structuredContent["server_version"] == "0.3.0"
         assert result.structuredContent["mode"] == "offline"
+        assert any(
+            "Scenario.add_vehicle" in limitation and "model-origin clearance" in limitation
+            for limitation in result.structuredContent["limitations"]
+        )
         invalid_trigger = await session.call_tool(
             "map_trigger_create",
             {
@@ -133,6 +151,35 @@ async def test_official_in_memory_client_can_call_structured_tool(tmp_path: Path
             )
             assert invalid_events.isError is True
     # Lifespan owns shutdown; a second shutdown remains safe.
+    await runtime.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_road_network_serializes_numeric_road_ids_for_mcp_client(
+    tmp_path: Path,
+) -> None:
+    settings = Settings(workspace={"root": tmp_path / "workspace"})
+    mcp, runtime = create_mcp_server(settings)
+
+    async def road_network(
+        *, include_edges: bool, drivable_only: bool
+    ) -> dict[float, dict[str, object]]:
+        assert include_edges is True
+        assert drivable_only is True
+        return {31375.0: {"nodes": ["a", "b"]}}
+
+    runtime.simulator.road_network = road_network  # type: ignore[method-assign]
+    async with create_connected_server_and_client_session(mcp) as session:
+        result = await session.call_tool(
+            "map_road_network",
+            {"include_edges": True, "drivable_only": True, "limit": 1},
+        )
+
+        assert result.isError is False
+        assert result.structuredContent == {
+            "31375.0": {"nodes": ["a", "b"]},
+            "_meta": {"returned": 1, "total": 1, "truncated": False},
+        }
     await runtime.shutdown()
 
 

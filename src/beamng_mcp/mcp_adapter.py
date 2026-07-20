@@ -41,6 +41,8 @@ from .models import (
     OperationResult,
     ScenarioInfo,
     ScenarioRef,
+    ScenarioSelector,
+    ScenarioVehiclePlacement,
     SensorReading,
     SensorSpec,
     TriggerCursor,
@@ -73,6 +75,9 @@ READ_ONLY = ToolAnnotations(
 )
 ACTION = ToolAnnotations(
     readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=False
+)
+IDEMPOTENT_ACTION = ToolAnnotations(
+    readOnlyHint=False, destructiveHint=False, idempotentHint=True, openWorldHint=False
 )
 DESTRUCTIVE = ToolAnnotations(
     readOnlyHint=False, destructiveHint=True, idempotentHint=False, openWorldHint=False
@@ -252,7 +257,7 @@ def create_mcp_server(
 
     @mcp.tool(annotations=ACTION)
     @tool_guard
-    async def scenario_load(ref: ScenarioRef) -> ScenarioInfo:
+    async def scenario_load(ref: ScenarioSelector) -> ScenarioInfo:
         """Load an existing scenario by level and scenario name."""
 
         return await app_runtime.while_autonomy_inactive(
@@ -263,13 +268,13 @@ def create_mcp_server(
     @tool_guard
     async def scenario_create(
         ref: ScenarioRef,
-        vehicles: list[VehicleSpawn],
+        vehicles: list[ScenarioVehiclePlacement],
         description: str | None = None,
         load: bool = True,
         overwrite: bool = False,
         confirm_overwrite: bool = False,
     ) -> ScenarioInfo:
-        """Create scenario files; replacing an existing scenario needs two explicit flags."""
+        """Create surface-relative scenario files; replacement needs two explicit flags."""
 
         if overwrite and not confirm_overwrite:
             raise SafetyInterlockError("Scenario overwrite requires confirm_overwrite=true")
@@ -319,7 +324,7 @@ def create_mcp_server(
     @mcp.tool(annotations=ACTION)
     @tool_guard
     async def vehicle_spawn(spec: VehicleSpawn) -> VehicleInfo:
-        """Spawn and connect a vehicle in the current scenario."""
+        """Spawn at measured surface plus model-origin clearance and connect."""
 
         return await app_runtime.while_autonomy_inactive(
             "spawn a vehicle", lambda: app_runtime.simulator.spawn_vehicle(spec)
@@ -414,7 +419,7 @@ def create_mcp_server(
             include_edges=include_edges, drivable_only=drivable_only
         )
         items = list(network.items())
-        result = dict(items[:limit])
+        result = {str(road_id): road for road_id, road in items[:limit]}
         result["_meta"] = {
             "returned": min(len(items), limit),
             "total": len(items),
@@ -665,7 +670,7 @@ def create_mcp_server(
             ),
         )
 
-    @mcp.tool(annotations=ACTION)
+    @mcp.tool(annotations=DESTRUCTIVE)
     @tool_guard
     async def mod_test_start(
         mod_name: str,
@@ -729,7 +734,7 @@ def create_mcp_server(
 
         return app_runtime.autonomy_status()
 
-    @mcp.tool(annotations=ACTION)
+    @mcp.tool(annotations=IDEMPOTENT_ACTION)
     @tool_guard
     async def emergency_stop(vehicle_id: str | None = None) -> OperationResult:
         """Immediately brake through every connected control path; safe and idempotent."""
