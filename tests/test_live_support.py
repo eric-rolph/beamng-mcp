@@ -343,12 +343,19 @@ def test_temporary_lua_bridge_config_rotates_endpoint_and_restores_exact_bytes(
     original = b'{"marker":"beamng-mcp-bridge","port":8765,"token":"original-secret"}\n'
     config.write_bytes(original)
 
-    with temporary_lua_bridge_config(user, 49123) as endpoint:
+    with temporary_lua_bridge_config(
+        user,
+        49123,
+        heartbeat_interval_seconds=1.0,
+        heartbeat_timeout_seconds=2.0,
+    ) as endpoint:
         current = json.loads(config.read_text(encoding="utf-8"))
         assert endpoint.port == 49123
         assert current["port"] == 49123
         assert current["token"] == endpoint.token.get_secret_value()
         assert current["token"] != "original-secret"
+        assert current["heartbeat_interval_seconds"] == 1.0
+        assert current["heartbeat_timeout_seconds"] == 2.0
 
     assert config.read_bytes() == original
 

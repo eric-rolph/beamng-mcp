@@ -41,7 +41,18 @@ Primary risks:
 - Mod I/O is rooted, canonicalized, file/count/byte-bounded, symlink/reparse-point-aware, atomic,
   and revision-aware.
 - Bridge-managed map objects are the default mutation scope. Editing pre-existing level objects
-  requires a separate default-off Python/Lua gate.
+  requires a separate default-off Python/Lua gate. Exact identity mismatches revoke mutation
+  authority but retain a non-authorizing evidence tombstone, preventing extension reload from
+  discarding possibly live scene state before exact deletion or a mission transition.
+- `BeamNGTrigger` has a separate typed registry and is never accepted by the generic object API.
+  The bridge generates its engine name, fixes its callback, disables ticking and persistence,
+  permits only bounded enter/exit event emission, and validates exact connection/object ownership.
+  A disabled trigger is only an in-memory draft; disconnect, mission transition, or extension
+  unload normally deletes drafts and any live engine objects. An exceptional identity or deletion
+  failure quarantines the record as ownerless and event-silent while preserving its exact
+  object/ID/name/generation evidence for retry. Quarantine metadata is retired only after an exact
+  deletion retry succeeds or a mission teardown proves that neither registered ID nor reserved
+  name remains, and it continues to count against the global 64-trigger cap while retained.
 - Persistent map save requires independent Python and Lua configuration gates, confirmation, and
   the exact loaded level identifier. Object and vehicle deletion also require confirmation.
 - Sensor arrays/images become local artifacts instead of unbounded MCP JSON.
@@ -62,6 +73,8 @@ Primary risks:
   `%LOCALAPPDATA%\BeamNG\BeamNG.drive.ini`; the Windows default is
   `%LOCALAPPDATA%\BeamNG\BeamNG.drive\current`.
 - Work only on cloned/user levels and source-controlled mod workspaces.
+- Re-run `beamng-mcp install-lua --force` after upgrading the Python package. New trigger methods
+  fail closed when an older installed bridge does not advertise them.
 - Keep `allow_mod_install`, `allow_existing_map_object_edits`, and
   `allow_persistent_map_edits` false unless a specific reviewed workflow requires them.
 - Review third-party model licenses and use safe weight formats where possible.

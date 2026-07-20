@@ -152,9 +152,12 @@ At minimum verify:
    after expiry. Independently delay frames and confirm the Python watchdog brakes.
 10. Create a managed ephemeral object in a cloned test level. Verify pre-existing object edits are
     rejected until their operator gate is enabled.
-11. Verify `map_save` rejects a missing or mismatched level ID; exercise a confirmed exact-level
+11. Create a typed trigger draft and verify no scene object or event exists before enable. Enable
+    it, move a real vehicle out → in → out, verify one typed enter and exit, then disable/delete it.
+    Confirm generic trigger creation and callback/command/name injection are rejected.
+12. Verify `map_save` rejects a missing or mismatched level ID; exercise a confirmed exact-level
     save only on disposable cloned content.
-12. Leave mod installation disabled for pack-only tests. In a dedicated user folder, verify that
+13. Leave mod installation disabled for pack-only tests. In a dedicated user folder, verify that
     enabling `allow_mod_install` plus confirmation installs the reviewed artifact and that disabling
     the gate blocks both direct and job-based installation.
 

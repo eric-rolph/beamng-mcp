@@ -4,12 +4,13 @@ import asyncio
 import json
 
 import pytest
-from pydantic import SecretStr
+from pydantic import SecretStr, ValidationError
 from websockets.asyncio.server import serve
 
 from beamng_mcp.adapters.lua_bridge import BRIDGE_SCHEMA, BRIDGE_SUBPROTOCOL, LuaBridgeClient
 from beamng_mcp.config import LuaSettings
 from beamng_mcp.errors import LuaBridgeError
+from beamng_mcp.models import MapTriggerDeleteResult, MapTriggerInfo
 
 
 @pytest.mark.asyncio
@@ -109,6 +110,181 @@ async def test_lua_bridge_rejects_non_allowlisted_method_without_connecting() ->
 
 
 @pytest.mark.asyncio
+async def test_lua_bridge_rejects_unadvertised_trigger_method_before_mutation() -> None:
+    seen_methods: list[str] = []
+
+    async def handler(websocket) -> None:
+        async for raw in websocket:
+            request = json.loads(raw)
+            seen_methods.append(request["method"])
+            await websocket.send(
+                json.dumps(
+                    {
+                        "schema": BRIDGE_SCHEMA,
+                        "id": request["id"],
+                        "type": "response",
+                        "method": request["method"],
+                        "result": {"methods": ["ping"]},
+                    }
+                )
+            )
+
+    async with serve(handler, "127.0.0.1", 0, subprotocols=[BRIDGE_SUBPROTOCOL]) as server:
+        port = server.sockets[0].getsockname()[1]
+        client = LuaBridgeClient(
+            LuaSettings(url=f"ws://127.0.0.1:{port}", token=SecretStr("secret" * 8))
+        )
+        try:
+            with pytest.raises(LuaBridgeError, match="install-lua --force"):
+                await client.call(
+                    "trigger.create",
+                    {"handle": "trg_" + "a" * 32},
+                )
+            assert seen_methods == ["capabilities"]
+        finally:
+            await client.close()
+
+
+@pytest.mark.asyncio
+async def test_lua_bridge_allows_advertised_trigger_method() -> None:
+    seen_methods: list[str] = []
+
+    async def handler(websocket) -> None:
+        async for raw in websocket:
+            request = json.loads(raw)
+            seen_methods.append(request["method"])
+            result = (
+                {"methods": ["trigger.list"]}
+                if request["method"] == "capabilities"
+                else {"triggers": [], "count": 0}
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "schema": BRIDGE_SCHEMA,
+                        "id": request["id"],
+                        "type": "response",
+                        "method": request["method"],
+                        "result": result,
+                    }
+                )
+            )
+
+    async with serve(handler, "127.0.0.1", 0, subprotocols=[BRIDGE_SUBPROTOCOL]) as server:
+        port = server.sockets[0].getsockname()[1]
+        client = LuaBridgeClient(
+            LuaSettings(url=f"ws://127.0.0.1:{port}", token=SecretStr("secret" * 8))
+        )
+        try:
+            assert await client.call("trigger.list", {"limit": 10}) == {
+                "triggers": [],
+                "count": 0,
+            }
+            assert seen_methods == ["capabilities", "trigger.list"]
+        finally:
+            await client.close()
+
+
+@pytest.mark.asyncio
+async def test_lua_bridge_queues_only_sanitized_typed_trigger_events() -> None:
+    async def handler(websocket) -> None:
+        async for raw in websocket:
+            request = json.loads(raw)
+            await websocket.send(
+                json.dumps(
+                    {
+                        "schema": BRIDGE_SCHEMA,
+                        "id": request["id"],
+                        "type": "response",
+                        "method": request["method"],
+                        "result": {"methods": ["ping"]},
+                    }
+                )
+            )
+            if request["method"] != "capabilities":
+                continue
+            base = {
+                "handle": "trg_" + "a" * 32,
+                "event": "enter",
+                "subject_id": 7,
+                "subject_name": "ego",
+                "trigger_id": 42,
+                "trigger_name": "beamng_mcp_trigger_" + "a" * 32,
+                "sequence": 1,
+                "count": 1,
+                "time_seconds": 12.5,
+            }
+            await websocket.send(
+                json.dumps(
+                    {
+                        "schema": BRIDGE_SCHEMA,
+                        "type": "event",
+                        "method": "trigger.event",
+                        "params": {**base, "event": "tick"},
+                    }
+                )
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "schema": BRIDGE_SCHEMA,
+                        "type": "event",
+                        "method": "trigger.event",
+                        "params": {**base, "subject_id": True},
+                    }
+                )
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "schema": BRIDGE_SCHEMA,
+                        "type": "event",
+                        "method": "trigger.event",
+                        "params": base,
+                        "untrusted": "discarded",
+                    }
+                )
+            )
+
+    async with serve(handler, "127.0.0.1", 0, subprotocols=[BRIDGE_SUBPROTOCOL]) as server:
+        port = server.sockets[0].getsockname()[1]
+        client = LuaBridgeClient(
+            LuaSettings(url=f"ws://127.0.0.1:{port}", token=SecretStr("secret" * 8))
+        )
+        try:
+            await client.connect()
+            for _ in range(20):
+                if client.recent_events(limit=50):
+                    break
+                await asyncio.sleep(0.01)
+            assert client.recent_events(limit=50) == [
+                {
+                    "schema": BRIDGE_SCHEMA,
+                    "type": "event",
+                    "method": "trigger.event",
+                    "params": {
+                        "handle": "trg_" + "a" * 32,
+                        "event": "enter",
+                        "subject_id": 7,
+                        "subject_name": "ego",
+                        "trigger_id": 42,
+                        "trigger_name": "beamng_mcp_trigger_" + "a" * 32,
+                        "sequence": 1,
+                        "count": 1,
+                        "time_seconds": 12.5,
+                    },
+                }
+            ]
+            buffered = client.buffered_trigger_events("trg_" + "a" * 32)
+            assert len(buffered) == 1
+            assert buffered[0].sequence == 1
+            assert buffered[0].event == "enter"
+            assert client.buffered_trigger_events("trg_" + "b" * 32) == []
+        finally:
+            await client.close()
+
+
+@pytest.mark.asyncio
 async def test_lua_bridge_surfaces_structured_errors() -> None:
     async def handler(websocket) -> None:
         async for raw in websocket:
@@ -182,6 +358,262 @@ async def test_lua_bridge_timeout_does_not_poison_the_next_request() -> None:
             assert client.status().connected is True
             assert client.status().authenticated is True
         finally:
+            await client.close()
+
+
+@pytest.mark.asyncio
+async def test_trigger_mutation_timeout_closes_peer_and_reconnects_cleanly() -> None:
+    connection_count = 0
+    mutation_applied = asyncio.Event()
+    first_peer_closed = asyncio.Event()
+
+    async def handler(websocket) -> None:
+        nonlocal connection_count
+        connection_count += 1
+        current_connection = connection_count
+        try:
+            async for raw in websocket:
+                request = json.loads(raw)
+                if request["method"] == "trigger.create":
+                    mutation_applied.set()
+                    await websocket.wait_closed()
+                    return
+                result = (
+                    {"methods": ["trigger.create", "ping"]}
+                    if request["method"] == "capabilities"
+                    else {"pong": True}
+                )
+                await websocket.send(
+                    json.dumps(
+                        {
+                            "schema": BRIDGE_SCHEMA,
+                            "id": request["id"],
+                            "type": "response",
+                            "method": request["method"],
+                            "result": result,
+                        }
+                    )
+                )
+        finally:
+            if current_connection == 1:
+                first_peer_closed.set()
+
+    async with serve(handler, "127.0.0.1", 0, subprotocols=[BRIDGE_SUBPROTOCOL]) as server:
+        port = server.sockets[0].getsockname()[1]
+        client = LuaBridgeClient(
+            LuaSettings(
+                url=f"ws://127.0.0.1:{port}",
+                token=SecretStr("secret" * 8),
+                request_timeout_seconds=0.1,
+            )
+        )
+        try:
+            with pytest.raises(LuaBridgeError, match="timed out"):
+                await client.call("trigger.create", {"handle": "trg_" + "a" * 32})
+
+            assert mutation_applied.is_set()
+            await asyncio.wait_for(first_peer_closed.wait(), timeout=1.0)
+            assert client.status().connected is False
+            assert client.status().authenticated is False
+
+            assert await client.call("ping") == {"pong": True}
+            assert connection_count == 2
+            assert client.status().connected is True
+            assert client.status().authenticated is True
+        finally:
+            await client.close()
+
+
+@pytest.mark.asyncio
+async def test_cancelled_trigger_mutation_closes_uncertain_peer_before_propagating() -> None:
+    connection_count = 0
+    mutation_applied = asyncio.Event()
+    first_peer_closed = asyncio.Event()
+
+    async def handler(websocket) -> None:
+        nonlocal connection_count
+        connection_count += 1
+        current_connection = connection_count
+        try:
+            async for raw in websocket:
+                request = json.loads(raw)
+                if request["method"] == "trigger.update":
+                    mutation_applied.set()
+                    await websocket.wait_closed()
+                    return
+                result = (
+                    {"methods": ["trigger.update", "ping"]}
+                    if request["method"] == "capabilities"
+                    else {"pong": True}
+                )
+                await websocket.send(
+                    json.dumps(
+                        {
+                            "schema": BRIDGE_SCHEMA,
+                            "id": request["id"],
+                            "type": "response",
+                            "method": request["method"],
+                            "result": result,
+                        }
+                    )
+                )
+        finally:
+            if current_connection == 1:
+                first_peer_closed.set()
+
+    async with serve(handler, "127.0.0.1", 0, subprotocols=[BRIDGE_SUBPROTOCOL]) as server:
+        port = server.sockets[0].getsockname()[1]
+        client = LuaBridgeClient(
+            LuaSettings(
+                url=f"ws://127.0.0.1:{port}",
+                token=SecretStr("secret" * 8),
+                request_timeout_seconds=5.0,
+            )
+        )
+        mutation = asyncio.create_task(
+            client.call(
+                "trigger.update",
+                {"handle": "trg_" + "a" * 32, "enabled": True},
+            )
+        )
+        try:
+            await asyncio.wait_for(mutation_applied.wait(), timeout=1.0)
+            mutation.cancel()
+            with pytest.raises(asyncio.CancelledError):
+                await mutation
+
+            await asyncio.wait_for(first_peer_closed.wait(), timeout=1.0)
+            assert client.status().connected is False
+            assert client.status().authenticated is False
+
+            assert await client.call("ping") == {"pong": True}
+            assert connection_count == 2
+        finally:
+            mutation.cancel()
+            await asyncio.gather(mutation, return_exceptions=True)
+            await client.close()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("method", "validator"),
+    [
+        ("trigger.create", MapTriggerInfo.model_validate),
+        ("trigger.update", MapTriggerInfo.model_validate),
+        ("trigger.delete", MapTriggerDeleteResult.model_validate),
+    ],
+)
+async def test_invalid_typed_trigger_mutation_response_closes_exact_peer_before_error(
+    method,
+    validator,
+) -> None:
+    peer_closed = asyncio.Event()
+
+    async def handler(websocket) -> None:
+        try:
+            async for raw in websocket:
+                request = json.loads(raw)
+                result = {"methods": [method]} if request["method"] == "capabilities" else {}
+                await websocket.send(
+                    json.dumps(
+                        {
+                            "schema": BRIDGE_SCHEMA,
+                            "id": request["id"],
+                            "type": "response",
+                            "method": request["method"],
+                            "result": result,
+                        }
+                    )
+                )
+        finally:
+            peer_closed.set()
+
+    async with serve(handler, "127.0.0.1", 0, subprotocols=[BRIDGE_SUBPROTOCOL]) as server:
+        port = server.sockets[0].getsockname()[1]
+        client = LuaBridgeClient(
+            LuaSettings(
+                url=f"ws://127.0.0.1:{port}",
+                token=SecretStr("secret" * 8),
+                request_timeout_seconds=1.0,
+            )
+        )
+        try:
+            with pytest.raises(ValidationError):
+                await client.call_validated_trigger_mutation(method, {}, validator)
+
+            await asyncio.wait_for(peer_closed.wait(), timeout=1.0)
+            assert client.status().connected is False
+            assert client.status().authenticated is False
+        finally:
+            await client.close()
+
+
+@pytest.mark.asyncio
+async def test_cancellation_during_invalid_response_cleanup_waits_for_close_and_wins() -> None:
+    peer_closed = asyncio.Event()
+
+    async def handler(websocket) -> None:
+        try:
+            async for raw in websocket:
+                request = json.loads(raw)
+                result = (
+                    {"methods": ["trigger.create"]} if request["method"] == "capabilities" else {}
+                )
+                await websocket.send(
+                    json.dumps(
+                        {
+                            "schema": BRIDGE_SCHEMA,
+                            "id": request["id"],
+                            "type": "response",
+                            "method": request["method"],
+                            "result": result,
+                        }
+                    )
+                )
+        finally:
+            peer_closed.set()
+
+    async with serve(handler, "127.0.0.1", 0, subprotocols=[BRIDGE_SUBPROTOCOL]) as server:
+        port = server.sockets[0].getsockname()[1]
+        client = LuaBridgeClient(
+            LuaSettings(
+                url=f"ws://127.0.0.1:{port}",
+                token=SecretStr("secret" * 8),
+                request_timeout_seconds=1.0,
+            )
+        )
+        await client.connect()
+        original_close = client._close_socket
+        close_started = asyncio.Event()
+        release_close = asyncio.Event()
+
+        async def delayed_close(*, expected_ws=None) -> None:
+            close_started.set()
+            await release_close.wait()
+            await original_close(expected_ws=expected_ws)
+
+        client._close_socket = delayed_close  # type: ignore[method-assign]
+        mutation = asyncio.create_task(
+            client.call_validated_trigger_mutation(
+                "trigger.create",
+                {},
+                MapTriggerInfo.model_validate,
+            )
+        )
+        try:
+            await asyncio.wait_for(close_started.wait(), timeout=1.0)
+            mutation.cancel()
+            await asyncio.sleep(0)
+            assert mutation.done() is False
+
+            release_close.set()
+            with pytest.raises(asyncio.CancelledError):
+                await mutation
+            await asyncio.wait_for(peer_closed.wait(), timeout=1.0)
+            assert client.status().connected is False
+        finally:
+            release_close.set()
+            await asyncio.gather(mutation, return_exceptions=True)
             await client.close()
 
 

@@ -4,10 +4,13 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import secrets
 import time
 import uuid
 from collections.abc import Awaitable, Callable
 from typing import Any, Literal, TypeVar
+
+from pydantic import TypeAdapter
 
 from . import __version__
 from .adapters.beamngpy_adapter import BeamNGpyAdapter
@@ -23,7 +26,17 @@ from .models import (
     JobInfo,
     MapObjectMutation,
     MapObjectPatch,
+    MapTriggerCreate,
+    MapTriggerDeleteResult,
+    MapTriggerEvent,
+    MapTriggerEventPage,
+    MapTriggerInfo,
+    MapTriggerList,
+    MapTriggerPatch,
     OperationResult,
+    TriggerCursor,
+    TriggerHandle,
+    TriggerListLimit,
 )
 from .services.autonomy import AutonomyService
 from .services.jobs import JobContext, JobManager
@@ -31,6 +44,9 @@ from .services.mods import ModWorkspace
 from .services.structural import StructuralModService
 
 T = TypeVar("T")
+TRIGGER_HANDLE_ADAPTER = TypeAdapter(TriggerHandle)
+TRIGGER_CURSOR_ADAPTER = TypeAdapter(TriggerCursor)
+TRIGGER_LIST_LIMIT_ADAPTER = TypeAdapter(TriggerListLimit)
 
 
 async def _await_to_completion(
@@ -84,6 +100,12 @@ TOOL_NAMES = [
     "map_object_create",
     "map_object_update",
     "map_object_delete",
+    "map_trigger_create",
+    "map_trigger_get",
+    "map_trigger_update",
+    "map_trigger_list",
+    "map_trigger_events",
+    "map_trigger_delete",
     "map_save",
     "lua_bridge_status",
     "lua_extension_reload",
@@ -311,6 +333,8 @@ class Runtime:
         self,
         operation: str,
         callback: Callable[[], Awaitable[T]],
+        *,
+        propagate_cancellation: bool = False,
     ) -> T:
         """Serialize a run-invalidating mutation with autonomy lifecycle transitions."""
 
@@ -320,6 +344,8 @@ class Runtime:
                     f"Cannot {operation} while autonomy is starting, running, or fail-closed; "
                     "call autonomy_stop first"
                 )
+            if propagate_cancellation:
+                return await callback()
             result, cancellation_requested = await _await_to_completion(callback())
             if cancellation_requested:
                 raise asyncio.CancelledError
@@ -747,6 +773,115 @@ class Runtime:
         params: dict[str, Any] = {"confirm": True}
         params["id" if isinstance(object_id, int) else "name"] = object_id
         return await self.lua.call("world.delete_object", params)
+
+    async def map_trigger_create(self, request: MapTriggerCreate) -> MapTriggerInfo:
+        """Create a disabled trigger draft under an unguessable bridge-owned handle."""
+
+        params = request.model_dump(mode="json")
+        params["handle"] = f"trg_{secrets.token_hex(16)}"
+        return await self.lua.call_validated_trigger_mutation(
+            "trigger.create",
+            params,
+            MapTriggerInfo.model_validate,
+        )
+
+    async def map_trigger_get(self, handle: TriggerHandle) -> MapTriggerInfo:
+        handle = TRIGGER_HANDLE_ADAPTER.validate_python(handle)
+        return MapTriggerInfo.model_validate(await self.lua.call("trigger.get", {"handle": handle}))
+
+    async def map_trigger_update(self, patch: MapTriggerPatch) -> MapTriggerInfo:
+        params = patch.model_dump(mode="json", exclude_none=True)
+        return await self.lua.call_validated_trigger_mutation(
+            "trigger.update",
+            params,
+            MapTriggerInfo.model_validate,
+        )
+
+    async def map_trigger_list(self, *, limit: TriggerListLimit = 100) -> MapTriggerList:
+        limit = TRIGGER_LIST_LIMIT_ADAPTER.validate_python(limit)
+        return MapTriggerList.model_validate(await self.lua.call("trigger.list", {"limit": limit}))
+
+    async def map_trigger_events(
+        self,
+        handle: TriggerHandle,
+        *,
+        after_sequence: TriggerCursor = 0,
+        limit: TriggerListLimit = 50,
+    ) -> MapTriggerEventPage:
+        """Page sanitized buffered events after verifying the trigger is still owned."""
+
+        handle = TRIGGER_HANDLE_ADAPTER.validate_python(handle)
+        after_sequence = TRIGGER_CURSOR_ADAPTER.validate_python(after_sequence)
+        limit = TRIGGER_LIST_LIMIT_ADAPTER.validate_python(limit)
+        descriptor = await self.map_trigger_get(handle)
+        if descriptor.handle != handle:
+            raise SafetyInterlockError(
+                "Trigger ownership response did not match the requested handle"
+            )
+
+        buffered = self.lua.buffered_trigger_events(handle)
+        if not all(isinstance(event, MapTriggerEvent) for event in buffered):
+            raise SafetyInterlockError("Trigger event buffer contained an unvalidated event")
+
+        latest_sequence = descriptor.sequence
+        by_sequence: dict[int, MapTriggerEvent] = {}
+        duplicate_sequence = False
+        for event in buffered:
+            if event.handle != handle or event.sequence > latest_sequence:
+                continue
+            if event.sequence in by_sequence:
+                if after_sequence < event.sequence <= latest_sequence:
+                    duplicate_sequence = True
+                continue
+            by_sequence[event.sequence] = event
+        ordered = [by_sequence[sequence] for sequence in sorted(by_sequence)]
+        oldest_available_sequence = ordered[0].sequence if ordered else None
+        eligible = [event for event in ordered if event.sequence > after_sequence]
+
+        truncated = duplicate_sequence
+        if latest_sequence > after_sequence:
+            previous = after_sequence
+            for event in eligible:
+                if event.sequence != previous + 1:
+                    truncated = True
+                previous = event.sequence
+            if previous != latest_sequence:
+                truncated = True
+
+        page_events = eligible[:limit]
+        if page_events:
+            next_sequence = page_events[-1].sequence
+        elif latest_sequence > after_sequence:
+            # Nothing recoverable remains for this cursor. Acknowledge the known
+            # current sequence so callers do not loop forever on deque loss.
+            next_sequence = latest_sequence
+        else:
+            next_sequence = after_sequence
+
+        return MapTriggerEventPage(
+            handle=handle,
+            events=page_events,
+            after_sequence=after_sequence,
+            next_sequence=next_sequence,
+            latest_sequence=latest_sequence,
+            current_count=descriptor.count,
+            oldest_available_sequence=oldest_available_sequence,
+            truncated=truncated,
+            has_more=next_sequence < latest_sequence,
+            limit=limit,
+        )
+
+    async def map_trigger_delete(
+        self, handle: TriggerHandle, *, confirm: bool
+    ) -> MapTriggerDeleteResult:
+        handle = TRIGGER_HANDLE_ADAPTER.validate_python(handle)
+        if confirm is not True:
+            raise SafetyInterlockError("Trigger deletion requires confirm=true")
+        return await self.lua.call_validated_trigger_mutation(
+            "trigger.delete",
+            {"handle": handle, "confirm": True},
+            MapTriggerDeleteResult.model_validate,
+        )
 
     async def map_save(self, *, level: str | None, confirm: bool) -> dict[str, Any]:
         if not self.settings.workspace.allow_persistent_map_edits:

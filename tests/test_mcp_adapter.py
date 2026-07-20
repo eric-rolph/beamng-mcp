@@ -19,13 +19,19 @@ async def test_mcp_exposes_curated_typed_surface(tmp_path: Path) -> None:
     mcp, runtime = create_mcp_server(settings)
     tools = await mcp.list_tools()
     names = {tool.name for tool in tools}
-    assert len(tools) == 51
+    assert len(tools) == 57
     assert {
         "simulator_connect",
         "mod_validate",
         "softbody_handoff_create",
         "softbody_mod_build",
         "softbody_mod_validate",
+        "map_trigger_create",
+        "map_trigger_get",
+        "map_trigger_update",
+        "map_trigger_list",
+        "map_trigger_events",
+        "map_trigger_delete",
         "autonomy_start",
         "emergency_stop",
     } <= names
@@ -40,6 +46,34 @@ async def test_mcp_exposes_curated_typed_surface(tmp_path: Path) -> None:
     assert create.inputSchema["properties"]["overwrite"]["default"] is False
     assert create.inputSchema["properties"]["confirm_overwrite"]["default"] is False
     assert "level" in save.inputSchema["required"]
+    trigger_create = next(tool for tool in tools if tool.name == "map_trigger_create")
+    trigger_update = next(tool for tool in tools if tool.name == "map_trigger_update")
+    trigger_events = next(tool for tool in tools if tool.name == "map_trigger_events")
+    trigger_delete = next(tool for tool in tools if tool.name == "map_trigger_delete")
+    assert trigger_create.annotations is not None
+    assert trigger_create.annotations.openWorldHint is False
+    create_request_schema = trigger_create.inputSchema["$defs"]["MapTriggerCreate"]
+    assert set(create_request_schema["required"]) == {"position", "scale"}
+    assert trigger_update.annotations is not None
+    assert trigger_update.annotations.destructiveHint is True
+    assert trigger_events.annotations is not None
+    assert trigger_events.annotations.readOnlyHint is True
+    assert trigger_events.inputSchema["properties"]["after_sequence"]["default"] == 0
+    assert trigger_events.inputSchema["properties"]["limit"]["default"] == 50
+    assert {
+        "handle",
+        "events",
+        "after_sequence",
+        "next_sequence",
+        "latest_sequence",
+        "current_count",
+        "truncated",
+        "has_more",
+        "limit",
+    } <= set(trigger_events.outputSchema["required"])
+    assert trigger_delete.annotations is not None
+    assert trigger_delete.annotations.destructiveHint is True
+    assert trigger_delete.inputSchema["properties"]["confirm"]["default"] is False
     softbody_build = next(tool for tool in tools if tool.name == "softbody_mod_build")
     assert softbody_build.annotations is not None
     assert softbody_build.annotations.destructiveHint is True
@@ -63,9 +97,88 @@ async def test_official_in_memory_client_can_call_structured_tool(tmp_path: Path
         result = await session.call_tool("capabilities_get", {})
         assert result.isError is False
         assert result.structuredContent is not None
-        assert result.structuredContent["server_version"] == "0.2.0"
+        assert result.structuredContent["server_version"] == "0.3.0"
         assert result.structuredContent["mode"] == "offline"
+        invalid_trigger = await session.call_tool(
+            "map_trigger_create",
+            {
+                "request": {
+                    "position": {"x": "1", "y": 0.0, "z": 0.0},
+                    "scale": {"x": 1.0, "y": 1.0, "z": 1.0},
+                }
+            },
+        )
+        assert invalid_trigger.isError is True
+        unconfirmed_delete = await session.call_tool(
+            "map_trigger_delete",
+            {"handle": "trg_" + "a" * 32, "confirm": False},
+        )
+        assert unconfirmed_delete.isError is True
+        for coerced_confirmation in (1, "true"):
+            coerced_delete = await session.call_tool(
+                "map_trigger_delete",
+                {
+                    "handle": "trg_" + "a" * 32,
+                    "confirm": coerced_confirmation,
+                },
+            )
+            assert coerced_delete.isError is True
+        for invalid_cursor in (True, "0"):
+            invalid_events = await session.call_tool(
+                "map_trigger_events",
+                {
+                    "handle": "trg_" + "a" * 32,
+                    "after_sequence": invalid_cursor,
+                },
+            )
+            assert invalid_events.isError is True
     # Lifespan owns shutdown; a second shutdown remains safe.
+    await runtime.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_trigger_mutation_tools_propagate_cancellation_to_lua_cleanup(
+    tmp_path: Path,
+) -> None:
+    settings = Settings(workspace={"root": tmp_path / "workspace"})
+    mcp, runtime = create_mcp_server(settings)
+    guarded_operations: list[tuple[str, bool]] = []
+
+    async def capture_guard(
+        operation: str,
+        _callback,
+        *,
+        propagate_cancellation: bool = False,
+    ) -> None:
+        guarded_operations.append((operation, propagate_cancellation))
+        raise RuntimeError("guard capture")
+
+    runtime.while_autonomy_inactive = capture_guard  # type: ignore[method-assign]
+    handle = "trg_" + "a" * 32
+    calls = [
+        (
+            "map_trigger_create",
+            {
+                "request": {
+                    "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                    "scale": {"x": 1.0, "y": 1.0, "z": 1.0},
+                }
+            },
+        ),
+        ("map_trigger_update", {"patch": {"handle": handle, "enabled": True}}),
+        ("map_trigger_delete", {"handle": handle, "confirm": True}),
+    ]
+
+    async with create_connected_server_and_client_session(mcp) as session:
+        for tool_name, arguments in calls:
+            result = await session.call_tool(tool_name, arguments)
+            assert result.isError is True
+
+    assert guarded_operations == [
+        ("create a map trigger", True),
+        ("update a map trigger", True),
+        ("delete a map trigger", True),
+    ]
     await runtime.shutdown()
 
 

@@ -8,7 +8,7 @@ local M = {}
 M.dependencies = {"core_gamestate"}
 
 local LOG_TAG = "beamng_mcp_bridge"
-local BRIDGE_VERSION = "0.2.0"
+local BRIDGE_VERSION = "0.3.0"
 local SCHEMA_VERSION = 1
 local LOOPBACK_ADDRESS = "127.0.0.1"
 local WEBSOCKET_PATH = ""
@@ -21,6 +21,14 @@ local HARD_MAX_PAYLOAD_BYTES = 1048576
 local MAX_EVENTS_PER_UPDATE = 64
 local MAX_OBJECT_RESULTS = 200
 local MAX_IDENTIFIER_LENGTH = 96
+local MAX_MANAGED_TRIGGERS_PER_PEER = 32
+local MAX_MANAGED_TRIGGERS_TOTAL = 64
+local MAX_TRIGGER_RESULTS = 100
+local MAX_TRIGGER_EVENTS_PER_SECOND = 20
+local TRIGGER_POSITION_ABSOLUTE_TOLERANCE = 0.0001
+local TRIGGER_SCALE_ABSOLUTE_TOLERANCE = 0.000001
+local TRIGGER_VECTOR_RELATIVE_TOLERANCE = 0.0000001
+local TRIGGER_ROTATION_ABSOLUTE_TOLERANCE = 0.00001
 
 local wsUtils = require("utils/wsUtils")
 
@@ -28,6 +36,10 @@ local server = nil
 local config = nil
 local peers = {}
 local managedObjects = {}
+local managedTriggers = {}
+local managedTriggerNames = {}
+local managedTriggerIds = {}
+local triggerGeneration = 0
 local elapsedSeconds = 0
 local realElapsedSeconds = 0
 local telemetryElapsed = 0
@@ -166,6 +178,14 @@ local function protocolError(code, message, details)
     message = message,
     details = details or {}
   }
+end
+
+local function pendingReloadMutationError()
+  if not pendingReload then return nil end
+  return protocolError(
+    "extension_reload_pending",
+    "scene mutations are unavailable while bridge extension reload is pending"
+  )
 end
 
 local function responseEnvelope(request, result, requestError)
@@ -450,13 +470,81 @@ local function quaternionToTable(value)
   return {x = value.x, y = value.y, z = value.z, w = value.w}
 end
 
+local function storeManagedObjectEvidence(object)
+  local identityOk, objectId, objectName, className = pcall(function()
+    return object:getId(), object:getName(), object:getClassName()
+  end)
+  if not identityOk
+    or not isInteger(objectId)
+    or objectId < 1
+    or not validIdentifier(objectName)
+    or not CREATABLE_CLASSES[className] then
+    return nil, "managed object identity was invalid"
+  end
+  local sceneOk, byId, byName = pcall(function()
+    return scenetree.findObjectById(objectId), scenetree.findObject(objectName)
+  end)
+  if not sceneOk or byId ~= object or byName ~= object then
+    return nil, "managed object scene registration was not exact"
+  end
+  local existing = managedObjects[objectId]
+  if existing and existing.object ~= object then
+    return nil, "managed object ID is already retained by another evidence record"
+  end
+  local evidence = {
+    object = object,
+    id = objectId,
+    name = objectName,
+    class = className
+  }
+  managedObjects[objectId] = evidence
+  return evidence, nil
+end
+
+local function exactManagedObjectEvidence(object)
+  if not object then return nil end
+  local identityOk, objectId, objectName, className = pcall(function()
+    return object:getId(), object:getName(), object:getClassName()
+  end)
+  if not identityOk or not isInteger(objectId) or objectId < 1 then return nil end
+  local evidence = managedObjects[objectId]
+  if not evidence then return nil end
+  local sceneOk, byId, byName = pcall(function()
+    return scenetree.findObjectById(objectId), scenetree.findObject(objectName)
+  end)
+  if evidence.object ~= object
+    or evidence.id ~= objectId
+    or evidence.name ~= objectName
+    or evidence.class ~= className
+    or not sceneOk
+    or byId ~= object
+    or byName ~= object then
+    -- Exact evidence is authorization, not a best-effort cache. A mismatch
+    -- revokes mutation rights, but the non-authorizing tombstone must remain so
+    -- extension reload cannot discard unproven live scene state.
+    return nil
+  end
+  return evidence
+end
+
+local function managedObjectEvidenceSceneAbsent(evidence)
+  local lookupOk, byId, byName = pcall(function()
+    return scenetree.findObjectById(evidence.id), scenetree.findObject(evidence.name)
+  end)
+  if not lookupOk then return nil, "managed object deletion could not verify scene absence" end
+  if byId ~= nil or byName ~= nil then
+    return nil, "managed object deletion left an exact scene registration"
+  end
+  return true, nil
+end
+
 local function objectDescriptor(object, includeFields)
   local className = object:getClassName()
   local descriptor = {
     id = object:getId(),
     name = object:getName(),
     class = className,
-    managed = managedObjects[object:getId()] == true
+    managed = exactManagedObjectEvidence(object) ~= nil
   }
 
   local positionOk, position = pcall(function() return object:getPosition() end)
@@ -591,6 +679,11 @@ HANDLERS["capabilities"] = function()
     "world.update_object",
     "world.delete_object",
     "world.save_level",
+    "trigger.create",
+    "trigger.get",
+    "trigger.update",
+    "trigger.list",
+    "trigger.delete",
     "safety.lease_arm",
     "safety.lease_renew",
     "safety.lease_disarm",
@@ -666,6 +759,8 @@ HANDLERS["world.get_object"] = function(params)
 end
 
 HANDLERS["world.create_object"] = function(params)
+  local reloadError = pendingReloadMutationError()
+  if reloadError then return nil, reloadError end
   local className = params.class
   if type(className) ~= "string" or not CREATABLE_CLASSES[className] then
     return nil, protocolError("invalid_class", "class is not in the creation allowlist")
@@ -702,24 +797,36 @@ HANDLERS["world.create_object"] = function(params)
     return nil, protocolError("create_failed", "object creation failed", {reason = tostring(createError)})
   end
 
-  managedObjects[object:getId()] = true
+  local evidence, evidenceError = storeManagedObjectEvidence(object)
+  if not evidence then
+    pcall(function() object:delete() end)
+    return nil, protocolError(
+      "create_failed",
+      "object creation could not retain exact management evidence",
+      {reason = tostring(evidenceError)}
+    )
+  end
   markEditorDirty()
   return objectDescriptor(object, true), nil
 end
 
 local function ensureManagedMutation(object)
-  if managedObjects[object:getId()] == true or config.allow_existing_map_object_edits then
-    return true, nil
+  local evidence = exactManagedObjectEvidence(object)
+  if evidence then return true, nil, evidence end
+  if config.allow_existing_map_object_edits then
+    return true, nil, nil
   end
-  return nil, "existing map object edits are disabled by configuration"
+  return nil, "existing map object edits are disabled by configuration", nil
 end
 
 HANDLERS["world.update_object"] = function(params)
+  local reloadError = pendingReloadMutationError()
+  if reloadError then return nil, reloadError end
   local object, resolveError = resolveObject(params)
   if resolveError then return nil, protocolError("invalid_identifier", resolveError) end
   local className, writableError = ensureWritableObject(object)
   if writableError then return nil, protocolError("object_unavailable", writableError) end
-  local _, managedError = ensureManagedMutation(object)
+  local _, managedError, managedEvidence = ensureManagedMutation(object)
   if managedError then
     return nil, protocolError("existing_object_edits_disabled", managedError)
   end
@@ -746,11 +853,23 @@ HANDLERS["world.update_object"] = function(params)
   if not ok then
     return nil, protocolError("update_failed", "object update failed", {reason = tostring(updateError)})
   end
+  if managedEvidence then
+    local refreshed, refreshError = storeManagedObjectEvidence(object)
+    if not refreshed then
+      return nil, protocolError(
+        "update_failed",
+        "object update lost exact mutation authority; retained evidence blocks bridge reload",
+        {reason = tostring(refreshError)}
+      )
+    end
+  end
   markEditorDirty()
   return objectDescriptor(object, true), nil
 end
 
 HANDLERS["world.delete_object"] = function(params)
+  local reloadError = pendingReloadMutationError()
+  if reloadError then return nil, reloadError end
   if params.confirm ~= true then
     return nil, protocolError("confirmation_required", "set confirm to true to delete an object")
   end
@@ -758,7 +877,7 @@ HANDLERS["world.delete_object"] = function(params)
   if resolveError then return nil, protocolError("invalid_identifier", resolveError) end
   local _, writableError = ensureWritableObject(object)
   if writableError then return nil, protocolError("object_unavailable", writableError) end
-  local _, managedError = ensureManagedMutation(object)
+  local _, managedError, managedEvidence = ensureManagedMutation(object)
   if managedError then
     return nil, protocolError("existing_object_edits_disabled", managedError)
   end
@@ -775,12 +894,20 @@ HANDLERS["world.delete_object"] = function(params)
   if not ok or deleted == false then
     return nil, protocolError("delete_failed", "BeamNG did not delete the object")
   end
-  managedObjects[objectId] = nil
+  if managedEvidence then
+    local absent, absenceError = managedObjectEvidenceSceneAbsent(managedEvidence)
+    if not absent then
+      return nil, protocolError("delete_failed", absenceError)
+    end
+    if managedObjects[objectId] == managedEvidence then managedObjects[objectId] = nil end
+  end
   markEditorDirty()
   return {deleted = true, id = objectId, name = objectName}, nil
 end
 
 HANDLERS["world.save_level"] = function(params)
+  local reloadError = pendingReloadMutationError()
+  if reloadError then return nil, reloadError end
   if not config.allow_persistent_map_edits then
     return nil, protocolError(
       "persistent_edits_disabled",
@@ -826,12 +953,26 @@ HANDLERS["world.save_level"] = function(params)
 end
 
 HANDLERS["extension.reload"] = function(params)
+  local reloadError = pendingReloadMutationError()
+  if reloadError then return nil, reloadError end
   local extensionName = params.name or "beamng_mcp/bridge"
   local canonicalName = type(extensionName) == "string"
     and RELOADABLE_EXTENSIONS[extensionName]
     or nil
   if not canonicalName then
     return nil, protocolError("extension_not_allowed", "extension is not in the reload allowlist")
+  end
+  if next(managedTriggers) ~= nil then
+    return nil, protocolError(
+      "managed_triggers_active",
+      "delete every managed trigger draft and quarantine before reloading the bridge"
+    )
+  end
+  if next(managedObjects) ~= nil then
+    return nil, protocolError(
+      "managed_objects_active",
+      "delete every bridge-managed map object before reloading the bridge"
+    )
   end
   pendingReload = canonicalName
   return {scheduled = true, name = extensionName}, nil
@@ -860,6 +1001,1034 @@ local function findVehicleByName(vehicleName)
     if vehicle:getName() == vehicleName then return vehicle end
   end
   return nil
+end
+
+-- BeamNGTrigger is intentionally not part of CREATABLE_CLASSES or FIELD_RULES.
+-- Triggers have a separate, closed schema because their luaFunction field is an
+-- execution primitive. The bridge creates only the fixed onBeamNGTrigger hook.
+local TRIGGER_CREATE_KEYS = {
+  handle = true,
+  shape = true,
+  position = true,
+  rotation = true,
+  scale = true,
+  mode = true,
+  test_type = true,
+  debug = true,
+  action = true
+}
+
+local TRIGGER_UPDATE_KEYS = {
+  handle = true,
+  position = true,
+  rotation = true,
+  scale = true,
+  mode = true,
+  test_type = true,
+  debug = true,
+  action = true,
+  enabled = true
+}
+
+local TRIGGER_MODE_FIELDS = {
+  center = "Center",
+  contains = "Contains",
+  overlaps = "Overlaps"
+}
+
+local TRIGGER_TEST_TYPE_FIELDS = {
+  race_corners = "Race corners",
+  bounding_box = "Bounding box"
+}
+
+local TRIGGER_ACTION_EVENTS = {
+  enter = true,
+  exit = true
+}
+
+local function validateExactObject(value, allowedKeys, requiredKeys, label)
+  if type(value) ~= "table" then return nil, label .. " must be an object" end
+  for key, _ in pairs(value) do
+    if type(key) ~= "string" or not allowedKeys[key] then
+      return nil, label .. " contains an unknown field: " .. tostring(key)
+    end
+  end
+  for key, _ in pairs(requiredKeys or {}) do
+    if value[key] == nil then return nil, label .. " requires " .. key end
+  end
+  return true, nil
+end
+
+local function validateTriggerHandle(handle)
+  if type(handle) ~= "string" or #handle ~= 36 or handle:sub(1, 4) ~= "trg_" then
+    return nil, "handle must be trg_ followed by 32 lowercase hexadecimal characters"
+  end
+  if not handle:sub(5):match("^[0-9a-f]+$") then
+    return nil, "handle must be trg_ followed by 32 lowercase hexadecimal characters"
+  end
+  return true, nil
+end
+
+local function triggerNameForHandle(handle)
+  return "beamng_mcp_trigger_" .. handle:sub(5)
+end
+
+local function parseExactVector3(value, label, minimum, maximum, positiveOnly)
+  local valid, objectError = validateExactObject(
+    value,
+    {x = true, y = true, z = true},
+    {x = true, y = true, z = true},
+    label
+  )
+  if not valid then return nil, objectError end
+  local components = {value.x, value.y, value.z}
+  for _, component in ipairs(components) do
+    if not isFiniteNumber(component) or component < minimum or component > maximum then
+      return nil, label .. " components must be finite numbers inside the permitted range"
+    end
+    if positiveOnly and component <= 0 then
+      return nil, label .. " components must be positive"
+    end
+  end
+  return {x = value.x, y = value.y, z = value.z}, nil
+end
+
+local function parseExactQuaternion(value)
+  local valid, objectError = validateExactObject(
+    value,
+    {x = true, y = true, z = true, w = true},
+    {x = true, y = true, z = true, w = true},
+    "rotation"
+  )
+  if not valid then return nil, objectError end
+  local components = {value.x, value.y, value.z, value.w}
+  for _, component in ipairs(components) do
+    if not isFiniteNumber(component) or component < -1000000 or component > 1000000 then
+      return nil, "rotation components must be finite and bounded"
+    end
+  end
+  local magnitude = math.sqrt(
+    value.x * value.x + value.y * value.y + value.z * value.z + value.w * value.w
+  )
+  if magnitude < 0.000001 or magnitude > 1000000 then
+    return nil, "rotation quaternion has an invalid magnitude"
+  end
+  return {
+    x = value.x / magnitude,
+    y = value.y / magnitude,
+    z = value.z / magnitude,
+    w = value.w / magnitude
+  }, nil
+end
+
+local function parseTriggerAction(value)
+  local valid, objectError = validateExactObject(
+    value,
+    {type = true, events = true},
+    {type = true, events = true},
+    "action"
+  )
+  if not valid then return nil, objectError end
+  if value.type ~= "emit_bridge_event" then
+    return nil, "action.type must be emit_bridge_event"
+  end
+  if type(value.events) ~= "table" then return nil, "action.events must be an array" end
+
+  local count = 0
+  for key, _ in pairs(value.events) do
+    if not isInteger(key) or key < 1 or key > 2 then
+      return nil, "action.events must be a compact array with at most two entries"
+    end
+    count = count + 1
+  end
+  if count < 1 or count > 2 then
+    return nil, "action.events must contain one or two entries"
+  end
+
+  local events = {}
+  local eventSet = {}
+  for index = 1, count do
+    local eventName = value.events[index]
+    if not TRIGGER_ACTION_EVENTS[eventName] then
+      return nil, "action.events supports only enter and exit"
+    end
+    if eventSet[eventName] then return nil, "action.events entries must be unique" end
+    eventSet[eventName] = true
+    table.insert(events, eventName)
+  end
+  if #events ~= count then return nil, "action.events must not contain gaps" end
+  return {
+    type = "emit_bridge_event",
+    events = events,
+    event_set = eventSet
+  }, nil
+end
+
+local function copyTriggerAction(action)
+  local events = {}
+  local eventSet = {}
+  for _, eventName in ipairs(action.events) do
+    table.insert(events, eventName)
+    eventSet[eventName] = true
+  end
+  return {type = "emit_bridge_event", events = events, event_set = eventSet}
+end
+
+local function copyTriggerRecord(record)
+  return {
+    handle = record.handle,
+    name = record.name,
+    owner = record.owner,
+    generation = record.generation,
+    shape = record.shape,
+    position = shallowCopy(record.position),
+    rotation = shallowCopy(record.rotation),
+    scale = shallowCopy(record.scale),
+    mode = record.mode,
+    test_type = record.test_type,
+    debug = record.debug,
+    action = copyTriggerAction(record.action),
+    object = record.object,
+    object_id = record.object_id,
+    object_name = record.object_name,
+    object_class = record.object_class,
+    occupancy = shallowCopy(record.occupancy),
+    sequence = record.sequence,
+    count = record.count,
+    last_event = record.last_event and shallowCopy(record.last_event) or nil,
+    rate_window_started = record.rate_window_started,
+    rate_count = record.rate_count,
+    quarantined = record.quarantined == true,
+    quarantine_reason = record.quarantine_reason,
+    quarantined_at = record.quarantined_at
+  }
+end
+
+local function triggerDescriptor(record)
+  local descriptor = {
+    handle = record.handle,
+    engine_name = record.name,
+    shape = record.shape,
+    position = shallowCopy(record.position),
+    rotation = shallowCopy(record.rotation),
+    scale = shallowCopy(record.scale),
+    mode = record.mode,
+    test_type = record.test_type,
+    debug = record.debug,
+    action = {
+      type = record.action.type,
+      events = {unpack(record.action.events)}
+    },
+    enabled = record.object ~= nil,
+    persistent = false,
+    sequence = record.sequence,
+    count = record.count
+  }
+  if record.object_id then descriptor.object_id = record.object_id end
+  if record.last_event then descriptor.last_event = shallowCopy(record.last_event) end
+  return descriptor
+end
+
+local function countTriggersForPeer(peerId)
+  local count = 0
+  for _, record in pairs(managedTriggers) do
+    if record.owner == peerId then count = count + 1 end
+  end
+  return count
+end
+
+local function countManagedTriggers()
+  local count = 0
+  -- Quarantined records deliberately remain in managedTriggers and therefore
+  -- consume this global quota until exact deletion or verified mission absence.
+  for _ in pairs(managedTriggers) do count = count + 1 end
+  return count
+end
+
+local function ownedTrigger(handle, peerId)
+  local valid, handleError = validateTriggerHandle(handle)
+  if not valid then return nil, protocolError("invalid_handle", handleError) end
+  local record = managedTriggers[handle]
+  if not record or record.owner ~= peerId then
+    return nil, protocolError("trigger_not_found", "trigger was not found")
+  end
+  return record, nil
+end
+
+local function exactLiveTrigger(record)
+  if not record.object or not record.object_id then return nil, "trigger is not enabled" end
+  local ok, objectId, objectName, className = pcall(function()
+    return record.object:getId(), record.object:getName(), record.object:getClassName()
+  end)
+  if not ok
+    or objectId ~= record.object_id
+    or objectName ~= record.object_name
+    or objectName ~= record.name
+    or className ~= record.object_class
+    or className ~= "BeamNGTrigger" then
+    return nil, "live trigger identity changed"
+  end
+  local sceneOk, byId, byName = pcall(function()
+    return scenetree.findObjectById(objectId), scenetree.findObject(objectName)
+  end)
+  if not sceneOk then return nil, "live trigger scene lookup failed" end
+  if byId ~= record.object or byName ~= record.object then
+    return nil, "live trigger scene registration changed"
+  end
+  local nameRegistration = managedTriggerNames[objectName]
+  local idRegistration = managedTriggerIds[objectId]
+  if not nameRegistration
+    or not idRegistration
+    or nameRegistration.handle ~= record.handle
+    or idRegistration.handle ~= record.handle
+    or nameRegistration.generation ~= record.generation
+    or idRegistration.generation ~= record.generation then
+    return nil, "live trigger registry generation changed"
+  end
+  return record.object, nil
+end
+
+local function quarantineTrigger(record, reason, failure)
+  -- Preserve every exact reference and registry entry for a later cleanup
+  -- retry. Removing those records while a live engine object may remain would
+  -- lose the only evidence that the bridge owns it.
+  record.quarantined = true
+  record.owner = nil
+  record.occupancy = {}
+  record.quarantine_reason = tostring(reason) .. ": " .. tostring(failure)
+  record.quarantined_at = realElapsedSeconds
+  return nil, failure
+end
+
+local function clearExactTriggerRegistrations(record)
+  local nameRegistration = managedTriggerNames[record.name]
+  if nameRegistration
+    and nameRegistration.handle == record.handle
+    and nameRegistration.generation == record.generation then
+    managedTriggerNames[record.name] = nil
+  end
+  if record.object_id then
+    local idRegistration = managedTriggerIds[record.object_id]
+    if idRegistration
+      and idRegistration.handle == record.handle
+      and idRegistration.generation == record.generation then
+      managedTriggerIds[record.object_id] = nil
+    end
+  end
+end
+
+local function clearTriggerObjectEvidence(record)
+  record.object = nil
+  record.object_id = nil
+  record.object_name = nil
+  record.object_class = nil
+  record.occupancy = {}
+end
+
+local function captureTriggerObjectEvidence(record)
+  if not record.object then return nil, nil, nil, nil end
+  local ok, objectId, objectName, className = pcall(function()
+    return record.object:getId(), record.object:getName(), record.object:getClassName()
+  end)
+  if not ok then return nil, nil, nil, nil end
+  if isInteger(objectId) and objectId >= 1 then record.object_id = objectId end
+  if type(objectName) == "string" and #objectName > 0 then
+    record.object_name = objectName
+  end
+  if type(className) == "string" and #className > 0 then
+    record.object_class = className
+  end
+  return true, objectId, objectName, className
+end
+
+local function lookupTriggerSceneEvidence(record)
+  return pcall(function()
+    local byId = nil
+    if isInteger(record.object_id) and record.object_id >= 1 then
+      byId = scenetree.findObjectById(record.object_id)
+    end
+    local byName = scenetree.findObject(record.name)
+    local byObjectName = nil
+    if type(record.object_name) == "string"
+      and #record.object_name > 0
+      and record.object_name ~= record.name then
+      byObjectName = scenetree.findObject(record.object_name)
+    end
+    return byId, byName, byObjectName
+  end)
+end
+
+local function retainExactTriggerRegistrations(record)
+  local lookupOk, byId, byName = lookupTriggerSceneEvidence(record)
+  if not lookupOk then return end
+  if byName == record.object then
+    managedTriggerNames[record.name] = {
+      handle = record.handle,
+      generation = record.generation
+    }
+  end
+  if record.object_id and byId == record.object then
+    managedTriggerIds[record.object_id] = {
+      handle = record.handle,
+      generation = record.generation
+    }
+  end
+end
+
+local function triggerScalarNear(actual, expected, absoluteTolerance, relativeTolerance)
+  if not isFiniteNumber(actual) or not isFiniteNumber(expected) then return false end
+  local magnitude = math.max(math.abs(actual), math.abs(expected))
+  return math.abs(actual - expected)
+    <= absoluteTolerance + relativeTolerance * magnitude
+end
+
+local function triggerVectorNear(actual, expected, absoluteTolerance)
+  if not actual or not expected then return false end
+  return triggerScalarNear(
+    actual.x,
+    expected.x,
+    absoluteTolerance,
+    TRIGGER_VECTOR_RELATIVE_TOLERANCE
+  )
+    and triggerScalarNear(
+      actual.y,
+      expected.y,
+      absoluteTolerance,
+      TRIGGER_VECTOR_RELATIVE_TOLERANCE
+    )
+    and triggerScalarNear(
+      actual.z,
+      expected.z,
+      absoluteTolerance,
+      TRIGGER_VECTOR_RELATIVE_TOLERANCE
+    )
+end
+
+local function triggerQuaternionNear(actual, expected)
+  if not actual or not expected then return false end
+  local direct = triggerScalarNear(
+    actual.x,
+    expected.x,
+    TRIGGER_ROTATION_ABSOLUTE_TOLERANCE,
+    0
+  )
+    and triggerScalarNear(
+      actual.y,
+      expected.y,
+      TRIGGER_ROTATION_ABSOLUTE_TOLERANCE,
+      0
+    )
+    and triggerScalarNear(
+      actual.z,
+      expected.z,
+      TRIGGER_ROTATION_ABSOLUTE_TOLERANCE,
+      0
+    )
+    and triggerScalarNear(
+      actual.w,
+      expected.w,
+      TRIGGER_ROTATION_ABSOLUTE_TOLERANCE,
+      0
+    )
+  if direct then return true end
+  return triggerScalarNear(
+    actual.x,
+    -expected.x,
+    TRIGGER_ROTATION_ABSOLUTE_TOLERANCE,
+    0
+  )
+    and triggerScalarNear(
+      actual.y,
+      -expected.y,
+      TRIGGER_ROTATION_ABSOLUTE_TOLERANCE,
+      0
+    )
+    and triggerScalarNear(
+      actual.z,
+      -expected.z,
+      TRIGGER_ROTATION_ABSOLUTE_TOLERANCE,
+      0
+    )
+    and triggerScalarNear(
+      actual.w,
+      -expected.w,
+      TRIGGER_ROTATION_ABSOLUTE_TOLERANCE,
+      0
+    )
+end
+
+local function verifyTriggerTransformReadback(record, object)
+  local readOk, matches = pcall(function()
+    local position = object:getPosition()
+    local rotation = quat(object:getRotation())
+    local scale = object:getScale()
+    return triggerVectorNear(
+      position,
+      record.position,
+      TRIGGER_POSITION_ABSOLUTE_TOLERANCE
+    )
+      and triggerQuaternionNear(rotation, record.rotation)
+      and triggerVectorNear(scale, record.scale, TRIGGER_SCALE_ABSOLUTE_TOLERANCE)
+  end)
+  if not readOk then return nil, "BeamNG trigger transform readback failed" end
+  if not matches then
+    return nil, "BeamNG trigger transform did not match the requested collision volume"
+  end
+  return true, nil
+end
+
+local function deleteTriggerObjectAndProveAbsent(record)
+  if not record.object then return true, nil end
+  local identityOk = captureTriggerObjectEvidence(record)
+  local deleteOk, deleteResult = pcall(function() return record.object:delete() end)
+  local lookupOk, byId, byName, byObjectName = lookupTriggerSceneEvidence(record)
+  if not identityOk then return nil, "trigger deletion could not capture exact object identity" end
+  if not deleteOk then return nil, "BeamNG trigger deletion raised an error" end
+  if deleteResult == false then return nil, "BeamNG rejected trigger deletion" end
+  if not lookupOk then return nil, "trigger deletion could not verify scene absence" end
+  if byId ~= nil or byName ~= nil or byObjectName ~= nil then
+    return nil, "trigger deletion did not remove every exact scene registration"
+  end
+  return true, nil
+end
+
+local function rollbackTriggerInstantiation(record, previousRecord, failure)
+  local deleted, deleteError = deleteTriggerObjectAndProveAbsent(record)
+  if deleted then
+    clearExactTriggerRegistrations(record)
+    clearTriggerObjectEvidence(record)
+    managedTriggers[record.handle] = previousRecord
+    return nil, failure
+  end
+
+  retainExactTriggerRegistrations(record)
+  managedTriggers[record.handle] = record
+  quarantineTrigger(
+    record,
+    "trigger_enable_rollback_failed",
+    tostring(failure) .. "; " .. tostring(deleteError)
+  )
+  return nil,
+    tostring(failure) .. "; rollback could not prove trigger deletion: " .. tostring(deleteError)
+end
+
+local function instantiateTrigger(record)
+  if record.object then return nil, "trigger is already enabled" end
+  if not scenetree.MissionGroup then
+    return nil, "a level with MissionGroup must be loaded"
+  end
+  if scenetree.findObject(record.name) then
+    return nil, "the reserved trigger name is already present in the scene"
+  end
+  if managedTriggerNames[record.name] then
+    return nil, "the reserved trigger name is already registered"
+  end
+
+  local previousRecord = managedTriggers[record.handle]
+  managedTriggers[record.handle] = record
+  local createOk, object = pcall(function() return createObject("BeamNGTrigger") end)
+  if not createOk or not object then
+    managedTriggers[record.handle] = previousRecord
+    return nil, "BeamNG did not create the trigger"
+  end
+  record.object = object
+  captureTriggerObjectEvidence(record)
+  local ok, createError = pcall(function()
+    object.loadMode = 1
+    if type(object.preApply) == "function" then object:preApply() end
+    if type(object.setCanSave) == "function" then object:setCanSave(false) end
+    object.canSave = false
+    object:setField("canSave", 0, "0")
+    object:setField("luaFunction", 0, "onBeamNGTrigger")
+    object:setField("triggerType", 0, "Box")
+    object:setField("triggerMode", 0, TRIGGER_MODE_FIELDS[record.mode])
+    object:setField("triggerTestType", 0, TRIGGER_TEST_TYPE_FIELDS[record.test_type])
+    object:setField("ticking", 0, "0")
+    object:setField("debug", 0, record.debug and "1" or "0")
+    if type(object.postApply) == "function" then object:postApply() end
+    object:registerObject(record.name)
+    scenetree.MissionGroup:addObject(object)
+    object:setPosRot(
+      record.position.x,
+      record.position.y,
+      record.position.z,
+      record.rotation.x,
+      record.rotation.y,
+      record.rotation.z,
+      record.rotation.w
+    )
+    object:setScale(vec3(record.scale.x, record.scale.y, record.scale.z))
+  end)
+  if not ok then
+    return rollbackTriggerInstantiation(
+      record,
+      previousRecord,
+      "trigger creation failed: " .. tostring(createError)
+    )
+  end
+
+  local identityOk, objectId, objectName, className = captureTriggerObjectEvidence(record)
+  if not identityOk
+    or not isInteger(objectId)
+    or objectId < 1
+    or objectName ~= record.name
+    or className ~= "BeamNGTrigger" then
+    return rollbackTriggerInstantiation(
+      record,
+      previousRecord,
+      "BeamNG registered an unexpected trigger identity"
+    )
+  end
+  local sceneOk, byId, byName = lookupTriggerSceneEvidence(record)
+  if not sceneOk or byId ~= object or byName ~= object then
+    return rollbackTriggerInstantiation(
+      record,
+      previousRecord,
+      "BeamNG did not expose the exact registered trigger in the scene"
+    )
+  end
+  local transformVerified, transformError = verifyTriggerTransformReadback(record, object)
+  if not transformVerified then
+    return rollbackTriggerInstantiation(record, previousRecord, transformError)
+  end
+
+  record.occupancy = {}
+  managedTriggerNames[record.name] = {
+    handle = record.handle,
+    generation = record.generation
+  }
+  managedTriggerIds[objectId] = {
+    handle = record.handle,
+    generation = record.generation
+  }
+  return true, nil
+end
+
+local function disableTrigger(record)
+  local object, identityError = exactLiveTrigger(record)
+  if not object then return nil, identityError end
+  -- Unregister before deletion so any synchronous exit hook emitted by the
+  -- engine during teardown cannot escape as an owner event.
+  local nameRegistration = managedTriggerNames[record.name]
+  local idRegistration = managedTriggerIds[record.object_id]
+  managedTriggerNames[record.name] = nil
+  managedTriggerIds[record.object_id] = nil
+  local deleted, deleteError = deleteTriggerObjectAndProveAbsent(record)
+  if not deleted then
+    managedTriggerNames[record.name] = nameRegistration
+    managedTriggerIds[record.object_id] = idRegistration
+    return nil, deleteError
+  end
+  clearTriggerObjectEvidence(record)
+  return true, nil
+end
+
+local function cleanupTriggerRecord(handle, reason)
+  local record = managedTriggers[handle]
+  if not record then return true, nil end
+  if record.object then
+    local disabled, disableError = disableTrigger(record)
+    if not disabled then
+      quarantineTrigger(record, reason, disableError)
+      log(
+        "W",
+        LOG_TAG,
+        "Quarantined an event-silent managed trigger during "
+          .. tostring(reason)
+          .. ": "
+          .. tostring(disableError)
+      )
+      return nil, disableError
+    end
+  end
+  clearExactTriggerRegistrations(record)
+  managedTriggers[handle] = nil
+  return true, nil
+end
+
+local function cleanupTriggersForPeer(peerId, reason)
+  local handles = {}
+  for handle, record in pairs(managedTriggers) do
+    if record.owner == peerId then table.insert(handles, handle) end
+  end
+  local allClean = true
+  local failures = 0
+  for _, handle in ipairs(handles) do
+    local cleaned = cleanupTriggerRecord(handle, reason)
+    if not cleaned then
+      allClean = false
+      failures = failures + 1
+    end
+  end
+  return allClean, failures
+end
+
+local function cleanupAllTriggers(reason)
+  local handles = {}
+  for handle, _ in pairs(managedTriggers) do table.insert(handles, handle) end
+  local allClean = true
+  local failures = 0
+  for _, handle in ipairs(handles) do
+    local cleaned = cleanupTriggerRecord(handle, reason)
+    if not cleaned then
+      allClean = false
+      failures = failures + 1
+    end
+  end
+  return allClean, failures
+end
+
+local function releaseGoneQuarantinedTriggers(reason)
+  local released = 0
+  local handles = {}
+  for handle, record in pairs(managedTriggers) do
+    if record.quarantined then table.insert(handles, handle) end
+  end
+  for _, handle in ipairs(handles) do
+    local record = managedTriggers[handle]
+    local lookupOk, byId, byName, byObjectName = lookupTriggerSceneEvidence(record)
+    -- A mission teardown is the one external boundary that can remove an
+    -- identity-tampered object for us. Retire evidence only after every exact
+    -- ID, reserved-name, and observed-name lookup proves that no object remains.
+    if lookupOk and byId == nil and byName == nil and byObjectName == nil then
+      clearExactTriggerRegistrations(record)
+      managedTriggers[handle] = nil
+      released = released + 1
+      log(
+        "I",
+        LOG_TAG,
+        "Released absent quarantined trigger after " .. tostring(reason)
+      )
+    end
+  end
+  return released
+end
+
+local function parseTriggerCreate(params, peerId)
+  local valid, paramsError = validateExactObject(
+    params,
+    TRIGGER_CREATE_KEYS,
+    TRIGGER_CREATE_KEYS,
+    "trigger.create params"
+  )
+  if not valid then return nil, paramsError end
+  local handleOk, handleError = validateTriggerHandle(params.handle)
+  if not handleOk then return nil, handleError end
+  if params.shape ~= "box" then return nil, "shape must be box" end
+  if type(params.debug) ~= "boolean" then return nil, "debug must be boolean" end
+  if not TRIGGER_MODE_FIELDS[params.mode] then
+    return nil, "mode must be center, contains, or overlaps"
+  end
+  if not TRIGGER_TEST_TYPE_FIELDS[params.test_type] then
+    return nil, "test_type must be race_corners or bounding_box"
+  end
+
+  local position, positionError = parseExactVector3(
+    params.position,
+    "position",
+    -1000000,
+    1000000,
+    false
+  )
+  if not position then return nil, positionError end
+  local rotation, rotationError = parseExactQuaternion(params.rotation)
+  if not rotation then return nil, rotationError end
+  local scale, scaleError = parseExactVector3(params.scale, "scale", 0.0001, 10000, true)
+  if not scale then return nil, scaleError end
+  local action, actionError = parseTriggerAction(params.action)
+  if not action then return nil, actionError end
+
+  triggerGeneration = triggerGeneration + 1
+  return {
+    handle = params.handle,
+    name = triggerNameForHandle(params.handle),
+    owner = peerId,
+    generation = triggerGeneration,
+    shape = "box",
+    position = position,
+    rotation = rotation,
+    scale = scale,
+    mode = params.mode,
+    test_type = params.test_type,
+    debug = params.debug,
+    action = action,
+    object = nil,
+    object_id = nil,
+    object_name = nil,
+    object_class = nil,
+    occupancy = {},
+    sequence = 0,
+    count = 0,
+    last_event = nil,
+    rate_window_started = realElapsedSeconds,
+    rate_count = 0,
+    quarantined = false,
+    quarantine_reason = nil,
+    quarantined_at = nil
+  }, nil
+end
+
+local function applyTriggerPatch(candidate, params)
+  if params.position ~= nil then
+    local value, valueError = parseExactVector3(
+      params.position,
+      "position",
+      -1000000,
+      1000000,
+      false
+    )
+    if not value then return nil, valueError end
+    candidate.position = value
+  end
+  if params.rotation ~= nil then
+    local value, valueError = parseExactQuaternion(params.rotation)
+    if not value then return nil, valueError end
+    candidate.rotation = value
+  end
+  if params.scale ~= nil then
+    local value, valueError = parseExactVector3(params.scale, "scale", 0.0001, 10000, true)
+    if not value then return nil, valueError end
+    candidate.scale = value
+  end
+  if params.mode ~= nil then
+    if not TRIGGER_MODE_FIELDS[params.mode] then
+      return nil, "mode must be center, contains, or overlaps"
+    end
+    candidate.mode = params.mode
+  end
+  if params.test_type ~= nil then
+    if not TRIGGER_TEST_TYPE_FIELDS[params.test_type] then
+      return nil, "test_type must be race_corners or bounding_box"
+    end
+    candidate.test_type = params.test_type
+  end
+  if params.debug ~= nil then
+    if type(params.debug) ~= "boolean" then return nil, "debug must be boolean" end
+    candidate.debug = params.debug
+  end
+  if params.action ~= nil then
+    local value, valueError = parseTriggerAction(params.action)
+    if not value then return nil, valueError end
+    candidate.action = value
+  end
+  return candidate, nil
+end
+
+HANDLERS["trigger.create"] = function(params, peerId)
+  local reloadError = pendingReloadMutationError()
+  if reloadError then return nil, reloadError end
+  local record, parseError = parseTriggerCreate(params, peerId)
+  if not record then return nil, protocolError("invalid_trigger", parseError) end
+  if managedTriggers[record.handle] then
+    return nil, protocolError("trigger_exists", "trigger handle already exists")
+  end
+  if countManagedTriggers() >= MAX_MANAGED_TRIGGERS_TOTAL then
+    return nil, protocolError("trigger_quota_exceeded", "global managed trigger quota reached")
+  end
+  if countTriggersForPeer(peerId) >= MAX_MANAGED_TRIGGERS_PER_PEER then
+    return nil, protocolError("trigger_quota_exceeded", "managed trigger quota reached")
+  end
+  if managedTriggerNames[record.name] or scenetree.findObject(record.name) then
+    return nil, protocolError("trigger_name_collision", "reserved trigger name is unavailable")
+  end
+  managedTriggers[record.handle] = record
+  return triggerDescriptor(record), nil
+end
+
+HANDLERS["trigger.get"] = function(params, peerId)
+  local valid, paramsError = validateExactObject(
+    params,
+    {handle = true},
+    {handle = true},
+    "trigger.get params"
+  )
+  if not valid then return nil, protocolError("invalid_params", paramsError) end
+  local record, recordError = ownedTrigger(params.handle, peerId)
+  if not record then return nil, recordError end
+  return triggerDescriptor(record), nil
+end
+
+HANDLERS["trigger.list"] = function(params, peerId)
+  local valid, paramsError = validateExactObject(
+    params,
+    {limit = true},
+    {},
+    "trigger.list params"
+  )
+  if not valid then return nil, protocolError("invalid_params", paramsError) end
+  local limit = params.limit or MAX_TRIGGER_RESULTS
+  if not isInteger(limit) or limit < 1 or limit > MAX_TRIGGER_RESULTS then
+    return nil, protocolError("invalid_limit", "limit must be from 1 through 100")
+  end
+  local handles = {}
+  for handle, record in pairs(managedTriggers) do
+    if record.owner == peerId then table.insert(handles, handle) end
+  end
+  table.sort(handles)
+  local descriptors = {}
+  for _, handle in ipairs(handles) do
+    if #descriptors >= limit then break end
+    table.insert(descriptors, triggerDescriptor(managedTriggers[handle]))
+  end
+  return {triggers = descriptors, count = #descriptors, limit = limit}, nil
+end
+
+HANDLERS["trigger.update"] = function(params, peerId)
+  local reloadError = pendingReloadMutationError()
+  if reloadError then return nil, reloadError end
+  local valid, paramsError = validateExactObject(
+    params,
+    TRIGGER_UPDATE_KEYS,
+    {handle = true},
+    "trigger.update params"
+  )
+  if not valid then return nil, protocolError("invalid_params", paramsError) end
+  if params.enabled ~= nil and type(params.enabled) ~= "boolean" then
+    return nil, protocolError("invalid_trigger", "enabled must be boolean")
+  end
+
+  local record, recordError = ownedTrigger(params.handle, peerId)
+  if not record then return nil, recordError end
+  local hasPatch = params.position ~= nil
+    or params.rotation ~= nil
+    or params.scale ~= nil
+    or params.mode ~= nil
+    or params.test_type ~= nil
+    or params.debug ~= nil
+    or params.action ~= nil
+
+  if record.object then
+    if hasPatch then
+      return nil, protocolError(
+        "trigger_enabled",
+        "enabled triggers are immutable; disable the trigger before editing"
+      )
+    end
+    if params.enabled == false then
+      local disabled, disableError = disableTrigger(record)
+      if not disabled then
+        quarantineTrigger(record, "owner_disable_failed", disableError)
+        return nil, protocolError("trigger_identity_mismatch", disableError)
+      end
+      return triggerDescriptor(record), nil
+    end
+    if params.enabled == true then return triggerDescriptor(record), nil end
+    return nil, protocolError("empty_update", "provide enabled=false to disable the trigger")
+  end
+
+  if not hasPatch and params.enabled == nil then
+    return nil, protocolError("empty_update", "provide at least one trigger field or enabled state")
+  end
+  local candidate = copyTriggerRecord(record)
+  local patched, patchError = applyTriggerPatch(candidate, params)
+  if not patched then return nil, protocolError("invalid_trigger", patchError) end
+  if params.enabled == true then
+    local instantiated, createError = instantiateTrigger(candidate)
+    if not instantiated then return nil, protocolError("trigger_enable_failed", createError) end
+  end
+  managedTriggers[record.handle] = candidate
+  return triggerDescriptor(candidate), nil
+end
+
+HANDLERS["trigger.delete"] = function(params, peerId)
+  local reloadError = pendingReloadMutationError()
+  if reloadError then return nil, reloadError end
+  local valid, paramsError = validateExactObject(
+    params,
+    {handle = true, confirm = true},
+    {handle = true, confirm = true},
+    "trigger.delete params"
+  )
+  if not valid then return nil, protocolError("invalid_params", paramsError) end
+  if params.confirm ~= true then
+    return nil, protocolError("confirmation_required", "set confirm to true to delete a trigger")
+  end
+  local record, recordError = ownedTrigger(params.handle, peerId)
+  if not record then return nil, recordError end
+  if record.object then
+    local disabled, disableError = disableTrigger(record)
+    if not disabled then
+      quarantineTrigger(record, "owner_delete_failed", disableError)
+      return nil, protocolError("trigger_identity_mismatch", disableError)
+    end
+  end
+  managedTriggerNames[record.name] = nil
+  managedTriggers[record.handle] = nil
+  return {deleted = true, handle = record.handle}, nil
+end
+
+local function onBeamNGTrigger(data)
+  if type(data) ~= "table" then return end
+  if data.event ~= "enter" and data.event ~= "exit" then return end
+  if not isInteger(data.triggerID) or data.triggerID < 1 then return end
+  if type(data.triggerName) ~= "string" or #data.triggerName > MAX_IDENTIFIER_LENGTH then return end
+
+  local nameRegistration = managedTriggerNames[data.triggerName]
+  local idRegistration = managedTriggerIds[data.triggerID]
+  if not nameRegistration or not idRegistration then return end
+  if nameRegistration.handle ~= idRegistration.handle
+    or nameRegistration.generation ~= idRegistration.generation then
+    return
+  end
+  local record = managedTriggers[nameRegistration.handle]
+  if not record then return end
+  if record.quarantined then return end
+  if record.generation ~= nameRegistration.generation then return end
+  if record.object_id ~= data.triggerID or record.name ~= data.triggerName then return end
+  local object = exactLiveTrigger(record)
+  if not object then return end
+  local peer = peers[record.owner]
+  if not peer or not peer.authenticated then return end
+
+  if not isInteger(data.subjectID) or data.subjectID < 1 then return end
+  local vehicle = findVehicleById(data.subjectID)
+  if not vehicle then return end
+  local vehicleId = vehicle:getId()
+  if vehicleId ~= data.subjectID then return end
+
+  local occupied = record.occupancy[vehicleId] == true
+  if data.event == "enter" and occupied then return end
+  if data.event == "exit" and not occupied then return end
+  record.occupancy[vehicleId] = data.event == "enter" or nil
+
+  -- Occupancy is lifecycle state, not action state. Always update it before
+  -- applying the selected event subset so exit-only and enter-only actions can
+  -- re-arm correctly.
+  if not record.action.event_set[data.event] then return end
+
+  if realElapsedSeconds - record.rate_window_started >= 1 then
+    record.rate_window_started = realElapsedSeconds
+    record.rate_count = 0
+  end
+  if record.rate_count >= MAX_TRIGGER_EVENTS_PER_SECOND then return end
+  record.rate_count = record.rate_count + 1
+  record.sequence = record.sequence + 1
+  record.count = record.count + 1
+  local subjectName = vehicle:getName()
+  if type(subjectName) ~= "string" or #subjectName < 1 then
+    subjectName = "vehicle_" .. tostring(vehicleId)
+  end
+  if #subjectName > MAX_IDENTIFIER_LENGTH then
+    subjectName = subjectName:sub(1, MAX_IDENTIFIER_LENGTH)
+  end
+  record.last_event = {
+    sequence = record.sequence,
+    event = data.event,
+    subject_id = vehicleId,
+    subject_name = subjectName,
+    time_seconds = realElapsedSeconds
+  }
+  sendEnvelope(record.owner, eventEnvelope("trigger.event", {
+    handle = record.handle,
+    event = data.event,
+    subject_id = vehicleId,
+    subject_name = subjectName,
+    trigger_id = record.object_id,
+    trigger_name = record.name,
+    sequence = record.sequence,
+    count = record.count,
+    time_seconds = realElapsedSeconds
+  }))
 end
 
 local function stopLeaseVehicles(lease)
@@ -995,6 +2164,21 @@ HANDLERS["emergency_stop"] = function(params)
   return {stopped = true, vehicle_ids = stopped}, nil
 end
 
+local function revokePeerAuthentication(peerId, peer, reason)
+  -- Always clean ownership, even when the peer already appears unauthenticated.
+  -- This keeps malformed/missing-token requests fail-closed if peer state and
+  -- trigger ownership ever diverge.
+  cleanupTriggersForPeer(peerId, reason)
+  peer.authenticated = false
+end
+
+local function boundedAuthenticationRequest(request)
+  return {
+    id = validRequestId(request and request.id) and request.id or "protocol-error",
+    method = "protocol.authentication"
+  }
+end
+
 local function validateRequest(request)
   if type(request) ~= "table" then
     return protocolError("invalid_request", "request must be a JSON object")
@@ -1047,17 +2231,29 @@ local function handleMessage(peerId, message)
     return
   end
 
-  local requestError = validateRequest(request)
-  if requestError then
+  -- Authenticate before generic envelope validation. Otherwise a peer that
+  -- was already authenticated could combine a missing/wrong token with an
+  -- earlier schema or method error and avoid credential revocation.
+  if type(request.token) ~= "string"
+    or not constantTimeEquals(request.token, config.token) then
+    revokePeerAuthentication(peerId, peer, "authentication_failed")
     peer.failures = peer.failures + 1
-    sendEnvelope(peerId, responseEnvelope(request, nil, requestError))
+    sendError(
+      peerId,
+      boundedAuthenticationRequest(request),
+      "authentication_failed",
+      "token was rejected"
+    )
     return
   end
 
-  if not constantTimeEquals(request.token, config.token) then
-    peer.authenticated = false
+  local requestError = validateRequest(request)
+  if requestError then
+    if requestError.code == "authentication_failed" then
+      revokePeerAuthentication(peerId, peer, "authentication_failed")
+    end
     peer.failures = peer.failures + 1
-    sendError(peerId, request, "authentication_failed", "token was rejected")
+    sendEnvelope(peerId, responseEnvelope(request, nil, requestError))
     return
   end
 
@@ -1080,9 +2276,10 @@ local function handleMessage(peerId, message)
 end
 
 local function expireStaleAuthentication()
-  for _, peer in pairs(peers) do
+  for peerId, peer in pairs(peers) do
     if peer.authenticated
       and elapsedSeconds - peer.last_seen > config.heartbeat_timeout_seconds then
+      cleanupTriggersForPeer(peerId, "authentication_expired")
       peer.authenticated = false
     end
   end
@@ -1122,6 +2319,7 @@ end
 
 local function onExtensionUnloaded()
   if safetyLease then expireSafetyLease("extension_unloaded") end
+  cleanupAllTriggers("extension_unloaded")
   if server then
     pcall(BNGWebWSServer.destroy, server)
     server = nil
@@ -1130,6 +2328,18 @@ local function onExtensionUnloaded()
   managedObjects = {}
   pendingReload = nil
   log("I", LOG_TAG, "BeamNG MCP bridge stopped")
+end
+
+local function onClientStartMission()
+  cleanupAllTriggers("mission_started")
+  releaseGoneQuarantinedTriggers("mission_started")
+  managedObjects = {}
+end
+
+local function onClientEndMission()
+  cleanupAllTriggers("mission_ended")
+  releaseGoneQuarantinedTriggers("mission_ended")
+  managedObjects = {}
 end
 
 local function onUpdate(dtReal, dtSim, dtRaw)
@@ -1155,12 +2365,14 @@ local function onUpdate(dtReal, dtSim, dtRaw)
       if processed >= MAX_EVENTS_PER_UPDATE then break end
       processed = processed + 1
       if event.type == "C" then
+        cleanupTriggersForPeer(event.peerId, "peer_reconnected")
         peers[event.peerId] = {
           authenticated = false,
           last_seen = elapsedSeconds,
           failures = 0
         }
       elseif event.type == "DC" then
+        cleanupTriggersForPeer(event.peerId, "peer_disconnected")
         peers[event.peerId] = nil
       elseif event.type == "D" and event.msg ~= "" then
         handleMessage(event.peerId, event.msg)
@@ -1187,12 +2399,23 @@ local function onUpdate(dtReal, dtSim, dtRaw)
   if pendingReload then
     local extensionName = pendingReload
     pendingReload = nil
-    extensions.reload(extensionName)
+    if next(managedTriggers) ~= nil or next(managedObjects) ~= nil then
+      log(
+        "W",
+        LOG_TAG,
+        "Cancelled bridge extension reload because managed scene state appeared after scheduling"
+      )
+    else
+      extensions.reload(extensionName)
+    end
   end
 end
 
 M.onExtensionLoaded = onExtensionLoaded
 M.onExtensionUnloaded = onExtensionUnloaded
+M.onClientStartMission = onClientStartMission
+M.onClientEndMission = onClientEndMission
+M.onBeamNGTrigger = onBeamNGTrigger
 M.onUpdate = onUpdate
 
 return M

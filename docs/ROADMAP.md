@@ -7,8 +7,8 @@
 - Route planner and waypoint fusion for the hybrid controller
 - Transactional cloned-level editing with World Editor undo/rollback, save previews, artifact
   manifests, and no writes to shipped game archives
-- Typed `BeamNGTrigger` lifecycle and action schemas with an explicit allowlist; never expose a raw
-  Lua or unrestricted command field
+- Expand the typed ephemeral `BeamNGTrigger` v1 lifecycle beyond live-tested Box enter/exit event
+  emission only after each new shape/action receives a dedicated safety review and runtime matrix
 - Managed motion/path runtime for bridge-created props and triggers, including bounded looping,
   pause/resume/stop, ownership, and cleanup
 - Typed River/water-volume authoring with validated geometry, flow/material parameters, preview,

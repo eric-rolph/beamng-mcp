@@ -8,19 +8,36 @@ import json
 import time
 import uuid
 from collections import deque
+from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, TypeVar
 
+from pydantic import ValidationError
 from websockets.asyncio.client import ClientConnection, connect
 from websockets.exceptions import ConnectionClosed
 from websockets.typing import Subprotocol
 
 from ..config import LuaSettings
 from ..errors import ConfigurationError, LuaBridgeError
-from ..models import BridgeStatus
+from ..models import BridgeStatus, MapTriggerEvent
+
+T = TypeVar("T")
 
 BRIDGE_SCHEMA = 1
 BRIDGE_SUBPROTOCOL = "beamng-mcp-v1"
+TRIGGER_METHODS = frozenset(
+    {
+        "trigger.create",
+        "trigger.get",
+        "trigger.update",
+        "trigger.list",
+        "trigger.delete",
+    }
+)
+TRIGGER_READ_METHODS = frozenset({"trigger.get", "trigger.list"})
+# Any newly allowlisted trigger operation fails closed as a mutation until it is
+# deliberately classified read-only here.
+TRIGGER_MUTATION_METHODS = TRIGGER_METHODS - TRIGGER_READ_METHODS
 ALLOWED_METHODS = frozenset(
     {
         "ping",
@@ -32,6 +49,7 @@ ALLOWED_METHODS = frozenset(
         "world.update_object",
         "world.delete_object",
         "world.save_level",
+        *TRIGGER_METHODS,
         "safety.lease_arm",
         "safety.lease_renew",
         "safety.lease_disarm",
@@ -53,10 +71,12 @@ class LuaBridgeClient:
         self._connect_lock = asyncio.Lock()
         self._send_lock = asyncio.Lock()
         self._events: deque[dict[str, Any]] = deque(maxlen=256)
+        self._trigger_events: deque[MapTriggerEvent] = deque(maxlen=256)
         self._latest_telemetry: dict[str, Any] | None = None
         self._authenticated = False
         self._bridge_version: str | None = None
         self._game_version: str | None = None
+        self._capability_methods: frozenset[str] | None = None
         self._last_message_at: datetime | None = None
         self._last_error: str | None = None
         self._latency_ms: float | None = None
@@ -101,6 +121,12 @@ class LuaBridgeClient:
                     self._reader(ws), name="beamng-lua-bridge-reader"
                 )
                 result = await self._call_connected("capabilities", {})
+                methods = result.get("methods")
+                self._capability_methods = (
+                    frozenset(methods)
+                    if isinstance(methods, list) and all(isinstance(item, str) for item in methods)
+                    else frozenset()
+                )
                 self._authenticated = True
                 self._bridge_version = _string_or_none(result.get("bridge_version"))
                 self._game_version = _string_or_none(result.get("game_version"))
@@ -134,6 +160,7 @@ class LuaBridgeClient:
         pending = tuple(self._pending.values())
         self._pending.clear()
         self._authenticated = False
+        self._capability_methods = None
         self._native_preamble_received = False
 
         for _, future in pending:
@@ -168,18 +195,54 @@ class LuaBridgeClient:
             await self._close_socket(expected_ws=ws)
 
     async def call(self, method: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
+        result, _ws = await self._call_with_peer(method, params or {})
+        return result
+
+    async def _call_with_peer(
+        self, method: str, params: dict[str, Any]
+    ) -> tuple[dict[str, Any], ClientConnection]:
         if method not in ALLOWED_METHODS:
             raise LuaBridgeError(f"Lua bridge method {method!r} is not allowlisted")
         if not self.connected or not self._authenticated:
             await self.connect()
+        if method in TRIGGER_METHODS and method not in (self._capability_methods or frozenset()):
+            raise LuaBridgeError(
+                f"Installed Lua bridge does not advertise {method!r}; run "
+                "`beamng-mcp install-lua --force` and reload the bridge"
+            )
         ws = self._ws
+        if ws is None:
+            raise LuaBridgeError("Lua bridge socket closed before the request could be sent")
         try:
-            return await self._call_connected(method, params or {})
+            return await self._call_connected(method, params), ws
         except (ConnectionClosed, OSError) as exc:
             if self._ws is ws:
                 self._last_error = f"{type(exc).__name__}: {exc}"
             await self._close_socket(expected_ws=ws)
             raise LuaBridgeError(f"Lua bridge disconnected during {method}") from exc
+
+    async def call_validated_trigger_mutation(
+        self,
+        method: str,
+        params: dict[str, Any],
+        validator: Callable[[dict[str, Any]], T],
+    ) -> T:
+        """Validate a mutation response while retaining its exact peer for cleanup."""
+
+        if method not in TRIGGER_MUTATION_METHODS:
+            raise LuaBridgeError(f"Lua bridge method {method!r} is not a trigger mutation")
+        result, ws = await self._call_with_peer(method, params)
+        try:
+            return validator(result)
+        except ValidationError:
+            cancellation_requested = await self._close_uncertain_trigger_mutation(
+                ws,
+                method=method,
+                reason="strict typed response validation failed",
+            )
+            if cancellation_requested:
+                raise asyncio.CancelledError from None
+            raise
 
     async def _call_connected(self, method: str, params: dict[str, Any]) -> dict[str, Any]:
         ws = self._ws
@@ -204,12 +267,28 @@ class LuaBridgeClient:
         future: asyncio.Future[dict[str, Any]] = asyncio.get_running_loop().create_future()
         self._pending[request_id] = (method, future)
         started = time.perf_counter()
+        send_started = False
         try:
             async with self._send_lock:
+                send_started = True
                 await ws.send(encoded)
             async with asyncio.timeout(self.settings.request_timeout_seconds):
                 response = await future
+        except asyncio.CancelledError:
+            if method in TRIGGER_MUTATION_METHODS and send_started:
+                await self._close_uncertain_trigger_mutation(
+                    ws,
+                    method=method,
+                    reason="request cancelled after send started",
+                )
+            raise
         except TimeoutError as exc:
+            if method in TRIGGER_MUTATION_METHODS:
+                await self._close_uncertain_trigger_mutation(
+                    ws,
+                    method=method,
+                    reason="response timed out after send",
+                )
             raise LuaBridgeError(f"Lua bridge request {method!r} timed out") from exc
         finally:
             self._pending.pop(request_id, None)
@@ -224,6 +303,32 @@ class LuaBridgeClient:
             raise LuaBridgeError(f"Lua bridge {method} failed: {message}")
         result = response.get("result", {})
         return result if isinstance(result, dict) else {"result": result}
+
+    async def _close_uncertain_trigger_mutation(
+        self,
+        ws: ClientConnection,
+        *,
+        method: str,
+        reason: str,
+    ) -> bool:
+        """Finish peer cleanup before propagating timeout or cancellation."""
+
+        self._last_error = f"{method} outcome unknown: {reason}; connection closed fail-safe"
+        closing = asyncio.create_task(self._close_socket(expected_ws=ws))
+        cancellation_requested = False
+        while not closing.done():
+            try:
+                await asyncio.shield(closing)
+            except asyncio.CancelledError:
+                cancellation_requested = True
+        try:
+            closing.result()
+        except Exception as exc:
+            self._last_error = (
+                f"{method} outcome unknown: {reason}; fail-safe close failed: "
+                f"{type(exc).__name__}: {exc}"
+            )
+        return cancellation_requested
 
     async def _reader(self, ws: ClientConnection) -> None:
         try:
@@ -254,7 +359,23 @@ class LuaBridgeClient:
                     if not future.done():
                         future.set_result(message)
                 elif message.get("type") == "event":
-                    self._events.append(message)
+                    if message.get("method") == "trigger.event":
+                        params = message.get("params")
+                        try:
+                            event = MapTriggerEvent.model_validate(params)
+                        except (TypeError, ValueError):
+                            continue
+                        self._trigger_events.append(event)
+                        self._events.append(
+                            {
+                                "schema": BRIDGE_SCHEMA,
+                                "type": "event",
+                                "method": "trigger.event",
+                                "params": event.model_dump(mode="json"),
+                            }
+                        )
+                    else:
+                        self._events.append(message)
                     if message.get("method") == "telemetry.snapshot":
                         params = message.get("params")
                         if isinstance(params, dict):
@@ -321,6 +442,13 @@ class LuaBridgeClient:
         if not 1 <= limit <= 256:
             raise ValueError("event limit must be between 1 and 256")
         return list(self._events)[-limit:]
+
+    def buffered_trigger_events(self, handle: str) -> list[MapTriggerEvent]:
+        """Return defensive copies of already-validated events for one opaque handle."""
+
+        return [
+            event.model_copy(deep=True) for event in self._trigger_events if event.handle == handle
+        ]
 
 
 def _string_or_none(value: Any) -> str | None:

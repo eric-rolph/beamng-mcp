@@ -5,8 +5,15 @@ uses semantic versioning after the initial alpha series.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-20
+
 ### Added
 
+- Six typed, ephemeral `BeamNGTrigger` tools with connection-owned drafts, explicit
+  enable/disable, Box geometry, typed modes/tests, and loss-aware cursor paging over bounded
+  vehicle enter/exit events
+- A sentinel-gated BeamNG 0.38.6 trigger regression covering a real vehicle enter/exit sequence,
+  injection and foreign-owner rejection, disable/re-enable, confirmed deletion, and owner cleanup
 - Runtime Blender discovery and a fail-closed `doctor` capability probe that reports the exact
   executable/version, selection-only Collada operator, and glTF availability
 - Opt-in real-runtime regressions for transformed Blender exports, Blender MCP profile registration,
@@ -17,6 +24,10 @@ uses semantic versioning after the initial alpha series.
 
 ### Changed
 
+- The Python bridge client now verifies trigger-method capability advertisement before any trigger
+  request and directs stale installations to `install-lua --force`
+- Trigger deletion uses strict boolean confirmation; uncertain mutation timeouts/cancellation close
+  the owning peer; and failed exact engine cleanup is retained as ownerless, event-silent quarantine
 - BeamNG launch configuration accepts an explicit direct `beamng.binary`; an active user folder
   named `current` is preserved for mod/token operations while its parent is passed to `-userpath`
 - Soft-body setup now documents the validated side-by-side Blender 4.5.4 LTS/Blender MCP 1.6.4

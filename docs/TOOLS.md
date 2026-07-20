@@ -52,9 +52,63 @@ controls; the server still enforces gates itself.
 | `map_object_create` | Ephemeral allowlisted object creation |
 | `map_object_update` | Transform/safe-field update; pre-existing objects require the operator gate |
 | `map_object_delete` | Confirmed deletion; pre-existing objects require the operator gate |
+| `map_trigger_create` | Create a connection-owned disabled Box-trigger draft; no scene object yet |
+| `map_trigger_get` | Read one trigger draft/live record owned by the current bridge connection |
+| `map_trigger_update` | Edit a disabled draft or explicitly enable/disable it; enabled geometry is immutable |
+| `map_trigger_list` | List only trigger records owned by the current bridge connection |
+| `map_trigger_events` | Page sanitized enter/exit events for one owned handle with bounded loss-aware cursors |
+| `map_trigger_delete` | Confirmed deletion of the live object, if any, and its draft |
 | `map_save` | Gated exact-level World Editor save request; BeamNG 0.38 reports it as unverified |
 | `lua_bridge_status` | Connection/auth/latency/last error, optional probe |
 | `lua_extension_reload` | Reload the allowlisted bridge and wait for fresh authenticated readiness |
+
+Generic map-object mutation authority is bound to the exact object reference, ID, name, class, and
+scene registrations captured at creation. Renames refresh that evidence, identity mismatches fail
+closed without discarding the record, and mission transitions clear the level-scoped registry so a
+recycled numeric ID cannot adopt prior authority. A mismatched record is a non-authorizing
+tombstone: it blocks bridge reload until exact managed deletion proves its ID and name absent or
+the mission changes.
+
+The trigger API is not a wrapper around generic scene fields. `map_trigger_create` returns a
+disabled draft identified by an opaque `trg_...` handle. `map_trigger_update(enabled=true)` creates
+an ephemeral `BeamNGTrigger`; setting `enabled=false` deletes that engine object while retaining
+the editable draft. Enabled triggers accept no other updates. V1 supports Box volumes, typed
+center/contains/overlaps modes, race-corners/bounding-box tests, and a single
+`emit_bridge_event` action selecting unique enter/exit events. It does not expose scene names,
+`luaFunction`, commands, ticking, dynamic fields, persistence, or existing-trigger adoption.
+
+Each engine trigger is `canSave=false`, uses the fixed `onBeamNGTrigger` callback, and is deleted
+with its draft when the owning authenticated peer disappears, a mission changes, or the bridge
+unloads under normal engine behavior. If exact identity or deletion cannot be proved, the bridge
+instead retains an ownerless, event-silent quarantine for an exact cleanup retry or verified
+mission teardown; retained quarantines consume the global trigger cap. Upgrade skew fails closed
+before mutation with `install-lua --force` guidance.
+`lua_extension_reload` also refuses to unload the bridge while any bridge-managed scene record
+remains: this includes generic map objects plus trigger drafts, live triggers, and quarantines.
+Once accepted, the bridge blocks further scene mutations and rechecks both registries immediately
+before unloading, so another request in the same engine event batch cannot add state behind the
+guard. Delete managed objects and triggers through their MCP tools before requesting a reload.
+That guard applies to MCP-requested reloads. An operator-forced unload through BeamNG's console or
+extension manager remains unsafe: exact generic-object authorization is lost, and although the
+unload hook attempts trigger cleanup, module-local quarantine evidence cannot survive if the
+engine unloads the extension despite a cleanup failure.
+Do not force-unload the bridge while managed scene records remain.
+If a trigger mutation times out or its caller is cancelled after sending begins, the client closes
+that bridge peer before returning; disconnect cleanup removes connection-owned drafts and live
+triggers whose mutation outcome could otherwise be unknown.
+
+`map_trigger_events` first revalidates current ownership with `trigger.get`, then reads only typed
+events already sanitized by the Python bridge client. Supply the prior page's `next_sequence` as
+`after_sequence`. `truncated=true` reports deque overflow or another sequence gap; when every
+requested event has already fallen out of the buffer, the next cursor advances safely to the
+trigger's current sequence instead of repeatedly returning the same empty page.
+
+BeamNG's own volume sampling still depends on trigger mode, test type, object bounds, and motion.
+In the 0.38.6 deterministic harness, a broad rotated volume crossed reliably while a very thin
+rotated volume could miss a teleport-based crossing. Validate thin/speed-trap geometry with
+`debug=true`, representative vehicle motion, and the intended mode/test pair; the
+[official trigger reference](https://documentation.beamng.com/modding/levels/level_classes/beamngtrigger/)
+likewise calls out test-type/object-bound mismatches as a common cause of missed events.
 
 ## Mods and jobs
 
@@ -120,6 +174,8 @@ Safety-relevant tool conditions:
   authored Lua mod executes code inside BeamNG.
 - Updating or deleting a pre-existing level object requires
   `workspace.allow_existing_map_object_edits = true` in Python and the installed Lua bridge.
+- Typed triggers are always bridge-created and connection-owned. The existing-object gate cannot
+  adopt a level trigger, and `map_save` cannot persist one.
 - `map_save` requires `workspace.allow_persistent_map_edits = true` in both layers, an initialized
   World Editor, `confirm=true`, and a `level` value equal to the loaded level identifier.
 - Every `autonomy_start` mode requires an authenticated GELua lease for the selected vehicle. A
