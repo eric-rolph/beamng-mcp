@@ -1,4 +1,4 @@
-"""Live Phase 4 impact and telemetry gate for the Cannon Car Wash."""
+"""Live Phase 4 impact gate for the exact public Cannon Car Wash package."""
 
 from __future__ import annotations
 

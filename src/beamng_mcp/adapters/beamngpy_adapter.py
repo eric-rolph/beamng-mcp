@@ -137,6 +137,38 @@ class BeamNGpyAdapter:
         return self._bng
 
     @staticmethod
+    def _read_game_version(bng: BeamNGpy) -> str | None:
+        """Read the game build without relying on host OS metadata.
+
+        BeamNGpy's ``system.get_info`` response is host-system information and
+        does not include a game version on retail BeamNG.drive.  Read the
+        authoritative engine globals through the public GE Lua API first, then
+        retain the historical SDK fields only as a compatibility fallback.
+        """
+
+        try:
+            candidate = bng.control.queue_lua_command(
+                "return tostring(beamng_version or beamng_versionb or 'unknown')",
+                True,
+            )
+        except Exception:
+            candidate = None
+        if candidate is not None and str(candidate).strip().casefold() not in {
+            "",
+            "unknown",
+        }:
+            return str(candidate).strip()
+
+        try:
+            info = bng.system.get_info(os=True, cpu=False, gpu=False, power=False)
+        except Exception:
+            info = {}
+        candidate = info.get("version") or info.get("build")
+        if candidate is None or str(candidate).strip().casefold() in {"", "unknown"}:
+            return None
+        return str(candidate).strip()
+
+    @staticmethod
     def _close_failed_connection(bng: BeamNGpy) -> None:
         """Dispose of a connection that never became usable, or report why not."""
 
@@ -437,13 +469,7 @@ class BeamNGpyAdapter:
                 raise SimulatorConnectionError(
                     "BeamNGpy tech_enabled() returned an invalid capability value"
                 )
-            try:
-                info = await self._call(
-                    bng.system.get_info, os=True, cpu=False, gpu=False, power=False
-                )
-                version = str(info.get("version") or info.get("build") or "unknown")
-            except SimulatorConnectionError:
-                version = None
+            version = await self._call(self._read_game_version, bng)
         return ConnectionStatus(
             connected=self._connected,
             host=self.settings.host,

@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "verified_on": "2026-07-21",
+  "result": "passed",
+  "test": "tests/test_cannon_car_wash_selector_live.py",
+  "runtime": {
+    "beamng_drive": "0.38.6",
+    "beamngpy": "1.35.1",
+    "profile": "sentinel-isolated"
+  },
+  "catalog": {
+    "model": "ericrolph_cannon_car_wash",
+    "name": "Cannon Car Wash",
+    "type": "Prop",
+    "default_configuration": "standard"
+  },
+  "topology": {
+    "node_count": 77,
+    "fixed_node_count": 77,
+    "beam_count": 322,
+    "triangle_count": 144,
+    "flexbody_count": 1,
+    "total_mass_kg": 14875,
+    "vehicle_directory": "/vehicles/ericrolph_cannon_car_wash/"
+  },
+  "stability": {
+    "deterministic_steps": 120,
+    "initial_position": [-110.0, -170.0, 100.12000274658203],
+    "settled_position": [-110.0, -170.0, 100.12000274658203],
+    "settled_velocity_mps": [0.0, 0.0, 0.0],
+    "rigidity": {
+      "maximum_shell_node_displacement_m": 0.0,
+      "maximum_shell_node_speed_mps": 0.0
+    }
+  },
+  "collision_contact": {
+    "vehicle": "ericrolph_cannon_car_wash_truck",
+    "injected_velocity_x_mps": 30.0,
+    "peak_positive_velocity_x_mps": 29.552316665649414,
+    "minimum_post_impact_velocity_x_mps": -0.3917746841907501,
+    "wall_world_x": -106.9,
+    "maximum_world_x": -108.08714124560356,
+    "final_truck_position": [
+      -108.72320964921892,
+      -170.26836361174082,
+      100.40684587817123
+    ],
+    "final_truck_velocity_mps": [
+      0.0005712726269848645,
+      0.00017760027549229562,
+      0.0002407096471870318
+    ],
+    "prop_position_after_contact": [
+      -110.0,
+      -170.0,
+      100.12000274658203
+    ],
+    "sample_count": 70,
+    "rigidity": {
+      "maximum_ref_displacement_m": 0.0,
+      "maximum_ref_speed_mps": 0.0,
+      "maximum_shell_node_displacement_m": 0.0,
+      "maximum_shell_node_speed_mps": 0.0,
+      "sample_count": 31
+    }
+  },
+  "selector_asset_errors": []
+}

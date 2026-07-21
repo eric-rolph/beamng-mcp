@@ -1703,6 +1703,48 @@ async def test_status_calls_the_sdk_tech_capability_probe(tmp_path: Path) -> Non
 
 
 @pytest.mark.asyncio
+async def test_status_reads_retail_game_version_from_engine_lua(tmp_path: Path) -> None:
+    class FakeSystem:
+        def get_info(self, **_kwargs: object) -> dict[str, str]:
+            return {"os": "Windows", "version": "10.0.26100"}
+
+    class FakeControl:
+        def __init__(self) -> None:
+            self.calls: list[tuple[str, bool]] = []
+
+        def queue_lua_command(self, chunk: str, response: bool = False) -> str:
+            self.calls.append((chunk, response))
+            return "0.38.6.0.19963"
+
+    class FakeDriveBng:
+        system = FakeSystem()
+
+        def __init__(self) -> None:
+            self.control = FakeControl()
+
+        def tech_enabled(self) -> bool:
+            return False
+
+    bng = FakeDriveBng()
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+    adapter._connected = True
+    adapter._bng = bng  # type: ignore[assignment]
+
+    try:
+        status = await adapter.status()
+
+        assert status.version == "0.38.6.0.19963"
+        assert bng.control.calls == [
+            (
+                "return tostring(beamng_version or beamng_versionb or 'unknown')",
+                True,
+            )
+        ]
+    finally:
+        adapter._executor.shutdown(wait=True)
+
+
+@pytest.mark.asyncio
 async def test_status_preserves_an_unknown_sdk_tech_capability(tmp_path: Path) -> None:
     class FakeSystem:
         def get_info(self, **_kwargs: object) -> dict[str, str]:

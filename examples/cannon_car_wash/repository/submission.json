@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "title": "Cannon Car Wash",
+  "internal_name": "ericrolph_cannon_car_wash",
+  "stable_zip_filename": "cannon_car_wash_ericrolph.zip",
+  "version": "1.3.0",
+  "type": "Other",
+  "author": "Eric Rolph",
+  "tag_line": "Triggered rollers and spray, then a fully-contained 360 km/h launch",
+  "description": "Drive a Gavril D-Series through a detailed Gridmap V2 car wash. Entering the bay starts five animated brushes and twelve spray misters. Once the truck is fully contained in the exit trigger, a 3-2-1-GO countdown holds the vehicle before launching it at 360 km/h toward the crash target. The rigid car-wash structure is also available in the Props vehicle selector.",
+  "categories": [
+    "Gameplay",
+    "Scenarios",
+    "Props"
+  ],
+  "update_summary": "Prepared the mod for public Repository review: author-qualified all runtime identifiers, removed loose and unused archive content, moved Lua into BeamNG's scenario-owned lifecycle, added the scenario preview, preserved trigger and wash behavior, and added deterministic distribution validation.",
+  "gallery_images": [
+    "images/01_exterior.png",
+    "images/02_wash_active.png"
+  ],
+  "resource_icon": {
+    "path": "icon.jpg",
+    "width": 96,
+    "height": 96
+  },
+  "gallery_capture": {
+    "beamng_drive": "0.38.6",
+    "resolution": [
+      1280,
+      720
+    ],
+    "source": "tests/test_cannon_car_wash_phase3_live.py"
+  },
+  "release_artifact": {
+    "filename": "cannon_car_wash_ericrolph.zip",
+    "sha256": "9c479f49dfc7fe5db7442f75ff059ea51e1023bff631563fa115ed6dcaa3fa1b",
+    "size_bytes": 1863665,
+    "member_count": 14
+  },
+  "release_validation": {
+    "beamng_drive": "0.38.6.0.19963",
+    "exact_prebuilt_archive_smoke": "passed",
+    "scenario_discovered": true,
+    "prop_catalog_discovered": true,
+    "scenario_loaded": true,
+    "scenario_extension_unloaded_after_stop": true,
+    "truck_grounded": true,
+    "cannon_log_issues": []
+  }
+}

@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "phase": 2,
+  "level": "gridmap_v2",
+  "asset": {
+    "path": "/levels/gridmap_v2/art/shapes/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
+    "sha256": "dcea5ed44e2e63204ebedc18c811fa52654209d70ea5c70166ed57c22e5f502e",
+    "position": [
+      -122.011475,
+      -170.0,
+      100.0
+    ],
+    "rotation_xyzw": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "drive_axis_local": [
+      0.0,
+      1.0,
+      0.0
+    ]
+  },
+  "trigger": {
+    "name": "ericrolph_cannon_car_wash_launch_trigger",
+    "class": "BeamNGTrigger",
+    "local_center": [
+      0.0,
+      5.0,
+      2.1
+    ],
+    "world_center": [
+      -122.011475,
+      -165.0,
+      102.1
+    ],
+    "dimensions": [
+      5.8,
+      7.5,
+      4.6
+    ],
+    "rotation_xyzw": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "lua_function": "onBeamNGTrigger",
+    "mode": "Contains",
+    "test_type": "Bounding box"
+  },
+  "wash_activation_trigger": {
+    "name": "ericrolph_cannon_car_wash_wash_activation_trigger",
+    "class": "BeamNGTrigger",
+    "local_center": [
+      0.0,
+      0.0,
+      2.2
+    ],
+    "world_center": [
+      -122.011475,
+      -170.0,
+      102.2
+    ],
+    "dimensions": [
+      5.8,
+      17.5,
+      4.4
+    ],
+    "rotation_xyzw": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "lua_function": "onBeamNGTrigger",
+    "mode": "Overlaps",
+    "test_type": "Bounding box"
+  },
+  "wash_effects": {
+    "visual_name": "ericrolph_cannon_car_wash_scenario_visual",
+    "roller_sequence": "ambient",
+    "roller_control_field": "playAmbient",
+    "mister_emitter": "BNGP_sprinkler",
+    "mister_datablock": "lightExampleEmitterNodeData1",
+    "misters": [
+      {
+        "name": "ericrolph_cannon_car_wash_mister_PreSoak_L_1",
+        "local_position": [-2.62, -5.6, 1.25],
+        "world_position": [-124.631475, -175.6, 101.25],
+        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_mister_PreSoak_L_2",
+        "local_position": [-2.62, -5.6, 2.1],
+        "world_position": [-124.631475, -175.6, 102.1],
+        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_mister_PreSoak_L_3",
+        "local_position": [-2.62, -5.6, 3.0],
+        "world_position": [-124.631475, -175.6, 103.0],
+        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_mister_PreSoak_R_1",
+        "local_position": [2.62, -5.6, 1.25],
+        "world_position": [-119.391475, -175.6, 101.25],
+        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_mister_PreSoak_R_2",
+        "local_position": [2.62, -5.6, 2.1],
+        "world_position": [-119.391475, -175.6, 102.1],
+        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_mister_PreSoak_R_3",
+        "local_position": [2.62, -5.6, 3.0],
+        "world_position": [-119.391475, -175.6, 103.0],
+        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_mister_Rinse_L_1",
+        "local_position": [-2.62, 5.65, 1.25],
+        "world_position": [-124.631475, -164.35, 101.25],
+        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_mister_Rinse_L_2",
+        "local_position": [-2.62, 5.65, 2.1],
+        "world_position": [-124.631475, -164.35, 102.1],
+        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_mister_Rinse_L_3",
+        "local_position": [-2.62, 5.65, 3.0],
+        "world_position": [-124.631475, -164.35, 103.0],
+        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_mister_Rinse_R_1",
+        "local_position": [2.62, 5.65, 1.25],
+        "world_position": [-119.391475, -164.35, 101.25],
+        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_mister_Rinse_R_2",
+        "local_position": [2.62, 5.65, 2.1],
+        "world_position": [-119.391475, -164.35, 102.1],
+        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_mister_Rinse_R_3",
+        "local_position": [2.62, 5.65, 3.0],
+        "world_position": [-119.391475, -164.35, 103.0],
+        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+      }
+    ]
+  },
+  "vehicle": {
+    "name": "ericrolph_cannon_car_wash_truck",
+    "model": "pickup",
+    "configuration": "default",
+    "position": [
+      -122.011475,
+      -182.5,
+      100.747742
+    ],
+    "rotation_xyzw": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "forward_axis_world": [
+      0.0,
+      1.0,
+      0.0
+    ]
+  },
+  "phase3_launch_behavior_present": false
+}

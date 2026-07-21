@@ -733,16 +733,9 @@ class ModWorkspace:
                     issues=[ValidationIssue(severity="error", message=str(exc))],
                 )
 
-            info = root / "mod_info" / mod_name / "info.json"
-            self._assert_no_reparse_components(info)
-            try:
-                info_metadata = os.lstat(info)
-            except FileNotFoundError:
-                info_metadata = None
-            if info_metadata is None or not stat.S_ISREG(info_metadata.st_mode):
-                issues.append(
-                    ValidationIssue(severity="warning", message="mod_info manifest is missing")
-                )
+            # Repository upload archives intentionally omit mod_info. BeamNG's
+            # Repository service injects that account/resource metadata after
+            # upload, so its absence is not a validation issue for a runtime mod.
             for file in files:
                 top = Path(file.path).parts[0]
                 if top not in ALLOWED_TOP_LEVEL:

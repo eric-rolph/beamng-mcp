@@ -1,9 +1,8 @@
-"""Phase 2 live gate for the Cannon Car Wash visual asset and trigger.
+"""Phase 2 live gate for the public Cannon Car Wash distribution artifact.
 
-This test deliberately stages only visual-package files.  It never copies or
-executes the Phase 3 Lua extension, even after the complete example mod grows
-one.  Run it only against the sentinel-isolated BeamNG profile used by the
-other live tests.
+The package under test is the exact 14-file Repository upload tree.  Authoring
+evidence and validation manifests are read from their source-only directories
+and must never be copied into the disposable mod or resulting ZIP.
 """
 
 from __future__ import annotations
@@ -38,18 +37,40 @@ from tests.live_support import (
     temporary_lua_bridge_config,
 )
 
-MOD_SOURCE = Path(__file__).parents[1] / "examples" / "cannon_car_wash" / "mod"
-ASSET_RELATIVE_PATH = Path("levels/gridmap_v2/art/shapes/carwash/cannon_car_wash.dae")
-MANIFEST_RELATIVE_PATH = ASSET_RELATIVE_PATH.with_suffix(".geometry.json")
-SOURCE_INFO_RELATIVE_PATH = Path("mod_info/cannon_car_wash/info.json")
-SOURCE_PHASE2_MANIFEST_RELATIVE_PATH = Path("mod_info/cannon_car_wash/phase2_manifest.json")
-PACKAGED_SCENARIO_DIRECTORY = Path("levels/gridmap_v2/scenarios/cannon_car_wash")
+EXAMPLE_ROOT = Path(__file__).parents[1] / "examples" / "cannon_car_wash"
+MOD_SOURCE = EXAMPLE_ROOT / "mod"
+MOD_ID = "ericrolph_cannon_car_wash"
+ASSET_RELATIVE_PATH = Path(f"levels/gridmap_v2/art/shapes/{MOD_ID}/{MOD_ID}.dae")
+GEOMETRY_MANIFEST_PATH = EXAMPLE_ROOT / "authoring" / f"{MOD_ID}.geometry.json"
+PHASE2_MANIFEST_PATH = EXAMPLE_ROOT / "validation" / "manifests" / "phase2.json"
+PACKAGED_SCENARIO_DIRECTORY = Path("levels/gridmap_v2/scenarios") / MOD_ID
 PACKAGED_SCENARIO_FILES = (
-    PACKAGED_SCENARIO_DIRECTORY / "cannon_car_wash.json",
-    PACKAGED_SCENARIO_DIRECTORY / "cannon_car_wash.prefab.json",
+    PACKAGED_SCENARIO_DIRECTORY / f"{MOD_ID}.json",
+    PACKAGED_SCENARIO_DIRECTORY / f"{MOD_ID}.lua",
+    PACKAGED_SCENARIO_DIRECTORY / f"{MOD_ID}.prefab.json",
+    PACKAGED_SCENARIO_DIRECTORY / f"{MOD_ID}.jpg",
 )
 VIRTUAL_ASSET_PATH = ASSET_RELATIVE_PATH.as_posix()
-TRUCK_ID = "cannon_car_wash_truck"
+TRUCK_ID = f"{MOD_ID}_truck"
+SCENARIO_VISUAL_ID = f"{MOD_ID}_scenario_visual"
+LAUNCH_TRIGGER_ID = f"{MOD_ID}_launch_trigger"
+WASH_TRIGGER_ID = f"{MOD_ID}_wash_activation_trigger"
+PUBLIC_RUNTIME_FILES = frozenset(
+    {
+        VIRTUAL_ASSET_PATH,
+        (ASSET_RELATIVE_PATH.parent / f"{MOD_ID}.materials.json").as_posix(),
+        *(path.as_posix() for path in PACKAGED_SCENARIO_FILES),
+        f"vehicles/{MOD_ID}/{MOD_ID}.dae",
+        f"vehicles/{MOD_ID}/{MOD_ID}.jbeam",
+        f"vehicles/{MOD_ID}/default.jpg",
+        f"vehicles/{MOD_ID}/info.json",
+        f"vehicles/{MOD_ID}/info_standard.json",
+        f"vehicles/{MOD_ID}/main.materials.json",
+        f"vehicles/{MOD_ID}/standard.jpg",
+        f"vehicles/{MOD_ID}/standard.pc",
+    }
+)
+PUBLIC_ROOTS = {"levels", "vehicles"}
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,14 +118,13 @@ def _copy_regular_file(source: Path, destination: Path) -> None:
     shutil.copy2(source, destination)
 
 
-def _stage_visual_only_mod(
+def _stage_public_mod(
     workspace: Path, runtime_mod_name: str
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Copy the reviewed visual subset into a disposable MCP workspace."""
+    """Copy exactly the reviewed public-upload tree into a disposable workspace."""
 
-    manifest_path = MOD_SOURCE / MANIFEST_RELATIVE_PATH
     try:
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest = json.loads(GEOMETRY_MANIFEST_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         pytest.fail(f"cannot read Cannon Car Wash geometry contract: {exc}")
     assert manifest["coordinate_system"] == "right-handed, meters, Z-up"
@@ -114,59 +134,37 @@ def _stage_visual_only_mod(
         "height": 4.48,
         "length": 18.0,
     }
-    phase2_manifest_path = MOD_SOURCE / SOURCE_PHASE2_MANIFEST_RELATIVE_PATH
     try:
-        phase2_manifest = json.loads(phase2_manifest_path.read_text(encoding="utf-8"))
+        phase2_manifest = json.loads(PHASE2_MANIFEST_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         pytest.fail(f"cannot read Cannon Car Wash Phase 2 contract: {exc}")
     assert phase2_manifest["schema_version"] == 1
     assert phase2_manifest["phase"] == 2
     assert phase2_manifest["phase3_launch_behavior_present"] is False
+    assert phase2_manifest["asset"]["path"] == f"/{VIRTUAL_ASSET_PATH}"
+    assert phase2_manifest["vehicle"]["name"] == TRUCK_ID
+    assert phase2_manifest["wash_effects"]["visual_name"] == SCENARIO_VISUAL_ID
+    assert phase2_manifest["trigger"]["name"] == LAUNCH_TRIGGER_ID
+    assert phase2_manifest["wash_activation_trigger"]["name"] == WASH_TRIGGER_ID
     assert phase2_manifest["trigger"]["local_center"] == manifest["trigger"]["center"]
     assert phase2_manifest["trigger"]["dimensions"] == manifest["trigger"]["dimensions"]
 
+    source_files = {
+        path.relative_to(MOD_SOURCE).as_posix(): path
+        for path in MOD_SOURCE.rglob("*")
+        if path.is_file() and not path.is_symlink()
+    }
+    assert len(PUBLIC_RUNTIME_FILES) == 14
+    assert set(source_files) == PUBLIC_RUNTIME_FILES
+
     mod_root = workspace / "mods" / runtime_mod_name
-    for relative in (ASSET_RELATIVE_PATH, MANIFEST_RELATIVE_PATH):
-        _copy_regular_file(MOD_SOURCE / relative, mod_root / relative)
+    for relative in sorted(PUBLIC_RUNTIME_FILES):
+        _copy_regular_file(source_files[relative], mod_root / Path(relative))
 
-    asset_directory = MOD_SOURCE / ASSET_RELATIVE_PATH.parent
-    material_sources = sorted(
-        path
-        for path in asset_directory.iterdir()
-        if path.is_file()
-        and not path.is_symlink()
-        and (path.name == "materials.json" or path.name.endswith(".materials.json"))
-    )
-    if not material_sources:
-        pytest.fail(f"no BeamNG materials JSON found beside {ASSET_RELATIVE_PATH.name}")
-    for material_source in material_sources:
-        relative = ASSET_RELATIVE_PATH.parent / material_source.name
-        _copy_regular_file(material_source, mod_root / relative)
-
-    source_info = MOD_SOURCE / SOURCE_INFO_RELATIVE_PATH
-    try:
-        info = json.loads(source_info.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        pytest.fail(f"cannot read Cannon Car Wash mod_info manifest: {exc}")
-    runtime_info = mod_root / "mod_info" / runtime_mod_name / "info.json"
-    runtime_info.parent.mkdir(parents=True, exist_ok=True)
-    runtime_info.write_text(json.dumps(info, indent=2) + "\n", encoding="utf-8")
-    _copy_regular_file(
-        MOD_SOURCE / SOURCE_PHASE2_MANIFEST_RELATIVE_PATH,
-        runtime_info.parent / "phase2_manifest.json",
-    )
-    for scenario_relative in PACKAGED_SCENARIO_FILES:
-        _copy_regular_file(MOD_SOURCE / scenario_relative, mod_root / scenario_relative)
-
-    source_readme = MOD_SOURCE / "README.md"
-    if source_readme.is_file() and not source_readme.is_symlink():
-        _copy_regular_file(source_readme, mod_root / "README.md")
-
-    staged_files = [path for path in mod_root.rglob("*") if path.is_file()]
-    assert staged_files
-    assert not any(path.suffix.casefold() == ".lua" for path in staged_files)
-    assert not (mod_root / "lua").exists()
-    assert not (mod_root / "scripts").exists()
+    staged_files = {
+        path.relative_to(mod_root).as_posix() for path in mod_root.rglob("*") if path.is_file()
+    }
+    assert staged_files == PUBLIC_RUNTIME_FILES
     return manifest, phase2_manifest
 
 
@@ -394,11 +392,11 @@ async def _wait_for_enter_event(session: Any, trigger_handle: str) -> dict[str, 
 async def test_cannon_car_wash_phase2_visual_placement_and_trigger(tmp_path: Path) -> None:
     home, user, binary = _configured_runtime()
     suffix = uuid.uuid4().hex[:10]
-    runtime_mod_name = f"cannon_wash_phase2_{suffix}"
+    runtime_mod_name = f"{MOD_ID}_phase2_{suffix}"
     scenario_name = f"cannon_wash_phase2_{suffix}"
     map_object_name = f"cannon_wash_asset_{suffix}"
     workspace = tmp_path / "workspace"
-    manifest, phase2_manifest = _stage_visual_only_mod(workspace, runtime_mod_name)
+    manifest, phase2_manifest = _stage_public_mod(workspace, runtime_mod_name)
 
     scenario_directory = require_confined_profile_target(
         user, Path("levels") / "gridmap_v2" / "scenarios" / scenario_name
@@ -473,17 +471,9 @@ async def test_cannon_car_wash_phase2_visual_placement_and_trigger(tmp_path: Pat
                 artifact_path = Path(artifact["path"])
                 assert await asyncio.to_thread(artifact_path.is_file)
                 names = await asyncio.to_thread(_zip_members, artifact_path)
-                assert VIRTUAL_ASSET_PATH in names
-                assert {path.as_posix() for path in PACKAGED_SCENARIO_FILES} <= names
-                assert (
-                    Path("mod_info") / runtime_mod_name / "phase2_manifest.json"
-                ).as_posix() in names
-                assert any(
-                    name == (ASSET_RELATIVE_PATH.parent / "materials.json").as_posix()
-                    or name.endswith(".materials.json")
-                    for name in names
-                )
-                assert not any(name.casefold().endswith(".lua") for name in names)
+                assert len(names) == 14
+                assert names == PUBLIC_RUNTIME_FILES
+                assert {name.partition("/")[0] for name in names} == PUBLIC_ROOTS
                 installed = _structured(
                     await session.call_tool(
                         "mod_install",
@@ -509,7 +499,7 @@ async def test_cannon_car_wash_phase2_visual_placement_and_trigger(tmp_path: Pat
                     (
                         item
                         for item in available_scenarios
-                        if "cannon_car_wash/cannon_car_wash.json"
+                        if f"{MOD_ID}/{MOD_ID}.json"
                         in str(item.get("source_file", "")).replace("\\", "/")
                     ),
                     None,
@@ -552,7 +542,7 @@ async def test_cannon_car_wash_phase2_visual_placement_and_trigger(tmp_path: Pat
                 )
                 assert packaged_paused["ok"] is True
                 packaged_asset = _structured(
-                    await session.call_tool("map_object_get", {"object_id": "CannonCarWash_Visual"})
+                    await session.call_tool("map_object_get", {"object_id": SCENARIO_VISUAL_ID})
                 )
                 assert packaged_asset["class"] == "TSStatic"
                 assert packaged_asset["managed"] is False
@@ -771,7 +761,7 @@ async def test_cannon_car_wash_phase2_visual_placement_and_trigger(tmp_path: Pat
                                     "y": trigger_dimensions[1],
                                     "z": trigger_dimensions[2],
                                 },
-                                "mode": "overlaps",
+                                "mode": str(phase2_manifest["trigger"]["mode"]).lower(),
                                 "test_type": "bounding_box",
                                 "debug": False,
                                 "action": {
@@ -797,10 +787,11 @@ async def test_cannon_car_wash_phase2_visual_placement_and_trigger(tmp_path: Pat
                     "z": pytest.approx(trigger_world[2]),
                 }
                 assert enabled["scale"] == {
-                    "x": pytest.approx(4.8),
-                    "y": pytest.approx(1.5),
-                    "z": pytest.approx(3.4),
+                    "x": pytest.approx(trigger_dimensions[0]),
+                    "y": pytest.approx(trigger_dimensions[1]),
+                    "z": pytest.approx(trigger_dimensions[2]),
                 }
+                assert enabled["mode"] == "contains"
                 actual_rotation = enabled["rotation"]
                 rotation_dot = abs(
                     actual_rotation["x"] * asset_rotation[0]

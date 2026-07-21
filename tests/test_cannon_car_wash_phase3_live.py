@@ -19,6 +19,7 @@ from typing import Any
 
 import pytest
 from mcp.shared.memory import create_connected_server_and_client_session
+from PIL import Image, ImageChops, ImageStat
 
 from beamng_mcp.config import Settings
 from beamng_mcp.mcp_adapter import create_mcp_server
@@ -27,17 +28,48 @@ from tests.live_support import (
     cleanup_exact_live_artifacts,
     cleanup_owned_beamng_session,
     isolated_profile_lock,
+    require_confined_profile_target,
     reserve_loopback_ports,
     temporary_lua_bridge_config,
 )
 
-MOD_SOURCE = Path(__file__).parents[1] / "examples" / "cannon_car_wash" / "mod"
-PHASE2_MANIFEST = MOD_SOURCE / "mod_info" / "cannon_car_wash" / "phase2_manifest.json"
-PHASE3_MANIFEST = MOD_SOURCE / "mod_info" / "cannon_car_wash" / "phase3_manifest.json"
-PHASE4_MANIFEST = MOD_SOURCE / "mod_info" / "cannon_car_wash" / "phase4_manifest.json"
-SCENARIO_FRAGMENT = "cannon_car_wash/cannon_car_wash.json"
-TRUCK_ID = "cannon_car_wash_truck"
-LOG_TAG = "CANNON_CAR_WASH"
+EXAMPLE_ROOT = Path(__file__).parents[1] / "examples" / "cannon_car_wash"
+MOD_SOURCE = EXAMPLE_ROOT / "mod"
+MOD_ID = "ericrolph_cannon_car_wash"
+VALIDATION_MANIFESTS = EXAMPLE_ROOT / "validation" / "manifests"
+PHASE2_MANIFEST = VALIDATION_MANIFESTS / "phase2.json"
+PHASE3_MANIFEST = VALIDATION_MANIFESTS / "phase3.json"
+PHASE4_MANIFEST = VALIDATION_MANIFESTS / "phase4.json"
+SCENARIO_FRAGMENT = f"{MOD_ID}/{MOD_ID}.json"
+TRUCK_ID = f"{MOD_ID}_truck"
+LOG_TAG = "ERICROLPH_CANNON_CAR_WASH"
+LAUNCH_TRIGGER_NAME = f"{MOD_ID}_launch_trigger"
+WASH_TRIGGER_NAME = f"{MOD_ID}_wash_activation_trigger"
+SCENARIO_VISUAL_NAME = f"{MOD_ID}_scenario_visual"
+CRASH_WALL_NAME = f"{MOD_ID}_crash_wall"
+EXTENSION_REGISTRY_NAME = f"scenario_{MOD_ID}"
+EXPECTED_MISTER_COUNT = 12
+GALLERY_DIRECTORY_ENV = "BEAMNG_MCP_CANNON_GALLERY_DIR"
+GALLERY_RESOLUTION = (1280, 720)
+PUBLIC_RUNTIME_FILES = frozenset(
+    {
+        f"levels/gridmap_v2/art/shapes/{MOD_ID}/{MOD_ID}.dae",
+        f"levels/gridmap_v2/art/shapes/{MOD_ID}/{MOD_ID}.materials.json",
+        f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.json",
+        f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.lua",
+        f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.prefab.json",
+        f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.jpg",
+        f"vehicles/{MOD_ID}/{MOD_ID}.dae",
+        f"vehicles/{MOD_ID}/{MOD_ID}.jbeam",
+        f"vehicles/{MOD_ID}/default.jpg",
+        f"vehicles/{MOD_ID}/info.json",
+        f"vehicles/{MOD_ID}/info_standard.json",
+        f"vehicles/{MOD_ID}/main.materials.json",
+        f"vehicles/{MOD_ID}/standard.jpg",
+        f"vehicles/{MOD_ID}/standard.pc",
+    }
+)
+PUBLIC_ROOTS = {"levels", "vehicles"}
 
 
 def _configured_runtime() -> tuple[Path, Path, Path]:
@@ -60,6 +92,13 @@ def _configured_runtime() -> tuple[Path, Path, Path]:
     return home, user, binary
 
 
+def _configured_gallery_directory() -> Path | None:
+    value = os.getenv(GALLERY_DIRECTORY_ENV)
+    if value is None or not value.strip():
+        return None
+    return Path(value).expanduser().resolve(strict=False)
+
+
 def _structured(result: Any) -> Any:
     assert result.isError is False, result.content
     assert result.structuredContent is not None
@@ -70,23 +109,25 @@ def _structured(result: Any) -> Any:
 
 
 def _stage_full_mod(workspace: Path, runtime_mod_name: str) -> Path:
+    source_files = {
+        source.relative_to(MOD_SOURCE).as_posix(): source
+        for source in MOD_SOURCE.rglob("*")
+        if source.is_file() and not source.is_symlink()
+    }
+    assert len(PUBLIC_RUNTIME_FILES) == 14
+    assert set(source_files) == PUBLIC_RUNTIME_FILES
+
     mod_root = workspace / "mods" / runtime_mod_name
-    for source in MOD_SOURCE.rglob("*"):
-        if not source.is_file() or source.is_symlink():
-            continue
-        relative = source.relative_to(MOD_SOURCE)
-        if relative.parts[0] == "mod_info":
-            continue
-        destination = mod_root / relative
+    for relative in sorted(PUBLIC_RUNTIME_FILES):
+        source = source_files[relative]
+        destination = mod_root / Path(relative)
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
 
-    runtime_info = mod_root / "mod_info" / runtime_mod_name
-    runtime_info.mkdir(parents=True, exist_ok=True)
-    source_info = MOD_SOURCE / "mod_info" / "cannon_car_wash"
-    for source in source_info.iterdir():
-        if source.is_file() and not source.is_symlink():
-            shutil.copy2(source, runtime_info / source.name)
+    staged_files = {
+        path.relative_to(mod_root).as_posix() for path in mod_root.rglob("*") if path.is_file()
+    }
+    assert staged_files == PUBLIC_RUNTIME_FILES
     return mod_root
 
 
@@ -113,19 +154,16 @@ def _tagged_records(log_path: Path) -> list[dict[str, Any]]:
     return records
 
 
-def _cannon_error_lines(log_path: Path) -> list[str]:
+def _cannon_log_issues(log_path: Path, *, start_offset: int) -> list[str]:
     if not log_path.is_file():
         return []
-    lines = log_path.read_text(encoding="utf-8", errors="replace").splitlines()
+    payload = log_path.read_bytes()
+    current_run = payload[start_offset:] if start_offset <= len(payload) else payload
+    tokens = (LOG_TAG.casefold(), MOD_ID, EXTENSION_REGISTRY_NAME)
     return [
         line
-        for line in lines
-        if "|E|" in line
-        and (
-            LOG_TAG in line
-            or "cannon_car_wash" in line.casefold()
-            or "cannon__car__wash" in line.casefold()
-        )
+        for line in current_run.decode("utf-8", errors="replace").splitlines()
+        if ("|E|" in line or "|W|" in line) and any(token in line.casefold() for token in tokens)
     ]
 
 
@@ -147,30 +185,267 @@ async def _step(session: Any, steps: int) -> None:
     assert result["ok"] is True
 
 
+async def _request_gallery_capture(
+    runtime: Any,
+    bng: Any,
+    *,
+    relative_path: Path,
+    render_view_name: str,
+) -> None:
+    filename = relative_path.as_posix()
+    directory = relative_path.parent.as_posix()
+    payload = await runtime.simulator._call(
+        bng.control.queue_lua_command,
+        f"local directory = '{directory}'; "
+        f"local filename = '{filename}'; "
+        "if not FS:directoryExists(directory) then FS:directoryCreate(directory, true) end; "
+        "if not render_renderViews then extensions.load('render/renderViews') end; "
+        "if not render_renderViews or not render_renderViews.takeScreenshot then "
+        "return jsonEncode({ok = false, error = 'render_renderViews unavailable'}); "
+        "end; "
+        "if not core_camera then "
+        "return jsonEncode({ok = false, error = 'player camera unavailable'}); "
+        "end; "
+        "local ok, captureError = pcall(function() "
+        "render_renderViews.takeScreenshot({"
+        f"renderViewName = '{render_view_name}', "
+        "filename = filename, "
+        "resolution = vec3(1280, 720, 0), "
+        "pos = core_camera.getPosition(), "
+        "rot = core_camera.getQuat(), "
+        "fov = core_camera.getFovDeg(), "
+        "nearPlane = 0.1, "
+        "screenshotDelay = 0.1"
+        "}); "
+        "end); "
+        "return jsonEncode({ok = ok, error = ok and nil or tostring(captureError)})",
+        True,
+    )
+    status = json.loads(payload)
+    assert status.get("ok") is True, status
+
+
+def _read_gallery_capture(path: Path) -> tuple[Image.Image | None, OSError | None]:
+    if not path.is_file():
+        return None, None
+    try:
+        with Image.open(path) as captured:
+            image = captured.convert("RGB")
+            image.load()
+        if image.size == GALLERY_RESOLUTION and max(ImageStat.Stat(image).stddev) > 1.0:
+            return image, None
+    except OSError as exc:
+        return None, exc
+    return None, None
+
+
+async def _wait_for_gallery_capture(session: Any, path: Path) -> Image.Image:
+    deadline = monotonic() + 30.0
+    last_error: OSError | None = None
+    while monotonic() < deadline:
+        await _step(session, 3)
+        image, image_error = await asyncio.to_thread(_read_gallery_capture, path)
+        if image is not None:
+            return image
+        last_error = image_error or last_error
+        await asyncio.sleep(0.05)
+    pytest.fail(
+        "BeamNG retail RenderView did not produce a non-blank 1280x720 gallery frame "
+        f"within 30 seconds; capture={path}, last image error={last_error!r}"
+    )
+
+
+def _publish_gallery_captures(
+    output_directory: Path,
+    *,
+    exterior_source: Path,
+    exterior_image: Image.Image,
+    wash_source: Path,
+    wash_image: Image.Image,
+) -> None:
+    difference = ImageChops.difference(exterior_image, wash_image)
+    assert max(ImageStat.Stat(difference).mean) > 1.0, (
+        "Cannon Car Wash gallery frames are not materially distinct"
+    )
+    if output_directory.exists() and not output_directory.is_dir():
+        pytest.fail(f"configured gallery destination is not a directory: {output_directory}")
+    output_directory.mkdir(parents=True, exist_ok=True)
+    destinations = (
+        (exterior_source, output_directory / "01_exterior.png"),
+        (wash_source, output_directory / "02_wash_active.png"),
+    )
+    for source, destination in destinations:
+        shutil.copy2(source, destination)
+        if not destination.is_file() or destination.stat().st_size == 0:
+            pytest.fail(f"gallery capture was not published: {destination}")
+
+
 async def _wait_for_tagged_event(
     log_path: Path,
     event: str,
     *,
+    after_count: int = 0,
     attempts: int = 80,
 ) -> dict[str, Any]:
     for _ in range(attempts):
         matching = [record for record in _tagged_records(log_path) if record.get("event") == event]
-        if matching:
+        if len(matching) > after_count:
             return matching[-1]
         await asyncio.sleep(0.1)
     pytest.fail(f"timed out waiting for {LOG_TAG} event {event!r}")
+
+
+async def _extension_loaded(runtime: Any, bng: Any) -> bool:
+    payload = await runtime.simulator._call(
+        bng.control.queue_lua_command,
+        "return jsonEncode({loaded = extensions.isExtensionLoaded("
+        f"'{EXTENSION_REGISTRY_NAME}')"
+        "})",
+        True,
+    )
+    return bool(json.loads(payload)["loaded"])
+
+
+async def _wait_for_extension_loaded(runtime: Any, bng: Any, *, expected: bool) -> None:
+    for _ in range(80):
+        if await _extension_loaded(runtime, bng) is expected:
+            return
+        await asyncio.sleep(0.1)
+    pytest.fail(
+        f"scenario-owned extension {EXTENSION_REGISTRY_NAME!r} did not become loaded={expected}"
+    )
+
+
+async def _wash_system_state(runtime: Any, bng: Any) -> dict[str, Any]:
+    payload = await runtime.simulator._call(
+        bng.control.queue_lua_command,
+        f"local extension = extensions['{EXTENSION_REGISTRY_NAME}']; "
+        "if not extension or not extension.getSystemState then "
+        "return jsonEncode({error = 'cannon wash extension state unavailable'}); "
+        "end; "
+        "return jsonEncode(extension.getSystemState())",
+        True,
+    )
+    state = json.loads(payload)
+    assert "error" not in state, state
+    return state
+
+
+async def _wait_for_wash_system_state(
+    runtime: Any,
+    bng: Any,
+    *,
+    active: bool,
+    attempts: int = 80,
+) -> dict[str, Any]:
+    expected_ambient = "1" if active else "0"
+    expected_active_misters = EXPECTED_MISTER_COUNT if active else 0
+    last_state: dict[str, Any] | None = None
+    for _ in range(attempts):
+        last_state = await _wash_system_state(runtime, bng)
+        if (
+            last_state.get("active") is active
+            and int(last_state.get("mister_present_count", -1)) == EXPECTED_MISTER_COUNT
+            and int(last_state.get("mister_expected_count", -1)) == EXPECTED_MISTER_COUNT
+            and int(last_state.get("mister_active_count", -1)) == expected_active_misters
+            and str(last_state.get("roller_play_ambient")) == expected_ambient
+        ):
+            return last_state
+        await asyncio.sleep(0.1)
+    pytest.fail(f"Cannon Car Wash systems did not become active={active}: {last_state}")
+
+
+async def _trigger_scene_state(runtime: Any, bng: Any) -> dict[str, Any]:
+    payload = await runtime.simulator._call(
+        bng.control.queue_lua_command,
+        f"local launch = scenetree.findObject('{LAUNCH_TRIGGER_NAME}'); "
+        f"local wash = scenetree.findObject('{WASH_TRIGGER_NAME}'); "
+        "local function describe(trigger) "
+        "if not trigger then return nil end; "
+        "return {"
+        "name = trigger:getName(), "
+        "class = trigger:getClassName(), "
+        "mode = trigger:getField('triggerMode', 0), "
+        "test_type = trigger:getField('triggerTestType', 0)"
+        "}; "
+        "end; "
+        "return jsonEncode({launch = describe(launch), wash = describe(wash)})",
+        True,
+    )
+    return json.loads(payload)
+
+
+async def _vehicle_oobb_state(runtime: Any, bng: Any) -> dict[str, Any]:
+    payload = await runtime.simulator._call(
+        bng.control.queue_lua_command,
+        f"local vehicle = scenetree.findObject('{TRUCK_ID}'); "
+        "if not vehicle then return jsonEncode({error = 'vehicle missing'}) end; "
+        "local id = vehicle:getId(); "
+        "if not be:getObjectOOBBIsInitialized(id) then "
+        "return jsonEncode({error = 'oobb not initialized'}) end; "
+        "local center = vec3(be:getObjectOOBBCenterXYZ(id)); "
+        "local a0 = vec3(be:getObjectOOBBHalfAxisXYZ(id, 0)); "
+        "local a1 = vec3(be:getObjectOOBBHalfAxisXYZ(id, 1)); "
+        "local a2 = vec3(be:getObjectOOBBHalfAxisXYZ(id, 2)); "
+        "local extent = vec3("
+        "math.abs(a0.x) + math.abs(a1.x) + math.abs(a2.x), "
+        "math.abs(a0.y) + math.abs(a1.y) + math.abs(a2.y), "
+        "math.abs(a0.z) + math.abs(a1.z) + math.abs(a2.z)); "
+        "return jsonEncode({"
+        "center = {center.x, center.y, center.z}, "
+        "minimum = {center.x - extent.x, center.y - extent.y, center.z - extent.z}, "
+        "maximum = {center.x + extent.x, center.y + extent.y, center.z + extent.z}, "
+        "dimensions = {extent.x * 2, extent.y * 2, extent.z * 2}"
+        "})",
+        True,
+    )
+    return json.loads(payload)
 
 
 async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
     assert phase in {3, 4}
     home, user, binary = _configured_runtime()
     suffix = uuid.uuid4().hex[:10]
-    runtime_mod_name = f"cannon_wash_phase{phase}_{suffix}"
+    gallery_output_directory = _configured_gallery_directory() if phase == 3 else None
+    gallery_relative_directory = (
+        Path("screenshots") / "beamng-mcp" / f"cannon-gallery-{suffix}"
+        if gallery_output_directory is not None
+        else None
+    )
+    gallery_temp_directory = (
+        require_confined_profile_target(user, gallery_relative_directory)
+        if gallery_relative_directory is not None
+        else None
+    )
+    gallery_exterior_path = (
+        gallery_temp_directory / "01_exterior.png" if gallery_temp_directory is not None else None
+    )
+    gallery_wash_path = (
+        gallery_temp_directory / "02_wash_active.png"
+        if gallery_temp_directory is not None
+        else None
+    )
+    gallery_exterior_image: Image.Image | None = None
+    gallery_temp_owned = False
+    runtime_mod_name = f"{MOD_ID}_phase{phase}_{suffix}"
     workspace = tmp_path / "workspace"
     _stage_full_mod(workspace, runtime_mod_name)
     phase2 = json.loads(PHASE2_MANIFEST.read_text(encoding="utf-8"))
     phase3 = json.loads(PHASE3_MANIFEST.read_text(encoding="utf-8"))
     phase4 = json.loads(PHASE4_MANIFEST.read_text(encoding="utf-8")) if phase == 4 else None
+    assert phase2["vehicle"]["name"] == TRUCK_ID
+    assert phase2["trigger"]["name"] == LAUNCH_TRIGGER_NAME
+    assert phase2["wash_activation_trigger"]["name"] == WASH_TRIGGER_NAME
+    assert phase2["wash_effects"]["visual_name"] == SCENARIO_VISUAL_NAME
+    assert phase3["extension"] == {
+        "registry_name": EXTENSION_REGISTRY_NAME,
+        "file": f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.lua",
+        "scenario_entry": {"name": MOD_ID},
+        "lifecycle": "scenario_owned",
+    }
+    assert phase3["telemetry"]["log_tag"] == LOG_TAG
+    if phase4 is not None:
+        assert phase4["crash_target"]["name"] == CRASH_WALL_NAME
     log_path = user / "beamng.log"
 
     with ExitStack() as safety:
@@ -210,6 +485,7 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
         installed_path: Path | None = None
         normal_disconnect = False
         owned_process_cleaned = False
+        cannon_log_offset = 0
 
         def watchdog() -> None:
             active_bng = runtime.simulator._bng
@@ -237,8 +513,9 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 )
                 artifact_path = Path(artifact["path"])
                 members = _zip_members(artifact_path)
-                assert "lua/ge/extensions/cannon_car_wash/main.lua" in members
-                assert "scripts/cannon_car_wash/modScript.lua" in members
+                assert len(members) == 14
+                assert members == PUBLIC_RUNTIME_FILES
+                assert {member.partition("/")[0] for member in members} == PUBLIC_ROOTS
                 installed = _structured(
                     await session.call_tool(
                         "mod_install",
@@ -255,6 +532,8 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 bng = runtime.simulator._bng
                 assert bng is not None
                 owned_process = claim_owned_beamng_process(bng)
+                cannon_log_offset = log_path.stat().st_size if log_path.is_file() else 0
+                assert await _extension_loaded(runtime, bng) is False
 
                 scenarios = _structured(
                     await session.call_tool("scenario_list", {"level": "gridmap_v2"})
@@ -280,6 +559,54 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 assert started["ok"] is True
                 bridge = await _wait_for_bridge(session)
                 assert bridge["bridge_version"] == "0.3.0"
+                await _wait_for_extension_loaded(runtime, bng, expected=True)
+
+                loaded_before_reload = sum(
+                    record.get("event") == "extension_loaded"
+                    for record in _tagged_records(log_path)
+                )
+                unloaded_before_reload = sum(
+                    record.get("event") == "extension_unloaded"
+                    for record in _tagged_records(log_path)
+                )
+                sessions_before_reload = sum(
+                    record.get("event") == "session_start" for record in _tagged_records(log_path)
+                )
+                stopped_for_reload = _structured(
+                    await session.call_tool("scenario_control", {"action": "stop"})
+                )
+                assert stopped_for_reload["ok"] is True
+                await _wait_for_tagged_event(
+                    log_path,
+                    "extension_unloaded",
+                    after_count=unloaded_before_reload,
+                )
+                await _wait_for_extension_loaded(runtime, bng, expected=False)
+
+                _structured(
+                    await session.call_tool(
+                        "scenario_load",
+                        {"ref": {"level": "gridmap_v2", "name": packaged["name"]}},
+                    )
+                )
+                reloaded = _structured(
+                    await session.call_tool("scenario_control", {"action": "start"})
+                )
+                assert reloaded["ok"] is True
+                await _wait_for_tagged_event(
+                    log_path,
+                    "extension_loaded",
+                    after_count=loaded_before_reload,
+                )
+                await _wait_for_tagged_event(
+                    log_path,
+                    "session_start",
+                    after_count=sessions_before_reload,
+                )
+                await _wait_for_extension_loaded(runtime, bng, expected=True)
+                bridge = await _wait_for_bridge(session)
+                assert bridge["bridge_version"] == "0.3.0"
+
                 deterministic = _structured(
                     await session.call_tool(
                         "simulation_control",
@@ -295,11 +622,23 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                     await session.call_tool("simulation_control", {"action": "pause"})
                 )
                 assert paused["ok"] is True
-                await _wait_for_tagged_event(log_path, "session_start")
+                session_record = await _wait_for_tagged_event(log_path, "session_start")
+                session_number = int(session_record["session"])
+                trigger_scene_state = await _trigger_scene_state(runtime, bng)
+                assert trigger_scene_state["launch"]["name"] == LAUNCH_TRIGGER_NAME
+                assert trigger_scene_state["launch"]["class"] == "BeamNGTrigger"
+                assert trigger_scene_state["launch"]["mode"] == "Contains"
+                assert trigger_scene_state["launch"]["test_type"] == "Bounding box"
+                assert trigger_scene_state["wash"]["name"] == WASH_TRIGGER_NAME
+                assert trigger_scene_state["wash"]["class"] == "BeamNGTrigger"
+                assert trigger_scene_state["wash"]["mode"] == "Overlaps"
+                assert trigger_scene_state["wash"]["test_type"] == "Bounding box"
+                initial_wash_state = await _wait_for_wash_system_state(runtime, bng, active=False)
+                assert int(initial_wash_state["subject_count"]) == 0
                 if phase == 4:
                     assert phase4 is not None
                     crash_wall = _structured(
-                        await session.call_tool("map_object_get", {"object_id": "CannonCrashWall"})
+                        await session.call_tool("map_object_get", {"object_id": CRASH_WALL_NAME})
                     )
                     assert crash_wall["class"] == "TSStatic"
                     assert crash_wall["managed"] is False
@@ -337,6 +676,25 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 initial_state = _structured(
                     await session.call_tool("vehicle_state", {"vehicle_id": TRUCK_ID})
                 )
+                if gallery_output_directory is not None:
+                    assert gallery_relative_directory is not None
+                    assert gallery_temp_directory is not None
+                    assert gallery_exterior_path is not None
+                    if gallery_temp_directory.exists():
+                        pytest.fail(
+                            "refusing to overwrite an existing isolated-profile gallery "
+                            f"directory: {gallery_temp_directory}"
+                        )
+                    gallery_temp_owned = True
+                    await _request_gallery_capture(
+                        runtime,
+                        bng,
+                        relative_path=gallery_relative_directory / "01_exterior.png",
+                        render_view_name=f"beamngMcpCannonExterior{suffix}",
+                    )
+                    gallery_exterior_image = await _wait_for_gallery_capture(
+                        session, gallery_exterior_path
+                    )
                 electrics_sensor_name = f"cannon_phase{phase}_electrics"
                 attached_electrics = _structured(
                     await session.call_tool(
@@ -389,6 +747,7 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
 
                 trigger_record: dict[str, Any] | None = None
                 drive_states: list[dict[str, Any]] = []
+                last_oobb: dict[str, Any] | None = None
                 drive_deadline = monotonic() + 18.0
                 while monotonic() < drive_deadline:
                     state = _structured(
@@ -401,6 +760,7 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                             record
                             for record in reversed(records)
                             if record.get("event") == "trigger_enter"
+                            and int(record.get("session", 0)) == session_number
                             and int(record.get("run", 0)) > 0
                         ),
                         None,
@@ -415,6 +775,8 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                         * forward[axis]
                         for axis in range(3)
                     )
+                    if current_progress >= 10.0:
+                        last_oobb = await _vehicle_oobb_state(runtime, bng)
                     if current_progress < -3.0 or current_progress > 24.0:
                         await session.call_tool(
                             "vehicle_control",
@@ -431,7 +793,8 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                         )
                         pytest.fail(
                             "truck left the guarded approach corridor before trigger entry: "
-                            f"progress={current_progress:.3f} m, state={state}"
+                            f"progress={current_progress:.3f} m, state={state}, "
+                            f"oobb={last_oobb}, triggers={trigger_scene_state}"
                         )
                     if speed_mps < 3.0:
                         throttle, brake = 0.35, 0.0
@@ -477,12 +840,78 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                     "electrics": _structured(
                         await session.call_tool("sensor_poll", {"name": electrics_sensor_name})
                     )["data"],
-                    "lua_errors": _cannon_error_lines(log_path),
+                    "lua_errors": _cannon_log_issues(
+                        log_path,
+                        start_offset=cannon_log_offset,
+                    ),
                 }
                 assert trigger_record is not None, drive_diagnostics
                 assert max(drive_progress) >= 10.0
                 assert max(float(state["speed_mps"]) for state in drive_states) <= 8.0
                 assert max(float(state["speed_mps"]) for state in drive_states) >= 1.0
+                contained_oobb = await _vehicle_oobb_state(runtime, bng)
+                assert "error" not in contained_oobb, contained_oobb
+                trigger_center = [float(value) for value in phase2["trigger"]["world_center"]]
+                trigger_dimensions = [float(value) for value in phase2["trigger"]["dimensions"]]
+                trigger_minimum = [
+                    trigger_center[axis] - trigger_dimensions[axis] / 2.0 for axis in range(3)
+                ]
+                trigger_maximum = [
+                    trigger_center[axis] + trigger_dimensions[axis] / 2.0 for axis in range(3)
+                ]
+                assert all(
+                    float(contained_oobb["minimum"][axis]) >= trigger_minimum[axis] - 1e-3
+                    and float(contained_oobb["maximum"][axis]) <= trigger_maximum[axis] + 1e-3
+                    for axis in range(3)
+                ), {
+                    "reason": "Contains event fired before the live D-Series OOBB was inside",
+                    "oobb": contained_oobb,
+                    "trigger_minimum": trigger_minimum,
+                    "trigger_maximum": trigger_maximum,
+                }
+                active_wash_state = await _wait_for_wash_system_state(runtime, bng, active=True)
+                assert int(active_wash_state["subject_count"]) >= 1
+                if gallery_output_directory is not None:
+                    assert gallery_relative_directory is not None
+                    assert gallery_exterior_path is not None
+                    assert gallery_wash_path is not None
+                    assert gallery_exterior_image is not None
+                    repaused = _structured(
+                        await session.call_tool("simulation_control", {"action": "pause"})
+                    )
+                    assert repaused["ok"] is True
+                    await _request_gallery_capture(
+                        runtime,
+                        bng,
+                        relative_path=gallery_relative_directory / "02_wash_active.png",
+                        render_view_name=f"beamngMcpCannonWashActive{suffix}",
+                    )
+                    gallery_wash_image = await _wait_for_gallery_capture(session, gallery_wash_path)
+                    launch_already_occurred = any(
+                        record.get("event") == "launch"
+                        and record.get("run") == trigger_record["run"]
+                        for record in _tagged_records(log_path)
+                    )
+                    assert launch_already_occurred is False, (
+                        "active-wash gallery capture completed after launch"
+                    )
+                    _publish_gallery_captures(
+                        gallery_output_directory,
+                        exterior_source=gallery_exterior_path,
+                        exterior_image=gallery_exterior_image,
+                        wash_source=gallery_wash_path,
+                        wash_image=gallery_wash_image,
+                    )
+                    gallery_exterior_image.close()
+                    gallery_wash_image.close()
+                    resumed = _structured(
+                        await session.call_tool("simulation_control", {"action": "resume"})
+                    )
+                    assert resumed["ok"] is True
+                    realtime = _structured(
+                        await session.call_tool("simulation_control", {"action": "realtime"})
+                    )
+                    assert realtime["ok"] is True
 
                 hold_anchor = _structured(
                     await session.call_tool("vehicle_state", {"vehicle_id": TRUCK_ID})
@@ -533,7 +962,10 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                         await session.call_tool("simulation_control", {"action": "pause"})
                     )
                     assert repaused["ok"] is True
-                assert launch_state is not None, _cannon_error_lines(log_path)
+                assert launch_state is not None, _cannon_log_issues(
+                    log_path,
+                    start_offset=cannon_log_offset,
+                )
                 assert hold_states
 
                 anchor_position = [float(value) for value in hold_anchor["position"]]
@@ -693,23 +1125,43 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 )
                 assert reset["ok"] is True
                 await _step(session, 3)
+                final_wash_state = await _wait_for_wash_system_state(runtime, bng, active=False)
+                assert int(final_wash_state["subject_count"]) == 0
+                unloaded_before_stop = sum(
+                    record.get("event") == "extension_unloaded"
+                    for record in _tagged_records(log_path)
+                )
                 stopped = _structured(
                     await session.call_tool("scenario_control", {"action": "stop"})
                 )
                 assert stopped["ok"] is True
+                await _wait_for_tagged_event(
+                    log_path,
+                    "extension_unloaded",
+                    after_count=unloaded_before_stop,
+                )
+                await _wait_for_extension_loaded(runtime, bng, expected=False)
                 disconnected = _structured(await session.call_tool("simulator_disconnect", {}))
                 assert disconnected["ok"] is True
                 normal_disconnect = True
                 cleanup_owned_beamng_session(bng, owned_process=owned_process)
                 owned_process_cleaned = True
 
-                run_records = [
+                session_records = [
                     record
                     for record in _tagged_records(log_path)
+                    if int(record.get("session", 0)) == session_number
+                ]
+                run_records = [
+                    record
+                    for record in session_records
                     if record.get("run") == trigger_record["run"]
                 ]
-                event_names = [str(record.get("event")) for record in run_records]
+                event_names = [str(record.get("event")) for record in session_records]
                 required_order = [
+                    "wash_trigger_enter",
+                    "wash_systems_start",
+                    "containment_verified",
                     "trigger_enter",
                     "hold_start",
                     "countdown_3",
@@ -723,6 +1175,19 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 cursor = -1
                 for event in required_order:
                     cursor = event_names.index(event, cursor + 1)
+                containment_record = next(
+                    record
+                    for record in run_records
+                    if record.get("event") == "containment_verified"
+                )
+                assert containment_record["trigger_mode"] == "Contains"
+                wash_start_record = next(
+                    record
+                    for record in session_records
+                    if record.get("event") == "wash_systems_start"
+                )
+                assert int(wash_start_record["mister_count"]) == EXPECTED_MISTER_COUNT
+                assert wash_start_record["mister_emitter"] == "BNGP_sprinkler"
                 countdown = {
                     str(record["event"]): float(record["elapsed_time_seconds"])
                     for record in run_records
@@ -738,10 +1203,25 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                     phase3["countdown"]["interval_seconds"], abs=0.12
                 )
                 assert sum(event == "launch" for event in event_names) == 1
-                assert _cannon_error_lines(log_path) == []
+                assert (
+                    _cannon_log_issues(
+                        log_path,
+                        start_offset=cannon_log_offset,
+                    )
+                    == []
+                )
+                wash_telemetry = {
+                    "launch_trigger": trigger_scene_state["launch"],
+                    "activation_trigger": trigger_scene_state["wash"],
+                    "contained_vehicle_oobb": contained_oobb,
+                    "initial": initial_wash_state,
+                    "active_on_entry": active_wash_state,
+                    "final": final_wash_state,
+                }
                 if phase4_telemetry is not None:
                     phase4_telemetry["countdown_elapsed_seconds"] = countdown
                     phase4_telemetry["ordered_lua_events"] = event_names
+                    phase4_telemetry["wash_systems"] = wash_telemetry
                     phase4_telemetry["lua_errors"] = []
                     telemetry_path = tmp_path / "cannon_car_wash_phase4_telemetry.json"
                     telemetry_path.write_text(
@@ -749,6 +1229,19 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                         encoding="utf-8",
                     )
                     print("CANNON_PHASE4_TELEMETRY " + json.dumps(phase4_telemetry, sort_keys=True))
+                else:
+                    print(
+                        "CANNON_PHASE3_TELEMETRY "
+                        + json.dumps(
+                            {
+                                "ordered_lua_events": event_names,
+                                "wash_systems": wash_telemetry,
+                                "countdown_elapsed_seconds": countdown,
+                                "lua_errors": [],
+                            },
+                            sort_keys=True,
+                        )
+                    )
         finally:
             try:
                 if bng is not None and not normal_disconnect:
@@ -766,7 +1259,20 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                     await runtime.shutdown()
                 cleanup_exact_live_artifacts(
                     profile=user,
-                    files=(installed_path,) if installed_path is not None else (),
+                    files=tuple(
+                        path
+                        for path in (
+                            installed_path,
+                            gallery_exterior_path if gallery_temp_owned else None,
+                            gallery_wash_path if gallery_temp_owned else None,
+                        )
+                        if path is not None
+                    ),
+                    empty_directories=(
+                        (gallery_temp_directory,)
+                        if gallery_temp_owned and gallery_temp_directory is not None
+                        else ()
+                    ),
                 )
 
 

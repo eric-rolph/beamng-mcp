@@ -32,6 +32,26 @@ def test_mod_install_is_operator_gated_but_offline_workflow_remains_available(
     assert not (tmp_path / "user" / "mods").exists()
 
 
+def test_repository_upload_tree_does_not_require_injected_mod_info(tmp_path: Path) -> None:
+    mods = make_workspace(tmp_path)
+    runtime_file = (
+        tmp_path
+        / "workspace"
+        / "mods"
+        / "repository_ready"
+        / "levels"
+        / "example_level"
+        / "runtime.json"
+    )
+    runtime_file.parent.mkdir(parents=True)
+    runtime_file.write_text('{"enabled": true}\n', encoding="utf-8")
+
+    validation = mods.validate("repository_ready")
+
+    assert validation.valid is True
+    assert validation.issues == []
+
+
 def test_mod_install_gate_can_be_enabled_by_operator_environment(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
