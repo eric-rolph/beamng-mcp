@@ -41,8 +41,8 @@ TRUCK_ID = f"{MOD_ID}_truck"
 SELECTOR_VISUAL_NAME = f"{MOD_ID}_selector_visual"
 PHYSICS_GROUP_NAME = f"{MOD_ID}_physics"
 SCENARIO_FRAGMENT = f"{MOD_ID}/{MOD_ID}.json"
-SPAWN_POSITION = [-110.0, -170.0, 100.12]
 EXPECTED_SURFACE_Z = 100.0
+SPAWN_POSITION = [-110.0, -170.0, EXPECTED_SURFACE_Z + 0.35]
 
 EXPECTED_RUNTIME_FILES = {
     f"vehicles/{MOD_ID}/{MOD_ID}.dae",
@@ -53,12 +53,14 @@ EXPECTED_RUNTIME_FILES = {
     f"vehicles/{MOD_ID}/main.materials.json",
     f"vehicles/{MOD_ID}/{CONFIG_ID}.jpg",
     f"vehicles/{MOD_ID}/{CONFIG_ID}.pc",
-    f"levels/gridmap_v2/art/shapes/{MOD_ID}/{MOD_ID}.dae",
-    f"levels/gridmap_v2/art/shapes/{MOD_ID}/{MOD_ID}.materials.json",
+    f"art/shapes/{MOD_ID}/{MOD_ID}.dae",
+    f"art/shapes/{MOD_ID}/{MOD_ID}.materials.json",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.json",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.lua",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.prefab.json",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.jpg",
+    f"lua/ge/extensions/{MOD_ID}/runtime.lua",
+    f"vehicles/{MOD_ID}/lua/{MOD_ID}_vehicle.lua",
 }
 
 
@@ -115,7 +117,7 @@ async def _shell_snapshot(runtime: Any, vehicle: Any) -> dict[str, Any]:
         True,
     )
     snapshot = json.loads(payload)
-    assert len(snapshot["nodes"]) == 77
+    assert len(snapshot["nodes"]) == 79
     return snapshot
 
 
@@ -299,7 +301,7 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                                 "model": MODEL_ID,
                                 "position": SPAWN_POSITION,
                                 "rotation": [0.0, 0.0, 0.0, 1.0],
-                                "cling": False,
+                                "cling": True,
                             }
                         },
                     )
@@ -309,7 +311,8 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                 assert spawned["model"] == MODEL_ID
                 initial_position = [float(value) for value in spawned["position"]]
                 assert math.dist(initial_position[:2], SPAWN_POSITION[:2]) <= 0.25
-                assert 0.0 <= initial_position[2] - EXPECTED_SURFACE_Z <= 0.5
+                assert initial_position[2] == pytest.approx(EXPECTED_SURFACE_Z, abs=0.03)
+                assert SPAWN_POSITION[2] - initial_position[2] >= 0.30
 
                 prop_vehicle = runtime.simulator._vehicles[PROP_ID]
                 topology = json.loads(
@@ -336,12 +339,35 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                         True,
                     )
                 )
-                assert topology["node_count"] == 77
-                assert topology["fixed_node_count"] == 77
-                assert topology["beam_count"] == 322
+                engine_collision_modes = json.loads(
+                    await runtime.simulator._call(
+                        bng.control.queue_lua_command,
+                        f"local vehicle = scenetree.findObject('{PROP_ID}'); "
+                        "if not vehicle then return jsonEncode({ok = false}) end; "
+                        "local collisionModeThree = 0; "
+                        "for nodeId = 0, #vehicle:getNodeClusters() - 1 do "
+                        "if vehicle:getInitialNodeCollision(nodeId) == 3 then "
+                        "collisionModeThree = collisionModeThree + 1; "
+                        "end; "
+                        "end; "
+                        "return jsonEncode({ok = true, "
+                        "collision_mode_3_count = collisionModeThree})",
+                        True,
+                    )
+                )
+                topology["engine_collision_mode_3_count"] = int(
+                    engine_collision_modes["collision_mode_3_count"]
+                )
+                assert topology["node_count"] == 79
+                assert topology["fixed_node_count"] == 79
+                assert engine_collision_modes == {
+                    "ok": True,
+                    "collision_mode_3_count": 8,
+                }
+                assert topology["beam_count"] == 329
                 assert topology["triangle_count"] == 144
                 assert topology["flexbody_count"] == 1
-                assert topology["total_mass_kg"] == pytest.approx(14875.0, rel=1e-5)
+                assert topology["total_mass_kg"] == pytest.approx(15125.0, rel=1e-5)
                 assert topology["vehicle_directory"] == f"/vehicles/{MOD_ID}/"
                 initial_shell = await _shell_snapshot(runtime, prop_vehicle)
 
@@ -363,7 +389,7 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                 assert math.sqrt(sum(value * value for value in settled_velocity)) <= 0.01
                 assert settling_shell_displacement <= 0.005
                 assert float(settled_shell["max_node_speed_mps"]) <= 0.01
-                assert 0.0 <= settled_position[2] - EXPECTED_SURFACE_Z <= 0.5
+                assert settled_position[2] == pytest.approx(EXPECTED_SURFACE_Z, abs=0.03)
 
                 ai_disabled = _structured(
                     await session.call_tool(

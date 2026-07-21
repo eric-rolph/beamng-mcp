@@ -330,9 +330,9 @@ def test_handlers_and_json_operations_are_protected() -> None:
 def test_typed_triggers_are_isolated_from_generic_world_mutations() -> None:
     source = bridge_source()
     creatable = source.split("local CREATABLE_CLASSES = {", maxsplit=1)[1]
-    creatable = creatable.split("local COLLISION_TYPES", maxsplit=1)[0]
+    creatable = creatable.split("local READ_ONLY_CLASSES", maxsplit=1)[0]
     fields = source.split("local FIELD_RULES = {", maxsplit=1)[1]
-    fields = fields.split("local RELOADABLE_EXTENSIONS", maxsplit=1)[0]
+    fields = fields.split("local READ_ONLY_FIELD_RULES", maxsplit=1)[0]
 
     assert "BeamNGTrigger" not in creatable
     assert "BeamNGTrigger" not in fields
@@ -350,6 +350,62 @@ def test_typed_triggers_are_isolated_from_generic_world_mutations() -> None:
                 'HANDLERS["telemetry.snapshot"]', maxsplit=1
             )[0]
         )
+
+
+def test_packaged_trigger_and_particle_nodes_are_inspectable_but_not_mutable() -> None:
+    source = bridge_source()
+    creatable_classes = source.split("local CREATABLE_CLASSES = {", maxsplit=1)[1]
+    creatable_classes = creatable_classes.split("local READ_ONLY_CLASSES", maxsplit=1)[0]
+    read_only_classes = source.split("local READ_ONLY_CLASSES = {", maxsplit=1)[1]
+    read_only_classes = read_only_classes.split("local COLLISION_TYPES", maxsplit=1)[0]
+    writable_fields = source.split("local FIELD_RULES = {", maxsplit=1)[1]
+    writable_fields = writable_fields.split("local READ_ONLY_FIELD_RULES", maxsplit=1)[0]
+    read_only_fields = source.split("local READ_ONLY_FIELD_RULES = {", maxsplit=1)[1]
+    read_only_fields = read_only_fields.split("local RELOADABLE_EXTENSIONS", maxsplit=1)[0]
+    readable_guard = source.split("local function ensureReadableObject", maxsplit=1)[1]
+    readable_guard = readable_guard.split("local function ensureWritableObject", maxsplit=1)[0]
+    descriptor = source.split("local function objectDescriptor", maxsplit=1)[1]
+    descriptor = descriptor.split("local function ensureReadableObject", maxsplit=1)[0]
+    get_handler = source.split('HANDLERS["world.get_object"]', maxsplit=1)[1]
+    get_handler = get_handler.split('HANDLERS["world.create_object"]', maxsplit=1)[0]
+    list_handler = source.split('HANDLERS["world.list_objects"]', maxsplit=1)[1]
+    list_handler = list_handler.split('HANDLERS["world.get_object"]', maxsplit=1)[0]
+    update_handler = source.split('HANDLERS["world.update_object"]', maxsplit=1)[1]
+    update_handler = update_handler.split('HANDLERS["world.delete_object"]', maxsplit=1)[0]
+    delete_handler = source.split('HANDLERS["world.delete_object"]', maxsplit=1)[1]
+    delete_handler = delete_handler.split('HANDLERS["world.save_level"]', maxsplit=1)[0]
+
+    assert set(
+        re.findall(
+            r"^\s*([A-Za-z][A-Za-z0-9_]*)\s*=\s*true,?$",
+            read_only_classes,
+            re.MULTILINE,
+        )
+    ) == {
+        "BeamNGTrigger",
+        "ParticleEmitterNode",
+    }
+    for class_name in ("BeamNGTrigger", "ParticleEmitterNode"):
+        assert class_name not in creatable_classes
+        assert class_name not in writable_fields
+    assert re.search(
+        r"BeamNGTrigger\s*=\s*\{\s*triggerMode\s*=\s*true,\s*"
+        r"triggerTestType\s*=\s*true\s*\}",
+        read_only_fields,
+    )
+    assert re.search(
+        r"ParticleEmitterNode\s*=\s*\{\s*dataBlock\s*=\s*true,\s*"
+        r"emitter\s*=\s*true\s*\}",
+        read_only_fields,
+    )
+    assert "CREATABLE_CLASSES[className] or READ_ONLY_CLASSES[className]" in readable_guard
+    assert "FIELD_RULES[className] or READ_ONLY_FIELD_RULES[className]" in descriptor
+    assert "CREATABLE_CLASSES[requestedClass] or READ_ONLY_CLASSES[requestedClass]" in list_handler
+    assert "CREATABLE_CLASSES[className] or READ_ONLY_CLASSES[className]" in list_handler
+    assert "ensureReadableObject(object)" in get_handler
+    assert "ensureWritableObject(object)" not in get_handler
+    assert "ensureWritableObject(object)" in update_handler
+    assert "ensureWritableObject(object)" in delete_handler
 
 
 def test_typed_trigger_inputs_have_a_closed_non_executable_schema() -> None:

@@ -1,6 +1,6 @@
 """Phase 2 live gate for the public Cannon Car Wash distribution artifact.
 
-The package under test is the exact 14-file Repository upload tree.  Authoring
+The package under test is the exact 16-file Repository upload tree.  Authoring
 evidence and validation manifests are read from their source-only directories
 and must never be copied into the disposable mod or resulting ZIP.
 """
@@ -40,7 +40,7 @@ from tests.live_support import (
 EXAMPLE_ROOT = Path(__file__).parents[1] / "examples" / "cannon_car_wash"
 MOD_SOURCE = EXAMPLE_ROOT / "mod"
 MOD_ID = "ericrolph_cannon_car_wash"
-ASSET_RELATIVE_PATH = Path(f"levels/gridmap_v2/art/shapes/{MOD_ID}/{MOD_ID}.dae")
+ASSET_RELATIVE_PATH = Path(f"art/shapes/{MOD_ID}/{MOD_ID}.dae")
 GEOMETRY_MANIFEST_PATH = EXAMPLE_ROOT / "authoring" / f"{MOD_ID}.geometry.json"
 PHASE2_MANIFEST_PATH = EXAMPLE_ROOT / "validation" / "manifests" / "phase2.json"
 PACKAGED_SCENARIO_DIRECTORY = Path("levels/gridmap_v2/scenarios") / MOD_ID
@@ -55,6 +55,14 @@ TRUCK_ID = f"{MOD_ID}_truck"
 SCENARIO_VISUAL_ID = f"{MOD_ID}_scenario_visual"
 LAUNCH_TRIGGER_ID = f"{MOD_ID}_launch_trigger"
 WASH_TRIGGER_ID = f"{MOD_ID}_wash_activation_trigger"
+REPAIR_TRIGGER_ID = f"{MOD_ID}_repair_trigger"
+EXPECTED_EFFECT_COUNT = 16
+EXPECTED_EMITTER_COUNTS = {
+    "BNGP_sprinkler": 6,
+    "BNGP_waterfallsteam": 6,
+    "BNGP_34": 2,
+    "BNGP_2": 2,
+}
 PUBLIC_RUNTIME_FILES = frozenset(
     {
         VIRTUAL_ASSET_PATH,
@@ -68,9 +76,11 @@ PUBLIC_RUNTIME_FILES = frozenset(
         f"vehicles/{MOD_ID}/main.materials.json",
         f"vehicles/{MOD_ID}/standard.jpg",
         f"vehicles/{MOD_ID}/standard.pc",
+        f"lua/ge/extensions/{MOD_ID}/runtime.lua",
+        f"vehicles/{MOD_ID}/lua/{MOD_ID}_vehicle.lua",
     }
 )
-PUBLIC_ROOTS = {"levels", "vehicles"}
+PUBLIC_ROOTS = {"art", "levels", "lua", "vehicles"}
 
 
 @dataclass(frozen=True, slots=True)
@@ -146,15 +156,23 @@ def _stage_public_mod(
     assert phase2_manifest["wash_effects"]["visual_name"] == SCENARIO_VISUAL_ID
     assert phase2_manifest["trigger"]["name"] == LAUNCH_TRIGGER_ID
     assert phase2_manifest["wash_activation_trigger"]["name"] == WASH_TRIGGER_ID
+    assert phase2_manifest["repair_trigger"]["name"] == REPAIR_TRIGGER_ID
     assert phase2_manifest["trigger"]["local_center"] == manifest["trigger"]["center"]
     assert phase2_manifest["trigger"]["dimensions"] == manifest["trigger"]["dimensions"]
+    effects = phase2_manifest["wash_effects"]["effects"]
+    assert len(effects) == EXPECTED_EFFECT_COUNT
+    assert phase2_manifest["wash_effects"]["emitter_counts"] == EXPECTED_EMITTER_COUNTS
+    assert {
+        emitter: sum(effect["emitter"] == emitter for effect in effects)
+        for emitter in EXPECTED_EMITTER_COUNTS
+    } == EXPECTED_EMITTER_COUNTS
 
     source_files = {
         path.relative_to(MOD_SOURCE).as_posix(): path
         for path in MOD_SOURCE.rglob("*")
         if path.is_file() and not path.is_symlink()
     }
-    assert len(PUBLIC_RUNTIME_FILES) == 14
+    assert len(PUBLIC_RUNTIME_FILES) == 16
     assert set(source_files) == PUBLIC_RUNTIME_FILES
 
     mod_root = workspace / "mods" / runtime_mod_name
@@ -471,7 +489,7 @@ async def test_cannon_car_wash_phase2_visual_placement_and_trigger(tmp_path: Pat
                 artifact_path = Path(artifact["path"])
                 assert await asyncio.to_thread(artifact_path.is_file)
                 names = await asyncio.to_thread(_zip_members, artifact_path)
-                assert len(names) == 14
+                assert len(names) == 16
                 assert names == PUBLIC_RUNTIME_FILES
                 assert {name.partition("/")[0] for name in names} == PUBLIC_ROOTS
                 installed = _structured(
@@ -550,6 +568,41 @@ async def test_cannon_car_wash_phase2_visual_placement_and_trigger(tmp_path: Pat
                 assert tuple(
                     packaged_asset["position"][axis] for axis in ("x", "y", "z")
                 ) == pytest.approx(phase2_manifest["asset"]["position"])
+
+                packaged_triggers = {
+                    "launch": (LAUNCH_TRIGGER_ID, phase2_manifest["trigger"]),
+                    "wash": (WASH_TRIGGER_ID, phase2_manifest["wash_activation_trigger"]),
+                    "repair": (REPAIR_TRIGGER_ID, phase2_manifest["repair_trigger"]),
+                }
+                for trigger_name, trigger_contract in packaged_triggers.values():
+                    packaged_trigger = _structured(
+                        await session.call_tool("map_object_get", {"object_id": trigger_name})
+                    )
+                    assert packaged_trigger["class"] == "BeamNGTrigger"
+                    assert packaged_trigger["managed"] is False
+                    assert packaged_trigger["fields"]["triggerMode"] == trigger_contract["mode"]
+                    assert (
+                        packaged_trigger["fields"]["triggerTestType"]
+                        == trigger_contract["test_type"]
+                    )
+                    assert tuple(
+                        packaged_trigger["position"][axis] for axis in ("x", "y", "z")
+                    ) == pytest.approx(trigger_contract["world_center"])
+                    assert tuple(
+                        packaged_trigger["scale"][axis] for axis in ("x", "y", "z")
+                    ) == pytest.approx(trigger_contract["dimensions"])
+
+                live_emitter_counts = {emitter: 0 for emitter in EXPECTED_EMITTER_COUNTS}
+                for effect in phase2_manifest["wash_effects"]["effects"]:
+                    packaged_effect = _structured(
+                        await session.call_tool("map_object_get", {"object_id": effect["name"]})
+                    )
+                    assert packaged_effect["class"] == "ParticleEmitterNode"
+                    assert packaged_effect["managed"] is False
+                    assert packaged_effect["fields"]["dataBlock"] == "lightExampleEmitterNodeData1"
+                    assert packaged_effect["fields"]["emitter"] == effect["emitter"]
+                    live_emitter_counts[effect["emitter"]] += 1
+                assert live_emitter_counts == EXPECTED_EMITTER_COUNTS
 
                 packaged_ai_disabled = _structured(
                     await session.call_tool(

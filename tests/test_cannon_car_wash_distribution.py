@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import zipfile
+from collections import Counter
 from pathlib import Path, PurePosixPath
 from typing import Any
 from uuid import UUID
@@ -28,7 +29,7 @@ from examples.cannon_car_wash.build_distribution import (
 )
 
 VEHICLE_ROOT = PurePosixPath("vehicles") / MOD_ID
-LEVEL_ASSET_ROOT = PurePosixPath("levels") / "gridmap_v2" / "art" / "shapes" / MOD_ID
+LEVEL_ASSET_ROOT = PurePosixPath("art") / "shapes" / MOD_ID
 SCENARIO_ROOT = PurePosixPath("levels") / "gridmap_v2" / "scenarios" / MOD_ID
 REPOSITORY_ROOT = EXAMPLE_ROOT / "repository"
 
@@ -39,11 +40,14 @@ ALLOWED_STOCK_DEPENDENCY_REFERENCES = {
     "pickup",
     "default_vehicle",
     "BNGP_sprinkler",
+    "BNGP_waterfallsteam",
+    "BNGP_34",
+    "BNGP_2",
     "lightExampleEmitterNodeData1",
     "onBeamNGTrigger",
     STOCK_CRASH_WALL,
 }
-PERSISTENT_ID_BASELINE = 42
+PERSISTENT_ID_BASELINE = 47
 TEXT_RUNTIME_SUFFIXES = {".dae", ".jbeam", ".json", ".lua", ".pc"}
 LEGACY_AUTHORED_PATTERNS = {
     "legacy scenario material": re.compile(r"(?<![A-Za-z0-9_])CW_[A-Za-z0-9_]+"),
@@ -116,7 +120,7 @@ def _is_namespaced(value: str) -> bool:
 
 def test_distribution_tree_contains_only_approved_runtime_files() -> None:
     files = validate_mod_tree()
-    assert len(EXPECTED_RUNTIME_FILES) == 14
+    assert len(EXPECTED_RUNTIME_FILES) == 16
     assert set(files) == set(EXPECTED_RUNTIME_FILES)
 
     forbidden_suffixes = (".blend", ".py", ".geometry.json", ".selector_handoff.json")
@@ -329,9 +333,29 @@ def test_prefab_scene_names_are_namespaced_and_stock_assets_remain_references() 
     assert vehicles[0]["jBeam"] == "pickup"
 
     misters = [record for record in records if record.get("class") == "ParticleEmitterNode"]
-    assert len(misters) == 12
-    assert {record["emitter"] for record in misters} == {"BNGP_sprinkler"}
+    assert len(misters) == 16
+    assert Counter(record["emitter"] for record in misters) == {
+        "BNGP_sprinkler": 6,
+        "BNGP_waterfallsteam": 6,
+        "BNGP_34": 2,
+        "BNGP_2": 2,
+    }
     assert {record["dataBlock"] for record in misters} == {"lightExampleEmitterNodeData1"}
+
+    triggers = {
+        record["name"]: record for record in records if record.get("class") == "BeamNGTrigger"
+    }
+    assert set(triggers) == {
+        f"{MOD_ID}_wash_activation_trigger",
+        f"{MOD_ID}_repair_trigger",
+        f"{MOD_ID}_launch_trigger",
+    }
+    assert triggers[f"{MOD_ID}_wash_activation_trigger"]["triggerMode"] == "Overlaps"
+    assert triggers[f"{MOD_ID}_repair_trigger"]["triggerMode"] == "Overlaps"
+    assert triggers[f"{MOD_ID}_repair_trigger"]["position"] == [-122.011475, -175.6, 102.1]
+    assert triggers[f"{MOD_ID}_repair_trigger"]["scale"] == [5.4, 2.2, 4.2]
+    assert triggers[f"{MOD_ID}_launch_trigger"]["triggerMode"] == "Contains"
+    assert all(record["triggerTestType"] == "Bounding box" for record in triggers.values())
 
     shape_references = {
         record["shapeName"] for record in records if isinstance(record.get("shapeName"), str)
@@ -417,10 +441,11 @@ def test_deterministic_repository_archive_has_only_approved_root_members(tmp_pat
         assert archive.testzip() is None
         assert all(not member.is_dir() for member in archive.infolist())
         assert all(not member.flag_bits & 0x1 for member in archive.infolist())
+        assert all(member.compress_type == zipfile.ZIP_STORED for member in archive.infolist())
         assert all(member.date_time == ZIP_EPOCH for member in archive.infolist())
         assert all((member.external_attr >> 16) & 0o777 == 0o644 for member in archive.infolist())
         roots = {PurePosixPath(name).parts[0] for name in names}
-        assert roots == {"levels", "vehicles"}
+        assert roots == {"art", "levels", "lua", "vehicles"}
         assert roots == ALLOWED_TOP_LEVEL_ROOTS
 
 

@@ -4,6 +4,7 @@ import hashlib
 import json
 import math
 import re
+from collections import Counter
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
@@ -12,7 +13,7 @@ from PIL import Image
 
 EXAMPLE_ROOT = Path(__file__).parents[1] / "examples" / "cannon_car_wash"
 MOD_ID = "ericrolph_cannon_car_wash"
-ASSET_ROOT = EXAMPLE_ROOT / "mod" / "levels" / "gridmap_v2" / "art" / "shapes" / MOD_ID
+ASSET_ROOT = EXAMPLE_ROOT / "mod" / "art" / "shapes" / MOD_ID
 DAE_PATH = ASSET_ROOT / f"{MOD_ID}.dae"
 GEOMETRY_PATH = EXAMPLE_ROOT / "authoring" / f"{MOD_ID}.geometry.json"
 MATERIALS_PATH = ASSET_ROOT / f"{MOD_ID}.materials.json"
@@ -36,6 +37,7 @@ SELECTOR_RESULTS_PATH = EXAMPLE_ROOT / "telemetry" / "cannon_car_wash_selector_r
 COLLADA_NAMESPACE = {"c": "http://www.collada.org/2005/11/COLLADASchema"}
 LAUNCH_TRIGGER_NAME = f"{MOD_ID}_launch_trigger"
 WASH_TRIGGER_NAME = f"{MOD_ID}_wash_activation_trigger"
+REPAIR_TRIGGER_NAME = f"{MOD_ID}_repair_trigger"
 SCENARIO_VISUAL_NAME = f"{MOD_ID}_scenario_visual"
 SCENARIO_GROUP_NAME = f"{MOD_ID}_group"
 TRUCK_NAME = f"{MOD_ID}_truck"
@@ -47,12 +49,24 @@ LAUNCH_TRIGGER_CENTER = [0.0, 5.0, 2.1]
 LAUNCH_TRIGGER_DIMENSIONS = [5.8, 7.5, 4.6]
 WASH_TRIGGER_CENTER = [0.0, 0.0, 2.2]
 WASH_TRIGGER_DIMENSIONS = [5.8, 17.5, 4.4]
+REPAIR_TRIGGER_CENTER = [0.0, -5.6, 2.1]
+REPAIR_TRIGGER_DIMENSIONS = [5.4, 2.2, 4.2]
 COLLISION_MESH_NAMES = [f"Colmesh-{index}" for index in range(1, 5)]
-MISTER_NAMES = {
-    f"{MOD_ID}_mister_{arch}_{side}_{height}"
-    for arch in ("PreSoak", "Rinse")
-    for side in ("L", "R")
-    for height in range(1, 4)
+EFFECT_NAMES = (
+    {f"{MOD_ID}_mister_PreSoak_{side}_{height}" for side in ("L", "R") for height in range(1, 4)}
+    | {f"{MOD_ID}_dryer_Mist_{side}_{height}" for side in ("L", "R") for height in range(1, 4)}
+    | {f"{MOD_ID}_dryer_{layer}_{side}" for layer in ("Steam", "Dust") for side in ("L", "R")}
+)
+EFFECT_EMITTER_COUNTS = {
+    "BNGP_sprinkler": 6,
+    "BNGP_waterfallsteam": 6,
+    "BNGP_34": 2,
+    "BNGP_2": 2,
+}
+REQUESTED_TO_RUNTIME = {
+    "BNG_Waterfall_Mist": "BNGP_waterfallsteam",
+    "BNG_exhaust_steam": "BNGP_34",
+    "BNG_Ambient_Dust": "BNGP_2",
 }
 
 
@@ -119,7 +133,7 @@ def test_cannon_car_wash_collada_matches_exported_geometry_manifest() -> None:
     assert float(unit.attrib["meter"]) == pytest.approx(1.0)
     assert root.findtext("c:asset/c:up_axis", namespaces=COLLADA_NAMESPACE) == "Z_UP"
 
-    trigger_names = {LAUNCH_TRIGGER_NAME, WASH_TRIGGER_NAME}
+    trigger_names = {LAUNCH_TRIGGER_NAME, WASH_TRIGGER_NAME, REPAIR_TRIGGER_NAME}
     required_nodes = (set(manifest["primary_structures"]) - trigger_names) | set(
         manifest["collision_meshes"]
     )
@@ -152,6 +166,7 @@ def test_cannon_car_wash_collada_matches_exported_geometry_manifest() -> None:
     trigger_specs = {
         LAUNCH_TRIGGER_NAME: (LAUNCH_TRIGGER_CENTER, LAUNCH_TRIGGER_DIMENSIONS),
         WASH_TRIGGER_NAME: (WASH_TRIGGER_CENTER, WASH_TRIGGER_DIMENSIONS),
+        REPAIR_TRIGGER_NAME: (REPAIR_TRIGGER_CENTER, REPAIR_TRIGGER_DIMENSIONS),
     }
     for trigger_name, (center, dimensions) in trigger_specs.items():
         expected = manifest["primary_structures"][trigger_name]
@@ -185,6 +200,14 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
         "mode": "Overlaps",
         "events": ["enter", "exit"],
     }
+    assert manifest["repair_trigger"] == {
+        "name": REPAIR_TRIGGER_NAME,
+        "center": REPAIR_TRIGGER_CENTER,
+        "dimensions": REPAIR_TRIGGER_DIMENSIONS,
+        "mode": "Overlaps",
+        "events": ["enter", "exit"],
+        "repair_strategy": "RESET_PHYSICS",
+    }
     assert manifest["trigger"]["target_speed_kph"] >= 300.0
 
     opening = manifest["clear_opening"]
@@ -210,6 +233,23 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
         f"{MOD_ID}_Brush_Right_2_Spinner/transform",
         f"{MOD_ID}_Brush_Overhead_Spinner/transform",
     }
+    ambient = root.find(
+        "c:library_animation_clips/c:animation_clip[@name='ambient']",
+        COLLADA_NAMESPACE,
+    )
+    assert ambient is not None
+    assert float(ambient.attrib["start"]) == pytest.approx(0.0)
+    assert float(ambient.attrib["end"]) == pytest.approx(2.541667)
+    animation_ids = {
+        animation.attrib["id"]
+        for animation in root.findall("c:library_animations/c:animation", COLLADA_NAMESPACE)
+    }
+    clip_targets = {
+        instance.attrib["url"].removeprefix("#")
+        for instance in ambient.findall("c:instance_animation", COLLADA_NAMESPACE)
+    }
+    assert len(animation_ids) == 5
+    assert clip_targets == animation_ids
 
 
 def test_cannon_car_wash_phase2_materials_cover_every_collada_slot() -> None:
@@ -326,13 +366,29 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
         assert actual_nodes[node_id][1:4] == expected_position
         assert actual_nodes[node_id][4]["group"] == PHYSICS_GROUP_NAME
 
-    assert len(actual_nodes) == 77
+    assert len(actual_nodes) == 79
     fixed_nodes = {node_id for node_id, row in actual_nodes.items() if row[4]["fixed"]}
     assert fixed_nodes == set(actual_nodes)
     assert set(handoff["refnodes"].values()) <= fixed_nodes
-    assert all(row[4]["collision"] is False for row in actual_nodes.values())
+    assert expected_positions[handoff["refnodes"]["ref"]] == [0.0, 0.0, 0.0]
+    assert expected_positions[handoff["refnodes"]["back"]] == [0.0, 3.0, 0.0]
+    spawn_envelope_nodes = set(handoff["spawn_envelope_nodes"])
+    assert len(spawn_envelope_nodes) == 8
+    assert set(handoff["refnodes"].values()).isdisjoint(spawn_envelope_nodes)
+    assert {
+        node_id for node_id, row in actual_nodes.items() if row[4]["collision"] is True
+    } == spawn_envelope_nodes
     assert all(row[4]["selfCollision"] is False for row in actual_nodes.values())
-    assert all(row[4]["staticCollision"] is False for row in actual_nodes.values())
+    assert {
+        node_id for node_id, row in actual_nodes.items() if row[4]["staticCollision"] is True
+    } == spawn_envelope_nodes
+
+    envelope_positions = [expected_positions[node_id] for node_id in spawn_envelope_nodes]
+    envelope_minimum = [min(position[axis] for position in envelope_positions) for axis in range(3)]
+    envelope_maximum = [max(position[axis] for position in envelope_positions) for axis in range(3)]
+    assert envelope_minimum == pytest.approx([-3.4, -9.0, 0.0], abs=1e-5)
+    assert envelope_maximum == pytest.approx([3.4, 9.0, 4.96], abs=1e-5)
+    assert all(envelope_maximum[axis] > envelope_minimum[axis] for axis in range(3))
 
     base_nodes = set(handoff["base_nodes"])
     minimum_z = min(position[2] for position in expected_positions.values())
@@ -379,6 +435,7 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
     }
     assert live_result["topology"] == {
         "beam_count": len(handoff["beams"]),
+        "engine_collision_mode_3_count": len(spawn_envelope_nodes),
         "fixed_node_count": len(handoff["nodes"]),
         "flexbody_count": 1,
         "node_count": len(handoff["nodes"]),
@@ -418,7 +475,7 @@ def test_cannon_car_wash_repository_metadata_and_icon() -> None:
 
     assert repository_info["internal_name"] == MOD_ID
     assert repository_info["title"] == "Cannon Car Wash"
-    assert repository_info["version"] == "1.3.0"
+    assert repository_info["version"] == "1.6.0"
     assert repository_info["author"] == "Eric Rolph"
 
     with Image.open(MOD_ICON_PATH) as icon:
@@ -438,7 +495,7 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
 
     assert phase2["schema_version"] == 1
     assert phase2["phase"] == 2
-    assert phase2["asset"]["path"] == (f"/levels/gridmap_v2/art/shapes/{MOD_ID}/{MOD_ID}.dae")
+    assert phase2["asset"]["path"] == (f"/art/shapes/{MOD_ID}/{MOD_ID}.dae")
     assert phase2["asset"]["sha256"] == dae_sha256
     assert phase2["trigger"]["name"] == LAUNCH_TRIGGER_NAME
     assert phase2["trigger"]["local_center"] == geometry["trigger"]["center"]
@@ -456,11 +513,17 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
     )
     assert phase2["wash_activation_trigger"]["mode"] == "Overlaps"
     assert phase2["wash_activation_trigger"]["test_type"] == "Bounding box"
+    assert phase2["repair_trigger"]["name"] == REPAIR_TRIGGER_NAME
+    assert phase2["repair_trigger"]["local_center"] == geometry["repair_trigger"]["center"]
+    assert phase2["repair_trigger"]["dimensions"] == geometry["repair_trigger"]["dimensions"]
+    assert phase2["repair_trigger"]["mode"] == "Overlaps"
+    assert phase2["repair_trigger"]["test_type"] == "Bounding box"
+    assert phase2["repair_trigger"]["repair_strategy"] == "RESET_PHYSICS"
     assert phase2["wash_effects"]["visual_name"] == SCENARIO_VISUAL_NAME
     assert phase2["wash_effects"]["roller_sequence"] == "ambient"
     assert phase2["wash_effects"]["roller_control_field"] == "playAmbient"
-    assert phase2["wash_effects"]["mister_emitter"] == "BNGP_sprinkler"
-    assert phase2["wash_effects"]["mister_datablock"] == "lightExampleEmitterNodeData1"
+    assert phase2["wash_effects"]["node_datablock"] == "lightExampleEmitterNodeData1"
+    assert phase2["wash_effects"]["requested_to_runtime"] == REQUESTED_TO_RUNTIME
     assert phase2["phase3_launch_behavior_present"] is False
 
     asset_position = phase2["asset"]["position"]
@@ -475,16 +538,23 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
     assert phase2["wash_activation_trigger"]["world_center"] == pytest.approx(
         expected_wash_world_center
     )
+    repair_local_center = phase2["repair_trigger"]["local_center"]
+    expected_repair_world_center = [
+        asset_position[axis] + repair_local_center[axis] for axis in range(3)
+    ]
+    assert phase2["repair_trigger"]["world_center"] == pytest.approx(expected_repair_world_center)
 
     prefab_source = SCENARIO_PREFAB_PATH.read_text(encoding="utf-8")
     prefab_records = [json.loads(line) for line in prefab_source.splitlines() if line.strip()]
     prefab = {record["name"]: record for record in prefab_records}
-    assert len(prefab_records) == 18
+    assert len(prefab_records) == 23
     assert prefab[SCENARIO_GROUP_NAME]["class"] == "SimGroup"
 
     visual = prefab[SCENARIO_VISUAL_NAME]
     assert visual["class"] == "TSStatic"
+    assert visual["shapeName"] == f"/art/shapes/{MOD_ID}/{MOD_ID}.dae"
     assert visual["position"] == phase2["asset"]["position"]
+    assert visual["rotationMatrix"] == [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
     assert visual["scale"] == phase2["asset"]["scale"]
     assert visual["dynamic"] == "1"
     assert visual["playAmbient"] == "1"
@@ -506,29 +576,48 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
     assert wash_trigger["triggerMode"] == "Overlaps"
     assert wash_trigger["triggerTestType"] == "Bounding box"
 
-    mister_specs = {mister["name"]: mister for mister in geometry["wash_effects"]["misters"]}
-    assert set(mister_specs) == MISTER_NAMES
-    phase2_misters = {mister["name"]: mister for mister in phase2["wash_effects"]["misters"]}
-    assert set(phase2_misters) == MISTER_NAMES
-    misters = {
+    repair_trigger = prefab[REPAIR_TRIGGER_NAME]
+    assert repair_trigger["class"] == "BeamNGTrigger"
+    assert repair_trigger["position"] == phase2["repair_trigger"]["world_center"]
+    assert repair_trigger["scale"] == geometry["repair_trigger"]["dimensions"]
+    assert repair_trigger["luaFunction"] == "onBeamNGTrigger"
+    assert repair_trigger["triggerMode"] == "Overlaps"
+    assert repair_trigger["triggerTestType"] == "Bounding box"
+
+    effect_specs = {effect["name"]: effect for effect in geometry["wash_effects"]["effects"]}
+    assert set(effect_specs) == EFFECT_NAMES
+    phase2_effects = {effect["name"]: effect for effect in phase2["wash_effects"]["effects"]}
+    assert set(phase2_effects) == EFFECT_NAMES
+    effects = {
         name: record for name, record in prefab.items() if record["class"] == "ParticleEmitterNode"
     }
-    assert set(misters) == MISTER_NAMES
-    assert geometry["wash_effects"]["mister_emitter"] == "BNGP_sprinkler"
-    for name, mister in misters.items():
-        spec = mister_specs[name]
+    assert set(effects) == EFFECT_NAMES
+    assert geometry["wash_effects"]["node_datablock"] == "lightExampleEmitterNodeData1"
+    assert geometry["wash_effects"]["requested_to_runtime"] == REQUESTED_TO_RUNTIME
+    assert Counter(effect["emitter"] for effect in effect_specs.values()) == EFFECT_EMITTER_COUNTS
+    assert Counter(effect["role"] for effect in effect_specs.values()) == {
+        "wash_water": 6,
+        "dryer_primary": 6,
+        "dryer_secondary": 2,
+        "dryer_ambient": 2,
+    }
+    for name, effect in effects.items():
+        spec = effect_specs[name]
         expected_position = [
             asset_position[axis] + spec["local_position"][axis] for axis in range(3)
         ]
-        assert phase2_misters[name]["local_position"] == spec["local_position"]
-        assert phase2_misters[name]["world_position"] == pytest.approx(expected_position)
-        assert phase2_misters[name]["rotation_matrix"] == spec["rotation_matrix"]
-        assert mister["position"] == pytest.approx(expected_position)
-        assert mister["rotationMatrix"] == spec["rotation_matrix"]
-        assert mister["dataBlock"] == "lightExampleEmitterNodeData1"
-        assert mister["emitter"] == "BNGP_sprinkler"
-        assert mister["active"] is False
-        assert mister["__parent"] == SCENARIO_GROUP_NAME
+        synchronized = phase2_effects[name]
+        for field in ("role", "requested_particle", "emitter", "particle_data"):
+            assert synchronized[field] == spec[field]
+        assert synchronized["local_position"] == spec["local_position"]
+        assert synchronized["world_position"] == pytest.approx(expected_position)
+        assert synchronized["rotation_matrix"] == spec["rotation_matrix"]
+        assert effect["position"] == pytest.approx(expected_position)
+        assert effect["rotationMatrix"] == spec["rotation_matrix"]
+        assert effect["dataBlock"] == "lightExampleEmitterNodeData1"
+        assert effect["emitter"] == spec["emitter"]
+        assert effect["active"] is False
+        assert effect["__parent"] == SCENARIO_GROUP_NAME
 
     vehicle = prefab[TRUCK_NAME]
     assert vehicle["class"] == "BeamNGVehicle"

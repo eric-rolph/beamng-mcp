@@ -3,8 +3,8 @@
   "phase": 2,
   "level": "gridmap_v2",
   "asset": {
-    "path": "/levels/gridmap_v2/art/shapes/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
-    "sha256": "dcea5ed44e2e63204ebedc18c811fa52654209d70ea5c70166ed57c22e5f502e",
+    "path": "/art/shapes/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
+    "sha256": "974f9ff240b264a082b31e4d979016af2a339f5d182908cf56746587dfc4c14c",
     "position": [
       -122.011475,
       -170.0,
@@ -87,80 +87,546 @@
     "visual_name": "ericrolph_cannon_car_wash_scenario_visual",
     "roller_sequence": "ambient",
     "roller_control_field": "playAmbient",
-    "mister_emitter": "BNGP_sprinkler",
-    "mister_datablock": "lightExampleEmitterNodeData1",
-    "misters": [
+    "node_datablock": "lightExampleEmitterNodeData1",
+    "requested_to_runtime": {
+      "BNG_Waterfall_Mist": "BNGP_waterfallsteam",
+      "BNG_exhaust_steam": "BNGP_34",
+      "BNG_Ambient_Dust": "BNGP_2"
+    },
+    "emitter_counts": {
+      "BNGP_sprinkler": 6,
+      "BNGP_waterfallsteam": 6,
+      "BNGP_34": 2,
+      "BNGP_2": 2
+    },
+    "effects": [
       {
         "name": "ericrolph_cannon_car_wash_mister_PreSoak_L_1",
-        "local_position": [-2.62, -5.6, 1.25],
-        "world_position": [-124.631475, -175.6, 101.25],
-        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+        "local_position": [
+          -2.62,
+          -5.6,
+          1.25
+        ],
+        "world_position": [
+          -124.631475,
+          -175.6,
+          101.25
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "role": "wash_water",
+        "requested_particle": "BNG_sprinkler",
+        "emitter": "BNGP_sprinkler",
+        "particle_data": "BNG_sprinkler"
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_dryer_Mist_L_1",
+        "local_position": [
+          -2.62,
+          5.65,
+          1.25
+        ],
+        "world_position": [
+          -124.631475,
+          -164.35,
+          101.25
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "role": "dryer_primary",
+        "requested_particle": "BNG_Waterfall_Mist",
+        "emitter": "BNGP_waterfallsteam",
+        "particle_data": "BNG_waterfallsteam"
       },
       {
         "name": "ericrolph_cannon_car_wash_mister_PreSoak_L_2",
-        "local_position": [-2.62, -5.6, 2.1],
-        "world_position": [-124.631475, -175.6, 102.1],
-        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+        "local_position": [
+          -2.62,
+          -5.6,
+          2.1
+        ],
+        "world_position": [
+          -124.631475,
+          -175.6,
+          102.1
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "role": "wash_water",
+        "requested_particle": "BNG_sprinkler",
+        "emitter": "BNGP_sprinkler",
+        "particle_data": "BNG_sprinkler"
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_dryer_Mist_L_2",
+        "local_position": [
+          -2.62,
+          5.65,
+          2.1
+        ],
+        "world_position": [
+          -124.631475,
+          -164.35,
+          102.1
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "role": "dryer_primary",
+        "requested_particle": "BNG_Waterfall_Mist",
+        "emitter": "BNGP_waterfallsteam",
+        "particle_data": "BNG_waterfallsteam"
       },
       {
         "name": "ericrolph_cannon_car_wash_mister_PreSoak_L_3",
-        "local_position": [-2.62, -5.6, 3.0],
-        "world_position": [-124.631475, -175.6, 103.0],
-        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+        "local_position": [
+          -2.62,
+          -5.6,
+          3.0
+        ],
+        "world_position": [
+          -124.631475,
+          -175.6,
+          103.0
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "role": "wash_water",
+        "requested_particle": "BNG_sprinkler",
+        "emitter": "BNGP_sprinkler",
+        "particle_data": "BNG_sprinkler"
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_dryer_Mist_L_3",
+        "local_position": [
+          -2.62,
+          5.65,
+          3.0
+        ],
+        "world_position": [
+          -124.631475,
+          -164.35,
+          103.0
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "role": "dryer_primary",
+        "requested_particle": "BNG_Waterfall_Mist",
+        "emitter": "BNGP_waterfallsteam",
+        "particle_data": "BNG_waterfallsteam"
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_dryer_Steam_L",
+        "local_position": [
+          -2.62,
+          5.65,
+          2.1
+        ],
+        "world_position": [
+          -124.631475,
+          -164.35,
+          102.1
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "role": "dryer_secondary",
+        "requested_particle": "BNG_exhaust_steam",
+        "emitter": "BNGP_34",
+        "particle_data": "BNG_steam_light_exhaust"
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_dryer_Dust_L",
+        "local_position": [
+          -2.62,
+          5.65,
+          1.25
+        ],
+        "world_position": [
+          -124.631475,
+          -164.35,
+          101.25
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "role": "dryer_ambient",
+        "requested_particle": "BNG_Ambient_Dust",
+        "emitter": "BNGP_2",
+        "particle_data": "BNG_dust_light"
       },
       {
         "name": "ericrolph_cannon_car_wash_mister_PreSoak_R_1",
-        "local_position": [2.62, -5.6, 1.25],
-        "world_position": [-119.391475, -175.6, 101.25],
-        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+        "local_position": [
+          2.62,
+          -5.6,
+          1.25
+        ],
+        "world_position": [
+          -119.391475,
+          -175.6,
+          101.25
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "role": "wash_water",
+        "requested_particle": "BNG_sprinkler",
+        "emitter": "BNGP_sprinkler",
+        "particle_data": "BNG_sprinkler"
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_dryer_Mist_R_1",
+        "local_position": [
+          2.62,
+          5.65,
+          1.25
+        ],
+        "world_position": [
+          -119.391475,
+          -164.35,
+          101.25
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "role": "dryer_primary",
+        "requested_particle": "BNG_Waterfall_Mist",
+        "emitter": "BNGP_waterfallsteam",
+        "particle_data": "BNG_waterfallsteam"
       },
       {
         "name": "ericrolph_cannon_car_wash_mister_PreSoak_R_2",
-        "local_position": [2.62, -5.6, 2.1],
-        "world_position": [-119.391475, -175.6, 102.1],
-        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+        "local_position": [
+          2.62,
+          -5.6,
+          2.1
+        ],
+        "world_position": [
+          -119.391475,
+          -175.6,
+          102.1
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "role": "wash_water",
+        "requested_particle": "BNG_sprinkler",
+        "emitter": "BNGP_sprinkler",
+        "particle_data": "BNG_sprinkler"
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_dryer_Mist_R_2",
+        "local_position": [
+          2.62,
+          5.65,
+          2.1
+        ],
+        "world_position": [
+          -119.391475,
+          -164.35,
+          102.1
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "role": "dryer_primary",
+        "requested_particle": "BNG_Waterfall_Mist",
+        "emitter": "BNGP_waterfallsteam",
+        "particle_data": "BNG_waterfallsteam"
       },
       {
         "name": "ericrolph_cannon_car_wash_mister_PreSoak_R_3",
-        "local_position": [2.62, -5.6, 3.0],
-        "world_position": [-119.391475, -175.6, 103.0],
-        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+        "local_position": [
+          2.62,
+          -5.6,
+          3.0
+        ],
+        "world_position": [
+          -119.391475,
+          -175.6,
+          103.0
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "role": "wash_water",
+        "requested_particle": "BNG_sprinkler",
+        "emitter": "BNGP_sprinkler",
+        "particle_data": "BNG_sprinkler"
       },
       {
-        "name": "ericrolph_cannon_car_wash_mister_Rinse_L_1",
-        "local_position": [-2.62, 5.65, 1.25],
-        "world_position": [-124.631475, -164.35, 101.25],
-        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+        "name": "ericrolph_cannon_car_wash_dryer_Mist_R_3",
+        "local_position": [
+          2.62,
+          5.65,
+          3.0
+        ],
+        "world_position": [
+          -119.391475,
+          -164.35,
+          103.0
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "role": "dryer_primary",
+        "requested_particle": "BNG_Waterfall_Mist",
+        "emitter": "BNGP_waterfallsteam",
+        "particle_data": "BNG_waterfallsteam"
       },
       {
-        "name": "ericrolph_cannon_car_wash_mister_Rinse_L_2",
-        "local_position": [-2.62, 5.65, 2.1],
-        "world_position": [-124.631475, -164.35, 102.1],
-        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+        "name": "ericrolph_cannon_car_wash_dryer_Steam_R",
+        "local_position": [
+          2.62,
+          5.65,
+          2.1
+        ],
+        "world_position": [
+          -119.391475,
+          -164.35,
+          102.1
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "role": "dryer_secondary",
+        "requested_particle": "BNG_exhaust_steam",
+        "emitter": "BNGP_34",
+        "particle_data": "BNG_steam_light_exhaust"
       },
       {
-        "name": "ericrolph_cannon_car_wash_mister_Rinse_L_3",
-        "local_position": [-2.62, 5.65, 3.0],
-        "world_position": [-124.631475, -164.35, 103.0],
-        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
-      },
-      {
-        "name": "ericrolph_cannon_car_wash_mister_Rinse_R_1",
-        "local_position": [2.62, 5.65, 1.25],
-        "world_position": [-119.391475, -164.35, 101.25],
-        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
-      },
-      {
-        "name": "ericrolph_cannon_car_wash_mister_Rinse_R_2",
-        "local_position": [2.62, 5.65, 2.1],
-        "world_position": [-119.391475, -164.35, 102.1],
-        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
-      },
-      {
-        "name": "ericrolph_cannon_car_wash_mister_Rinse_R_3",
-        "local_position": [2.62, 5.65, 3.0],
-        "world_position": [-119.391475, -164.35, 103.0],
-        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+        "name": "ericrolph_cannon_car_wash_dryer_Dust_R",
+        "local_position": [
+          2.62,
+          5.65,
+          1.25
+        ],
+        "world_position": [
+          -119.391475,
+          -164.35,
+          101.25
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "role": "dryer_ambient",
+        "requested_particle": "BNG_Ambient_Dust",
+        "emitter": "BNGP_2",
+        "particle_data": "BNG_dust_light"
       }
     ]
   },
@@ -185,5 +651,34 @@
       0.0
     ]
   },
-  "phase3_launch_behavior_present": false
+  "phase3_launch_behavior_present": false,
+  "repair_trigger": {
+    "name": "ericrolph_cannon_car_wash_repair_trigger",
+    "class": "BeamNGTrigger",
+    "local_center": [
+      0.0,
+      -5.6,
+      2.1
+    ],
+    "world_center": [
+      -122.011475,
+      -175.6,
+      102.1
+    ],
+    "dimensions": [
+      5.4,
+      2.2,
+      4.2
+    ],
+    "rotation_xyzw": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "lua_function": "onBeamNGTrigger",
+    "mode": "Overlaps",
+    "test_type": "Bounding box",
+    "repair_strategy": "RESET_PHYSICS"
+  }
 }

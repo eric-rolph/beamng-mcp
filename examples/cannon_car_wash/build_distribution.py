@@ -19,25 +19,31 @@ MOD_ROOT = EXAMPLE_ROOT / "mod"
 DEFAULT_OUTPUT_DIR = EXAMPLE_ROOT / "dist"
 MOD_ID = "ericrolph_cannon_car_wash"
 ZIP_NAME = "cannon_car_wash_ericrolph.zip"
-ALLOWED_TOP_LEVEL_ROOTS = frozenset({"levels", "vehicles"})
+ALLOWED_TOP_LEVEL_ROOTS = frozenset({"art", "levels", "lua", "vehicles"})
 FILENAME_PATTERN = re.compile(r"^[A-Za-z0-9._-]+$")
-ZIP_EPOCH = (1980, 1, 1, 0, 0, 0)
+# Deterministic per-release timestamp. BeamNG compares Collada source mtimes to
+# its compiled .cdae cache, so a forever-1980 timestamp can preserve obsolete
+# animation data across mod updates. Bump this constant whenever a shipped DAE
+# changes while keeping it fixed for reproducible builds of the same release.
+ZIP_EPOCH = (2026, 7, 21, 14, 30, 0)
 LOGGER = logging.getLogger(__name__)
 
 # Public Repository contents are an explicit release decision. Never replace
 # this allowlist with a recursive "pack everything" implementation.
 EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
-    f"levels/gridmap_v2/art/shapes/{MOD_ID}/{MOD_ID}.dae",
-    f"levels/gridmap_v2/art/shapes/{MOD_ID}/{MOD_ID}.materials.json",
+    f"art/shapes/{MOD_ID}/{MOD_ID}.dae",
+    f"art/shapes/{MOD_ID}/{MOD_ID}.materials.json",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.jpg",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.json",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.lua",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.prefab.json",
+    f"lua/ge/extensions/{MOD_ID}/runtime.lua",
     f"vehicles/{MOD_ID}/default.jpg",
     f"vehicles/{MOD_ID}/{MOD_ID}.dae",
     f"vehicles/{MOD_ID}/{MOD_ID}.jbeam",
     f"vehicles/{MOD_ID}/info.json",
     f"vehicles/{MOD_ID}/info_standard.json",
+    f"vehicles/{MOD_ID}/lua/{MOD_ID}_vehicle.lua",
     f"vehicles/{MOD_ID}/main.materials.json",
     f"vehicles/{MOD_ID}/standard.jpg",
     f"vehicles/{MOD_ID}/standard.pc",
@@ -64,8 +70,8 @@ def _validate_member_name(name: str) -> PurePosixPath:
 
 
 def _validate_allowlist() -> None:
-    if len(EXPECTED_RUNTIME_FILES) != 14:
-        raise DistributionError("the public runtime allowlist must contain exactly 14 files")
+    if len(EXPECTED_RUNTIME_FILES) != 16:
+        raise DistributionError("the public runtime allowlist must contain exactly 16 files")
     if tuple(sorted(EXPECTED_RUNTIME_FILES)) != EXPECTED_RUNTIME_FILES:
         raise DistributionError("the public runtime allowlist must be deterministically sorted")
     for name in EXPECTED_RUNTIME_FILES:
@@ -158,22 +164,23 @@ def _cleanup_failure_note(path: Path, error: OSError) -> str:
 
 
 def _write_archive(path: Path, payloads: dict[str, bytes]) -> None:
+    # Stored members make the complete archive byte-for-byte reproducible across
+    # Python and zlib releases. DEFLATE level 9 produced different streams for
+    # the same payload on the local runtime and GitHub's Python 3.11/3.13 jobs.
     with zipfile.ZipFile(
         path,
         mode="w",
-        compression=zipfile.ZIP_DEFLATED,
-        compresslevel=9,
+        compression=zipfile.ZIP_STORED,
     ) as archive:
         for name in EXPECTED_RUNTIME_FILES:
             info = zipfile.ZipInfo(name, date_time=ZIP_EPOCH)
-            info.compress_type = zipfile.ZIP_DEFLATED
+            info.compress_type = zipfile.ZIP_STORED
             info.create_system = 3
             info.external_attr = (stat.S_IFREG | 0o644) << 16
             archive.writestr(
                 info,
                 payloads[name],
-                compress_type=zipfile.ZIP_DEFLATED,
-                compresslevel=9,
+                compress_type=zipfile.ZIP_STORED,
             )
 
 
@@ -196,6 +203,11 @@ def verify_archive(path: Path) -> None:
                     raise DistributionError(f"directory member is forbidden: {member.filename}")
                 if member.flag_bits & 0x1:
                     raise DistributionError(f"encrypted member is forbidden: {member.filename}")
+                if member.compress_type != zipfile.ZIP_STORED:
+                    raise DistributionError(
+                        f"non-portable compression method for {member.filename}: "
+                        f"{member.compress_type}"
+                    )
                 if member.date_time != ZIP_EPOCH:
                     raise DistributionError(f"non-deterministic timestamp: {member.filename}")
                 if member.create_system != 3:

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import Counter
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -10,6 +11,7 @@ MOD_ROOT = EXAMPLE_ROOT / "mod"
 MOD_ID = "ericrolph_cannon_car_wash"
 LAUNCH_TRIGGER_NAME = f"{MOD_ID}_launch_trigger"
 WASH_TRIGGER_NAME = f"{MOD_ID}_wash_activation_trigger"
+REPAIR_TRIGGER_NAME = f"{MOD_ID}_repair_trigger"
 TRUCK_NAME = f"{MOD_ID}_truck"
 SCENARIO_VISUAL_NAME = f"{MOD_ID}_scenario_visual"
 CRASH_WALL_NAME = f"{MOD_ID}_crash_wall"
@@ -108,6 +110,34 @@ def test_phase3_payload_uses_the_scenario_owned_extension_lifecycle() -> None:
     assert wash_trigger["triggerMode"] == "Overlaps"
     assert wash_trigger["triggerTestType"] == "Bounding box"
 
+    repair_trigger = prefab_by_name[REPAIR_TRIGGER_NAME]
+    assert repair_trigger["class"] == "BeamNGTrigger"
+    assert repair_trigger["position"] == [-122.011475, -175.6, 102.1]
+    assert repair_trigger["scale"] == [5.4, 2.2, 4.2]
+    assert repair_trigger["luaFunction"] == "onBeamNGTrigger"
+    assert repair_trigger["triggerMode"] == "Overlaps"
+    assert repair_trigger["triggerTestType"] == "Bounding box"
+
+    # ParticleEmitterNode emits along the third (local +Z) matrix column.
+    # Each left/right nozzle must point toward the wash centerline.
+    effects = [record for record in prefab if record["class"] == "ParticleEmitterNode"]
+    assert len(effects) == 16
+    assert Counter(effect["emitter"] for effect in effects) == {
+        "BNGP_sprinkler": 6,
+        "BNGP_waterfallsteam": 6,
+        "BNGP_34": 2,
+        "BNGP_2": 2,
+    }
+    for effect in effects:
+        local_x = float(effect["position"][0]) - float(
+            prefab_by_name[SCENARIO_VISUAL_NAME]["position"][0]
+        )
+        emission_axis = [float(value) for value in effect["rotationMatrix"][6:9]]
+        inward_x = -1.0 if local_x > 0 else 1.0
+        magnitude = sum(value * value for value in emission_axis) ** 0.5
+        inward_dot = emission_axis[0] * inward_x / magnitude
+        assert inward_dot > 0.999, effect
+
     source = extension_source()
     assert "setExtensionUnloadMode" not in source
     assert "extensions.load" not in source
@@ -118,29 +148,35 @@ def test_phase3_payload_uses_the_scenario_owned_extension_lifecycle() -> None:
         "onPreRender",
         "onClientStartMission",
         "onClientEndMission",
+        "onVehicleResetted",
         "onExtensionLoaded",
         "onExtensionUnloaded",
+        "onEricrolphCannonCarWashScenarioRepairIntegrityAcknowledged",
     ):
         _function_tail(source, callback)
         assert f"M.{callback}" in source
 
 
-def test_trigger_callback_requires_exact_live_trigger_and_exact_pickup() -> None:
+def test_trigger_callback_requires_exact_live_triggers_and_scopes_vehicle_identity() -> None:
     source = extension_source()
     dispatch = _function_section(source, "onBeamNGTrigger")
     launch_callback = _function_section(source, "handleLaunchTrigger")
+    repair_callback = _function_section(source, "handleRepairTrigger")
     trigger_resolver = _function_section(source, "exactTriggerFromEvent")
     vehicle_resolver = _function_section(source, "exactVehicleFromEvent")
     truck_resolver = _function_section(source, "exactTruckFromEvent")
 
     assert _lua_string(source, "LAUNCH_TRIGGER_NAME") == LAUNCH_TRIGGER_NAME
     assert _lua_string(source, "WASH_TRIGGER_NAME") == WASH_TRIGGER_NAME
+    assert _lua_string(source, "REPAIR_TRIGGER_NAME") == REPAIR_TRIGGER_NAME
     assert _lua_string(source, "TRUCK_NAME") == TRUCK_NAME
     assert _lua_string(source, "TRUCK_MODEL") == "pickup"
 
     assert "handleWashTrigger(data)" in dispatch
+    assert "handleRepairTrigger(data)" in dispatch
     assert "handleLaunchTrigger(data)" in dispatch
     assert "data.triggerName == WASH_TRIGGER_NAME" in dispatch
+    assert "data.triggerName == REPAIR_TRIGGER_NAME" in dispatch
     assert "data.triggerName == LAUNCH_TRIGGER_NAME" in dispatch
 
     # Do not accept an event solely because its user-controlled names happen to
@@ -150,6 +186,7 @@ def test_trigger_callback_requires_exact_live_trigger_and_exact_pickup() -> None
     assert "data.subjectID" in launch_callback
     assert 'exactTriggerFromEvent(data, LAUNCH_TRIGGER_NAME, "Contains")' in launch_callback
     assert 'exactTriggerFromEvent(data, WASH_TRIGGER_NAME, "Overlaps")' in source
+    assert 'exactTriggerFromEvent(data, REPAIR_TRIGGER_NAME, "Overlaps")' in repair_callback
     assert re.search(r"scenetree\.findObject\s*\(\s*expectedName\s*\)", trigger_resolver)
     assert re.search(r"scenetree\.findObjectById\s*\(\s*data\.triggerID\s*\)", trigger_resolver)
     assert re.search(
@@ -166,47 +203,71 @@ def test_trigger_callback_requires_exact_live_trigger_and_exact_pickup() -> None
     assert re.search(r"\w+:getId\(\)\s*~=\s*data\.subjectID", vehicle_resolver)
     assert re.search(r"\w+:getName\(\)\s*~=\s*TRUCK_NAME", truck_resolver)
     assert re.search(r"\w+:getJBeamFilename\(\)\s*~=\s*TRUCK_MODEL", truck_resolver)
+    assert "exactVehicleFromEvent(data)" in repair_callback
+    assert "exactTruckFromEvent(data)" not in repair_callback
 
     enter_guard = re.search(r"data\.event\s*~=\s*[\"']enter[\"']", launch_callback)
     assert enter_guard is not None
-    assert launch_callback.index("data.triggerName") < launch_callback.index("hold_start")
+    assert launch_callback.index("data.triggerName") < launch_callback.index("hold_requested")
 
 
-def test_wash_trigger_controls_all_rollers_and_stock_sprinkler_misters() -> None:
+def test_wash_trigger_controls_rollers_water_and_layered_dryer_effects() -> None:
     source = extension_source()
     wash_callback = _function_section(source, "handleWashTrigger")
     wash_systems = _function_section(source, "setWashSystemsEnabled")
     wash_resolver = _function_section(source, "resolveWashObjects")
     wash_rollback = _function_section(source, "forceWashSystemsOff")
+    ambient_control = _function_section(source, "setVisualAmbient")
 
     assert _lua_string(source, "VISUAL_NAME") == SCENARIO_VISUAL_NAME
     assert _lua_string(source, "VISUAL_CLASS") == "TSStatic"
-    assert _lua_string(source, "MISTER_CLASS") == "ParticleEmitterNode"
+    emitter_class = re.search(
+        r"local\s+(?:EFFECT|MISTER)_CLASS\s*=\s*([\"'])ParticleEmitterNode\1",
+        source,
+    )
+    assert emitter_class is not None
 
-    mister_table = re.search(
-        r"local\s+MISTER_NAMES\s*=\s*{(?P<body>.*?)}",
+    effect_table = re.search(
+        r"local\s+EFFECT_SPECS\s*=\s*\{(?P<body>.*?)\n\}",
         source,
         flags=re.DOTALL,
     )
-    assert mister_table is not None
-    mister_names = re.findall(r"[\"']([^\"']+)[\"']", mister_table.group("body"))
-    assert mister_names == [
-        f"{MOD_ID}_mister_{arch}_{side}_{height}"
-        for arch in ("PreSoak", "Rinse")
-        for side in ("L", "R")
-        for height in range(1, 4)
-    ]
+    assert effect_table is not None
+    effect_names = re.findall(r"\bname\s*=\s*[\"']([^\"']+)[\"']", effect_table.group("body"))
+    assert len(effect_names) == 16
+    assert set(effect_names) == (
+        {
+            f"{MOD_ID}_mister_PreSoak_{side}_{height}"
+            for side in ("L", "R")
+            for height in range(1, 4)
+        }
+        | {f"{MOD_ID}_dryer_Mist_{side}_{height}" for side in ("L", "R") for height in range(1, 4)}
+        | {f"{MOD_ID}_dryer_{layer}_{side}" for layer in ("Steam", "Dust") for side in ("L", "R")}
+    )
+    assert Counter(
+        re.findall(r"\bemitter\s*=\s*[\"']([^\"']+)[\"']", effect_table.group("body"))
+    ) == {
+        "BNGP_sprinkler": 6,
+        "BNGP_waterfallsteam": 6,
+        "BNGP_34": 2,
+        "BNGP_2": 2,
+    }
 
-    assert 'visual:setField("playAmbient", 0, expectedField)' in wash_systems
-    assert "exactSceneObject(name, MISTER_CLASS)" in wash_resolver
-    assert "mister:setActive(enabled)" in wash_systems
+    assert "setVisualAmbient(visual, enabled)" in wash_systems
+    assert 'visual:setField("playAmbient", 0, enabled and "1" or "0")' in ambient_control
+    assert "visual:preApply()" in ambient_control
+    assert "visual:postApply()" in ambient_control
+    assert "exactSceneObject(spec.name, EFFECT_CLASS)" in wash_resolver
+    assert 'effect:getField("emitter", 0) == spec.emitter' in wash_resolver
+    assert "effect:setActive(enabled)" in wash_systems
     assert "resolveWashObjects()" in wash_systems
-    assert wash_systems.count("forceWashSystemsOff(visual, misters)") >= 2
-    assert 'visual:setField("playAmbient", 0, "0")' in wash_rollback
-    assert "mister:setActive(false)" in wash_rollback
+    assert wash_systems.count("forceWashSystemsOff(visual, effects)") >= 2
+    assert "setVisualAmbient(visual, false)" in wash_rollback
+    assert "effect:setActive(false)" in wash_rollback
     assert "washSystemsActive = false" in wash_rollback
-    assert 'mister_emitter = "BNGP_sprinkler"' in wash_systems
-    assert "mister_count = #MISTER_NAMES" in wash_systems
+    for emitter in ("BNGP_sprinkler", "BNGP_waterfallsteam", "BNGP_34", "BNGP_2"):
+        assert emitter in source
+    assert re.search(r"effect_count\s*=\s*#EFFECT_SPECS", wash_systems)
 
     assert re.search(r"washSubjects\[data\.subjectID\]\s*=\s*true", wash_callback)
     assert re.search(r"washSubjects\[data\.subjectID\]\s*=\s*nil", wash_callback)
@@ -225,6 +286,121 @@ def test_wash_trigger_controls_all_rollers_and_stock_sprinkler_misters() -> None
         assert f'"{event}"' in source or f"'{event}'" in source
 
     assert re.search(r"M\.getSystemState\s*=\s*washSystemState", source)
+
+
+def test_repair_trigger_resets_once_and_waits_for_post_reset_integrity_ack() -> None:
+    source = extension_source()
+    repair_callback = _function_section(source, "handleRepairTrigger")
+    wash_callback = _function_section(source, "handleWashTrigger")
+    reset_callback = _function_section(source, "onVehicleResetted")
+    update = _function_section(source, "onPreRender")
+    pending_launch = _function_section(source, "processPendingLaunch")
+    integrity_ack_name = "onEricrolphCannonCarWashScenarioRepairIntegrityAcknowledged"
+    integrity_ack = _function_section(source, integrity_ack_name)
+    release_ack_name = "onEricrolphCannonCarWashScenarioRepairReleaseAcknowledged"
+    release_ack = _function_section(source, release_ack_name)
+    launch_callback = _function_section(source, "handleLaunchTrigger")
+
+    release_start = source.index("local function releaseVehicleCommand")
+    release_string_end = source.index("]]", release_start)
+    integrity_helper_start = source.index("local function repairIntegrityCommand")
+    assert integrity_helper_start > release_string_end
+    assert "repairIntegrityCommand" not in source[release_start:release_string_end]
+    integrity_helper = _function_section(source, "repairIntegrityCommand")
+    assert "'%s'" in integrity_helper
+    assert "%q" not in integrity_helper
+    assert "ericrolphCannonCarWashScenarioRepairHoldState" in integrity_helper
+    assert "controller.setFreeze(1)" in integrity_helper
+    repair_release = _function_section(source, "repairReleaseCommand")
+    assert "controller.setFreeze(previousFrozen and 1 or 0)" in repair_release
+    assert release_ack_name in repair_release
+
+    assert "repairOccupants" in source
+    for phase in (
+        "precheck_pending",
+        "reset_pending",
+        "pose_restore_pending",
+        "settling",
+        "verify_pending",
+        "release_pending",
+        "complete",
+        "failed",
+    ):
+        assert f'"{phase}"' in source or f"'{phase}'" in source
+
+    # A damaged OOBB only has to overlap the entry arch. Duplicate enter events
+    # from the intentional physics reset remain latched until the vehicle leaves
+    # the full wash bay; a repair-trigger exit alone only records observation.
+    assert 'exactTriggerFromEvent(data, REPAIR_TRIGGER_NAME, "Overlaps")' in repair_callback
+    assert "repairOccupants[data.subjectID]" in repair_callback
+    assert re.search(r"data\.event\s*==\s*[\"']exit[\"']", repair_callback)
+    assert "exitObserved = true" in repair_callback
+    assert re.search(
+        r"data\.event\s*~=\s*[\"']enter[\"']\s+or\s+repairOccupants\[data\.subjectID\]",
+        repair_callback,
+    )
+    assert re.search(r"repairOccupants\[data\.subjectID\]\s*=\s*nil", wash_callback)
+
+    assert re.search(r"(?:obj|vehicle):requestReset\(\s*RESET_PHYSICS\s*\)", source)
+    assert "resetBrokenFlexMesh" in source
+    assert "beamstate.damage" in source
+    assert "beamstate.getPartDamageData" in source
+    assert "obj:beamIsBroken" in source
+
+    # onVehicleResetted is the acknowledgement of the intentional reset. It
+    # must recognize reset_pending before the generic path removes/aborts the
+    # subject, then advance to a settling/verification phase and return.
+    assert reset_callback.index("reset_pending") < reset_callback.index("removeWashSubject")
+    reset_pending_branch = reset_callback[: reset_callback.index("removeWashSubject")]
+    assert "repairOccupants" in reset_pending_branch
+    assert '"repair_reset_ack"' in reset_pending_branch
+    assert "vehicle:setPositionRotation" in reset_pending_branch
+    assert "repair.positionBefore" in reset_pending_branch
+    assert "repair.rotationBefore" in reset_pending_branch
+    assert "pose_restore_requested = true" in reset_pending_branch
+    assert '"repair_pose_restore_ack"' in reset_pending_branch
+    assert "return" in reset_pending_branch
+
+    assert "repairOccupants" in integrity_ack
+    assert "verify_pending" in integrity_ack
+    assert "failed" in integrity_ack
+    assert f"M.{integrity_ack_name}" in source
+    assert "release_pending" in integrity_ack
+    assert "repair_release_requested" in integrity_ack
+    assert "repair_release_ack" in release_ack
+    assert "repair_complete" in release_ack
+    assert "processPendingLaunch" in release_ack
+    assert f"M.{release_ack_name}" in source
+
+    # Only trigger churn caused by the intentional reset may defer a wash
+    # exit. A reset-generated re-entry cancels that deferred exit; otherwise
+    # guard expiry removes the subject instead of leaking occupancy/effects.
+    assert "resetEdgeGuard" in wash_callback
+    assert "washExitDeferred = true" in wash_callback
+    assert 'repair.phase ~= "complete"' not in wash_callback
+    assert "washExitDeferred = false" in wash_callback
+    assert "deferredWashExit" in update
+    assert 'removeWashSubject(vehicleId, "deferred_exit_after_repair")' in update
+    assert "processPendingLaunch(vehicleId)" in update
+    assert re.search(
+        r"if\s+not\s+queued\s+then\s+failRepair\(vehicleId,\s*"
+        r'["\']repair_verification_command_failed["\']',
+        update,
+    )
+
+    # If full launch containment races the reset verification, keep the entry
+    # pending until this occupant reaches the complete phase.
+    assert re.search(
+        r"repair[A-Za-z_]*\s*\(\s*data\.subjectID\s*\)|"
+        r"repairOccupants\[data\.subjectID\]",
+        launch_callback,
+    )
+    assert "complete" in source
+    assert "resetEdgeGuard" in pending_launch
+    assert "washExitDeferred" in pending_launch
+    assert "resetEdgeGuard" in launch_callback
+    assert "washExitDeferred" in launch_callback
+    assert '"launch_deferred"' in launch_callback
 
 
 def test_phase3_manifest_describes_wash_cycle_and_containment_gate() -> None:
@@ -246,6 +422,9 @@ def test_phase3_manifest_describes_wash_cycle_and_containment_gate() -> None:
         "wash_trigger_name": WASH_TRIGGER_NAME,
         "wash_trigger_class": "BeamNGTrigger",
         "wash_trigger_mode": "Overlaps",
+        "repair_trigger_name": REPAIR_TRIGGER_NAME,
+        "repair_trigger_class": "BeamNGTrigger",
+        "repair_trigger_mode": "Overlaps",
         "vehicle_name": TRUCK_NAME,
         "vehicle_model": "pickup",
     }
@@ -255,16 +434,39 @@ def test_phase3_manifest_describes_wash_cycle_and_containment_gate() -> None:
             "roller_visual": SCENARIO_VISUAL_NAME,
             "roller_sequence": "ambient",
             "roller_play_ambient": True,
-            "mister_emitter": "BNGP_sprinkler",
-            "mister_count": 12,
-            "misters_active": True,
+            "emitter_counts": {
+                "BNGP_sprinkler": 6,
+                "BNGP_waterfallsteam": 6,
+                "BNGP_34": 2,
+                "BNGP_2": 2,
+            },
+            "effect_count": 16,
+            "effects_active": True,
         },
         "exit": {
             "roller_play_ambient": False,
-            "misters_active": False,
+            "effects_active": False,
         },
         "mission_initial_state": "off",
         "subject_tracking": "vehicle_id_set",
+    }
+    assert manifest["repair_cycle"] == {
+        "trigger_name": REPAIR_TRIGGER_NAME,
+        "trigger_mode": "Overlaps",
+        "trigger_test_type": "Bounding box",
+        "vehicle_scope": "any_live_vehicle",
+        "reset_strategy": "RESET_PHYSICS",
+        "pre_reset_hold": "acknowledged_controller_freeze_preserving_previous_state",
+        "pose_policy": "restore_exact_pre_reset_position_and_quaternion",
+        "reset_callback_sequence": [
+            "physics_reset_acknowledgement",
+            "pose_restore_acknowledgement",
+        ],
+        "settle_sim_frames": 2,
+        "completion": "post_reset_integrity_and_freeze_release_acknowledgements",
+        "duplicate_enter_policy": "ignore_until_wash_exit",
+        "deferred_exit_policy": "reconcile_after_reset_edge_guard",
+        "launch_policy": "defer_until_complete_and_reset_edge_guard_clear_when_occupied",
     }
     assert manifest["containment_gate"] == {
         "required_trigger": LAUNCH_TRIGGER_NAME,
@@ -272,7 +474,8 @@ def test_phase3_manifest_describes_wash_cycle_and_containment_gate() -> None:
         "required_test_type": "Bounding box",
         "required_vehicle_state": f"previously_entered_{WASH_TRIGGER_NAME}",
         "required_wash_system_state": "active",
-        "out_of_order_policy": "defer_until_wash_active",
+        "required_repair_state": "complete_when_repair_occupant_exists",
+        "out_of_order_policy": "defer_until_wash_active_and_repair_complete",
         "action": "begin_countdown",
     }
     assert manifest["telemetry"]["wash_events"] == [
@@ -280,6 +483,16 @@ def test_phase3_manifest_describes_wash_cycle_and_containment_gate() -> None:
         "wash_systems_start",
         "wash_trigger_exit",
         "wash_systems_stop",
+    ]
+    assert manifest["telemetry"]["repair_events"] == [
+        "repair_trigger_enter",
+        "repair_snapshot",
+        "repair_requested",
+        "repair_reset_ack",
+        "repair_pose_restore_ack",
+        "repair_release_requested",
+        "repair_release_ack",
+        "repair_complete",
     ]
     assert manifest["telemetry"]["launch_gate_event"] == "containment_verified"
     assert manifest["telemetry"]["launch_deferred_event"] == "launch_deferred"
@@ -300,6 +513,8 @@ def test_launch_requires_prior_wash_entry_and_engine_contains_event() -> None:
     pending = _function_section(source, "processPendingLaunch")
     assert "washSubjects[subjectId]" in pending
     assert "washSystemsActive" in pending
+    assert "repairOccupants" in source
+    assert "complete" in pending or re.search(r"repair[A-Za-z_]*\(\s*subjectId\s*\)", pending)
     assert "handleLaunchTrigger(pending)" in pending
     wash_callback = _function_section(source, "handleWashTrigger")
     assert "processPendingLaunch(data.subjectID)" in wash_callback
@@ -311,7 +526,7 @@ def test_launch_requires_prior_wash_entry_and_engine_contains_event() -> None:
         < launch_callback.index("armed = false")
         < launch_callback.index('"containment_verified"')
         < launch_callback.index('"trigger_enter"')
-        < launch_callback.index("HOLD_VEHICLE_COMMAND")
+        < launch_callback.index("holdVehicleCommand")
     )
 
 
@@ -341,7 +556,7 @@ def test_countdown_is_a_jobsystem_three_two_one_go_state_machine() -> None:
     assert "hptimer()" in countdown
     assert "COUNTDOWN_MESSAGES" in countdown
     assert re.search(r"countdownIndex\s*=\s*nextIndex", countdown)
-    assert "launchVehicle(vehicle)" in countdown
+    assert "requestReleaseForLaunch(vehicle)" in countdown
     assert "activeRun.number ~= runNumber" in countdown
 
 
@@ -359,16 +574,26 @@ def test_countdown_uses_stable_ui_messages_and_observable_event_names() -> None:
     for event in (
         "wash_trigger_enter",
         "wash_systems_start",
+        "repair_trigger_enter",
+        "repair_snapshot",
+        "repair_requested",
+        "repair_reset_ack",
+        "repair_complete",
         "containment_verified",
         "trigger_enter",
+        "hold_requested",
+        "hold_ack",
         "hold_start",
         "countdown_timer_start",
         "countdown_3",
         "countdown_2",
         "countdown_1",
         "go",
+        "release_requested",
+        "release_ack",
         "release",
         "launch",
+        "launch_complete",
         "wash_trigger_exit",
         "wash_systems_stop",
         "launch_deferred",
@@ -378,42 +603,54 @@ def test_countdown_uses_stable_ui_messages_and_observable_event_names() -> None:
         assert f'"{event}"' in source or f"'{event}'" in source
 
 
-def test_hold_uses_vehicle_input_freeze_plus_per_frame_physics_zeroing() -> None:
+def test_hold_uses_acknowledged_freeze_and_one_uniform_cluster_stop() -> None:
     source = extension_source()
     update = _function_tail(source, "onPreRender")
-    normalized_quotes = source.replace('"', "'")
-
-    for command in (
-        "ai.setMode('disabled')",
-        "input.event('throttle', 0, 1)",
-        "input.event('brake', 1, 1)",
-        "input.event('parkingbrake', 1, 1)",
-        "controller.setFreeze(1)",
-    ):
-        assert command in normalized_quotes
-    assert "queueLuaCommand" in source
-
-    zero_velocity = re.compile(
-        r"(?P<vehicle>[A-Za-z_]\w*):applyClusterVelocityScaleAdd\(\s*"
-        r"(?P=vehicle):getRefNodeId\(\)\s*,\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)",
-        flags=re.DOTALL,
+    assert "controller.setFreeze(1)" in source
+    assert "controller.setFreeze(previousFrozen and 1 or 0)" in source
+    assert "ericrolphCannonCarWashScenarioHoldState" in source
+    # Lua's ``condition and false_value or fallback`` idiom loses a stored
+    # false value. The release path must preserve the pre-hold unfrozen state
+    # explicitly or it restores the truck to frozen and the launch deadlocks.
+    assert "existing and existing.frozen or currentFrozen" not in source
+    assert "matched and existing.frozen" not in source
+    assert "if existing then previousFrozen = existing.frozen == true end" in source
+    assert "if matched then previousFrozen = existing.frozen == true end" in source
+    hold_ack = _function_section(source, "onEricrolphCannonCarWashScenarioHoldAcknowledged")
+    assert hold_ack.index("activeRun.holding = accepted") < hold_ack.index(
+        "if not accepted or not actualFrozen"
     )
-    assert zero_velocity.search(update)
-    assert re.search(r"if\s+[^\n]*hold", update, flags=re.IGNORECASE)
+    assert "input.event" not in source
+    assert "input.state" not in source
+    assert "queueLuaCommand" in source
+    assert "onEricrolphCannonCarWashScenarioHoldAcknowledged" in source
+    assert "onEricrolphCannonCarWashScenarioReleaseAcknowledged" in source
+    assert "hold_pending" in source
+    assert "release_pending" in source
+    assert "release_grace" in source
+    assert "RELEASE_GRACE_SIM_FRAMES" in source
+    assert "applyClusterVelocityScaleAdd" not in update
+    assert re.search(
+        r"vehicle:applyClusterVelocityScaleAdd\(\s*"
+        r"vehicle:getRefNodeId\(\)\s*,\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)",
+        hold_ack,
+    )
+    assert source.count("applyClusterVelocityScaleAdd") == 2
 
 
-def test_release_precedes_an_exact_100_mps_forward_velocity_replacement() -> None:
+def test_acknowledged_release_and_grace_precede_exact_100_mps_launch() -> None:
     source = extension_source()
-    normalized_quotes = source.replace('"', "'")
 
     assert _lua_number(source, "LAUNCH_SPEED_MPS") == 100.0
-    for command in (
-        "controller.setFreeze(0)",
-        "input.event('parkingbrake', 0, 1)",
-        "input.event('brake', 0, 1)",
-        "input.event('throttle', 0, 1)",
-    ):
-        assert command in normalized_quotes
+    assert _lua_number(source, "RELEASE_GRACE_SIM_FRAMES") == 2.0
+    release_ack = _function_section(source, "onEricrolphCannonCarWashScenarioReleaseAcknowledged")
+    update = _function_section(source, "onPreRender")
+    launch = _function_section(source, "launchVehicle")
+    assert 'activeRun.phase = "release_grace"' in release_ack
+    assert "activeRun.releaseGraceFrames = RELEASE_GRACE_SIM_FRAMES" in release_ack
+    assert 'activeRun.phase == "release_grace"' in update
+    assert "launchVehicle(vehicle)" in update
+    assert "releaseVehicle(" not in launch
 
     direction = re.search(
         r"local\s+(?P<direction>[A-Za-z_]\w*)\s*=\s*"
@@ -441,10 +678,8 @@ def test_release_precedes_an_exact_100_mps_forward_velocity_replacement() -> Non
     )
     assert launch_call is not None
 
-    release_position = source.index("controller.setFreeze(0)")
-    launch_position = launch_call.start()
-    assert release_position < launch_position
-    assert source.count("applyClusterVelocityScaleAdd") >= 2
+    assert launch_call.start() >= source.index("local function launchVehicle")
+    assert source.count("applyClusterVelocityScaleAdd") == 2
 
 
 def test_active_run_is_single_shot_but_exit_reset_and_lifecycle_rearm_it() -> None:

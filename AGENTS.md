@@ -102,45 +102,116 @@ machine-validated evidence.
 generator are under `blender/`; its local distributable staging tree is `mod/`; live evidence is
 under `telemetry/`.
 
-- The selector model is a physical-only `Type: Prop` named Cannon Car Wash. Its current validated
-  topology is 77/77 fixed nodes, 322 beams, 144 collision triangles, one flexbody, and 14,875 kg.
-  It has open portals and zero measured shell movement during settle and vehicle contact.
-- The Gridmap V2 scenario supplies the behavior that the selector prop intentionally does not:
-  `ericrolph_cannon_car_wash_wash_activation_trigger` is a full-bay `Overlaps` trigger that
-  starts/stops ambient brush animation and twelve `BNGP_sprinkler` emitters;
-  `ericrolph_cannon_car_wash_launch_trigger` is a `Contains` / `Bounding box` trigger for the
-  exact named D-Series.
-- Launch requires the wash system to be active and the truck to be fully contained. It holds the
-  truck, displays `3...`, `2...`, `1...`, `GO!` on one-second job-system intervals, then replaces
-  cluster velocity with 100 m/s (360 km/h) along the measured current forward axis. Activation is
-  transactional, live trigger configuration is checked, and simultaneous nested entry is deferred.
-- Do not add scenario Lua, triggers, or particle emitters to the vehicle-selector prop unless the
-  product behavior is intentionally redesigned and separately tested.
+- The selector model is a rigid `Type: Prop` named Cannon Car Wash. Its validated topology is
+  79/79 fixed nodes, 329 beams, 144 collision triangles, one flexbody, and 15,125 kg. The exact
+  Blender-derived ground datum is the
+  `ericrolph_cannon_car_wash_ground_reference` node at `[0, 0, 0]`, with
+  `ericrolph_cannon_car_wash_ground_back` at `[0, 3, 0]`; base-origin placement therefore uses the
+  measured map surface Z without an estimated clearance. Eight Blender-derived outer floor/roof
+  corner nodes deliberately use collision mode 3 so BeamNG's safe-placement OOBB is valid; keep
+  all other selector nodes non-colliding and verify an elevated cling spawn settles flush.
+- The selector prop owns a vehicle-local bootstrap which registers its instance with the on-demand
+  `ericrolph_cannon_car_wash/runtime` GELua manager. For each placed prop the manager hides the
+  static flexbody visual, adds a non-colliding animated visual, an `Overlaps` wash trigger, a
+  dedicated `Overlaps` repair trigger at the entry-water arch, a `Contains` launch trigger, and
+  sixteen particle nodes. The exact inventory is six `BNGP_sprinkler` water jets, six
+  `BNGP_waterfallsteam` primary dryer jets, two `BNGP_34` exhaust-steam accents, and two `BNGP_2`
+  ambient-dust accents. These objects are transient, namespaced and non-saveable. They follow the
+  prop transform; an external reset cancels any held countdown, releases its subject, and rebuilds
+  all three triggers so vehicles already inside receive fresh overlap events. All runtime objects
+  are removed on unregister/destruction/mission teardown, and the manager unloads after the last
+  prop is gone.
+  There is no global `modScript.lua`.
+- The selector-owned runtime accepts arbitrary real vehicles. Wash entry starts the rollers and
+  all sixteen water/dryer layers. Launch begins only when a vehicle is fully contained: it freezes the
+  subject, displays `3...`, `2...`, `1...`, `GO!` one second apart, then replaces main-cluster
+  velocity with 100 m/s (360 km/h)
+  along the measured current forward axis. ParticleEmitterNode emits along local +Z, so every
+  static and runtime mister transform must be proven inward after nonzero prop yaw. Countdown hold
+  uses an acknowledged controller freeze plus one uniform cluster stop; release must be
+  acknowledged and followed by two simulating frames before the only launch impulse. Never restore
+  the old per-frame velocity override or direct brake/parking-brake input mutation.
+- `ParticleEmitterNode.emitter` requires a `ParticleEmitterData` (`BNGP_*`) object, not a
+  `ParticleData` (`BNG_*`) object. The requested labels `BNG_Waterfall_Mist`,
+  `BNG_exhaust_steam`, and `BNG_Ambient_Dust` do not exist in the pinned BeamNG 0.38.6 data. Their
+  verified runtime mappings are `BNGP_waterfallsteam` -> `BNG_waterfallsteam`, `BNGP_34` ->
+  `BNG_steam_light_exhaust`, and `BNGP_2` -> `BNG_dust_light`. Preserve exact case. Local +Z is
+  the emission axis, and serialized rotation matrices are column-major, so the third column must
+  face inward. Do not multiply the 1 ms steam/dust emitters across every nozzle without a measured
+  performance budget; this baseline deliberately uses one accent of each type per side.
+- Entering the water arch repairs any non-prop vehicle once per wash pass. The only supported
+  trigger is namespaced `ericrolph_cannon_car_wash_repair_trigger`, local center
+  `[0, -5.6, 2.1]`, dimensions `[5.4, 2.2, 4.2]`, `Overlaps` plus `Bounding box`. The only supported
+  implementation is the stock full-reset pair `vehicle:requestReset(RESET_PHYSICS)` plus
+  `vehicle:resetBrokenFlexMesh()`. The repair precheck must acknowledge a dedicated controller
+  freeze while preserving its previous state, then snapshot the exact position and quaternion.
+  `RESET_PHYSICS` moves a rolling vehicle several metres even while frozen, so consume its
+  `onVehicleResetted`, restore only that captured pose with `vehicle:setPositionRotation(...)`, and
+  consume the second reset callback produced by that pose restore as `pose_restore_pending` before
+  settling. After two positive simulation frames, verify damage <= 0.01, no part damage, no broken
+  beams, and no deflated tires; restore the prior freeze state through an acknowledged release; only
+  then emit `repair_complete` or permit launch. Every failure/teardown path must make a best-effort
+  release so a subject cannot remain frozen. Never substitute `beamstate.reset()` (bookkeeping
+  only), flex-mesh reset alone (visual only), recovery/safe teleport (chooses a different pose), or
+  let either intentional callback enter the generic reset-abort path.
+- Suppress wash exits only while the reset/pose-reset edge guard is active. A reset-generated
+  re-entry clears the deferred exit before any duplicate-subject return. At guard expiry, remove a
+  subject whose exit remains deferred; otherwise reprocess its pending launch. Do not discard a
+  legitimate precheck exit, clear `washExitDeferred` without reconciliation, or allow launch while
+  the edge guard/deferred-exit flag remains active. Retain the one-pass repair latch until the
+  subject exits the full wash; otherwise the reset can recurse.
+- Generic `world.get_object`/`world.list_objects` inspection has a separate read-only allowlist for
+  packaged `BeamNGTrigger` and `ParticleEmitterNode` objects. Its fields are limited to
+  `triggerMode`/`triggerTestType` and `dataBlock`/`emitter`. These classes must remain absent from
+  the generic creation and writable-field allowlists; trigger mutation stays on the typed trigger
+  API so `luaFunction` never becomes a generic execution surface.
+- The Gridmap V2 scenario remains a separate behavior path. Its JSON declares a scenario-owned
+  extension, its triggers use the persistent prefab objects, and its launch contract targets the
+  named D-Series. Do not merge that scenario lifecycle into the selector manager or make either
+  extension globally resident.
 
 Relevant proof gates are:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q `
   .\tests\test_cannon_car_wash_assets.py `
-  .\tests\test_cannon_car_wash_phase3_lua_contract.py
+  .\tests\test_cannon_car_wash_phase3_lua_contract.py `
+  .\tests\test_cannon_car_wash_selector_runtime_contract.py
 
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_phase2_live.py
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_phase3_live.py
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_phase4_live.py
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_selector_live.py
+.\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_selector_runtime_live.py
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_distribution_live.py
 ```
 
-The v1.3.0 migration passed all four dedicated authoring/behavior gates plus the exact prebuilt-ZIP
-smoke on BeamNG.drive 0.38.6. That final smoke verifies the locked release hash before and after
-copy, installs only to an isolated `USER_FOLDER/mods`, discovers both scenario and Props entry,
-loads the scenario, settles the truck on Gridmap V2, scans namespaced warnings/errors, and restores the
-support mod byte-for-byte. The repository-wide result at this evidence refresh was 536 passed with
-12 environment-gated skips, plus clean Ruff, mypy, and PEP 517 sdist/wheel builds. These results are
-evidence, not permission to skip reruns after a change. Preserve
+For v1.6, accept release evidence only after all scenario, selector, selector-runtime, and exact
+prebuilt-ZIP gates pass serially on BeamNG.drive 0.38.6. Together those gates exercise the two
+distinct Lua lifecycles. The final archive smoke must verify the locked release hash before and
+after copy, install only to an isolated `USER_FOLDER/mods`, discover both the scenario and Props
+entry, scan namespaced warnings/errors, and restore support mods byte-for-byte. Recorded results
+are evidence, not permission to skip reruns after a change. Preserve
 `telemetry/cannon_car_wash_phase4_results.json` and
 `telemetry/cannon_car_wash_selector_results.json` as source-side evidence; refresh them only from a
 successful isolated live gate.
+
+The deterministic archive timestamp in `examples/cannon_car_wash/build_distribution.py` is a
+per-release cache epoch, not a permanent 1980 value. BeamNG compares Collada source timestamps to
+compiled `.cdae` cache entries; bump the fixed epoch whenever a shipped DAE changes, then rebuild
+and rerun the exact-ZIP live gate.
+
+The release builder intentionally writes `ZIP_STORED` members. Python's level-9 DEFLATE stream is
+not byte-stable across zlib versions: the same 16 source files produced a three-byte/hash difference
+between the development runtime and GitHub's Python 3.11/3.13 runners. Do not re-enable DEFLATE
+while the SHA-256 is a cross-runtime release lock; any compression-policy change requires proving
+identical bytes across the complete CI matrix and rerunning the installed exact-ZIP gate.
+
+Every generator that writes a release-bound text file must also pass `newline="\n"`. Git's Windows
+text filter normalized a locally generated CRLF prefab to LF in CI, changing 23 payload bytes even
+with stored ZIP members. Before locking a release, compare each `mod/` worktree byte hash with its
+Git blob (`git hash-object --no-filters` versus `git rev-parse HEAD:<path>`); the builder, CI checkout,
+and installed archive must all consume the same canonical bytes.
 
 ## Namespacing and official Repository policy
 
@@ -180,7 +251,7 @@ tree. Opening it must show only the relevant approved BeamNG top-level folders, 
 `vehicles`, `levels`, `art`, `assets`, `lua`, `scripts`, `ui`, `gameplay`, `settings`,
 `trackEditor`, and/or `vehicleGroups`. There must be no extra wrapper folder, loose root payload,
 unrelated folder, source/evidence file, or `README`. For Cannon Car Wash, `mod/` is the exact
-14-file public-upload tree and its roots must be exactly `levels` and `vehicles`. Repository
+16-file public-upload tree and its roots must be exactly `art`, `levels`, `lua`, and `vehicles`. Repository
 metadata/icon/gallery images are under `repository/`; coordinate handoffs
 are under `authoring/`; Phase contracts are under `validation/`; none enter the ZIP. The stable
 filename is `cannon_car_wash_ericrolph.zip`; increment the source-side version without renaming it.
@@ -200,7 +271,8 @@ live gates:
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_distribution_live.py
 ```
 
-The v1.3.0 release lock (member count, byte size, and SHA-256) is recorded in
+The verified v1.6 release lock is 16 members, 11,844,763 bytes, SHA-256
+`93f946e585c77a1a5dc98400a9144dbf7edc9b16d774f39474fccd197f2b9ad3`. It is recorded in
 `repository/submission.json` and the exact distribution live test. A runtime-byte or builder-policy
 change requires an intentional metadata update, rebuild, new hash lock, and complete distribution
 rerun.
@@ -246,6 +318,7 @@ try {
   Remove-Item Env:CANNON_CAR_WASH_STAGE -ErrorAction SilentlyContinue
 }
 .\.venv\Scripts\python.exe .\examples\cannon_car_wash\build_selector_prop.py
+.\.venv\Scripts\python.exe .\examples\cannon_car_wash\sync_scenario_outputs.py
 ```
 
 All live tests must use this sentinel-isolated BeamNG 0.38.6 profile and run serially:
@@ -286,9 +359,7 @@ For Blender, Lua, BeamNGpy, packaging, map-placement, or physics changes, add th
 Blender/live gates from `docs/DEVELOPMENT.md`; document the exact simulator/Blender versions and
 any skipped gate. Do not call a mod functional based only on static tests.
 
-At the time this guide was added, work was on `codex/cannon-car-wash-prop` with draft PR #8 at
-<https://github.com/eric-rolph/beamng-mcp/pull/8>; earlier Cannon Car Wash work had already been
-merged. Treat that as orientation, not durable state: check `git status`, the current branch,
+Branch and PR references are not durable project state: check `git status`, the current branch,
 remote tracking, and PR status before editing or publishing. Preserve unrelated user changes. Do
 not commit, push, merge, publish a public mod, or mutate GitHub state unless the user explicitly
 requests that action.
