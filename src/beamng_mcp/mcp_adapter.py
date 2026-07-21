@@ -345,7 +345,7 @@ def create_mcp_server(
     @mcp.tool(annotations=ACTION)
     @tool_guard
     async def vehicle_control(command: VehicleControl) -> OperationResult:
-        """Apply clamped steering, throttle, brake, clutch, parking brake, and gear inputs."""
+        """Apply clamped vehicle inputs with ADAS-safe or explicit direct arbitration."""
 
         await app_runtime.while_autonomy_inactive(
             "apply direct vehicle control",

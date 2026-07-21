@@ -122,6 +122,25 @@ def test_validate_warns_on_plain_lua_load_call(tmp_path: Path) -> None:
     )
 
 
+def test_validate_allows_fixed_extension_bootstrap_load(tmp_path: Path) -> None:
+    mods = make_workspace(tmp_path)
+    mods.scaffold("static_lua", title="Static Lua", author="Test")
+    mods.write_file(
+        ModFileWrite(
+            mod_name="static_lua",
+            path="scripts/static_lua/modScript.lua",
+            content=('local EXTENSION_PATH = "static_lua/main"\nextensions.load(EXTENSION_PATH)\n'),
+        )
+    )
+
+    validation = mods.validate("static_lua")
+
+    assert not any(
+        issue.message == "Dynamic Lua evaluation found; review before installing"
+        for issue in validation.issues
+    )
+
+
 @pytest.mark.parametrize(
     "content",
     [
@@ -178,6 +197,87 @@ def test_validate_does_not_warn_for_identifiers_containing_load(tmp_path: Path) 
         issue.message == "Dynamic Lua evaluation found; review before installing"
         for issue in validation.issues
     )
+
+
+def test_validate_accepts_beamng_newline_delimited_prefab_json(tmp_path: Path) -> None:
+    mods = make_workspace(tmp_path)
+    mods.scaffold("prefab_mod", title="Prefab", author="Test")
+    mods.write_file(
+        ModFileWrite(
+            mod_name="prefab_mod",
+            path="levels/gridmap_v2/scenarios/demo/demo.prefab.json",
+            content=(
+                '{"name":"truck","class":"BeamNGVehicle"}\n'
+                '{"name":"demo_group","class":"SimGroup"}\n'
+            ),
+        )
+    )
+
+    validation = mods.validate("prefab_mod")
+
+    assert validation.valid is True
+    assert validation.issues == []
+
+
+def test_validate_reports_the_malformed_prefab_json_record_line(tmp_path: Path) -> None:
+    mods = make_workspace(tmp_path)
+    mods.scaffold("prefab_mod", title="Prefab", author="Test")
+    mods.write_file(
+        ModFileWrite(
+            mod_name="prefab_mod",
+            path="levels/gridmap_v2/scenarios/demo/demo.prefab.json",
+            content=('{"name":"truck","class":"BeamNGVehicle"}\n{"name":"broken",}\n'),
+        )
+    )
+
+    validation = mods.validate("prefab_mod")
+
+    assert validation.valid is False
+    assert any(
+        issue.path == "levels/gridmap_v2/scenarios/demo/demo.prefab.json"
+        and "invalid prefab object on line 2" in issue.message
+        for issue in validation.issues
+    )
+
+
+def test_validate_keeps_ordinary_json_as_one_document(tmp_path: Path) -> None:
+    mods = make_workspace(tmp_path)
+    mods.scaffold("json_mod", title="JSON", author="Test")
+    mods.write_file(
+        ModFileWrite(
+            mod_name="json_mod",
+            path="levels/gridmap_v2/scenarios/demo/data.json",
+            content='{"first":1}\n{"second":2}\n',
+        )
+    )
+
+    validation = mods.validate("json_mod")
+
+    assert validation.valid is False
+    assert any(
+        issue.path == "levels/gridmap_v2/scenarios/demo/data.json"
+        and "Invalid JSON: Extra data" in issue.message
+        for issue in validation.issues
+    )
+
+
+def test_validate_accepts_standard_root_mod_metadata(tmp_path: Path) -> None:
+    mods = make_workspace(tmp_path)
+    mods.scaffold("metadata_mod", title="Metadata", author="Test")
+    mods.write_file(
+        ModFileWrite(
+            mod_name="metadata_mod",
+            path="info.json",
+            content=(
+                '{"title":"Metadata","name":"metadata_mod","version":"1.0.0","type":"Other"}\n'
+            ),
+        )
+    )
+
+    validation = mods.validate("metadata_mod")
+
+    assert validation.valid is True
+    assert validation.issues == []
 
 
 def test_internal_symlink_is_rejected_for_listing_and_writes(tmp_path: Path) -> None:

@@ -271,6 +271,8 @@ class Runtime:
                 "confirmation to the bridge",
                 "vehicle_control is an explicit one-shot input outside the engine deadman and "
                 "can remain latched until another control command",
+                "vehicle_control defaults to ADAS arbitration; is_adas=false can override local "
+                "driver inputs and is intended only for isolated automation sessions",
                 "BeamNGpy Scenario.add_vehicle cannot apply ground cling while serializing a "
                 "prefab; scenario_create requires measured surface Z plus model-origin clearance, "
                 "or create an "

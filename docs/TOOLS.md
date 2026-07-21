@@ -29,7 +29,7 @@ controls; the server still enforces gates itself.
 | `vehicle_state` | One vehicle's position/direction/velocity/speed |
 | `vehicle_spawn` | Spawn and connect a vehicle; explicit measured surface + model-origin clearance is required and `cling` defaults false |
 | `vehicle_remove` | Despawn with explicit confirmation |
-| `vehicle_control` | Complete one-shot normalized actuation; may remain latched until a follow-up |
+| `vehicle_control` | Complete one-shot normalized actuation with ADAS-safe default arbitration, explicit isolated-session direct mode, and optional shifter behavior; automatic `gear` values are selector indices and are vehicle-dependent |
 | `vehicle_teleport` | Position/quaternion teleport |
 | `vehicle_ai_configure` | Disable or stop native AI; moving modes must use leased `autonomy_start` |
 

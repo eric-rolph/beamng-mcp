@@ -1,0 +1,257 @@
+{
+  "CW_Concrete": {
+    "name": "CW_Concrete",
+    "mapTo": "CW_Concrete",
+    "class": "Material",
+    "persistentId": "6f452cba-20a4-49a1-9a66-fffd34376845",
+    "Stages": [
+      {
+        "baseColorFactor": [0.18, 0.2, 0.23, 1.0],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.82
+      },
+      {},
+      {},
+      {}
+    ],
+    "groundType": "CONCRETE",
+    "materialTag0": "cannon_car_wash",
+    "version": 1.5
+  },
+  "CW_DeepBlue": {
+    "name": "CW_DeepBlue",
+    "mapTo": "CW_DeepBlue",
+    "class": "Material",
+    "persistentId": "62c997c0-f530-4bbe-ada7-ce5a0bd19a2a",
+    "Stages": [
+      {
+        "baseColorFactor": [0.015, 0.09, 0.22, 1.0],
+        "metallicFactor": 0.15,
+        "roughnessFactor": 0.5
+      },
+      {},
+      {},
+      {}
+    ],
+    "materialTag0": "cannon_car_wash",
+    "version": 1.5
+  },
+  "CW_CyanTrim": {
+    "name": "CW_CyanTrim",
+    "mapTo": "CW_CyanTrim",
+    "class": "Material",
+    "persistentId": "5582efde-f4e7-4a9e-b66c-a2e4b40702a5",
+    "Stages": [
+      {
+        "baseColorFactor": [0.0, 0.52, 0.83, 1.0],
+        "metallicFactor": 0.25,
+        "roughnessFactor": 0.5
+      },
+      {},
+      {},
+      {}
+    ],
+    "materialTag0": "cannon_car_wash",
+    "version": 1.5
+  },
+  "CW_Stainless": {
+    "name": "CW_Stainless",
+    "mapTo": "CW_Stainless",
+    "class": "Material",
+    "persistentId": "3b5655a8-1cc4-4229-9ff1-0b457a3e5a20",
+    "Stages": [
+      {
+        "baseColorFactor": [0.42, 0.46, 0.5, 1.0],
+        "metallicFactor": 0.9,
+        "roughnessFactor": 0.2
+      },
+      {},
+      {},
+      {}
+    ],
+    "dynamicCubemap": true,
+    "materialTag0": "cannon_car_wash",
+    "version": 1.5
+  },
+  "CW_Glass": {
+    "name": "CW_Glass",
+    "mapTo": "CW_Glass",
+    "class": "Material",
+    "persistentId": "f6d87ecf-884e-4cc6-a631-36707b861864",
+    "Stages": [
+      {
+        "baseColorFactor": [0.03, 0.32, 0.48, 1.0],
+        "metallicFactor": 0.1,
+        "opacityFactor": 0.38,
+        "roughnessFactor": 0.08
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": false,
+    "doubleSided": true,
+    "dynamicCubemap": true,
+    "materialTag0": "cannon_car_wash",
+    "translucent": true,
+    "translucentBlendOp": "PreMulAlpha",
+    "translucentRecvShadows": true,
+    "version": 1.5
+  },
+  "CW_BrushBlue": {
+    "name": "CW_BrushBlue",
+    "mapTo": "CW_BrushBlue",
+    "class": "Material",
+    "persistentId": "9f7457b4-f731-449d-bbce-f98245a24930",
+    "Stages": [
+      {
+        "baseColorFactor": [0.005, 0.2, 0.74, 1.0],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.72
+      },
+      {},
+      {},
+      {}
+    ],
+    "doubleSided": true,
+    "materialTag0": "cannon_car_wash",
+    "version": 1.5
+  },
+  "CW_BrushAqua": {
+    "name": "CW_BrushAqua",
+    "mapTo": "CW_BrushAqua",
+    "class": "Material",
+    "persistentId": "69fe8337-3457-400b-979b-859cf3a3b545",
+    "Stages": [
+      {
+        "baseColorFactor": [0.0, 0.82, 0.83, 1.0],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.72
+      },
+      {},
+      {},
+      {}
+    ],
+    "doubleSided": true,
+    "materialTag0": "cannon_car_wash",
+    "version": 1.5
+  },
+  "CW_SafetyOrange": {
+    "name": "CW_SafetyOrange",
+    "mapTo": "CW_SafetyOrange",
+    "class": "Material",
+    "persistentId": "823eb95c-43a5-41c5-82cb-2181afb40500",
+    "Stages": [
+      {
+        "baseColorFactor": [1.0, 0.16, 0.015, 1.0],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.38
+      },
+      {},
+      {},
+      {}
+    ],
+    "materialTag0": "cannon_car_wash",
+    "version": 1.5
+  },
+  "CW_HazardYellow": {
+    "name": "CW_HazardYellow",
+    "mapTo": "CW_HazardYellow",
+    "class": "Material",
+    "persistentId": "6909b195-f178-429c-978c-fe219eb7acce",
+    "Stages": [
+      {
+        "baseColorFactor": [1.0, 0.68, 0.015, 1.0],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.45
+      },
+      {},
+      {},
+      {}
+    ],
+    "materialTag0": "cannon_car_wash",
+    "version": 1.5
+  },
+  "CW_Rubber": {
+    "name": "CW_Rubber",
+    "mapTo": "CW_Rubber",
+    "class": "Material",
+    "persistentId": "30f0cbc9-2b00-40b6-aac6-2f59e56817a5",
+    "Stages": [
+      {
+        "baseColorFactor": [0.012, 0.014, 0.018, 1.0],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.9
+      },
+      {},
+      {},
+      {}
+    ],
+    "groundType": "RUBBER",
+    "materialTag0": "cannon_car_wash",
+    "version": 1.5
+  },
+  "CW_Screen": {
+    "name": "CW_Screen",
+    "mapTo": "CW_Screen",
+    "class": "Material",
+    "persistentId": "ba22dd7d-5151-4dbc-9c29-e8e4692c838f",
+    "Stages": [
+      {
+        "baseColorFactor": [0.005, 0.12, 0.2, 1.0],
+        "emissive": true,
+        "emissiveFactor": [0.0, 2.2, 4.0],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.5
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": false,
+    "materialTag0": "cannon_car_wash",
+    "version": 1.5
+  },
+  "CW_LED": {
+    "name": "CW_LED",
+    "mapTo": "CW_LED",
+    "class": "Material",
+    "persistentId": "bca3ab3f-c304-4b7f-ac1a-d909548598eb",
+    "Stages": [
+      {
+        "baseColorFactor": [0.75, 0.93, 1.0, 1.0],
+        "emissive": true,
+        "emissiveFactor": [3.5, 6.3, 7.0],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.5
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": false,
+    "materialTag0": "cannon_car_wash",
+    "version": 1.5
+  },
+  "CW_TriggerInvisible": {
+    "name": "CW_TriggerInvisible",
+    "mapTo": "CW_TriggerInvisible",
+    "class": "Material",
+    "persistentId": "fe9cf497-31fa-4561-85f1-2c811b78e80b",
+    "Stages": [
+      {
+        "baseColorFactor": [0.000001, 0.000001, 0.000001, 1.0],
+        "metallicFactor": 1.0,
+        "opacityFactor": 0.0
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": false,
+    "materialTag0": "cannon_car_wash",
+    "translucent": true,
+    "translucentBlendOp": "Sub",
+    "version": 1.5
+  }
+}

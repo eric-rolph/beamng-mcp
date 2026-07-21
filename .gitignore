@@ -20,3 +20,4 @@ models/
 *.engine
 *.plan
 *.onnx.data
+*.blend[0-9]*
