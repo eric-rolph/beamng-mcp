@@ -85,7 +85,8 @@ The distribution gate builds a deterministic, explicitly allowlisted 16-file ZIP
 loose root files, wrapper folders, README/mod_info content, source evidence, unsafe names,
 unnamespaced runtime declarations, invalid JSON, broken references, and nondeterministic members.
 Members are stored without DEFLATE so the complete archive remains byte-identical across Python and
-zlib versions; BeamNG still receives a standard ZIP, while the release SHA-256 stays portable.
+zlib versions; release-bound generators also force LF newlines so Windows checkout filters cannot
+change payload bytes. BeamNG still receives a standard ZIP, while the release SHA-256 stays portable.
 
 ## Isolated live gates
 
@@ -118,8 +119,8 @@ sentinel-isolated profile's USER_FOLDER/mods directory:
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_distribution_live.py
 ~~~
 
-The verified v1.6 artifact contains 16 members, is 11,844,786 bytes, and has SHA-256
-`12338a09198a2739449304ab59ae7a68c3f8fceb5219c466778ca014b6f7f9b6`; the same lock is stored in
+The verified v1.6 artifact contains 16 members, is 11,844,763 bytes, and has SHA-256
+`93f946e585c77a1a5dc98400a9144dbf7edc9b16d774f39474fccd197f2b9ad3`; the same lock is stored in
 repository/submission.json. Do not place a pre-submission ZIP under mods/repo; BeamNG owns that
 location for Repository-managed downloads.
 

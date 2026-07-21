@@ -207,6 +207,12 @@ between the development runtime and GitHub's Python 3.11/3.13 runners. Do not re
 while the SHA-256 is a cross-runtime release lock; any compression-policy change requires proving
 identical bytes across the complete CI matrix and rerunning the installed exact-ZIP gate.
 
+Every generator that writes a release-bound text file must also pass `newline="\n"`. Git's Windows
+text filter normalized a locally generated CRLF prefab to LF in CI, changing 23 payload bytes even
+with stored ZIP members. Before locking a release, compare each `mod/` worktree byte hash with its
+Git blob (`git hash-object --no-filters` versus `git rev-parse HEAD:<path>`); the builder, CI checkout,
+and installed archive must all consume the same canonical bytes.
+
 ## Namespacing and official Repository policy
 
 Consult current official guidance before preparing a public upload:
@@ -265,8 +271,8 @@ live gates:
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_distribution_live.py
 ```
 
-The verified v1.6 release lock is 16 members, 11,844,786 bytes, SHA-256
-`12338a09198a2739449304ab59ae7a68c3f8fceb5219c466778ca014b6f7f9b6`. It is recorded in
+The verified v1.6 release lock is 16 members, 11,844,763 bytes, SHA-256
+`93f946e585c77a1a5dc98400a9144dbf7edc9b16d774f39474fccd197f2b9ad3`. It is recorded in
 `repository/submission.json` and the exact distribution live test. A runtime-byte or builder-policy
 change requires an intentional metadata update, rebuild, new hash lock, and complete distribution
 rerun.

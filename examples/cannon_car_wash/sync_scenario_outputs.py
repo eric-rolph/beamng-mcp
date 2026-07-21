@@ -180,10 +180,15 @@ def main() -> None:
         "emitter_counts": expected_counts,
         "effects": synchronized,
     }
-    PHASE2_PATH.write_text(json.dumps(phase2, indent=2) + "\n", encoding="utf-8")
+    PHASE2_PATH.write_text(
+        json.dumps(phase2, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
     PREFAB_PATH.write_text(
         "".join(json.dumps(record, separators=(",", ":")) + "\n" for record in rewritten_prefab),
         encoding="utf-8",
+        newline="\n",
     )
     print(
         json.dumps(
