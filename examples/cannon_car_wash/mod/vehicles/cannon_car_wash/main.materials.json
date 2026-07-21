@@ -1,0 +1,304 @@
+{
+  "CWV_BrushAqua": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.0,
+          0.82,
+          0.83,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.72
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "doubleSided": true,
+    "mapTo": "CWV_BrushAqua",
+    "materialTag0": "cannon_car_wash_selector",
+    "name": "CWV_BrushAqua",
+    "persistentId": "913b9066-f2b1-5d87-a1a4-fd82cee95e83",
+    "version": 1.5
+  },
+  "CWV_BrushBlue": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.005,
+          0.2,
+          0.74,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.72
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "doubleSided": true,
+    "mapTo": "CWV_BrushBlue",
+    "materialTag0": "cannon_car_wash_selector",
+    "name": "CWV_BrushBlue",
+    "persistentId": "f1efb085-0b66-58ab-9ddd-e276b84df44f",
+    "version": 1.5
+  },
+  "CWV_Concrete": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.18,
+          0.2,
+          0.23,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.82
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "groundType": "CONCRETE",
+    "mapTo": "CWV_Concrete",
+    "materialTag0": "cannon_car_wash_selector",
+    "name": "CWV_Concrete",
+    "persistentId": "eba07523-fdf4-5769-a0ed-c231a5f517d9",
+    "version": 1.5
+  },
+  "CWV_CyanTrim": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.0,
+          0.52,
+          0.83,
+          1.0
+        ],
+        "metallicFactor": 0.25,
+        "roughnessFactor": 0.5
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "mapTo": "CWV_CyanTrim",
+    "materialTag0": "cannon_car_wash_selector",
+    "name": "CWV_CyanTrim",
+    "persistentId": "5b85147b-c07c-55d2-8719-1addb11a8b90",
+    "version": 1.5
+  },
+  "CWV_DeepBlue": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.015,
+          0.09,
+          0.22,
+          1.0
+        ],
+        "metallicFactor": 0.15,
+        "roughnessFactor": 0.5
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "mapTo": "CWV_DeepBlue",
+    "materialTag0": "cannon_car_wash_selector",
+    "name": "CWV_DeepBlue",
+    "persistentId": "d485ac1a-5ff9-555e-9ba0-e36ab2915489",
+    "version": 1.5
+  },
+  "CWV_Glass": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.03,
+          0.32,
+          0.48,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "opacityFactor": 0.38,
+        "roughnessFactor": 0.08
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": false,
+    "class": "Material",
+    "doubleSided": true,
+    "dynamicCubemap": true,
+    "mapTo": "CWV_Glass",
+    "materialTag0": "cannon_car_wash_selector",
+    "name": "CWV_Glass",
+    "persistentId": "d290b464-a74c-5dd1-b228-15318ecf3a99",
+    "translucent": true,
+    "translucentBlendOp": "PreMulAlpha",
+    "translucentRecvShadows": true,
+    "version": 1.5
+  },
+  "CWV_HazardYellow": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          1.0,
+          0.68,
+          0.015,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.45
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "mapTo": "CWV_HazardYellow",
+    "materialTag0": "cannon_car_wash_selector",
+    "name": "CWV_HazardYellow",
+    "persistentId": "b0bc8e15-7cb1-5b9f-bfa0-21a2e3ffbac9",
+    "version": 1.5
+  },
+  "CWV_LED": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.75,
+          0.93,
+          1.0,
+          1.0
+        ],
+        "emissive": true,
+        "emissiveFactor": [
+          3.5,
+          6.3,
+          7.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.5
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": false,
+    "class": "Material",
+    "mapTo": "CWV_LED",
+    "materialTag0": "cannon_car_wash_selector",
+    "name": "CWV_LED",
+    "persistentId": "6012bca1-80c4-511e-aa03-02b170200d2e",
+    "version": 1.5
+  },
+  "CWV_Rubber": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.012,
+          0.014,
+          0.018,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.9
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "groundType": "RUBBER",
+    "mapTo": "CWV_Rubber",
+    "materialTag0": "cannon_car_wash_selector",
+    "name": "CWV_Rubber",
+    "persistentId": "943a84d7-d145-57ab-98cb-3193c8255c33",
+    "version": 1.5
+  },
+  "CWV_SafetyOrange": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          1.0,
+          0.16,
+          0.015,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.38
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "mapTo": "CWV_SafetyOrange",
+    "materialTag0": "cannon_car_wash_selector",
+    "name": "CWV_SafetyOrange",
+    "persistentId": "3456626a-efc4-521d-b66e-2ac9010e3512",
+    "version": 1.5
+  },
+  "CWV_Screen": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.005,
+          0.12,
+          0.2,
+          1.0
+        ],
+        "emissive": true,
+        "emissiveFactor": [
+          0.0,
+          2.2,
+          4.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.5
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": false,
+    "class": "Material",
+    "mapTo": "CWV_Screen",
+    "materialTag0": "cannon_car_wash_selector",
+    "name": "CWV_Screen",
+    "persistentId": "40e01cb8-7cd5-5df0-8718-25300aa94536",
+    "version": 1.5
+  },
+  "CWV_Stainless": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.42,
+          0.46,
+          0.5,
+          1.0
+        ],
+        "metallicFactor": 0.9,
+        "roughnessFactor": 0.2
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "dynamicCubemap": true,
+    "mapTo": "CWV_Stainless",
+    "materialTag0": "cannon_car_wash_selector",
+    "name": "CWV_Stainless",
+    "persistentId": "39d82576-6262-5a5a-9811-e9bcb7e924dd",
+    "version": 1.5
+  }
+}

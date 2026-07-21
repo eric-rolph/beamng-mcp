@@ -6,15 +6,17 @@ major construction steps. Execute it with globals containing ``STAGE`` and optio
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
+import os
 from pathlib import Path
 from typing import Any
 
 import bpy
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
-STAGE = str(globals().get("STAGE", "all"))
+STAGE = str(globals().get("STAGE", os.environ.get("CANNON_CAR_WASH_STAGE", "all")))
 SCRIPT_PATH = Path(str(globals().get("SCRIPT_PATH", __file__))).resolve()
 EXAMPLE_ROOT = SCRIPT_PATH.parents[1]
 MOD_ROOT = Path(str(globals().get("MOD_ROOT", EXAMPLE_ROOT / "mod"))).resolve()
@@ -24,6 +26,11 @@ BLEND_PATH = Path(
 ASSET_DIRECTORY = MOD_ROOT / "levels" / "gridmap_v2" / "art" / "shapes" / "carwash"
 DAE_PATH = ASSET_DIRECTORY / "cannon_car_wash.dae"
 MANIFEST_PATH = ASSET_DIRECTORY / "cannon_car_wash.geometry.json"
+VEHICLE_DIRECTORY = MOD_ROOT / "vehicles" / "cannon_car_wash"
+VEHICLE_DAE_PATH = VEHICLE_DIRECTORY / "cannon_car_wash.dae"
+VEHICLE_HANDOFF_PATH = VEHICLE_DIRECTORY / "cannon_car_wash.selector_handoff.json"
+VEHICLE_VISUAL_NAME = "cannon_car_wash_visual"
+VEHICLE_CAGE_NAME = "CannonCarWash_SelectorCage"
 
 PRIMARY_STRUCTURES = (
     "CarWash_Floor",
@@ -461,8 +468,22 @@ def object_bounds(obj: bpy.types.Object) -> dict[str, Any]:
     }
 
 
-def mesh_statistics() -> dict[str, int]:
-    meshes = [obj for obj in bpy.context.scene.objects if obj.type == "MESH"]
+def evaluated_object_bounds(obj: bpy.types.Object) -> dict[str, Any]:
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    evaluated = obj.evaluated_get(depsgraph)
+    corners = [evaluated.matrix_world @ Vector(corner) for corner in evaluated.bound_box]
+    minimum = [min(point[axis] for point in corners) for axis in range(3)]
+    maximum = [max(point[axis] for point in corners) for axis in range(3)]
+    return {
+        "min": [round(value, 6) for value in minimum],
+        "max": [round(value, 6) for value in maximum],
+        "corners": [[round(value, 6) for value in point] for point in corners],
+    }
+
+
+def mesh_statistics(meshes: list[bpy.types.Object] | None = None) -> dict[str, int]:
+    if meshes is None:
+        meshes = [obj for obj in bpy.context.scene.objects if obj.type == "MESH"]
     return {
         "objects": len(meshes),
         "vertices": sum(len(obj.data.vertices) for obj in meshes),
@@ -470,51 +491,9 @@ def mesh_statistics() -> dict[str, int]:
     }
 
 
-def finalize() -> None:
-    ASSET_DIRECTORY.mkdir(parents=True, exist_ok=True)
+def save_portable_blend() -> None:
+    """Save without persisting author-machine paths in the portable source file."""
     BLEND_PATH.parent.mkdir(parents=True, exist_ok=True)
-    bpy.context.view_layer.update()
-    primary = {name: object_bounds(bpy.data.objects[name]) for name in PRIMARY_STRUCTURES}
-    visible_meshes = [
-        obj
-        for obj in bpy.context.scene.objects
-        if obj.type == "MESH" and not obj.name.startswith("Colmesh-")
-    ]
-    all_corners = [
-        obj.matrix_world @ Vector(corner) for obj in visible_meshes for corner in obj.bound_box
-    ]
-    manifest = {
-        "asset": "cannon_car_wash",
-        "coordinate_system": "right-handed, meters, Z-up",
-        "drive_axis": [0.0, 1.0, 0.0],
-        "entrance_center": [0.0, -9.0, 0.12],
-        "exit_center": [0.0, 9.0, 0.12],
-        "truck_envelope": {"width": 2.4, "height": 2.6, "length": 6.2},
-        # Usable height is measured from the 0.12 m floor surface to the 4.60 m
-        # roof underside, rather than from the world-space zero datum.
-        "clear_opening": {"width": 6.2, "height": 4.48, "length": 18.0},
-        "scene_bounds": {
-            "min": [round(min(point[axis] for point in all_corners), 6) for axis in range(3)],
-            "max": [round(max(point[axis] for point in all_corners), 6) for axis in range(3)],
-        },
-        "primary_structures": primary,
-        "trigger": {
-            "name": "LaunchTrigger_Mesh",
-            "center": [0.0, 7.35, 1.82],
-            "dimensions": [4.8, 1.5, 3.4],
-            "events": ["enter", "exit"],
-            "target_speed_kph": 320.0,
-        },
-        "mesh_statistics": mesh_statistics(),
-        "collision_meshes": ["Colmesh-1", "Colmesh-2", "Colmesh-3", "Colmesh-4"],
-    }
-    MANIFEST_PATH.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-
-    # Blender serializes user asset-library and file-browser paths into a .blend
-    # even with --factory-startup. Overwrite each complete string buffer with a
-    # full-width portable placeholder for the save: assigning a shorter value
-    # can leave the old path tail in Blender's fixed-size binary buffer. Restore
-    # the live settings afterward so an MCP session keeps the user's locations.
     file_preferences = bpy.context.preferences.filepaths
     save_version = file_preferences.save_version
     asset_libraries = list(file_preferences.asset_libraries)
@@ -540,9 +519,392 @@ def finalize() -> None:
         for params, directory in zip(file_browser_params, file_browser_directories, strict=True):
             params.directory = directory
 
+
+def _selector_structure() -> dict[str, Any]:
+    """Derive the selector JBeam cage from evaluated primary-structure bounds.
+
+    BeamNG vehicle space points forward along -Y. The authored scene drives along
+    +Y, so both the cage and selector visual use the same proper 180-degree Z
+    rotation. No node coordinate is entered independently of the Blender shell.
+    """
+    primary = {name: evaluated_object_bounds(bpy.data.objects[name]) for name in PRIMARY_STRUCTURES}
+    floor = primary["CarWash_Floor"]
+    left_wall = primary["CarWash_Wall_Left"]
+    right_wall = primary["CarWash_Wall_Right"]
+    roof = primary["CarWash_Roof"]
+    y_min, y_max = floor["min"][1], floor["max"][1]
+    stations = [y_min + (y_max - y_min) * index / 6.0 for index in range(7)]
+
+    tracks = (
+        ("floor_outer_left", floor["min"][0], floor["min"][2]),
+        ("floor_inner_left", left_wall["max"][0], floor["max"][2]),
+        ("floor_center", 0.0, floor["max"][2]),
+        ("floor_inner_right", right_wall["min"][0], floor["max"][2]),
+        ("floor_outer_right", floor["max"][0], floor["min"][2]),
+        ("wall_top_inner_right", right_wall["min"][0], roof["min"][2]),
+        ("roof_top_right", roof["max"][0], roof["max"][2]),
+        ("roof_top_center", 0.0, roof["max"][2]),
+        ("roof_top_left", roof["min"][0], roof["max"][2]),
+        ("wall_top_inner_left", left_wall["max"][0], roof["min"][2]),
+        ("roof_bottom_center", 0.0, roof["min"][2]),
+    )
+    rotation = Matrix.Rotation(math.pi, 4, "Z")
+    nodes: list[dict[str, Any]] = []
+    node_id: dict[tuple[int, str], str] = {}
+    for station_index, source_y in enumerate(stations):
+        for track_index, (track_name, source_x, source_z) in enumerate(tracks):
+            identifier = f"cw_s{station_index:02d}_t{track_index:02d}"
+            source = Vector((source_x, source_y, source_z))
+            mapped = rotation @ source
+            node_id[(station_index, track_name)] = identifier
+            nodes.append(
+                {
+                    "id": identifier,
+                    "source_object": VEHICLE_CAGE_NAME,
+                    "source_vertex_index": len(nodes),
+                    "source_world_position": [round(value, 6) for value in source],
+                    "position": [round(value, 6) for value in mapped],
+                    "station": station_index,
+                    "track": track_name,
+                }
+            )
+
+    cross_section_edges = (
+        ("floor_outer_left", "floor_inner_left"),
+        ("floor_inner_left", "floor_center"),
+        ("floor_center", "floor_inner_right"),
+        ("floor_inner_right", "floor_outer_right"),
+        ("floor_outer_right", "wall_top_inner_right"),
+        ("wall_top_inner_right", "roof_top_right"),
+        ("roof_top_right", "roof_top_center"),
+        ("roof_top_center", "roof_top_left"),
+        ("roof_top_left", "wall_top_inner_left"),
+        ("wall_top_inner_left", "floor_outer_left"),
+        ("floor_outer_right", "roof_top_right"),
+        ("roof_top_left", "floor_outer_left"),
+        ("floor_inner_right", "wall_top_inner_right"),
+        ("wall_top_inner_right", "roof_bottom_center"),
+        ("roof_bottom_center", "wall_top_inner_left"),
+        ("wall_top_inner_left", "floor_inner_left"),
+    )
+    surface_bands = (
+        ("floor_outer_left", "floor_inner_left", "floor_edge_left"),
+        ("floor_inner_left", "floor_center", "floor_left"),
+        ("floor_center", "floor_inner_right", "floor_right"),
+        ("floor_inner_right", "floor_outer_right", "floor_edge_right"),
+        ("floor_outer_right", "roof_top_right", "wall_outer_right"),
+        ("floor_inner_right", "wall_top_inner_right", "wall_inner_right"),
+        ("roof_top_right", "roof_top_center", "roof_top_right"),
+        ("roof_top_center", "roof_top_left", "roof_top_left"),
+        ("wall_top_inner_right", "roof_bottom_center", "roof_bottom_right"),
+        ("roof_bottom_center", "wall_top_inner_left", "roof_bottom_left"),
+        ("wall_top_inner_left", "floor_inner_left", "wall_inner_left"),
+        ("roof_top_left", "floor_outer_left", "wall_outer_left"),
+    )
+
+    beams: set[tuple[str, str]] = set()
+
+    def add_beam(first: str, second: str) -> None:
+        if first != second:
+            beams.add(tuple(sorted((first, second))))
+
+    for station_index in range(len(stations)):
+        for first_track, second_track in cross_section_edges:
+            add_beam(
+                node_id[(station_index, first_track)],
+                node_id[(station_index, second_track)],
+            )
+    for station_index in range(len(stations) - 1):
+        for track_name, _x, _z in tracks:
+            add_beam(
+                node_id[(station_index, track_name)],
+                node_id[(station_index + 1, track_name)],
+            )
+        for first_track, second_track, _surface in surface_bands:
+            add_beam(
+                node_id[(station_index, first_track)],
+                node_id[(station_index + 1, second_track)],
+            )
+            add_beam(
+                node_id[(station_index, second_track)],
+                node_id[(station_index + 1, first_track)],
+            )
+
+    triangles: list[dict[str, Any]] = []
+    for station_index in range(len(stations) - 1):
+        for first_track, second_track, surface in surface_bands:
+            first_now = node_id[(station_index, first_track)]
+            second_now = node_id[(station_index, second_track)]
+            first_next = node_id[(station_index + 1, first_track)]
+            second_next = node_id[(station_index + 1, second_track)]
+            triangles.extend(
+                (
+                    {"nodes": [first_now, second_now, first_next], "surface": surface},
+                    {"nodes": [second_now, second_next, first_next], "surface": surface},
+                )
+            )
+
+    base_nodes = [
+        node_id[(station_index, track_name)]
+        for station_index in range(len(stations))
+        for track_name in ("floor_outer_left", "floor_outer_right")
+    ]
+    middle_station = len(stations) // 2
+    refnodes = {
+        "ref": node_id[(middle_station, "floor_center")],
+        # Source station 2 maps from Y=-3 to BeamNG's +Y/back direction.
+        "back": node_id[(middle_station - 1, "floor_center")],
+        # Source -X maps to BeamNG +X/left after the proper Z rotation.
+        "left": node_id[(middle_station, "floor_inner_left")],
+        "up": node_id[(middle_station, "roof_bottom_center")],
+    }
+    return {
+        "schema": "cannon-car-wash-selector-handoff-v1",
+        "asset": {
+            "id": "cannon_car_wash",
+            "physics_cage": VEHICLE_CAGE_NAME,
+            "visual_mesh": VEHICLE_VISUAL_NAME,
+        },
+        "coordinate_system": {
+            "source": "right-handed, meters, Z-up, +Y drive direction",
+            "target": "BeamNG vehicle space, meters, Z-up, -Y forward",
+            "source_world_to_beamng_vehicle": [
+                [-1.0, 0.0, 0.0, 0.0],
+                [0.0, -1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
+        },
+        "source_primary_bounds": primary,
+        "stations_source_y": [round(value, 6) for value in stations],
+        "nodes": nodes,
+        "beams": [list(pair) for pair in sorted(beams)],
+        "triangles": triangles,
+        "base_nodes": base_nodes,
+        "refnodes": refnodes,
+    }
+
+
+def export_vehicle_selector_asset() -> None:
+    """Export one multi-material flexbody mesh plus its exact Blender cage evidence."""
+    VEHICLE_DIRECTORY.mkdir(parents=True, exist_ok=True)
+    scene = bpy.context.scene
+    previous_frame = scene.frame_current
+    scene.frame_set(1)
+    bpy.context.view_layer.update()
+
+    old_cage = bpy.data.objects.get(VEHICLE_CAGE_NAME)
+    if old_cage is not None:
+        old_mesh = old_cage.data
+        bpy.data.objects.remove(old_cage, do_unlink=True)
+        if old_mesh is not None and old_mesh.users == 0:
+            bpy.data.meshes.remove(old_mesh)
+
+    structure = _selector_structure()
+    cage_mesh = bpy.data.meshes.new(f"{VEHICLE_CAGE_NAME}_Mesh")
+    cage_mesh.from_pydata(
+        [node["position"] for node in structure["nodes"]],
+        [
+            (
+                next(
+                    node["source_vertex_index"]
+                    for node in structure["nodes"]
+                    if node["id"] == first
+                ),
+                next(
+                    node["source_vertex_index"]
+                    for node in structure["nodes"]
+                    if node["id"] == second
+                ),
+            )
+            for first, second in structure["beams"]
+        ],
+        [
+            tuple(
+                next(
+                    node["source_vertex_index"]
+                    for node in structure["nodes"]
+                    if node["id"] == identifier
+                )
+                for identifier in triangle["nodes"]
+            )
+            for triangle in structure["triangles"]
+        ],
+    )
+    cage_mesh.update()
+    cage = bpy.data.objects.new(VEHICLE_CAGE_NAME, cage_mesh)
+    scene.collection.objects.link(cage)
+    cage.display_type = "WIRE"
+    cage.hide_render = True
+    cage.show_in_front = True
+    cage["beamng_physics_cage"] = True
+    cage["beamng_vehicle_forward"] = "-Y"
+    save_portable_blend()
+
+    sources = sorted(
+        (
+            obj
+            for obj in scene.objects
+            if obj.type == "MESH"
+            and not obj.name.startswith("Colmesh-")
+            and obj.name not in {"LaunchTrigger_Mesh", VEHICLE_CAGE_NAME}
+        ),
+        key=lambda obj: obj.name,
+    )
+    if not sources:
+        raise RuntimeError("No visible meshes are available for the selector prop export")
+
+    temporary_collection = bpy.data.collections.new("CannonCarWash_SelectorExport")
+    scene.collection.children.link(temporary_collection)
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    vehicle_rotation = Matrix.Rotation(math.pi, 4, "Z")
+    duplicates: list[bpy.types.Object] = []
+    selector_materials: dict[str, bpy.types.Material] = {}
+    for source in sources:
+        evaluated = source.evaluated_get(depsgraph)
+        mesh_copy = bpy.data.meshes.new_from_object(
+            evaluated,
+            preserve_all_data_layers=True,
+            depsgraph=depsgraph,
+        )
+        for material_index, source_material in enumerate(mesh_copy.materials):
+            if source_material is None:
+                continue
+            selector_material = selector_materials.get(source_material.name)
+            if selector_material is None:
+                selector_material = source_material.copy()
+                suffix = source_material.name.removeprefix("CW_")
+                selector_material.name = f"CWV_{suffix}"
+                selector_materials[source_material.name] = selector_material
+            mesh_copy.materials[material_index] = selector_material
+        duplicate = bpy.data.objects.new(f"selector_{source.name}", mesh_copy)
+        temporary_collection.objects.link(duplicate)
+        duplicate.matrix_world = vehicle_rotation @ source.matrix_world
+        duplicates.append(duplicate)
+
+    bpy.ops.object.select_all(action="DESELECT")
+    for duplicate in duplicates:
+        duplicate.select_set(True)
+    bpy.context.view_layer.objects.active = duplicates[0]
+    bpy.ops.object.join()
+    visual = bpy.context.object
+    visual.name = VEHICLE_VISUAL_NAME
+    visual.data.name = VEHICLE_VISUAL_NAME
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    visual_bounds = object_bounds(visual)
+
+    bpy.ops.object.select_all(action="DESELECT")
+    visual.select_set(True)
+    bpy.context.view_layer.objects.active = visual
+    result = bpy.ops.wm.collada_export(
+        filepath=str(VEHICLE_DAE_PATH),
+        check_existing=False,
+        selected=True,
+        include_children=False,
+        include_animations=False,
+        include_all_actions=False,
+        apply_modifiers=True,
+        triangulate=True,
+        use_texture_copies=True,
+        apply_global_orientation=True,
+        export_global_forward_selection="Y",
+        export_global_up_selection="Z",
+        sort_by_name=True,
+    )
+    if "FINISHED" not in result:
+        raise RuntimeError(f"Vehicle-selector Collada export failed: {result}")
+
+    structure["visual"] = {
+        "path": "vehicles/cannon_car_wash/cannon_car_wash.dae",
+        "bounds": visual_bounds,
+        "materials": sorted(material.name for material in visual.data.materials if material),
+        "sha256": hashlib.sha256(VEHICLE_DAE_PATH.read_bytes()).hexdigest(),
+        "size": VEHICLE_DAE_PATH.stat().st_size,
+    }
+    VEHICLE_HANDOFF_PATH.write_text(
+        json.dumps(structure, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    visual_mesh = visual.data
+    bpy.data.objects.remove(visual, do_unlink=True)
+    if visual_mesh.users == 0:
+        bpy.data.meshes.remove(visual_mesh)
+    for selector_material in selector_materials.values():
+        if selector_material.users == 0:
+            bpy.data.materials.remove(selector_material)
+    bpy.data.collections.remove(temporary_collection)
+    scene.frame_set(previous_frame)
+    print(
+        "CANNON_CAR_WASH_STAGE vehicle_prop complete",
+        json.dumps(
+            {
+                "dae": str(VEHICLE_DAE_PATH),
+                "handoff": str(VEHICLE_HANDOFF_PATH),
+                "nodes": len(structure["nodes"]),
+                "beams": len(structure["beams"]),
+                "triangles": len(structure["triangles"]),
+            },
+            sort_keys=True,
+        ),
+    )
+
+
+def finalize() -> None:
+    ASSET_DIRECTORY.mkdir(parents=True, exist_ok=True)
+    BLEND_PATH.parent.mkdir(parents=True, exist_ok=True)
+    bpy.context.view_layer.update()
+    primary = {name: object_bounds(bpy.data.objects[name]) for name in PRIMARY_STRUCTURES}
+    manifest_meshes = [
+        obj
+        for obj in bpy.context.scene.objects
+        if obj.type == "MESH"
+        and obj.name not in {VEHICLE_CAGE_NAME, VEHICLE_VISUAL_NAME}
+        and not obj.name.startswith("selector_")
+    ]
+    visible_meshes = [obj for obj in manifest_meshes if not obj.name.startswith("Colmesh-")]
+    all_corners = [
+        obj.matrix_world @ Vector(corner) for obj in visible_meshes for corner in obj.bound_box
+    ]
+    manifest = {
+        "asset": "cannon_car_wash",
+        "coordinate_system": "right-handed, meters, Z-up",
+        "drive_axis": [0.0, 1.0, 0.0],
+        "entrance_center": [0.0, -9.0, 0.12],
+        "exit_center": [0.0, 9.0, 0.12],
+        "truck_envelope": {"width": 2.4, "height": 2.6, "length": 6.2},
+        # Usable height is measured from the 0.12 m floor surface to the 4.60 m
+        # roof underside, rather than from the world-space zero datum.
+        "clear_opening": {"width": 6.2, "height": 4.48, "length": 18.0},
+        "scene_bounds": {
+            "min": [round(min(point[axis] for point in all_corners), 6) for axis in range(3)],
+            "max": [round(max(point[axis] for point in all_corners), 6) for axis in range(3)],
+        },
+        "primary_structures": primary,
+        "trigger": {
+            "name": "LaunchTrigger_Mesh",
+            "center": [0.0, 7.35, 1.82],
+            "dimensions": [4.8, 1.5, 3.4],
+            "events": ["enter", "exit"],
+            "target_speed_kph": 320.0,
+        },
+        "mesh_statistics": mesh_statistics(manifest_meshes),
+        "collision_meshes": ["Colmesh-1", "Colmesh-2", "Colmesh-3", "Colmesh-4"],
+    }
+    MANIFEST_PATH.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+
+    # Blender serializes user asset-library and file-browser paths into a .blend
+    # even with --factory-startup. Save through the sanitizing helper so no
+    # author-machine paths survive in the checked-in source file.
+    save_portable_blend()
+
     bpy.ops.object.select_all(action="DESELECT")
     for obj in bpy.context.scene.objects:
-        if obj.type in {"MESH", "EMPTY"}:
+        if (
+            obj.type in {"MESH", "EMPTY"}
+            and obj.name not in {VEHICLE_CAGE_NAME, VEHICLE_VISUAL_NAME}
+            and not obj.name.startswith("selector_")
+        ):
             obj.select_set(True)
     result = bpy.ops.wm.collada_export(
         filepath=str(DAE_PATH),
@@ -584,3 +946,5 @@ if STAGE in {"details", "all"}:
     build_details()
 if STAGE in {"finalize", "all"}:
     finalize()
+if STAGE in {"vehicle_prop", "all"}:
+    export_vehicle_selector_asset()

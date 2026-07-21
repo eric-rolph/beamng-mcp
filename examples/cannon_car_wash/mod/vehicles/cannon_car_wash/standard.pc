@@ -1,0 +1,6 @@
+{
+  "format": 2,
+  "mainPartName": "cannon_car_wash",
+  "model": "cannon_car_wash",
+  "parts": {}
+}

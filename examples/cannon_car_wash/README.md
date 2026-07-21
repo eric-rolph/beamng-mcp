@@ -16,6 +16,11 @@ so they cannot leak into the packed archive.
 4. **Impact telemetry:** `phase4_manifest.json` fixes the concrete wall bounds and State,
    Electrics, Damage, and log assertions. The latest live result is in
    [`telemetry/cannon_car_wash_phase4_results.json`](telemetry/cannon_car_wash_phase4_results.json).
+5. **Vehicle-selector prop:** `vehicles/cannon_car_wash` exposes the structure as a standard
+   `Type: Prop` model with a fixed-base JBeam, collision triangles, a multi-material flexbody,
+   `Standard` configuration, and model/configuration thumbnails. The latest catalog, topology,
+   mass, and stability result is in
+   [`telemetry/cannon_car_wash_selector_results.json`](telemetry/cannon_car_wash_selector_results.json).
 
 Each gate is validated before the next one runs. The live approach uses direct input arbitration
 only inside a sentinel-isolated BeamNG profile. On BeamNG 0.38's default D-Series automatic,
@@ -30,7 +35,22 @@ blender --factory-startup --background `
 
 Factory startup keeps the scene deterministic. During the save, the generator also uses a relative
 preview path and temporarily blanks user asset-library paths, preventing authoring-machine details
-from leaking into the portable `.blend`. It writes only the reviewed example paths. Re-run the
+from leaking into the portable `.blend`. It writes only the reviewed example paths.
+
+The same Blender run exports the selector visual and its physics-cage handoff. To rebuild only the
+selector artifacts from the checked-in `.blend`, then translate that measured handoff into JBeam:
+
+```powershell
+$env:CANNON_CAR_WASH_STAGE = 'vehicle_prop'
+blender .\examples\cannon_car_wash\blender\cannon_car_wash.blend --background `
+  --python .\examples\cannon_car_wash\blender\create_cannon_car_wash.py
+python .\examples\cannon_car_wash\build_selector_prop.py
+```
+
+The selector export rotates both its visual and cage 180 degrees around Z. This preserves Z-up
+while mapping the Blender scene's `+Y` drive direction to BeamNG vehicle-forward `-Y`. The trigger
+helper and `Colmesh-*` objects are intentionally excluded: the prop supplies JBeam collision, while
+the cannon countdown/launch trigger remains part of the packaged Gridmap V2 scenario. Re-run the
 asset and Lua contract tests after any geometry change:
 
 ```powershell
@@ -52,6 +72,7 @@ $env:BEAMNG_MCP_TEST_BEAMNG_BINARY = 'Bin64\BeamNG.drive.x64.exe'
 python -m pytest -q -s .\tests\test_cannon_car_wash_phase2_live.py
 python -m pytest -q -s .\tests\test_cannon_car_wash_phase3_live.py
 python -m pytest -q -s .\tests\test_cannon_car_wash_phase4_live.py
+python -m pytest -q -s .\tests\test_cannon_car_wash_selector_live.py
 ```
 
 The Phase 4 test prints one `CANNON_PHASE4_TELEMETRY` JSON record. It fails on an ungrounded spawn,

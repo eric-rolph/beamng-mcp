@@ -242,10 +242,10 @@ comprehensive acceptance for arbitrary third-party mods remains manual.
 
 [`examples/cannon_car_wash`](examples/cannon_car_wash) contains the Blender source/generator,
 Z-up Collada asset, Gridmap V2 scenario, exact trigger/placement manifests, GELua countdown/launch
-extension, and the stock collision wall used by the Phase 4 test. The live test drives a grounded
-default D-Series into the wash at 3–5 m/s, holds it through `3... 2... 1... GO!`, injects 100 m/s
-along its measured forward axis, and verifies impact through State, Electrics, Damage, and engine-log
-telemetry. The latest checked-in result is
+extension, and a Blender-derived `Type: Prop` model for the vehicle selector. The live gates prove
+the prop is catalogued and spawnable, then drive a grounded default D-Series into the wash at
+3–5 m/s, hold it through `3... 2... 1... GO!`, inject 100 m/s along its measured forward axis, and
+verify impact through State, Electrics, Damage, and engine-log telemetry. The latest checked-in result is
 [`cannon_car_wash_phase4_results.json`](examples/cannon_car_wash/telemetry/cannon_car_wash_phase4_results.json).
 
 ### Blender to functional soft body

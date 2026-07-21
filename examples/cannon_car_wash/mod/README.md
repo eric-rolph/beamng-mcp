@@ -1,6 +1,13 @@
 # Cannon Car Wash
 
-Functional Cannon Car Wash trap for the BeamNG.drive Gridmap V2 test scenario.
+Functional Cannon Car Wash trap for the BeamNG.drive Gridmap V2 test scenario, plus a standalone
+spawnable structure in the vehicle selector's **Props** category.
+
+The selector model is rooted at `vehicles/cannon_car_wash`. Its `Standard` configuration uses a
+14,875 kg cross-braced JBeam with fourteen heavy fixed floor-edge nodes, 144 collision triangles,
+and one multi-material flexbody. The prop remains open at both ends and can be placed like stock
+large structures. Selecting the prop does not create the cannon trigger; that scripted behavior
+belongs to the scenario described below.
 
 The packaged Gridmap V2 scenario places the car-wash asset on the flat central
 test pad, spawns a default Gavril D-Series at the entrance, and creates the
