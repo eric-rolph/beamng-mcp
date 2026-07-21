@@ -17,6 +17,9 @@
     "wash_trigger_name": "ericrolph_cannon_car_wash_wash_activation_trigger",
     "wash_trigger_class": "BeamNGTrigger",
     "wash_trigger_mode": "Overlaps",
+    "repair_trigger_name": "ericrolph_cannon_car_wash_repair_trigger",
+    "repair_trigger_class": "BeamNGTrigger",
+    "repair_trigger_mode": "Overlaps",
     "vehicle_name": "ericrolph_cannon_car_wash_truck",
     "vehicle_model": "pickup"
   },
@@ -26,16 +29,39 @@
       "roller_visual": "ericrolph_cannon_car_wash_scenario_visual",
       "roller_sequence": "ambient",
       "roller_play_ambient": true,
-      "mister_emitter": "BNGP_sprinkler",
-      "mister_count": 12,
-      "misters_active": true
+      "effect_count": 16,
+      "emitter_counts": {
+        "BNGP_sprinkler": 6,
+        "BNGP_waterfallsteam": 6,
+        "BNGP_34": 2,
+        "BNGP_2": 2
+      },
+      "effects_active": true
     },
     "exit": {
       "roller_play_ambient": false,
-      "misters_active": false
+      "effects_active": false
     },
     "mission_initial_state": "off",
     "subject_tracking": "vehicle_id_set"
+  },
+  "repair_cycle": {
+    "trigger_name": "ericrolph_cannon_car_wash_repair_trigger",
+    "trigger_mode": "Overlaps",
+    "trigger_test_type": "Bounding box",
+    "vehicle_scope": "any_live_vehicle",
+    "reset_strategy": "RESET_PHYSICS",
+    "pre_reset_hold": "acknowledged_controller_freeze_preserving_previous_state",
+    "pose_policy": "restore_exact_pre_reset_position_and_quaternion",
+    "reset_callback_sequence": [
+      "physics_reset_acknowledgement",
+      "pose_restore_acknowledgement"
+    ],
+    "settle_sim_frames": 2,
+    "completion": "post_reset_integrity_and_freeze_release_acknowledgements",
+    "duplicate_enter_policy": "ignore_until_wash_exit",
+    "deferred_exit_policy": "reconcile_after_reset_edge_guard",
+    "launch_policy": "defer_until_complete_and_reset_edge_guard_clear_when_occupied"
   },
   "containment_gate": {
     "required_trigger": "ericrolph_cannon_car_wash_launch_trigger",
@@ -43,7 +69,8 @@
     "required_test_type": "Bounding box",
     "required_vehicle_state": "previously_entered_ericrolph_cannon_car_wash_wash_activation_trigger",
     "required_wash_system_state": "active",
-    "out_of_order_policy": "defer_until_wash_active",
+    "required_repair_state": "complete_when_repair_occupant_exists",
+    "out_of_order_policy": "defer_until_wash_active_and_repair_complete",
     "action": "begin_countdown"
   },
   "countdown": {
@@ -59,14 +86,10 @@
     "ui_category": "ericrolph_cannon_car_wash_countdown"
   },
   "hold": {
-    "vehicle_lua_controls": [
-      "ai_disabled",
-      "throttle_zero",
-      "service_brake_full",
-      "parking_brake_full",
-      "controller_freeze"
-    ],
-    "game_engine_physics": "replace_cluster_velocity_with_zero_each_pre_render_tick"
+    "vehicle_lua_control": "acknowledged_controller_freeze",
+    "game_engine_physics": "one_uniform_main_cluster_stop_after_hold_ack",
+    "release": "acknowledged_restore_of_previous_freeze_state",
+    "post_release_grace_sim_frames": 2
   },
   "launch": {
     "speed_mps": 100.0,
@@ -83,6 +106,16 @@
       "wash_systems_start",
       "wash_trigger_exit",
       "wash_systems_stop"
+    ],
+    "repair_events": [
+      "repair_trigger_enter",
+      "repair_snapshot",
+      "repair_requested",
+      "repair_reset_ack",
+      "repair_pose_restore_ack",
+      "repair_release_requested",
+      "repair_release_ack",
+      "repair_complete"
     ],
     "launch_gate_event": "containment_verified",
     "launch_deferred_event": "launch_deferred"

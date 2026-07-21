@@ -19,25 +19,31 @@ MOD_ROOT = EXAMPLE_ROOT / "mod"
 DEFAULT_OUTPUT_DIR = EXAMPLE_ROOT / "dist"
 MOD_ID = "ericrolph_cannon_car_wash"
 ZIP_NAME = "cannon_car_wash_ericrolph.zip"
-ALLOWED_TOP_LEVEL_ROOTS = frozenset({"levels", "vehicles"})
+ALLOWED_TOP_LEVEL_ROOTS = frozenset({"art", "levels", "lua", "vehicles"})
 FILENAME_PATTERN = re.compile(r"^[A-Za-z0-9._-]+$")
-ZIP_EPOCH = (1980, 1, 1, 0, 0, 0)
+# Deterministic per-release timestamp. BeamNG compares Collada source mtimes to
+# its compiled .cdae cache, so a forever-1980 timestamp can preserve obsolete
+# animation data across mod updates. Bump this constant whenever a shipped DAE
+# changes while keeping it fixed for reproducible builds of the same release.
+ZIP_EPOCH = (2026, 7, 21, 14, 30, 0)
 LOGGER = logging.getLogger(__name__)
 
 # Public Repository contents are an explicit release decision. Never replace
 # this allowlist with a recursive "pack everything" implementation.
 EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
-    f"levels/gridmap_v2/art/shapes/{MOD_ID}/{MOD_ID}.dae",
-    f"levels/gridmap_v2/art/shapes/{MOD_ID}/{MOD_ID}.materials.json",
+    f"art/shapes/{MOD_ID}/{MOD_ID}.dae",
+    f"art/shapes/{MOD_ID}/{MOD_ID}.materials.json",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.jpg",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.json",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.lua",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.prefab.json",
+    f"lua/ge/extensions/{MOD_ID}/runtime.lua",
     f"vehicles/{MOD_ID}/default.jpg",
     f"vehicles/{MOD_ID}/{MOD_ID}.dae",
     f"vehicles/{MOD_ID}/{MOD_ID}.jbeam",
     f"vehicles/{MOD_ID}/info.json",
     f"vehicles/{MOD_ID}/info_standard.json",
+    f"vehicles/{MOD_ID}/lua/{MOD_ID}_vehicle.lua",
     f"vehicles/{MOD_ID}/main.materials.json",
     f"vehicles/{MOD_ID}/standard.jpg",
     f"vehicles/{MOD_ID}/standard.pc",
@@ -64,8 +70,8 @@ def _validate_member_name(name: str) -> PurePosixPath:
 
 
 def _validate_allowlist() -> None:
-    if len(EXPECTED_RUNTIME_FILES) != 14:
-        raise DistributionError("the public runtime allowlist must contain exactly 14 files")
+    if len(EXPECTED_RUNTIME_FILES) != 16:
+        raise DistributionError("the public runtime allowlist must contain exactly 16 files")
     if tuple(sorted(EXPECTED_RUNTIME_FILES)) != EXPECTED_RUNTIME_FILES:
         raise DistributionError("the public runtime allowlist must be deterministically sorted")
     for name in EXPECTED_RUNTIME_FILES:

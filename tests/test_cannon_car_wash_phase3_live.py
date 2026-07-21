@@ -45,16 +45,23 @@ TRUCK_ID = f"{MOD_ID}_truck"
 LOG_TAG = "ERICROLPH_CANNON_CAR_WASH"
 LAUNCH_TRIGGER_NAME = f"{MOD_ID}_launch_trigger"
 WASH_TRIGGER_NAME = f"{MOD_ID}_wash_activation_trigger"
+REPAIR_TRIGGER_NAME = f"{MOD_ID}_repair_trigger"
 SCENARIO_VISUAL_NAME = f"{MOD_ID}_scenario_visual"
 CRASH_WALL_NAME = f"{MOD_ID}_crash_wall"
 EXTENSION_REGISTRY_NAME = f"scenario_{MOD_ID}"
-EXPECTED_MISTER_COUNT = 12
+EXPECTED_EFFECT_COUNT = 16
+EXPECTED_EMITTER_COUNTS = {
+    "BNGP_sprinkler": 6,
+    "BNGP_waterfallsteam": 6,
+    "BNGP_34": 2,
+    "BNGP_2": 2,
+}
 GALLERY_DIRECTORY_ENV = "BEAMNG_MCP_CANNON_GALLERY_DIR"
 GALLERY_RESOLUTION = (1280, 720)
 PUBLIC_RUNTIME_FILES = frozenset(
     {
-        f"levels/gridmap_v2/art/shapes/{MOD_ID}/{MOD_ID}.dae",
-        f"levels/gridmap_v2/art/shapes/{MOD_ID}/{MOD_ID}.materials.json",
+        f"art/shapes/{MOD_ID}/{MOD_ID}.dae",
+        f"art/shapes/{MOD_ID}/{MOD_ID}.materials.json",
         f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.json",
         f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.lua",
         f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.prefab.json",
@@ -67,9 +74,11 @@ PUBLIC_RUNTIME_FILES = frozenset(
         f"vehicles/{MOD_ID}/main.materials.json",
         f"vehicles/{MOD_ID}/standard.jpg",
         f"vehicles/{MOD_ID}/standard.pc",
+        f"lua/ge/extensions/{MOD_ID}/runtime.lua",
+        f"vehicles/{MOD_ID}/lua/{MOD_ID}_vehicle.lua",
     }
 )
-PUBLIC_ROOTS = {"levels", "vehicles"}
+PUBLIC_ROOTS = {"art", "levels", "lua", "vehicles"}
 
 
 def _configured_runtime() -> tuple[Path, Path, Path]:
@@ -114,7 +123,7 @@ def _stage_full_mod(workspace: Path, runtime_mod_name: str) -> Path:
         for source in MOD_SOURCE.rglob("*")
         if source.is_file() and not source.is_symlink()
     }
-    assert len(PUBLIC_RUNTIME_FILES) == 14
+    assert len(PUBLIC_RUNTIME_FILES) == 16
     assert set(source_files) == PUBLIC_RUNTIME_FILES
 
     mod_root = workspace / "mods" / runtime_mod_name
@@ -339,15 +348,18 @@ async def _wait_for_wash_system_state(
     attempts: int = 80,
 ) -> dict[str, Any]:
     expected_ambient = "1" if active else "0"
-    expected_active_misters = EXPECTED_MISTER_COUNT if active else 0
+    expected_active_effects = EXPECTED_EFFECT_COUNT if active else 0
+    expected_active_emitters = EXPECTED_EMITTER_COUNTS if active else {}
     last_state: dict[str, Any] | None = None
     for _ in range(attempts):
         last_state = await _wash_system_state(runtime, bng)
         if (
             last_state.get("active") is active
-            and int(last_state.get("mister_present_count", -1)) == EXPECTED_MISTER_COUNT
-            and int(last_state.get("mister_expected_count", -1)) == EXPECTED_MISTER_COUNT
-            and int(last_state.get("mister_active_count", -1)) == expected_active_misters
+            and int(last_state.get("effect_present_count", -1)) == EXPECTED_EFFECT_COUNT
+            and int(last_state.get("effect_expected_count", -1)) == EXPECTED_EFFECT_COUNT
+            and int(last_state.get("effect_active_count", -1)) == expected_active_effects
+            and last_state.get("emitter_present_counts") == EXPECTED_EMITTER_COUNTS
+            and last_state.get("emitter_active_counts") == expected_active_emitters
             and str(last_state.get("roller_play_ambient")) == expected_ambient
         ):
             return last_state
@@ -360,6 +372,7 @@ async def _trigger_scene_state(runtime: Any, bng: Any) -> dict[str, Any]:
         bng.control.queue_lua_command,
         f"local launch = scenetree.findObject('{LAUNCH_TRIGGER_NAME}'); "
         f"local wash = scenetree.findObject('{WASH_TRIGGER_NAME}'); "
+        f"local repair = scenetree.findObject('{REPAIR_TRIGGER_NAME}'); "
         "local function describe(trigger) "
         "if not trigger then return nil end; "
         "return {"
@@ -369,10 +382,84 @@ async def _trigger_scene_state(runtime: Any, bng: Any) -> dict[str, Any]:
         "test_type = trigger:getField('triggerTestType', 0)"
         "}; "
         "end; "
-        "return jsonEncode({launch = describe(launch), wash = describe(wash)})",
+        "return jsonEncode({"
+        "launch = describe(launch), wash = describe(wash), repair = describe(repair)})",
         True,
     )
     return json.loads(payload)
+
+
+async def _vehicle_integrity_state(runtime: Any, vehicle: Any) -> dict[str, Any]:
+    payload = await runtime.simulator._call(
+        vehicle.queue_lua_command,
+        "local partDamage = beamstate and type(beamstate.getPartDamageData) == 'function' "
+        "and beamstate.getPartDamageData() or {}; "
+        "local partDamageCount = 0; "
+        "for _ in pairs(partDamage) do partDamageCount = partDamageCount + 1 end; "
+        "local brokenBeamCount = 0; "
+        "if v and v.data and v.data.beams then "
+        "for _, beam in pairs(v.data.beams) do "
+        "if type(beam) == 'table' and beam.cid ~= nil "
+        "and obj:beamIsBroken(beam.cid) then brokenBeamCount = brokenBeamCount + 1 end; "
+        "end; end; "
+        "local deflatedTireCount = 0; "
+        "if wheels and wheels.wheels then "
+        "for _, wheel in pairs(wheels.wheels) do "
+        "if type(wheel) == 'table' and wheel.isTireDeflated == true then "
+        "deflatedTireCount = deflatedTireCount + 1 end; "
+        "end; end; "
+        "return jsonEncode({"
+        "damage = beamstate and tonumber(beamstate.damage) or 0, "
+        "part_damage_count = partDamageCount, broken_beam_count = brokenBeamCount, "
+        "deflated_tire_count = deflatedTireCount})",
+        True,
+    )
+    state = json.loads(payload)
+    return {
+        "damage": float(state["damage"]),
+        "part_damage_count": int(state["part_damage_count"]),
+        "broken_beam_count": int(state["broken_beam_count"]),
+        "deflated_tire_count": int(state["deflated_tire_count"]),
+    }
+
+
+async def _damage_vehicle_for_repair(runtime: Any, vehicle: Any) -> dict[str, Any]:
+    """Break one stable, deterministic beam and deflate one tire before entry."""
+
+    payload = await runtime.simulator._call(
+        vehicle.queue_lua_command,
+        "local candidates = {}; "
+        "for _, beam in pairs(v.data.beams or {}) do "
+        "if type(beam) == 'table' and type(beam.cid) == 'number' "
+        "and not obj:beamIsBroken(beam.cid) then "
+        "local part = tostring(beam.partOrigin or beam.partName or beam.partPath or ''); "
+        "local folded = string.lower(part); "
+        "local priority = string.find(folded, 'bumper', 1, true) and 0 "
+        "or (string.find(folded, 'body', 1, true) and 1 or 2); "
+        "candidates[#candidates + 1] = {cid = beam.cid, part = part, priority = priority}; "
+        "end; end; "
+        "table.sort(candidates, function(left, right) "
+        "if left.priority ~= right.priority then return left.priority < right.priority end; "
+        "return left.cid < right.cid end); "
+        "local selected = candidates[1]; "
+        "if not selected then return jsonEncode({ok = false, error = 'no intact beam'}) end; "
+        "obj:breakBeam(selected.cid); "
+        "local wheelIds = {}; "
+        "for wheelId, wheel in pairs((wheels and wheels.wheels) or {}) do "
+        "if type(wheel) == 'table' and wheel.isTireDeflated ~= true then "
+        "wheelIds[#wheelIds + 1] = wheelId end; end; "
+        "table.sort(wheelIds, function(left, right) return left < right end); "
+        "local wheelId = wheelIds[1]; "
+        "if wheelId == nil or not beamstate or type(beamstate.deflateTire) ~= 'function' then "
+        "return jsonEncode({ok = false, error = 'no inflatable tire'}); end; "
+        "beamstate.deflateTire(wheelId); "
+        "return jsonEncode({ok = true, beam_cid = selected.cid, "
+        "beam_part = selected.part, wheel_id = wheelId})",
+        True,
+    )
+    result = json.loads(payload)
+    assert result.get("ok") is True, result
+    return result
 
 
 async def _vehicle_oobb_state(runtime: Any, bng: Any) -> dict[str, Any]:
@@ -436,7 +523,10 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
     assert phase2["vehicle"]["name"] == TRUCK_ID
     assert phase2["trigger"]["name"] == LAUNCH_TRIGGER_NAME
     assert phase2["wash_activation_trigger"]["name"] == WASH_TRIGGER_NAME
+    assert phase2["repair_trigger"]["name"] == REPAIR_TRIGGER_NAME
     assert phase2["wash_effects"]["visual_name"] == SCENARIO_VISUAL_NAME
+    assert len(phase2["wash_effects"]["effects"]) == EXPECTED_EFFECT_COUNT
+    assert phase2["wash_effects"]["emitter_counts"] == EXPECTED_EMITTER_COUNTS
     assert phase3["extension"] == {
         "registry_name": EXTENSION_REGISTRY_NAME,
         "file": f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.lua",
@@ -513,7 +603,7 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 )
                 artifact_path = Path(artifact["path"])
                 members = _zip_members(artifact_path)
-                assert len(members) == 14
+                assert len(members) == 16
                 assert members == PUBLIC_RUNTIME_FILES
                 assert {member.partition("/")[0] for member in members} == PUBLIC_ROOTS
                 installed = _structured(
@@ -633,8 +723,18 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 assert trigger_scene_state["wash"]["class"] == "BeamNGTrigger"
                 assert trigger_scene_state["wash"]["mode"] == "Overlaps"
                 assert trigger_scene_state["wash"]["test_type"] == "Bounding box"
+                assert trigger_scene_state["repair"]["name"] == REPAIR_TRIGGER_NAME
+                assert trigger_scene_state["repair"]["class"] == "BeamNGTrigger"
+                assert trigger_scene_state["repair"]["mode"] == "Overlaps"
+                assert trigger_scene_state["repair"]["test_type"] == "Bounding box"
                 initial_wash_state = await _wait_for_wash_system_state(runtime, bng, active=False)
                 assert int(initial_wash_state["subject_count"]) == 0
+                assert initial_wash_state["repair_trigger"] == {
+                    "name": REPAIR_TRIGGER_NAME,
+                    "id": initial_wash_state["repair_trigger"]["id"],
+                    "mode": "Overlaps",
+                    "test_type": "Bounding box",
+                }
                 if phase == 4:
                     assert phase4 is not None
                     crash_wall = _structured(
@@ -709,27 +809,53 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                     )
                 )
                 assert attached_electrics["ok"] is True
-                damage_sensor_name: str | None = None
-                initial_damage = 0.0
-                if phase == 4:
-                    damage_sensor_name = "cannon_phase4_damage"
-                    attached_damage = _structured(
-                        await session.call_tool(
-                            "sensor_attach",
-                            {
-                                "spec": {
-                                    "name": damage_sensor_name,
-                                    "sensor_type": "damage",
-                                    "vehicle_id": TRUCK_ID,
-                                }
-                            },
+                damage_sensor_name = f"cannon_phase{phase}_damage"
+                attached_damage = _structured(
+                    await session.call_tool(
+                        "sensor_attach",
+                        {
+                            "spec": {
+                                "name": damage_sensor_name,
+                                "sensor_type": "damage",
+                                "vehicle_id": TRUCK_ID,
+                            }
+                        },
+                    )
+                )
+                assert attached_damage["ok"] is True
+                clean_damage_reading = _structured(
+                    await session.call_tool("sensor_poll", {"name": damage_sensor_name})
+                )
+                live_vehicle = await runtime.simulator._vehicle(TRUCK_ID)
+                clean_integrity = await _vehicle_integrity_state(runtime, live_vehicle)
+                assert clean_integrity == {
+                    "damage": pytest.approx(0.0, abs=0.01),
+                    "part_damage_count": 0,
+                    "broken_beam_count": 0,
+                    "deflated_tire_count": 0,
+                }
+                assert float(clean_damage_reading["data"]["damage"]) <= 0.01
+                damage_injection = await _damage_vehicle_for_repair(runtime, live_vehicle)
+                damaged_integrity: dict[str, Any] | None = None
+                for _ in range(60):
+                    await _step(session, 1)
+                    candidate_integrity = await _vehicle_integrity_state(runtime, live_vehicle)
+                    if (
+                        candidate_integrity["broken_beam_count"] >= 1
+                        and candidate_integrity["deflated_tire_count"] >= 1
+                        and (
+                            candidate_integrity["damage"] > clean_integrity["damage"]
+                            or candidate_integrity["part_damage_count"] > 0
                         )
-                    )
-                    assert attached_damage["ok"] is True
-                    initial_damage_reading = _structured(
-                        await session.call_tool("sensor_poll", {"name": damage_sensor_name})
-                    )
-                    initial_damage = float(initial_damage_reading["data"]["damage"])
+                    ):
+                        damaged_integrity = candidate_integrity
+                        break
+                assert damaged_integrity is not None, damage_injection
+                assert damaged_integrity["damage"] > clean_integrity["damage"] or (
+                    damaged_integrity["part_damage_count"] > 0
+                )
+                assert damaged_integrity["broken_beam_count"] >= 1
+                assert damaged_integrity["deflated_tire_count"] >= 1
                 forward = [float(value) for value in phase2["vehicle"]["forward_axis_world"]]
                 rotation = phase2["vehicle"]["rotation_xyzw"]
 
@@ -846,6 +972,74 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                     ),
                 }
                 assert trigger_record is not None, drive_diagnostics
+                repair_records = [
+                    record
+                    for record in _tagged_records(log_path)
+                    if int(record.get("session", 0)) == session_number
+                    and record.get("event")
+                    in {
+                        "repair_snapshot",
+                        "repair_requested",
+                        "repair_reset_ack",
+                        "repair_complete",
+                    }
+                ]
+                repair_snapshots = [
+                    record for record in repair_records if record.get("event") == "repair_snapshot"
+                ]
+                repair_reset_acks = [
+                    record for record in repair_records if record.get("event") == "repair_reset_ack"
+                ]
+                repair_completions = [
+                    record for record in repair_records if record.get("event") == "repair_complete"
+                ]
+                assert len(repair_snapshots) == 1, repair_records
+                assert len(repair_reset_acks) == 1, repair_records
+                assert len(repair_completions) == 1, repair_records
+                repair_snapshot = repair_snapshots[0]
+                repair_complete = repair_completions[0]
+                repair_token = int(repair_snapshot["repair_token"])
+                assert int(repair_reset_acks[0]["repair_token"]) == repair_token
+                assert int(repair_complete["repair_token"]) == repair_token
+                assert int(repair_snapshot["broken_beams_before"]) >= 1
+                assert int(repair_snapshot["deflated_tires_before"]) >= 1
+                assert (
+                    float(repair_snapshot["damage_before"]) > 0.01
+                    or int(repair_snapshot["part_damage_before"]) > 0
+                )
+                assert float(repair_complete["damage_after"]) <= 0.01
+                assert int(repair_complete["part_damage_after"]) == 0
+                assert int(repair_complete["broken_beams_after"]) == 0
+                assert int(repair_complete["deflated_tires_after"]) == 0
+                assert float(repair_complete["position_drift_m"]) <= 0.15
+                assert float(repair_complete["direction_dot"]) >= 0.999
+                restored_integrity = await _vehicle_integrity_state(runtime, live_vehicle)
+                assert restored_integrity["damage"] <= 0.01
+                assert restored_integrity["part_damage_count"] == 0
+                assert restored_integrity["broken_beam_count"] == 0
+                assert restored_integrity["deflated_tire_count"] == 0
+                records_after_repair = _tagged_records(log_path)
+                assert not any(
+                    record.get("event") == "abort"
+                    and record.get("reason") == "vehicle_reset"
+                    and int(record.get("session", 0)) == session_number
+                    for record in records_after_repair
+                )
+                assert not any(
+                    record.get("event") == "wash_subject_removed"
+                    and record.get("reason") == "vehicle_reset"
+                    and int(record.get("session", 0)) == session_number
+                    for record in records_after_repair
+                )
+                restored_damage_reading = _structured(
+                    await session.call_tool("sensor_poll", {"name": damage_sensor_name})
+                )
+                initial_damage = float(restored_damage_reading["data"]["damage"])
+                initial_part_damage = restored_damage_reading["data"].get("part_damage") or {}
+                assert initial_damage <= 0.01
+                assert initial_part_damage == {}
+                pre_go_damage_samples = [initial_damage]
+                pre_go_part_damage_samples = [initial_part_damage]
                 assert max(drive_progress) >= 10.0
                 assert max(float(state["speed_mps"]) for state in drive_states) <= 8.0
                 assert max(float(state["speed_mps"]) for state in drive_states) >= 1.0
@@ -916,12 +1110,13 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 hold_anchor = _structured(
                     await session.call_tool("vehicle_state", {"vehicle_id": TRUCK_ID})
                 )
-                prelaunch_damage = initial_damage
-                if damage_sensor_name is not None:
-                    prelaunch_damage_reading = _structured(
-                        await session.call_tool("sensor_poll", {"name": damage_sensor_name})
-                    )
-                    prelaunch_damage = float(prelaunch_damage_reading["data"]["damage"])
+                prelaunch_damage_reading = _structured(
+                    await session.call_tool("sensor_poll", {"name": damage_sensor_name})
+                )
+                pre_go_damage_samples.append(float(prelaunch_damage_reading["data"]["damage"]))
+                pre_go_part_damage_samples.append(
+                    prelaunch_damage_reading["data"].get("part_damage") or {}
+                )
                 hold_states: list[dict[str, Any]] = []
                 launch_state: dict[str, Any] | None = None
                 launch_samples: list[dict[str, Any]] = []
@@ -932,6 +1127,26 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                         await session.call_tool("vehicle_state", {"vehicle_id": TRUCK_ID})
                     )
                     records = _tagged_records(log_path)
+                    run_events_before_damage = {
+                        str(record.get("event"))
+                        for record in records
+                        if record.get("run") == trigger_record["run"]
+                    }
+                    if "go" not in run_events_before_damage:
+                        hold_damage = _structured(
+                            await session.call_tool("sensor_poll", {"name": damage_sensor_name})
+                        )
+                        records_after_damage = _tagged_records(log_path)
+                        run_events_after_damage = {
+                            str(record.get("event"))
+                            for record in records_after_damage
+                            if record.get("run") == trigger_record["run"]
+                        }
+                        if "go" not in run_events_after_damage:
+                            pre_go_damage_samples.append(float(hold_damage["data"]["damage"]))
+                            pre_go_part_damage_samples.append(
+                                hold_damage["data"].get("part_damage") or {}
+                            )
                     launched = any(
                         record.get("event") == "launch"
                         and record.get("run") == trigger_record["run"]
@@ -979,6 +1194,22 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 maximum_hold_speed = max(float(state["speed_mps"]) for state in hold_states)
                 assert maximum_hold_drift <= 0.30
                 assert maximum_hold_speed <= 0.50
+                prelaunch_damage = max(pre_go_damage_samples)
+                prelaunch_damage_delta = prelaunch_damage - initial_damage
+                assert prelaunch_damage_delta == pytest.approx(0.0, abs=1e-3), {
+                    "reason": "vehicle accumulated damage before the GO event",
+                    "initial_damage": initial_damage,
+                    "peak_pre_go_damage": prelaunch_damage,
+                    "pre_go_damage_delta": prelaunch_damage_delta,
+                    "sample_count": len(pre_go_damage_samples),
+                }
+                assert all(
+                    sample == initial_part_damage for sample in pre_go_part_damage_samples
+                ), {
+                    "reason": "part-damage map changed before the GO event",
+                    "initial_part_damage": initial_part_damage,
+                    "pre_go_part_damage_samples": pre_go_part_damage_samples,
+                }
 
                 peak_speed = float(launch_state["speed_mps"])
                 assert peak_speed >= 83.333
@@ -1079,6 +1310,10 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                         "hold": {
                             "maximum_drift_m": maximum_hold_drift,
                             "maximum_speed_mps": maximum_hold_speed,
+                            "initial_damage": initial_damage,
+                            "peak_pre_go_damage": prelaunch_damage,
+                            "pre_go_damage_delta": prelaunch_damage_delta,
+                            "pre_go_part_damage_count": len(initial_part_damage),
                         },
                         "launch": {
                             "peak_speed_mps": peak_speed,
@@ -1104,11 +1339,10 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                     await session.call_tool("sensor_remove", {"name": electrics_sensor_name})
                 )
                 assert removed_electrics["ok"] is True
-                if damage_sensor_name is not None:
-                    removed_damage = _structured(
-                        await session.call_tool("sensor_remove", {"name": damage_sensor_name})
-                    )
-                    assert removed_damage["ok"] is True
+                removed_damage = _structured(
+                    await session.call_tool("sensor_remove", {"name": damage_sensor_name})
+                )
+                assert removed_damage["ok"] is True
 
                 reset = _structured(
                     await session.call_tool(
@@ -1161,15 +1395,24 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 required_order = [
                     "wash_trigger_enter",
                     "wash_systems_start",
+                    "repair_trigger_enter",
+                    "repair_snapshot",
+                    "repair_requested",
+                    "repair_reset_ack",
+                    "repair_complete",
                     "containment_verified",
                     "trigger_enter",
+                    "hold_requested",
+                    "hold_ack",
                     "hold_start",
                     "countdown_3",
                     "countdown_timer_start",
                     "countdown_2",
                     "countdown_1",
-                    "go",
+                    "release_requested",
+                    "release_ack",
                     "release",
+                    "go",
                     "launch",
                 ]
                 cursor = -1
@@ -1186,8 +1429,15 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                     for record in session_records
                     if record.get("event") == "wash_systems_start"
                 )
-                assert int(wash_start_record["mister_count"]) == EXPECTED_MISTER_COUNT
-                assert wash_start_record["mister_emitter"] == "BNGP_sprinkler"
+                assert int(wash_start_record["effect_count"]) == EXPECTED_EFFECT_COUNT
+                assert wash_start_record["emitter_counts"] == EXPECTED_EMITTER_COUNTS
+                assert sum(event == "repair_requested" for event in event_names) == 1
+                assert sum(event == "repair_reset_ack" for event in event_names) == 1
+                assert sum(event == "repair_complete" for event in event_names) == 1
+                assert not any(
+                    record.get("event") == "abort" and record.get("reason") == "vehicle_reset"
+                    for record in session_records
+                )
                 countdown = {
                     str(record["event"]): float(record["elapsed_time_seconds"])
                     for record in run_records
@@ -1213,15 +1463,25 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 wash_telemetry = {
                     "launch_trigger": trigger_scene_state["launch"],
                     "activation_trigger": trigger_scene_state["wash"],
+                    "repair_trigger": trigger_scene_state["repair"],
                     "contained_vehicle_oobb": contained_oobb,
                     "initial": initial_wash_state,
                     "active_on_entry": active_wash_state,
                     "final": final_wash_state,
                 }
+                repair_telemetry = {
+                    "injection": damage_injection,
+                    "clean_integrity": clean_integrity,
+                    "damaged_integrity": damaged_integrity,
+                    "restored_integrity": restored_integrity,
+                    "snapshot": repair_snapshot,
+                    "complete": repair_complete,
+                }
                 if phase4_telemetry is not None:
                     phase4_telemetry["countdown_elapsed_seconds"] = countdown
                     phase4_telemetry["ordered_lua_events"] = event_names
                     phase4_telemetry["wash_systems"] = wash_telemetry
+                    phase4_telemetry["repair"] = repair_telemetry
                     phase4_telemetry["lua_errors"] = []
                     telemetry_path = tmp_path / "cannon_car_wash_phase4_telemetry.json"
                     telemetry_path.write_text(
@@ -1236,7 +1496,15 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                             {
                                 "ordered_lua_events": event_names,
                                 "wash_systems": wash_telemetry,
+                                "repair": repair_telemetry,
                                 "countdown_elapsed_seconds": countdown,
+                                "pre_go_damage": {
+                                    "initial": initial_damage,
+                                    "peak": prelaunch_damage,
+                                    "delta": prelaunch_damage_delta,
+                                    "part_damage_count": len(initial_part_damage),
+                                    "sample_count": len(pre_go_damage_samples),
+                                },
                                 "lua_errors": [],
                             },
                             sort_keys=True,

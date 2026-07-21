@@ -10,6 +10,7 @@ import hashlib
 import json
 import math
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -25,7 +26,7 @@ AUTHORING_ROOT = EXAMPLE_ROOT / "authoring"
 BLEND_PATH = Path(
     str(globals().get("BLEND_PATH", EXAMPLE_ROOT / "blender" / "cannon_car_wash.blend"))
 ).resolve()
-ASSET_DIRECTORY = MOD_ROOT / "levels" / "gridmap_v2" / "art" / "shapes" / MOD_ID
+ASSET_DIRECTORY = MOD_ROOT / "art" / "shapes" / MOD_ID
 DAE_PATH = ASSET_DIRECTORY / f"{MOD_ID}.dae"
 MANIFEST_PATH = AUTHORING_ROOT / f"{MOD_ID}.geometry.json"
 VEHICLE_DIRECTORY = MOD_ROOT / "vehicles" / MOD_ID
@@ -34,6 +35,34 @@ VEHICLE_HANDOFF_PATH = AUTHORING_ROOT / f"{MOD_ID}.selector_handoff.json"
 VEHICLE_VISUAL_NAME = f"{MOD_ID}_selector_visual"
 VEHICLE_CAGE_NAME = f"{MOD_ID}_selector_cage"
 SCENARIO_VISUAL_NAME = f"{MOD_ID}_scenario_visual"
+
+
+def add_ambient_animation_clip(path: Path) -> None:
+    """Group every exported spinner action into BeamNG's required ambient sequence."""
+
+    payload = path.read_bytes()
+    if b'<animation_clip id="ambient" name="ambient"' in payload:
+        raise RuntimeError("Collada already contains an ambient animation clip")
+    animation_ids = re.findall(rb'^    <animation id="([A-Za-z0-9_.-]+)"', payload, re.MULTILINE)
+    if len(animation_ids) != 5 or len(set(animation_ids)) != 5:
+        raise RuntimeError(
+            f"expected exactly five top-level spinner animations, found {len(animation_ids)}"
+        )
+    newline = b"\r\n" if b"\r\n" in payload else b"\n"
+    clip_lines = [
+        b"  <library_animation_clips>",
+        b'    <animation_clip id="ambient" name="ambient" start="0" end="2.541667">',
+    ]
+    clip_lines.extend(
+        b'      <instance_animation url="#' + animation_id + b'"/>'
+        for animation_id in animation_ids
+    )
+    clip_lines.extend((b"    </animation_clip>", b"  </library_animation_clips>"))
+    clip = newline.join(clip_lines) + newline
+    anchor = b"  <library_visual_scenes>"
+    if payload.count(anchor) != 1:
+        raise RuntimeError("Collada visual-scene anchor is missing or ambiguous")
+    path.write_bytes(payload.replace(anchor, clip + anchor, 1))
 
 
 def namespaced_object_name(name: str) -> str:
@@ -57,6 +86,7 @@ def scenario_material_name(name: str) -> str:
 
 LAUNCH_TRIGGER_NAME = namespaced_object_name("launch_trigger")
 WASH_ACTIVATION_TRIGGER_NAME = namespaced_object_name("wash_activation_trigger")
+REPAIR_TRIGGER_NAME = namespaced_object_name("repair_trigger")
 # BeamNG's live D-Series OOBB settles roughly 1 cm below the road surface.
 # Give Contains a measured 20 cm under-floor allowance while keeping the top
 # inside the 4.48 m opening: local Z bounds are [-0.2, 4.4].
@@ -64,7 +94,9 @@ LAUNCH_TRIGGER_CENTER = (0.0, 5.0, 2.1)
 LAUNCH_TRIGGER_DIMENSIONS = (5.8, 7.5, 4.6)
 WASH_ACTIVATION_TRIGGER_CENTER = (0.0, 0.0, 2.2)
 WASH_ACTIVATION_TRIGGER_DIMENSIONS = (5.8, 17.5, 4.4)
-TRIGGER_NAMES = {LAUNCH_TRIGGER_NAME, WASH_ACTIVATION_TRIGGER_NAME}
+REPAIR_TRIGGER_CENTER = (0.0, -5.6, 2.1)
+REPAIR_TRIGGER_DIMENSIONS = (5.4, 2.2, 4.2)
+TRIGGER_NAMES = {LAUNCH_TRIGGER_NAME, WASH_ACTIVATION_TRIGGER_NAME, REPAIR_TRIGGER_NAME}
 
 PRIMARY_STRUCTURES = (
     namespaced_object_name("CarWash_Floor"),
@@ -73,6 +105,7 @@ PRIMARY_STRUCTURES = (
     namespaced_object_name("CarWash_Roof"),
     LAUNCH_TRIGGER_NAME,
     WASH_ACTIVATION_TRIGGER_NAME,
+    REPAIR_TRIGGER_NAME,
 )
 COLLISION_MESH_NAMES = tuple(namespaced_object_name(f"Colmesh-{index}") for index in range(1, 5))
 PORTABLE_FILE_BROWSER_PATH = "//" + "_" * 1021
@@ -288,25 +321,97 @@ def add_pipe_arch(
     )
 
 
-def mister_specs() -> list[dict[str, Any]]:
+def wash_effect_specs() -> list[dict[str, Any]]:
+    """Return the exact BeamNG particle-node contract for both arches.
+
+    ``ParticleEmitterNode.emitter`` consumes ``ParticleEmitterData`` objects
+    (the ``BNGP_*`` names below), not the underlying ``ParticleData`` object.
+    BeamNG 0.38.6 does not contain the three user-facing semantic labels, so
+    the manifest records both the requested role and its verified stock
+    runtime mapping.
+    """
+
     specs: list[dict[str, Any]] = []
-    for arch_name, y in (("PreSoak", -5.6), ("Rinse", 5.65)):
-        for side_name, side in (("L", -1.0), ("R", 1.0)):
-            # ParticleEmitterNode emits along local +Z. Rotate that axis inward
-            # so each stock sprinkler follows its matching Blender nozzle.
-            rotation = (
-                (0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0)
-                if side < 0
-                else (0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0)
+
+    def append_effect(
+        *,
+        suffix: str,
+        side_name: str,
+        side: float,
+        y: float,
+        z: float,
+        role: str,
+        requested_particle: str,
+        emitter: str,
+        particle_data: str,
+    ) -> None:
+        # ParticleEmitterNode emits along local +Z. Rotate that axis inward so
+        # every layer follows its matching Blender nozzle. BeamNG serializes
+        # rotationMatrix column-by-column; the final triplet is emitted +Z.
+        rotation = (
+            (0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0)
+            if side < 0
+            else (0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0)
+        )
+        specs.append(
+            {
+                "name": namespaced_object_name(suffix),
+                "role": role,
+                "requested_particle": requested_particle,
+                "emitter": emitter,
+                "particle_data": particle_data,
+                "local_position": [round(-side * 0.1 + side * 2.72, 6), y, z],
+                "rotation_matrix": list(rotation),
+                "scale": [1.0, 1.0, 1.0],
+            }
+        )
+
+    for side_name, side in (("L", -1.0), ("R", 1.0)):
+        for index, z in enumerate((1.25, 2.1, 3.0), start=1):
+            append_effect(
+                suffix=f"mister_PreSoak_{side_name}_{index}",
+                side_name=side_name,
+                side=side,
+                y=-5.6,
+                z=z,
+                role="wash_water",
+                requested_particle="BNG_sprinkler",
+                emitter="BNGP_sprinkler",
+                particle_data="BNG_sprinkler",
             )
-            for index, z in enumerate((1.25, 2.1, 3.0), start=1):
-                specs.append(
-                    {
-                        "name": namespaced_object_name(f"mister_{arch_name}_{side_name}_{index}"),
-                        "local_position": [round(-side * 0.1 + side * 2.72, 6), y, z],
-                        "rotation_matrix": list(rotation),
-                    }
-                )
+            append_effect(
+                suffix=f"dryer_Mist_{side_name}_{index}",
+                side_name=side_name,
+                side=side,
+                y=5.65,
+                z=z,
+                role="dryer_primary",
+                requested_particle="BNG_Waterfall_Mist",
+                emitter="BNGP_waterfallsteam",
+                particle_data="BNG_waterfallsteam",
+            )
+        append_effect(
+            suffix=f"dryer_Steam_{side_name}",
+            side_name=side_name,
+            side=side,
+            y=5.65,
+            z=2.1,
+            role="dryer_secondary",
+            requested_particle="BNG_exhaust_steam",
+            emitter="BNGP_34",
+            particle_data="BNG_steam_light_exhaust",
+        )
+        append_effect(
+            suffix=f"dryer_Dust_{side_name}",
+            side_name=side_name,
+            side=side,
+            y=5.65,
+            z=1.25,
+            role="dryer_ambient",
+            requested_particle="BNG_Ambient_Dust",
+            emitter="BNGP_2",
+            particle_data="BNG_dust_light",
+        )
     return specs
 
 
@@ -353,7 +458,10 @@ def reset_scene() -> None:
     scene.render.filepath = "//cannon_car_wash_preview.png"
     scene.render.use_stamp = False
     scene.frame_start = 1
-    scene.frame_end = 60
+    # The spinner actions key a full revolution at frame 61. Collada samples
+    # through frame_end and writes its last sample into visual_scene, so ending
+    # on the equivalent rest pose keeps animated and flattened exports aligned.
+    scene.frame_end = 61
     scene["beamng_axis"] = "Z-up, +Y drive direction"
     scene["beamng_asset"] = MOD_ID
     print("CANNON_CAR_WASH_STAGE reset complete")
@@ -535,6 +643,13 @@ def build_details() -> None:
             f"{MOD_ID}_cycle",
             "Overlaps",
         ),
+        (
+            REPAIR_TRIGGER_NAME,
+            REPAIR_TRIGGER_CENTER,
+            REPAIR_TRIGGER_DIMENSIONS,
+            f"{MOD_ID}_repair",
+            "Overlaps",
+        ),
     )
     for name, center, dimensions, event, mode in trigger_specs:
         trigger = add_box(name, center, dimensions, trigger_material, bevel=0.0)
@@ -548,6 +663,8 @@ def build_details() -> None:
         trigger["trigger_axis"] = "+Y"
         if name == LAUNCH_TRIGGER_NAME:
             trigger["trigger_target_speed_kph"] = 320.0
+        elif name == REPAIR_TRIGGER_NAME:
+            trigger["repair_strategy"] = "RESET_PHYSICS"
     print("CANNON_CAR_WASH_STAGE details complete")
 
 
@@ -663,6 +780,34 @@ def _selector_structure() -> dict[str, Any]:
                 }
             )
 
+    # A vehicle's spawn position is its reference-node position. Keep the
+    # selector datum on the measured underside of the floor so callers can use
+    # the actual map-surface Z without a hidden 12 cm compensation. These two
+    # points are derived from the evaluated floor minimum and authored station
+    # coordinates; they are part of the Blender handoff, never patched into the
+    # generated JBeam independently.
+    middle_station = len(stations) // 2
+    ground_reference_tracks = (
+        (middle_station, "ground_reference"),
+        (middle_station - 1, "ground_back"),
+    )
+    for station_index, track_name in ground_reference_tracks:
+        source = Vector((0.0, stations[station_index], floor["min"][2]))
+        mapped = rotation @ source
+        identifier = f"{MOD_ID}_{track_name}"
+        node_id[(station_index, track_name)] = identifier
+        nodes.append(
+            {
+                "id": identifier,
+                "source_object": VEHICLE_CAGE_NAME,
+                "source_vertex_index": len(nodes),
+                "source_world_position": [round(value, 6) for value in source],
+                "position": [round(value, 6) for value in mapped],
+                "station": station_index,
+                "track": track_name,
+            }
+        )
+
     cross_section_edges = (
         ("floor_outer_left", "floor_inner_left"),
         ("floor_inner_left", "floor_center"),
@@ -724,6 +869,15 @@ def _selector_structure() -> dict[str, Any]:
                 node_id[(station_index + 1, first_track)],
             )
 
+    for station_index, track_name in ground_reference_tracks:
+        reference_id = node_id[(station_index, track_name)]
+        for support_track in ("floor_outer_left", "floor_center", "floor_outer_right"):
+            add_beam(reference_id, node_id[(station_index, support_track)])
+    add_beam(
+        node_id[(middle_station, "ground_reference")],
+        node_id[(middle_station - 1, "ground_back")],
+    )
+
     triangles: list[dict[str, Any]] = []
     for station_index in range(len(stations) - 1):
         for first_track, second_track, surface in surface_bands:
@@ -743,13 +897,28 @@ def _selector_structure() -> dict[str, Any]:
         for station_index in range(len(stations))
         for track_name in ("floor_outer_left", "floor_outer_right")
     ]
-    middle_station = len(stations) // 2
+    # BeamNG's Vehicle Selector grounds a newly spawned/replaced vehicle from
+    # its *collidable* initial-node OOBB.  Keep that placement envelope sparse
+    # and outside the drive lane: the eight measured shell corners give the
+    # selector a non-degenerate XYZ box without adding collision points around
+    # the brushes or the vehicle path.  The JBeam builder consumes this exact
+    # Blender-derived list; it never invents an independent placement cage.
+    spawn_envelope_nodes = [
+        node_id[(station_index, track_name)]
+        for station_index in (0, len(stations) - 1)
+        for track_name in (
+            "floor_outer_left",
+            "floor_outer_right",
+            "roof_top_left",
+            "roof_top_right",
+        )
+    ]
     refnodes = {
-        "ref": node_id[(middle_station, "floor_center")],
+        "ref": node_id[(middle_station, "ground_reference")],
         # Source station 2 maps from Y=-3 to BeamNG's +Y/back direction.
-        "back": node_id[(middle_station - 1, "floor_center")],
+        "back": node_id[(middle_station - 1, "ground_back")],
         # Source -X maps to BeamNG +X/left after the proper Z rotation.
-        "left": node_id[(middle_station, "floor_inner_left")],
+        "left": node_id[(middle_station, "floor_outer_left")],
         "up": node_id[(middle_station, "roof_bottom_center")],
     }
     return {
@@ -775,6 +944,7 @@ def _selector_structure() -> dict[str, Any]:
         "beams": [list(pair) for pair in sorted(beams)],
         "triangles": triangles,
         "base_nodes": base_nodes,
+        "spawn_envelope_nodes": spawn_envelope_nodes,
         "refnodes": refnodes,
     }
 
@@ -957,6 +1127,10 @@ def finalize() -> None:
     ASSET_DIRECTORY.mkdir(parents=True, exist_ok=True)
     MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
     BLEND_PATH.parent.mkdir(parents=True, exist_ok=True)
+    # Collada writes the current evaluated pose into visual-scene transforms in
+    # addition to its animation channels. Keep the scenario and flattened
+    # selector exports on the same authored rest frame.
+    bpy.context.scene.frame_set(1)
     bpy.context.view_layer.update()
     primary = {name: object_bounds(bpy.data.objects[name]) for name in PRIMARY_STRUCTURES}
     manifest_meshes = [
@@ -1000,11 +1174,24 @@ def finalize() -> None:
             "mode": "Overlaps",
             "events": ["enter", "exit"],
         },
+        "repair_trigger": {
+            "name": REPAIR_TRIGGER_NAME,
+            "center": list(REPAIR_TRIGGER_CENTER),
+            "dimensions": list(REPAIR_TRIGGER_DIMENSIONS),
+            "mode": "Overlaps",
+            "events": ["enter", "exit"],
+            "repair_strategy": "RESET_PHYSICS",
+        },
         "wash_effects": {
             "roller_visual": SCENARIO_VISUAL_NAME,
             "roller_sequence": "ambient",
-            "mister_emitter": "BNGP_sprinkler",
-            "misters": mister_specs(),
+            "node_datablock": "lightExampleEmitterNodeData1",
+            "requested_to_runtime": {
+                "BNG_Waterfall_Mist": "BNGP_waterfallsteam",
+                "BNG_exhaust_steam": "BNGP_34",
+                "BNG_Ambient_Dust": "BNGP_2",
+            },
+            "effects": wash_effect_specs(),
         },
         "mesh_statistics": mesh_statistics(manifest_meshes),
         "collision_meshes": list(COLLISION_MESH_NAMES),
@@ -1042,6 +1229,7 @@ def finalize() -> None:
     )
     if "FINISHED" not in result:
         raise RuntimeError(f"Collada export failed: {result}")
+    add_ambient_animation_clip(DAE_PATH)
     print(
         "CANNON_CAR_WASH_STAGE finalize complete",
         json.dumps(

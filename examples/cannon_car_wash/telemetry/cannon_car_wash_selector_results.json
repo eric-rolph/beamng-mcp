@@ -3,6 +3,7 @@
   "verified_on": "2026-07-21",
   "result": "passed",
   "test": "tests/test_cannon_car_wash_selector_live.py",
+  "runtime_test": "tests/test_cannon_car_wash_selector_runtime_live.py",
   "runtime": {
     "beamng_drive": "0.38.6",
     "beamngpy": "1.35.1",
@@ -15,18 +16,20 @@
     "default_configuration": "standard"
   },
   "topology": {
-    "node_count": 77,
-    "fixed_node_count": 77,
-    "beam_count": 322,
+    "node_count": 79,
+    "fixed_node_count": 79,
+    "engine_collision_mode_3_count": 8,
+    "beam_count": 329,
     "triangle_count": 144,
     "flexbody_count": 1,
-    "total_mass_kg": 14875,
+    "total_mass_kg": 15125,
     "vehicle_directory": "/vehicles/ericrolph_cannon_car_wash/"
   },
   "stability": {
     "deterministic_steps": 120,
-    "initial_position": [-110.0, -170.0, 100.12000274658203],
-    "settled_position": [-110.0, -170.0, 100.12000274658203],
+    "requested_spawn_position": [-110.0, -170.0, 100.35],
+    "initial_position": [-110.0, -170.0, 99.99999237060547],
+    "settled_position": [-110.0, -170.0, 99.99999237060547],
     "settled_velocity_mps": [0.0, 0.0, 0.0],
     "rigidity": {
       "maximum_shell_node_displacement_m": 0.0,
@@ -36,24 +39,24 @@
   "collision_contact": {
     "vehicle": "ericrolph_cannon_car_wash_truck",
     "injected_velocity_x_mps": 30.0,
-    "peak_positive_velocity_x_mps": 29.552316665649414,
-    "minimum_post_impact_velocity_x_mps": -0.3917746841907501,
+    "peak_positive_velocity_x_mps": 29.553020477294922,
+    "minimum_post_impact_velocity_x_mps": -0.4083935618400574,
     "wall_world_x": -106.9,
-    "maximum_world_x": -108.08714124560356,
+    "maximum_world_x": -108.08719137310982,
     "final_truck_position": [
-      -108.72320964921892,
-      -170.26836361174082,
-      100.40684587817123
+      -108.72831861507495,
+      -170.27203787257713,
+      100.40553992119385
     ],
     "final_truck_velocity_mps": [
-      0.0005712726269848645,
-      0.00017760027549229562,
-      0.0002407096471870318
+      0.00022783724125474691,
+      -0.00007120268128346652,
+      -0.00038488468271680176
     ],
     "prop_position_after_contact": [
       -110.0,
       -170.0,
-      100.12000274658203
+      99.99999237060547
     ],
     "sample_count": 70,
     "rigidity": {
@@ -63,6 +66,170 @@
       "maximum_shell_node_speed_mps": 0.0,
       "sample_count": 31
     }
+  },
+  "selector_runtime": {
+    "mode": "selector_prop",
+    "level": "smallgrid",
+    "runtime_log_schema_version": 2,
+    "subject": {
+      "model": "etk800",
+      "arbitrary_vehicle_support": true
+    },
+    "grounding": {
+      "surface_z": 0.0,
+      "requested_prop_spawn_z": 0.0,
+      "reported_ground_origin_z": 0.0,
+      "acceptance_tolerance_m": 0.03
+    },
+    "runtime_objects": {
+      "animated_visual_present": true,
+      "wash_trigger": {
+        "class": "BeamNGTrigger",
+        "mode": "Overlaps",
+        "test_type": "Bounding box"
+      },
+      "repair_trigger": {
+        "class": "BeamNGTrigger",
+        "mode": "Overlaps",
+        "test_type": "Bounding box"
+      },
+      "launch_trigger": {
+        "class": "BeamNGTrigger",
+        "mode": "Contains",
+        "test_type": "Bounding box"
+      },
+      "effect_present_count": 16,
+      "emitter_present_counts": {
+        "BNGP_sprinkler": 6,
+        "BNGP_waterfallsteam": 6,
+        "BNGP_34": 2,
+        "BNGP_2": 2
+      },
+      "rotated_effect_orientation": {
+        "yaw_degrees": 90,
+        "minimum_inward_dot": 0.99999999999998,
+        "present_count": 16,
+        "left_right_pair_count": 8
+      },
+      "material_count": 12,
+      "animation_sequences": ["ambient"]
+    },
+    "wash_activation": {
+      "roller_sequence": "ambient",
+      "roller_play_ambient_enabled": true,
+      "effect_active_count": 16,
+      "emitter_active_counts": {
+        "BNGP_sprinkler": 6,
+        "BNGP_waterfallsteam": 6,
+        "BNGP_34": 2,
+        "BNGP_2": 2
+      },
+      "rendered_frame_evidence": {
+        "resolution": [640, 360],
+        "changed_pixels": 132924,
+        "pixel_count": 230400,
+        "changed_pixel_ratio": 0.5769270833333333,
+        "channel_difference_means": [
+          32.4163671875,
+          31.07460503472222,
+          28.57255642361111
+        ]
+      }
+    },
+    "countdown_event_elapsed_seconds": {
+      "countdown_3": 0.0,
+      "countdown_2": 1.0159888,
+      "countdown_1": 2.0318545
+    },
+    "go_after_countdown_3_seconds": 3.2006000000000014,
+    "timing_sources": {
+      "countdown_events": "structured runtime event elapsed_time_seconds",
+      "go": "BeamNG file-log timestamp delta from countdown_3"
+    },
+    "launch": {
+      "target_speed_mps": 100.0,
+      "observed_peak_velocity_mps": [
+        -0.13892138004302979,
+        -99.81570434570312,
+        -6.066760063171387
+      ],
+      "observed_peak_speed_mps": 99.9999985542137,
+      "exit_reason": "launch_trigger_exit"
+    },
+    "reset_recovery": {
+      "repair_reset_callbacks_consumed": true,
+      "prop_reset_count": 3,
+      "unexpected_abort_count": 0
+    },
+    "repair": {
+      "requests_per_pass": 1,
+      "before": {
+        "damage": 1100.0,
+        "part_damage_count": 1,
+        "broken_beam_count": 3,
+        "deflated_tire_count": 1
+      },
+      "after": {
+        "damage": 0.0,
+        "part_damage_count": 0,
+        "broken_beam_count": 0,
+        "deflated_tire_count": 0,
+        "position_drift_m": 0.0887491217673,
+        "direction_dot": 0.99975656799924,
+        "controller_frozen": false
+      }
+    },
+    "pre_go_integrity": {
+      "baseline_damage": 0.0,
+      "maximum_damage_delta": 0.0,
+      "part_damage_count": 0,
+      "broken_beam_count": 0,
+      "deflated_tire_count": 0,
+      "sample_count": 33,
+      "countdown_controller_frozen": true,
+      "release_grace_controller_unfrozen": true
+    },
+    "final_ordered_lua_events": [
+      "repair_trigger_enter",
+      "repair_hold_ack",
+      "repair_snapshot",
+      "repair_requested",
+      "repair_reset_ack",
+      "repair_pose_restore_ack",
+      "repair_release_requested",
+      "repair_release_ack",
+      "repair_complete",
+      "repair_trigger_exit",
+      "repair_trigger_exit",
+      "containment_verified",
+      "hold_requested",
+      "hold_ack",
+      "hold_start",
+      "countdown_timer_start",
+      "countdown_3",
+      "countdown_2",
+      "countdown_1",
+      "release_requested",
+      "release_ack",
+      "release",
+      "go",
+      "launch",
+      "launch_complete",
+      "trigger_exit",
+      "wash_trigger_exit",
+      "wash_subject_removed",
+      "wash_systems_stop",
+      "prop_unregistered",
+      "extension_unload_attempt",
+      "extension_unloaded"
+    ],
+    "cleanup": {
+      "prop_unregistered": true,
+      "extension_loaded_after_prop_despawn": false,
+      "runtime_object_count_after_prop_despawn": 0,
+      "unexpected_abort_event_present": false
+    },
+    "runtime_namespace_log_issues": []
   },
   "selector_asset_errors": []
 }

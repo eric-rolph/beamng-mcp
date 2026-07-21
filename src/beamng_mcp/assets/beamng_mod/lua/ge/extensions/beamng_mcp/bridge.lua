@@ -79,6 +79,11 @@ local CREATABLE_CLASSES = {
   BeamNGWaypoint = true
 }
 
+local READ_ONLY_CLASSES = {
+  BeamNGTrigger = true,
+  ParticleEmitterNode = true
+}
+
 local COLLISION_TYPES = {
   ["Collision Mesh"] = true,
   ["Visible Mesh"] = true,
@@ -116,6 +121,17 @@ local FIELD_RULES = {
   },
   BeamNGWaypoint = {
     radius = {kind = "number", min = 0.1, max = 1000}
+  }
+}
+
+local READ_ONLY_FIELD_RULES = {
+  BeamNGTrigger = {
+    triggerMode = true,
+    triggerTestType = true
+  },
+  ParticleEmitterNode = {
+    dataBlock = true,
+    emitter = true
   }
 }
 
@@ -560,12 +576,22 @@ local function objectDescriptor(object, includeFields)
 
   if includeFields then
     descriptor.fields = {}
-    for fieldName, _ in pairs(FIELD_RULES[className] or {}) do
+    local readableFields = FIELD_RULES[className] or READ_ONLY_FIELD_RULES[className] or {}
+    for fieldName, _ in pairs(readableFields) do
       local fieldOk, fieldValue = pcall(function() return object:getField(fieldName, 0) end)
       if fieldOk then descriptor.fields[fieldName] = fieldValue end
     end
   end
   return descriptor
+end
+
+local function ensureReadableObject(object)
+  if not object then return nil, "object was not found" end
+  local className = object:getClassName()
+  if not (CREATABLE_CLASSES[className] or READ_ONLY_CLASSES[className]) then
+    return nil, "object class is not readable through this bridge"
+  end
+  return className, nil
 end
 
 local function ensureWritableObject(object)
@@ -720,7 +746,8 @@ end
 
 HANDLERS["world.list_objects"] = function(params)
   local requestedClass = params.class
-  if requestedClass ~= nil and not CREATABLE_CLASSES[requestedClass] then
+  if requestedClass ~= nil
+    and not (CREATABLE_CLASSES[requestedClass] or READ_ONLY_CLASSES[requestedClass]) then
     return nil, protocolError("invalid_class", "class is not readable through this bridge")
   end
   local limit = params.limit or 100
@@ -740,7 +767,7 @@ HANDLERS["world.list_objects"] = function(params)
     if object then
       local className = object:getClassName()
       local nameMatches = prefix == nil or name:sub(1, #prefix) == prefix
-      if CREATABLE_CLASSES[className]
+      if (CREATABLE_CLASSES[className] or READ_ONLY_CLASSES[className])
         and (requestedClass == nil or requestedClass == className)
         and nameMatches then
         table.insert(objects, objectDescriptor(object, false))
@@ -755,8 +782,8 @@ HANDLERS["world.get_object"] = function(params)
   if resolveError then
     return nil, protocolError("invalid_identifier", resolveError)
   end
-  local _, writableError = ensureWritableObject(object)
-  if writableError then return nil, protocolError("object_unavailable", writableError) end
+  local _, readableError = ensureReadableObject(object)
+  if readableError then return nil, protocolError("object_unavailable", readableError) end
   return objectDescriptor(object, true), nil
 end
 

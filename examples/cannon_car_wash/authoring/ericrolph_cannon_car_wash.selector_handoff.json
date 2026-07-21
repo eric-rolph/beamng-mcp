@@ -22,6 +22,34 @@
   ],
   "beams": [
     [
+      "ericrolph_cannon_car_wash_ground_back",
+      "ericrolph_cannon_car_wash_ground_reference"
+    ],
+    [
+      "ericrolph_cannon_car_wash_ground_back",
+      "ericrolph_cannon_car_wash_s02_t00"
+    ],
+    [
+      "ericrolph_cannon_car_wash_ground_back",
+      "ericrolph_cannon_car_wash_s02_t02"
+    ],
+    [
+      "ericrolph_cannon_car_wash_ground_back",
+      "ericrolph_cannon_car_wash_s02_t04"
+    ],
+    [
+      "ericrolph_cannon_car_wash_ground_reference",
+      "ericrolph_cannon_car_wash_s03_t00"
+    ],
+    [
+      "ericrolph_cannon_car_wash_ground_reference",
+      "ericrolph_cannon_car_wash_s03_t02"
+    ],
+    [
+      "ericrolph_cannon_car_wash_ground_reference",
+      "ericrolph_cannon_car_wash_s03_t04"
+    ],
+    [
       "ericrolph_cannon_car_wash_s00_t00",
       "ericrolph_cannon_car_wash_s00_t01"
     ],
@@ -2649,12 +2677,46 @@
       ],
       "station": 6,
       "track": "roof_bottom_center"
+    },
+    {
+      "id": "ericrolph_cannon_car_wash_ground_reference",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_object": "ericrolph_cannon_car_wash_selector_cage",
+      "source_vertex_index": 77,
+      "source_world_position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "station": 3,
+      "track": "ground_reference"
+    },
+    {
+      "id": "ericrolph_cannon_car_wash_ground_back",
+      "position": [
+        0.0,
+        3.0,
+        0.0
+      ],
+      "source_object": "ericrolph_cannon_car_wash_selector_cage",
+      "source_vertex_index": 78,
+      "source_world_position": [
+        0.0,
+        -3.0,
+        0.0
+      ],
+      "station": 2,
+      "track": "ground_back"
     }
   ],
   "refnodes": {
-    "back": "ericrolph_cannon_car_wash_s02_t02",
-    "left": "ericrolph_cannon_car_wash_s03_t01",
-    "ref": "ericrolph_cannon_car_wash_s03_t02",
+    "back": "ericrolph_cannon_car_wash_ground_back",
+    "left": "ericrolph_cannon_car_wash_s03_t00",
+    "ref": "ericrolph_cannon_car_wash_ground_reference",
     "up": "ericrolph_cannon_car_wash_s03_t10"
   },
   "schema": "ericrolph-cannon-car-wash-selector-handoff-v1",
@@ -2929,6 +2991,60 @@
         -0.2
       ]
     },
+    "ericrolph_cannon_car_wash_repair_trigger": {
+      "corners": [
+        [
+          -2.7,
+          -6.7,
+          0.0
+        ],
+        [
+          -2.7,
+          -6.7,
+          4.2
+        ],
+        [
+          -2.7,
+          -4.5,
+          4.2
+        ],
+        [
+          -2.7,
+          -4.5,
+          0.0
+        ],
+        [
+          2.7,
+          -6.7,
+          0.0
+        ],
+        [
+          2.7,
+          -6.7,
+          4.2
+        ],
+        [
+          2.7,
+          -4.5,
+          4.2
+        ],
+        [
+          2.7,
+          -4.5,
+          0.0
+        ]
+      ],
+      "max": [
+        2.7,
+        -4.5,
+        4.2
+      ],
+      "min": [
+        -2.7,
+        -6.7,
+        0.0
+      ]
+    },
     "ericrolph_cannon_car_wash_wash_activation_trigger": {
       "corners": [
         [
@@ -2984,6 +3100,16 @@
       ]
     }
   },
+  "spawn_envelope_nodes": [
+    "ericrolph_cannon_car_wash_s00_t00",
+    "ericrolph_cannon_car_wash_s00_t04",
+    "ericrolph_cannon_car_wash_s00_t08",
+    "ericrolph_cannon_car_wash_s00_t06",
+    "ericrolph_cannon_car_wash_s06_t00",
+    "ericrolph_cannon_car_wash_s06_t04",
+    "ericrolph_cannon_car_wash_s06_t08",
+    "ericrolph_cannon_car_wash_s06_t06"
+  ],
   "stations_source_y": [
     -9.0,
     -6.0,
@@ -4217,7 +4343,7 @@
       "ericrolph_cannon_car_wash_selector_stainless"
     ],
     "path": "vehicles/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
-    "sha256": "36b94c9b9dde4bd755f1beabb7a26df5a272c4187b385678c41ceeaa630bf19e",
-    "size": 5570451
+    "sha256": "5e7a80536a887d247fb1ed1615164ac34977fd02a600e79e93de9fe318a59465",
+    "size": 5570645
   }
 }

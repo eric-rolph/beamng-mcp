@@ -12,20 +12,17 @@ import json
 import shutil
 import uuid
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 EXAMPLE_ROOT = Path(__file__).resolve().parent
 MOD_ROOT = EXAMPLE_ROOT / "mod"
 MOD_ID = "ericrolph_cannon_car_wash"
 AUTHORING_ROOT = EXAMPLE_ROOT / "authoring"
-REPOSITORY_ROOT = EXAMPLE_ROOT / "repository"
 VEHICLE_ROOT = MOD_ROOT / "vehicles" / MOD_ID
 HANDOFF_PATH = AUTHORING_ROOT / f"{MOD_ID}.selector_handoff.json"
 DAE_PATH = VEHICLE_ROOT / f"{MOD_ID}.dae"
-SOURCE_MATERIALS_PATH = (
-    MOD_ROOT / "levels" / "gridmap_v2" / "art" / "shapes" / MOD_ID / f"{MOD_ID}.materials.json"
-)
-THUMBNAIL_SOURCE = REPOSITORY_ROOT / "icon.jpg"
+SOURCE_MATERIALS_PATH = MOD_ROOT / "art" / "shapes" / MOD_ID / f"{MOD_ID}.materials.json"
+THUMBNAIL_SOURCE = MOD_ROOT / "levels" / "gridmap_v2" / "scenarios" / MOD_ID / f"{MOD_ID}.jpg"
 
 MODEL_ID = MOD_ID
 CONFIG_ID = "standard"
@@ -56,21 +53,25 @@ def load_handoff() -> dict[str, Any]:
     digest = hashlib.sha256(DAE_PATH.read_bytes()).hexdigest()
     if visual.get("sha256") != digest or visual.get("size") != DAE_PATH.stat().st_size:
         raise ValueError("selector Collada changed after Blender handoff extraction")
-    return handoff
+    return cast(dict[str, Any], handoff)
 
 
 def build_jbeam(handoff: dict[str, Any]) -> tuple[dict[str, Any], float]:
     nodes = handoff["nodes"]
     base_ids = set(handoff["base_nodes"])
+    spawn_envelope_ids = set(handoff["spawn_envelope_nodes"])
     node_ids = {node["id"] for node in nodes}
     if len(node_ids) != len(nodes):
         raise ValueError("selector handoff contains duplicate node ids")
     if not base_ids or not base_ids <= node_ids:
         raise ValueError("selector handoff base nodes are missing from the cage")
+    if len(spawn_envelope_ids) != 8 or not spawn_envelope_ids <= node_ids:
+        raise ValueError("selector handoff spawn envelope must contain eight cage nodes")
 
     node_rows: list[list[Any]] = [["id", "posX", "posY", "posZ"]]
     for node in nodes:
         is_base = node["id"] in base_ids
+        is_spawn_envelope = node["id"] in spawn_envelope_ids
         node_rows.append(
             [
                 node["id"],
@@ -79,14 +80,18 @@ def build_jbeam(handoff: dict[str, Any]) -> tuple[dict[str, Any], float]:
                     # The selector model is infrastructure, not a deformable
                     # vehicle. Fix the entire measured shell so its coplanar
                     # panels cannot fold through zero-stiffness modes.
-                    "collision": False,
+                    # BeamNG's safe-spawn/Vehicle Selector placement builds an
+                    # OOBB only from collidable initial nodes.  Eight authored
+                    # exterior corners provide that grounding envelope; the
+                    # collision triangles remain the actual wash surface.
+                    "collision": is_spawn_envelope,
                     "fixed": True,
                     "frictionCoef": 0.9,
                     "group": GROUP,
                     "nodeMaterial": "|NM_METAL",
                     "nodeWeight": BASE_NODE_MASS_KG if is_base else STRUCTURE_NODE_MASS_KG,
                     "selfCollision": False,
-                    "staticCollision": False,
+                    "staticCollision": is_spawn_envelope,
                 },
             ]
         )

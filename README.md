@@ -235,25 +235,31 @@ mod_scaffold → mod_file_read/list → mod_file_write(expected_sha256=...)
 `mod_test_start` is a static build job: it validates, packs, and can copy an approved archive. It
 does not activate the mod, launch a scenario, or prove runtime behavior. Deterministic in-game mod
 execution is available as opt-in developer regressions against a sentinel-marked disposable BeamNG
-profile. The Cannon Car Wash example below is one fully automated scenario-specific gate;
-comprehensive acceptance for arbitrary third-party mods remains manual.
+profile. The Cannon Car Wash example below has automated scenario and free-roam selector-prop
+gates; comprehensive acceptance for arbitrary third-party mods remains manual.
 
 ### Cannon Car Wash end-to-end example
 
 [`examples/cannon_car_wash`](examples/cannon_car_wash) contains the Blender source/generator,
 Z-up Collada asset, Gridmap V2 scenario, exact trigger/placement manifests, GELua wash-cycle and
 countdown/launch extension, and a Blender-derived rigid `Type: Prop` model for the vehicle selector.
-Its `mod/` directory is also the exact official-upload staging tree: 14 runtime files under only
-`levels` and `vehicles`, with every authored runtime identifier namespaced as
+Its `mod/` directory is also the exact official-upload staging tree: 16 runtime files under only
+`art`, `levels`, `lua`, and `vehicles`, with every authored runtime identifier namespaced as
 `ericrolph_cannon_car_wash`. Repository-form metadata, provenance, gallery images, authoring
 handoffs, and telemetry remain outside that tree. The stable release filename is
 `cannon_car_wash_ericrolph.zip`.
-The wash-cycle trigger starts the ambient rollers and twelve stock spray misters while a vehicle is
-inside the bay. A separate containment trigger launches only after the named D-Series is fully inside.
-The live gates prove the prop is catalogued and spawnable, then drive a grounded default D-Series into
-the wash at 3–5 m/s, hold it through `3... 2... 1... GO!`, inject 100 m/s along its measured forward
-axis, and verify impact through State, Electrics, Damage, and engine-log telemetry. The latest
-checked-in result is
+The selector cage is grounded from exact Blender-derived datum nodes at Z=0 and contains 79 fixed
+nodes, 329 beams, 144 collision triangles, one multi-material flexbody, and 15,125 kg of mass.
+Its vehicle-local bootstrap registers each placed prop with an on-demand GELua manager. The manager
+adds the animated rollers, six water jets, a ten-node layered mist/steam/dust dryer, and transient
+wash/repair/launch triggers. Crossing the entry-water arch restores transient vehicle damage with
+an acknowledged full physics reset, exact pose restoration, integrity proof, and prior-freeze-state
+release. The runtime accepts arbitrary real vehicles, waits for full containment, holds the vehicle through
+`3... 2... 1... GO!`, and sets its main cluster to 100 m/s along the measured forward axis. It cleans up those transient
+objects and unloads after the last prop is removed. The Gridmap V2 scenario keeps its separate
+scenario-owned extension and named D-Series contract, so scenario load/unload behavior is not
+conflated with free-roam prop ownership. The live gates exercise both paths and preserve their
+telemetry separately. The scenario result is
 [`cannon_car_wash_phase4_results.json`](examples/cannon_car_wash/telemetry/cannon_car_wash_phase4_results.json).
 
 ### Blender to functional soft body
@@ -362,9 +368,10 @@ Work on cloned/user-folder levels; do not edit shipped game content.
 - BeamNGpy and Lua WebSocket endpoints are loopback-only.
 - The Lua bridge exposes no direct arbitrary Lua-eval, unrestricted extension-load, shell, or file
   tool. Separately, installing an authored Lua mod is code execution and is disabled by default.
-- `BeamNGTrigger` is excluded from the generic object API. Trigger names, callbacks, command
-  fields, ticks, and arbitrary actions are not client-controlled; live objects are ephemeral and
-  tied to exact bridge ownership records.
+- `BeamNGTrigger` and `ParticleEmitterNode` have a narrow read-only generic inspection path for
+  packaged-scene validation. They remain excluded from generic create/update/delete; trigger
+  callbacks, command fields, ticks, and arbitrary actions are not client-controlled, and typed
+  live triggers remain ephemeral and tied to exact bridge ownership records.
 - Every `autonomy_start` mode requires an authenticated engine-side real-time lease. The Python
   supervisor and GELua expiry brake are separate safety layers; neither replaces an operator's
   manual stop path.

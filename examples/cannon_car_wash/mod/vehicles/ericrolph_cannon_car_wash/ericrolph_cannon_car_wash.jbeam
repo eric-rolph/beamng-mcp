@@ -6,6 +6,76 @@
         "id2:"
       ],
       [
+        "ericrolph_cannon_car_wash_ground_back",
+        "ericrolph_cannon_car_wash_ground_reference",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_ground_back",
+        "ericrolph_cannon_car_wash_s02_t00",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_ground_back",
+        "ericrolph_cannon_car_wash_s02_t02",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_ground_back",
+        "ericrolph_cannon_car_wash_s02_t04",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_ground_reference",
+        "ericrolph_cannon_car_wash_s03_t00",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_ground_reference",
+        "ericrolph_cannon_car_wash_s03_t02",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_ground_reference",
+        "ericrolph_cannon_car_wash_s03_t04",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
         "ericrolph_cannon_car_wash_s00_t00",
         "ericrolph_cannon_car_wash_s00_t01",
         {
@@ -3265,14 +3335,14 @@
         9.0,
         0.0,
         {
-          "collision": false,
+          "collision": true,
           "fixed": true,
           "frictionCoef": 0.9,
           "group": "ericrolph_cannon_car_wash_physics",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 500.0,
           "selfCollision": false,
-          "staticCollision": false
+          "staticCollision": true
         }
       ],
       [
@@ -3329,14 +3399,14 @@
         9.0,
         0.0,
         {
-          "collision": false,
+          "collision": true,
           "fixed": true,
           "frictionCoef": 0.9,
           "group": "ericrolph_cannon_car_wash_physics",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 500.0,
           "selfCollision": false,
-          "staticCollision": false
+          "staticCollision": true
         }
       ],
       [
@@ -3361,14 +3431,14 @@
         9.0,
         4.96,
         {
-          "collision": false,
+          "collision": true,
           "fixed": true,
           "frictionCoef": 0.9,
           "group": "ericrolph_cannon_car_wash_physics",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": false
+          "staticCollision": true
         }
       ],
       [
@@ -3393,14 +3463,14 @@
         9.0,
         4.96,
         {
-          "collision": false,
+          "collision": true,
           "fixed": true,
           "frictionCoef": 0.9,
           "group": "ericrolph_cannon_car_wash_physics",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": false
+          "staticCollision": true
         }
       ],
       [
@@ -4321,14 +4391,14 @@
         -9.0,
         0.0,
         {
-          "collision": false,
+          "collision": true,
           "fixed": true,
           "frictionCoef": 0.9,
           "group": "ericrolph_cannon_car_wash_physics",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 500.0,
           "selfCollision": false,
-          "staticCollision": false
+          "staticCollision": true
         }
       ],
       [
@@ -4385,14 +4455,14 @@
         -9.0,
         0.0,
         {
-          "collision": false,
+          "collision": true,
           "fixed": true,
           "frictionCoef": 0.9,
           "group": "ericrolph_cannon_car_wash_physics",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 500.0,
           "selfCollision": false,
-          "staticCollision": false
+          "staticCollision": true
         }
       ],
       [
@@ -4417,14 +4487,14 @@
         -9.0,
         4.96,
         {
-          "collision": false,
+          "collision": true,
           "fixed": true,
           "frictionCoef": 0.9,
           "group": "ericrolph_cannon_car_wash_physics",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": false
+          "staticCollision": true
         }
       ],
       [
@@ -4449,14 +4519,14 @@
         -9.0,
         4.96,
         {
-          "collision": false,
+          "collision": true,
           "fixed": true,
           "frictionCoef": 0.9,
           "group": "ericrolph_cannon_car_wash_physics",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": false
+          "staticCollision": true
         }
       ],
       [
@@ -4490,6 +4560,38 @@
           "selfCollision": false,
           "staticCollision": false
         }
+      ],
+      [
+        "ericrolph_cannon_car_wash_ground_reference",
+        0.0,
+        0.0,
+        0.0,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.9,
+          "group": "ericrolph_cannon_car_wash_physics",
+          "nodeMaterial": "|NM_METAL",
+          "nodeWeight": 125.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_ground_back",
+        0.0,
+        3.0,
+        0.0,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.9,
+          "group": "ericrolph_cannon_car_wash_physics",
+          "nodeMaterial": "|NM_METAL",
+          "nodeWeight": 125.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
       ]
     ],
     "refNodes": [
@@ -4500,9 +4602,9 @@
         "up:"
       ],
       [
-        "ericrolph_cannon_car_wash_s03_t02",
-        "ericrolph_cannon_car_wash_s02_t02",
-        "ericrolph_cannon_car_wash_s03_t01",
+        "ericrolph_cannon_car_wash_ground_reference",
+        "ericrolph_cannon_car_wash_ground_back",
+        "ericrolph_cannon_car_wash_s03_t00",
         "ericrolph_cannon_car_wash_s03_t10"
       ]
     ],
