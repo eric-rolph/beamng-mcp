@@ -441,6 +441,7 @@ def test_deterministic_repository_archive_has_only_approved_root_members(tmp_pat
         assert archive.testzip() is None
         assert all(not member.is_dir() for member in archive.infolist())
         assert all(not member.flag_bits & 0x1 for member in archive.infolist())
+        assert all(member.compress_type == zipfile.ZIP_STORED for member in archive.infolist())
         assert all(member.date_time == ZIP_EPOCH for member in archive.infolist())
         assert all((member.external_attr >> 16) & 0o777 == 0o644 for member in archive.infolist())
         roots = {PurePosixPath(name).parts[0] for name in names}

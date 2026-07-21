@@ -201,6 +201,12 @@ per-release cache epoch, not a permanent 1980 value. BeamNG compares Collada sou
 compiled `.cdae` cache entries; bump the fixed epoch whenever a shipped DAE changes, then rebuild
 and rerun the exact-ZIP live gate.
 
+The release builder intentionally writes `ZIP_STORED` members. Python's level-9 DEFLATE stream is
+not byte-stable across zlib versions: the same 16 source files produced a three-byte/hash difference
+between the development runtime and GitHub's Python 3.11/3.13 runners. Do not re-enable DEFLATE
+while the SHA-256 is a cross-runtime release lock; any compression-policy change requires proving
+identical bytes across the complete CI matrix and rerunning the installed exact-ZIP gate.
+
 ## Namespacing and official Repository policy
 
 Consult current official guidance before preparing a public upload:
@@ -259,8 +265,8 @@ live gates:
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_distribution_live.py
 ```
 
-The verified v1.6 release lock is 16 members, 1,882,321 bytes, SHA-256
-`20ff19d331f22f97a71f806d34ee5cdf4a5aade24d61e376a88b814316db0455`. It is recorded in
+The verified v1.6 release lock is 16 members, 11,844,786 bytes, SHA-256
+`12338a09198a2739449304ab59ae7a68c3f8fceb5219c466778ca014b6f7f9b6`. It is recorded in
 `repository/submission.json` and the exact distribution live test. A runtime-byte or builder-policy
 change requires an intentional metadata update, rebuild, new hash lock, and complete distribution
 rerun.

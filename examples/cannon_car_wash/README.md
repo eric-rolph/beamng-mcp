@@ -84,6 +84,8 @@ refreshes their DAE lock. Never patch JBeam or emitter coordinates independently
 The distribution gate builds a deterministic, explicitly allowlisted 16-file ZIP and rejects
 loose root files, wrapper folders, README/mod_info content, source evidence, unsafe names,
 unnamespaced runtime declarations, invalid JSON, broken references, and nondeterministic members.
+Members are stored without DEFLATE so the complete archive remains byte-identical across Python and
+zlib versions; BeamNG still receives a standard ZIP, while the release SHA-256 stays portable.
 
 ## Isolated live gates
 
@@ -116,8 +118,8 @@ sentinel-isolated profile's USER_FOLDER/mods directory:
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_distribution_live.py
 ~~~
 
-The verified v1.6 artifact contains 16 members, is 1,882,321 bytes, and has SHA-256
-`20ff19d331f22f97a71f806d34ee5cdf4a5aade24d61e376a88b814316db0455`; the same lock is stored in
+The verified v1.6 artifact contains 16 members, is 11,844,786 bytes, and has SHA-256
+`12338a09198a2739449304ab59ae7a68c3f8fceb5219c466778ca014b6f7f9b6`; the same lock is stored in
 repository/submission.json. Do not place a pre-submission ZIP under mods/repo; BeamNG owns that
 location for Repository-managed downloads.
 

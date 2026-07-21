@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "captured_at": "2026-07-21T15:04:41.3016295-06:00",
+  "captured_at": "2026-07-21T15:21:31.7845702-06:00",
   "status": "passed",
   "environment": {
     "beamng_version": "0.38.6.0.19963",
@@ -15,12 +15,12 @@
     ],
     "phase4_duration_seconds": 51.70,
     "selector_runtime_duration_seconds": 40.61,
-    "distribution_smoke_duration_seconds": 28.00
+    "distribution_smoke_duration_seconds": 28.53
   },
   "installed_archive": {
     "filename": "cannon_car_wash_ericrolph.zip",
-    "sha256": "20ff19d331f22f97a71f806d34ee5cdf4a5aade24d61e376a88b814316db0455",
-    "size_bytes": 1882321,
+    "sha256": "12338a09198a2739449304ab59ae7a68c3f8fceb5219c466778ca014b6f7f9b6",
+    "size_bytes": 11844786,
     "entry_count": 16,
     "install_root": "USER_FOLDER/mods",
     "root_info_present": false,

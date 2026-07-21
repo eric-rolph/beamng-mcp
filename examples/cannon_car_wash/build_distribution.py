@@ -164,22 +164,23 @@ def _cleanup_failure_note(path: Path, error: OSError) -> str:
 
 
 def _write_archive(path: Path, payloads: dict[str, bytes]) -> None:
+    # Stored members make the complete archive byte-for-byte reproducible across
+    # Python and zlib releases. DEFLATE level 9 produced different streams for
+    # the same payload on the local runtime and GitHub's Python 3.11/3.13 jobs.
     with zipfile.ZipFile(
         path,
         mode="w",
-        compression=zipfile.ZIP_DEFLATED,
-        compresslevel=9,
+        compression=zipfile.ZIP_STORED,
     ) as archive:
         for name in EXPECTED_RUNTIME_FILES:
             info = zipfile.ZipInfo(name, date_time=ZIP_EPOCH)
-            info.compress_type = zipfile.ZIP_DEFLATED
+            info.compress_type = zipfile.ZIP_STORED
             info.create_system = 3
             info.external_attr = (stat.S_IFREG | 0o644) << 16
             archive.writestr(
                 info,
                 payloads[name],
-                compress_type=zipfile.ZIP_DEFLATED,
-                compresslevel=9,
+                compress_type=zipfile.ZIP_STORED,
             )
 
 
@@ -202,6 +203,11 @@ def verify_archive(path: Path) -> None:
                     raise DistributionError(f"directory member is forbidden: {member.filename}")
                 if member.flag_bits & 0x1:
                     raise DistributionError(f"encrypted member is forbidden: {member.filename}")
+                if member.compress_type != zipfile.ZIP_STORED:
+                    raise DistributionError(
+                        f"non-portable compression method for {member.filename}: "
+                        f"{member.compress_type}"
+                    )
                 if member.date_time != ZIP_EPOCH:
                     raise DistributionError(f"non-deterministic timestamp: {member.filename}")
                 if member.create_system != 3:
