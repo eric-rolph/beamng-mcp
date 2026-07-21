@@ -243,6 +243,11 @@ comprehensive acceptance for arbitrary third-party mods remains manual.
 [`examples/cannon_car_wash`](examples/cannon_car_wash) contains the Blender source/generator,
 Z-up Collada asset, Gridmap V2 scenario, exact trigger/placement manifests, GELua wash-cycle and
 countdown/launch extension, and a Blender-derived rigid `Type: Prop` model for the vehicle selector.
+Its `mod/` directory is also the exact official-upload staging tree: 14 runtime files under only
+`levels` and `vehicles`, with every authored runtime identifier namespaced as
+`ericrolph_cannon_car_wash`. Repository-form metadata, provenance, gallery images, authoring
+handoffs, and telemetry remain outside that tree. The stable release filename is
+`cannon_car_wash_ericrolph.zip`.
 The wash-cycle trigger starts the ambient rollers and twelve stock spray misters while a vehicle is
 inside the bay. A separate containment trigger launches only after the named D-Series is fully inside.
 The live gates prove the prop is catalogued and spawnable, then drive a grounded default D-Series into

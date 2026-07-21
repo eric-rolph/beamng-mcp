@@ -16,25 +16,22 @@ from typing import Any
 
 EXAMPLE_ROOT = Path(__file__).resolve().parent
 MOD_ROOT = EXAMPLE_ROOT / "mod"
-VEHICLE_ROOT = MOD_ROOT / "vehicles" / "cannon_car_wash"
-HANDOFF_PATH = VEHICLE_ROOT / "cannon_car_wash.selector_handoff.json"
-DAE_PATH = VEHICLE_ROOT / "cannon_car_wash.dae"
+MOD_ID = "ericrolph_cannon_car_wash"
+AUTHORING_ROOT = EXAMPLE_ROOT / "authoring"
+REPOSITORY_ROOT = EXAMPLE_ROOT / "repository"
+VEHICLE_ROOT = MOD_ROOT / "vehicles" / MOD_ID
+HANDOFF_PATH = AUTHORING_ROOT / f"{MOD_ID}.selector_handoff.json"
+DAE_PATH = VEHICLE_ROOT / f"{MOD_ID}.dae"
 SOURCE_MATERIALS_PATH = (
-    MOD_ROOT
-    / "levels"
-    / "gridmap_v2"
-    / "art"
-    / "shapes"
-    / "carwash"
-    / "cannon_car_wash.materials.json"
+    MOD_ROOT / "levels" / "gridmap_v2" / "art" / "shapes" / MOD_ID / f"{MOD_ID}.materials.json"
 )
-THUMBNAIL_SOURCE = MOD_ROOT / "mod_info" / "cannon_car_wash" / "icon.jpg"
+THUMBNAIL_SOURCE = REPOSITORY_ROOT / "icon.jpg"
 
-MODEL_ID = "cannon_car_wash"
+MODEL_ID = MOD_ID
 CONFIG_ID = "standard"
 DISPLAY_NAME = "Cannon Car Wash"
-AUTHOR = "beamng-mcp contributors"
-GROUP = "cannon_car_wash"
+AUTHOR = "Eric Rolph"
+GROUP = f"{MOD_ID}_physics"
 BASE_NODE_MASS_KG = 500.0
 STRUCTURE_NODE_MASS_KG = 125.0
 
@@ -49,7 +46,7 @@ def write_json(path: Path, value: Any) -> None:
 
 def load_handoff() -> dict[str, Any]:
     handoff = json.loads(HANDOFF_PATH.read_text(encoding="utf-8"))
-    if handoff.get("schema") != "cannon-car-wash-selector-handoff-v1":
+    if handoff.get("schema") != "ericrolph-cannon-car-wash-selector-handoff-v1":
         raise ValueError("unsupported or missing selector handoff schema")
     if handoff.get("asset", {}).get("id") != MODEL_ID:
         raise ValueError("selector handoff model id does not match output model")
@@ -153,18 +150,22 @@ def build_materials(handoff: dict[str, Any]) -> dict[str, Any]:
     source_materials = json.loads(SOURCE_MATERIALS_PATH.read_text(encoding="utf-8"))
     output: dict[str, Any] = {}
     for selector_name in handoff["visual"]["materials"]:
-        if not selector_name.startswith("CWV_"):
+        selector_prefix = f"{MOD_ID}_selector_"
+        if not selector_name.startswith(selector_prefix):
             raise ValueError(f"unexpected selector material name: {selector_name}")
-        source_name = f"CW_{selector_name.removeprefix('CWV_')}"
+        source_name = f"{MOD_ID}_{selector_name.removeprefix(selector_prefix)}"
         if source_name not in source_materials:
             raise ValueError(f"no authored material definition for {selector_name}")
         definition = copy.deepcopy(source_materials[source_name])
         definition["name"] = selector_name
         definition["mapTo"] = selector_name
         definition["persistentId"] = str(
-            uuid.uuid5(uuid.NAMESPACE_URL, f"beamng-mcp:cannon-car-wash:{selector_name}")
+            uuid.uuid5(
+                uuid.NAMESPACE_URL,
+                f"beamng-mcp:{MOD_ID}:{selector_name}",
+            )
         )
-        definition["materialTag0"] = "cannon_car_wash_selector"
+        definition["materialTag0"] = f"{MOD_ID}_selector"
         output[selector_name] = definition
     return output
 

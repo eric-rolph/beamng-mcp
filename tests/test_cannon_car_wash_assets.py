@@ -11,34 +11,45 @@ import pytest
 from PIL import Image
 
 EXAMPLE_ROOT = Path(__file__).parents[1] / "examples" / "cannon_car_wash"
-ASSET_ROOT = EXAMPLE_ROOT / "mod" / "levels" / "gridmap_v2" / "art" / "shapes" / "carwash"
-DAE_PATH = ASSET_ROOT / "cannon_car_wash.dae"
-GEOMETRY_PATH = ASSET_ROOT / "cannon_car_wash.geometry.json"
-MATERIALS_PATH = ASSET_ROOT / "cannon_car_wash.materials.json"
-MOD_INFO_ROOT = EXAMPLE_ROOT / "mod" / "mod_info" / "cannon_car_wash"
-PHASE2_MANIFEST_PATH = MOD_INFO_ROOT / "phase2_manifest.json"
-PHASE4_MANIFEST_PATH = MOD_INFO_ROOT / "phase4_manifest.json"
-MOD_ICON_PATH = MOD_INFO_ROOT / "icon.jpg"
-ROOT_INFO_PATH = EXAMPLE_ROOT / "mod" / "info.json"
+MOD_ID = "ericrolph_cannon_car_wash"
+ASSET_ROOT = EXAMPLE_ROOT / "mod" / "levels" / "gridmap_v2" / "art" / "shapes" / MOD_ID
+DAE_PATH = ASSET_ROOT / f"{MOD_ID}.dae"
+GEOMETRY_PATH = EXAMPLE_ROOT / "authoring" / f"{MOD_ID}.geometry.json"
+MATERIALS_PATH = ASSET_ROOT / f"{MOD_ID}.materials.json"
+MANIFEST_ROOT = EXAMPLE_ROOT / "validation" / "manifests"
+PHASE2_MANIFEST_PATH = MANIFEST_ROOT / "phase2.json"
+PHASE4_MANIFEST_PATH = MANIFEST_ROOT / "phase4.json"
+REPOSITORY_ROOT = EXAMPLE_ROOT / "repository"
+REPOSITORY_INFO_PATH = REPOSITORY_ROOT / "submission.json"
+MOD_ICON_PATH = REPOSITORY_ROOT / "icon.jpg"
 BLEND_PATH = EXAMPLE_ROOT / "blender" / "cannon_car_wash.blend"
 PREVIEW_PATH = EXAMPLE_ROOT / "blender" / "cannon_car_wash_preview.png"
-SCENARIO_ROOT = EXAMPLE_ROOT / "mod" / "levels" / "gridmap_v2" / "scenarios" / "cannon_car_wash"
-SCENARIO_PREFAB_PATH = SCENARIO_ROOT / "cannon_car_wash.prefab.json"
-SELECTOR_ROOT = EXAMPLE_ROOT / "mod" / "vehicles" / "cannon_car_wash"
-SELECTOR_DAE_PATH = SELECTOR_ROOT / "cannon_car_wash.dae"
-SELECTOR_HANDOFF_PATH = SELECTOR_ROOT / "cannon_car_wash.selector_handoff.json"
-SELECTOR_JBEAM_PATH = SELECTOR_ROOT / "cannon_car_wash.jbeam"
+SCENARIO_ROOT = EXAMPLE_ROOT / "mod" / "levels" / "gridmap_v2" / "scenarios" / MOD_ID
+SCENARIO_PREFAB_PATH = SCENARIO_ROOT / f"{MOD_ID}.prefab.json"
+SCENARIO_PATH = SCENARIO_ROOT / f"{MOD_ID}.json"
+SELECTOR_ROOT = EXAMPLE_ROOT / "mod" / "vehicles" / MOD_ID
+SELECTOR_DAE_PATH = SELECTOR_ROOT / f"{MOD_ID}.dae"
+SELECTOR_HANDOFF_PATH = EXAMPLE_ROOT / "authoring" / f"{MOD_ID}.selector_handoff.json"
+SELECTOR_JBEAM_PATH = SELECTOR_ROOT / f"{MOD_ID}.jbeam"
 SELECTOR_MATERIALS_PATH = SELECTOR_ROOT / "main.materials.json"
 SELECTOR_RESULTS_PATH = EXAMPLE_ROOT / "telemetry" / "cannon_car_wash_selector_results.json"
 COLLADA_NAMESPACE = {"c": "http://www.collada.org/2005/11/COLLADASchema"}
-LAUNCH_TRIGGER_NAME = "LaunchTrigger_Mesh"
-WASH_TRIGGER_NAME = "WashActivationTrigger_Mesh"
+LAUNCH_TRIGGER_NAME = f"{MOD_ID}_launch_trigger"
+WASH_TRIGGER_NAME = f"{MOD_ID}_wash_activation_trigger"
+SCENARIO_VISUAL_NAME = f"{MOD_ID}_scenario_visual"
+SCENARIO_GROUP_NAME = f"{MOD_ID}_group"
+TRUCK_NAME = f"{MOD_ID}_truck"
+CRASH_WALL_NAME = f"{MOD_ID}_crash_wall"
+SELECTOR_VISUAL_NAME = f"{MOD_ID}_selector_visual"
+SELECTOR_CAGE_NAME = f"{MOD_ID}_selector_cage"
+PHYSICS_GROUP_NAME = f"{MOD_ID}_physics"
 LAUNCH_TRIGGER_CENTER = [0.0, 5.0, 2.1]
 LAUNCH_TRIGGER_DIMENSIONS = [5.8, 7.5, 4.6]
 WASH_TRIGGER_CENTER = [0.0, 0.0, 2.2]
 WASH_TRIGGER_DIMENSIONS = [5.8, 17.5, 4.4]
+COLLISION_MESH_NAMES = [f"Colmesh-{index}" for index in range(1, 5)]
 MISTER_NAMES = {
-    f"CannonWash_Mister_{arch}_{side}_{height}"
+    f"{MOD_ID}_mister_{arch}_{side}_{height}"
     for arch in ("PreSoak", "Rinse")
     for side in ("L", "R")
     for height in range(1, 4)
@@ -108,7 +119,15 @@ def test_cannon_car_wash_collada_matches_exported_geometry_manifest() -> None:
     assert float(unit.attrib["meter"]) == pytest.approx(1.0)
     assert root.findtext("c:asset/c:up_axis", namespaces=COLLADA_NAMESPACE) == "Z_UP"
 
-    required_nodes = set(manifest["primary_structures"]) | set(manifest["collision_meshes"])
+    trigger_names = {LAUNCH_TRIGGER_NAME, WASH_TRIGGER_NAME}
+    required_nodes = (set(manifest["primary_structures"]) - trigger_names) | set(
+        manifest["collision_meshes"]
+    )
+    runtime_node_names = {
+        node.attrib["name"]
+        for node in root.findall(".//c:library_visual_scenes//c:node", COLLADA_NAMESPACE)
+    }
+    assert trigger_names.isdisjoint(runtime_node_names)
     for node_name in required_nodes:
         node = root.find(
             f".//c:library_visual_scenes//c:node[@name='{node_name}']",
@@ -118,18 +137,35 @@ def test_cannon_car_wash_collada_matches_exported_geometry_manifest() -> None:
         positions = _geometry_position_values(root, node)
         assert positions
         assert all(math.isfinite(value) for value in positions)
+        if node_name in COLLISION_MESH_NAMES:
+            instance = node.find("c:instance_geometry", COLLADA_NAMESPACE)
+            assert instance is not None
+            geometry_id = instance.attrib["url"].removeprefix("#")
+            assert geometry_id.startswith(f"{MOD_ID}_")
+            geometry = root.find(
+                f".//c:library_geometries/c:geometry[@id='{geometry_id}']",
+                COLLADA_NAMESPACE,
+            )
+            assert geometry is not None
+            assert geometry.attrib["name"].startswith(f"{MOD_ID}_")
 
-    for trigger_name in (LAUNCH_TRIGGER_NAME, WASH_TRIGGER_NAME):
-        actual_minimum, actual_maximum = _transformed_bounds(root, trigger_name)
+    trigger_specs = {
+        LAUNCH_TRIGGER_NAME: (LAUNCH_TRIGGER_CENTER, LAUNCH_TRIGGER_DIMENSIONS),
+        WASH_TRIGGER_NAME: (WASH_TRIGGER_CENTER, WASH_TRIGGER_DIMENSIONS),
+    }
+    for trigger_name, (center, dimensions) in trigger_specs.items():
         expected = manifest["primary_structures"][trigger_name]
-        assert actual_minimum == pytest.approx(expected["min"], abs=1e-5)
-        assert actual_maximum == pytest.approx(expected["max"], abs=1e-5)
+        expected_minimum = [center[axis] - dimensions[axis] / 2.0 for axis in range(3)]
+        expected_maximum = [center[axis] + dimensions[axis] / 2.0 for axis in range(3)]
+        assert expected["min"] == pytest.approx(expected_minimum, abs=1e-5)
+        assert expected["max"] == pytest.approx(expected_maximum, abs=1e-5)
 
 
 def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
     manifest = json.loads(GEOMETRY_PATH.read_text(encoding="utf-8"))
     root = ET.parse(DAE_PATH).getroot()  # noqa: S314 - parses a repository-owned fixture
 
+    assert manifest["asset"] == MOD_ID
     assert manifest["coordinate_system"] == "right-handed, meters, Z-up"
     assert manifest["drive_axis"] == [0.0, 1.0, 0.0]
     assert manifest["entrance_center"][1] < manifest["trigger"]["center"][1]
@@ -159,12 +195,7 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
     assert manifest["trigger"]["dimensions"][2] > truck["height"]
     assert manifest["wash_activation_trigger"]["dimensions"][1] <= opening["length"]
     assert manifest["mesh_statistics"]["polygons"] <= 20_000
-    assert manifest["collision_meshes"] == [
-        "Colmesh-1",
-        "Colmesh-2",
-        "Colmesh-3",
-        "Colmesh-4",
-    ]
+    assert manifest["collision_meshes"] == COLLISION_MESH_NAMES
 
     channels = root.findall(".//c:library_animations//c:channel", COLLADA_NAMESPACE)
     spinner_targets = {
@@ -173,11 +204,11 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
         if "Spinner" in channel.attrib.get("target", "")
     }
     assert spinner_targets == {
-        "Brush_Left_1_Spinner/transform",
-        "Brush_Left_2_Spinner/transform",
-        "Brush_Right_1_Spinner/transform",
-        "Brush_Right_2_Spinner/transform",
-        "Brush_Overhead_Spinner/transform",
+        f"{MOD_ID}_Brush_Left_1_Spinner/transform",
+        f"{MOD_ID}_Brush_Left_2_Spinner/transform",
+        f"{MOD_ID}_Brush_Right_1_Spinner/transform",
+        f"{MOD_ID}_Brush_Right_2_Spinner/transform",
+        f"{MOD_ID}_Brush_Overhead_Spinner/transform",
     }
 
 
@@ -193,10 +224,8 @@ def test_cannon_car_wash_phase2_materials_cover_every_collada_slot() -> None:
     assert {definition["mapTo"] for definition in materials.values()} == material_names
     assert all(definition["class"] == "Material" for definition in materials.values())
     assert all(definition["version"] == 1.5 for definition in materials.values())
-    invisible = materials["CW_TriggerInvisible"]
-    assert invisible["translucent"] is True
-    assert invisible["castShadows"] is False
-    assert invisible["Stages"][0]["opacityFactor"] == 0.0
+    assert all(name.startswith(f"{MOD_ID}_") for name in materials)
+    assert f"{MOD_ID}_trigger_invisible" not in materials
 
 
 def test_cannon_car_wash_vehicle_selector_metadata_and_thumbnails() -> None:
@@ -205,15 +234,15 @@ def test_cannon_car_wash_vehicle_selector_metadata_and_thumbnails() -> None:
     config = json.loads((SELECTOR_ROOT / "standard.pc").read_text(encoding="utf-8"))
 
     assert model_info == {
-        "Author": "beamng-mcp contributors",
+        "Author": "Eric Rolph",
         "Name": "Cannon Car Wash",
         "Type": "Prop",
         "default_pc": "standard",
     }
     assert config == {
         "format": 2,
-        "mainPartName": "cannon_car_wash",
-        "model": "cannon_car_wash",
+        "mainPartName": MOD_ID,
+        "model": MOD_ID,
         "parts": {},
     }
     assert config_info["Configuration"] == "Standard"
@@ -230,7 +259,10 @@ def test_cannon_car_wash_selector_collada_is_a_clean_single_flexbody() -> None:
     root = ET.parse(SELECTOR_DAE_PATH).getroot()  # noqa: S314 - repository-owned fixture
     dae_bytes = SELECTOR_DAE_PATH.read_bytes()
 
-    assert handoff["schema"] == "cannon-car-wash-selector-handoff-v1"
+    assert handoff["schema"] == "ericrolph-cannon-car-wash-selector-handoff-v1"
+    assert handoff["asset"]["id"] == MOD_ID
+    assert handoff["asset"]["physics_cage"] == SELECTOR_CAGE_NAME
+    assert handoff["asset"]["visual_mesh"] == SELECTOR_VISUAL_NAME
     assert handoff["coordinate_system"]["source_world_to_beamng_vehicle"] == [
         [-1.0, 0.0, 0.0, 0.0],
         [0.0, -1.0, 0.0, 0.0],
@@ -242,13 +274,13 @@ def test_cannon_car_wash_selector_collada_is_a_clean_single_flexbody() -> None:
     assert root.findtext("c:asset/c:up_axis", namespaces=COLLADA_NAMESPACE) == "Z_UP"
 
     scene_nodes = root.findall(".//c:library_visual_scenes//c:node", COLLADA_NAMESPACE)
-    assert [node.attrib["name"] for node in scene_nodes] == ["cannon_car_wash_visual"]
+    assert [node.attrib["name"] for node in scene_nodes] == [SELECTOR_VISUAL_NAME]
     assert LAUNCH_TRIGGER_NAME.encode() not in dae_bytes
     assert WASH_TRIGGER_NAME.encode() not in dae_bytes
     assert b"Colmesh-" not in dae_bytes
-    assert b"CannonCarWash_SelectorCage" not in dae_bytes
+    assert SELECTOR_CAGE_NAME.encode() not in dae_bytes
 
-    actual_minimum, actual_maximum = _transformed_bounds(root, "cannon_car_wash_visual")
+    actual_minimum, actual_maximum = _transformed_bounds(root, SELECTOR_VISUAL_NAME)
     assert actual_minimum == pytest.approx(handoff["visual"]["bounds"]["min"], abs=1e-5)
     assert actual_maximum == pytest.approx(handoff["visual"]["bounds"]["max"], abs=1e-5)
 
@@ -262,18 +294,19 @@ def test_cannon_car_wash_selector_collada_is_a_clean_single_flexbody() -> None:
     assert set(selector_materials) == dae_materials
     assert {definition["mapTo"] for definition in selector_materials.values()} == dae_materials
     assert dae_materials.isdisjoint(scenario_materials)
+    assert all(name.startswith(f"{MOD_ID}_selector_") for name in dae_materials)
 
 
 def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
     handoff = json.loads(SELECTOR_HANDOFF_PATH.read_text(encoding="utf-8"))
     jbeam = json.loads(SELECTOR_JBEAM_PATH.read_text(encoding="utf-8"))
-    assert list(jbeam) == ["cannon_car_wash"]
-    part = jbeam["cannon_car_wash"]
+    assert list(jbeam) == [MOD_ID]
+    part = jbeam[MOD_ID]
 
     assert part["slotType"] == "main"
     assert part["flexbodies"] == [
         ["mesh", "[group]:"],
-        ["cannon_car_wash_visual", ["cannon_car_wash"]],
+        [SELECTOR_VISUAL_NAME, [PHYSICS_GROUP_NAME]],
     ]
     assert part["cameraExternal"]["distance"] >= 20.0
     assert part["refNodes"] == [
@@ -291,7 +324,7 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
     assert set(actual_nodes) == set(expected_positions)
     for node_id, expected_position in expected_positions.items():
         assert actual_nodes[node_id][1:4] == expected_position
-        assert actual_nodes[node_id][4]["group"] == "cannon_car_wash"
+        assert actual_nodes[node_id][4]["group"] == PHYSICS_GROUP_NAME
 
     assert len(actual_nodes) == 77
     fixed_nodes = {node_id for node_id, row in actual_nodes.items() if row[4]["fixed"]}
@@ -340,7 +373,7 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
     assert live_result["result"] == "passed"
     assert live_result["catalog"] == {
         "default_configuration": "standard",
-        "model": "cannon_car_wash",
+        "model": MOD_ID,
         "name": "Cannon Car Wash",
         "type": "Prop",
     }
@@ -351,10 +384,10 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
         "node_count": len(handoff["nodes"]),
         "total_mass_kg": total_mass,
         "triangle_count": len(handoff["triangles"]),
-        "vehicle_directory": "/vehicles/cannon_car_wash/",
+        "vehicle_directory": f"/vehicles/{MOD_ID}/",
     }
     collision = live_result["collision_contact"]
-    assert collision["vehicle"] == "cannon_car_wash_truck"
+    assert collision["vehicle"] == TRUCK_NAME
     assert collision["injected_velocity_x_mps"] == 30.0
     assert collision["peak_positive_velocity_x_mps"] >= 20.0
     assert collision["minimum_post_impact_velocity_x_mps"] <= 5.0
@@ -381,19 +414,21 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
 
 
 def test_cannon_car_wash_repository_metadata_and_icon() -> None:
-    root_info = json.loads(ROOT_INFO_PATH.read_text(encoding="utf-8"))
-    repository_info = json.loads((MOD_INFO_ROOT / "info.json").read_text(encoding="utf-8"))
+    repository_info = json.loads(REPOSITORY_INFO_PATH.read_text(encoding="utf-8"))
 
-    assert root_info["name"] == "cannon_car_wash"
-    assert root_info["title"] == "Cannon Car Wash"
-    assert root_info["version"] == "1.2.0"
-    assert repository_info["name"] == root_info["name"]
-    assert repository_info["version"] == root_info["version"]
-    assert repository_info["version_string"] == root_info["version"]
+    assert repository_info["internal_name"] == MOD_ID
+    assert repository_info["title"] == "Cannon Car Wash"
+    assert repository_info["version"] == "1.3.0"
+    assert repository_info["author"] == "Eric Rolph"
 
     with Image.open(MOD_ICON_PATH) as icon:
         assert icon.format == "JPEG"
-        assert icon.size == (640, 360)
+        assert icon.size == (96, 96)
+    assert repository_info["resource_icon"] == {
+        "path": "icon.jpg",
+        "width": 96,
+        "height": 96,
+    }
 
 
 def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contract() -> None:
@@ -403,7 +438,9 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
 
     assert phase2["schema_version"] == 1
     assert phase2["phase"] == 2
+    assert phase2["asset"]["path"] == (f"/levels/gridmap_v2/art/shapes/{MOD_ID}/{MOD_ID}.dae")
     assert phase2["asset"]["sha256"] == dae_sha256
+    assert phase2["trigger"]["name"] == LAUNCH_TRIGGER_NAME
     assert phase2["trigger"]["local_center"] == geometry["trigger"]["center"]
     assert phase2["trigger"]["dimensions"] == geometry["trigger"]["dimensions"]
     assert phase2["trigger"]["mode"] == "Contains"
@@ -412,13 +449,14 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
         phase2["wash_activation_trigger"]["local_center"]
         == geometry["wash_activation_trigger"]["center"]
     )
+    assert phase2["wash_activation_trigger"]["name"] == WASH_TRIGGER_NAME
     assert (
         phase2["wash_activation_trigger"]["dimensions"]
         == geometry["wash_activation_trigger"]["dimensions"]
     )
     assert phase2["wash_activation_trigger"]["mode"] == "Overlaps"
     assert phase2["wash_activation_trigger"]["test_type"] == "Bounding box"
-    assert phase2["wash_effects"]["visual_name"] == "CannonCarWash_Visual"
+    assert phase2["wash_effects"]["visual_name"] == SCENARIO_VISUAL_NAME
     assert phase2["wash_effects"]["roller_sequence"] == "ambient"
     assert phase2["wash_effects"]["roller_control_field"] == "playAmbient"
     assert phase2["wash_effects"]["mister_emitter"] == "BNGP_sprinkler"
@@ -442,9 +480,9 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
     prefab_records = [json.loads(line) for line in prefab_source.splitlines() if line.strip()]
     prefab = {record["name"]: record for record in prefab_records}
     assert len(prefab_records) == 18
-    assert prefab["cannon_car_wash_group"]["class"] == "SimGroup"
+    assert prefab[SCENARIO_GROUP_NAME]["class"] == "SimGroup"
 
-    visual = prefab["CannonCarWash_Visual"]
+    visual = prefab[SCENARIO_VISUAL_NAME]
     assert visual["class"] == "TSStatic"
     assert visual["position"] == phase2["asset"]["position"]
     assert visual["scale"] == phase2["asset"]["scale"]
@@ -490,16 +528,18 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
         assert mister["dataBlock"] == "lightExampleEmitterNodeData1"
         assert mister["emitter"] == "BNGP_sprinkler"
         assert mister["active"] is False
-        assert mister["__parent"] == "cannon_car_wash_group"
+        assert mister["__parent"] == SCENARIO_GROUP_NAME
 
-    vehicle = prefab["cannon_car_wash_truck"]
+    vehicle = prefab[TRUCK_NAME]
     assert vehicle["class"] == "BeamNGVehicle"
     assert vehicle["jBeam"] == "pickup"
+    assert phase2["vehicle"]["name"] == TRUCK_NAME
     assert vehicle["position"] == phase2["vehicle"]["position"]
     assert "applyClusterVelocityScaleAdd" not in prefab_source
 
     phase4 = json.loads(PHASE4_MANIFEST_PATH.read_text(encoding="utf-8"))
-    wall = prefab["CannonCrashWall"]
+    wall = prefab[CRASH_WALL_NAME]
+    assert phase4["crash_target"]["name"] == CRASH_WALL_NAME
     assert wall["class"] == "TSStatic"
     assert wall["shapeName"] == phase4["crash_target"]["asset"]
     assert wall["position"] == phase4["crash_target"]["position"]
@@ -513,7 +553,7 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
     )
 
     # BeamNG's scenario loader accepts one scenario object wrapped in a JSON array.
-    scenario_data = json.loads((SCENARIO_ROOT / "cannon_car_wash.json").read_text(encoding="utf-8"))
+    scenario_data = json.loads(SCENARIO_PATH.read_text(encoding="utf-8"))
     assert isinstance(scenario_data, list) and len(scenario_data) == 1
     # BeamNG 0.38 auto-discovers a same-named sibling prefab. Listing that path
     # explicitly makes the legacy scenario loader append it twice.

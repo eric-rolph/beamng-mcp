@@ -5,18 +5,20 @@ import re
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-MOD_ROOT = PROJECT_ROOT / "examples" / "cannon_car_wash" / "mod"
-EXTENSION = MOD_ROOT / "lua" / "ge" / "extensions" / "cannon_car_wash" / "main.lua"
-BOOTSTRAP = MOD_ROOT / "scripts" / "cannon_car_wash" / "modScript.lua"
-PHASE3_MANIFEST = MOD_ROOT / "mod_info" / "cannon_car_wash" / "phase3_manifest.json"
-PREFAB = (
-    MOD_ROOT
-    / "levels"
-    / "gridmap_v2"
-    / "scenarios"
-    / "cannon_car_wash"
-    / "cannon_car_wash.prefab.json"
-)
+EXAMPLE_ROOT = PROJECT_ROOT / "examples" / "cannon_car_wash"
+MOD_ROOT = EXAMPLE_ROOT / "mod"
+MOD_ID = "ericrolph_cannon_car_wash"
+LAUNCH_TRIGGER_NAME = f"{MOD_ID}_launch_trigger"
+WASH_TRIGGER_NAME = f"{MOD_ID}_wash_activation_trigger"
+TRUCK_NAME = f"{MOD_ID}_truck"
+SCENARIO_VISUAL_NAME = f"{MOD_ID}_scenario_visual"
+CRASH_WALL_NAME = f"{MOD_ID}_crash_wall"
+EXTENSION_REGISTRY_NAME = f"scenario_{MOD_ID}"
+SCENARIO_DIRECTORY = MOD_ROOT / "levels" / "gridmap_v2" / "scenarios" / MOD_ID
+SCENARIO = SCENARIO_DIRECTORY / f"{MOD_ID}.json"
+EXTENSION = SCENARIO_DIRECTORY / f"{MOD_ID}.lua"
+PHASE3_MANIFEST = EXAMPLE_ROOT / "validation" / "manifests" / "phase3.json"
+PREFAB = SCENARIO_DIRECTORY / f"{MOD_ID}.prefab.json"
 
 
 def extension_source() -> str:
@@ -77,34 +79,40 @@ def _function_section(source: str, name: str) -> str:
     return source[match.start() : match.end() + next_function.start()]
 
 
-def test_phase3_payload_has_the_beamng_entry_points_and_exact_bootstrap() -> None:
+def test_phase3_payload_uses_the_scenario_owned_extension_lifecycle() -> None:
     assert EXTENSION.is_file()
-    assert BOOTSTRAP.is_file()
+    assert SCENARIO.is_file()
     assert PREFAB.is_file()
 
-    bootstrap = BOOTSTRAP.read_text(encoding="utf-8")
-    assert _lua_string(bootstrap, "EXTENSION_PATH") == "cannon_car_wash/main"
-    assert "extensions.load(EXTENSION_PATH)" in bootstrap
-    assert "loadstring" not in bootstrap.lower()
-    assert "dofile" not in bootstrap.lower()
+    scenarios = json.loads(SCENARIO.read_text(encoding="utf-8"))
+    assert len(scenarios) == 1
+    assert scenarios[0]["extensions"] == [{"name": MOD_ID}]
+    assert not (MOD_ROOT / "lua" / "ge" / "extensions" / MOD_ID / "main.lua").exists()
+    assert not (MOD_ROOT / "scripts" / MOD_ID / "modScript.lua").exists()
 
     prefab = [
         json.loads(line) for line in PREFAB.read_text(encoding="utf-8").splitlines() if line.strip()
     ]
     prefab_by_name = {record["name"]: record for record in prefab}
-    launch_trigger = prefab_by_name["LaunchTrigger_Mesh"]
+    assert prefab_by_name[SCENARIO_VISUAL_NAME]["class"] == "TSStatic"
+    assert prefab_by_name[CRASH_WALL_NAME]["class"] == "TSStatic"
+    launch_trigger = prefab_by_name[LAUNCH_TRIGGER_NAME]
     assert launch_trigger["class"] == "BeamNGTrigger"
     assert launch_trigger["luaFunction"] == "onBeamNGTrigger"
     assert launch_trigger["triggerMode"] == "Contains"
     assert launch_trigger["triggerTestType"] == "Bounding box"
 
-    wash_trigger = prefab_by_name["WashActivationTrigger_Mesh"]
+    wash_trigger = prefab_by_name[WASH_TRIGGER_NAME]
     assert wash_trigger["class"] == "BeamNGTrigger"
     assert wash_trigger["luaFunction"] == "onBeamNGTrigger"
     assert wash_trigger["triggerMode"] == "Overlaps"
     assert wash_trigger["triggerTestType"] == "Bounding box"
 
     source = extension_source()
+    assert "setExtensionUnloadMode" not in source
+    assert "extensions.load" not in source
+    assert "loadstring" not in source.lower()
+    assert "dofile" not in source.lower()
     for callback in (
         "onBeamNGTrigger",
         "onPreRender",
@@ -125,9 +133,9 @@ def test_trigger_callback_requires_exact_live_trigger_and_exact_pickup() -> None
     vehicle_resolver = _function_section(source, "exactVehicleFromEvent")
     truck_resolver = _function_section(source, "exactTruckFromEvent")
 
-    assert _lua_string(source, "LAUNCH_TRIGGER_NAME") == "LaunchTrigger_Mesh"
-    assert _lua_string(source, "WASH_TRIGGER_NAME") == "WashActivationTrigger_Mesh"
-    assert _lua_string(source, "TRUCK_NAME") == "cannon_car_wash_truck"
+    assert _lua_string(source, "LAUNCH_TRIGGER_NAME") == LAUNCH_TRIGGER_NAME
+    assert _lua_string(source, "WASH_TRIGGER_NAME") == WASH_TRIGGER_NAME
+    assert _lua_string(source, "TRUCK_NAME") == TRUCK_NAME
     assert _lua_string(source, "TRUCK_MODEL") == "pickup"
 
     assert "handleWashTrigger(data)" in dispatch
@@ -171,7 +179,7 @@ def test_wash_trigger_controls_all_rollers_and_stock_sprinkler_misters() -> None
     wash_resolver = _function_section(source, "resolveWashObjects")
     wash_rollback = _function_section(source, "forceWashSystemsOff")
 
-    assert _lua_string(source, "VISUAL_NAME") == "CannonCarWash_Visual"
+    assert _lua_string(source, "VISUAL_NAME") == SCENARIO_VISUAL_NAME
     assert _lua_string(source, "VISUAL_CLASS") == "TSStatic"
     assert _lua_string(source, "MISTER_CLASS") == "ParticleEmitterNode"
 
@@ -183,7 +191,7 @@ def test_wash_trigger_controls_all_rollers_and_stock_sprinkler_misters() -> None
     assert mister_table is not None
     mister_names = re.findall(r"[\"']([^\"']+)[\"']", mister_table.group("body"))
     assert mister_names == [
-        f"CannonWash_Mister_{arch}_{side}_{height}"
+        f"{MOD_ID}_mister_{arch}_{side}_{height}"
         for arch in ("PreSoak", "Rinse")
         for side in ("L", "R")
         for height in range(1, 4)
@@ -224,21 +232,27 @@ def test_phase3_manifest_describes_wash_cycle_and_containment_gate() -> None:
 
     assert manifest["schema_version"] == 1
     assert manifest["phase"] == 3
+    assert manifest["extension"] == {
+        "registry_name": EXTENSION_REGISTRY_NAME,
+        "file": f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.lua",
+        "scenario_entry": {"name": MOD_ID},
+        "lifecycle": "scenario_owned",
+    }
     assert manifest["identity"] == {
-        "trigger_name": "LaunchTrigger_Mesh",
+        "trigger_name": LAUNCH_TRIGGER_NAME,
         "trigger_class": "BeamNGTrigger",
         "trigger_mode": "Contains",
         "trigger_test_type": "Bounding box",
-        "wash_trigger_name": "WashActivationTrigger_Mesh",
+        "wash_trigger_name": WASH_TRIGGER_NAME,
         "wash_trigger_class": "BeamNGTrigger",
         "wash_trigger_mode": "Overlaps",
-        "vehicle_name": "cannon_car_wash_truck",
+        "vehicle_name": TRUCK_NAME,
         "vehicle_model": "pickup",
     }
     assert manifest["wash_cycle"] == {
         "scope": "full_bay",
         "enter": {
-            "roller_visual": "CannonCarWash_Visual",
+            "roller_visual": SCENARIO_VISUAL_NAME,
             "roller_sequence": "ambient",
             "roller_play_ambient": True,
             "mister_emitter": "BNGP_sprinkler",
@@ -253,10 +267,10 @@ def test_phase3_manifest_describes_wash_cycle_and_containment_gate() -> None:
         "subject_tracking": "vehicle_id_set",
     }
     assert manifest["containment_gate"] == {
-        "required_trigger": "LaunchTrigger_Mesh",
+        "required_trigger": LAUNCH_TRIGGER_NAME,
         "required_mode": "Contains",
         "required_test_type": "Bounding box",
-        "required_vehicle_state": "previously_entered_WashActivationTrigger_Mesh",
+        "required_vehicle_state": f"previously_entered_{WASH_TRIGGER_NAME}",
         "required_wash_system_state": "active",
         "out_of_order_policy": "defer_until_wash_active",
         "action": "begin_countdown",
@@ -334,7 +348,7 @@ def test_countdown_is_a_jobsystem_three_two_one_go_state_machine() -> None:
 def test_countdown_uses_stable_ui_messages_and_observable_event_names() -> None:
     source = extension_source()
 
-    assert _lua_string(source, "UI_CATEGORY") == "cannon_car_wash_countdown"
+    assert _lua_string(source, "UI_CATEGORY") == f"{MOD_ID}_countdown"
     assert "guihooks.message" in source
     assert re.search(
         r"guihooks\.message\s*\(\s*{\s*txt\s*=\s*[^}]+}\s*,\s*[^,]+,\s*UI_CATEGORY\s*\)",
@@ -470,7 +484,7 @@ def test_active_run_is_single_shot_but_exit_reset_and_lifecycle_rearm_it() -> No
 def test_logs_are_tagged_versioned_json_records_not_human_only_messages() -> None:
     source = extension_source()
 
-    assert _lua_string(source, "LOG_TAG") == "CANNON_CAR_WASH"
+    assert _lua_string(source, "LOG_TAG") == "ERICROLPH_CANNON_CAR_WASH"
     assert re.search(r"schema_version\s*=\s*1", source)
     assert re.search(r"event\s*=\s*event", source)
     assert "vehicle_id" in source

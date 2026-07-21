@@ -33,13 +33,33 @@ from tests.test_cannon_car_wash_phase3_live import (
     _wait_for_bridge,
 )
 
-MODEL_ID = "cannon_car_wash"
+MOD_ID = "ericrolph_cannon_car_wash"
+MODEL_ID = MOD_ID
 CONFIG_ID = "standard"
-PROP_ID = "cannon_car_wash_selector"
-TRUCK_ID = "cannon_car_wash_truck"
-SCENARIO_FRAGMENT = "cannon_car_wash/cannon_car_wash.json"
+PROP_ID = f"{MOD_ID}_selector"
+TRUCK_ID = f"{MOD_ID}_truck"
+SELECTOR_VISUAL_NAME = f"{MOD_ID}_selector_visual"
+PHYSICS_GROUP_NAME = f"{MOD_ID}_physics"
+SCENARIO_FRAGMENT = f"{MOD_ID}/{MOD_ID}.json"
 SPAWN_POSITION = [-110.0, -170.0, 100.12]
 EXPECTED_SURFACE_Z = 100.0
+
+EXPECTED_RUNTIME_FILES = {
+    f"vehicles/{MOD_ID}/{MOD_ID}.dae",
+    f"vehicles/{MOD_ID}/{MOD_ID}.jbeam",
+    f"vehicles/{MOD_ID}/default.jpg",
+    f"vehicles/{MOD_ID}/info.json",
+    f"vehicles/{MOD_ID}/info_{CONFIG_ID}.json",
+    f"vehicles/{MOD_ID}/main.materials.json",
+    f"vehicles/{MOD_ID}/{CONFIG_ID}.jpg",
+    f"vehicles/{MOD_ID}/{CONFIG_ID}.pc",
+    f"levels/gridmap_v2/art/shapes/{MOD_ID}/{MOD_ID}.dae",
+    f"levels/gridmap_v2/art/shapes/{MOD_ID}/{MOD_ID}.materials.json",
+    f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.json",
+    f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.lua",
+    f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.prefab.json",
+    f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.jpg",
+}
 
 
 def _zip_members(path: Path) -> set[str]:
@@ -51,16 +71,26 @@ def _selector_error_lines(log_path: Path) -> list[str]:
     if not log_path.is_file():
         return []
     relevant_tokens = (
-        "cannon_car_wash",
-        "cannon__car__wash",
-        "cannon_car_wash_visual",
-        "cwv_",
+        MOD_ID,
+        f"scenario_{MOD_ID}",
+        f"{MOD_ID}_selector_visual",
+        f"{MOD_ID}_selector_",
     )
-    return [
-        line
-        for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines()
-        if "|E|" in line and any(token in line.casefold() for token in relevant_tokens)
-    ]
+    issues: list[str] = []
+    for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines():
+        folded = line.casefold()
+        test_cleanup_notice = (
+            "|w|" in folded
+            and "core_modmanager.initdb| mod vanished:" in folded
+            and f"/mods/repo/{MOD_ID}_" in folded
+        )
+        if (
+            not test_cleanup_notice
+            and ("|e|" in folded or "|w|" in folded)
+            and any(token in folded for token in relevant_tokens)
+        ):
+            issues.append(line)
+    return issues
 
 
 async def _shell_snapshot(runtime: Any, vehicle: Any) -> dict[str, Any]:
@@ -181,17 +211,15 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                 )
                 archive_path = Path(artifact["path"])
                 members = _zip_members(archive_path)
-                expected_vehicle_files = {
-                    f"vehicles/{MODEL_ID}/{MODEL_ID}.jbeam",
-                    f"vehicles/{MODEL_ID}/{MODEL_ID}.dae",
-                    f"vehicles/{MODEL_ID}/main.materials.json",
-                    f"vehicles/{MODEL_ID}/info.json",
-                    f"vehicles/{MODEL_ID}/info_{CONFIG_ID}.json",
-                    f"vehicles/{MODEL_ID}/{CONFIG_ID}.pc",
-                    f"vehicles/{MODEL_ID}/default.jpg",
-                    f"vehicles/{MODEL_ID}/{CONFIG_ID}.jpg",
-                }
-                assert expected_vehicle_files <= members
+                assert members == EXPECTED_RUNTIME_FILES
+                with zipfile.ZipFile(archive_path) as archive:
+                    jbeam = json.loads(
+                        archive.read(f"vehicles/{MOD_ID}/{MOD_ID}.jbeam").decode("utf-8")
+                    )
+                assert list(jbeam) == [MOD_ID]
+                part = jbeam[MOD_ID]
+                assert part["flexbodies"][1] == [SELECTOR_VISUAL_NAME, [PHYSICS_GROUP_NAME]]
+                assert all(row[-1]["group"] == PHYSICS_GROUP_NAME for row in part["nodes"][1:])
                 installed = _structured(
                     await session.call_tool(
                         "mod_install",
@@ -314,7 +342,7 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                 assert topology["triangle_count"] == 144
                 assert topology["flexbody_count"] == 1
                 assert topology["total_mass_kg"] == pytest.approx(14875.0, rel=1e-5)
-                assert topology["vehicle_directory"] == "/vehicles/cannon_car_wash/"
+                assert topology["vehicle_directory"] == f"/vehicles/{MOD_ID}/"
                 initial_shell = await _shell_snapshot(runtime, prop_vehicle)
 
                 stepped = _structured(

@@ -20,19 +20,43 @@ STAGE = str(globals().get("STAGE", os.environ.get("CANNON_CAR_WASH_STAGE", "all"
 SCRIPT_PATH = Path(str(globals().get("SCRIPT_PATH", __file__))).resolve()
 EXAMPLE_ROOT = SCRIPT_PATH.parents[1]
 MOD_ROOT = Path(str(globals().get("MOD_ROOT", EXAMPLE_ROOT / "mod"))).resolve()
+MOD_ID = "ericrolph_cannon_car_wash"
+AUTHORING_ROOT = EXAMPLE_ROOT / "authoring"
 BLEND_PATH = Path(
     str(globals().get("BLEND_PATH", EXAMPLE_ROOT / "blender" / "cannon_car_wash.blend"))
 ).resolve()
-ASSET_DIRECTORY = MOD_ROOT / "levels" / "gridmap_v2" / "art" / "shapes" / "carwash"
-DAE_PATH = ASSET_DIRECTORY / "cannon_car_wash.dae"
-MANIFEST_PATH = ASSET_DIRECTORY / "cannon_car_wash.geometry.json"
-VEHICLE_DIRECTORY = MOD_ROOT / "vehicles" / "cannon_car_wash"
-VEHICLE_DAE_PATH = VEHICLE_DIRECTORY / "cannon_car_wash.dae"
-VEHICLE_HANDOFF_PATH = VEHICLE_DIRECTORY / "cannon_car_wash.selector_handoff.json"
-VEHICLE_VISUAL_NAME = "cannon_car_wash_visual"
-VEHICLE_CAGE_NAME = "CannonCarWash_SelectorCage"
-LAUNCH_TRIGGER_NAME = "LaunchTrigger_Mesh"
-WASH_ACTIVATION_TRIGGER_NAME = "WashActivationTrigger_Mesh"
+ASSET_DIRECTORY = MOD_ROOT / "levels" / "gridmap_v2" / "art" / "shapes" / MOD_ID
+DAE_PATH = ASSET_DIRECTORY / f"{MOD_ID}.dae"
+MANIFEST_PATH = AUTHORING_ROOT / f"{MOD_ID}.geometry.json"
+VEHICLE_DIRECTORY = MOD_ROOT / "vehicles" / MOD_ID
+VEHICLE_DAE_PATH = VEHICLE_DIRECTORY / f"{MOD_ID}.dae"
+VEHICLE_HANDOFF_PATH = AUTHORING_ROOT / f"{MOD_ID}.selector_handoff.json"
+VEHICLE_VISUAL_NAME = f"{MOD_ID}_selector_visual"
+VEHICLE_CAGE_NAME = f"{MOD_ID}_selector_cage"
+SCENARIO_VISUAL_NAME = f"{MOD_ID}_scenario_visual"
+
+
+def namespaced_object_name(name: str) -> str:
+    """Return a globally unique DAE/scene object name.
+
+    BeamNG discovers collision helpers by the exact ``Colmesh-N`` convention,
+    so those object names stay file-local while their mesh datablocks remain
+    globally namespaced.
+    """
+
+    if name.startswith(f"{MOD_ID}_"):
+        return name
+    if name.startswith("Colmesh-"):
+        return name
+    return f"{MOD_ID}_{name}"
+
+
+def scenario_material_name(name: str) -> str:
+    return f"{MOD_ID}_{name}"
+
+
+LAUNCH_TRIGGER_NAME = namespaced_object_name("launch_trigger")
+WASH_ACTIVATION_TRIGGER_NAME = namespaced_object_name("wash_activation_trigger")
 # BeamNG's live D-Series OOBB settles roughly 1 cm below the road surface.
 # Give Contains a measured 20 cm under-floor allowance while keeping the top
 # inside the 4.48 m opening: local Z bounds are [-0.2, 4.4].
@@ -43,13 +67,14 @@ WASH_ACTIVATION_TRIGGER_DIMENSIONS = (5.8, 17.5, 4.4)
 TRIGGER_NAMES = {LAUNCH_TRIGGER_NAME, WASH_ACTIVATION_TRIGGER_NAME}
 
 PRIMARY_STRUCTURES = (
-    "CarWash_Floor",
-    "CarWash_Wall_Left",
-    "CarWash_Wall_Right",
-    "CarWash_Roof",
+    namespaced_object_name("CarWash_Floor"),
+    namespaced_object_name("CarWash_Wall_Left"),
+    namespaced_object_name("CarWash_Wall_Right"),
+    namespaced_object_name("CarWash_Roof"),
     LAUNCH_TRIGGER_NAME,
     WASH_ACTIVATION_TRIGGER_NAME,
 )
+COLLISION_MESH_NAMES = tuple(namespaced_object_name(f"Colmesh-{index}") for index in range(1, 5))
 PORTABLE_FILE_BROWSER_PATH = "//" + "_" * 1021
 PORTABLE_ASSET_LIBRARY_PATH = "/" + "_" * 1022
 
@@ -101,7 +126,9 @@ def add_box(
 ) -> bpy.types.Object:
     bpy.ops.mesh.primitive_cube_add(location=location, rotation=rotation)
     obj = bpy.context.object
-    obj.name = name
+    obj.name = namespaced_object_name(name)
+    mesh_name = f"{MOD_ID}_{name}" if name.startswith("Colmesh-") else obj.name
+    obj.data.name = f"{mesh_name}_mesh"
     obj.dimensions = dimensions
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     assign_material(obj, value)
@@ -130,7 +157,8 @@ def add_cylinder(
         rotation=rotation,
     )
     obj = bpy.context.object
-    obj.name = name
+    obj.name = namespaced_object_name(name)
+    obj.data.name = f"{obj.name}_mesh"
     assign_material(obj, value)
     bevel = obj.modifiers.new("EdgeSoftening", "BEVEL")
     bevel.width = 0.025
@@ -165,7 +193,7 @@ def add_vertical_brush(
     accent: bpy.types.Material,
     steel: bpy.types.Material,
 ) -> None:
-    root = bpy.data.objects.new(f"{name}_Spinner", None)
+    root = bpy.data.objects.new(namespaced_object_name(f"{name}_Spinner"), None)
     root.empty_display_type = "CIRCLE"
     root.location = location
     bpy.context.scene.collection.objects.link(root)
@@ -197,7 +225,7 @@ def add_horizontal_brush(
     accent: bpy.types.Material,
     steel: bpy.types.Material,
 ) -> None:
-    root = bpy.data.objects.new("Brush_Overhead_Spinner", None)
+    root = bpy.data.objects.new(namespaced_object_name("Brush_Overhead_Spinner"), None)
     root.empty_display_type = "CIRCLE"
     root.location = location
     bpy.context.scene.collection.objects.link(root)
@@ -274,7 +302,7 @@ def mister_specs() -> list[dict[str, Any]]:
             for index, z in enumerate((1.25, 2.1, 3.0), start=1):
                 specs.append(
                     {
-                        "name": f"CannonWash_Mister_{arch_name}_{side_name}_{index}",
+                        "name": namespaced_object_name(f"mister_{arch_name}_{side_name}_{index}"),
                         "local_position": [round(-side * 0.1 + side * 2.72, 6), y, z],
                         "rotation_matrix": list(rotation),
                     }
@@ -290,14 +318,15 @@ def add_text_mesh(
     *,
     size: float,
 ) -> None:
-    curve = bpy.data.curves.new(f"{name}_Curve", "FONT")
+    object_name = namespaced_object_name(name)
+    curve = bpy.data.curves.new(f"{object_name}_curve", "FONT")
     curve.body = body
     curve.align_x = "CENTER"
     curve.align_y = "CENTER"
     curve.size = size
     curve.extrude = 0.035
     curve.bevel_depth = 0.012
-    obj = bpy.data.objects.new(name, curve)
+    obj = bpy.data.objects.new(object_name, curve)
     obj.location = location
     obj.rotation_euler = (math.pi / 2.0, 0.0, 0.0)
     bpy.context.scene.collection.objects.link(obj)
@@ -315,7 +344,7 @@ def reset_scene() -> None:
         for datablock in list(datablocks):
             datablocks.remove(datablock)
     scene = bpy.context.scene
-    scene.name = "CannonCarWash_Scene"
+    scene.name = namespaced_object_name("scene")
     scene.unit_settings.system = "METRIC"
     scene.unit_settings.scale_length = 1.0
     scene.render.engine = "BLENDER_EEVEE_NEXT"
@@ -326,16 +355,20 @@ def reset_scene() -> None:
     scene.frame_start = 1
     scene.frame_end = 60
     scene["beamng_axis"] = "Z-up, +Y drive direction"
-    scene["beamng_asset"] = "cannon_car_wash"
+    scene["beamng_asset"] = MOD_ID
     print("CANNON_CAR_WASH_STAGE reset complete")
 
 
 def build_shell() -> None:
-    concrete = material("CW_Concrete", (0.18, 0.2, 0.23, 1.0), roughness=0.82)
-    blue = material("CW_DeepBlue", (0.015, 0.09, 0.22, 1.0), metallic=0.15)
-    cyan = material("CW_CyanTrim", (0.0, 0.52, 0.83, 1.0), metallic=0.25)
-    steel = material("CW_Stainless", (0.42, 0.46, 0.5, 1.0), metallic=0.9, roughness=0.2)
-    glass = material("CW_Glass", (0.03, 0.32, 0.48, 0.38), metallic=0.1, roughness=0.08)
+    concrete = material(scenario_material_name("concrete"), (0.18, 0.2, 0.23, 1.0), roughness=0.82)
+    blue = material(scenario_material_name("deep_blue"), (0.015, 0.09, 0.22, 1.0), metallic=0.15)
+    cyan = material(scenario_material_name("cyan_trim"), (0.0, 0.52, 0.83, 1.0), metallic=0.25)
+    steel = material(
+        scenario_material_name("stainless"), (0.42, 0.46, 0.5, 1.0), metallic=0.9, roughness=0.2
+    )
+    glass = material(
+        scenario_material_name("glass"), (0.03, 0.32, 0.48, 0.38), metallic=0.1, roughness=0.08
+    )
 
     add_box("CarWash_Floor", (0.0, 0.0, 0.06), (6.8, 18.0, 0.12), concrete, bevel=0.025)
     add_box("CarWash_Wall_Left", (-3.25, 0.0, 2.35), (0.3, 18.0, 4.6), blue)
@@ -374,7 +407,7 @@ def build_shell() -> None:
     add_box("Colmesh-2", (-3.25, 0.0, 2.35), (0.3, 18.0, 4.6), None, bevel=0.0)
     add_box("Colmesh-3", (3.25, 0.0, 2.35), (0.3, 18.0, 4.6), None, bevel=0.0)
     add_box("Colmesh-4", (0.0, 0.0, 4.78), (6.8, 18.0, 0.36), None, bevel=0.0)
-    for name in ("Colmesh-1", "Colmesh-2", "Colmesh-3", "Colmesh-4"):
+    for name in COLLISION_MESH_NAMES:
         collision = bpy.data.objects[name]
         collision.display_type = "WIRE"
         collision.hide_render = True
@@ -383,21 +416,31 @@ def build_shell() -> None:
 
 
 def build_details() -> None:
-    cyan = material("CW_CyanTrim", (0.0, 0.52, 0.83, 1.0), metallic=0.25)
-    blue_brush = material("CW_BrushBlue", (0.005, 0.2, 0.74, 1.0), roughness=0.72)
-    aqua_brush = material("CW_BrushAqua", (0.0, 0.82, 0.83, 1.0), roughness=0.72)
-    orange = material("CW_SafetyOrange", (1.0, 0.16, 0.015, 1.0), roughness=0.38)
-    yellow = material("CW_HazardYellow", (1.0, 0.68, 0.015, 1.0), roughness=0.45)
-    rubber = material("CW_Rubber", (0.012, 0.014, 0.018, 1.0), roughness=0.9)
-    steel = material("CW_Stainless", (0.42, 0.46, 0.5, 1.0), metallic=0.9, roughness=0.2)
+    cyan = material(scenario_material_name("cyan_trim"), (0.0, 0.52, 0.83, 1.0), metallic=0.25)
+    blue_brush = material(
+        scenario_material_name("brush_blue"), (0.005, 0.2, 0.74, 1.0), roughness=0.72
+    )
+    aqua_brush = material(
+        scenario_material_name("brush_aqua"), (0.0, 0.82, 0.83, 1.0), roughness=0.72
+    )
+    orange = material(
+        scenario_material_name("safety_orange"), (1.0, 0.16, 0.015, 1.0), roughness=0.38
+    )
+    yellow = material(
+        scenario_material_name("hazard_yellow"), (1.0, 0.68, 0.015, 1.0), roughness=0.45
+    )
+    rubber = material(scenario_material_name("rubber"), (0.012, 0.014, 0.018, 1.0), roughness=0.9)
+    steel = material(
+        scenario_material_name("stainless"), (0.42, 0.46, 0.5, 1.0), metallic=0.9, roughness=0.2
+    )
     screen = material(
-        "CW_Screen",
+        scenario_material_name("screen"),
         (0.005, 0.12, 0.2, 1.0),
         emission=(0.0, 0.55, 1.0, 1.0),
         emission_strength=4.0,
     )
     light = material(
-        "CW_LED",
+        scenario_material_name("led"),
         (0.75, 0.93, 1.0, 1.0),
         emission=(0.5, 0.9, 1.0, 1.0),
         emission_strength=7.0,
@@ -472,20 +515,24 @@ def build_details() -> None:
     add_text_mesh("EntranceSign_Text", "CANNON WASH", (0.0, -9.3, 4.34), light, size=0.62)
     add_text_mesh("ExitSign_Text", "FIRE WHEN READY", (0.0, 9.26, 4.29), orange, size=0.38)
 
-    trigger_material = material("CW_TriggerInvisible", (1.0, 0.0, 0.0, 0.0), roughness=1.0)
+    trigger_material = material(
+        scenario_material_name("trigger_invisible"),
+        (1.0, 0.0, 0.0, 0.0),
+        roughness=1.0,
+    )
     trigger_specs = (
         (
             LAUNCH_TRIGGER_NAME,
             LAUNCH_TRIGGER_CENTER,
             LAUNCH_TRIGGER_DIMENSIONS,
-            "cannon_car_wash_launch",
+            f"{MOD_ID}_launch",
             "Contains",
         ),
         (
             WASH_ACTIVATION_TRIGGER_NAME,
             WASH_ACTIVATION_TRIGGER_CENTER,
             WASH_ACTIVATION_TRIGGER_DIMENSIONS,
-            "cannon_car_wash_cycle",
+            f"{MOD_ID}_cycle",
             "Overlaps",
         ),
     )
@@ -575,10 +622,10 @@ def _selector_structure() -> dict[str, Any]:
     rotation. No node coordinate is entered independently of the Blender shell.
     """
     primary = {name: evaluated_object_bounds(bpy.data.objects[name]) for name in PRIMARY_STRUCTURES}
-    floor = primary["CarWash_Floor"]
-    left_wall = primary["CarWash_Wall_Left"]
-    right_wall = primary["CarWash_Wall_Right"]
-    roof = primary["CarWash_Roof"]
+    floor = primary[namespaced_object_name("CarWash_Floor")]
+    left_wall = primary[namespaced_object_name("CarWash_Wall_Left")]
+    right_wall = primary[namespaced_object_name("CarWash_Wall_Right")]
+    roof = primary[namespaced_object_name("CarWash_Roof")]
     y_min, y_max = floor["min"][1], floor["max"][1]
     stations = [y_min + (y_max - y_min) * index / 6.0 for index in range(7)]
 
@@ -600,7 +647,7 @@ def _selector_structure() -> dict[str, Any]:
     node_id: dict[tuple[int, str], str] = {}
     for station_index, source_y in enumerate(stations):
         for track_index, (track_name, source_x, source_z) in enumerate(tracks):
-            identifier = f"cw_s{station_index:02d}_t{track_index:02d}"
+            identifier = f"{MOD_ID}_s{station_index:02d}_t{track_index:02d}"
             source = Vector((source_x, source_y, source_z))
             mapped = rotation @ source
             node_id[(station_index, track_name)] = identifier
@@ -706,9 +753,9 @@ def _selector_structure() -> dict[str, Any]:
         "up": node_id[(middle_station, "roof_bottom_center")],
     }
     return {
-        "schema": "cannon-car-wash-selector-handoff-v1",
+        "schema": "ericrolph-cannon-car-wash-selector-handoff-v1",
         "asset": {
-            "id": "cannon_car_wash",
+            "id": MOD_ID,
             "physics_cage": VEHICLE_CAGE_NAME,
             "visual_mesh": VEHICLE_VISUAL_NAME,
         },
@@ -801,7 +848,7 @@ def export_vehicle_selector_asset() -> None:
     if not sources:
         raise RuntimeError("No visible meshes are available for the selector prop export")
 
-    temporary_collection = bpy.data.collections.new("CannonCarWash_SelectorExport")
+    temporary_collection = bpy.data.collections.new(f"{MOD_ID}_selector_export")
     scene.collection.children.link(temporary_collection)
     depsgraph = bpy.context.evaluated_depsgraph_get()
     vehicle_rotation = Matrix.Rotation(math.pi, 4, "Z")
@@ -820,11 +867,20 @@ def export_vehicle_selector_asset() -> None:
             selector_material = selector_materials.get(source_material.name)
             if selector_material is None:
                 selector_material = source_material.copy()
-                suffix = source_material.name.removeprefix("CW_")
-                selector_material.name = f"CWV_{suffix}"
+                if not source_material.name.startswith(f"{MOD_ID}_"):
+                    raise RuntimeError(
+                        f"Scenario material is not namespaced: {source_material.name}"
+                    )
+                suffix = source_material.name.removeprefix(f"{MOD_ID}_")
+                selector_material.name = f"{MOD_ID}_selector_{suffix}"
                 selector_materials[source_material.name] = selector_material
             mesh_copy.materials[material_index] = selector_material
-        duplicate = bpy.data.objects.new(f"selector_{source.name}", mesh_copy)
+        source_suffix = source.name.removeprefix(f"{MOD_ID}_")
+        duplicate = bpy.data.objects.new(
+            f"{MOD_ID}_selector_export_{source_suffix}",
+            mesh_copy,
+        )
+        duplicate.data.name = f"{duplicate.name}_mesh"
         temporary_collection.objects.link(duplicate)
         duplicate.matrix_world = vehicle_rotation @ source.matrix_world
         duplicates.append(duplicate)
@@ -862,7 +918,7 @@ def export_vehicle_selector_asset() -> None:
         raise RuntimeError(f"Vehicle-selector Collada export failed: {result}")
 
     structure["visual"] = {
-        "path": "vehicles/cannon_car_wash/cannon_car_wash.dae",
+        "path": f"vehicles/{MOD_ID}/{MOD_ID}.dae",
         "bounds": visual_bounds,
         "materials": sorted(material.name for material in visual.data.materials if material),
         "sha256": hashlib.sha256(VEHICLE_DAE_PATH.read_bytes()).hexdigest(),
@@ -899,6 +955,7 @@ def export_vehicle_selector_asset() -> None:
 
 def finalize() -> None:
     ASSET_DIRECTORY.mkdir(parents=True, exist_ok=True)
+    MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
     BLEND_PATH.parent.mkdir(parents=True, exist_ok=True)
     bpy.context.view_layer.update()
     primary = {name: object_bounds(bpy.data.objects[name]) for name in PRIMARY_STRUCTURES}
@@ -907,14 +964,14 @@ def finalize() -> None:
         for obj in bpy.context.scene.objects
         if obj.type == "MESH"
         and obj.name not in {VEHICLE_CAGE_NAME, VEHICLE_VISUAL_NAME}
-        and not obj.name.startswith("selector_")
+        and not obj.name.startswith(f"{MOD_ID}_selector_export_")
     ]
     visible_meshes = [obj for obj in manifest_meshes if not obj.name.startswith("Colmesh-")]
     all_corners = [
         obj.matrix_world @ Vector(corner) for obj in visible_meshes for corner in obj.bound_box
     ]
     manifest = {
-        "asset": "cannon_car_wash",
+        "asset": MOD_ID,
         "coordinate_system": "right-handed, meters, Z-up",
         "drive_axis": [0.0, 1.0, 0.0],
         "entrance_center": [0.0, -9.0, 0.12],
@@ -944,13 +1001,13 @@ def finalize() -> None:
             "events": ["enter", "exit"],
         },
         "wash_effects": {
-            "roller_visual": "CannonCarWash_Visual",
+            "roller_visual": SCENARIO_VISUAL_NAME,
             "roller_sequence": "ambient",
             "mister_emitter": "BNGP_sprinkler",
             "misters": mister_specs(),
         },
         "mesh_statistics": mesh_statistics(manifest_meshes),
-        "collision_meshes": ["Colmesh-1", "Colmesh-2", "Colmesh-3", "Colmesh-4"],
+        "collision_meshes": list(COLLISION_MESH_NAMES),
     }
     MANIFEST_PATH.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
@@ -964,7 +1021,8 @@ def finalize() -> None:
         if (
             obj.type in {"MESH", "EMPTY"}
             and obj.name not in {VEHICLE_CAGE_NAME, VEHICLE_VISUAL_NAME}
-            and not obj.name.startswith("selector_")
+            and obj.name not in TRIGGER_NAMES
+            and not obj.name.startswith(f"{MOD_ID}_selector_export_")
         ):
             obj.select_set(True)
     result = bpy.ops.wm.collada_export(

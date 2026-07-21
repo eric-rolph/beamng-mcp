@@ -1,101 +1,102 @@
 # Cannon Car Wash
 
-This example is the complete Blender MCP → BeamNG MCP workflow for a drive-through car-wash
-trap. The distributable mod lives in [`mod`](mod); Blender authoring files stay outside that folder
-so they cannot leak into the packed archive.
+This example is the repeatable Blender MCP to BeamNG MCP workflow for a drive-through
+wash-and-launch trap and rigid vehicle-selector prop.
 
-## Phase gates
+The mod/ directory is intentionally the exact public-upload staging tree. It contains only 14
+runtime files below BeamNG-approved top-level folders. Authoring evidence, Blender sources,
+submission metadata, gallery images, and live telemetry stay beside it and never enter the ZIP.
 
-1. **Blender asset:** `blender/create_cannon_car_wash.py` repeatably rebuilds the `.blend`, Z-up
-   Collada, material file, and geometry manifest. The checked-in PNG is the validated authoring
-   preview. The manifest records the exact trigger bounds, twelve Blender-authored mister positions,
-   and drive axis used by every later phase.
-2. **Engine setup:** `phase2_manifest.json` fixes the Gridmap V2 asset origin, grounded D-Series
-   spawn, full-bay wash-cycle trigger, fully-contained launch trigger, and world `+Y` drive direction.
-3. **Lua behavior:** `phase3_manifest.json` describes the exact trigger/vehicle identity checks,
-   trigger-controlled ambient rollers and `BNGP_sprinkler` misters, real-time job-system countdown,
-   fail-closed effect updates, same-frame trigger deferral, hold/release sequence, and 100 m/s
-   forward velocity injection.
-4. **Impact telemetry:** `phase4_manifest.json` fixes the concrete wall bounds and State,
-   Electrics, Damage, and log assertions. The latest live result is in
-   [`telemetry/cannon_car_wash_phase4_results.json`](telemetry/cannon_car_wash_phase4_results.json).
-5. **Vehicle-selector prop:** `vehicles/cannon_car_wash` exposes the structure as a standard
-   `Type: Prop` model with a fully fixed infrastructure JBeam, collision triangles, a multi-material
-   flexbody,
-   `Standard` configuration, and model/configuration thumbnails. The latest catalog, topology,
-   mass, and stability result is in
-   [`telemetry/cannon_car_wash_selector_results.json`](telemetry/cannon_car_wash_selector_results.json).
+## Runtime behavior
 
-Each gate is validated before the next one runs. The live approach uses direct input arbitration
-only inside a sentinel-isolated BeamNG profile. On BeamNG 0.38's default D-Series automatic,
-selector index `2` means Drive; it is not physical second gear.
+- The Gridmap V2 scenario spawns a grounded Gavril D-Series at the entrance.
+- The full-bay ericrolph_cannon_car_wash_wash_activation_trigger starts five ambient brush
+  animations and twelve inward-facing BNGP_sprinkler emitters while a vehicle overlaps the bay.
+- The exit ericrolph_cannon_car_wash_launch_trigger uses Contains plus Bounding box. The exact
+  named D-Series must be fully inside and the wash must already be active.
+- Lua holds the truck, displays 3-2-1-GO on one-second job-system intervals, then replaces its
+  cluster velocity with 100 m/s along its measured current forward axis.
+- The vehicle selector exposes ericrolph_cannon_car_wash as a Props-category model. Its measured
+  cage has 77 fixed nodes, 322 beams, 144 collision triangles, one multi-material flexbody, and a
+  mass of 14,875 kg.
 
-## Rebuild the Blender asset
+Every authored runtime path, JBeam part/group/mesh, material key/name/mapTo, DAE geometry, scene
+object, trigger, Lua extension, and UI category uses the ericrolph_cannon_car_wash namespace.
+Required stock references remain unchanged.
 
-```powershell
-blender --factory-startup --background `
-  --python .\examples\cannon_car_wash\blender\create_cannon_car_wash.py
-```
+The gameplay extension lives beside the scenario JSON and is declared in that scenario's
+`extensions` table. BeamNG loads it only for Cannon Car Wash and unloads it on scenario stop; there
+is no global `modScript.lua` bootstrap.
 
-Factory startup keeps the scene deterministic. During the save, the generator also uses a relative
-preview path and temporarily blanks user asset-library paths, preventing authoring-machine details
-from leaking into the portable `.blend`. It writes only the reviewed example paths.
+## Source and distribution layout
 
-The same Blender run exports the selector visual and its physics-cage handoff. To rebuild only the
-selector artifacts from the checked-in `.blend`, then translate that measured handoff into JBeam:
+~~~text
+blender/       Blender source, preview, and deterministic generator
+authoring/     exact geometry and selector-cage handoff evidence
+validation/    Phase 2/3/4 contracts used by static and live gates
+telemetry/     latest successful isolated live-test evidence
+repository/    upload-form metadata, provenance, icon, and gallery images
+mod/           exact 14-file BeamNG public ZIP root
+~~~
 
-```powershell
-$env:CANNON_CAR_WASH_STAGE = 'vehicle_prop'
-blender .\examples\cannon_car_wash\blender\cannon_car_wash.blend --background `
-  --python .\examples\cannon_car_wash\blender\create_cannon_car_wash.py
-python .\examples\cannon_car_wash\build_selector_prop.py
-```
+The stable release filename is cannon_car_wash_ericrolph.zip. Keep that filename across updates
+and increment repository/submission.json instead.
 
-The selector export rotates both its visual and cage 180 degrees around Z. This preserves Z-up
-while mapping the Blender scene's `+Y` drive direction to BeamNG vehicle-forward `-Y`. Every selector
-JBeam node is fixed so the building behaves like installed infrastructure rather than a flexible vehicle;
-the heavier floor-edge nodes remain the foundation classification. The trigger helpers and `Colmesh-*`
-objects are intentionally excluded: the prop supplies JBeam collision, while wash-cycle effects and the
-cannon countdown/launch behavior remain part of the packaged Gridmap V2 scenario. Re-run the asset and
-Lua contract tests after any geometry change:
+## Rebuild
 
-```powershell
-python -m pytest -q `
-  .\tests\test_cannon_car_wash_assets.py `
-  .\tests\test_cannon_car_wash_phase3_lua_contract.py
-```
+~~~powershell
+$blender454 = '<path to Blender 4.5.4 LTS executable>'
+& $blender454 --factory-startup --background --python .\examples\cannon_car_wash\blender\create_cannon_car_wash.py
+.\.venv\Scripts\python.exe .\examples\cannon_car_wash\build_selector_prop.py
+~~~
 
-## Run the isolated live gates
+The generator saves a portable Z-up Blender file, exports the namespaced scenario and selector
+Collada files, and writes source-side coordinate handoffs. The selector builder refuses a stale
+DAE hash and creates the JBeam/material/configuration files only from that handoff. Never patch
+JBeam coordinates independently.
 
-Set the three live-test variables to a BeamNG 0.38 installation and sentinel-marked disposable
-profile, then run each phase independently:
+## Static and distribution gates
 
-```powershell
-$env:BEAMNG_MCP_TEST_BEAMNG_HOME = '<BeamNG installation>'
-$env:BEAMNG_MCP_TEST_BEAMNG_USER = '<sentinel-isolated user profile>\current'
-$env:BEAMNG_MCP_TEST_BEAMNG_BINARY = 'Bin64\BeamNG.drive.x64.exe'
+~~~powershell
+.\.venv\Scripts\python.exe -m pytest -q .\tests\test_cannon_car_wash_assets.py .\tests\test_cannon_car_wash_phase3_lua_contract.py .\tests\test_cannon_car_wash_distribution.py
+~~~
 
-python -m pytest -q -s .\tests\test_cannon_car_wash_phase2_live.py
-python -m pytest -q -s .\tests\test_cannon_car_wash_phase3_live.py
-python -m pytest -q -s .\tests\test_cannon_car_wash_phase4_live.py
-python -m pytest -q -s .\tests\test_cannon_car_wash_selector_live.py
-```
+The distribution gate builds a deterministic, explicitly allowlisted 14-file ZIP and rejects
+loose root files, wrapper folders, README/mod_info content, source evidence, unsafe names,
+unnamespaced runtime declarations, invalid JSON, broken references, and nondeterministic members.
 
-The Phase 3 and Phase 4 gates also verify that the twelve misters and ambient roller sequence are off
-before entry, on while the truck occupies the wash, and off after exit. The Phase 4 test prints one
-`CANNON_PHASE4_TELEMETRY` JSON record. It fails on an ungrounded spawn, premature (not fully contained)
-launch, slow or misaligned launch, missing wall collision, insufficient structural damage/deceleration,
-countdown drift, duplicate launch, or tagged Lua error.
+## Isolated live gates
 
-## Package and install
+~~~powershell
+$env:BEAMNG_MCP_TEST_BEAMNG_HOME = '<BeamNG.drive installation>'
+$env:BEAMNG_MCP_TEST_BEAMNG_BINARY = '<BeamNG.drive executable>'
+$env:BEAMNG_MCP_TEST_BEAMNG_USER = '<sentinel-isolated BeamNG user profile>\current'
+.\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_phase2_live.py
+.\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_phase3_live.py
+.\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_phase4_live.py
+.\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_selector_live.py
+.\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_distribution_live.py
+~~~
 
-Stage the contents of `mod` as one MCP mod workspace named `cannon_car_wash`, then use the normal
-gated workflow:
+Run these serially against only the sentinel-marked profile. They install and exercise the exact
+runtime staging tree, not a development tree with injected metadata. Phase 4 prints the velocity,
+damage, countdown, wash-state, and Lua-log evidence used to refresh telemetry/.
 
-```text
-mod_validate → mod_pack → mod_install(confirm=true)
-```
+## Public upload
 
-The resulting zip has `info.json` at its root and repository metadata/icon under
-`mod_info/cannon_car_wash`, so it is discoverable by BeamNG's Mod Manager when placed under the
-active user profile's `mods/repo` directory.
+Build the artifact from the production immutable allowlist, then test that exact ZIP alone in the
+sentinel-isolated profile's USER_FOLDER/mods directory:
+
+~~~powershell
+.\.venv\Scripts\python.exe .\examples\cannon_car_wash\build_distribution.py --overwrite
+.\.venv\Scripts\python.exe -m pytest -q .\tests\test_cannon_car_wash_distribution.py
+.\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_distribution_live.py
+~~~
+
+Use the member count, size, and SHA-256 printed by the builder and locked in
+repository/submission.json. Do not place a pre-submission ZIP under mods/repo; BeamNG owns that
+location for Repository-managed downloads.
+
+The operator must still use the official Repository form: upload the ZIP, icon, and at least two
+gallery images, paste the overview in repository/SUBMISSION.md, verify authorship/provenance, and
+submit it for moderator review. No automation in this repository publishes the mod.

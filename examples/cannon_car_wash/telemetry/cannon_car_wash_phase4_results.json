@@ -1,72 +1,93 @@
 {
   "schema_version": 1,
-  "captured_at": "2026-07-20T23:59:36.0503943-06:00",
+  "captured_at": "2026-07-21T01:52:49.4583962-06:00",
   "status": "passed",
   "environment": {
     "beamng_version": "0.38.6.0.19963",
     "level": "gridmap_v2",
-    "test": "tests/test_cannon_car_wash_phase2_live.py + phase3_live.py + phase4_live.py",
-    "duration_seconds": 139.7
+    "tests": [
+      "tests/test_cannon_car_wash_phase2_live.py",
+      "tests/test_cannon_car_wash_phase3_live.py",
+      "tests/test_cannon_car_wash_phase4_live.py",
+      "tests/test_cannon_car_wash_distribution_live.py"
+    ],
+    "phase4_duration_seconds": 50.70,
+    "distribution_smoke_duration_seconds": 29.52
   },
   "installed_archive": {
-    "sha256": "2540f66abfe5b9a1a009b4d9a658c3c98fa24b5ba6ca2e6f8a4bf9eed7b50bac",
-    "size_bytes": 1909668,
-    "entry_count": 23,
-    "root_info_present": true,
-    "repository_icon_present": true
+    "filename": "cannon_car_wash_ericrolph.zip",
+    "sha256": "9c479f49dfc7fe5db7442f75ff059ea51e1023bff631563fa115ed6dcaa3fa1b",
+    "size_bytes": 1863665,
+    "entry_count": 14,
+    "install_root": "USER_FOLDER/mods",
+    "root_info_present": false,
+    "repository_metadata_present": false
+  },
+  "distribution_smoke": {
+    "exact_prebuilt_archive": true,
+    "archive_verified_before_and_after_copy": true,
+    "mods_repo_untouched": true,
+    "support_mod_restored_byte_for_byte": true,
+    "scenario_discovered": true,
+    "prop_catalog_discovered": true,
+    "scenario_loaded_and_started": true,
+    "scenario_extension_loaded": true,
+    "scenario_extension_unloaded_after_stop": true,
+    "truck_grounded": true,
+    "namespace_log_issues": []
   },
   "phase": 4,
   "scenario": "Cannon Car Wash",
-  "vehicle": "cannon_car_wash_truck",
+  "vehicle": "ericrolph_cannon_car_wash_truck",
   "approach": {
-    "forward_progress_m": 17.444354572879092,
-    "peak_speed_mps": 5.12894450785472,
-    "minimum_z": 100.2959469066991,
-    "maximum_z": 100.32275359946652
+    "forward_progress_m": 17.504751095364554,
+    "peak_speed_mps": 5.150094169636726,
+    "minimum_z": 100.29583993315464,
+    "maximum_z": 100.32279462454608
   },
   "hold": {
-    "maximum_drift_m": 0.0019010777827067852,
-    "maximum_speed_mps": 0.0029521333792121235
+    "maximum_drift_m": 0.002310127127094444,
+    "maximum_speed_mps": 0.0029352760062591127
   },
   "countdown_elapsed_seconds": {
     "countdown_3": 0.0,
-    "countdown_2": 1.0148949,
-    "countdown_1": 2.0319646,
-    "go": 3.0482493
+    "countdown_2": 1.0152557,
+    "countdown_1": 2.0308839,
+    "go": 3.0475362
   },
   "launch": {
-    "peak_speed_mps": 99.00577263218703,
-    "peak_speed_kph": 356.4207814758733,
-    "forward_alignment": 0.9999823784171443
+    "peak_speed_mps": 98.2786407282113,
+    "peak_speed_kph": 353.8031066215607,
+    "forward_alignment": 0.9999013612313183
   },
   "impact": {
-    "wall": "CannonCrashWall",
+    "wall": "ericrolph_cannon_car_wash_crash_wall",
     "position": [
-      -122.18295951117761,
-      -133.58794988691807,
-      100.1325377933681
+      -122.02773097716272,
+      -132.89358174055815,
+      99.99901004740968
     ],
     "initial_damage": 0.0,
     "prelaunch_damage": 0.0,
-    "peak_damage": 3765514.75,
-    "damage_delta": 3765514.75,
+    "peak_damage": 10342489.0,
+    "damage_delta": 10342489.0,
     "part_damage_count": 40,
-    "minimum_post_crash_speed_mps": 7.349001919099702,
-    "maximum_world_y": -133.34467853605747,
-    "sample_count": 5,
-    "observation_seconds": 0.4900331999961054
+    "minimum_post_crash_speed_mps": 2.5533133262190355,
+    "maximum_world_y": -132.81379267573357,
+    "sample_count": 4,
+    "observation_seconds": 0.3536211999889929
   },
   "wash_systems": {
     "activation_trigger": {
       "class": "BeamNGTrigger",
       "mode": "Overlaps",
-      "name": "WashActivationTrigger_Mesh",
+      "name": "ericrolph_cannon_car_wash_wash_activation_trigger",
       "test_type": "Bounding box"
     },
     "launch_trigger": {
       "class": "BeamNGTrigger",
       "mode": "Contains",
-      "name": "LaunchTrigger_Mesh",
+      "name": "ericrolph_cannon_car_wash_launch_trigger",
       "test_type": "Bounding box"
     },
     "initial": {
@@ -86,10 +107,26 @@
       "subject_count": 1
     },
     "contained_vehicle_oobb": {
-      "center": [-122.59489440918, -166.09378051758, 100.86171722412],
-      "dimensions": [2.3170651335968, 4.9787258533761, 1.7558454587124],
-      "minimum": [-123.75342697598, -168.58314344427, 99.983794494765],
-      "maximum": [-121.43636184238, -163.60441759089, 101.73963995348]
+      "center": [
+        -122.59161376953,
+        -166.03468322754,
+        100.86143493652
+      ],
+      "dimensions": [
+        2.3165029815864,
+        4.9760571378283,
+        1.7480710813543
+      ],
+      "minimum": [
+        -123.74986526032,
+        -168.52271179645,
+        99.987399395846
+      ],
+      "maximum": [
+        -121.43336227874,
+        -163.54665465862,
+        101.7354704772
+      ]
     },
     "final": {
       "active": false,
@@ -101,8 +138,14 @@
     }
   },
   "ordered_lua_events": [
+    "wash_systems_stop",
     "session_start",
     "wash_systems_stop",
+    "session_end",
+    "extension_unloaded",
+    "extension_unloaded",
+    "wash_systems_stop",
+    "session_start",
     "wash_trigger_enter",
     "wash_systems_start",
     "containment_verified",
@@ -120,8 +163,10 @@
     "release",
     "abort",
     "wash_systems_stop",
-    "session_end"
+    "session_end",
+    "extension_unloaded",
+    "extension_unloaded"
   ],
-  "cleanup_note": "The final release/abort pair is the deliberate post-measurement vehicle reset.",
+  "cleanup_note": "The lifecycle preflight proves stop/unload and full reload/start; the final release/abort pair is the deliberate post-measurement vehicle reset.",
   "lua_errors": []
 }

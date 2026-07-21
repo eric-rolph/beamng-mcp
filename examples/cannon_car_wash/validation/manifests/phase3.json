@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "phase": 3,
+  "extension": {
+    "registry_name": "scenario_ericrolph_cannon_car_wash",
+    "file": "levels/gridmap_v2/scenarios/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.lua",
+    "scenario_entry": {
+      "name": "ericrolph_cannon_car_wash"
+    },
+    "lifecycle": "scenario_owned"
+  },
+  "identity": {
+    "trigger_name": "ericrolph_cannon_car_wash_launch_trigger",
+    "trigger_class": "BeamNGTrigger",
+    "trigger_mode": "Contains",
+    "trigger_test_type": "Bounding box",
+    "wash_trigger_name": "ericrolph_cannon_car_wash_wash_activation_trigger",
+    "wash_trigger_class": "BeamNGTrigger",
+    "wash_trigger_mode": "Overlaps",
+    "vehicle_name": "ericrolph_cannon_car_wash_truck",
+    "vehicle_model": "pickup"
+  },
+  "wash_cycle": {
+    "scope": "full_bay",
+    "enter": {
+      "roller_visual": "ericrolph_cannon_car_wash_scenario_visual",
+      "roller_sequence": "ambient",
+      "roller_play_ambient": true,
+      "mister_emitter": "BNGP_sprinkler",
+      "mister_count": 12,
+      "misters_active": true
+    },
+    "exit": {
+      "roller_play_ambient": false,
+      "misters_active": false
+    },
+    "mission_initial_state": "off",
+    "subject_tracking": "vehicle_id_set"
+  },
+  "containment_gate": {
+    "required_trigger": "ericrolph_cannon_car_wash_launch_trigger",
+    "required_mode": "Contains",
+    "required_test_type": "Bounding box",
+    "required_vehicle_state": "previously_entered_ericrolph_cannon_car_wash_wash_activation_trigger",
+    "required_wash_system_state": "active",
+    "out_of_order_policy": "defer_until_wash_active",
+    "action": "begin_countdown"
+  },
+  "countdown": {
+    "clock": "jobsystem_hptimer",
+    "callback": "core_jobsystem",
+    "messages": [
+      "3...",
+      "2...",
+      "1...",
+      "GO!"
+    ],
+    "interval_seconds": 1.0,
+    "ui_category": "ericrolph_cannon_car_wash_countdown"
+  },
+  "hold": {
+    "vehicle_lua_controls": [
+      "ai_disabled",
+      "throttle_zero",
+      "service_brake_full",
+      "parking_brake_full",
+      "controller_freeze"
+    ],
+    "game_engine_physics": "replace_cluster_velocity_with_zero_each_pre_render_tick"
+  },
+  "launch": {
+    "speed_mps": 100.0,
+    "speed_kph": 360.0,
+    "axis": "normalized_current_vehicle_forward",
+    "operation": "replace_cluster_velocity"
+  },
+  "telemetry": {
+    "log_tag": "ERICROLPH_CANNON_CAR_WASH",
+    "record_schema_version": 1,
+    "format": "json",
+    "wash_events": [
+      "wash_trigger_enter",
+      "wash_systems_start",
+      "wash_trigger_exit",
+      "wash_systems_stop"
+    ],
+    "launch_gate_event": "containment_verified",
+    "launch_deferred_event": "launch_deferred"
+  }
+}

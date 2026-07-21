@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Cannon Car Wash",
+    "description": "Drive through triggered rollers and spray, then enter the exit bay fully to arm the Cannon Car Wash launch.",
+    "difficulty": 0,
+    "authors": "Eric Rolph",
+    "lapConfig": [],
+    "forceNoCountDown": true,
+    "extensions": [
+      {
+        "name": "ericrolph_cannon_car_wash"
+      }
+    ],
+    "vehicles": {
+      "ericrolph_cannon_car_wash_truck": {
+        "playerUsable": true,
+        "startFocus": true
+      }
+    },
+    "prefabs": []
+  }
+]

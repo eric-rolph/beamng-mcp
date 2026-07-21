@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "verified_on": "2026-07-20",
+  "verified_on": "2026-07-21",
   "result": "passed",
   "test": "tests/test_cannon_car_wash_selector_live.py",
   "runtime": {
@@ -9,7 +9,7 @@
     "profile": "sentinel-isolated"
   },
   "catalog": {
-    "model": "cannon_car_wash",
+    "model": "ericrolph_cannon_car_wash",
     "name": "Cannon Car Wash",
     "type": "Prop",
     "default_configuration": "standard"
@@ -21,7 +21,7 @@
     "triangle_count": 144,
     "flexbody_count": 1,
     "total_mass_kg": 14875,
-    "vehicle_directory": "/vehicles/cannon_car_wash/"
+    "vehicle_directory": "/vehicles/ericrolph_cannon_car_wash/"
   },
   "stability": {
     "deterministic_steps": 120,
@@ -34,21 +34,21 @@
     }
   },
   "collision_contact": {
-    "vehicle": "cannon_car_wash_truck",
+    "vehicle": "ericrolph_cannon_car_wash_truck",
     "injected_velocity_x_mps": 30.0,
-    "peak_positive_velocity_x_mps": 29.552650451660156,
-    "minimum_post_impact_velocity_x_mps": -0.4220651388168335,
+    "peak_positive_velocity_x_mps": 29.552316665649414,
+    "minimum_post_impact_velocity_x_mps": -0.3917746841907501,
     "wall_world_x": -106.9,
-    "maximum_world_x": -108.0871992111206,
+    "maximum_world_x": -108.08714124560356,
     "final_truck_position": [
-      -108.73353145283181,
-      -170.27663224703792,
-      100.40622714881101
+      -108.72320964921892,
+      -170.26836361174082,
+      100.40684587817123
     ],
     "final_truck_velocity_mps": [
-      -0.0024964066687971354,
-      -0.00005312240668542324,
-      -0.003528767265379429
+      0.0005712726269848645,
+      0.00017760027549229562,
+      0.0002407096471870318
     ],
     "prop_position_after_contact": [
       -110.0,
