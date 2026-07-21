@@ -218,7 +218,37 @@ class VehicleControl(StrictModel):
     steering: SteeringControl = 0.0
     parking_brake: UnitControl = 0.0
     clutch: UnitControl = 0.0
-    gear: int | None = Field(default=None, ge=-1, le=32)
+    gear: int | None = Field(
+        default=None,
+        ge=-1,
+        le=32,
+        description=(
+            "BeamNG transmission selector index. On the BeamNG 0.38 default D-Series "
+            "automatic, 1 selects Park and 2 selects Drive; this is not always a physical gear."
+        ),
+    )
+    shift_mode: (
+        Literal[
+            "realistic_manual",
+            "realistic_manual_auto_clutch",
+            "arcade",
+            "realistic_automatic",
+        ]
+        | None
+    ) = Field(
+        default=None,
+        description=(
+            "Optional BeamNGpy shifter behavior applied after the selector input; modern "
+            "BeamNG versions collapse the realistic variants to realistic behavior"
+        ),
+    )
+    is_adas: bool = Field(
+        default=True,
+        description=(
+            "Use BeamNG's ADAS arbitration by default so local driver inputs retain priority; "
+            "set false only for explicit direct control in an isolated automation session"
+        ),
+    )
 
     @field_validator("brake")
     @classmethod

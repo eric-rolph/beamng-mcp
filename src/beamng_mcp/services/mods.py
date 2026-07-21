@@ -20,7 +20,7 @@ from ..errors import ConflictError, NotFoundError, SafetyInterlockError, Workspa
 from ..models import ModArtifact, ModFileInfo, ModFileWrite, ModValidation, ValidationIssue
 
 MOD_NAME = re.compile(r"^[a-z][a-z0-9_-]{0,63}$")
-DYNAMIC_LUA_EVAL = re.compile(r"\b(?:load(?:string)?|dostring)\s*\(")
+DYNAMIC_LUA_EVAL = re.compile(r"(?<!\bextensions\.)\bload\s*\(|\b(?:loadstring|dostring)\s*\(")
 ALLOWED_TOP_LEVEL = frozenset(
     {
         "art",
@@ -35,6 +35,7 @@ ALLOWED_TOP_LEVEL = frozenset(
         "ui",
         "vehicleGroups",
         "vehicles",
+        "info.json",
         "README.md",
         "LICENSE",
     }
@@ -98,6 +99,34 @@ class _QuotaExceeded(WorkspaceError):
     def __init__(self, message: str, *, files_checked: int) -> None:
         super().__init__(message)
         self.files_checked = files_checked
+
+
+class _PrefabJsonError(ValueError):
+    """A malformed record in BeamNG's newline-delimited prefab format."""
+
+
+def _validate_json_text(path: str, text: str) -> None:
+    """Validate ordinary JSON or BeamNG's one-object-per-line prefab JSON."""
+
+    if not path.casefold().endswith(".prefab.json"):
+        json.loads(text)
+        return
+
+    records = 0
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        if not line.strip():
+            continue
+        records += 1
+        try:
+            value = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise _PrefabJsonError(
+                f"invalid prefab object on line {line_number}: {exc.msg} at column {exc.colno}"
+            ) from exc
+        if not isinstance(value, dict):
+            raise _PrefabJsonError(f"prefab record on line {line_number} must be a JSON object")
+    if records == 0:
+        raise _PrefabJsonError("prefab JSON must contain at least one object")
 
 
 class ModWorkspace:
@@ -738,8 +767,8 @@ class ModWorkspace:
                 if suffix == ".json" and not file.path.lower().endswith(".jbeam"):
                     try:
                         text = self._read_stable_bytes(root, file).decode("utf-8")
-                        json.loads(text)
-                    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                        _validate_json_text(file.path, text)
+                    except (UnicodeDecodeError, json.JSONDecodeError, _PrefabJsonError) as exc:
                         issues.append(
                             ValidationIssue(
                                 severity="error",

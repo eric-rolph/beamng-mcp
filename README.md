@@ -234,9 +234,19 @@ mod_scaffold → mod_file_read/list → mod_file_write(expected_sha256=...)
 
 `mod_test_start` is a static build job: it validates, packs, and can copy an approved archive. It
 does not activate the mod, launch a scenario, or prove runtime behavior. Deterministic in-game mod
-execution is available only as an opt-in developer regression against a sentinel-marked disposable
-BeamNG profile; comprehensive collision, deformation, actuator, and log collection remain manual
-acceptance work.
+execution is available as opt-in developer regressions against a sentinel-marked disposable BeamNG
+profile. The Cannon Car Wash example below is one fully automated scenario-specific gate;
+comprehensive acceptance for arbitrary third-party mods remains manual.
+
+### Cannon Car Wash end-to-end example
+
+[`examples/cannon_car_wash`](examples/cannon_car_wash) contains the Blender source/generator,
+Z-up Collada asset, Gridmap V2 scenario, exact trigger/placement manifests, GELua countdown/launch
+extension, and the stock collision wall used by the Phase 4 test. The live test drives a grounded
+default D-Series into the wash at 3–5 m/s, holds it through `3... 2... 1... GO!`, injects 100 m/s
+along its measured forward axis, and verifies impact through State, Electrics, Damage, and engine-log
+telemetry. The latest checked-in result is
+[`cannon_car_wash_phase4_results.json`](examples/cannon_car_wash/telemetry/cannon_car_wash_phase4_results.json).
 
 ### Blender to functional soft body
 
@@ -352,7 +362,9 @@ Work on cloned/user-folder levels; do not edit shipped game content.
   manual stop path.
 - Vision backends warm while native AI is disabled and the vehicle is fully braked, before the
   short engine lease is armed. Direct `vehicle_control` calls remain one-shot, may latch until a
-  follow-up command, and are rejected while an automated run is starting or active.
+  follow-up command, and are rejected while an automated run is starting or active. Its default
+  ADAS arbitration preserves local-driver priority; `is_adas=false` intentionally bypasses that
+  arbitration and is reserved for isolated automation sessions.
 - Mod paths are canonicalized beneath one workspace; traversal and symlinks are rejected.
 - Blender handoffs use random, capped, expiring, single-use directories with fixed filenames,
   stable reads, DAE XML/external-reference checks, SHA-256 binding, and transactional bundle

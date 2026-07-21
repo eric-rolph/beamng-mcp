@@ -746,6 +746,8 @@ class FakeAI:
 class FakeVehicle:
     def __init__(self, *, connected: bool = True) -> None:
         self.kwargs: dict = {}
+        self.shift_modes: list[str] = []
+        self.lua_commands: list[str] = []
         self.connected = connected
         self.connected_with: object | None = None
         self.ai = FakeAI()
@@ -759,6 +761,12 @@ class FakeVehicle:
 
     def control(self, **kwargs) -> None:
         self.kwargs = kwargs
+
+    def set_shift_mode(self, mode: str) -> None:
+        self.shift_modes.append(mode)
+
+    def queue_lua_command(self, command: str) -> None:
+        self.lua_commands.append(command)
 
 
 class FakeScenarioApi:
@@ -1858,6 +1866,33 @@ async def test_service_brake_wins_over_throttle(tmp_path: Path) -> None:
     assert fake.kwargs["throttle"] == 0.0
     assert fake.kwargs["brake"] == 0.2
     assert fake.kwargs["is_adas"] is True
+    adapter._executor.shutdown(wait=True)
+
+
+@pytest.mark.asyncio
+async def test_direct_vehicle_control_can_override_local_inputs(tmp_path: Path) -> None:
+    adapter = BeamNGpyAdapter(BeamNGSettings(), tmp_path)
+    fake = FakeVehicle()
+    adapter._connected = True
+    adapter._bng = object()  # type: ignore[assignment]
+    adapter._vehicles["ego"] = fake  # type: ignore[assignment]
+    await adapter.control_vehicle(
+        VehicleControl(
+            vehicle_id="ego",
+            brake=0.0,
+            parking_brake=0.0,
+            shift_mode="arcade",
+            is_adas=False,
+        )
+    )
+    assert fake.shift_modes == ["arcade"]
+    assert fake.lua_commands == [
+        "local c=controller.getController('vehicleController');"
+        "if c and c.setGearboxMode then c.setGearboxMode('arcade') end"
+    ]
+    assert fake.kwargs["brake"] == 0.0
+    assert fake.kwargs["parkingbrake"] == 0.0
+    assert fake.kwargs["is_adas"] is False
     adapter._executor.shutdown(wait=True)
 
 

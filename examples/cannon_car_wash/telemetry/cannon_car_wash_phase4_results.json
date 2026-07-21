@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-07-20T20:49:05.3685594-06:00",
+  "status": "passed",
+  "environment": {
+    "beamng_version": "0.38.6.0.19963",
+    "level": "gridmap_v2",
+    "test": "tests/test_cannon_car_wash_phase2_live.py + phase3_live.py + phase4_live.py",
+    "duration_seconds": 131.11
+  },
+  "installed_archive": {
+    "sha256": "7ec6602d27f1ca97573ad7f5ec4f829fbb3e0f863a91f09bb9afc1f9036b58c9",
+    "size_bytes": 734951,
+    "entry_count": 14,
+    "root_info_present": true,
+    "repository_icon_present": true
+  },
+  "phase": 4,
+  "scenario": "Cannon Car Wash",
+  "vehicle": "cannon_car_wash_truck",
+  "approach": {
+    "forward_progress_m": 17.870211139382036,
+    "peak_speed_mps": 5.0724757069548545,
+    "minimum_z": 100.29628478230734,
+    "maximum_z": 100.32261149340775
+  },
+  "hold": {
+    "maximum_drift_m": 0.004494340091036793,
+    "maximum_speed_mps": 0.005613712961270071
+  },
+  "countdown_elapsed_seconds": {
+    "countdown_3": 0.0,
+    "countdown_2": 1.0131242,
+    "countdown_1": 2.0297519,
+    "go": 3.0466064
+  },
+  "launch": {
+    "peak_speed_mps": 98.43972602939682,
+    "peak_speed_kph": 354.38301370582855,
+    "forward_alignment": 0.9999415183705574
+  },
+  "impact": {
+    "wall": "CannonCrashWall",
+    "position": [
+      -122.1625985809369,
+      -132.8171923221089,
+      99.99850837490521
+    ],
+    "initial_damage": 0.0,
+    "prelaunch_damage": 0.0,
+    "peak_damage": 3663190.0,
+    "damage_delta": 3663190.0,
+    "part_damage_count": 40,
+    "minimum_post_crash_speed_mps": 1.011494309426557,
+    "maximum_world_y": -132.8171923221089,
+    "sample_count": 4,
+    "observation_seconds": 0.6308985999930883
+  },
+  "ordered_lua_events": [
+    "trigger_enter",
+    "hold_start",
+    "countdown_3",
+    "countdown_timer_start",
+    "countdown_2",
+    "countdown_1",
+    "go",
+    "release",
+    "launch",
+    "release",
+    "abort",
+    "session_end"
+  ],
+  "cleanup_note": "The final release/abort pair is the deliberate post-measurement vehicle reset.",
+  "lua_errors": []
+}

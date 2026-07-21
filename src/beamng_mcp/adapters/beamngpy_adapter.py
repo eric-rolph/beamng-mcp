@@ -1012,8 +1012,16 @@ class BeamNGpyAdapter:
             parkingbrake=command.parking_brake,
             clutch=command.clutch,
             gear=command.gear,
-            is_adas=True,
+            is_adas=command.is_adas,
         )
+        if command.shift_mode is not None:
+            await self._call(vehicle.set_shift_mode, command.shift_mode)
+            gearbox_behavior = "arcade" if command.shift_mode == "arcade" else "realistic"
+            modern_controller_command = (
+                "local c=controller.getController('vehicleController');"
+                f"if c and c.setGearboxMode then c.setGearboxMode('{gearbox_behavior}') end"
+            )
+            await self._call(vehicle.queue_lua_command, modern_controller_command)
 
     async def teleport_vehicle(self, command: VehicleTeleport) -> bool:
         bng = self._require()
