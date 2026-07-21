@@ -1,9 +1,9 @@
 {
   "title": "Cannon Car Wash",
   "name": "cannon_car_wash",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "Other",
-  "description": "Drive a Gavril D-Series through an animated car wash, trigger a 3-2-1 countdown, launch at 360 km/h, or spawn the full structure from the vehicle selector's Props category.",
+  "description": "Drive a Gavril D-Series through trigger-controlled rollers and twelve spray misters, then launch at 360 km/h once fully contained, or place the rigid structure from the vehicle selector's Props category.",
   "authors": "beamng-mcp contributors",
   "categories": [
     "Gameplay",

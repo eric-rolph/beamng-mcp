@@ -10,8 +10,39 @@
   "identity": {
     "trigger_name": "LaunchTrigger_Mesh",
     "trigger_class": "BeamNGTrigger",
+    "trigger_mode": "Contains",
+    "trigger_test_type": "Bounding box",
+    "wash_trigger_name": "WashActivationTrigger_Mesh",
+    "wash_trigger_class": "BeamNGTrigger",
+    "wash_trigger_mode": "Overlaps",
     "vehicle_name": "cannon_car_wash_truck",
     "vehicle_model": "pickup"
+  },
+  "wash_cycle": {
+    "scope": "full_bay",
+    "enter": {
+      "roller_visual": "CannonCarWash_Visual",
+      "roller_sequence": "ambient",
+      "roller_play_ambient": true,
+      "mister_emitter": "BNGP_sprinkler",
+      "mister_count": 12,
+      "misters_active": true
+    },
+    "exit": {
+      "roller_play_ambient": false,
+      "misters_active": false
+    },
+    "mission_initial_state": "off",
+    "subject_tracking": "vehicle_id_set"
+  },
+  "containment_gate": {
+    "required_trigger": "LaunchTrigger_Mesh",
+    "required_mode": "Contains",
+    "required_test_type": "Bounding box",
+    "required_vehicle_state": "previously_entered_WashActivationTrigger_Mesh",
+    "required_wash_system_state": "active",
+    "out_of_order_policy": "defer_until_wash_active",
+    "action": "begin_countdown"
   },
   "countdown": {
     "clock": "jobsystem_hptimer",
@@ -44,6 +75,14 @@
   "telemetry": {
     "log_tag": "CANNON_CAR_WASH",
     "record_schema_version": 1,
-    "format": "json"
+    "format": "json",
+    "wash_events": [
+      "wash_trigger_enter",
+      "wash_systems_start",
+      "wash_trigger_exit",
+      "wash_systems_stop"
+    ],
+    "launch_gate_event": "containment_verified",
+    "launch_deferred_event": "launch_deferred"
   }
 }

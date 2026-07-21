@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
-  "captured_at": "2026-07-20T20:49:05.3685594-06:00",
+  "captured_at": "2026-07-20T23:59:36.0503943-06:00",
   "status": "passed",
   "environment": {
     "beamng_version": "0.38.6.0.19963",
     "level": "gridmap_v2",
     "test": "tests/test_cannon_car_wash_phase2_live.py + phase3_live.py + phase4_live.py",
-    "duration_seconds": 131.11
+    "duration_seconds": 139.7
   },
   "installed_archive": {
-    "sha256": "7ec6602d27f1ca97573ad7f5ec4f829fbb3e0f863a91f09bb9afc1f9036b58c9",
-    "size_bytes": 734951,
-    "entry_count": 14,
+    "sha256": "2540f66abfe5b9a1a009b4d9a658c3c98fa24b5ba6ca2e6f8a4bf9eed7b50bac",
+    "size_bytes": 1909668,
+    "entry_count": 23,
     "root_info_present": true,
     "repository_icon_present": true
   },
@@ -19,44 +19,93 @@
   "scenario": "Cannon Car Wash",
   "vehicle": "cannon_car_wash_truck",
   "approach": {
-    "forward_progress_m": 17.870211139382036,
-    "peak_speed_mps": 5.0724757069548545,
-    "minimum_z": 100.29628478230734,
-    "maximum_z": 100.32261149340775
+    "forward_progress_m": 17.444354572879092,
+    "peak_speed_mps": 5.12894450785472,
+    "minimum_z": 100.2959469066991,
+    "maximum_z": 100.32275359946652
   },
   "hold": {
-    "maximum_drift_m": 0.004494340091036793,
-    "maximum_speed_mps": 0.005613712961270071
+    "maximum_drift_m": 0.0019010777827067852,
+    "maximum_speed_mps": 0.0029521333792121235
   },
   "countdown_elapsed_seconds": {
     "countdown_3": 0.0,
-    "countdown_2": 1.0131242,
-    "countdown_1": 2.0297519,
-    "go": 3.0466064
+    "countdown_2": 1.0148949,
+    "countdown_1": 2.0319646,
+    "go": 3.0482493
   },
   "launch": {
-    "peak_speed_mps": 98.43972602939682,
-    "peak_speed_kph": 354.38301370582855,
-    "forward_alignment": 0.9999415183705574
+    "peak_speed_mps": 99.00577263218703,
+    "peak_speed_kph": 356.4207814758733,
+    "forward_alignment": 0.9999823784171443
   },
   "impact": {
     "wall": "CannonCrashWall",
     "position": [
-      -122.1625985809369,
-      -132.8171923221089,
-      99.99850837490521
+      -122.18295951117761,
+      -133.58794988691807,
+      100.1325377933681
     ],
     "initial_damage": 0.0,
     "prelaunch_damage": 0.0,
-    "peak_damage": 3663190.0,
-    "damage_delta": 3663190.0,
+    "peak_damage": 3765514.75,
+    "damage_delta": 3765514.75,
     "part_damage_count": 40,
-    "minimum_post_crash_speed_mps": 1.011494309426557,
-    "maximum_world_y": -132.8171923221089,
-    "sample_count": 4,
-    "observation_seconds": 0.6308985999930883
+    "minimum_post_crash_speed_mps": 7.349001919099702,
+    "maximum_world_y": -133.34467853605747,
+    "sample_count": 5,
+    "observation_seconds": 0.4900331999961054
+  },
+  "wash_systems": {
+    "activation_trigger": {
+      "class": "BeamNGTrigger",
+      "mode": "Overlaps",
+      "name": "WashActivationTrigger_Mesh",
+      "test_type": "Bounding box"
+    },
+    "launch_trigger": {
+      "class": "BeamNGTrigger",
+      "mode": "Contains",
+      "name": "LaunchTrigger_Mesh",
+      "test_type": "Bounding box"
+    },
+    "initial": {
+      "active": false,
+      "mister_active_count": 0,
+      "mister_expected_count": 12,
+      "mister_present_count": 12,
+      "roller_play_ambient": "0",
+      "subject_count": 0
+    },
+    "active_on_entry": {
+      "active": true,
+      "mister_active_count": 12,
+      "mister_expected_count": 12,
+      "mister_present_count": 12,
+      "roller_play_ambient": "1",
+      "subject_count": 1
+    },
+    "contained_vehicle_oobb": {
+      "center": [-122.59489440918, -166.09378051758, 100.86171722412],
+      "dimensions": [2.3170651335968, 4.9787258533761, 1.7558454587124],
+      "minimum": [-123.75342697598, -168.58314344427, 99.983794494765],
+      "maximum": [-121.43636184238, -163.60441759089, 101.73963995348]
+    },
+    "final": {
+      "active": false,
+      "mister_active_count": 0,
+      "mister_expected_count": 12,
+      "mister_present_count": 12,
+      "roller_play_ambient": "0",
+      "subject_count": 0
+    }
   },
   "ordered_lua_events": [
+    "session_start",
+    "wash_systems_stop",
+    "wash_trigger_enter",
+    "wash_systems_start",
+    "containment_verified",
     "trigger_enter",
     "hold_start",
     "countdown_3",
@@ -66,8 +115,11 @@
     "go",
     "release",
     "launch",
+    "wash_subject_removed",
+    "wash_systems_stop",
     "release",
     "abort",
+    "wash_systems_stop",
     "session_end"
   ],
   "cleanup_note": "The final release/abort pair is the deliberate post-measurement vehicle reset.",

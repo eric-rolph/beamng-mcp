@@ -31,13 +31,24 @@ VEHICLE_DAE_PATH = VEHICLE_DIRECTORY / "cannon_car_wash.dae"
 VEHICLE_HANDOFF_PATH = VEHICLE_DIRECTORY / "cannon_car_wash.selector_handoff.json"
 VEHICLE_VISUAL_NAME = "cannon_car_wash_visual"
 VEHICLE_CAGE_NAME = "CannonCarWash_SelectorCage"
+LAUNCH_TRIGGER_NAME = "LaunchTrigger_Mesh"
+WASH_ACTIVATION_TRIGGER_NAME = "WashActivationTrigger_Mesh"
+# BeamNG's live D-Series OOBB settles roughly 1 cm below the road surface.
+# Give Contains a measured 20 cm under-floor allowance while keeping the top
+# inside the 4.48 m opening: local Z bounds are [-0.2, 4.4].
+LAUNCH_TRIGGER_CENTER = (0.0, 5.0, 2.1)
+LAUNCH_TRIGGER_DIMENSIONS = (5.8, 7.5, 4.6)
+WASH_ACTIVATION_TRIGGER_CENTER = (0.0, 0.0, 2.2)
+WASH_ACTIVATION_TRIGGER_DIMENSIONS = (5.8, 17.5, 4.4)
+TRIGGER_NAMES = {LAUNCH_TRIGGER_NAME, WASH_ACTIVATION_TRIGGER_NAME}
 
 PRIMARY_STRUCTURES = (
     "CarWash_Floor",
     "CarWash_Wall_Left",
     "CarWash_Wall_Right",
     "CarWash_Roof",
-    "LaunchTrigger_Mesh",
+    LAUNCH_TRIGGER_NAME,
+    WASH_ACTIVATION_TRIGGER_NAME,
 )
 PORTABLE_FILE_BROWSER_PATH = "//" + "_" * 1021
 PORTABLE_ASSET_LIBRARY_PATH = "/" + "_" * 1022
@@ -249,6 +260,28 @@ def add_pipe_arch(
     )
 
 
+def mister_specs() -> list[dict[str, Any]]:
+    specs: list[dict[str, Any]] = []
+    for arch_name, y in (("PreSoak", -5.6), ("Rinse", 5.65)):
+        for side_name, side in (("L", -1.0), ("R", 1.0)):
+            # ParticleEmitterNode emits along local +Z. Rotate that axis inward
+            # so each stock sprinkler follows its matching Blender nozzle.
+            rotation = (
+                (0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0)
+                if side < 0
+                else (0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0)
+            )
+            for index, z in enumerate((1.25, 2.1, 3.0), start=1):
+                specs.append(
+                    {
+                        "name": f"CannonWash_Mister_{arch_name}_{side_name}_{index}",
+                        "local_position": [round(-side * 0.1 + side * 2.72, 6), y, z],
+                        "rotation_matrix": list(rotation),
+                    }
+                )
+    return specs
+
+
 def add_text_mesh(
     name: str,
     body: str,
@@ -439,21 +472,35 @@ def build_details() -> None:
     add_text_mesh("EntranceSign_Text", "CANNON WASH", (0.0, -9.3, 4.34), light, size=0.62)
     add_text_mesh("ExitSign_Text", "FIRE WHEN READY", (0.0, 9.26, 4.29), orange, size=0.38)
 
-    trigger = add_box(
-        "LaunchTrigger_Mesh",
-        (0.0, 7.35, 1.82),
-        (4.8, 1.5, 3.4),
-        material("CW_TriggerInvisible", (1.0, 0.0, 0.0, 0.0), roughness=1.0),
-        bevel=0.0,
+    trigger_material = material("CW_TriggerInvisible", (1.0, 0.0, 0.0, 0.0), roughness=1.0)
+    trigger_specs = (
+        (
+            LAUNCH_TRIGGER_NAME,
+            LAUNCH_TRIGGER_CENTER,
+            LAUNCH_TRIGGER_DIMENSIONS,
+            "cannon_car_wash_launch",
+            "Contains",
+        ),
+        (
+            WASH_ACTIVATION_TRIGGER_NAME,
+            WASH_ACTIVATION_TRIGGER_CENTER,
+            WASH_ACTIVATION_TRIGGER_DIMENSIONS,
+            "cannon_car_wash_cycle",
+            "Overlaps",
+        ),
     )
-    trigger.display_type = "WIRE"
-    trigger.show_in_front = True
-    trigger.hide_render = True
-    trigger["beamng_type"] = "BeamNGTrigger"
-    trigger["beamng_collision"] = "None"
-    trigger["trigger_event"] = "cannon_car_wash_launch"
-    trigger["trigger_axis"] = "+Y"
-    trigger["trigger_target_speed_kph"] = 320.0
+    for name, center, dimensions, event, mode in trigger_specs:
+        trigger = add_box(name, center, dimensions, trigger_material, bevel=0.0)
+        trigger.display_type = "WIRE"
+        trigger.show_in_front = True
+        trigger.hide_render = True
+        trigger["beamng_type"] = "BeamNGTrigger"
+        trigger["beamng_collision"] = "None"
+        trigger["trigger_event"] = event
+        trigger["trigger_mode"] = mode
+        trigger["trigger_axis"] = "+Y"
+        if name == LAUNCH_TRIGGER_NAME:
+            trigger["trigger_target_speed_kph"] = 320.0
     print("CANNON_CAR_WASH_STAGE details complete")
 
 
@@ -747,7 +794,7 @@ def export_vehicle_selector_asset() -> None:
             for obj in scene.objects
             if obj.type == "MESH"
             and not obj.name.startswith("Colmesh-")
-            and obj.name not in {"LaunchTrigger_Mesh", VEHICLE_CAGE_NAME}
+            and obj.name not in TRIGGER_NAMES | {VEHICLE_CAGE_NAME}
         ),
         key=lambda obj: obj.name,
     )
@@ -882,11 +929,25 @@ def finalize() -> None:
         },
         "primary_structures": primary,
         "trigger": {
-            "name": "LaunchTrigger_Mesh",
-            "center": [0.0, 7.35, 1.82],
-            "dimensions": [4.8, 1.5, 3.4],
+            "name": LAUNCH_TRIGGER_NAME,
+            "center": list(LAUNCH_TRIGGER_CENTER),
+            "dimensions": list(LAUNCH_TRIGGER_DIMENSIONS),
+            "mode": "Contains",
             "events": ["enter", "exit"],
             "target_speed_kph": 320.0,
+        },
+        "wash_activation_trigger": {
+            "name": WASH_ACTIVATION_TRIGGER_NAME,
+            "center": list(WASH_ACTIVATION_TRIGGER_CENTER),
+            "dimensions": list(WASH_ACTIVATION_TRIGGER_DIMENSIONS),
+            "mode": "Overlaps",
+            "events": ["enter", "exit"],
+        },
+        "wash_effects": {
+            "roller_visual": "CannonCarWash_Visual",
+            "roller_sequence": "ambient",
+            "mister_emitter": "BNGP_sprinkler",
+            "misters": mister_specs(),
         },
         "mesh_statistics": mesh_statistics(manifest_meshes),
         "collision_meshes": ["Colmesh-1", "Colmesh-2", "Colmesh-3", "Colmesh-4"],

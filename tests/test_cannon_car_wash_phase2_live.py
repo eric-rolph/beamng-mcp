@@ -771,7 +771,7 @@ async def test_cannon_car_wash_phase2_visual_placement_and_trigger(tmp_path: Pat
                                     "y": trigger_dimensions[1],
                                     "z": trigger_dimensions[2],
                                 },
-                                "mode": "overlaps",
+                                "mode": str(phase2_manifest["trigger"]["mode"]).lower(),
                                 "test_type": "bounding_box",
                                 "debug": False,
                                 "action": {
@@ -797,10 +797,11 @@ async def test_cannon_car_wash_phase2_visual_placement_and_trigger(tmp_path: Pat
                     "z": pytest.approx(trigger_world[2]),
                 }
                 assert enabled["scale"] == {
-                    "x": pytest.approx(4.8),
-                    "y": pytest.approx(1.5),
-                    "z": pytest.approx(3.4),
+                    "x": pytest.approx(trigger_dimensions[0]),
+                    "y": pytest.approx(trigger_dimensions[1]),
+                    "z": pytest.approx(trigger_dimensions[2]),
                 }
+                assert enabled["mode"] == "contains"
                 actual_rotation = enabled["rotation"]
                 rotation_dot = abs(
                     actual_rotation["x"] * asset_rotation[0]

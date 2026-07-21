@@ -1,8 +1,26 @@
 local M = {}
 
 local LOG_TAG = "CANNON_CAR_WASH"
-local TRIGGER_NAME = "LaunchTrigger_Mesh"
+local LAUNCH_TRIGGER_NAME = "LaunchTrigger_Mesh"
+local WASH_TRIGGER_NAME = "WashActivationTrigger_Mesh"
 local TRIGGER_CLASS = "BeamNGTrigger"
+local VISUAL_NAME = "CannonCarWash_Visual"
+local VISUAL_CLASS = "TSStatic"
+local MISTER_CLASS = "ParticleEmitterNode"
+local MISTER_NAMES = {
+  "CannonWash_Mister_PreSoak_L_1",
+  "CannonWash_Mister_PreSoak_L_2",
+  "CannonWash_Mister_PreSoak_L_3",
+  "CannonWash_Mister_PreSoak_R_1",
+  "CannonWash_Mister_PreSoak_R_2",
+  "CannonWash_Mister_PreSoak_R_3",
+  "CannonWash_Mister_Rinse_L_1",
+  "CannonWash_Mister_Rinse_L_2",
+  "CannonWash_Mister_Rinse_L_3",
+  "CannonWash_Mister_Rinse_R_1",
+  "CannonWash_Mister_Rinse_R_2",
+  "CannonWash_Mister_Rinse_R_3",
+}
 local TRUCK_NAME = "cannon_car_wash_truck"
 local TRUCK_MODEL = "pickup"
 local UI_CATEGORY = "cannon_car_wash_countdown"
@@ -31,6 +49,10 @@ local armed = true
 local countdownIndex = 1
 local runCounter = 0
 local sessionCounter = 0
+local washSubjects = {}
+local washSystemsActive = false
+local washInitialized = false
+local pendingLaunchEntries = {}
 
 local function integer(value)
   return type(value) == "number" and value >= 1 and value % 1 == 0
@@ -73,28 +95,38 @@ local function showMessage(message, ttl)
   if not ok then emitError("gui_message_failed", {detail = tostring(messageError)}) end
 end
 
-local function exactTriggerFromEvent(data)
+local function exactTriggerFromEvent(data, expectedName, expectedMode)
   if type(data) ~= "table"
-    or data.triggerName ~= TRIGGER_NAME
+    or data.triggerName ~= expectedName
     or not integer(data.triggerID) then
     return nil
   end
 
-  local triggerByName = scenetree.findObject(TRIGGER_NAME)
+  local triggerByName = scenetree.findObject(expectedName)
   local triggerById = scenetree.findObjectById(data.triggerID)
   if not triggerByName or not triggerById then return nil end
   if triggerByName:getId() ~= data.triggerID then return nil end
   if triggerById:getId() ~= data.triggerID then return nil end
   if triggerByName:getClassName() ~= TRIGGER_CLASS then return nil end
   if triggerById:getClassName() ~= TRIGGER_CLASS then return nil end
+  if triggerByName:getField("triggerMode", 0) ~= expectedMode then return nil end
+  if triggerById:getField("triggerMode", 0) ~= expectedMode then return nil end
+  if triggerByName:getField("triggerTestType", 0) ~= "Bounding box" then return nil end
+  if triggerById:getField("triggerTestType", 0) ~= "Bounding box" then return nil end
   return triggerById
 end
 
-local function exactTruckFromEvent(data)
+local function exactVehicleFromEvent(data)
   if type(data) ~= "table" or not integer(data.subjectID) then return nil end
   local vehicle = be:getObjectByID(data.subjectID)
   if not vehicle then return nil end
   if vehicle:getId() ~= data.subjectID then return nil end
+  return vehicle
+end
+
+local function exactTruckFromEvent(data)
+  local vehicle = exactVehicleFromEvent(data)
+  if not vehicle then return nil end
   if vehicle:getName() ~= TRUCK_NAME then return nil end
   if vehicle:getJBeamFilename() ~= TRUCK_MODEL then return nil end
   return vehicle
@@ -128,10 +160,128 @@ local function releaseVehicle(vehicle, reason)
   end
 end
 
+local function washSubjectCount()
+  local count = 0
+  for _ in pairs(washSubjects) do count = count + 1 end
+  return count
+end
+
+local function exactSceneObject(name, expectedClass)
+  local object = scenetree.findObject(name)
+  if not object or object:getName() ~= name then return nil end
+  if object:getClassName() ~= expectedClass then return nil end
+  return object
+end
+
+local function resolveWashObjects()
+  local visual = exactSceneObject(VISUAL_NAME, VISUAL_CLASS)
+  local misters = {}
+  local missing = {}
+  if not visual then missing[#missing + 1] = VISUAL_NAME end
+  for _, name in ipairs(MISTER_NAMES) do
+    local mister = exactSceneObject(name, MISTER_CLASS)
+    if mister then
+      misters[#misters + 1] = mister
+    else
+      missing[#missing + 1] = name
+    end
+  end
+  return visual, misters, missing
+end
+
+local function forceWashSystemsOff(visual, misters)
+  if visual then pcall(function() visual:setField("playAmbient", 0, "0") end) end
+  for _, mister in ipairs(misters or {}) do
+    pcall(function() mister:setActive(false) end)
+  end
+  washSystemsActive = false
+  washInitialized = false
+end
+
+local function setWashSystemsEnabled(enabled, reason, strict)
+  local expectedField = enabled and "1" or "0"
+  local visual, misters, missing = resolveWashObjects()
+  if not visual or #missing > 0 then
+    forceWashSystemsOff(visual, misters)
+    if strict then
+      emitError("wash_objects_missing", {missing_objects = table.concat(missing, ",")})
+    end
+    return false
+  end
+
+  local updated, updateError = pcall(function()
+    visual:setField("playAmbient", 0, expectedField)
+    for _, mister in ipairs(misters) do
+      mister:setActive(enabled)
+    end
+  end)
+  if not updated then
+    forceWashSystemsOff(visual, misters)
+    if strict then
+      emitError("wash_system_update_failed", {detail = tostring(updateError)})
+    end
+    return false
+  end
+
+  washSystemsActive = enabled
+  washInitialized = true
+  emitEvent("I", enabled and "wash_systems_start" or "wash_systems_stop", {
+    reason = reason,
+    roller_sequence = "ambient",
+    mister_emitter = "BNGP_sprinkler",
+    mister_count = #MISTER_NAMES,
+  })
+  return true
+end
+
+local function resetWashState(reason, strict)
+  washSubjects = {}
+  washInitialized = false
+  return setWashSystemsEnabled(false, reason, strict)
+end
+
+local function removeWashSubject(vehicleId, reason)
+  pendingLaunchEntries[vehicleId] = nil
+  if not washSubjects[vehicleId] then return end
+  washSubjects[vehicleId] = nil
+  emitEvent("I", "wash_subject_removed", {
+    subject_id = vehicleId,
+    reason = reason,
+  })
+  if washSubjectCount() == 0 and washSystemsActive then
+    setWashSystemsEnabled(false, reason, true)
+  end
+end
+
+local function washSystemState()
+  local visual = exactSceneObject(VISUAL_NAME, VISUAL_CLASS)
+  local activeMisters = 0
+  local presentMisters = 0
+  for _, name in ipairs(MISTER_NAMES) do
+    local mister = exactSceneObject(name, MISTER_CLASS)
+    if mister then
+      presentMisters = presentMisters + 1
+      local activeField = string.lower(tostring(mister:getField("active", 0) or ""))
+      if activeField == "1" or activeField == "true" then
+        activeMisters = activeMisters + 1
+      end
+    end
+  end
+  return {
+    active = washSystemsActive,
+    subject_count = washSubjectCount(),
+    roller_play_ambient = visual and visual:getField("playAmbient", 0) or nil,
+    mister_active_count = activeMisters,
+    mister_present_count = presentMisters,
+    mister_expected_count = #MISTER_NAMES,
+  }
+end
+
 local function resetState()
   activeRun = nil
   armed = true
   countdownIndex = 1
+  pendingLaunchEntries = {}
 end
 
 local function abortActiveRun(reason, vehicle)
@@ -231,18 +381,60 @@ local function countdownJob(job, runNumber)
   launchVehicle(vehicle)
 end
 
-local function onBeamNGTrigger(data)
+local handleLaunchTrigger
+
+local function processPendingLaunch(subjectId)
+  local pending = pendingLaunchEntries[subjectId]
+  if not pending or not washSubjects[subjectId] or not washSystemsActive then return end
+  pendingLaunchEntries[subjectId] = nil
+  handleLaunchTrigger(pending)
+end
+
+local function handleWashTrigger(data)
   if type(data) ~= "table"
-    or data.triggerName ~= TRIGGER_NAME
+    or data.triggerName ~= WASH_TRIGGER_NAME
     or not integer(data.triggerID)
     or not integer(data.subjectID) then
     return
   end
-  if not exactTriggerFromEvent(data) then return end
+  if not exactTriggerFromEvent(data, WASH_TRIGGER_NAME, "Overlaps") then return end
+  local vehicle = exactVehicleFromEvent(data)
+  if not vehicle then return end
+
+  if data.event == "enter" then
+    local wasPresent = washSubjects[data.subjectID] == true
+    washSubjects[data.subjectID] = true
+    emitEvent("I", "wash_trigger_enter", {subject_id = data.subjectID})
+    if not wasPresent and not washSystemsActive then
+      setWashSystemsEnabled(true, "vehicle_enter", true)
+    end
+    processPendingLaunch(data.subjectID)
+    return
+  end
+  if data.event ~= "exit" then return end
+
+  pendingLaunchEntries[data.subjectID] = nil
+  washSubjects[data.subjectID] = nil
+  emitEvent("I", "wash_trigger_exit", {subject_id = data.subjectID})
+  if washSubjectCount() == 0 and washSystemsActive then
+    setWashSystemsEnabled(false, "last_vehicle_exit", true)
+  end
+end
+
+handleLaunchTrigger = function(data)
+  if type(data) ~= "table"
+    or data.triggerName ~= LAUNCH_TRIGGER_NAME
+    or not integer(data.triggerID)
+    or not integer(data.subjectID) then
+    return
+  end
+  local trigger = exactTriggerFromEvent(data, LAUNCH_TRIGGER_NAME, "Contains")
+  if not trigger then return end
   local vehicle = exactTruckFromEvent(data)
   if not vehicle then return end
 
   if data.event == "exit" then
+    pendingLaunchEntries[data.subjectID] = nil
     if activeRun and activeRun.vehicleId == data.subjectID then
       if activeRun.holding then
         abortActiveRun("trigger_exit_during_countdown", vehicle)
@@ -257,7 +449,18 @@ local function onBeamNGTrigger(data)
   end
   if data.event ~= "enter" then return end
   if not armed or activeRun then return end
+  if not washSubjects[data.subjectID] or not washSystemsActive then
+    pendingLaunchEntries[data.subjectID] = {
+      triggerName = data.triggerName,
+      triggerID = data.triggerID,
+      subjectID = data.subjectID,
+      event = "enter",
+    }
+    emitEvent("I", "launch_deferred", {reason = "wash_not_active"})
+    return
+  end
 
+  pendingLaunchEntries[data.subjectID] = nil
   armed = false
   runCounter = runCounter + 1
   countdownIndex = 1
@@ -270,6 +473,10 @@ local function onBeamNGTrigger(data)
     elapsedTime = 0,
   }
 
+  emitEvent("I", "containment_verified", {
+    trigger_mode = trigger:getField("triggerMode", 0),
+    trigger_test_type = trigger:getField("triggerTestType", 0),
+  })
   emitEvent("I", "trigger_enter")
   local held = queueVehicleCommand(vehicle, HOLD_VEHICLE_COMMAND, "hold_command_failed")
   if not held then
@@ -292,7 +499,30 @@ local function onBeamNGTrigger(data)
   emitEvent("I", "countdown_timer_start", {clock = "jobsystem_hptimer"})
 end
 
+local function onBeamNGTrigger(data)
+  if type(data) ~= "table" then return end
+  if data.triggerName == WASH_TRIGGER_NAME then
+    handleWashTrigger(data)
+  elseif data.triggerName == LAUNCH_TRIGGER_NAME then
+    handleLaunchTrigger(data)
+  end
+end
+
 local function onPreRender(dtReal,dtSim,dtRaw)
+  -- The extension can load before its prefab.  Retry silently until the
+  -- animated visual and every particle node exist, preserving the desired
+  -- state if a vehicle reached the bay during prefab initialization.
+  if not washInitialized then
+    setWashSystemsEnabled(washSubjectCount() > 0, "scene_initialized", false)
+    if washSystemsActive then
+      local pendingSubjects = {}
+      for subjectId in pairs(pendingLaunchEntries) do
+        pendingSubjects[#pendingSubjects + 1] = subjectId
+      end
+      for _, subjectId in ipairs(pendingSubjects) do processPendingLaunch(subjectId) end
+    end
+  end
+
   if not activeRun or not activeRun.holding then return end
 
   local vehicle = activeVehicle()
@@ -319,16 +549,20 @@ local function onClientStartMission(levelPath)
   abortActiveRun("mission_started")
   resetState()
   sessionCounter = sessionCounter + 1
+  resetWashState("mission_started", false)
   emitEvent("I", "session_start", {level_path = tostring(levelPath or "")})
 end
 
 local function onClientEndMission(levelPath)
   abortActiveRun("mission_ended")
   resetState()
+  resetWashState("mission_ended", false)
+  washInitialized = false
   emitEvent("I", "session_end", {level_path = tostring(levelPath or "")})
 end
 
 local function onVehicleResetted(vehicleId)
+  removeWashSubject(vehicleId, "vehicle_reset")
   if activeRun and activeRun.vehicleId == vehicleId then
     abortActiveRun("vehicle_reset")
     resetState()
@@ -336,6 +570,7 @@ local function onVehicleResetted(vehicleId)
 end
 
 local function onVehicleDestroyed(vehicleId)
+  removeWashSubject(vehicleId, "vehicle_destroyed")
   if activeRun and activeRun.vehicleId == vehicleId then
     emitEvent("W", "abort", {reason = "vehicle_destroyed"})
     resetState()
@@ -345,6 +580,7 @@ end
 local function onExtensionLoaded()
   abortActiveRun("extension_loaded")
   resetState()
+  resetWashState("extension_loaded", false)
   if setExtensionUnloadMode then setExtensionUnloadMode(M, "manual") end
   emitEvent("I", "extension_loaded")
 end
@@ -352,6 +588,8 @@ end
 local function onExtensionUnloaded()
   abortActiveRun("extension_unloaded")
   resetState()
+  resetWashState("extension_unloaded", false)
+  washInitialized = false
   emitEvent("I", "extension_unloaded")
 end
 
@@ -363,5 +601,6 @@ M.onVehicleResetted = onVehicleResetted
 M.onVehicleDestroyed = onVehicleDestroyed
 M.onExtensionLoaded = onExtensionLoaded
 M.onExtensionUnloaded = onExtensionUnloaded
+M.getSystemState = washSystemState
 
 return M

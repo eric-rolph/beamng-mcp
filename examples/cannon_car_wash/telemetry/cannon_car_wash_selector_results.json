@@ -16,6 +16,7 @@
   },
   "topology": {
     "node_count": 77,
+    "fixed_node_count": 77,
     "beam_count": 322,
     "triangle_count": 144,
     "flexbody_count": 1,
@@ -24,33 +25,44 @@
   },
   "stability": {
     "deterministic_steps": 120,
-    "initial_position": [-110.0, -170.0, 100.0],
-    "settled_position": [-110.0, -170.0, 100.0],
-    "settled_velocity_mps": [0.0, 0.0, 0.0]
+    "initial_position": [-110.0, -170.0, 100.12000274658203],
+    "settled_position": [-110.0, -170.0, 100.12000274658203],
+    "settled_velocity_mps": [0.0, 0.0, 0.0],
+    "rigidity": {
+      "maximum_shell_node_displacement_m": 0.0,
+      "maximum_shell_node_speed_mps": 0.0
+    }
   },
   "collision_contact": {
     "vehicle": "cannon_car_wash_truck",
     "injected_velocity_x_mps": 30.0,
-    "peak_positive_velocity_x_mps": 29.501379013061523,
-    "minimum_post_impact_velocity_x_mps": -1.9302945137023926,
+    "peak_positive_velocity_x_mps": 29.552650451660156,
+    "minimum_post_impact_velocity_x_mps": -0.4220651388168335,
     "wall_world_x": -106.9,
-    "maximum_world_x": -108.07234102487564,
+    "maximum_world_x": -108.0871992111206,
     "final_truck_position": [
-      -109.56067913110746,
-      -170.88519194199762,
-      100.2609463034023
+      -108.73353145283181,
+      -170.27663224703792,
+      100.40622714881101
     ],
     "final_truck_velocity_mps": [
-      -0.0028876070864498615,
-      -0.007332951296120882,
-      -0.007652572356164455
+      -0.0024964066687971354,
+      -0.00005312240668542324,
+      -0.003528767265379429
     ],
     "prop_position_after_contact": [
-      -110.00021160346296,
-      -169.9999911725463,
-      99.97430175813679
+      -110.0,
+      -170.0,
+      100.12000274658203
     ],
-    "sample_count": 70
+    "sample_count": 70,
+    "rigidity": {
+      "maximum_ref_displacement_m": 0.0,
+      "maximum_ref_speed_mps": 0.0,
+      "maximum_shell_node_displacement_m": 0.0,
+      "maximum_shell_node_speed_mps": 0.0,
+      "sample_count": 31
+    }
   },
   "selector_asset_errors": []
 }

@@ -241,11 +241,14 @@ comprehensive acceptance for arbitrary third-party mods remains manual.
 ### Cannon Car Wash end-to-end example
 
 [`examples/cannon_car_wash`](examples/cannon_car_wash) contains the Blender source/generator,
-Z-up Collada asset, Gridmap V2 scenario, exact trigger/placement manifests, GELua countdown/launch
-extension, and a Blender-derived `Type: Prop` model for the vehicle selector. The live gates prove
-the prop is catalogued and spawnable, then drive a grounded default D-Series into the wash at
-3–5 m/s, hold it through `3... 2... 1... GO!`, inject 100 m/s along its measured forward axis, and
-verify impact through State, Electrics, Damage, and engine-log telemetry. The latest checked-in result is
+Z-up Collada asset, Gridmap V2 scenario, exact trigger/placement manifests, GELua wash-cycle and
+countdown/launch extension, and a Blender-derived rigid `Type: Prop` model for the vehicle selector.
+The wash-cycle trigger starts the ambient rollers and twelve stock spray misters while a vehicle is
+inside the bay. A separate containment trigger launches only after the named D-Series is fully inside.
+The live gates prove the prop is catalogued and spawnable, then drive a grounded default D-Series into
+the wash at 3–5 m/s, hold it through `3... 2... 1... GO!`, inject 100 m/s along its measured forward
+axis, and verify impact through State, Electrics, Damage, and engine-log telemetry. The latest
+checked-in result is
 [`cannon_car_wash_phase4_results.json`](examples/cannon_car_wash/telemetry/cannon_car_wash_phase4_results.json).
 
 ### Blender to functional soft body

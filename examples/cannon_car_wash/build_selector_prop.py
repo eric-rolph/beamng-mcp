@@ -73,20 +73,23 @@ def build_jbeam(handoff: dict[str, Any]) -> tuple[dict[str, Any], float]:
 
     node_rows: list[list[Any]] = [["id", "posX", "posY", "posZ"]]
     for node in nodes:
-        fixed = node["id"] in base_ids
+        is_base = node["id"] in base_ids
         node_rows.append(
             [
                 node["id"],
                 *node["position"],
                 {
-                    "collision": not fixed,
-                    "fixed": fixed,
+                    # The selector model is infrastructure, not a deformable
+                    # vehicle. Fix the entire measured shell so its coplanar
+                    # panels cannot fold through zero-stiffness modes.
+                    "collision": False,
+                    "fixed": True,
                     "frictionCoef": 0.9,
                     "group": GROUP,
                     "nodeMaterial": "|NM_METAL",
-                    "nodeWeight": BASE_NODE_MASS_KG if fixed else STRUCTURE_NODE_MASS_KG,
+                    "nodeWeight": BASE_NODE_MASS_KG if is_base else STRUCTURE_NODE_MASS_KG,
                     "selfCollision": False,
-                    "staticCollision": not fixed,
+                    "staticCollision": False,
                 },
             ]
         )

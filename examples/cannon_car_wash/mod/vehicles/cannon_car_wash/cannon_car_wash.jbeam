@@ -3281,14 +3281,14 @@
         9.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3297,14 +3297,14 @@
         9.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3313,14 +3313,14 @@
         9.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3345,14 +3345,14 @@
         9.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3361,14 +3361,14 @@
         9.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3377,14 +3377,14 @@
         9.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3393,14 +3393,14 @@
         9.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3409,14 +3409,14 @@
         9.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3425,14 +3425,14 @@
         9.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3457,14 +3457,14 @@
         6.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3473,14 +3473,14 @@
         6.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3489,14 +3489,14 @@
         6.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3521,14 +3521,14 @@
         6.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3537,14 +3537,14 @@
         6.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3553,14 +3553,14 @@
         6.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3569,14 +3569,14 @@
         6.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3585,14 +3585,14 @@
         6.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3601,14 +3601,14 @@
         6.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3633,14 +3633,14 @@
         3.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3649,14 +3649,14 @@
         3.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3665,14 +3665,14 @@
         3.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3697,14 +3697,14 @@
         3.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3713,14 +3713,14 @@
         3.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3729,14 +3729,14 @@
         3.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3745,14 +3745,14 @@
         3.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3761,14 +3761,14 @@
         3.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3777,14 +3777,14 @@
         3.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3809,14 +3809,14 @@
         -0.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3825,14 +3825,14 @@
         0.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3841,14 +3841,14 @@
         0.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3873,14 +3873,14 @@
         0.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3889,14 +3889,14 @@
         0.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3905,14 +3905,14 @@
         0.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3921,14 +3921,14 @@
         -0.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3937,14 +3937,14 @@
         -0.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3953,14 +3953,14 @@
         0.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -3985,14 +3985,14 @@
         -3.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4001,14 +4001,14 @@
         -3.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4017,14 +4017,14 @@
         -3.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4049,14 +4049,14 @@
         -3.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4065,14 +4065,14 @@
         -3.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4081,14 +4081,14 @@
         -3.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4097,14 +4097,14 @@
         -3.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4113,14 +4113,14 @@
         -3.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4129,14 +4129,14 @@
         -3.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4161,14 +4161,14 @@
         -6.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4177,14 +4177,14 @@
         -6.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4193,14 +4193,14 @@
         -6.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4225,14 +4225,14 @@
         -6.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4241,14 +4241,14 @@
         -6.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4257,14 +4257,14 @@
         -6.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4273,14 +4273,14 @@
         -6.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4289,14 +4289,14 @@
         -6.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4305,14 +4305,14 @@
         -6.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4337,14 +4337,14 @@
         -9.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4353,14 +4353,14 @@
         -9.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4369,14 +4369,14 @@
         -9.0,
         0.12,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4401,14 +4401,14 @@
         -9.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4417,14 +4417,14 @@
         -9.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4433,14 +4433,14 @@
         -9.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4449,14 +4449,14 @@
         -9.0,
         4.96,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4465,14 +4465,14 @@
         -9.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ],
       [
@@ -4481,14 +4481,14 @@
         -9.0,
         4.6,
         {
-          "collision": true,
-          "fixed": false,
+          "collision": false,
+          "fixed": true,
           "frictionCoef": 0.9,
           "group": "cannon_car_wash",
           "nodeMaterial": "|NM_METAL",
           "nodeWeight": 125.0,
           "selfCollision": false,
-          "staticCollision": true
+          "staticCollision": false
         }
       ]
     ],

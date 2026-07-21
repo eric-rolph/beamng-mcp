@@ -31,6 +31,18 @@ SELECTOR_JBEAM_PATH = SELECTOR_ROOT / "cannon_car_wash.jbeam"
 SELECTOR_MATERIALS_PATH = SELECTOR_ROOT / "main.materials.json"
 SELECTOR_RESULTS_PATH = EXAMPLE_ROOT / "telemetry" / "cannon_car_wash_selector_results.json"
 COLLADA_NAMESPACE = {"c": "http://www.collada.org/2005/11/COLLADASchema"}
+LAUNCH_TRIGGER_NAME = "LaunchTrigger_Mesh"
+WASH_TRIGGER_NAME = "WashActivationTrigger_Mesh"
+LAUNCH_TRIGGER_CENTER = [0.0, 5.0, 2.1]
+LAUNCH_TRIGGER_DIMENSIONS = [5.8, 7.5, 4.6]
+WASH_TRIGGER_CENTER = [0.0, 0.0, 2.2]
+WASH_TRIGGER_DIMENSIONS = [5.8, 17.5, 4.4]
+MISTER_NAMES = {
+    f"CannonWash_Mister_{arch}_{side}_{height}"
+    for arch in ("PreSoak", "Rinse")
+    for side in ("L", "R")
+    for height in range(1, 4)
+}
 
 
 @pytest.mark.parametrize("artifact", [BLEND_PATH, PREVIEW_PATH])
@@ -107,10 +119,11 @@ def test_cannon_car_wash_collada_matches_exported_geometry_manifest() -> None:
         assert positions
         assert all(math.isfinite(value) for value in positions)
 
-    actual_minimum, actual_maximum = _transformed_bounds(root, "LaunchTrigger_Mesh")
-    expected = manifest["primary_structures"]["LaunchTrigger_Mesh"]
-    assert actual_minimum == pytest.approx(expected["min"], abs=1e-5)
-    assert actual_maximum == pytest.approx(expected["max"], abs=1e-5)
+    for trigger_name in (LAUNCH_TRIGGER_NAME, WASH_TRIGGER_NAME):
+        actual_minimum, actual_maximum = _transformed_bounds(root, trigger_name)
+        expected = manifest["primary_structures"][trigger_name]
+        assert actual_minimum == pytest.approx(expected["min"], abs=1e-5)
+        assert actual_maximum == pytest.approx(expected["max"], abs=1e-5)
 
 
 def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
@@ -121,12 +134,30 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
     assert manifest["drive_axis"] == [0.0, 1.0, 0.0]
     assert manifest["entrance_center"][1] < manifest["trigger"]["center"][1]
     assert manifest["trigger"]["center"][1] < manifest["exit_center"][1]
+    assert manifest["trigger"] == {
+        "name": LAUNCH_TRIGGER_NAME,
+        "center": LAUNCH_TRIGGER_CENTER,
+        "dimensions": LAUNCH_TRIGGER_DIMENSIONS,
+        "mode": "Contains",
+        "events": ["enter", "exit"],
+        "target_speed_kph": 320.0,
+    }
+    assert manifest["wash_activation_trigger"] == {
+        "name": WASH_TRIGGER_NAME,
+        "center": WASH_TRIGGER_CENTER,
+        "dimensions": WASH_TRIGGER_DIMENSIONS,
+        "mode": "Overlaps",
+        "events": ["enter", "exit"],
+    }
     assert manifest["trigger"]["target_speed_kph"] >= 300.0
 
     opening = manifest["clear_opening"]
     truck = manifest["truck_envelope"]
     assert opening["width"] - truck["width"] >= 1.0
     assert opening["height"] - truck["height"] >= 1.0
+    assert manifest["trigger"]["dimensions"][1] > truck["length"]
+    assert manifest["trigger"]["dimensions"][2] > truck["height"]
+    assert manifest["wash_activation_trigger"]["dimensions"][1] <= opening["length"]
     assert manifest["mesh_statistics"]["polygons"] <= 20_000
     assert manifest["collision_meshes"] == [
         "Colmesh-1",
@@ -212,7 +243,8 @@ def test_cannon_car_wash_selector_collada_is_a_clean_single_flexbody() -> None:
 
     scene_nodes = root.findall(".//c:library_visual_scenes//c:node", COLLADA_NAMESPACE)
     assert [node.attrib["name"] for node in scene_nodes] == ["cannon_car_wash_visual"]
-    assert b"LaunchTrigger_Mesh" not in dae_bytes
+    assert LAUNCH_TRIGGER_NAME.encode() not in dae_bytes
+    assert WASH_TRIGGER_NAME.encode() not in dae_bytes
     assert b"Colmesh-" not in dae_bytes
     assert b"CannonCarWash_SelectorCage" not in dae_bytes
 
@@ -261,11 +293,24 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
         assert actual_nodes[node_id][1:4] == expected_position
         assert actual_nodes[node_id][4]["group"] == "cannon_car_wash"
 
+    assert len(actual_nodes) == 77
     fixed_nodes = {node_id for node_id, row in actual_nodes.items() if row[4]["fixed"]}
-    assert fixed_nodes == set(handoff["base_nodes"])
+    assert fixed_nodes == set(actual_nodes)
+    assert set(handoff["refnodes"].values()) <= fixed_nodes
+    assert all(row[4]["collision"] is False for row in actual_nodes.values())
+    assert all(row[4]["selfCollision"] is False for row in actual_nodes.values())
+    assert all(row[4]["staticCollision"] is False for row in actual_nodes.values())
+
+    base_nodes = set(handoff["base_nodes"])
     minimum_z = min(position[2] for position in expected_positions.values())
-    assert all(expected_positions[node_id][2] == minimum_z for node_id in fixed_nodes)
-    assert len(fixed_nodes) >= 4
+    assert all(expected_positions[node_id][2] == minimum_z for node_id in base_nodes)
+    assert len(base_nodes) >= 4
+    assert all(actual_nodes[node_id][4]["nodeWeight"] == 500.0 for node_id in base_nodes)
+    assert all(
+        row[4]["nodeWeight"] == 125.0
+        for node_id, row in actual_nodes.items()
+        if node_id not in base_nodes
+    )
 
     actual_beams = {tuple(sorted(row[:2])) for row in part["beams"][1:]}
     expected_beams = {tuple(sorted(pair)) for pair in handoff["beams"]}
@@ -275,6 +320,7 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
     expected_triangles = [triangle["nodes"] for triangle in handoff["triangles"]]
     actual_triangles = [row[:3] for row in part["triangles"][1:]]
     assert actual_triangles == expected_triangles
+    assert {node_id for triangle in actual_triangles for node_id in triangle} <= fixed_nodes
     station_by_node = {node["id"]: node["station"] for node in handoff["nodes"]}
     # Every collision triangle spans adjacent length stations. No end-cap triangle
     # closes either portal, so the standard D-Series can drive through the prop.
@@ -300,6 +346,7 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
     }
     assert live_result["topology"] == {
         "beam_count": len(handoff["beams"]),
+        "fixed_node_count": len(handoff["nodes"]),
         "flexbody_count": 1,
         "node_count": len(handoff["nodes"]),
         "total_mass_kg": total_mass,
@@ -320,6 +367,15 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
         <= 0.05
     )
     assert math.sqrt(sum(value * value for value in collision["final_truck_velocity_mps"])) <= 0.05
+    assert live_result["stability"]["rigidity"] == {
+        "maximum_shell_node_displacement_m": 0.0,
+        "maximum_shell_node_speed_mps": 0.0,
+    }
+    assert collision["rigidity"]["maximum_ref_displacement_m"] <= 0.005
+    assert collision["rigidity"]["maximum_ref_speed_mps"] <= 0.01
+    assert collision["rigidity"]["maximum_shell_node_displacement_m"] <= 0.005
+    assert collision["rigidity"]["maximum_shell_node_speed_mps"] <= 0.01
+    assert collision["rigidity"]["sample_count"] >= 30
     assert collision["sample_count"] == 70
     assert live_result["selector_asset_errors"] == []
 
@@ -330,7 +386,7 @@ def test_cannon_car_wash_repository_metadata_and_icon() -> None:
 
     assert root_info["name"] == "cannon_car_wash"
     assert root_info["title"] == "Cannon Car Wash"
-    assert root_info["version"] == "1.1.0"
+    assert root_info["version"] == "1.2.0"
     assert repository_info["name"] == root_info["name"]
     assert repository_info["version"] == root_info["version"]
     assert repository_info["version_string"] == root_info["version"]
@@ -350,6 +406,23 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
     assert phase2["asset"]["sha256"] == dae_sha256
     assert phase2["trigger"]["local_center"] == geometry["trigger"]["center"]
     assert phase2["trigger"]["dimensions"] == geometry["trigger"]["dimensions"]
+    assert phase2["trigger"]["mode"] == "Contains"
+    assert phase2["trigger"]["test_type"] == "Bounding box"
+    assert (
+        phase2["wash_activation_trigger"]["local_center"]
+        == geometry["wash_activation_trigger"]["center"]
+    )
+    assert (
+        phase2["wash_activation_trigger"]["dimensions"]
+        == geometry["wash_activation_trigger"]["dimensions"]
+    )
+    assert phase2["wash_activation_trigger"]["mode"] == "Overlaps"
+    assert phase2["wash_activation_trigger"]["test_type"] == "Bounding box"
+    assert phase2["wash_effects"]["visual_name"] == "CannonCarWash_Visual"
+    assert phase2["wash_effects"]["roller_sequence"] == "ambient"
+    assert phase2["wash_effects"]["roller_control_field"] == "playAmbient"
+    assert phase2["wash_effects"]["mister_emitter"] == "BNGP_sprinkler"
+    assert phase2["wash_effects"]["mister_datablock"] == "lightExampleEmitterNodeData1"
     assert phase2["phase3_launch_behavior_present"] is False
 
     asset_position = phase2["asset"]["position"]
@@ -357,24 +430,67 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
     assert phase2["asset"]["rotation_xyzw"] == [0.0, 0.0, 0.0, 1.0]
     expected_world_center = [asset_position[axis] + local_center[axis] for axis in range(3)]
     assert phase2["trigger"]["world_center"] == pytest.approx(expected_world_center)
+    wash_local_center = phase2["wash_activation_trigger"]["local_center"]
+    expected_wash_world_center = [
+        asset_position[axis] + wash_local_center[axis] for axis in range(3)
+    ]
+    assert phase2["wash_activation_trigger"]["world_center"] == pytest.approx(
+        expected_wash_world_center
+    )
 
     prefab_source = SCENARIO_PREFAB_PATH.read_text(encoding="utf-8")
     prefab_records = [json.loads(line) for line in prefab_source.splitlines() if line.strip()]
     prefab = {record["name"]: record for record in prefab_records}
-    assert len(prefab_records) == 5
+    assert len(prefab_records) == 18
     assert prefab["cannon_car_wash_group"]["class"] == "SimGroup"
 
     visual = prefab["CannonCarWash_Visual"]
     assert visual["class"] == "TSStatic"
     assert visual["position"] == phase2["asset"]["position"]
     assert visual["scale"] == phase2["asset"]["scale"]
+    assert visual["dynamic"] == "1"
+    assert visual["playAmbient"] == "1"
     assert visual["collisionType"] == "Collision Mesh"
 
-    trigger = prefab["LaunchTrigger_Mesh"]
+    trigger = prefab[LAUNCH_TRIGGER_NAME]
     assert trigger["class"] == "BeamNGTrigger"
     assert trigger["position"] == phase2["trigger"]["world_center"]
     assert trigger["scale"] == geometry["trigger"]["dimensions"]
     assert trigger["luaFunction"] == "onBeamNGTrigger"
+    assert trigger["triggerMode"] == "Contains"
+    assert trigger["triggerTestType"] == "Bounding box"
+
+    wash_trigger = prefab[WASH_TRIGGER_NAME]
+    assert wash_trigger["class"] == "BeamNGTrigger"
+    assert wash_trigger["position"] == phase2["wash_activation_trigger"]["world_center"]
+    assert wash_trigger["scale"] == geometry["wash_activation_trigger"]["dimensions"]
+    assert wash_trigger["luaFunction"] == "onBeamNGTrigger"
+    assert wash_trigger["triggerMode"] == "Overlaps"
+    assert wash_trigger["triggerTestType"] == "Bounding box"
+
+    mister_specs = {mister["name"]: mister for mister in geometry["wash_effects"]["misters"]}
+    assert set(mister_specs) == MISTER_NAMES
+    phase2_misters = {mister["name"]: mister for mister in phase2["wash_effects"]["misters"]}
+    assert set(phase2_misters) == MISTER_NAMES
+    misters = {
+        name: record for name, record in prefab.items() if record["class"] == "ParticleEmitterNode"
+    }
+    assert set(misters) == MISTER_NAMES
+    assert geometry["wash_effects"]["mister_emitter"] == "BNGP_sprinkler"
+    for name, mister in misters.items():
+        spec = mister_specs[name]
+        expected_position = [
+            asset_position[axis] + spec["local_position"][axis] for axis in range(3)
+        ]
+        assert phase2_misters[name]["local_position"] == spec["local_position"]
+        assert phase2_misters[name]["world_position"] == pytest.approx(expected_position)
+        assert phase2_misters[name]["rotation_matrix"] == spec["rotation_matrix"]
+        assert mister["position"] == pytest.approx(expected_position)
+        assert mister["rotationMatrix"] == spec["rotation_matrix"]
+        assert mister["dataBlock"] == "lightExampleEmitterNodeData1"
+        assert mister["emitter"] == "BNGP_sprinkler"
+        assert mister["active"] is False
+        assert mister["__parent"] == "cannon_car_wash_group"
 
     vehicle = prefab["cannon_car_wash_truck"]
     assert vehicle["class"] == "BeamNGVehicle"

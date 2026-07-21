@@ -4,7 +4,7 @@
   "level": "gridmap_v2",
   "asset": {
     "path": "/levels/gridmap_v2/art/shapes/carwash/cannon_car_wash.dae",
-    "sha256": "b8e2460ad2fc104cfe11f0854ead3d59c3abb8597f023204a2aaddee88b3775a",
+    "sha256": "121f33d087be604ba967f040b83f0712eb2700c8a05e203a7251421e54e7f585",
     "position": [
       -122.011475,
       -170.0,
@@ -32,18 +32,46 @@
     "class": "BeamNGTrigger",
     "local_center": [
       0.0,
-      7.35,
-      1.82
+      5.0,
+      2.1
     ],
     "world_center": [
       -122.011475,
-      -162.65,
-      101.82
+      -165.0,
+      102.1
     ],
     "dimensions": [
-      4.8,
-      1.5,
-      3.4
+      5.8,
+      7.5,
+      4.6
+    ],
+    "rotation_xyzw": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "lua_function": "onBeamNGTrigger",
+    "mode": "Contains",
+    "test_type": "Bounding box"
+  },
+  "wash_activation_trigger": {
+    "name": "WashActivationTrigger_Mesh",
+    "class": "BeamNGTrigger",
+    "local_center": [
+      0.0,
+      0.0,
+      2.2
+    ],
+    "world_center": [
+      -122.011475,
+      -170.0,
+      102.2
+    ],
+    "dimensions": [
+      5.8,
+      17.5,
+      4.4
     ],
     "rotation_xyzw": [
       0.0,
@@ -54,6 +82,87 @@
     "lua_function": "onBeamNGTrigger",
     "mode": "Overlaps",
     "test_type": "Bounding box"
+  },
+  "wash_effects": {
+    "visual_name": "CannonCarWash_Visual",
+    "roller_sequence": "ambient",
+    "roller_control_field": "playAmbient",
+    "mister_emitter": "BNGP_sprinkler",
+    "mister_datablock": "lightExampleEmitterNodeData1",
+    "misters": [
+      {
+        "name": "CannonWash_Mister_PreSoak_L_1",
+        "local_position": [-2.62, -5.6, 1.25],
+        "world_position": [-124.631475, -175.6, 101.25],
+        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+      },
+      {
+        "name": "CannonWash_Mister_PreSoak_L_2",
+        "local_position": [-2.62, -5.6, 2.1],
+        "world_position": [-124.631475, -175.6, 102.1],
+        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+      },
+      {
+        "name": "CannonWash_Mister_PreSoak_L_3",
+        "local_position": [-2.62, -5.6, 3.0],
+        "world_position": [-124.631475, -175.6, 103.0],
+        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+      },
+      {
+        "name": "CannonWash_Mister_PreSoak_R_1",
+        "local_position": [2.62, -5.6, 1.25],
+        "world_position": [-119.391475, -175.6, 101.25],
+        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+      },
+      {
+        "name": "CannonWash_Mister_PreSoak_R_2",
+        "local_position": [2.62, -5.6, 2.1],
+        "world_position": [-119.391475, -175.6, 102.1],
+        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+      },
+      {
+        "name": "CannonWash_Mister_PreSoak_R_3",
+        "local_position": [2.62, -5.6, 3.0],
+        "world_position": [-119.391475, -175.6, 103.0],
+        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+      },
+      {
+        "name": "CannonWash_Mister_Rinse_L_1",
+        "local_position": [-2.62, 5.65, 1.25],
+        "world_position": [-124.631475, -164.35, 101.25],
+        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+      },
+      {
+        "name": "CannonWash_Mister_Rinse_L_2",
+        "local_position": [-2.62, 5.65, 2.1],
+        "world_position": [-124.631475, -164.35, 102.1],
+        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+      },
+      {
+        "name": "CannonWash_Mister_Rinse_L_3",
+        "local_position": [-2.62, 5.65, 3.0],
+        "world_position": [-124.631475, -164.35, 103.0],
+        "rotation_matrix": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0]
+      },
+      {
+        "name": "CannonWash_Mister_Rinse_R_1",
+        "local_position": [2.62, 5.65, 1.25],
+        "world_position": [-119.391475, -164.35, 101.25],
+        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+      },
+      {
+        "name": "CannonWash_Mister_Rinse_R_2",
+        "local_position": [2.62, 5.65, 2.1],
+        "world_position": [-119.391475, -164.35, 102.1],
+        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+      },
+      {
+        "name": "CannonWash_Mister_Rinse_R_3",
+        "local_position": [2.62, 5.65, 3.0],
+        "world_position": [-119.391475, -164.35, 103.0],
+        "rotation_matrix": [0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+      }
+    ]
   },
   "vehicle": {
     "name": "cannon_car_wash_truck",

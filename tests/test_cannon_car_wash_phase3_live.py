@@ -38,6 +38,9 @@ PHASE4_MANIFEST = MOD_SOURCE / "mod_info" / "cannon_car_wash" / "phase4_manifest
 SCENARIO_FRAGMENT = "cannon_car_wash/cannon_car_wash.json"
 TRUCK_ID = "cannon_car_wash_truck"
 LOG_TAG = "CANNON_CAR_WASH"
+LAUNCH_TRIGGER_NAME = "LaunchTrigger_Mesh"
+WASH_TRIGGER_NAME = "WashActivationTrigger_Mesh"
+EXPECTED_MISTER_COUNT = 12
 
 
 def _configured_runtime() -> tuple[Path, Path, Path]:
@@ -159,6 +162,92 @@ async def _wait_for_tagged_event(
             return matching[-1]
         await asyncio.sleep(0.1)
     pytest.fail(f"timed out waiting for {LOG_TAG} event {event!r}")
+
+
+async def _wash_system_state(runtime: Any, bng: Any) -> dict[str, Any]:
+    payload = await runtime.simulator._call(
+        bng.control.queue_lua_command,
+        "local extension = extensions['cannon__car__wash_main']; "
+        "if not extension or not extension.getSystemState then "
+        "return jsonEncode({error = 'cannon wash extension state unavailable'}); "
+        "end; "
+        "return jsonEncode(extension.getSystemState())",
+        True,
+    )
+    state = json.loads(payload)
+    assert "error" not in state, state
+    return state
+
+
+async def _wait_for_wash_system_state(
+    runtime: Any,
+    bng: Any,
+    *,
+    active: bool,
+    attempts: int = 80,
+) -> dict[str, Any]:
+    expected_ambient = "1" if active else "0"
+    expected_active_misters = EXPECTED_MISTER_COUNT if active else 0
+    last_state: dict[str, Any] | None = None
+    for _ in range(attempts):
+        last_state = await _wash_system_state(runtime, bng)
+        if (
+            last_state.get("active") is active
+            and int(last_state.get("mister_present_count", -1)) == EXPECTED_MISTER_COUNT
+            and int(last_state.get("mister_expected_count", -1)) == EXPECTED_MISTER_COUNT
+            and int(last_state.get("mister_active_count", -1)) == expected_active_misters
+            and str(last_state.get("roller_play_ambient")) == expected_ambient
+        ):
+            return last_state
+        await asyncio.sleep(0.1)
+    pytest.fail(f"Cannon Car Wash systems did not become active={active}: {last_state}")
+
+
+async def _trigger_scene_state(runtime: Any, bng: Any) -> dict[str, Any]:
+    payload = await runtime.simulator._call(
+        bng.control.queue_lua_command,
+        f"local launch = scenetree.findObject('{LAUNCH_TRIGGER_NAME}'); "
+        f"local wash = scenetree.findObject('{WASH_TRIGGER_NAME}'); "
+        "local function describe(trigger) "
+        "if not trigger then return nil end; "
+        "return {"
+        "name = trigger:getName(), "
+        "class = trigger:getClassName(), "
+        "mode = trigger:getField('triggerMode', 0), "
+        "test_type = trigger:getField('triggerTestType', 0)"
+        "}; "
+        "end; "
+        "return jsonEncode({launch = describe(launch), wash = describe(wash)})",
+        True,
+    )
+    return json.loads(payload)
+
+
+async def _vehicle_oobb_state(runtime: Any, bng: Any) -> dict[str, Any]:
+    payload = await runtime.simulator._call(
+        bng.control.queue_lua_command,
+        f"local vehicle = scenetree.findObject('{TRUCK_ID}'); "
+        "if not vehicle then return jsonEncode({error = 'vehicle missing'}) end; "
+        "local id = vehicle:getId(); "
+        "if not be:getObjectOOBBIsInitialized(id) then "
+        "return jsonEncode({error = 'oobb not initialized'}) end; "
+        "local center = vec3(be:getObjectOOBBCenterXYZ(id)); "
+        "local a0 = vec3(be:getObjectOOBBHalfAxisXYZ(id, 0)); "
+        "local a1 = vec3(be:getObjectOOBBHalfAxisXYZ(id, 1)); "
+        "local a2 = vec3(be:getObjectOOBBHalfAxisXYZ(id, 2)); "
+        "local extent = vec3("
+        "math.abs(a0.x) + math.abs(a1.x) + math.abs(a2.x), "
+        "math.abs(a0.y) + math.abs(a1.y) + math.abs(a2.y), "
+        "math.abs(a0.z) + math.abs(a1.z) + math.abs(a2.z)); "
+        "return jsonEncode({"
+        "center = {center.x, center.y, center.z}, "
+        "minimum = {center.x - extent.x, center.y - extent.y, center.z - extent.z}, "
+        "maximum = {center.x + extent.x, center.y + extent.y, center.z + extent.z}, "
+        "dimensions = {extent.x * 2, extent.y * 2, extent.z * 2}"
+        "})",
+        True,
+    )
+    return json.loads(payload)
 
 
 async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
@@ -295,7 +384,19 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                     await session.call_tool("simulation_control", {"action": "pause"})
                 )
                 assert paused["ok"] is True
-                await _wait_for_tagged_event(log_path, "session_start")
+                session_record = await _wait_for_tagged_event(log_path, "session_start")
+                session_number = int(session_record["session"])
+                trigger_scene_state = await _trigger_scene_state(runtime, bng)
+                assert trigger_scene_state["launch"]["name"] == LAUNCH_TRIGGER_NAME
+                assert trigger_scene_state["launch"]["class"] == "BeamNGTrigger"
+                assert trigger_scene_state["launch"]["mode"] == "Contains"
+                assert trigger_scene_state["launch"]["test_type"] == "Bounding box"
+                assert trigger_scene_state["wash"]["name"] == WASH_TRIGGER_NAME
+                assert trigger_scene_state["wash"]["class"] == "BeamNGTrigger"
+                assert trigger_scene_state["wash"]["mode"] == "Overlaps"
+                assert trigger_scene_state["wash"]["test_type"] == "Bounding box"
+                initial_wash_state = await _wait_for_wash_system_state(runtime, bng, active=False)
+                assert int(initial_wash_state["subject_count"]) == 0
                 if phase == 4:
                     assert phase4 is not None
                     crash_wall = _structured(
@@ -389,6 +490,7 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
 
                 trigger_record: dict[str, Any] | None = None
                 drive_states: list[dict[str, Any]] = []
+                last_oobb: dict[str, Any] | None = None
                 drive_deadline = monotonic() + 18.0
                 while monotonic() < drive_deadline:
                     state = _structured(
@@ -401,6 +503,7 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                             record
                             for record in reversed(records)
                             if record.get("event") == "trigger_enter"
+                            and int(record.get("session", 0)) == session_number
                             and int(record.get("run", 0)) > 0
                         ),
                         None,
@@ -415,6 +518,8 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                         * forward[axis]
                         for axis in range(3)
                     )
+                    if current_progress >= 10.0:
+                        last_oobb = await _vehicle_oobb_state(runtime, bng)
                     if current_progress < -3.0 or current_progress > 24.0:
                         await session.call_tool(
                             "vehicle_control",
@@ -431,7 +536,8 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                         )
                         pytest.fail(
                             "truck left the guarded approach corridor before trigger entry: "
-                            f"progress={current_progress:.3f} m, state={state}"
+                            f"progress={current_progress:.3f} m, state={state}, "
+                            f"oobb={last_oobb}, triggers={trigger_scene_state}"
                         )
                     if speed_mps < 3.0:
                         throttle, brake = 0.35, 0.0
@@ -483,6 +589,28 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 assert max(drive_progress) >= 10.0
                 assert max(float(state["speed_mps"]) for state in drive_states) <= 8.0
                 assert max(float(state["speed_mps"]) for state in drive_states) >= 1.0
+                contained_oobb = await _vehicle_oobb_state(runtime, bng)
+                assert "error" not in contained_oobb, contained_oobb
+                trigger_center = [float(value) for value in phase2["trigger"]["world_center"]]
+                trigger_dimensions = [float(value) for value in phase2["trigger"]["dimensions"]]
+                trigger_minimum = [
+                    trigger_center[axis] - trigger_dimensions[axis] / 2.0 for axis in range(3)
+                ]
+                trigger_maximum = [
+                    trigger_center[axis] + trigger_dimensions[axis] / 2.0 for axis in range(3)
+                ]
+                assert all(
+                    float(contained_oobb["minimum"][axis]) >= trigger_minimum[axis] - 1e-3
+                    and float(contained_oobb["maximum"][axis]) <= trigger_maximum[axis] + 1e-3
+                    for axis in range(3)
+                ), {
+                    "reason": "Contains event fired before the live D-Series OOBB was inside",
+                    "oobb": contained_oobb,
+                    "trigger_minimum": trigger_minimum,
+                    "trigger_maximum": trigger_maximum,
+                }
+                active_wash_state = await _wait_for_wash_system_state(runtime, bng, active=True)
+                assert int(active_wash_state["subject_count"]) >= 1
 
                 hold_anchor = _structured(
                     await session.call_tool("vehicle_state", {"vehicle_id": TRUCK_ID})
@@ -693,6 +821,8 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 )
                 assert reset["ok"] is True
                 await _step(session, 3)
+                final_wash_state = await _wait_for_wash_system_state(runtime, bng, active=False)
+                assert int(final_wash_state["subject_count"]) == 0
                 stopped = _structured(
                     await session.call_tool("scenario_control", {"action": "stop"})
                 )
@@ -703,13 +833,21 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 cleanup_owned_beamng_session(bng, owned_process=owned_process)
                 owned_process_cleaned = True
 
-                run_records = [
+                session_records = [
                     record
                     for record in _tagged_records(log_path)
+                    if int(record.get("session", 0)) == session_number
+                ]
+                run_records = [
+                    record
+                    for record in session_records
                     if record.get("run") == trigger_record["run"]
                 ]
-                event_names = [str(record.get("event")) for record in run_records]
+                event_names = [str(record.get("event")) for record in session_records]
                 required_order = [
+                    "wash_trigger_enter",
+                    "wash_systems_start",
+                    "containment_verified",
                     "trigger_enter",
                     "hold_start",
                     "countdown_3",
@@ -723,6 +861,19 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 cursor = -1
                 for event in required_order:
                     cursor = event_names.index(event, cursor + 1)
+                containment_record = next(
+                    record
+                    for record in run_records
+                    if record.get("event") == "containment_verified"
+                )
+                assert containment_record["trigger_mode"] == "Contains"
+                wash_start_record = next(
+                    record
+                    for record in session_records
+                    if record.get("event") == "wash_systems_start"
+                )
+                assert int(wash_start_record["mister_count"]) == EXPECTED_MISTER_COUNT
+                assert wash_start_record["mister_emitter"] == "BNGP_sprinkler"
                 countdown = {
                     str(record["event"]): float(record["elapsed_time_seconds"])
                     for record in run_records
@@ -739,9 +890,18 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 )
                 assert sum(event == "launch" for event in event_names) == 1
                 assert _cannon_error_lines(log_path) == []
+                wash_telemetry = {
+                    "launch_trigger": trigger_scene_state["launch"],
+                    "activation_trigger": trigger_scene_state["wash"],
+                    "contained_vehicle_oobb": contained_oobb,
+                    "initial": initial_wash_state,
+                    "active_on_entry": active_wash_state,
+                    "final": final_wash_state,
+                }
                 if phase4_telemetry is not None:
                     phase4_telemetry["countdown_elapsed_seconds"] = countdown
                     phase4_telemetry["ordered_lua_events"] = event_names
+                    phase4_telemetry["wash_systems"] = wash_telemetry
                     phase4_telemetry["lua_errors"] = []
                     telemetry_path = tmp_path / "cannon_car_wash_phase4_telemetry.json"
                     telemetry_path.write_text(
@@ -749,6 +909,19 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                         encoding="utf-8",
                     )
                     print("CANNON_PHASE4_TELEMETRY " + json.dumps(phase4_telemetry, sort_keys=True))
+                else:
+                    print(
+                        "CANNON_PHASE3_TELEMETRY "
+                        + json.dumps(
+                            {
+                                "ordered_lua_events": event_names,
+                                "wash_systems": wash_telemetry,
+                                "countdown_elapsed_seconds": countdown,
+                                "lua_errors": [],
+                            },
+                            sort_keys=True,
+                        )
+                    )
         finally:
             try:
                 if bng is not None and not normal_disconnect:

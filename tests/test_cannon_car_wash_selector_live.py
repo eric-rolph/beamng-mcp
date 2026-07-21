@@ -63,6 +63,49 @@ def _selector_error_lines(log_path: Path) -> list[str]:
     ]
 
 
+async def _shell_snapshot(runtime: Any, vehicle: Any) -> dict[str, Any]:
+    """Read every live shell node so transient flex cannot hide in the ref node."""
+
+    payload = await runtime.simulator._call(
+        vehicle.queue_lua_command,
+        "local nodes = {}; local maxSpeed = 0; "
+        "for nodeId = 0, obj:getNodeCount() - 1 do "
+        "local position = obj:getNodePosition(nodeId); "
+        "local velocity = obj:getNodeVelocityVector(nodeId); "
+        "local speed = velocity:length(); "
+        "if speed > maxSpeed then maxSpeed = speed end; "
+        "nodes[#nodes + 1] = {"
+        "id = nodeId, "
+        "position = {position.x, position.y, position.z}, "
+        "velocity = {velocity.x, velocity.y, velocity.z}, "
+        "speed_mps = speed"
+        "}; "
+        "end; "
+        "return jsonEncode({nodes = nodes, max_node_speed_mps = maxSpeed})",
+        True,
+    )
+    snapshot = json.loads(payload)
+    assert len(snapshot["nodes"]) == 77
+    return snapshot
+
+
+def _maximum_shell_displacement(
+    baseline: dict[str, Any],
+    observed: dict[str, Any],
+) -> float:
+    baseline_positions = {
+        int(node["id"]): [float(value) for value in node["position"]] for node in baseline["nodes"]
+    }
+    observed_positions = {
+        int(node["id"]): [float(value) for value in node["position"]] for node in observed["nodes"]
+    }
+    assert observed_positions.keys() == baseline_positions.keys()
+    return max(
+        math.dist(baseline_positions[node_id], observed_positions[node_id])
+        for node_id in baseline_positions
+    )
+
+
 @pytest.mark.beamng_live
 @pytest.mark.asyncio
 async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: Path) -> None:
@@ -244,12 +287,18 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                 topology = json.loads(
                     await runtime.simulator._call(
                         prop_vehicle.queue_lua_command,
-                        "local mass = 0; "
+                        "local mass = 0; local fixedNodes = 0; "
                         "for nodeId = 0, obj:getNodeCount() - 1 do "
                         "mass = mass + obj:getNodeMass(nodeId); "
                         "end; "
+                        "for _, node in pairs(v.data.nodes or {}) do "
+                        "if type(node) == 'table' and node.fixed == true then "
+                        "fixedNodes = fixedNodes + 1; "
+                        "end; "
+                        "end; "
                         "return jsonEncode({"
                         "node_count = obj:getNodeCount(), "
+                        "fixed_node_count = fixedNodes, "
                         "beam_count = obj:getBeamCount(), "
                         "triangle_count = tableSize(v.data.triangles or {}), "
                         "flexbody_count = tableSize(v.data.flexbodies or {}), "
@@ -260,11 +309,13 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                     )
                 )
                 assert topology["node_count"] == 77
+                assert topology["fixed_node_count"] == 77
                 assert topology["beam_count"] == 322
                 assert topology["triangle_count"] == 144
                 assert topology["flexbody_count"] == 1
                 assert topology["total_mass_kg"] == pytest.approx(14875.0, rel=1e-5)
                 assert topology["vehicle_directory"] == "/vehicles/cannon_car_wash/"
+                initial_shell = await _shell_snapshot(runtime, prop_vehicle)
 
                 stepped = _structured(
                     await session.call_tool("simulation_control", {"action": "step", "steps": 120})
@@ -275,9 +326,15 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                 )
                 settled_position = [float(value) for value in settled["position"]]
                 settled_velocity = [float(value) for value in settled["velocity"]]
+                settled_shell = await _shell_snapshot(runtime, prop_vehicle)
+                settling_shell_displacement = _maximum_shell_displacement(
+                    initial_shell, settled_shell
+                )
                 assert settled["model"] == MODEL_ID
-                assert math.dist(settled_position, initial_position) <= 0.05
-                assert math.sqrt(sum(value * value for value in settled_velocity)) <= 0.05
+                assert math.dist(settled_position, initial_position) <= 0.005
+                assert math.sqrt(sum(value * value for value in settled_velocity)) <= 0.01
+                assert settling_shell_displacement <= 0.005
+                assert float(settled_shell["max_node_speed_mps"]) <= 0.01
                 assert 0.0 <= settled_position[2] - EXPECTED_SURFACE_Z <= 0.5
 
                 ai_disabled = _structured(
@@ -339,18 +396,37 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                 assert injected == {"ok": True, "velocity_x_mps": 30}
 
                 contact_samples: list[dict[str, Any]] = []
+                prop_contact_samples: list[dict[str, Any]] = []
                 step_schedule = ([1] * 30) + ([3] * 40)
-                for steps in step_schedule:
+                cumulative_steps = 0
+                for sample_index, steps in enumerate(step_schedule):
                     _structured(
                         await session.call_tool(
                             "simulation_control", {"action": "step", "steps": steps}
                         )
                     )
+                    cumulative_steps += steps
                     contact_samples.append(
                         _structured(
                             await session.call_tool("vehicle_state", {"vehicle_id": TRUCK_ID})
                         )
                     )
+                    if (
+                        sample_index < 20
+                        or sample_index % 5 == 0
+                        or sample_index == len(step_schedule) - 1
+                    ):
+                        prop_state = _structured(
+                            await session.call_tool("vehicle_state", {"vehicle_id": PROP_ID})
+                        )
+                        prop_contact_samples.append(
+                            {
+                                "physics_step": cumulative_steps,
+                                "position": [float(value) for value in prop_state["position"]],
+                                "velocity": [float(value) for value in prop_state["velocity"]],
+                                "shell": await _shell_snapshot(runtime, prop_vehicle),
+                            }
+                        )
 
                 truck_positions = [
                     [float(value) for value in sample["position"]] for sample in contact_samples
@@ -363,6 +439,21 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                 maximum_world_x = max(position[0] for position in truck_positions)
                 final_truck_position = truck_positions[-1]
                 final_truck_velocity = truck_velocities[-1]
+                maximum_prop_ref_displacement = max(
+                    math.dist(settled_position, sample["position"])
+                    for sample in prop_contact_samples
+                )
+                maximum_prop_ref_speed = max(
+                    math.sqrt(sum(value * value for value in sample["velocity"]))
+                    for sample in prop_contact_samples
+                )
+                maximum_contact_shell_displacement = max(
+                    _maximum_shell_displacement(settled_shell, sample["shell"])
+                    for sample in prop_contact_samples
+                )
+                maximum_contact_shell_speed = max(
+                    float(sample["shell"]["max_node_speed_mps"]) for sample in prop_contact_samples
+                )
                 collision_metrics = {
                     "peak_positive_velocity_x_mps": peak_positive_velocity,
                     "minimum_post_impact_velocity_x_mps": minimum_post_impact_velocity,
@@ -371,15 +462,26 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                     "final_truck_position": final_truck_position,
                     "final_truck_velocity_mps": final_truck_velocity,
                     "sample_count": len(contact_samples),
+                    "prop_rigidity": {
+                        "sample_count": len(prop_contact_samples),
+                        "maximum_ref_displacement_m": maximum_prop_ref_displacement,
+                        "maximum_ref_speed_mps": maximum_prop_ref_speed,
+                        "maximum_shell_node_displacement_m": (maximum_contact_shell_displacement),
+                        "maximum_shell_node_speed_mps": maximum_contact_shell_speed,
+                    },
                 }
                 assert peak_positive_velocity >= 20.0, collision_metrics
                 assert maximum_world_x <= settled_position[0] + 4.5, collision_metrics
                 assert minimum_post_impact_velocity <= 5.0, collision_metrics
                 assert final_truck_position[0] <= settled_position[0] + 4.5, collision_metrics
+                assert maximum_prop_ref_displacement <= 0.005, collision_metrics
+                assert maximum_prop_ref_speed <= 0.01, collision_metrics
+                assert maximum_contact_shell_displacement <= 0.005, collision_metrics
+                assert maximum_contact_shell_speed <= 0.01, collision_metrics
                 post_contact_prop = _structured(
                     await session.call_tool("vehicle_state", {"vehicle_id": PROP_ID})
                 )
-                assert post_contact_prop["position"] == pytest.approx(settled_position, abs=0.05)
+                assert post_contact_prop["position"] == pytest.approx(settled_position, abs=0.005)
 
                 vehicles = _structured(await session.call_tool("vehicle_list", {}))
                 assert any(
@@ -417,6 +519,10 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                             "initial_position": initial_position,
                             "settled_position": settled_position,
                             "settled_velocity_mps": settled_velocity,
+                            "settling_rigidity": {
+                                "maximum_shell_node_displacement_m": (settling_shell_displacement),
+                                "maximum_shell_node_speed_mps": settled_shell["max_node_speed_mps"],
+                            },
                             "collision_contact": {
                                 "injected_velocity_x_mps": injected["velocity_x_mps"],
                                 **collision_metrics,

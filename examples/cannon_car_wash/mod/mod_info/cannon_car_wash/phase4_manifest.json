@@ -49,7 +49,7 @@
       ]
     },
     "impact_face_y": -133.0,
-    "distance_after_trigger_center_m": 29.65
+    "distance_after_trigger_center_m": 32.0
   },
   "telemetry": {
     "sensors": [
@@ -65,6 +65,9 @@
     "minimum_launch_speed_kph": 300.0,
     "minimum_damage_delta": 1.0,
     "maximum_post_crash_speed_fraction": 0.5,
+    "require_wash_systems_on_before_launch": true,
+    "require_full_containment_event": true,
+    "require_wash_systems_off_after_exit": true,
     "lua_errors": 0
   }
 }

@@ -8,16 +8,20 @@ so they cannot leak into the packed archive.
 
 1. **Blender asset:** `blender/create_cannon_car_wash.py` repeatably rebuilds the `.blend`, Z-up
    Collada, material file, and geometry manifest. The checked-in PNG is the validated authoring
-   preview. The manifest records the exact trigger bounds and drive axis used by every later phase.
+   preview. The manifest records the exact trigger bounds, twelve Blender-authored mister positions,
+   and drive axis used by every later phase.
 2. **Engine setup:** `phase2_manifest.json` fixes the Gridmap V2 asset origin, grounded D-Series
-   spawn, exact `BeamNGTrigger` center/scale, and world `+Y` drive direction.
+   spawn, full-bay wash-cycle trigger, fully-contained launch trigger, and world `+Y` drive direction.
 3. **Lua behavior:** `phase3_manifest.json` describes the exact trigger/vehicle identity checks,
-   real-time job-system countdown, hold/release sequence, and 100 m/s forward velocity injection.
+   trigger-controlled ambient rollers and `BNGP_sprinkler` misters, real-time job-system countdown,
+   fail-closed effect updates, same-frame trigger deferral, hold/release sequence, and 100 m/s
+   forward velocity injection.
 4. **Impact telemetry:** `phase4_manifest.json` fixes the concrete wall bounds and State,
    Electrics, Damage, and log assertions. The latest live result is in
    [`telemetry/cannon_car_wash_phase4_results.json`](telemetry/cannon_car_wash_phase4_results.json).
 5. **Vehicle-selector prop:** `vehicles/cannon_car_wash` exposes the structure as a standard
-   `Type: Prop` model with a fixed-base JBeam, collision triangles, a multi-material flexbody,
+   `Type: Prop` model with a fully fixed infrastructure JBeam, collision triangles, a multi-material
+   flexbody,
    `Standard` configuration, and model/configuration thumbnails. The latest catalog, topology,
    mass, and stability result is in
    [`telemetry/cannon_car_wash_selector_results.json`](telemetry/cannon_car_wash_selector_results.json).
@@ -48,10 +52,12 @@ python .\examples\cannon_car_wash\build_selector_prop.py
 ```
 
 The selector export rotates both its visual and cage 180 degrees around Z. This preserves Z-up
-while mapping the Blender scene's `+Y` drive direction to BeamNG vehicle-forward `-Y`. The trigger
-helper and `Colmesh-*` objects are intentionally excluded: the prop supplies JBeam collision, while
-the cannon countdown/launch trigger remains part of the packaged Gridmap V2 scenario. Re-run the
-asset and Lua contract tests after any geometry change:
+while mapping the Blender scene's `+Y` drive direction to BeamNG vehicle-forward `-Y`. Every selector
+JBeam node is fixed so the building behaves like installed infrastructure rather than a flexible vehicle;
+the heavier floor-edge nodes remain the foundation classification. The trigger helpers and `Colmesh-*`
+objects are intentionally excluded: the prop supplies JBeam collision, while wash-cycle effects and the
+cannon countdown/launch behavior remain part of the packaged Gridmap V2 scenario. Re-run the asset and
+Lua contract tests after any geometry change:
 
 ```powershell
 python -m pytest -q `
@@ -75,8 +81,10 @@ python -m pytest -q -s .\tests\test_cannon_car_wash_phase4_live.py
 python -m pytest -q -s .\tests\test_cannon_car_wash_selector_live.py
 ```
 
-The Phase 4 test prints one `CANNON_PHASE4_TELEMETRY` JSON record. It fails on an ungrounded spawn,
-slow or misaligned launch, missing wall collision, insufficient structural damage/deceleration,
+The Phase 3 and Phase 4 gates also verify that the twelve misters and ambient roller sequence are off
+before entry, on while the truck occupies the wash, and off after exit. The Phase 4 test prints one
+`CANNON_PHASE4_TELEMETRY` JSON record. It fails on an ungrounded spawn, premature (not fully contained)
+launch, slow or misaligned launch, missing wall collision, insufficient structural damage/deceleration,
 countdown drift, duplicate launch, or tagged Lua error.
 
 ## Package and install
