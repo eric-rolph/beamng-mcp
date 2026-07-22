@@ -119,16 +119,16 @@
     {
       "name": "ericrolph_cannon_car_wash_sign.color.png",
       "width": 2048,
-      "height": 512,
+      "height": 1024,
       "mode": "RGB",
-      "sha256": "c6cdb1cae914f04449ef5366dc0322ac03e67371dd2cfd0f6511d32d95694530"
+      "sha256": "18f8f7ae9dda46d1444ca5e7d25a309a415084472d639be2bf00790fc974a545"
     },
     {
       "name": "ericrolph_cannon_car_wash_sign_emissive.data.png",
       "width": 2048,
-      "height": 512,
+      "height": 1024,
       "mode": "RGB",
-      "sha256": "719b44e71458333cdfef2eab81d4fd6cef1a4ae5fbdd0255362639bfdfd81f97"
+      "sha256": "c97cdb020fc2be47111885d7f4d2d688b9c99e4f80ee301e23660bd04661ea2e"
     },
     {
       "name": "ericrolph_cannon_car_wash_wet_concrete.color.png",

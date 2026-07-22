@@ -3,7 +3,7 @@
   "title": "Cannon Car Wash",
   "internal_name": "ericrolph_cannon_car_wash",
   "stable_zip_filename": "cannon_car_wash_ericrolph.zip",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "type": "Other",
   "author": "Eric Rolph",
   "tag_line": "Water, layered air drying, full repair, then a 360 km/h launch",
@@ -13,7 +13,7 @@
     "Scenarios",
     "Props"
   ],
-  "update_summary": "Visual overhaul: metric-true procedural CMU, ivory-buff brick, and corrugated PBR tiles (life-size blocks instead of miniature tiling), a redesigned 2048x512 tower-mounted cabinet sign with cannonball badge, DIN lockup, tagline pill, and cannon finial, new parapet/coping, pilasters, wainscot, clearance bar, menu monument, bollards, exit accents, and rooftop equipment, plus a cyclic ambient animation flag so the rollers keep spinning the entire time any vehicle is in the wash.",
+  "update_summary": "Real punched window openings with recessed glass and stainless frames replace the old interior glass panels, and a backlit FIRING TABLE wash-menu monument (THE DUD through MUZZLE VELOCITY) plus an exit thank-you strip join the v1.9 visual overhaul: metric-true PBR masonry, the tower-mounted cabinet sign with cannon finial, modern site furniture, and rollers that keep spinning for the whole occupancy window.",
   "gallery_images": [
     "images/01_exterior.png",
     "images/02_wash_active.png"
@@ -34,8 +34,8 @@
   },
   "release_artifact": {
     "filename": "cannon_car_wash_ericrolph.zip",
-    "sha256": "99bf1cbdea559b659c3ab5ae35ef371ce50b1c6f1ce2ab52d89222d977860ce0",
-    "size_bytes": 27515825,
+    "sha256": "71bde42e198c8539e5f73593b5c3e86410e07ef99b61b8f10b52eb2eeaf5da62",
+    "size_bytes": 29900006,
     "member_count": 40
   },
   "release_validation": {
@@ -118,7 +118,7 @@
     "scenario_effect_count": 16,
     "scenario_light_count": 7,
     "scenario_material_count": 18,
-    "scenario_dae_triangle_count": 14680,
+    "scenario_dae_triangle_count": 13830,
     "scenario_dae_primitive_group_count": 34,
     "selector_runtime_rendered_effects": true,
     "selector_runtime_repair_reset_callbacks_consumed": true,
