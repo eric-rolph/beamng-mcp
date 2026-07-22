@@ -192,11 +192,20 @@ under `telemetry/`.
 - `sync_scenario_outputs.py` synchronizes all three Blender-authored trigger transforms plus the
   particle layers into the Phase 2 manifest and scenario prefab. Never update only one generated
   trigger copy or hand-patch runtime geometry independently of the Blender handoff.
-- The v1.8 visual export is deliberately bounded: the scenario DAE is 10,714 triangles across 33
-  primitive groups and 18 materials; the consolidated selector DAE is 10,666 triangles across 18
+- The v1.9 visual export is deliberately bounded: the scenario DAE is 14,680 triangles across 34
+  primitive groups and 18 materials; the consolidated selector DAE is 14,632 triangles across 18
   groups. Its separate vehicle-local runtime DAE retains five independently animated brush
   channels. Vertical brushes use 16 alpha-tested radial cards and the overhead brush uses 14;
-  collision remains on the simple authored shell. The public runtime contains 22 BeamNG-cooked DDS
+  collision remains on the simple authored shell. The exported `ambient` animation clip carries an
+  explicit `<extra><technique profile="Torque"><cyclic>1</cyclic>` flag — Torque-derived Collada
+  loaders default explicit clips to non-cyclic, which froze the rollers after one 2.54 s
+  revolution; the flag keeps them looping for the whole reference-counted occupancy window. The
+  entrance sign is a tower-mounted cabinet (face card at local `[0, -9.639, 4.90]` on a raised
+  fascia, stainless retainer, cannon finial) with a 2048x512 atlas; architectural details
+  (parapet/coping, pilasters, wainscot, clearance bar, menu monument, bollards, exit accents,
+  rooftop equipment) reuse the existing 18 materials and stay outside the drive envelope. The
+  masonry/corrugated tiles are metric-true procedural textures; only wet concrete keeps a photo
+  source. The public runtime contains 22 BeamNG-cooked DDS
   textures and no authoring PNGs. Blender's `.blend` file uses numeric preview materials; the two
   namespaced `main.materials.json` files and in-game BeamNG inspection are the PBR authority.
 - Seven Blender-authored light anchors are synchronized into both lifecycles: five shadowless
@@ -311,11 +320,14 @@ live gates:
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_distribution_live.py
 ```
 
-The v1.8 release lock is 40 members, 23,754,854 bytes, SHA-256
-`bdd54a270311fbc5b3d6ffb46022c0fac0474225b355e106f85260e50fd9d583`. It is recorded in
+The v1.9 release lock is 40 members, 27,515,825 bytes, SHA-256
+`99bf1cbdea559b659c3ab5ae35ef371ce50b1c6f1ce2ab52d89222d977860ce0`. It is recorded in
 `repository/submission.json` and the exact distribution live test. A runtime-byte or builder-policy
 change requires an intentional metadata update, rebuild, new hash lock, and complete distribution
-rerun.
+rerun. The v1.9 lock has passed the static distribution gate plus an isolated selector-runtime
+smoke (asset/material/light/effect resolution, occupancy, repair, launch, cyclic rollers); the
+four-cold-start release matrix must still be rerun before a Repository upload refreshes
+`release_validation`.
 
 Ship only content authored here or content with documented redistribution permission. Never copy
 BeamNG proprietary meshes, maps, textures, or JBeam reference files into the repository or mod.

@@ -3,7 +3,7 @@
   "title": "Cannon Car Wash",
   "internal_name": "ericrolph_cannon_car_wash",
   "stable_zip_filename": "cannon_car_wash_ericrolph.zip",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "type": "Other",
   "author": "Eric Rolph",
   "tag_line": "Water, layered air drying, full repair, then a 360 km/h launch",
@@ -13,7 +13,7 @@
     "Scenarios",
     "Props"
   ],
-  "update_summary": "Preserved and corridor-aligned vehicle pose through midpoint repair, replaced block brushes with optimized alpha-card fans, added authored CMU/brick/wet-concrete/corrugated PBR textures, emissive signage, tunnel and entrance lighting, and strengthened cooked-texture and incremental Lua-log validation.",
+  "update_summary": "Visual overhaul: metric-true procedural CMU, ivory-buff brick, and corrugated PBR tiles (life-size blocks instead of miniature tiling), a redesigned 2048x512 tower-mounted cabinet sign with cannonball badge, DIN lockup, tagline pill, and cannon finial, new parapet/coping, pilasters, wainscot, clearance bar, menu monument, bollards, exit accents, and rooftop equipment, plus a cyclic ambient animation flag so the rollers keep spinning the entire time any vehicle is in the wash.",
   "gallery_images": [
     "images/01_exterior.png",
     "images/02_wash_active.png"
@@ -34,8 +34,8 @@
   },
   "release_artifact": {
     "filename": "cannon_car_wash_ericrolph.zip",
-    "sha256": "bdd54a270311fbc5b3d6ffb46022c0fac0474225b355e106f85260e50fd9d583",
-    "size_bytes": 23754854,
+    "sha256": "99bf1cbdea559b659c3ab5ae35ef371ce50b1c6f1ce2ab52d89222d977860ce0",
+    "size_bytes": 27515825,
     "member_count": 40
   },
   "release_validation": {
@@ -118,8 +118,8 @@
     "scenario_effect_count": 16,
     "scenario_light_count": 7,
     "scenario_material_count": 18,
-    "scenario_dae_triangle_count": 10714,
-    "scenario_dae_primitive_group_count": 33,
+    "scenario_dae_triangle_count": 14680,
+    "scenario_dae_primitive_group_count": 34,
     "selector_runtime_rendered_effects": true,
     "selector_runtime_repair_reset_callbacks_consumed": true,
     "selector_runtime_prop_reset_recovered": true,
