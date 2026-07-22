@@ -185,9 +185,9 @@ def test_selector_runtime_creates_tracks_and_cleans_authored_scene_lights() -> N
     runtime = GE_RUNTIME.read_text(encoding="utf-8")
     lighting = LIGHTING_RUNTIME.read_text(encoding="utf-8")
     assert 'require("common/ericrolph_cannon_car_wash/lighting")' in runtime
-    assert lighting.count('class = "PointLight"') == 5
-    assert lighting.count('class = "SpotLight"') == 2
-    assert lighting.count(f'name = "{MOD_ID}_light_anchor_') == 7
+    assert lighting.count('class = "PointLight"') == 9
+    assert lighting.count('class = "SpotLight"') == 4
+    assert lighting.count(f'name = "{MOD_ID}_light_anchor_') == 13
     create_light = _function_section(runtime, "createLight")
     synchronize = _function_section(runtime, "synchronizeTransforms")
     cleanup = _function_section(runtime, "cleanupInstallation")

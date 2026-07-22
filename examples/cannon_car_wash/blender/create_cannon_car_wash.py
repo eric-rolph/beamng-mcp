@@ -751,7 +751,23 @@ def lighting_specs() -> list[dict[str, Any]]:
                 "class": "PointLight",
                 "local_position": [0.0, y, 4.34],
                 "color": [0.56, 0.82, 1.0],
-                "brightness": 1.25,
+                "brightness": 3.2,
+                "radius": 5.6,
+                "cast_shadows": False,
+            }
+        )
+    # Warm-white task fill on the piers between the windows: real express
+    # tunnels pair a cool accent row with brighter neutral wall washers so the
+    # brushes and vehicles read at night instead of silhouetting.
+    for index, (x, y) in enumerate(((-2.7, -4.6), (2.7, -4.6), (-2.7, 4.6), (2.7, 4.6)), start=1):
+        anchors.append(
+            {
+                "name": namespaced_object_name(f"light_anchor_wall_{index:02d}"),
+                "role": "tunnel_wall_task_fill",
+                "class": "PointLight",
+                "local_position": [x, y, 3.9],
+                "color": [0.92, 0.96, 1.0],
+                "brightness": 2.4,
                 "radius": 4.4,
                 "cast_shadows": False,
             }
@@ -765,8 +781,26 @@ def lighting_specs() -> list[dict[str, Any]]:
                 "local_position": [x, -8.72, 4.08],
                 "local_direction": [0.0, -0.97, -0.24],
                 "color": [0.1, 0.64, 1.0],
-                "brightness": 1.8,
-                "range": 7.5,
+                "brightness": 3.0,
+                "range": 9.0,
+                "inner_angle_degrees": 28.0,
+                "outer_angle_degrees": 48.0,
+                "cast_shadows": False,
+            }
+        )
+    # The exit mirrors the entrance pair so departing vehicles and the
+    # thank-you strip are lit instead of falling into shadow.
+    for side_name, x in (("left", -1.9), ("right", 1.9)):
+        anchors.append(
+            {
+                "name": namespaced_object_name(f"light_anchor_exit_{side_name}"),
+                "role": "exit_spill",
+                "class": "SpotLight",
+                "local_position": [x, 8.72, 4.08],
+                "local_direction": [0.0, 0.97, -0.24],
+                "color": [0.1, 0.64, 1.0],
+                "brightness": 3.0,
+                "range": 9.0,
                 "inner_angle_degrees": 28.0,
                 "outer_angle_degrees": 48.0,
                 "cast_shadows": False,
@@ -1181,6 +1215,16 @@ def build_details() -> None:
         for y in (-6.8, -3.4, 0.0, 3.4, 6.8)
     ]
     join_static_meshes("CeilingLights", ceiling_lights)
+    # Emissive wall-pack fixtures on the window piers give the four warm-white
+    # task-fill anchors a visible source.
+    for index, (side, y) in enumerate(((-1.0, -4.6), (1.0, -4.6), (-1.0, 4.6), (1.0, 4.6)), 1):
+        add_box(
+            f"WallPack_{index:02d}",
+            (side * 3.03, y, 3.95),
+            (0.10, 0.30, 0.12),
+            light,
+            bevel=0.0,
+        )
 
     exterior_cmu = material(
         scenario_material_name("exterior_cmu"), (0.32, 0.34, 0.36, 1.0), roughness=0.88

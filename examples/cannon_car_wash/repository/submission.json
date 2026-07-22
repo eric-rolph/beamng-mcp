@@ -3,7 +3,7 @@
   "title": "Cannon Car Wash",
   "internal_name": "ericrolph_cannon_car_wash",
   "stable_zip_filename": "cannon_car_wash_ericrolph.zip",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "type": "Other",
   "author": "Eric Rolph",
   "tag_line": "Water, layered air drying, full repair, then a 360 km/h launch",
@@ -13,7 +13,7 @@
     "Scenarios",
     "Props"
   ],
-  "update_summary": "Real punched window openings with recessed glass and stainless frames replace the old interior glass panels, and a backlit FIRING TABLE wash-menu monument (THE DUD through MUZZLE VELOCITY) plus an exit thank-you strip join the v1.9 visual overhaul: metric-true PBR masonry, the tower-mounted cabinet sign with cannon finial, modern site furniture, and rollers that keep spinning for the whole occupancy window.",
+  "update_summary": "Interior lighting pass: the rig grows from seven to thirteen shadowless lights (brighter cool-blue ceiling row, four warm-white wall task-fill points with emissive wall-pack fixtures, mirrored exit spotlights) and fixes a long-standing bug where light radius/range collapsed to one meter because the engine links light extent to object scale - the tunnel, entrance, and exit are now genuinely illuminated at night.",
   "gallery_images": [
     "images/01_exterior.png",
     "images/02_wash_active.png"
@@ -34,8 +34,8 @@
   },
   "release_artifact": {
     "filename": "cannon_car_wash_ericrolph.zip",
-    "sha256": "71bde42e198c8539e5f73593b5c3e86410e07ef99b61b8f10b52eb2eeaf5da62",
-    "size_bytes": 29900006,
+    "sha256": "1168cbd637959c238714ecd3813597b53049a9c6690416fc7858f4c8c273f2b0",
+    "size_bytes": 29920753,
     "member_count": 40
   },
   "release_validation": {
@@ -80,7 +80,7 @@
     },
     "selector_runtime_effect_count": 16,
     "selector_runtime_material_count": 18,
-    "selector_runtime_light_count": 7,
+    "selector_runtime_light_count": 13,
     "selector_runtime_emitter_counts": {
       "BNGP_sprinkler": 6,
       "BNGP_waterfallsteam": 6,
@@ -116,7 +116,7 @@
     "scenario_impact_damage_delta": 14162682.0,
     "scenario_impact_part_damage_count": 45,
     "scenario_effect_count": 16,
-    "scenario_light_count": 7,
+    "scenario_light_count": 13,
     "scenario_material_count": 18,
     "scenario_dae_triangle_count": 13830,
     "scenario_dae_primitive_group_count": 34,

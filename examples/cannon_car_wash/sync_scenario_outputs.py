@@ -242,11 +242,11 @@ def main() -> None:
 
     light_anchors = geometry["lighting"]["anchors"]
     if (
-        len(light_anchors) != 7
-        or len({anchor["name"] for anchor in light_anchors}) != 7
-        or Counter(anchor["class"] for anchor in light_anchors) != {"PointLight": 5, "SpotLight": 2}
+        len(light_anchors) != 13
+        or len({anchor["name"] for anchor in light_anchors}) != 13
+        or Counter(anchor["class"] for anchor in light_anchors) != {"PointLight": 9, "SpotLight": 4}
     ):
-        raise ValueError("Blender evidence must define five point and two spot light anchors")
+        raise ValueError("Blender evidence must define nine point and four spot light anchors")
     light_records: list[dict[str, Any]] = []
     synchronized_lights: list[dict[str, Any]] = []
     for anchor in light_anchors:
@@ -271,8 +271,10 @@ def main() -> None:
             "texSize": 256,
             "canSave": "1",
             "canSaveDynamicFields": "1",
+            # Stock BeamNG level lights never persist a scale field: the
+            # engine links light extent to object scale, so a serialized
+            # 1,1,1 scale can clobber the authored radius/range at load.
             "position": world_position,
-            "scale": [1.0, 1.0, 1.0],
         }
         evidence = dict(anchor)
         evidence["world_position"] = world_position
@@ -336,7 +338,7 @@ def main() -> None:
     phase2["lighting"] = {
         "coordinate_space": geometry["lighting"]["coordinate_space"],
         "light_count": len(synchronized_lights),
-        "class_counts": {"PointLight": 5, "SpotLight": 2},
+        "class_counts": {"PointLight": 9, "SpotLight": 4},
         "lights": synchronized_lights,
     }
     PHASE2_PATH.write_text(

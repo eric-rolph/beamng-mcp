@@ -612,7 +612,7 @@ def test_cannon_car_wash_repository_metadata_and_icon() -> None:
 
     assert repository_info["internal_name"] == MOD_ID
     assert repository_info["title"] == "Cannon Car Wash"
-    assert repository_info["version"] == "1.10.0"
+    assert repository_info["version"] == "1.11.0"
     assert repository_info["author"] == "Eric Rolph"
 
     with Image.open(MOD_ICON_PATH) as icon:
@@ -684,7 +684,7 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
     prefab_source = SCENARIO_PREFAB_PATH.read_text(encoding="utf-8")
     prefab_records = [json.loads(line) for line in prefab_source.splitlines() if line.strip()]
     prefab = {record["name"]: record for record in prefab_records}
-    assert len(prefab_records) == 30
+    assert len(prefab_records) == 36
     assert prefab[SCENARIO_GROUP_NAME]["class"] == "SimGroup"
 
     visual = prefab[SCENARIO_VISUAL_NAME]
@@ -763,13 +763,13 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
         for name, record in prefab.items()
         if record["class"] in {"PointLight", "SpotLight"}
     }
-    assert len(light_specs) == len(phase2_lights) == len(lights) == 7
+    assert len(light_specs) == len(phase2_lights) == len(lights) == 13
     assert set(light_specs) == set(phase2_lights) == set(lights)
     assert Counter(spec["class"] for spec in light_specs.values()) == {
-        "PointLight": 5,
-        "SpotLight": 2,
+        "PointLight": 9,
+        "SpotLight": 4,
     }
-    assert phase2["lighting"]["class_counts"] == {"PointLight": 5, "SpotLight": 2}
+    assert phase2["lighting"]["class_counts"] == {"PointLight": 9, "SpotLight": 4}
     for name, light in lights.items():
         spec = light_specs[name]
         expected_position = [

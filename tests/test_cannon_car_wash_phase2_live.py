@@ -51,7 +51,7 @@ LAUNCH_TRIGGER_ID = f"{MOD_ID}_launch_trigger"
 WASH_TRIGGER_ID = f"{MOD_ID}_wash_activation_trigger"
 REPAIR_TRIGGER_ID = f"{MOD_ID}_repair_trigger"
 EXPECTED_EFFECT_COUNT = 16
-EXPECTED_LIGHT_COUNT = 7
+EXPECTED_LIGHT_COUNT = 13
 EXPECTED_EMITTER_COUNTS = {
     "BNGP_sprinkler": 6,
     "BNGP_waterfallsteam": 6,
