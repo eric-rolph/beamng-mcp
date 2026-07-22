@@ -1,48 +1,11 @@
 {
-  "schema_version": 1,
-  "verified_on": "2026-07-21",
-  "result": "passed",
-  "test": "tests/test_cannon_car_wash_selector_live.py",
-  "runtime_test": "tests/test_cannon_car_wash_selector_runtime_live.py",
-  "runtime": {
-    "beamng_drive": "0.38.6",
-    "beamngpy": "1.35.1",
-    "profile": "sentinel-isolated"
-  },
   "catalog": {
+    "default_configuration": "standard",
     "model": "ericrolph_cannon_car_wash",
     "name": "Cannon Car Wash",
-    "type": "Prop",
-    "default_configuration": "standard"
-  },
-  "topology": {
-    "node_count": 79,
-    "fixed_node_count": 79,
-    "engine_collision_mode_3_count": 8,
-    "beam_count": 329,
-    "triangle_count": 144,
-    "flexbody_count": 1,
-    "total_mass_kg": 15125,
-    "vehicle_directory": "/vehicles/ericrolph_cannon_car_wash/"
-  },
-  "stability": {
-    "deterministic_steps": 120,
-    "requested_spawn_position": [-110.0, -170.0, 100.35],
-    "initial_position": [-110.0, -170.0, 99.99999237060547],
-    "settled_position": [-110.0, -170.0, 99.99999237060547],
-    "settled_velocity_mps": [0.0, 0.0, 0.0],
-    "rigidity": {
-      "maximum_shell_node_displacement_m": 0.0,
-      "maximum_shell_node_speed_mps": 0.0
-    }
+    "type": "Prop"
   },
   "collision_contact": {
-    "vehicle": "ericrolph_cannon_car_wash_truck",
-    "injected_velocity_x_mps": 30.0,
-    "peak_positive_velocity_x_mps": 29.55270767211914,
-    "minimum_post_impact_velocity_x_mps": -0.41943395137786865,
-    "wall_world_x": -106.9,
-    "maximum_world_x": -108.08724442124367,
     "final_truck_position": [
       -108.73361938144171,
       -170.26923342426835,
@@ -53,203 +16,67 @@
       -0.002081809099763632,
       -0.0016744467429816723
     ],
+    "injected_velocity_x_mps": 30.0,
+    "maximum_world_x": -108.08724442124367,
+    "minimum_post_impact_velocity_x_mps": -0.41943395137786865,
+    "peak_positive_velocity_x_mps": 29.55270767211914,
     "prop_position_after_contact": [
       -110.0,
       -170.0,
       99.99999237060547
     ],
-    "sample_count": 70,
     "rigidity": {
       "maximum_ref_displacement_m": 0.0,
       "maximum_ref_speed_mps": 0.0,
       "maximum_shell_node_displacement_m": 0.0,
       "maximum_shell_node_speed_mps": 0.0,
       "sample_count": 31
-    }
+    },
+    "sample_count": 70,
+    "vehicle": "ericrolph_cannon_car_wash_truck",
+    "wall_world_x": -106.9
   },
+  "result": "passed",
+  "runtime": {
+    "beamng_drive": "0.38.6",
+    "beamngpy": "1.35.1",
+    "profile": "sentinel-isolated"
+  },
+  "runtime_test": "tests/test_cannon_car_wash_selector_runtime_live.py",
+  "schema_version": 1,
+  "selector_asset_errors": [],
   "selector_runtime": {
-    "mode": "selector_prop",
-    "level": "smallgrid",
-    "runtime_log_schema_version": 2,
-    "subject": {
-      "model": "citybus",
-      "configuration": "city",
-      "arbitrary_vehicle_support": true,
-      "approach_lateral_offset_m": -0.65,
-      "approach_lateral_offset_magnitude": 0.65,
-      "approach_yaw_offset_degrees": 2.0
+    "cleanup": {
+      "loaded": false,
+      "runtime_object_count": 0
     },
-    "grounding": {
-      "surface_z": 0.0,
-      "requested_prop_spawn_z": 0.0,
-      "reported_ground_origin_z": 0.0,
-      "acceptance_tolerance_m": 0.03
+    "countdown_log_elapsed_seconds": [
+      0.0,
+      1.0155600000000007,
+      2.0322300000000055,
+      3.1828200000000066
+    ],
+    "countdown_structured_elapsed_seconds": [
+      0.0,
+      1.0150577,
+      2.0317298
+    ],
+    "effect_active_count": 16,
+    "emitter_active_counts": {
+      "BNGP_2": 2,
+      "BNGP_34": 2,
+      "BNGP_sprinkler": 6,
+      "BNGP_waterfallsteam": 6
     },
-    "runtime_objects": {
-      "animated_visual_present": true,
-      "animated_visual_path": "/vehicles/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash_runtime_visual.dae",
-      "animated_visual_coordinate_space": "vehicle_local",
-      "wash_trigger": {
-        "class": "BeamNGTrigger",
-        "mode": "Overlaps",
-        "test_type": "Bounding box"
-      },
-      "repair_trigger": {
-        "class": "BeamNGTrigger",
-        "mode": "Overlaps",
-        "test_type": "Bounding box",
-        "local_center": [0.0, 0.0, 2.1],
-        "dimensions": [5.4, 2.2, 4.2]
-      },
-      "launch_trigger": {
-        "class": "BeamNGTrigger",
-        "mode": "Contains",
-        "test_type": "Bounding box",
-        "local_center": [0.0, 0.0, 2.1],
-        "dimensions": [5.8, 17.5, 4.6]
-      },
-      "effect_present_count": 16,
-      "emitter_present_counts": {
-        "BNGP_sprinkler": 6,
-        "BNGP_waterfallsteam": 6,
-        "BNGP_34": 2,
-        "BNGP_2": 2
-      },
-      "rotated_effect_orientation": {
-        "yaw_degrees": 90,
-        "minimum_inward_dot": 0.99999999999998,
-        "present_count": 16,
-        "left_right_pair_count": 8
-      },
-      "material_count": 18,
-      "light_count": 7,
-      "animation_sequences": ["ambient"]
-    },
-    "wash_activation": {
-      "roller_sequence": "ambient",
-      "roller_play_ambient_enabled": true,
-      "effect_active_count": 16,
-      "emitter_active_counts": {
-        "BNGP_sprinkler": 6,
-        "BNGP_waterfallsteam": 6,
-        "BNGP_34": 2,
-        "BNGP_2": 2
-      },
-      "rendered_frame_evidence": {
-        "resolution": [640, 360],
-        "changed_pixels": 120832,
-        "pixel_count": 230400,
-        "changed_pixel_ratio": 0.5244444444444445,
-        "channel_difference_means": [
-          28.380243055555557,
-          27.508172743055557,
-          25.40080295138889
-        ]
-      },
-      "occupancy_reference_count": {
-        "two": {
-          "subject_count": 2,
-          "wash_active": true,
-          "effect_active_count": 16
-        },
-        "one": {
-          "subject_count": 1,
-          "wash_active": true,
-          "effect_active_count": 16
-        },
-        "zero": {
-          "subject_count": 0,
-          "wash_active": false,
-          "effect_active_count": 0
-        }
-      }
-    },
-    "countdown_event_elapsed_seconds": {
-      "countdown_3": 0.0,
-      "countdown_2": 1.0138007,
-      "countdown_1": 2.0305162
-    },
-    "go_after_countdown_3_seconds": 3.21532000000001,
-    "timing_sources": {
-      "countdown_events": "structured runtime event elapsed_time_seconds",
-      "go": "BeamNG file-log timestamp delta from countdown_3"
-    },
-    "launch": {
-      "target_speed_mps": 100.0,
-      "commanded_velocity_mps": [
-        -0.18179895337203,
-        -99.987614888081,
-        1.5632716121599
-      ],
-      "commanded_speed_mps": 100.0,
-      "sensor_peak_persisted": false,
-      "exit_reason": "wash_trigger_exit_after_launch"
-    },
-    "launch_containment": {
-      "ok": true,
-      "center": [0.0, 0.0, 2.0999999046326],
-      "scale": [5.8000001907349, 17.5, 4.5999999046326],
-      "vehicle_min": [-1.6626304388046, -3.9365832805634, 0.04554295539856],
-      "vehicle_max": [1.4709901809692, 8.7068452835083, 3.0779292583466]
-    },
-    "reset_recovery": {
-      "repair_reset_callbacks_consumed": true,
-      "prop_reset_count": 5,
-      "unexpected_abort_count": 0
-    },
-    "repair": {
-      "requests_per_pass": 1,
-      "before": {
-        "damage": 1100.0,
-        "part_damage_count": 1,
-        "broken_beam_count": 3,
-        "deflated_tire_count": 1
-      },
-      "after": {
-        "damage": 0.0,
-        "part_damage_count": 0,
-        "broken_beam_count": 0,
-        "deflated_tire_count": 0,
-        "position_drift_m": 0.0043196832906604,
-        "direction_dot": 0.99999573401305,
-        "centerline_error_before_m": 0.43114733695984,
-        "centerline_error_m": 0.00079983472824097,
-        "alignment_translation_m": 0.7704204737998,
-        "corridor_direction_dot": 0.99999573401305,
-        "upright_dot": 0.99999550695098,
-        "travel_direction_dot": 0.99638558919562,
-        "travel_sign": 1,
-        "travel_sign_preserved": true,
-        "pose_correction_attempts": 1,
-        "controller_frozen": false
-      },
-      "pre_midpoint": {
-        "damage": 1100.0,
-        "part_damage_count": 1,
-        "broken_beam_count": 3,
-        "deflated_tire_count": 1
-      },
-      "midpoint_local_center": [0.0, 0.0, 2.1]
-    },
-    "pre_go_integrity": {
-      "baseline_damage": 0.0,
-      "maximum_damage_delta": 0.0,
-      "part_damage_count": 0,
-      "broken_beam_count": 0,
-      "deflated_tire_count": 0,
-      "sample_count": 33,
-      "countdown_controller_frozen": true,
-      "release_grace_controller_unfrozen": true
-    },
-    "final_ordered_lua_events": [
+    "final_events": [
       "repair_trigger_enter",
       "repair_hold_ack",
       "repair_snapshot",
       "repair_requested",
       "repair_reset_ack",
       "repair_pose_restore_ack",
-      "repair_trigger_exit",
       "repair_pose_correction_requested",
+      "repair_trigger_exit",
       "repair_pose_restore_ack",
       "repair_release_requested",
       "repair_release_ack",
@@ -277,13 +104,441 @@
       "extension_unload_attempt",
       "extension_unloaded"
     ],
-    "cleanup": {
-      "prop_unregistered": true,
-      "extension_loaded_after_prop_despawn": false,
-      "runtime_object_count_after_prop_despawn": 0,
-      "unexpected_abort_event_present": false
+    "launch_containment": {
+      "center": [
+        0,
+        0,
+        2.0999999046326
+      ],
+      "ok": true,
+      "scale": [
+        5.8000001907349,
+        17.5,
+        4.5999999046326
+      ],
+      "vehicle_max": [
+        1.5608630180359,
+        8.7422685623169,
+        3.079313993454
+      ],
+      "vehicle_min": [
+        -1.5744812488556,
+        -3.9020056724548,
+        0.042747974395752
+      ]
     },
-    "runtime_namespace_log_issues": []
+    "level": "smallgrid",
+    "log_issues": [],
+    "material_count": 18,
+    "occupancy_reference_count": {
+      "one": {
+        "effect_active_count": 16,
+        "subject_count": 1,
+        "wash_active": true
+      },
+      "two": {
+        "effect_active_count": 16,
+        "subject_count": 2,
+        "wash_active": true
+      },
+      "zero": {
+        "effect_active_count": 0,
+        "subject_count": 0,
+        "wash_active": false
+      }
+    },
+    "ordered_launch_events": [
+      "hold_requested",
+      "hold_ack",
+      "countdown_3",
+      "countdown_2",
+      "countdown_1",
+      "release_requested",
+      "release_ack",
+      "go",
+      "launch"
+    ],
+    "peak_speed_mps": 100.0000026047282,
+    "peak_velocity_mps": [
+      -0.18179894983768463,
+      -99.98761749267578,
+      1.5632716417312622
+    ],
+    "pre_go_integrity": {
+      "baseline_damage": 0.0,
+      "broken_beam_count": 0,
+      "countdown_controller_frozen": true,
+      "deflated_tire_count": 0,
+      "maximum_damage_delta": 0.0,
+      "observed_phases": [
+        "countdown",
+        "release_grace"
+      ],
+      "part_damage_count": 0,
+      "release_grace_controller_unfrozen": true,
+      "sample_count": 33
+    },
+    "prop_reset_count": 3,
+    "render_difference": {
+      "changed_pixel_ratio": 0.366796875,
+      "changed_pixels": 84510,
+      "channel_means": [
+        12.404466145833334,
+        12.01294704861111,
+        11.380251736111111
+      ],
+      "pixel_count": 230400
+    },
+    "repair": {
+      "after": {
+        "alignment_translation_m": 0.7704204737998,
+        "broken_beam_count": 0,
+        "centerline_error_before_m": 0.43114733695984,
+        "centerline_error_m": 0.00079983472824097,
+        "corridor_direction_dot": 0.99999573401305,
+        "damage": 0.0,
+        "deflated_tire_count": 0,
+        "direction_dot": 0.99999573401305,
+        "part_damage_count": 0,
+        "position_drift_m": 0.0043196832906604,
+        "travel_direction_dot": 0.99638558919562,
+        "travel_sign": 1,
+        "travel_sign_preserved": true,
+        "upright_dot": 0.99999550695098
+      },
+      "before": {
+        "broken_beam_count": 3,
+        "damage": 1100.0,
+        "deflated_tire_count": 1,
+        "part_damage_count": 1
+      },
+      "external_after": {
+        "broken_beam_count": 0,
+        "controller_frozen": false,
+        "damage": 0.0,
+        "deflated_tire_count": 0,
+        "part_damage": [],
+        "part_damage_count": 0
+      },
+      "independent_pose_readback": {
+        "centerline_error_m": 0.00096356868743896,
+        "corridor_direction_dot": 0.99999577749098,
+        "repair_frame_sample_count": 5,
+        "travel_direction_dot": 0.9982583034551721,
+        "upright_dot": 0.99999570570348
+      },
+      "induced_beams": [
+        {
+          "cid": 0,
+          "part": "/citybus_frame/citybus_frame"
+        },
+        {
+          "cid": 1,
+          "part": "/citybus_frame/citybus_frame"
+        },
+        {
+          "cid": 2,
+          "part": "/citybus_frame/citybus_frame"
+        }
+      ],
+      "ordered_events": [
+        "repair_trigger_enter",
+        "repair_snapshot",
+        "repair_requested",
+        "repair_reset_ack",
+        "repair_complete"
+      ],
+      "pending_observed": true,
+      "pre_midpoint_integrity": {
+        "broken_beam_count": 3,
+        "controller_frozen": true,
+        "damage": 1100.0,
+        "deflated_tire_count": 1,
+        "part_damage": [
+          {
+            "damage": 0.54054054054054,
+            "name": "Standard Frame",
+            "part_name": "/citybus_frame/citybus_frame"
+          }
+        ],
+        "part_damage_count": 1
+      },
+      "pre_midpoint_pose": {
+        "bounding_center": [
+          -0.34060251712799,
+          14.809661865234,
+          1.4981846809387
+        ],
+        "direction": [
+          -0.057235318810509,
+          -0.99828355882002,
+          -0.012411868122317
+        ],
+        "maximum_z": 3.1674604415894,
+        "minimum_z": -0.17109107971191,
+        "ok": true,
+        "position": [
+          -1.0927456617355,
+          10.085357666016,
+          0.22870683670044
+        ],
+        "up": [
+          -0.062940191383413,
+          -0.0087994797403388,
+          0.99797850751653
+        ]
+      },
+      "token": 1
+    },
+    "rotated_effect_orientation": {
+      "minimum_inward_dot": 0.99999999999998,
+      "present_count": 16,
+      "rotation_quaternion": [
+        0,
+        0,
+        0.7071067811865476,
+        0.7071067811865476
+      ],
+      "samples": [
+        {
+          "expected_emitter": "BNGP_sprinkler",
+          "left": "mister_PreSoak_L_1",
+          "left_axis": [
+            3.4228549133567e-08,
+            0.99999999999998,
+            2.0281594864855e-07
+          ],
+          "left_emitter": "BNGP_sprinkler",
+          "left_inward_dot": 0.99999999999998,
+          "left_to_right": [
+            0,
+            1,
+            0
+          ],
+          "right": "mister_PreSoak_R_1",
+          "right_axis": [
+            -3.4228549133567e-08,
+            -0.99999999999998,
+            2.0281594864855e-07
+          ],
+          "right_emitter": "BNGP_sprinkler",
+          "right_inward_dot": 0.99999999999998
+        },
+        {
+          "expected_emitter": "BNGP_sprinkler",
+          "left": "mister_PreSoak_L_2",
+          "left_axis": [
+            3.4228549133567e-08,
+            0.99999999999998,
+            2.0281594864855e-07
+          ],
+          "left_emitter": "BNGP_sprinkler",
+          "left_inward_dot": 0.99999999999998,
+          "left_to_right": [
+            0,
+            1,
+            0
+          ],
+          "right": "mister_PreSoak_R_2",
+          "right_axis": [
+            -3.4228549133567e-08,
+            -0.99999999999998,
+            2.0281594864855e-07
+          ],
+          "right_emitter": "BNGP_sprinkler",
+          "right_inward_dot": 0.99999999999998
+        },
+        {
+          "expected_emitter": "BNGP_sprinkler",
+          "left": "mister_PreSoak_L_3",
+          "left_axis": [
+            3.4228549133567e-08,
+            0.99999999999998,
+            2.0281594864855e-07
+          ],
+          "left_emitter": "BNGP_sprinkler",
+          "left_inward_dot": 0.99999999999998,
+          "left_to_right": [
+            0,
+            1,
+            0
+          ],
+          "right": "mister_PreSoak_R_3",
+          "right_axis": [
+            -3.4228549133567e-08,
+            -0.99999999999998,
+            2.0281594864855e-07
+          ],
+          "right_emitter": "BNGP_sprinkler",
+          "right_inward_dot": 0.99999999999998
+        },
+        {
+          "expected_emitter": "BNGP_waterfallsteam",
+          "left": "dryer_Mist_L_1",
+          "left_axis": [
+            3.4228549133567e-08,
+            0.99999999999998,
+            2.0281594864855e-07
+          ],
+          "left_emitter": "BNGP_waterfallsteam",
+          "left_inward_dot": 0.99999999999998,
+          "left_to_right": [
+            9.0999469928087e-08,
+            1,
+            0
+          ],
+          "right": "dryer_Mist_R_1",
+          "right_axis": [
+            -3.4228549133567e-08,
+            -0.99999999999998,
+            2.0281594864855e-07
+          ],
+          "right_emitter": "BNGP_waterfallsteam",
+          "right_inward_dot": 0.99999999999998
+        },
+        {
+          "expected_emitter": "BNGP_waterfallsteam",
+          "left": "dryer_Mist_L_2",
+          "left_axis": [
+            3.4228549133567e-08,
+            0.99999999999998,
+            2.0281594864855e-07
+          ],
+          "left_emitter": "BNGP_waterfallsteam",
+          "left_inward_dot": 0.99999999999998,
+          "left_to_right": [
+            9.0999469928087e-08,
+            1,
+            0
+          ],
+          "right": "dryer_Mist_R_2",
+          "right_axis": [
+            -3.4228549133567e-08,
+            -0.99999999999998,
+            2.0281594864855e-07
+          ],
+          "right_emitter": "BNGP_waterfallsteam",
+          "right_inward_dot": 0.99999999999998
+        },
+        {
+          "expected_emitter": "BNGP_waterfallsteam",
+          "left": "dryer_Mist_L_3",
+          "left_axis": [
+            3.4228549133567e-08,
+            0.99999999999998,
+            2.0281594864855e-07
+          ],
+          "left_emitter": "BNGP_waterfallsteam",
+          "left_inward_dot": 0.99999999999998,
+          "left_to_right": [
+            9.0999469928087e-08,
+            1,
+            0
+          ],
+          "right": "dryer_Mist_R_3",
+          "right_axis": [
+            -3.4228549133567e-08,
+            -0.99999999999998,
+            2.0281594864855e-07
+          ],
+          "right_emitter": "BNGP_waterfallsteam",
+          "right_inward_dot": 0.99999999999998
+        },
+        {
+          "expected_emitter": "BNGP_34",
+          "left": "dryer_Steam_L",
+          "left_axis": [
+            3.4228549133567e-08,
+            0.99999999999998,
+            2.0281594864855e-07
+          ],
+          "left_emitter": "BNGP_34",
+          "left_inward_dot": 0.99999999999998,
+          "left_to_right": [
+            9.0999469928087e-08,
+            1,
+            0
+          ],
+          "right": "dryer_Steam_R",
+          "right_axis": [
+            -3.4228549133567e-08,
+            -0.99999999999998,
+            2.0281594864855e-07
+          ],
+          "right_emitter": "BNGP_34",
+          "right_inward_dot": 0.99999999999998
+        },
+        {
+          "expected_emitter": "BNGP_2",
+          "left": "dryer_Dust_L",
+          "left_axis": [
+            3.4228549133567e-08,
+            0.99999999999998,
+            2.0281594864855e-07
+          ],
+          "left_emitter": "BNGP_2",
+          "left_inward_dot": 0.99999999999998,
+          "left_to_right": [
+            9.0999469928087e-08,
+            1,
+            0
+          ],
+          "right": "dryer_Dust_R",
+          "right_axis": [
+            -3.4228549133567e-08,
+            -0.99999999999998,
+            2.0281594864855e-07
+          ],
+          "right_emitter": "BNGP_2",
+          "right_inward_dot": 0.99999999999998
+        }
+      ]
+    },
+    "sequence_names": [
+      "ambient"
+    ],
+    "subject_configuration": "city",
+    "subject_model": "citybus",
+    "surface_z": 0.0,
+    "target_speed_mps": 100.0
   },
-  "selector_asset_errors": []
+  "stability": {
+    "deterministic_steps": 120,
+    "initial_position": [
+      -110.0,
+      -170.0,
+      99.99999237060547
+    ],
+    "requested_spawn_position": [
+      -110.0,
+      -170.0,
+      100.35
+    ],
+    "rigidity": {
+      "maximum_shell_node_displacement_m": 0.0,
+      "maximum_shell_node_speed_mps": 0.0
+    },
+    "settled_position": [
+      -110.0,
+      -170.0,
+      99.99999237060547
+    ],
+    "settled_velocity_mps": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "test": "tests/test_cannon_car_wash_selector_live.py",
+  "topology": {
+    "beam_count": 329,
+    "engine_collision_mode_3_count": 8,
+    "fixed_node_count": 79,
+    "flexbody_count": 1,
+    "node_count": 79,
+    "total_mass_kg": 15125,
+    "triangle_count": 144,
+    "vehicle_directory": "/vehicles/ericrolph_cannon_car_wash/"
+  },
+  "verified_on": "2026-07-22T10:58:00-06:00"
 }
