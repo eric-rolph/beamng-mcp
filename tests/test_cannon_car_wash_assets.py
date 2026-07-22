@@ -302,6 +302,11 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
     }
     assert len(animation_ids) == 5
     assert clip_targets == animation_ids
+    cyclic = ambient.find(
+        "c:extra/c:technique[@profile='Torque']/c:cyclic",
+        COLLADA_NAMESPACE,
+    )
+    assert cyclic is not None and cyclic.text == "1"
 
 
 def test_cannon_car_wash_phase2_materials_cover_every_collada_slot() -> None:
@@ -324,13 +329,16 @@ def test_selector_runtime_visual_preserves_animations_and_uses_vehicle_materials
     root = ET.parse(SELECTOR_RUNTIME_DAE_PATH).getroot()  # noqa: S314 - owned fixture
     channels = root.findall(".//c:library_animations//c:channel", COLLADA_NAMESPACE)
     assert len(channels) == 5
-    assert (
-        root.find(
-            "c:library_animation_clips/c:animation_clip[@name='ambient']",
-            COLLADA_NAMESPACE,
-        )
-        is not None
+    runtime_ambient = root.find(
+        "c:library_animation_clips/c:animation_clip[@name='ambient']",
+        COLLADA_NAMESPACE,
     )
+    assert runtime_ambient is not None
+    runtime_cyclic = runtime_ambient.find(
+        "c:extra/c:technique[@profile='Torque']/c:cyclic",
+        COLLADA_NAMESPACE,
+    )
+    assert runtime_cyclic is not None and runtime_cyclic.text == "1"
 
     runtime_materials = {
         material.attrib["name"]
@@ -604,7 +612,7 @@ def test_cannon_car_wash_repository_metadata_and_icon() -> None:
 
     assert repository_info["internal_name"] == MOD_ID
     assert repository_info["title"] == "Cannon Car Wash"
-    assert repository_info["version"] == "1.8.0"
+    assert repository_info["version"] == "1.9.0"
     assert repository_info["author"] == "Eric Rolph"
 
     with Image.open(MOD_ICON_PATH) as icon:

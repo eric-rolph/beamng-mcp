@@ -58,7 +58,22 @@ def add_ambient_animation_clip(path: Path) -> None:
         b'      <instance_animation url="#' + animation_id + b'"/>'
         for animation_id in animation_ids
     )
-    clip_lines.extend((b"    </animation_clip>", b"  </library_animation_clips>"))
+    # Torque-derived Collada loaders read sequence flags from an <extra>
+    # technique on the clip; ColladaExtension_animation_clip defaults cyclic to
+    # false, which froze the rollers after one 2.54 s revolution even while the
+    # runtime held playAmbient enabled. The explicit flag keeps the ambient
+    # sequence looping for the whole occupancy window.
+    clip_lines.extend(
+        (
+            b"      <extra>",
+            b'        <technique profile="Torque">',
+            b"          <cyclic>1</cyclic>",
+            b"        </technique>",
+            b"      </extra>",
+            b"    </animation_clip>",
+            b"  </library_animation_clips>",
+        )
+    )
     clip = newline.join(clip_lines) + newline
     anchor = b"  <library_visual_scenes>"
     if payload.count(anchor) != 1:
@@ -1073,13 +1088,229 @@ def build_details() -> None:
     ]
     join_static_meshes("CeilingLights", ceiling_lights)
 
-    add_box("EntranceSign_Back", (0.0, -9.245, 4.28), (5.15, 0.08, 1.35), rubber, bevel=0.025)
-    sign = add_sign_face((0.0, -9.288, 4.28), (4.8, 1.2), sign_face)
+    exterior_cmu = material(
+        scenario_material_name("exterior_cmu"), (0.32, 0.34, 0.36, 1.0), roughness=0.88
+    )
+    corrugated_blue = material(
+        scenario_material_name("corrugated_blue"),
+        (0.018, 0.13, 0.34, 1.0),
+        metallic=0.0,
+        roughness=0.31,
+    )
+
+    # Entrance tower: a raised deep-blue fascia carries the cabinet sign above
+    # the roofline, replacing the old flat slab-on-header mount. The tower's
+    # z-minimum matches the existing header bottom (3.99) so the drivable
+    # opening is unchanged, and every part stays outside the building at
+    # y <= -9.25.
+    add_box("EntranceTowerFascia", (0.0, -9.32, 5.05), (7.30, 0.14, 2.10), deep_blue, bevel=0.02)
+    add_box("TowerCopingCap", (0.0, -9.32, 6.13), (7.46, 0.30, 0.06), steel, bevel=0.01)
+    add_box("Sign_Cabinet_Body", (0.0, -9.51, 4.90), (5.00, 0.25, 1.36), deep_blue, bevel=0.02)
+    add_box("Sign_Retainer_Top", (0.0, -9.652, 5.545), (4.98, 0.085, 0.09), steel, bevel=0.012)
+    add_box("Sign_Retainer_Bottom", (0.0, -9.652, 4.255), (4.98, 0.085, 0.09), steel, bevel=0.012)
+    add_box("Sign_Retainer_L", (-2.445, -9.652, 4.90), (0.09, 0.085, 1.20), steel, bevel=0.012)
+    add_box("Sign_Retainer_R", (2.445, -9.652, 4.90), (0.09, 0.085, 1.20), steel, bevel=0.012)
+    # The cannon finial is the brand landmark: a stainless barrel breaking the
+    # coping line with a hazard-yellow muzzle ring, aimed along the launch arc.
+    add_box("Sign_Cannon_Base", (1.62, -9.51, 5.65), (0.30, 0.26, 0.18), deep_blue, bevel=0.015)
+    add_cylinder(
+        "Sign_Cannon_Barrel",
+        (1.62, -9.74, 6.03),
+        0.085,
+        0.80,
+        steel,
+        rotation=(math.radians(35.0), 0.0, 0.0),
+        vertices=16,
+    )
+    add_cylinder(
+        "Sign_Cannon_Muzzle",
+        (1.62, -9.94, 6.32),
+        0.105,
+        0.09,
+        yellow,
+        rotation=(math.radians(35.0), 0.0, 0.0),
+        vertices=16,
+    )
+    for side in (-1.0, 1.0):
+        side_name = "L" if side < 0 else "R"
+        add_cylinder(
+            f"SignDownlightCan_{side_name}",
+            (side * 1.30, -9.79, 5.78),
+            0.07,
+            0.20,
+            steel,
+            rotation=(math.radians(35.0), 0.0, 0.0),
+            vertices=8,
+        )
+        add_box(
+            f"DownlightArm_{side_name}",
+            (side * 1.30, -9.585, 5.88),
+            (0.05, 0.41, 0.05),
+            steel,
+            bevel=0.0,
+        )
+    sign = add_sign_face((0.0, -9.639, 4.90), (4.8, 1.2), sign_face)
     sign["uv0_usage"] = "0..1 sign albedo/emissive atlas"
     sign["uv2_usage"] = "0..1 future sign AO"
     # The dual-layer sign atlas owns its letters and emissive halo. Separate
     # converted font meshes duplicated the label and contributed >19k export
     # triangles, so they are deliberately not part of the runtime asset.
+
+    # Parapet band and stainless coping wrap the flat roof edge; LED accent
+    # strips tuck under the fascia. Side runs embed into the tower and the
+    # exit band so no corner gap opens.
+    for side in (-1.0, 1.0):
+        side_name = "L" if side < 0 else "R"
+        add_box(
+            f"ParapetFascia_{side_name}",
+            (side * 3.46, -0.02, 4.86),
+            (0.06, 18.47, 0.62),
+            deep_blue,
+            bevel=0.0,
+        )
+        add_box(
+            f"CopingCap_{side_name}",
+            (side * 3.44, -0.025, 5.195),
+            (0.18, 18.51, 0.05),
+            steel,
+            bevel=0.01,
+        )
+        add_box(
+            f"LEDAccent_{side_name}",
+            (side * 3.465, 0.0, 4.515),
+            (0.05, 17.80, 0.07),
+            light,
+            bevel=0.0,
+        )
+    add_box("ParapetFascia_Exit", (0.0, 9.21, 4.86), (7.04, 0.06, 0.62), deep_blue, bevel=0.0)
+    add_box("CopingCap_Exit", (0.0, 9.20, 5.195), (7.10, 0.18, 0.05), steel, bevel=0.01)
+
+    # Facade rhythm: CMU pilasters between the windows, a deep-blue wainscot
+    # with a stainless drip cap, and square downspouts near the corners.
+    for side in (-1.0, 1.0):
+        side_name = "L" if side < 0 else "R"
+        for index, y in enumerate((-7.6, -4.35, -1.45, 1.45, 4.35, 7.6), start=1):
+            add_box(
+                f"Pilaster_{side_name}_{index}",
+                (side * 3.475, y, 2.305),
+                (0.16, 0.50, 4.49),
+                exterior_cmu,
+                bevel=0.0,
+                metric_uv_meters=(0.8, 0.4),
+            )
+        add_box(
+            f"Wainscot_{side_name}",
+            (side * 3.42, 0.0, 0.585),
+            (0.05, 17.20, 1.05),
+            deep_blue,
+            bevel=0.0,
+        )
+        add_box(
+            f"WainscotCap_{side_name}",
+            (side * 3.43, 0.0, 1.13),
+            (0.09, 17.20, 0.04),
+            steel,
+            bevel=0.0,
+        )
+        for end_name, y in (("F", -8.4), ("R", 8.4)):
+            add_box(
+                f"Downspout_{end_name}{side_name}",
+                (side * 3.465, y, 2.27),
+                (0.09, 0.09, 4.42),
+                steel,
+                bevel=0.0,
+            )
+
+    # Site furniture: clearance bar, menu monument, and bollards signal a
+    # commercial express wash while keeping the approach lane |x| <= 3.1 clear.
+    # The portal header soffit is the true low point at z 3.99, so the honest
+    # clearance bar hangs just below it rather than at the interior 4.48 m
+    # clear height.
+    add_box("ClearanceBar", (0.0, -11.40, 3.90), (6.90, 0.10, 0.28), yellow, bevel=0.0)
+    for side in (-1.0, 1.0):
+        side_name = "L" if side < 0 else "R"
+        add_box(
+            f"ClearancePost_{side_name}",
+            (side * 3.32, -11.40, 2.38),
+            (0.12, 0.12, 4.76),
+            steel,
+            bevel=0.0,
+        )
+        add_box(
+            f"ClearanceBase_{side_name}",
+            (side * 3.32, -11.40, 0.02),
+            (0.30, 0.30, 0.04),
+            steel,
+            bevel=0.0,
+        )
+    add_box("MenuCabinet", (-4.30, -11.20, 1.45), (1.40, 0.16, 1.90), deep_blue, bevel=0.0)
+    add_box("MenuPedestal", (-4.30, -11.20, 0.25), (1.50, 0.45, 0.50), rubber, bevel=0.0)
+    menu_screen = add_card_mesh(
+        "MenuScreen",
+        (-4.30, -11.285, 1.45),
+        [
+            (-0.60, 0.0, -0.75),
+            (0.60, 0.0, -0.75),
+            (0.60, 0.0, 0.75),
+            (-0.60, 0.0, 0.75),
+        ],
+        [(0, 1, 2, 3)],
+        screen,
+        [((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))],
+        alpha_test=False,
+    )
+    menu_screen["uv0_usage"] = "0..1 menu screen"
+    add_box("MenuTopCap", (-4.30, -11.20, 2.425), (1.50, 0.20, 0.05), steel, bevel=0.0)
+    bollard_positions = (
+        (-3.38, -9.80),
+        (3.38, -9.80),
+        (-3.38, 9.80),
+        (3.38, 9.80),
+        (-3.65, -10.90),
+        (-4.95, -10.90),
+    )
+    for index, (x, y) in enumerate(bollard_positions, start=1):
+        add_cylinder(f"Bollard_{index:02d}", (x, y, 0.50), 0.10, 1.00, orange, vertices=8)
+    for end_name, y in (("Entrance", -9.42), ("Exit", 9.42)):
+        add_box(
+            f"ThresholdStripe_{end_name}",
+            (0.0, y, 0.008),
+            (6.16, 0.60, 0.016),
+            yellow,
+            bevel=0.0,
+        )
+
+    # Exit accents and interior guard rails.
+    add_box("ThankYouPanel", (0.0, 9.26, 4.30), (3.20, 0.06, 0.50), screen, bevel=0.0)
+    for side in (-1.0, 1.0):
+        side_name = "L" if side < 0 else "R"
+        add_box(
+            f"ExitBlade_{side_name}",
+            (side * 3.625, 9.05, 2.00),
+            (0.06, 0.16, 3.50),
+            cyan,
+            bevel=0.0,
+        )
+        add_box(
+            f"TunnelGuardRail_{side_name}",
+            (side * 3.048, 0.0, 0.98),
+            (0.05, 16.80, 0.22),
+            orange,
+            bevel=0.0,
+        )
+
+    # Rooftop equipment visible along the launch arc.
+    add_box(
+        "RoofEquipScreen",
+        (1.50, 4.20, 5.36),
+        (2.60, 3.40, 0.80),
+        corrugated_blue,
+        bevel=0.0,
+        metric_uv_meters=(1.2, 1.2),
+    )
+    add_cylinder("RoofVent", (-1.80, 6.50, 5.41), 0.14, 0.90, steel, vertices=8)
+    add_box("RoofDuct", (-0.50, 5.60, 5.11), (0.30, 1.20, 0.30), steel, bevel=0.0)
+
     add_light_anchors()
 
     trigger_material = material(

@@ -90,9 +90,15 @@ normal map and weighted normals should carry sub-centimetre detail.
 The build script at `textures/build_pbr_textures.py` creates 22 power-of-two source maps. Base colour
 is saved as `*.color.png` (sRGB), tangent normals as `*.normal.png` (OpenGL Y+), and roughness, AO,
 and opacity as grayscale `*.data.png` (linear). The sign emissive RGB map is also linear
-`*.data.png`. The source-image normals and AO are conservative luminance-derived approximations,
-not scans or authored height fields; a future material upgrade should replace them with measured or
-hand-authored height information and rerun the same cook validation.
+`*.data.png`. The CMU, interior-brick, and corrugated tiles are drawn procedurally at true metric
+scale — the CMU tile is exactly two 390 x 190 mm blocks per course over 0.8 x 0.4 m, the ivory-buff
+brick tile is six 190 x 65 mm modular bricks across eight courses over 1.2 x 0.6 m, and the
+corrugated tile carries six 0.2 m-pitch trapezoidal ribs — with wrap-periodic cell hashing so every
+tile is seamless by construction rather than mirrored. Their normal and AO maps derive from a real
+metric height field (mortar recess, arris rounding, rib profile), not a luminance guess. Only the
+wet-concrete floor still starts from a photo source; it is made seamless with an offset cross-fade
+plus periodic value noise, and its tile-edge saw-cut joints land on the 2 x 2 m UV grid so the whole
+floor reads as jointed slabs.
 
 Each material uses only relevant maps. Masonry, concrete, and factory-painted corrugated steel are
 dielectric at the paint surface, so they use `metallicFactor: 0.0` and omit metallic maps. Bare
@@ -174,7 +180,8 @@ padded non-overlapping unwrap. Do not bake a directional lamp or sun into base c
 
 ### Texture cooking
 
-1. Keep the four source images under `textures/source/` and rebuild the 22 PNG authoring maps once.
+1. Keep the wet-concrete source image under `textures/source/` and rebuild the 22 PNG authoring
+   maps once; the masonry, corrugated, brush, and sign maps are fully procedural.
 2. Install the unpacked development mod into the sentinel BeamNG profile.
 3. Start one visual asset session and allow the game to cook the complete batch.
 4. Check `beamng.log` for texture-cooker errors.
@@ -188,11 +195,20 @@ padded non-overlapping unwrap. Do not bake a directional lamp or sun into base c
 
 ## 3. Signage and lighting entity setup
 
-The sign is dual-layered:
+The sign is a tower-mounted cabinet package, all outside the building at y <= -9.25 so the drive
+envelope is untouched:
 
-1. A shallow sign cabinet and UV-mapped face use the sign base-colour map.
-2. The same face uses a separate emissive mask and restrained HDR factor. Emission makes the letters
-   visible and drives bloom, but does not cast useful light on vehicles or asphalt.
+1. A raised deep-blue entrance tower fascia (7.30 x 0.14 x 2.10 m, z 4.00-6.10, its bottom matching
+   the existing header soffit) carries a 5.00 x 0.25 x 1.36 m cabinet, a stainless retainer frame
+   wrapping the 4.8 x 1.2 m UV-mapped face at (0, -9.639, 4.90), two stainless downlight cans on
+   arms, and a stainless cannon-barrel finial with a hazard-yellow muzzle ring breaking the coping
+   line along the launch arc. The face uses the 2048x512 sign atlas: circular cannonball-comet
+   badge, "CANNON" (Bahnschrift Bold Condensed) beside "WASH" (SemiLight Condensed), and a
+   safety-orange "WASH · WAX · LAUNCH" tagline pill.
+2. The same face uses a separate emissive mask and restrained HDR factor that lights only the
+   graphic elements — letters, badge, and the pill with knocked-out dark text — so the night read
+   is channel-lit signage on a dark panel. Emission drives bloom but does not cast useful light on
+   vehicles or asphalt.
 3. Two namespaced SpotLights at the entrance provide real illumination. Their exact production
    transforms and settings are listed below; both remain shadowless in this release.
 
@@ -222,8 +238,8 @@ lights left behind after deleting the selector prop.
 These are project budgets, not claimed engine limits. The current measured baseline is the primary
 regression target:
 
-- scenario DAE: 10,714 rendered triangles, 33 geometry/primitive groups, 18 materials;
-- consolidated selector DAE: 10,666 rendered triangles and 18 primitive/material groups;
+- scenario DAE: 14,680 rendered triangles, 34 geometry/primitive groups, 18 materials;
+- consolidated selector DAE: 14,632 rendered triangles and 18 primitive/material groups;
 - separate vehicle-local animated DAE: retain five independently animated brush channels rather
   than joining them into an unanimated static draw;
 - whole visible LOD0 hard gate: at or below 15,000 rendered triangles;
@@ -235,7 +251,7 @@ regression target:
 - each LOD should roughly halve both triangles and material count;
 - tileable CMU, brick, concrete, and corrugated sets: 1K in this release; move to 2K only after a
   measured close-up shows 1K is insufficient;
-- brush atlas: 512; sign: 1024x256; small prop atlas: 512–1K;
+- brush atlas: 512; sign: 2048x512; small prop atlas: 512–1K;
 - use grayscale BC4-ready data maps and BC5-ready normal maps rather than RGB where one/two channels
   suffice;
 - avoid 4K textures, a light per fluorescent tube, overlapping translucent puddles, and individual
