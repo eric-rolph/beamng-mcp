@@ -192,9 +192,12 @@ under `telemetry/`.
 - `sync_scenario_outputs.py` synchronizes all three Blender-authored trigger transforms plus the
   particle layers into the Phase 2 manifest and scenario prefab. Never update only one generated
   trigger copy or hand-patch runtime geometry independently of the Blender handoff.
-- The v1.9 visual export is deliberately bounded: the scenario DAE is 14,680 triangles across 34
-  primitive groups and 18 materials; the consolidated selector DAE is 14,632 triangles across 18
-  groups. Its separate vehicle-local runtime DAE retains five independently animated brush
+- The v1.10 visual export is deliberately bounded: the scenario DAE is 13,830 triangles across 34
+  primitive groups and 18 materials; the consolidated selector DAE is 13,782 triangles across 18
+  groups. Five real window openings per side are boolean-cut through the walls and liners with
+  wall bounds (and therefore the cage) unchanged. The 2048x1024 signage atlas carries the entrance
+  sign in its top half plus the FIRING TABLE menu board and exit thank-you strip below, all on the
+  single sign_face material. Its separate vehicle-local runtime DAE retains five independently animated brush
   channels. Vertical brushes use 16 alpha-tested radial cards and the overhead brush uses 14;
   collision remains on the simple authored shell. The exported `ambient` animation clip carries an
   explicit `<extra><technique profile="Torque"><cyclic>1</cyclic>` flag — Torque-derived Collada
@@ -320,14 +323,14 @@ live gates:
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_distribution_live.py
 ```
 
-The v1.9 release lock is 40 members, 27,515,825 bytes, SHA-256
-`99bf1cbdea559b659c3ab5ae35ef371ce50b1c6f1ce2ab52d89222d977860ce0`. It is recorded in
+The v1.10 release lock is 40 members, 29,900,006 bytes, SHA-256
+`71bde42e198c8539e5f73593b5c3e86410e07ef99b61b8f10b52eb2eeaf5da62`. It is recorded in
 `repository/submission.json` and the exact distribution live test. A runtime-byte or builder-policy
 change requires an intentional metadata update, rebuild, new hash lock, and complete distribution
-rerun. The v1.9 lock has passed the static distribution gate plus an isolated selector-runtime
-smoke (asset/material/light/effect resolution, occupancy, repair, launch, cyclic rollers); the
-four-cold-start release matrix must still be rerun before a Repository upload refreshes
-`release_validation`.
+rerun. The v1.10 lock has passed the static distribution gate plus an isolated selector-runtime
+smoke (asset/material/light/effect resolution, occupancy, cyclic rollers, window and menu
+rendering); the four-cold-start release matrix must still be rerun before a Repository upload
+refreshes `release_validation`.
 
 Ship only content authored here or content with documented redistribution permission. Never copy
 BeamNG proprietary meshes, maps, textures, or JBeam reference files into the repository or mod.

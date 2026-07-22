@@ -565,7 +565,7 @@ def _sign_logo(draw: ImageDraw.ImageDraw, *, emissive: bool) -> None:
         draw.ellipse((cx - r, cy - r, cx + r, cy + r), fill=droplet_fill)
 
 
-def _build_sign(output_root: Path) -> list[Path]:
+def _draw_sign_panel() -> tuple[Image.Image, Image.Image]:
     """Modern express-wash sign lockup: badge, DIN two-weight wordmark, tagline.
 
     The colour layer reads as a framed cabinet face by day; the emissive layer
@@ -657,6 +657,186 @@ def _build_sign(output_root: Path) -> list[Path]:
     tagline_x = 1280.0 - tagline_width / 2.0
     _tracked_text([(colour_draw, (16, 20, 34))], tagline_x, 422.0, _SIGN_TAGLINE, tagline_font, 6.0)
     _tracked_text([(emissive_draw, (0, 0, 0))], tagline_x, 422.0, _SIGN_TAGLINE, tagline_font, 6.0)
+
+    return colour, emissive
+
+
+# FIRING TABLE menu copy: express-wash tier structure delivered in artillery
+# deadpan. Lower tiers pointedly do not launch you; the flagship does, and it
+# is of course the most popular. Written for a smart six-year-old and a wise
+# fifty-one-year-old at the same time.
+_MENU_TITLE = "FIRING TABLE"
+_MENU_TIERS: Final = (
+    ("THE DUD", "Soap, rinse, dry. Does not go off.", "$3", False),
+    ("THE MISFIRE", "Wash & wax. Departure still voluntary.", "$6", False),
+    ("HALF CHARGE", "Repairs your car, then gently fires it.", "$12", False),
+    ("MUZZLE VELOCITY", "Full powder. Exit at 360 km/h. GO.", "$24", True),
+)
+_MENU_FINE_PRINT = (
+    "Do not exit vehicle. The vehicle will exit.",
+    "Landing is the customer's responsibility.",
+)
+_THANKS_LINE = "THANK YOU! COME BACK DOWN SOON."
+
+
+def _draw_menu_panel() -> tuple[Image.Image, Image.Image]:
+    """Backlit FIRING TABLE menu board for the entrance-lane monument."""
+
+    width, height = 416, 512
+    colour = Image.new("RGB", (width, height), (6, 14, 32))
+    emissive = Image.new("RGB", (width, height), (0, 0, 0))
+    colour_draw = ImageDraw.Draw(colour)
+    emissive_draw = ImageDraw.Draw(emissive)
+
+    colour_draw.rectangle((4, 4, width - 5, height - 5), outline=(0, 150, 220), width=3)
+    emissive_draw.rectangle((4, 4, width - 5, height - 5), outline=(24, 60, 110), width=3)
+
+    title_font = _sign_font("Bold Condensed", 44, "arialbd.ttf")
+    name_font = _sign_font("Bold Condensed", 30, "arialbd.ttf")
+    blurb_font = _sign_font("SemiLight", 18, "arial.ttf")
+    tag_font = _sign_font("SemiBold", 13, "arialbd.ttf")
+    fine_font = _sign_font("SemiLight", 13, "arial.ttf")
+
+    title_width = _tracked_width(colour_draw, _MENU_TITLE, title_font, 2.0)
+    title_x = (width - title_width) / 2.0
+    _tracked_text(
+        [(colour_draw, (240, 247, 255)), (emissive_draw, (225, 238, 252))],
+        title_x,
+        56.0,
+        _MENU_TITLE,
+        title_font,
+        2.0,
+    )
+    colour_draw.line((24, 70, width - 24, 70), fill=(0, 150, 220), width=2)
+    emissive_draw.line((24, 70, width - 24, 70), fill=(20, 70, 120), width=2)
+
+    for index, (name, blurb, price, most_popular) in enumerate(_MENU_TIERS):
+        row_top = 84 + index * 92
+        if most_popular:
+            colour_draw.rounded_rectangle(
+                (8, row_top - 4, width - 9, row_top + 66), radius=10, fill=(236, 98, 18)
+            )
+            emissive_draw.rounded_rectangle(
+                (8, row_top - 4, width - 9, row_top + 66), radius=10, fill=(150, 64, 14)
+            )
+            tag_width = _tracked_width(colour_draw, "MOST POPULAR", tag_font, 1.0)
+            _tracked_text(
+                [(colour_draw, (16, 20, 34)), (emissive_draw, (0, 0, 0))],
+                width - 16 - tag_width,
+                row_top + 62.0,
+                "MOST POPULAR",
+                tag_font,
+                1.0,
+            )
+            name_fill = (16, 20, 34)
+            price_fill = (16, 20, 34)
+            blurb_fill = (52, 26, 8)
+            name_glow = (0, 0, 0)
+            price_glow = (0, 0, 0)
+            blurb_glow = (0, 0, 0)
+        else:
+            name_fill = (235, 243, 252)
+            price_fill = (0, 190, 255)
+            blurb_fill = (150, 170, 195)
+            name_glow = (205, 224, 240)
+            price_glow = (70, 185, 250)
+            blurb_glow = (90, 110, 140)
+        _tracked_text(
+            [(colour_draw, name_fill), (emissive_draw, name_glow)],
+            16.0,
+            row_top + 26.0,
+            name,
+            name_font,
+            1.0,
+        )
+        price_width = _tracked_width(colour_draw, price, name_font, 1.0)
+        _tracked_text(
+            [(colour_draw, price_fill), (emissive_draw, price_glow)],
+            width - 16 - price_width,
+            row_top + 26.0,
+            price,
+            name_font,
+            1.0,
+        )
+        _tracked_text(
+            [(colour_draw, blurb_fill), (emissive_draw, blurb_glow)],
+            16.0,
+            row_top + 52.0,
+            blurb,
+            blurb_font,
+            0.0,
+        )
+
+    for line_index, line in enumerate(_MENU_FINE_PRINT):
+        line_width = _tracked_width(colour_draw, line, fine_font, 0.0)
+        _tracked_text(
+            [(colour_draw, (110, 130, 160)), (emissive_draw, (60, 80, 105))],
+            (width - line_width) / 2.0,
+            468.0 + line_index * 18.0,
+            line,
+            fine_font,
+            0.0,
+        )
+    return colour, emissive
+
+
+def _draw_thanks_strip() -> tuple[Image.Image, Image.Image]:
+    """Exit strip; at 360 km/h the driver cannot read it, which is the joke."""
+
+    width, height = 1600, 250
+    colour = Image.new("RGB", (width, height), (6, 14, 32))
+    emissive = Image.new("RGB", (width, height), (0, 0, 0))
+    colour_draw = ImageDraw.Draw(colour)
+    emissive_draw = ImageDraw.Draw(emissive)
+    colour_draw.rectangle((6, 6, width - 7, height - 7), outline=(0, 150, 220), width=4)
+    emissive_draw.rectangle((6, 6, width - 7, height - 7), outline=(24, 60, 110), width=4)
+
+    font = _sign_font("Bold Condensed", 96, "arialbd.ttf")
+    first, second = "THANK YOU! ", "COME BACK DOWN SOON."
+    first_width = _tracked_width(colour_draw, first, font, 2.0)
+    second_width = _tracked_width(colour_draw, second, font, 2.0)
+    start_x = (width - (first_width + second_width)) / 2.0
+    baseline = 158.0
+    _tracked_text(
+        [(colour_draw, (245, 250, 255)), (emissive_draw, (235, 244, 255))],
+        start_x,
+        baseline,
+        first,
+        font,
+        2.0,
+    )
+    _tracked_text(
+        [(colour_draw, (0, 190, 255)), (emissive_draw, (90, 200, 255))],
+        start_x + first_width,
+        baseline,
+        second,
+        font,
+        2.0,
+    )
+    return colour, emissive
+
+
+def _build_sign(output_root: Path) -> list[Path]:
+    """Compose the 2048x1024 signage atlas: sign, menu board, thank-you strip.
+
+    The entrance sign occupies the full top half (UV v 0.5..1); the menu board
+    and exit strip live in the bottom half so the single emissive sign_face
+    material can drive all three displays without adding a material slot.
+    """
+
+    width, height = 2048, 1024
+    colour = Image.new("RGB", (width, height), (5, 9, 20))
+    emissive = Image.new("RGB", (width, height), (0, 0, 0))
+
+    sign_colour, sign_emissive = _draw_sign_panel()
+    menu_colour, menu_emissive = _draw_menu_panel()
+    thanks_colour, thanks_emissive = _draw_thanks_strip()
+    colour.paste(sign_colour, (0, 0))
+    emissive.paste(sign_emissive, (0, 0))
+    colour.paste(menu_colour, (0, 512))
+    emissive.paste(menu_emissive, (0, 512))
+    colour.paste(thanks_colour, (448, 512))
+    emissive.paste(thanks_emissive, (448, 512))
 
     # Tasteful bloom is baked only into the emissive mask; actual illumination
     # still comes from the namespaced scene lights.

@@ -29,7 +29,12 @@ and [Blender-to-DAE pipeline](https://documentation.beamng.com/modding/levels/le
 
 ### Building surfaces
 
-- Exterior structural wall faces use `ericrolph_cannon_car_wash_exterior_cmu`.
+- Exterior structural wall faces use `ericrolph_cannon_car_wash_exterior_cmu`. Five real window
+  openings per side are boolean-cut through each wall and its liner; the cutters stay strictly
+  inside the wall bounding box, so the evaluated bounds feeding the selector cage are unchanged,
+  and the metric UVs are re-authored after the cut so the masonry maps continuously around the
+  reveals. Recessed glass and a stainless surround sit inside each opening; the simple collision
+  shell stays solid behind the glass.
 - Thin interior liners use `ericrolph_cannon_car_wash_interior_brick`; they remain inside the
   collision shell and never reduce the validated drive envelope.
 - The floor uses `ericrolph_cannon_car_wash_wet_concrete`. Wet/dry breakup primarily lives in the
@@ -238,8 +243,8 @@ lights left behind after deleting the selector prop.
 These are project budgets, not claimed engine limits. The current measured baseline is the primary
 regression target:
 
-- scenario DAE: 14,680 rendered triangles, 34 geometry/primitive groups, 18 materials;
-- consolidated selector DAE: 14,632 rendered triangles and 18 primitive/material groups;
+- scenario DAE: 13,830 rendered triangles, 34 geometry/primitive groups, 18 materials;
+- consolidated selector DAE: 13,782 rendered triangles and 18 primitive/material groups;
 - separate vehicle-local animated DAE: retain five independently animated brush channels rather
   than joining them into an unanimated static draw;
 - whole visible LOD0 hard gate: at or below 15,000 rendered triangles;
@@ -251,7 +256,8 @@ regression target:
 - each LOD should roughly halve both triangles and material count;
 - tileable CMU, brick, concrete, and corrugated sets: 1K in this release; move to 2K only after a
   measured close-up shows 1K is insufficient;
-- brush atlas: 512; sign: 2048x512; small prop atlas: 512–1K;
+- brush atlas: 512; signage atlas (entrance sign + wash-menu board + exit strip): 2048x1024;
+  small prop atlas: 512–1K;
 - use grayscale BC4-ready data maps and BC5-ready normal maps rather than RGB where one/two channels
   suffice;
 - avoid 4K textures, a light per fluorescent tube, overlapping translucent puddles, and individual

@@ -299,6 +299,50 @@ def add_cylinder(
     return obj
 
 
+def cut_rect_openings(
+    targets: list[bpy.types.Object],
+    openings: list[tuple[tuple[float, float, float], tuple[float, float, float]]],
+) -> None:
+    """Boolean-subtract shared rectangular openings from each target mesh.
+
+    Any authored modifiers (the wall edge bevel) apply first in stack order,
+    then every opening, so the final mesh is fully evaluated. Callers must
+    re-author metric UVs afterwards because boolean cut faces carry no
+    meaningful coordinates. Openings sit strictly inside each target's
+    bounding box, so the evaluated bounds that feed the selector cage are
+    unchanged.
+    """
+
+    cutters: list[bpy.types.Object] = []
+    for index, (center, dimensions) in enumerate(openings):
+        bpy.ops.mesh.primitive_cube_add(location=center)
+        cutter = bpy.context.object
+        cutter.name = f"{targets[0].name}_cutter_{index}"
+        cutter.data.name = f"{cutter.name}_mesh"
+        cutter.dimensions = dimensions
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        cutter.display_type = "WIRE"
+        cutter.hide_render = True
+        cutters.append(cutter)
+    for target in targets:
+        for index, cutter in enumerate(cutters):
+            modifier = target.modifiers.new(f"Opening_{index}", "BOOLEAN")
+            modifier.operation = "DIFFERENCE"
+            modifier.solver = "EXACT"
+            modifier.object = cutter
+        bpy.ops.object.select_all(action="DESELECT")
+        target.select_set(True)
+        bpy.context.view_layer.objects.active = target
+        for modifier in list(target.modifiers):
+            bpy.ops.object.modifier_apply(modifier=modifier.name)
+        target.select_set(False)
+    for cutter in cutters:
+        mesh = cutter.data
+        bpy.data.objects.remove(cutter, do_unlink=True)
+        if mesh.users == 0:
+            bpy.data.meshes.remove(mesh)
+
+
 def join_static_meshes(name: str, objects: list[bpy.types.Object]) -> bpy.types.Object:
     """Join one-material static details into a single exported submesh."""
 
@@ -676,6 +720,9 @@ def add_sign_face(
     half_width, half_height = dimensions[0] / 2.0, dimensions[1] / 2.0
     # Winding points toward the entrance (-Y). The BeamNG material is
     # double-sided, but deterministic front-face orientation aids previews.
+    # The 2048x1024 signage atlas dedicates its top half to the entrance sign;
+    # the bottom half carries the wash-menu board and the exit thank-you strip
+    # so one emissive material serves all three displays.
     return add_card_mesh(
         "EntranceSign_Face",
         location,
@@ -687,7 +734,7 @@ def add_sign_face(
         ],
         [(0, 1, 2, 3)],
         value,
-        [((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))],
+        [((0.0, 0.5), (1.0, 0.5), (1.0, 1.0), (0.0, 1.0))],
         alpha_test=False,
     )
 
@@ -851,16 +898,63 @@ def build_shell() -> None:
         metric_uv_meters=(1.2, 1.2),
     )
 
+    # Real punched window openings: boolean-cut through the CMU wall and the
+    # brick liner so the bays read from the outside and the inside, then set
+    # recessed glass and a stainless surround inside each reveal. The cutters
+    # stay inside the wall bounding box, so the selector cage derived from the
+    # evaluated wall bounds is untouched, and the simple collision shell stays
+    # solid behind the glass.
+    window_positions = (-5.8, -2.9, 0.0, 2.9, 5.8)
+    window_width, window_height = 2.35, 1.45
+    window_z = 2.65
+    for side in (-1.0, 1.0):
+        side_name = "L" if side < 0 else "R"
+        wall = bpy.data.objects[
+            namespaced_object_name(f"CarWash_Wall_{'Left' if side < 0 else 'Right'}")
+        ]
+        liner = bpy.data.objects[namespaced_object_name(f"InteriorBrick_{side_name}")]
+        cut_rect_openings(
+            [wall, liner],
+            [
+                ((side * 3.24, y, window_z), (0.62, window_width, window_height))
+                for y in window_positions
+            ],
+        )
+        add_metric_box_uvs(wall, meters_per_tile=(0.8, 0.4))
+        add_metric_box_uvs(liner, meters_per_tile=(1.2, 0.6))
+        for y in window_positions:
+            add_box(
+                f"WindowGlass_{side_name}_{y}",
+                (side * 3.25, y, window_z),
+                (0.04, window_width - 0.06, window_height - 0.06),
+                glass,
+                bevel=0.0,
+            )
+            add_box(
+                f"WindowFrame_{side_name}_{y}_Top",
+                (side * 3.28, y, window_z + window_height / 2.0 - 0.035),
+                (0.10, window_width, 0.07),
+                steel,
+                bevel=0.0,
+            )
+            add_box(
+                f"WindowFrame_{side_name}_{y}_Bottom",
+                (side * 3.28, y, window_z - window_height / 2.0 + 0.035),
+                (0.10, window_width, 0.07),
+                steel,
+                bevel=0.0,
+            )
+            for jamb_side in (-1.0, 1.0):
+                jamb_name = "N" if jamb_side < 0 else "P"
+                add_box(
+                    f"WindowFrame_{side_name}_{y}_{jamb_name}",
+                    (side * 3.28, y + jamb_side * (window_width / 2.0 - 0.035), window_z),
+                    (0.10, 0.07, window_height - 0.14),
+                    steel,
+                    bevel=0.0,
+                )
     for side in (-1.0, 1.0):
         x = side * 3.085
-        for y in (-5.8, -2.9, 0.0, 2.9, 5.8):
-            add_box(
-                f"Window_{'L' if side < 0 else 'R'}_{y}",
-                (x, y, 2.65),
-                (0.035, 2.35, 1.45),
-                glass,
-                bevel=0.015,
-            )
         add_box(
             f"LowerTrim_{'L' if side < 0 else 'R'}",
             (x - side * 0.03, 0.0, 0.62),
@@ -1104,12 +1198,12 @@ def build_details() -> None:
     # opening is unchanged, and every part stays outside the building at
     # y <= -9.25.
     add_box("EntranceTowerFascia", (0.0, -9.32, 5.05), (7.30, 0.14, 2.10), deep_blue, bevel=0.02)
-    add_box("TowerCopingCap", (0.0, -9.32, 6.13), (7.46, 0.30, 0.06), steel, bevel=0.01)
+    add_box("TowerCopingCap", (0.0, -9.32, 6.13), (7.46, 0.30, 0.06), steel, bevel=0.0)
     add_box("Sign_Cabinet_Body", (0.0, -9.51, 4.90), (5.00, 0.25, 1.36), deep_blue, bevel=0.02)
-    add_box("Sign_Retainer_Top", (0.0, -9.652, 5.545), (4.98, 0.085, 0.09), steel, bevel=0.012)
-    add_box("Sign_Retainer_Bottom", (0.0, -9.652, 4.255), (4.98, 0.085, 0.09), steel, bevel=0.012)
-    add_box("Sign_Retainer_L", (-2.445, -9.652, 4.90), (0.09, 0.085, 1.20), steel, bevel=0.012)
-    add_box("Sign_Retainer_R", (2.445, -9.652, 4.90), (0.09, 0.085, 1.20), steel, bevel=0.012)
+    add_box("Sign_Retainer_Top", (0.0, -9.652, 5.545), (4.98, 0.085, 0.09), steel, bevel=0.0)
+    add_box("Sign_Retainer_Bottom", (0.0, -9.652, 4.255), (4.98, 0.085, 0.09), steel, bevel=0.0)
+    add_box("Sign_Retainer_L", (-2.445, -9.652, 4.90), (0.09, 0.085, 1.20), steel, bevel=0.0)
+    add_box("Sign_Retainer_R", (2.445, -9.652, 4.90), (0.09, 0.085, 1.20), steel, bevel=0.0)
     # The cannon finial is the brand landmark: a stainless barrel breaking the
     # coping line with a hazard-yellow muzzle ring, aimed along the launch arc.
     add_box("Sign_Cannon_Base", (1.62, -9.51, 5.65), (0.30, 0.26, 0.18), deep_blue, bevel=0.015)
@@ -1173,7 +1267,7 @@ def build_details() -> None:
             (side * 3.44, -0.025, 5.195),
             (0.18, 18.51, 0.05),
             steel,
-            bevel=0.01,
+            bevel=0.0,
         )
         add_box(
             f"LEDAccent_{side_name}",
@@ -1183,7 +1277,7 @@ def build_details() -> None:
             bevel=0.0,
         )
     add_box("ParapetFascia_Exit", (0.0, 9.21, 4.86), (7.04, 0.06, 0.62), deep_blue, bevel=0.0)
-    add_box("CopingCap_Exit", (0.0, 9.20, 5.195), (7.10, 0.18, 0.05), steel, bevel=0.01)
+    add_box("CopingCap_Exit", (0.0, 9.20, 5.195), (7.10, 0.18, 0.05), steel, bevel=0.0)
 
     # Facade rhythm: CMU pilasters between the windows, a deep-blue wainscot
     # with a stainless drip cap, and square downspouts near the corners.
@@ -1245,6 +1339,9 @@ def build_details() -> None:
         )
     add_box("MenuCabinet", (-4.30, -11.20, 1.45), (1.40, 0.16, 1.90), deep_blue, bevel=0.0)
     add_box("MenuPedestal", (-4.30, -11.20, 0.25), (1.50, 0.45, 0.50), rubber, bevel=0.0)
+    # The FIRING TABLE wash menu lives in the signage atlas's bottom-left
+    # 416x512 region, sharing the emissive sign_face material so no material
+    # slot is added for a second backlit display.
     menu_screen = add_card_mesh(
         "MenuScreen",
         (-4.30, -11.285, 1.45),
@@ -1255,11 +1352,11 @@ def build_details() -> None:
             (-0.60, 0.0, 0.75),
         ],
         [(0, 1, 2, 3)],
-        screen,
-        [((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))],
+        sign_face,
+        [((0.0, 0.0), (0.203125, 0.0), (0.203125, 0.5), (0.0, 0.5))],
         alpha_test=False,
     )
-    menu_screen["uv0_usage"] = "0..1 menu screen"
+    menu_screen["uv0_usage"] = "signage-atlas menu region"
     add_box("MenuTopCap", (-4.30, -11.20, 2.425), (1.50, 0.20, 0.05), steel, bevel=0.0)
     bollard_positions = (
         (-3.38, -9.80),
@@ -1280,8 +1377,32 @@ def build_details() -> None:
             bevel=0.0,
         )
 
-    # Exit accents and interior guard rails.
-    add_box("ThankYouPanel", (0.0, 9.26, 4.30), (3.20, 0.06, 0.50), screen, bevel=0.0)
+    # Exit accents and interior guard rails. The thank-you strip faces +Y so
+    # departing (or airborne) drivers read it; sign_face is single-sided, so
+    # the winding is reversed relative to the entrance sign and the U axis is
+    # mirrored to keep the text unreflected for a viewer beyond the exit.
+    thank_you = add_card_mesh(
+        "ThankYouPanel",
+        (0.0, 9.26, 4.30),
+        [
+            (1.60, 0.0, -0.25),
+            (-1.60, 0.0, -0.25),
+            (-1.60, 0.0, 0.25),
+            (1.60, 0.0, 0.25),
+        ],
+        [(0, 1, 2, 3)],
+        sign_face,
+        [
+            (
+                (0.21875, 0.255859375),
+                (1.0, 0.255859375),
+                (1.0, 0.5),
+                (0.21875, 0.5),
+            )
+        ],
+        alpha_test=False,
+    )
+    thank_you["uv0_usage"] = "signage-atlas thank-you region"
     for side in (-1.0, 1.0):
         side_name = "L" if side < 0 else "R"
         add_box(
