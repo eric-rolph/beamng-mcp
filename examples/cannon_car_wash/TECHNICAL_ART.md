@@ -217,15 +217,19 @@ envelope is untouched:
 3. Two namespaced SpotLights at the entrance provide real illumination. Their exact production
    transforms and settings are listed below; both remain shadowless in this release.
 
-The production rig contains exactly seven bounded, shadowless lights:
+The production rig contains exactly thirteen bounded, shadowless lights:
 
 - five cool-blue PointLights at local positions `[0, -6.8, 4.34]`, `[0, -3.4, 4.34]`,
   `[0, 0, 4.34]`, `[0, 3.4, 4.34]`, and `[0, 6.8, 4.34]`, colour `[0.56, 0.82, 1.0]`,
-  brightness 1.25, radius 4.4;
+  brightness 1.45, radius 5.0;
+- four warm-white wall task-fill PointLights at `[-/+2.7, -/+4.6, 3.9]`, colour
+  `[0.92, 0.96, 1.0]`, brightness 1.15, radius 3.8, each anchored to an emissive WallPack
+  fixture on the pier between the windows so the source reads;
 - two entrance/sign SpotLights at local positions `[-1.9, -8.72, 4.08]` and
-  `[1.9, -8.72, 4.08]`, local direction `[0, -0.97, -0.24]`, colour `[0.1, 0.64, 1.0]`,
-  brightness 1.8, range 7.5, inner angle 28 degrees, and outer angle 48 degrees;
-- all seven have shadows disabled. Add a shadow caster only after a measured night composition
+  `[1.9, -8.72, 4.08]`, local direction `[0, -0.97, -0.24]`, and two mirrored exit SpotLights at
+  `[-1.9, 8.72, 4.08]` and `[1.9, 8.72, 4.08]`, direction `[0, 0.97, -0.24]` — all four colour
+  `[0.1, 0.64, 1.0]`, brightness 1.8, range 7.5, inner angle 28 degrees, outer angle 48 degrees;
+- all thirteen have shadows disabled. Add a shadow caster only after a measured night composition
   demonstrates that the added GPU and CPU cost is worth it.
 
 The Blender generator owns local light anchors and emits their exact transforms into the geometry
@@ -262,8 +266,8 @@ regression target:
   suffice;
 - avoid 4K textures, a light per fluorescent tube, overlapping translucent puddles, and individual
   bristle objects;
-- keep the current seven lights shadowless; a future pass may use at most one carefully measured
-  shadow-casting key with a 256–512 px shadow map;
+- keep the current thirteen lights shadowless; a future pass may use at most one carefully
+  measured shadow-casting key with a 256–512 px shadow map;
 - keep particle counts bounded and turn all wash effects off when the last vehicle leaves;
 - test on a mid-range target as well as the RTX 5090. The fast development GPU is not the audience's
   VRAM or fill-rate budget.

@@ -211,11 +211,14 @@ under `telemetry/`.
   source. The public runtime contains 22 BeamNG-cooked DDS
   textures and no authoring PNGs. Blender's `.blend` file uses numeric preview materials; the two
   namespaced `main.materials.json` files and in-game BeamNG inspection are the PBR authority.
-- Seven Blender-authored light anchors are synchronized into both lifecycles: five shadowless
-  PointLights at local X=0, Z=4.34, and Y=-6.8/-3.4/0/3.4/6.8, brightness 1.25 and radius 4.4, plus two
-  shadowless entrance SpotLights at local `[-1.9, -8.72, 4.08]` and `[1.9, -8.72, 4.08]`, direction
-  `[0, -0.97, -0.24]`, brightness 1.8, range 7.5, and 28/48 degree inner/outer cones. Persisted
-  scenario lights and transient selector lights must produce the same seven-object inventory.
+- Thirteen Blender-authored light anchors are synchronized into both lifecycles, all shadowless:
+  five cool-blue tunnel PointLights at local X=0, Z=4.34, Y=-6.8/-3.4/0/3.4/6.8, brightness 1.45,
+  radius 5.0; four warm-white wall task-fill PointLights at local X=+/-2.7, Y=+/-4.6, Z=3.9,
+  colour `[0.92, 0.96, 1.0]`, brightness 1.15, radius 3.8 (each with an emissive WallPack fixture
+  on the window pier); two entrance SpotLights at `[-/+1.9, -8.72, 4.08]`, direction
+  `[0, -0.97, -0.24]`; and two mirrored exit SpotLights at `[-/+1.9, 8.72, 4.08]`, direction
+  `[0, 0.97, -0.24]` — all four spots brightness 1.8, range 7.5, 28/48 degree cones. Persisted
+  scenario lights and transient selector lights must produce the same thirteen-object inventory.
 
 Relevant proof gates are:
 
@@ -323,11 +326,11 @@ live gates:
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_distribution_live.py
 ```
 
-The v1.10 release lock is 40 members, 29,900,006 bytes, SHA-256
-`71bde42e198c8539e5f73593b5c3e86410e07ef99b61b8f10b52eb2eeaf5da62`. It is recorded in
+The v1.11 release lock is 40 members, 29,920,753 bytes, SHA-256
+`1168cbd637959c238714ecd3813597b53049a9c6690416fc7858f4c8c273f2b0`. It is recorded in
 `repository/submission.json` and the exact distribution live test. A runtime-byte or builder-policy
 change requires an intentional metadata update, rebuild, new hash lock, and complete distribution
-rerun. The v1.10 lock has passed the static distribution gate plus an isolated selector-runtime
+rerun. The v1.11 lock has passed the static distribution gate plus an isolated selector-runtime
 smoke (asset/material/light/effect resolution, occupancy, cyclic rollers, window and menu
 rendering); the four-cold-start release matrix must still be rerun before a Repository upload
 refreshes `release_validation`.

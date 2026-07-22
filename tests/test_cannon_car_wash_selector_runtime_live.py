@@ -838,8 +838,8 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             assert runtime_state["effect_present_count"] == 16
             assert runtime_state["effect_expected_count"] == 16
             assert runtime_state["effect_active_count"] == 0
-            assert runtime_state["light_present_count"] == 7
-            assert runtime_state["light_expected_count"] == 7
+            assert runtime_state["light_present_count"] == 13
+            assert runtime_state["light_expected_count"] == 13
             assert runtime_state["emitter_present_counts"] == EXPECTED_EMITTER_COUNTS
             assert runtime_state.get("emitter_active_counts") in ({}, None)
             assert runtime_state["wash_trigger"] == {
@@ -919,8 +919,8 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                     rotated_runtime_state = runtime_state
                     break
             assert rotated_runtime_state is not None, runtime_state
-            assert rotated_runtime_state["light_present_count"] == 7
-            assert rotated_runtime_state["light_expected_count"] == 7
+            assert rotated_runtime_state["light_present_count"] == 13
+            assert rotated_runtime_state["light_expected_count"] == 13
 
             effect_orientation = _runtime_effect_orientation_state(bng)
             assert effect_orientation["ok"] is True, effect_orientation
@@ -967,7 +967,7 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                     restored_runtime_state = runtime_state
                     break
             assert restored_runtime_state is not None, runtime_state
-            assert restored_runtime_state["light_present_count"] == 7
+            assert restored_runtime_state["light_present_count"] == 13
             assert restored_runtime_state["ground_origin"][2] == pytest.approx(surface_z, abs=0.03)
             repair_transform = _runtime_trigger_transform(bng, "repair_trigger")
             assert repair_transform == {

@@ -4,7 +4,7 @@
   "level": "gridmap_v2",
   "asset": {
     "path": "/art/shapes/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
-    "sha256": "ba3fa8ae37570dff8dc74cb86afef8f55a3910260ec9ad7dc1177c3971975405",
+    "sha256": "07fc59ff59a8dd8b7c27065e61ad5304de433e8dd81861e7bcf0093b130bcb9c",
     "position": [
       -122.011475,
       -170.0,
@@ -683,10 +683,10 @@
   },
   "lighting": {
     "coordinate_space": "Blender local, meters, Z-up",
-    "light_count": 7,
+    "light_count": 13,
     "class_counts": {
-      "PointLight": 5,
-      "SpotLight": 2
+      "PointLight": 9,
+      "SpotLight": 4
     },
     "lights": [
       {
@@ -703,8 +703,8 @@
           0.82,
           1.0
         ],
-        "brightness": 1.25,
-        "radius": 4.4,
+        "brightness": 3.2,
+        "radius": 5.6,
         "cast_shadows": false,
         "world_position": [
           -122.011475,
@@ -726,8 +726,8 @@
           0.82,
           1.0
         ],
-        "brightness": 1.25,
-        "radius": 4.4,
+        "brightness": 3.2,
+        "radius": 5.6,
         "cast_shadows": false,
         "world_position": [
           -122.011475,
@@ -749,8 +749,8 @@
           0.82,
           1.0
         ],
-        "brightness": 1.25,
-        "radius": 4.4,
+        "brightness": 3.2,
+        "radius": 5.6,
         "cast_shadows": false,
         "world_position": [
           -122.011475,
@@ -772,8 +772,8 @@
           0.82,
           1.0
         ],
-        "brightness": 1.25,
-        "radius": 4.4,
+        "brightness": 3.2,
+        "radius": 5.6,
         "cast_shadows": false,
         "world_position": [
           -122.011475,
@@ -795,13 +795,105 @@
           0.82,
           1.0
         ],
-        "brightness": 1.25,
-        "radius": 4.4,
+        "brightness": 3.2,
+        "radius": 5.6,
         "cast_shadows": false,
         "world_position": [
           -122.011475,
           -163.2,
           104.34
+        ]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_light_anchor_wall_01",
+        "role": "tunnel_wall_task_fill",
+        "class": "PointLight",
+        "local_position": [
+          -2.7,
+          -4.6,
+          3.9
+        ],
+        "color": [
+          0.92,
+          0.96,
+          1.0
+        ],
+        "brightness": 2.4,
+        "radius": 4.4,
+        "cast_shadows": false,
+        "world_position": [
+          -124.711475,
+          -174.6,
+          103.9
+        ]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_light_anchor_wall_02",
+        "role": "tunnel_wall_task_fill",
+        "class": "PointLight",
+        "local_position": [
+          2.7,
+          -4.6,
+          3.9
+        ],
+        "color": [
+          0.92,
+          0.96,
+          1.0
+        ],
+        "brightness": 2.4,
+        "radius": 4.4,
+        "cast_shadows": false,
+        "world_position": [
+          -119.311475,
+          -174.6,
+          103.9
+        ]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_light_anchor_wall_03",
+        "role": "tunnel_wall_task_fill",
+        "class": "PointLight",
+        "local_position": [
+          -2.7,
+          4.6,
+          3.9
+        ],
+        "color": [
+          0.92,
+          0.96,
+          1.0
+        ],
+        "brightness": 2.4,
+        "radius": 4.4,
+        "cast_shadows": false,
+        "world_position": [
+          -124.711475,
+          -165.4,
+          103.9
+        ]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_light_anchor_wall_04",
+        "role": "tunnel_wall_task_fill",
+        "class": "PointLight",
+        "local_position": [
+          2.7,
+          4.6,
+          3.9
+        ],
+        "color": [
+          0.92,
+          0.96,
+          1.0
+        ],
+        "brightness": 2.4,
+        "radius": 4.4,
+        "cast_shadows": false,
+        "world_position": [
+          -119.311475,
+          -165.4,
+          103.9
         ]
       },
       {
@@ -823,8 +915,8 @@
           0.64,
           1.0
         ],
-        "brightness": 1.8,
-        "range": 7.5,
+        "brightness": 3.0,
+        "range": 9.0,
         "inner_angle_degrees": 28.0,
         "outer_angle_degrees": 48.0,
         "cast_shadows": false,
@@ -864,8 +956,8 @@
           0.64,
           1.0
         ],
-        "brightness": 1.8,
-        "range": 7.5,
+        "brightness": 3.0,
+        "range": 9.0,
         "inner_angle_degrees": 28.0,
         "outer_angle_degrees": 48.0,
         "cast_shadows": false,
@@ -883,6 +975,88 @@
           -0.240180203,
           0.0,
           -0.240180203,
+          0.970728319
+        ]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_light_anchor_exit_left",
+        "role": "exit_spill",
+        "class": "SpotLight",
+        "local_position": [
+          -1.9,
+          8.72,
+          4.08
+        ],
+        "local_direction": [
+          0.0,
+          0.97,
+          -0.24
+        ],
+        "color": [
+          0.1,
+          0.64,
+          1.0
+        ],
+        "brightness": 3.0,
+        "range": 9.0,
+        "inner_angle_degrees": 28.0,
+        "outer_angle_degrees": 48.0,
+        "cast_shadows": false,
+        "world_position": [
+          -123.911475,
+          -161.28,
+          104.08
+        ],
+        "rotation_matrix": [
+          1.0,
+          -0.0,
+          0.0,
+          0.0,
+          0.970728319,
+          -0.240180203,
+          0.0,
+          0.240180203,
+          0.970728319
+        ]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_light_anchor_exit_right",
+        "role": "exit_spill",
+        "class": "SpotLight",
+        "local_position": [
+          1.9,
+          8.72,
+          4.08
+        ],
+        "local_direction": [
+          0.0,
+          0.97,
+          -0.24
+        ],
+        "color": [
+          0.1,
+          0.64,
+          1.0
+        ],
+        "brightness": 3.0,
+        "range": 9.0,
+        "inner_angle_degrees": 28.0,
+        "outer_angle_degrees": 48.0,
+        "cast_shadows": false,
+        "world_position": [
+          -120.111475,
+          -161.28,
+          104.08
+        ],
+        "rotation_matrix": [
+          1.0,
+          -0.0,
+          0.0,
+          0.0,
+          0.970728319,
+          -0.240180203,
+          0.0,
+          0.240180203,
           0.970728319
         ]
       }

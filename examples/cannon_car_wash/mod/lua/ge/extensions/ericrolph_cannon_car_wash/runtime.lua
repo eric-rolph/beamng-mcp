@@ -764,12 +764,23 @@ local function synchronizeTransforms(state)
         worldDirection:normalize()
         rotation = quatFromDir(worldDirection, worldUp)
       end
+      -- The engine links a light's illuminated extent to its object scale, so
+      -- scaling a light to 1,1,1 silently collapses its radius/range to one
+      -- meter. Move lights without touching scale, then re-assert the
+      -- authored extent because pose updates can still rewrite it.
       setObjectTransform(
         light,
         frame.origin + frame.modelRotation * spec.position,
         rotation,
-        vec3(1, 1, 1)
+        nil
       )
+      if type(light.preApply) == "function" then light:preApply() end
+      if spec.class == "PointLight" then
+        light:setField("radius", 0, tostring(spec.radius))
+      else
+        light:setField("range", 0, tostring(spec.range))
+      end
+      if type(light.postApply) == "function" then light:postApply() end
     end
     vehicle:setMeshAlpha(0, PROP_VISUAL_MESH, false)
   end)
