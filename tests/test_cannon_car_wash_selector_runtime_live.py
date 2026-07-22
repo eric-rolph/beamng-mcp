@@ -1218,9 +1218,12 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             right_length = math.sqrt(sum(value * value for value in corridor_right))
             corridor_right = [value / right_length for value in corridor_right]
             repair_center = [float(value) for value in repair_transform["position"]]
+            # Reference-cluster position, not the OOBB center: heavy body
+            # deformation moves the bounding box while the restored reference
+            # position is what the pose policy preserves.
             centerline_error_before = abs(
                 sum(
-                    (float(pre_midpoint_pose["bounding_center"][axis]) - repair_center[axis])
+                    (float(pre_midpoint_pose["position"][axis]) - repair_center[axis])
                     * corridor_right[axis]
                     for axis in range(3)
                 )
@@ -1307,22 +1310,36 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             repaired_up = [float(value) for value in repaired_pose["up"]]
             repaired_centerline_error = abs(
                 sum(
-                    (float(repaired_pose["bounding_center"][axis]) - repair_center[axis])
+                    (float(repaired_pose["position"][axis]) - repair_center[axis])
                     * corridor_right[axis]
                     for axis in range(3)
                 )
-            )
-            repaired_corridor_dot = sum(
-                repaired_direction[axis] * expected_corridor_direction[axis] for axis in range(3)
             )
             repaired_upright_dot = sum(repaired_up[axis] * trigger_up[axis] for axis in range(3))
             repaired_travel_dot = sum(
                 repaired_direction[axis] * incoming_direction[axis] for axis in range(3)
             )
-            assert repaired_centerline_error <= 0.15, repaired_pose
-            assert repaired_corridor_dot >= 0.999, repaired_pose
-            assert repaired_upright_dot >= 0.999, repaired_pose
-            assert repaired_travel_dot > 0, repaired_pose
+            # Pose preservation: the pre-midpoint sample is taken while the
+            # bus is still driving at a slight angle, so exact lateral
+            # equality cannot be asserted from here (the runtime's own
+            # position-drift metric, asserted below, is the precise
+            # instrument). This independent check refutes the old centering
+            # behavior: the deliberate off-center offset must survive instead
+            # of collapsing toward zero.
+            assert repaired_centerline_error >= 0.5 * centerline_error_before, repaired_pose
+            assert repaired_centerline_error <= centerline_error_before + 0.5, repaired_pose
+            # Horizontal headings only: reinflating tires legitimately changes
+            # pitch, so the full 3D travel dot cannot bind the repaired pose.
+            flat_repaired = [repaired_direction[0], repaired_direction[1]]
+            flat_incoming = [incoming_direction[0], incoming_direction[1]]
+            flat_norm = math.sqrt(sum(v * v for v in flat_repaired)) * math.sqrt(
+                sum(v * v for v in flat_incoming)
+            )
+            repaired_heading_dot = (
+                flat_repaired[0] * flat_incoming[0] + flat_repaired[1] * flat_incoming[1]
+            ) / flat_norm
+            assert repaired_upright_dot >= 0.98, repaired_pose
+            assert repaired_heading_dot >= 0.995, repaired_pose
             assert repair_pose_samples
             assert all(
                 sum(
@@ -1544,16 +1561,11 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
     assert int(after_repair["part_damage_after"]) == 0
     assert int(after_repair["broken_beams_after"]) == 0
     assert int(after_repair["deflated_tires_after"]) == 0
+    assert after_repair["pose_policy"] == "restore_exact_pre_repair_pose"
     assert float(after_repair["position_drift_m"]) <= 0.15
-    assert float(after_repair["direction_dot"]) >= 0.999
-    assert float(after_repair["centerline_error_before_m"]) >= 0.05
-    assert float(after_repair["centerline_error_m"]) <= 0.15
-    assert float(after_repair["alignment_translation_m"]) >= 0.05
-    assert float(after_repair["corridor_direction_dot"]) >= 0.999
-    assert float(after_repair["upright_dot"]) >= 0.999
-    assert float(after_repair["travel_direction_dot"]) > 0
+    assert float(after_repair["heading_dot"]) >= 0.995
+    assert float(after_repair["upright_dot"]) >= 0.98
     assert after_repair["travel_sign_preserved"] is True
-    assert int(after_repair["travel_sign"]) in {-1, 1}
 
     prop_reset_records = [record for record in records if record["event"] == "prop_reset"]
     assert len(prop_reset_records) >= 2, records
@@ -1684,20 +1696,15 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                         "deflated_tire_count": int(after_repair["deflated_tires_after"]),
                         "position_drift_m": float(after_repair["position_drift_m"]),
                         "direction_dot": float(after_repair["direction_dot"]),
-                        "centerline_error_before_m": float(
-                            after_repair["centerline_error_before_m"]
-                        ),
-                        "centerline_error_m": float(after_repair["centerline_error_m"]),
-                        "alignment_translation_m": float(after_repair["alignment_translation_m"]),
-                        "corridor_direction_dot": float(after_repair["corridor_direction_dot"]),
                         "upright_dot": float(after_repair["upright_dot"]),
-                        "travel_direction_dot": float(after_repair["travel_direction_dot"]),
+                        "independent_lateral_offset_delta_m": abs(
+                            repaired_centerline_error - centerline_error_before
+                        ),
                         "travel_sign_preserved": after_repair["travel_sign_preserved"],
-                        "travel_sign": int(after_repair["travel_sign"]),
                     },
                     "independent_pose_readback": {
-                        "centerline_error_m": repaired_centerline_error,
-                        "corridor_direction_dot": repaired_corridor_dot,
+                        "lateral_offset_before_m": centerline_error_before,
+                        "lateral_offset_after_m": repaired_centerline_error,
                         "upright_dot": repaired_upright_dot,
                         "travel_direction_dot": repaired_travel_dot,
                         "repair_frame_sample_count": len(repair_pose_samples),

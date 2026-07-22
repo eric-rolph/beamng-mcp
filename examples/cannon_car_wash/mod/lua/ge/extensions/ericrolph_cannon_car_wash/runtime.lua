@@ -41,9 +41,15 @@ local TRANSFORM_REFRESH_SECONDS = 0.1
 local VEHICLE_ACK_TIMEOUT_SECONDS = 1
 local REPAIR_ACK_TIMEOUT_SECONDS = 2
 local REPAIR_SETTLE_SIM_FRAMES = 2
-local REPAIR_MAX_CENTERLINE_ERROR_METERS = 0.15
-local REPAIR_MIN_CORRIDOR_DOT = 0.999
-local REPAIR_MIN_UPRIGHT_DOT = 0.999
+local REPAIR_MAX_POSITION_DRIFT_METERS = 0.15
+local REPAIR_MIN_DIRECTION_DOT = 0.995
+local REPAIR_MIN_UPRIGHT_DOT = 0.98
+-- Prop-local midpoint band, matching the authored repair trigger's center
+-- [0, 0, 2.1] and full extents [5.4, 2.2, 4.2] in the selector vehicle frame.
+local REPAIR_BAND_HALF_WIDTH = 2.7
+local REPAIR_BAND_HALF_LENGTH = 1.1
+local REPAIR_BAND_MIN_Z = 0.0
+local REPAIR_BAND_MAX_Z = 4.2
 local REPAIR_MAX_POSE_CORRECTION_ATTEMPTS = 2
 local RELEASE_GRACE_SIM_FRAMES = 2
 
@@ -296,27 +302,21 @@ local function finiteQuaternion(value)
     and finiteNumber(value.w)
 end
 
--- Construct the repaired pose from the live trigger frame instead of assuming
--- any vehicle model's internal forward axis. The source/target frame delta
--- preserves BeamNG's own vehicle quaternion convention while aligning the
--- visible vehicle with the wash corridor.
-local function repairTargetPose(vehicle, trigger)
-  if not vehicle or not trigger then return nil, "repair target objects are unavailable" end
+-- Snapshot the vehicle's exact live pose as the repair target. RESET_PHYSICS
+-- moves and can reorient the vehicle, so the restore step puts it back
+-- precisely where and how it stood before the repair: no corridor
+-- realignment, no dependence on the placed prop's yaw, and no follow-camera
+-- jump because the vehicle never ends up anywhere new.
+local function repairTargetPose(vehicle)
+  if not vehicle then return nil, "repair target vehicle is unavailable" end
   local position = vehicle:getPosition()
   local rotation = quat(vehicle:getRotation())
   local direction = vec3(vehicle:getDirectionVector())
   local vehicleUp = vec3(vehicle:getDirectionVectorUp())
-  local triggerPosition = trigger:getPosition()
-  local triggerRotation = quat(trigger:getRotation())
-  local boundingBox = vehicle:getSpawnWorldOOBB()
-  local boundingCenter = boundingBox and boundingBox:getCenter() or nil
   if not finiteVector3(position)
     or not finiteQuaternion(rotation)
     or not finiteVector3(direction)
     or not finiteVector3(vehicleUp)
-    or not finiteVector3(triggerPosition)
-    or not finiteQuaternion(triggerRotation)
-    or not finiteVector3(boundingCenter)
     or direction:length() < 0.000001
     or vehicleUp:length() < 0.000001 then
     return nil, "repair pose snapshot is invalid"
@@ -324,79 +324,13 @@ local function repairTargetPose(vehicle, trigger)
   direction:normalize()
   vehicleUp:normalize()
 
-  local corridorUp = triggerRotation * vec3(0, 0, 1)
-  local corridorForward = triggerRotation * vec3(0, 1, 0)
-  if not finiteVector3(corridorUp)
-    or not finiteVector3(corridorForward)
-    or corridorUp:length() < 0.000001 then
-    return nil, "repair trigger frame is invalid"
-  end
-  corridorUp:normalize()
-  corridorForward = corridorForward - corridorUp * corridorForward:dot(corridorUp)
-  if corridorForward:length() < 0.000001 then
-    return nil, "repair trigger corridor axis is invalid"
-  end
-  corridorForward:normalize()
-
-  local travelSign = 1
-  if direction:dot(corridorForward) < 0 then
-    corridorForward = -corridorForward
-    travelSign = -1
-  end
-  local travelDirectionDotBefore = direction:dot(corridorForward)
-  if travelDirectionDotBefore <= 0.000001 then
-    return nil, "vehicle travel direction is perpendicular to the wash corridor"
-  end
-
-  local corridorRight = corridorForward:cross(corridorUp)
-  if not finiteVector3(corridorRight) or corridorRight:length() < 0.000001 then
-    return nil, "repair trigger lateral axis is invalid"
-  end
-  corridorRight:normalize()
-  local sourceUp = vehicleUp - direction * vehicleUp:dot(direction)
-  if sourceUp:length() < 0.000001 then
-    return nil, "vehicle forward/up basis is degenerate"
-  end
-  sourceUp:normalize()
-  local forwardAlignment = direction:getRotationTo(corridorForward)
-  local alignedUp = forwardAlignment * sourceUp
-  alignedUp = alignedUp - corridorForward * alignedUp:dot(corridorForward)
-  if alignedUp:length() < 0.000001 then
-    return nil, "aligned vehicle up axis is degenerate"
-  end
-  alignedUp:normalize()
-  -- Both vectors are perpendicular to corridorForward, so this second,
-  -- shortest-arc rotation is around the corridor axis and cannot undo the
-  -- forward alignment. This avoids quatFromDir basis ambiguity on vehicles
-  -- such as the city bus while removing roll/pitch explicitly.
-  local upAlignment = alignedUp:getRotationTo(corridorUp)
-  local alignmentRotation = (upAlignment * forwardAlignment):normalized()
-  local targetRotation = (alignmentRotation * rotation):normalized()
-  local alignedBoundingOffset = alignmentRotation * (boundingCenter - position)
-  local alignedBoundingCenter = position + alignedBoundingOffset
-  local centerlineOffset = (alignedBoundingCenter - triggerPosition):dot(corridorRight)
-  local targetPosition = position - corridorRight * centerlineOffset
-  if not finiteVector3(targetPosition) or not finiteQuaternion(targetRotation) then
-    return nil, "repair target transform is invalid"
-  end
-
   return {
     positionBefore = vec3(position.x, position.y, position.z),
     rotationBefore = quat(rotation.x, rotation.y, rotation.z, rotation.w),
     directionBefore = vec3(direction.x, direction.y, direction.z),
     upBefore = vec3(vehicleUp.x, vehicleUp.y, vehicleUp.z),
-    targetPosition = targetPosition,
-    targetRotation = targetRotation,
-    targetDirection = corridorForward,
-    targetUp = corridorUp,
-    corridorRight = corridorRight,
-    corridorCenter = vec3(triggerPosition.x, triggerPosition.y, triggerPosition.z),
-    centerlineErrorBefore = math.abs(
-      (boundingCenter - triggerPosition):dot(corridorRight)
-    ),
-    alignmentTranslation = (targetPosition - position):length(),
-    travelDirectionDotBefore = travelDirectionDotBefore,
-    travelSign = travelSign,
+    targetPosition = vec3(position.x, position.y, position.z),
+    targetRotation = quat(rotation.x, rotation.y, rotation.z, rotation.w),
   }
 end
 
@@ -405,31 +339,34 @@ local function repairedPoseMetrics(vehicle, repair)
   local position = vehicle:getPosition()
   local direction = vec3(vehicle:getDirectionVector())
   local vehicleUp = vec3(vehicle:getDirectionVectorUp())
-  local boundingBox = vehicle:getSpawnWorldOOBB()
-  local boundingCenter = boundingBox and boundingBox:getCenter() or nil
   if not finiteVector3(position)
     or not finiteVector3(direction)
     or not finiteVector3(vehicleUp)
-    or not finiteVector3(boundingCenter)
     or direction:length() < 0.000001
     or vehicleUp:length() < 0.000001 then
     return nil
   end
   direction:normalize()
   vehicleUp:normalize()
-  local centerlineError = math.abs(
-    (boundingCenter - repair.corridorCenter):dot(repair.corridorRight)
-  )
-  local corridorDirectionDot = direction:dot(repair.targetDirection)
-  local uprightDot = vehicleUp:dot(repair.targetUp)
-  local travelDirectionDot = direction:dot(repair.directionBefore)
+  local directionDot = direction:dot(repair.directionBefore)
+  -- Repairing a damaged vehicle legitimately changes pitch and roll: tires
+  -- reinflate and the body relevels, so a listing pre-repair snapshot cannot
+  -- bind the full 3D direction. Preserve the horizontal heading exactly and
+  -- only require the upright axis not to degrade materially.
+  local flatDirection = vec3(direction.x, direction.y, 0)
+  local flatBefore = vec3(repair.directionBefore.x, repair.directionBefore.y, 0)
+  local headingDot = directionDot
+  if flatDirection:length() > 0.000001 and flatBefore:length() > 0.000001 then
+    flatDirection:normalize()
+    flatBefore:normalize()
+    headingDot = flatDirection:dot(flatBefore)
+  end
   return {
-    targetPositionDrift = (position - repair.targetPosition):length(),
-    centerlineError = centerlineError,
-    corridorDirectionDot = corridorDirectionDot,
-    uprightDot = uprightDot,
-    travelDirectionDot = travelDirectionDot,
-    travelSignPreserved = travelDirectionDot > 0,
+    positionDrift = (position - repair.targetPosition):length(),
+    directionDot = directionDot,
+    headingDot = headingDot,
+    uprightDot = vehicleUp:dot(repair.upBefore),
+    travelSignPreserved = headingDot > 0,
   }
 end
 
@@ -940,6 +877,7 @@ local function removeWashSubject(state, vehicleId, reason)
   state.repairOccupants[vehicleId] = nil
   if not state.washSubjects[vehicleId] then return end
   state.washSubjects[vehicleId] = nil
+  state.washSubjectLastLocalY[vehicleId] = nil
   if finishActiveRunOnExit(state, vehicleId, reason) then
     state.armed = true
   end
@@ -1362,7 +1300,7 @@ local function onEricrolphCannonCarWashRepairIntegrityAcknowledged(
       failRepair(state, vehicleId, "repair_vehicle_missing")
       return
     end
-    local target, targetError = repairTargetPose(vehicle, state.repairTrigger)
+    local target, targetError = repairTargetPose(vehicle)
     if not target then
       failRepair(state, vehicleId, "repair_target_pose_failed", {detail = targetError})
       return
@@ -1376,11 +1314,7 @@ local function onEricrolphCannonCarWashRepairIntegrityAcknowledged(
       subject_id = vehicleId,
       repair_token = token,
       strategy = "RESET_PHYSICS",
-      pose_policy = "center_oobb_on_trigger_axis_align_upright_preserve_travel_sign",
-      centerline_error_before_m = repair.centerlineErrorBefore,
-      alignment_translation_m = repair.alignmentTranslation,
-      travel_direction_dot_before = repair.travelDirectionDotBefore,
-      travel_sign = repair.travelSign,
+      pose_policy = "restore_exact_pre_repair_pose",
     })
     local reset, resetError = pcall(function()
       vehicle:requestReset(RESET_PHYSICS)
@@ -1418,43 +1352,23 @@ local function onEricrolphCannonCarWashRepairIntegrityAcknowledged(
     failRepair(state, vehicleId, "repair_pose_verification_unavailable")
     return
   end
-  repair.positionDrift = poseMetrics.targetPositionDrift
-  repair.directionDot = poseMetrics.corridorDirectionDot
-  repair.centerlineError = poseMetrics.centerlineError
-  repair.corridorDirectionDot = poseMetrics.corridorDirectionDot
+  repair.positionDrift = poseMetrics.positionDrift
+  repair.directionDot = poseMetrics.directionDot
+  repair.headingDot = poseMetrics.headingDot
   repair.uprightDot = poseMetrics.uprightDot
-  repair.travelDirectionDot = poseMetrics.travelDirectionDot
   repair.travelSignPreserved = poseMetrics.travelSignPreserved
-  if repair.centerlineError > REPAIR_MAX_CENTERLINE_ERROR_METERS
-    or repair.corridorDirectionDot < REPAIR_MIN_CORRIDOR_DOT
-    or repair.uprightDot < REPAIR_MIN_UPRIGHT_DOT
-    or not repair.travelSignPreserved then
+  if repair.positionDrift > REPAIR_MAX_POSITION_DRIFT_METERS
+    or repair.headingDot < REPAIR_MIN_DIRECTION_DOT
+    or repair.uprightDot < REPAIR_MIN_UPRIGHT_DOT then
     local correctionAttempts = repair.poseCorrectionAttempts or 0
     if correctionAttempts < REPAIR_MAX_POSE_CORRECTION_ATTEMPTS then
-      -- RESET_PHYSICS can change the renewed vehicle's OOBB-to-origin offset.
-      -- Recompute from the live repaired geometry; reusing the pre-reset target
-      -- cannot remove that residual and is especially visible on buses.
-      local correctionTarget, correctionTargetError = repairTargetPose(
-        vehicle,
-        state.repairTrigger
-      )
-      if not correctionTarget then
-        failRepair(state, vehicleId, "repair_pose_correction_target_failed", {
-          detail = correctionTargetError,
-        })
-        return
-      end
-      if correctionTarget.targetDirection:dot(repair.targetDirection) <= 0 then
-        failRepair(state, vehicleId, "repair_pose_correction_travel_sign_changed")
-        return
-      end
+      -- The target never changes: it is the exact pre-repair snapshot, so a
+      -- correction simply re-applies it after the physics settle.
       repair.poseCorrectionAttempts = correctionAttempts + 1
       repair.phase = "pose_restore_pending"
       repair.elapsed = 0
-      repair.targetPosition = correctionTarget.targetPosition
-      repair.targetRotation = correctionTarget.targetRotation
-      local position = correctionTarget.targetPosition
-      local rotation = correctionTarget.targetRotation
+      local position = repair.targetPosition
+      local rotation = repair.targetRotation
       local corrected, correctionError = pcall(function()
         vehicle:setPositionRotation(
           position.x,
@@ -1477,19 +1391,18 @@ local function onEricrolphCannonCarWashRepairIntegrityAcknowledged(
         subject_id = vehicleId,
         repair_token = token,
         correction_attempt = repair.poseCorrectionAttempts,
-        centerline_error_m = repair.centerlineError,
-        corridor_direction_dot = repair.corridorDirectionDot,
+        position_drift_m = repair.positionDrift,
+        direction_dot = repair.directionDot,
+        heading_dot = repair.headingDot,
         upright_dot = repair.uprightDot,
-        travel_direction_dot = repair.travelDirectionDot,
-        correction_translation_m = correctionTarget.alignmentTranslation,
       })
       return
     end
     failRepair(state, vehicleId, "repair_pose_verification_failed", {
-      centerline_error_m = repair.centerlineError,
-      corridor_direction_dot = repair.corridorDirectionDot,
+      position_drift_m = repair.positionDrift,
+      direction_dot = repair.directionDot,
+      heading_dot = repair.headingDot,
       upright_dot = repair.uprightDot,
-      travel_direction_dot = repair.travelDirectionDot,
       travel_sign_preserved = repair.travelSignPreserved,
       correction_attempts = correctionAttempts,
     })
@@ -1565,19 +1478,48 @@ local function onEricrolphCannonCarWashRepairReleaseAcknowledged(
     part_damage_after = repair.after.partDamageCount,
     broken_beams_after = repair.after.brokenBeamCount,
     deflated_tires_after = repair.after.deflatedTireCount,
+    pose_policy = "restore_exact_pre_repair_pose",
     position_drift_m = repair.positionDrift,
     direction_dot = repair.directionDot,
-    centerline_error_before_m = repair.centerlineErrorBefore,
-    centerline_error_m = repair.centerlineError,
-    alignment_translation_m = repair.alignmentTranslation,
-    corridor_direction_dot = repair.corridorDirectionDot,
+    heading_dot = repair.headingDot,
     upright_dot = repair.uprightDot,
-    travel_direction_dot = repair.travelDirectionDot,
     travel_sign_preserved = repair.travelSignPreserved,
-    travel_sign = repair.travelSign,
     pose_correction_attempts = repair.poseCorrectionAttempts or 0,
   })
   processPendingLaunch(state, vehicleId)
+end
+
+local function startRepair(state, subjectId, vehicle, detection)
+  if state.repairOccupants[subjectId] then return end
+
+  repairCounter = repairCounter + 1
+  state.repairOccupants[subjectId] = {
+    token = repairCounter,
+    phase = "precheck_pending",
+    elapsed = 0,
+    exitObserved = false,
+    holdMayExist = false,
+    bestEffortReleaseQueued = false,
+  }
+  emitEvent(state, "I", "repair_trigger_enter", {
+    subject_id = subjectId,
+    repair_token = repairCounter,
+    detection = detection,
+  })
+  local queued, queueError = queueVehicleCommand(
+    vehicle,
+    repairIntegrityCommand(state.propId, repairCounter, "before"),
+    state,
+    "repair_precheck_command_failed",
+    false
+  )
+  if queued then
+    state.repairOccupants[subjectId].holdMayExist = true
+  else
+    failRepair(state, subjectId, "repair_precheck_command_failed", {
+      detail = queueError,
+    })
+  end
 end
 
 local function handleRepairTrigger(state, data)
@@ -1589,35 +1531,7 @@ local function handleRepairTrigger(state, data)
     emitEvent(state, "I", "repair_trigger_exit", {subject_id = data.subjectID})
     return
   end
-  if state.repairOccupants[data.subjectID] then return end
-
-  repairCounter = repairCounter + 1
-  state.repairOccupants[data.subjectID] = {
-    token = repairCounter,
-    phase = "precheck_pending",
-    elapsed = 0,
-    exitObserved = false,
-    holdMayExist = false,
-    bestEffortReleaseQueued = false,
-  }
-  emitEvent(state, "I", "repair_trigger_enter", {
-    subject_id = data.subjectID,
-    repair_token = repairCounter,
-  })
-  local queued, queueError = queueVehicleCommand(
-    vehicle,
-    repairIntegrityCommand(state.propId, repairCounter, "before"),
-    state,
-    "repair_precheck_command_failed",
-    false
-  )
-  if queued then
-    state.repairOccupants[data.subjectID].holdMayExist = true
-  else
-    failRepair(state, data.subjectID, "repair_precheck_command_failed", {
-      detail = queueError,
-    })
-  end
+  startRepair(state, data.subjectID, vehicle, "trigger")
 end
 
 local function handleWashTrigger(state, data)
@@ -1918,6 +1832,7 @@ local function registerProp(propId)
     lights = {},
     lightSpecs = lightSpecs(prefix),
     washSubjects = {},
+    washSubjectLastLocalY = {},
     repairOccupants = {},
     pendingLaunchEntries = {},
     washSystemsActive = false,
@@ -2025,6 +1940,41 @@ local function onPreRender(dtReal, dtSim, dtRaw)
       if not synced then
         emitError(state, "transform_sync_failed", {detail = syncError})
         stale[#stale + 1] = propId
+      end
+    end
+    -- BeamNGTrigger stops delivering Overlaps enter events for the thin
+    -- transient repair band once the prop is placed at a rotated yaw
+    -- (verified live at 90 degrees with provably correct trigger
+    -- transforms), so the authoritative midpoint detection projects each
+    -- wash subject into the prop frame every frame. The trigger object
+    -- remains for inspection and exit telemetry, and the occupant latch
+    -- makes trigger-delivered and positional detection idempotent.
+    if state.washSystemsActive and state.origin and state.modelRotation then
+      state.positionalChecks = (state.positionalChecks or 0) + 1
+      local inverseRotation = state.modelRotation:inversed()
+      for subjectId in pairs(state.washSubjects) do
+        if not state.repairOccupants[subjectId] then
+          local subject = eligibleSubject(subjectId)
+          if subject then
+            local localPosition = inverseRotation * (subject:getPosition() - state.origin)
+            state.lastLocalPosition = {localPosition.x, localPosition.y, localPosition.z}
+            -- Segment test against the previous sample: a fast subject (or a
+            -- low render rate) can move further than the 2.2 m band between
+            -- frames, so point-in-band sampling alone would alias over it.
+            local previousY = state.washSubjectLastLocalY[subjectId]
+            state.washSubjectLastLocalY[subjectId] = localPosition.y
+            local insideBand = math.abs(localPosition.y) <= REPAIR_BAND_HALF_LENGTH
+            local crossedBand = previousY ~= nil
+              and math.min(previousY, localPosition.y) <= REPAIR_BAND_HALF_LENGTH
+              and math.max(previousY, localPosition.y) >= -REPAIR_BAND_HALF_LENGTH
+            if (insideBand or crossedBand)
+              and math.abs(localPosition.x) <= REPAIR_BAND_HALF_WIDTH
+              and localPosition.z >= REPAIR_BAND_MIN_Z
+              and localPosition.z <= REPAIR_BAND_MAX_Z then
+              startRepair(state, subjectId, subject, "positional")
+            end
+          end
+        end
       end
     end
     for vehicleId, repair in pairs(state.repairOccupants) do
@@ -2142,7 +2092,7 @@ local function onVehicleResetted(vehicleId)
         subject_id = vehicleId,
         repair_token = repair.token,
         pose_restore_requested = true,
-        pose_policy = "center_oobb_on_trigger_axis_align_upright_preserve_travel_sign",
+        pose_policy = "restore_exact_pre_repair_pose",
       })
       return
     end
@@ -2167,6 +2117,7 @@ local function onVehicleResetted(vehicleId)
       bestEffortReleaseRepair(state, subjectId, repair, "prop_reset")
     end
     state.washSubjects = {}
+    state.washSubjectLastLocalY = {}
     state.repairOccupants = {}
     state.pendingLaunchEntries = {}
     state.armed = true
@@ -2313,6 +2264,8 @@ local function installationState(state)
     emitter_active_counts = emitterActiveCounts,
     repair_pending_count = pendingRepairs,
     repaired_subject_count = completedRepairs,
+    positional_check_count = state.positionalChecks or 0,
+    last_local_position = state.lastLocalPosition,
     armed = state.armed,
     active_vehicle_id = state.activeRun and state.activeRun.vehicleId or nil,
     active_phase = state.activeRun and state.activeRun.phase or nil,

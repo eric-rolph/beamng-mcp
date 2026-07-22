@@ -400,6 +400,7 @@ def test_selector_runtime_owns_repair_trigger_through_full_lifecycle() -> None:
 def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     runtime = GE_RUNTIME.read_text(encoding="utf-8")
     repair_callback = _function_section(runtime, "handleRepairTrigger")
+    repair_start = _function_section(runtime, "startRepair")
     remove_subject = _function_section(runtime, "removeWashSubject")
     cleanup = _function_section(runtime, "cleanupInstallation")
     fail_repair = _function_section(runtime, "failRepair")
@@ -444,9 +445,15 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     assert re.search(r"data\.event\s*==\s*[\"']exit[\"']", repair_callback)
     assert "exitObserved = true" in repair_callback
     assert re.search(
-        r"if\s+state\.repairOccupants\[data\.subjectID\]\s+then\s+return\s+end",
-        repair_callback,
+        r"if\s+state\.repairOccupants\[subjectId\]\s+then\s+return\s+end",
+        runtime,
     )
+    # Both the trigger-delivered enter and the per-frame positional midpoint
+    # detection funnel through the same latched start helper.
+    assert 'startRepair(state, data.subjectID, vehicle, "trigger")' in repair_callback
+    assert 'startRepair(state, subjectId, subject, "positional")' in runtime
+    assert "REPAIR_BAND_HALF_LENGTH" in runtime
+    assert "state.modelRotation:inversed()" in runtime
     assert re.search(r"state\.repairOccupants\[vehicleId\]\s*=\s*nil", remove_subject)
 
     assert re.search(r"(?:obj|vehicle):requestReset\(\s*RESET_PHYSICS\s*\)", runtime)
@@ -455,29 +462,21 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     assert "beamstate.getPartDamageData" in runtime
     assert "obj:beamIsBroken" in runtime
 
-    # Runtime placement is based on the live prop-owned repair trigger and the
-    # measured vehicle basis. It must center the aligned OOBB and must not
-    # encode a model-specific 180-degree vehicle correction.
-    assert "trigger:getPosition()" in target_pose
-    assert "quat(trigger:getRotation())" in target_pose
-    assert "triggerRotation * vec3(0, 1, 0)" in target_pose
-    assert "triggerRotation * vec3(0, 0, 1)" in target_pose
-    assert "vehicle:getSpawnWorldOOBB()" in target_pose
-    assert "boundingBox:getCenter()" in target_pose
-    assert "direction:dot(corridorForward) < 0" in target_pose
-    assert "corridorForward = -corridorForward" in target_pose
-    assert "vehicleUp - direction * vehicleUp:dot(direction)" in target_pose
-    assert "direction:getRotationTo(corridorForward)" in target_pose
-    assert "alignedUp:getRotationTo(corridorUp)" in target_pose
-    assert "upAlignment * forwardAlignment" in target_pose
-    assert "alignmentRotation * (boundingCenter - position)" in target_pose
-    assert "targetPosition = position - corridorRight * centerlineOffset" in target_pose
+    # The repair target is the vehicle's exact live pose snapshot: the vehicle
+    # is put back precisely where and how it stood, independent of the placed
+    # prop's yaw, so the follow camera never jumps.
+    assert "vehicle:getPosition()" in target_pose
+    assert "quat(vehicle:getRotation())" in target_pose
+    assert "targetPosition = vec3(position.x, position.y, position.z)" in target_pose
+    assert "targetRotation = quat(rotation.x, rotation.y, rotation.z, rotation.w)" in (target_pose)
+    assert "corridor" not in target_pose
+    assert "trigger" not in target_pose
+    assert "getSpawnWorldOOBB" not in target_pose
     assert "quat(0, 0, 1, 0)" not in target_pose
     for metric in (
-        "centerlineError",
-        "corridorDirectionDot",
+        "positionDrift",
+        "directionDot",
         "uprightDot",
-        "travelDirectionDot",
         "travelSignPreserved",
     ):
         assert metric in pose_metrics
@@ -494,7 +493,7 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     assert "actualFrozen" in integrity_helper
     assert "existing.propId" in integrity_helper
     assert "existing.token" in integrity_helper
-    assert "holdMayExist" in repair_callback
+    assert "holdMayExist" in repair_start
 
     assert "ericrolphCannonCarWashRepairHoldState" in repair_release_helper
     assert "existing.propId" in repair_release_helper
@@ -525,9 +524,7 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     assert intentional_reset.index('repair.phase = "pose_restore_pending"') < (
         intentional_reset.index("vehicle:setPositionRotation(")
     )
-    assert 'pose_policy = "center_oobb_on_trigger_axis_align_upright_preserve_travel_sign"' in (
-        intentional_reset
-    )
+    assert 'pose_policy = "restore_exact_pre_repair_pose"' in (intentional_reset)
     assert '"repair_pose_restore_ack"' in intentional_reset
     assert intentional_reset.index('repair.phase == "pose_restore_pending"') < (
         intentional_reset.index('repair.phase = "settling"')
@@ -547,8 +544,8 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     assert "verify_pending" in integrity_ack
     assert "failed" in integrity_ack
     assert '"repair_pose_verification_failed"' in integrity_ack
-    assert "REPAIR_MAX_CENTERLINE_ERROR_METERS" in integrity_ack
-    assert "REPAIR_MIN_CORRIDOR_DOT" in integrity_ack
+    assert "REPAIR_MAX_POSITION_DRIFT_METERS" in integrity_ack
+    assert "REPAIR_MIN_DIRECTION_DOT" in integrity_ack
     assert "REPAIR_MIN_UPRIGHT_DOT" in integrity_ack
     assert "release_pending" in integrity_ack
     assert "repairReleaseCommand" in integrity_ack
@@ -566,14 +563,11 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     assert '"repair_release_ack"' in release_ack
     assert '"repair_complete"' in release_ack
     for telemetry_field in (
-        "centerline_error_before_m",
-        "centerline_error_m",
-        "alignment_translation_m",
-        "corridor_direction_dot",
+        "position_drift_m",
+        "direction_dot",
         "upright_dot",
-        "travel_direction_dot",
         "travel_sign_preserved",
-        "travel_sign",
+        "pose_correction_attempts",
     ):
         assert telemetry_field in release_ack
     assert release_ack.index('"repair_release_ack"') < release_ack.index('"repair_complete"')
@@ -653,10 +647,8 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     assert repair_sections.count("setPositionRotation(") == 1
     assert "REPAIR_MAX_POSE_CORRECTION_ATTEMPTS" in integrity_ack
     assert '"repair_pose_correction_requested"' in integrity_ack
-    assert "repairTargetPose(" in integrity_ack
-    assert "state.repairTrigger" in integrity_ack
-    assert "repair.targetPosition = correctionTarget.targetPosition" in integrity_ack
-    assert "repair.targetRotation = correctionTarget.targetRotation" in integrity_ack
-    assert '"repair_pose_correction_travel_sign_changed"' in integrity_ack
+    assert "repairTargetPose(vehicle)" in integrity_ack
+    assert "repair.targetPosition" in integrity_ack
+    assert "repair.targetRotation" in integrity_ack
     assert "safeTeleport" not in repair_sections
     assert "safeTeleport" not in intentional_reset

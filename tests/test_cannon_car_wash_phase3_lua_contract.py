@@ -352,30 +352,21 @@ def test_repair_trigger_resets_once_and_waits_for_post_reset_integrity_ack() -> 
     assert "beamstate.getPartDamageData" in source
     assert "obj:beamIsBroken" in source
 
-    # The target is derived from the live repair trigger's Y/Z frame and the
-    # vehicle's measured direction/up basis. Center the post-alignment OOBB,
-    # preserving longitudinal progress and height without assuming BeamNG's
-    # internal vehicle quaternion convention.
-    assert "trigger:getPosition()" in target_pose
-    assert "quat(trigger:getRotation())" in target_pose
-    assert "triggerRotation * vec3(0, 1, 0)" in target_pose
-    assert "triggerRotation * vec3(0, 0, 1)" in target_pose
-    assert "vehicle:getSpawnWorldOOBB()" in target_pose
-    assert "boundingBox:getCenter()" in target_pose
-    assert "direction:dot(corridorForward) < 0" in target_pose
-    assert "corridorForward = -corridorForward" in target_pose
-    assert "vehicleUp - direction * vehicleUp:dot(direction)" in target_pose
-    assert "direction:getRotationTo(corridorForward)" in target_pose
-    assert "alignedUp:getRotationTo(corridorUp)" in target_pose
-    assert "upAlignment * forwardAlignment" in target_pose
-    assert "alignmentRotation * (boundingCenter - position)" in target_pose
-    assert "targetPosition = position - corridorRight * centerlineOffset" in target_pose
+    # The target is the vehicle's exact live pose snapshot: repair must put
+    # the vehicle back precisely where and how it stood, independent of the
+    # wash's placed orientation, so the follow camera never jumps.
+    assert "vehicle:getPosition()" in target_pose
+    assert "quat(vehicle:getRotation())" in target_pose
+    assert "targetPosition = vec3(position.x, position.y, position.z)" in target_pose
+    assert "targetRotation = quat(rotation.x, rotation.y, rotation.z, rotation.w)" in (target_pose)
+    assert "corridor" not in target_pose
+    assert "trigger" not in target_pose
+    assert "getSpawnWorldOOBB" not in target_pose
     assert "quat(0, 0, 1, 0)" not in target_pose
     for metric in (
-        "centerlineError",
-        "corridorDirectionDot",
+        "positionDrift",
+        "directionDot",
         "uprightDot",
-        "travelDirectionDot",
         "travelSignPreserved",
     ):
         assert metric in pose_metrics
@@ -391,9 +382,7 @@ def test_repair_trigger_resets_once_and_waits_for_post_reset_integrity_ack() -> 
     assert "repair.targetPosition" in reset_pending_branch
     assert "repair.targetRotation" in reset_pending_branch
     assert "pose_restore_requested = true" in reset_pending_branch
-    assert 'pose_policy = "center_oobb_on_trigger_axis_align_upright_preserve_travel_sign"' in (
-        reset_pending_branch
-    )
+    assert 'pose_policy = "restore_exact_pre_repair_pose"' in (reset_pending_branch)
     assert '"repair_pose_restore_ack"' in reset_pending_branch
     assert "return" in reset_pending_branch
 
@@ -404,25 +393,20 @@ def test_repair_trigger_resets_once_and_waits_for_post_reset_integrity_ack() -> 
     assert "release_pending" in integrity_ack
     assert "repair_release_requested" in integrity_ack
     assert '"repair_pose_verification_failed"' in integrity_ack
-    assert "REPAIR_MAX_CENTERLINE_ERROR_METERS" in integrity_ack
-    assert "REPAIR_MIN_CORRIDOR_DOT" in integrity_ack
+    assert "REPAIR_MAX_POSITION_DRIFT_METERS" in integrity_ack
+    assert "REPAIR_MIN_DIRECTION_DOT" in integrity_ack
     assert "REPAIR_MIN_UPRIGHT_DOT" in integrity_ack
-    assert "repairTargetPose(" in integrity_ack
-    assert "repairTrigger" in integrity_ack
-    assert "repair.targetPosition = correctionTarget.targetPosition" in integrity_ack
-    assert "repair.targetRotation = correctionTarget.targetRotation" in integrity_ack
-    assert '"repair_pose_correction_travel_sign_changed"' in integrity_ack
+    assert "repair.targetPosition" in integrity_ack
+    assert "repair.targetRotation" in integrity_ack
+    assert "repairTargetPose(vehicle)" in integrity_ack
     assert "repair_release_ack" in release_ack
     assert "repair_complete" in release_ack
     for telemetry_field in (
-        "centerline_error_before_m",
-        "centerline_error_m",
-        "alignment_translation_m",
-        "corridor_direction_dot",
+        "position_drift_m",
+        "direction_dot",
         "upright_dot",
-        "travel_direction_dot",
         "travel_sign_preserved",
-        "travel_sign",
+        "pose_correction_attempts",
     ):
         assert telemetry_field in release_ack
     assert "processPendingLaunch" in release_ack
@@ -524,14 +508,14 @@ def test_phase3_manifest_describes_wash_cycle_and_containment_gate() -> None:
         "vehicle_scope": "any_live_vehicle",
         "reset_strategy": "RESET_PHYSICS",
         "pre_reset_hold": "acknowledged_controller_freeze_preserving_previous_state",
-        "pose_policy": "center_oobb_on_trigger_axis_align_upright_preserve_travel_sign",
+        "pose_policy": "restore_exact_pre_repair_pose",
         "center_reference": "vehicle_spawn_world_oobb",
         "position_policy": "remove_lateral_error_preserve_longitudinal_progress_and_height",
-        "orientation_policy": "live_trigger_y_z_basis_without_hard_coded_vehicle_axis",
+        "orientation_policy": "restore_exact_pre_repair_pose_heading_preserved",
         "pose_verification": {
-            "maximum_centerline_error_m": 0.15,
-            "minimum_corridor_direction_dot": 0.999,
-            "minimum_upright_dot": 0.999,
+            "maximum_position_drift_m": 0.15,
+            "minimum_heading_dot": 0.995,
+            "minimum_upright_dot": 0.98,
             "require_travel_sign_preserved": True,
         },
         "reset_callback_sequence": [

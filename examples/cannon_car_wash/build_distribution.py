@@ -25,7 +25,7 @@ FILENAME_PATTERN = re.compile(r"^[A-Za-z0-9._-]+$")
 # its compiled .cdae cache, so a forever-1980 timestamp can preserve obsolete
 # animation data across mod updates. Bump this constant whenever a shipped DAE
 # changes while keeping it fixed for reproducible builds of the same release.
-ZIP_EPOCH = (2026, 7, 22, 12, 0, 0)
+ZIP_EPOCH = (2026, 7, 22, 18, 0, 0)
 LOGGER = logging.getLogger(__name__)
 
 # Public Repository contents are an explicit release decision. Never replace
