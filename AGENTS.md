@@ -326,14 +326,13 @@ live gates:
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_distribution_live.py
 ```
 
-The v1.11 release lock is 40 members, 29,920,753 bytes, SHA-256
-`1168cbd637959c238714ecd3813597b53049a9c6690416fc7858f4c8c273f2b0`. It is recorded in
+The v1.11.1 release lock is 40 members, 29,983,024 bytes, SHA-256
+`45fc711d3d8273f93107b43673b90c5fd002b4f85e68e6e20059e85f7d1f66ba`. It is recorded in
 `repository/submission.json` and the exact distribution live test. A runtime-byte or builder-policy
 change requires an intentional metadata update, rebuild, new hash lock, and complete distribution
-rerun. The v1.11 lock has passed the static distribution gate plus an isolated selector-runtime
-smoke (asset/material/light/effect resolution, occupancy, cyclic rollers, window and menu
-rendering); the four-cold-start release matrix must still be rerun before a Repository upload
-refreshes `release_validation`.
+rerun. The complete four-cold-start release matrix passed on the v1.11 payload (2026-07-22) and
+refreshed `release_validation`; v1.11.1 changes only the three selector/scenario thumbnail
+JPEGs, revalidated with the static suite and the exact prebuilt-ZIP live gate.
 
 Ship only content authored here or content with documented redistribution permission. Never copy
 BeamNG proprietary meshes, maps, textures, or JBeam reference files into the repository or mod.
