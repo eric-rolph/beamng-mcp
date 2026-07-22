@@ -39,19 +39,19 @@
   "collision_contact": {
     "vehicle": "ericrolph_cannon_car_wash_truck",
     "injected_velocity_x_mps": 30.0,
-    "peak_positive_velocity_x_mps": 29.553020477294922,
-    "minimum_post_impact_velocity_x_mps": -0.4083935618400574,
+    "peak_positive_velocity_x_mps": 29.55270767211914,
+    "minimum_post_impact_velocity_x_mps": -0.41943395137786865,
     "wall_world_x": -106.9,
-    "maximum_world_x": -108.08719137310982,
+    "maximum_world_x": -108.08724442124367,
     "final_truck_position": [
-      -108.72831861507495,
-      -170.27203787257713,
-      100.40553992119385
+      -108.73361938144171,
+      -170.26923342426835,
+      100.4080509184123
     ],
     "final_truck_velocity_mps": [
-      0.00022783724125474691,
-      -0.00007120268128346652,
-      -0.00038488468271680176
+      -0.002388773951679468,
+      -0.002081809099763632,
+      -0.0016744467429816723
     ],
     "prop_position_after_contact": [
       -110.0,
@@ -72,8 +72,12 @@
     "level": "smallgrid",
     "runtime_log_schema_version": 2,
     "subject": {
-      "model": "etk800",
-      "arbitrary_vehicle_support": true
+      "model": "citybus",
+      "configuration": "city",
+      "arbitrary_vehicle_support": true,
+      "approach_lateral_offset_m": -0.65,
+      "approach_lateral_offset_magnitude": 0.65,
+      "approach_yaw_offset_degrees": 2.0
     },
     "grounding": {
       "surface_z": 0.0,
@@ -83,6 +87,8 @@
     },
     "runtime_objects": {
       "animated_visual_present": true,
+      "animated_visual_path": "/vehicles/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash_runtime_visual.dae",
+      "animated_visual_coordinate_space": "vehicle_local",
       "wash_trigger": {
         "class": "BeamNGTrigger",
         "mode": "Overlaps",
@@ -91,12 +97,16 @@
       "repair_trigger": {
         "class": "BeamNGTrigger",
         "mode": "Overlaps",
-        "test_type": "Bounding box"
+        "test_type": "Bounding box",
+        "local_center": [0.0, 0.0, 2.1],
+        "dimensions": [5.4, 2.2, 4.2]
       },
       "launch_trigger": {
         "class": "BeamNGTrigger",
         "mode": "Contains",
-        "test_type": "Bounding box"
+        "test_type": "Bounding box",
+        "local_center": [0.0, 0.0, 2.1],
+        "dimensions": [5.8, 17.5, 4.6]
       },
       "effect_present_count": 16,
       "emitter_present_counts": {
@@ -111,7 +121,8 @@
         "present_count": 16,
         "left_right_pair_count": 8
       },
-      "material_count": 12,
+      "material_count": 18,
+      "light_count": 7,
       "animation_sequences": ["ambient"]
     },
     "wash_activation": {
@@ -126,39 +137,64 @@
       },
       "rendered_frame_evidence": {
         "resolution": [640, 360],
-        "changed_pixels": 132924,
+        "changed_pixels": 120832,
         "pixel_count": 230400,
-        "changed_pixel_ratio": 0.5769270833333333,
+        "changed_pixel_ratio": 0.5244444444444445,
         "channel_difference_means": [
-          32.4163671875,
-          31.07460503472222,
-          28.57255642361111
+          28.380243055555557,
+          27.508172743055557,
+          25.40080295138889
         ]
+      },
+      "occupancy_reference_count": {
+        "two": {
+          "subject_count": 2,
+          "wash_active": true,
+          "effect_active_count": 16
+        },
+        "one": {
+          "subject_count": 1,
+          "wash_active": true,
+          "effect_active_count": 16
+        },
+        "zero": {
+          "subject_count": 0,
+          "wash_active": false,
+          "effect_active_count": 0
+        }
       }
     },
     "countdown_event_elapsed_seconds": {
       "countdown_3": 0.0,
-      "countdown_2": 1.0159888,
-      "countdown_1": 2.0318545
+      "countdown_2": 1.0138007,
+      "countdown_1": 2.0305162
     },
-    "go_after_countdown_3_seconds": 3.2006000000000014,
+    "go_after_countdown_3_seconds": 3.21532000000001,
     "timing_sources": {
       "countdown_events": "structured runtime event elapsed_time_seconds",
       "go": "BeamNG file-log timestamp delta from countdown_3"
     },
     "launch": {
       "target_speed_mps": 100.0,
-      "observed_peak_velocity_mps": [
-        -0.13892138004302979,
-        -99.81570434570312,
-        -6.066760063171387
+      "commanded_velocity_mps": [
+        -0.18179895337203,
+        -99.987614888081,
+        1.5632716121599
       ],
-      "observed_peak_speed_mps": 99.9999985542137,
-      "exit_reason": "launch_trigger_exit"
+      "commanded_speed_mps": 100.0,
+      "sensor_peak_persisted": false,
+      "exit_reason": "wash_trigger_exit_after_launch"
+    },
+    "launch_containment": {
+      "ok": true,
+      "center": [0.0, 0.0, 2.0999999046326],
+      "scale": [5.8000001907349, 17.5, 4.5999999046326],
+      "vehicle_min": [-1.6626304388046, -3.9365832805634, 0.04554295539856],
+      "vehicle_max": [1.4709901809692, 8.7068452835083, 3.0779292583466]
     },
     "reset_recovery": {
       "repair_reset_callbacks_consumed": true,
-      "prop_reset_count": 3,
+      "prop_reset_count": 5,
       "unexpected_abort_count": 0
     },
     "repair": {
@@ -174,10 +210,26 @@
         "part_damage_count": 0,
         "broken_beam_count": 0,
         "deflated_tire_count": 0,
-        "position_drift_m": 0.0887491217673,
-        "direction_dot": 0.99975656799924,
+        "position_drift_m": 0.0043196832906604,
+        "direction_dot": 0.99999573401305,
+        "centerline_error_before_m": 0.43114733695984,
+        "centerline_error_m": 0.00079983472824097,
+        "alignment_translation_m": 0.7704204737998,
+        "corridor_direction_dot": 0.99999573401305,
+        "upright_dot": 0.99999550695098,
+        "travel_direction_dot": 0.99638558919562,
+        "travel_sign": 1,
+        "travel_sign_preserved": true,
+        "pose_correction_attempts": 1,
         "controller_frozen": false
-      }
+      },
+      "pre_midpoint": {
+        "damage": 1100.0,
+        "part_damage_count": 1,
+        "broken_beam_count": 3,
+        "deflated_tire_count": 1
+      },
+      "midpoint_local_center": [0.0, 0.0, 2.1]
     },
     "pre_go_integrity": {
       "baseline_damage": 0.0,
@@ -196,10 +248,12 @@
       "repair_requested",
       "repair_reset_ack",
       "repair_pose_restore_ack",
+      "repair_trigger_exit",
+      "repair_pose_correction_requested",
+      "repair_pose_restore_ack",
       "repair_release_requested",
       "repair_release_ack",
       "repair_complete",
-      "repair_trigger_exit",
       "repair_trigger_exit",
       "containment_verified",
       "hold_requested",
@@ -207,6 +261,7 @@
       "hold_start",
       "countdown_timer_start",
       "countdown_3",
+      "containment_exit_suppressed",
       "countdown_2",
       "countdown_1",
       "release_requested",
@@ -214,9 +269,8 @@
       "release",
       "go",
       "launch",
-      "launch_complete",
-      "trigger_exit",
       "wash_trigger_exit",
+      "launch_complete",
       "wash_subject_removed",
       "wash_systems_stop",
       "prop_unregistered",

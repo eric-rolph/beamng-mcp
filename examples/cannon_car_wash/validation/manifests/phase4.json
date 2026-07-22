@@ -66,7 +66,7 @@
     "minimum_damage_delta": 1.0,
     "maximum_post_crash_speed_fraction": 0.5,
     "require_wash_systems_on_before_launch": true,
-    "require_entry_water_repair": true,
+    "require_midpoint_repair": true,
     "maximum_post_repair_damage": 0.01,
     "post_repair_part_damage_count": 0,
     "post_repair_broken_beam_count": 0,

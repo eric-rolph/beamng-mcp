@@ -108,7 +108,7 @@ local FIELD_RULES = {
     brightness = {kind = "number", min = 0, max = 100},
     range = {kind = "number", min = 0.1, max = 10000},
     castShadows = {kind = "boolean"},
-    enabled = {kind = "boolean"}
+    enabled = {kind = "boolean", engineField = "isEnabled"}
   },
   SpotLight = {
     color = {kind = "color"},
@@ -117,7 +117,7 @@ local FIELD_RULES = {
     innerAngle = {kind = "number", min = 0, max = 179},
     outerAngle = {kind = "number", min = 0.1, max = 179},
     castShadows = {kind = "boolean"},
-    enabled = {kind = "boolean"}
+    enabled = {kind = "boolean", engineField = "isEnabled"}
   },
   BeamNGWaypoint = {
     radius = {kind = "number", min = 0.1, max = 1000}
@@ -458,7 +458,7 @@ local function validateFields(className, fields)
     if fieldError then
       return nil, fieldName .. ": " .. fieldError
     end
-    serialized[fieldName] = fieldValue
+    serialized[classRules[fieldName].engineField or fieldName] = fieldValue
   end
   return serialized, nil
 end
@@ -577,8 +577,9 @@ local function objectDescriptor(object, includeFields)
   if includeFields then
     descriptor.fields = {}
     local readableFields = FIELD_RULES[className] or READ_ONLY_FIELD_RULES[className] or {}
-    for fieldName, _ in pairs(readableFields) do
-      local fieldOk, fieldValue = pcall(function() return object:getField(fieldName, 0) end)
+    for fieldName, fieldRule in pairs(readableFields) do
+      local engineField = type(fieldRule) == "table" and fieldRule.engineField or fieldName
+      local fieldOk, fieldValue = pcall(function() return object:getField(engineField, 0) end)
       if fieldOk then descriptor.fields[fieldName] = fieldValue end
     end
   end

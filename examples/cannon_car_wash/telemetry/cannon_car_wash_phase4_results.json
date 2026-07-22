@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "captured_at": "2026-07-21T15:30:30.8500885-06:00",
+  "captured_at": "2026-07-21T21:42:23-06:00",
   "status": "passed",
   "environment": {
     "beamng_version": "0.38.6.0.19963",
@@ -13,15 +13,17 @@
       "tests/test_cannon_car_wash_selector_runtime_live.py",
       "tests/test_cannon_car_wash_distribution_live.py"
     ],
-    "phase4_duration_seconds": 51.70,
-    "selector_runtime_duration_seconds": 40.61,
-    "distribution_smoke_duration_seconds": 27.22
+    "phase2_duration_seconds": 61.49,
+    "phase4_duration_seconds": 48.05,
+    "selector_duration_seconds": 52.45,
+    "selector_runtime_duration_seconds": 45.95,
+    "distribution_smoke_duration_seconds": 28.57
   },
   "installed_archive": {
     "filename": "cannon_car_wash_ericrolph.zip",
-    "sha256": "93f946e585c77a1a5dc98400a9144dbf7edc9b16d774f39474fccd197f2b9ad3",
-    "size_bytes": 11844763,
-    "entry_count": 16,
+    "sha256": "bdd54a270311fbc5b3d6ffb46022c0fac0474225b355e106f85260e50fd9d583",
+    "size_bytes": 23754854,
+    "entry_count": 40,
     "install_root": "USER_FOLDER/mods",
     "root_info_present": false,
     "repository_metadata_present": false
@@ -40,9 +42,12 @@
     "selector_runtime_cross_map_level": "smallgrid",
     "selector_runtime_common_art_resolved": true,
     "selector_runtime_loaded_on_demand": true,
-    "selector_runtime_arbitrary_vehicle": "etk800",
-    "selector_runtime_ground_origin_z": 100.0,
+    "selector_runtime_arbitrary_vehicle": "citybus",
+    "selector_runtime_vehicle_configuration": "city",
+    "selector_runtime_ground_origin_z": 0.0,
     "selector_runtime_effect_active_count": 16,
+    "selector_runtime_material_count": 18,
+    "selector_runtime_light_count": 7,
     "selector_runtime_emitter_active_counts": {
       "BNGP_sprinkler": 6,
       "BNGP_waterfallsteam": 6,
@@ -53,7 +58,20 @@
     "selector_runtime_rendered_effects": true,
     "selector_runtime_repair_verified": true,
     "selector_runtime_repair_count": 1,
-    "selector_runtime_repair_position_drift_m": 0.0887491217673,
+    "selector_runtime_repair_position_drift_m": 0.0043196832906604,
+    "selector_runtime_repair_centerline_error_before_m": 0.43114733695984,
+    "selector_runtime_repair_centerline_error_m": 0.00079983472824097,
+    "selector_runtime_repair_alignment_translation_m": 0.7704204737998,
+    "selector_runtime_repair_corridor_direction_dot": 0.99999573401305,
+    "selector_runtime_repair_upright_dot": 0.99999550695098,
+    "selector_runtime_repair_travel_direction_dot": 0.99638558919562,
+    "selector_runtime_repair_travel_sign_preserved": true,
+    "selector_runtime_repair_pose_correction_attempts": 1,
+    "selector_runtime_midpoint_repair_verified": true,
+    "selector_runtime_launch_requires_completed_repair": true,
+    "selector_runtime_two_vehicle_occupancy_verified": true,
+    "selector_runtime_remaining_vehicle_keeps_wash_active": true,
+    "selector_runtime_containment_exit_stabilized": true,
     "selector_runtime_repair_reset_callbacks_consumed": true,
     "selector_runtime_prop_reset_recovered": true,
     "selector_runtime_launch_speed_mps": 100.0,
@@ -67,14 +85,14 @@
   "scenario": "Cannon Car Wash",
   "vehicle": "ericrolph_cannon_car_wash_truck",
   "approach": {
-    "forward_progress_m": 17.634988482353947,
-    "peak_speed_mps": 4.510234952800684,
-    "minimum_z": 100.24624147929717,
-    "maximum_z": 100.31805737684772
+    "forward_progress_m": 10.26395616649279,
+    "peak_speed_mps": 4.821680106915563,
+    "minimum_z": 100.24443692713976,
+    "maximum_z": 100.74663632933516
   },
   "hold": {
-    "maximum_drift_m": 0.007867811253531233,
-    "maximum_speed_mps": 0.07286764336693281,
+    "maximum_drift_m": 0.005892852677750718,
+    "maximum_speed_mps": 0.04214756245012397,
     "initial_damage": 0.0,
     "peak_pre_go_damage": 0.0,
     "pre_go_damage_delta": 0.0,
@@ -82,31 +100,31 @@
   },
   "countdown_elapsed_seconds": {
     "countdown_3": 0.0,
-    "countdown_2": 1.0147377,
-    "countdown_1": 2.0310129,
-    "go": 3.0477527
+    "countdown_2": 1.0088218,
+    "countdown_1": 2.0228019,
+    "go": 3.0398279
   },
   "launch": {
-    "peak_speed_mps": 98.54488122628861,
-    "peak_speed_kph": 354.761572414639,
-    "forward_alignment": 0.9999812053746285
+    "peak_speed_mps": 98.36522085906223,
+    "peak_speed_kph": 354.11479509262404,
+    "forward_alignment": 0.9999600428428329
   },
   "impact": {
     "wall": "ericrolph_cannon_car_wash_crash_wall",
     "position": [
-      -122.14008782245219,
-      -133.4922512769699,
-      100.05793308094144
+      -120.56809153361246,
+      -133.29401345551014,
+      100.02743113599718
     ],
     "initial_damage": 0.0,
     "prelaunch_damage": 0.0,
-    "peak_damage": 3717694.25,
-    "damage_delta": 3717694.25,
-    "part_damage_count": 40,
-    "minimum_post_crash_speed_mps": 10.252496332022728,
-    "maximum_world_y": -132.92580318450928,
+    "peak_damage": 14162682.0,
+    "damage_delta": 14162682.0,
+    "part_damage_count": 45,
+    "minimum_post_crash_speed_mps": 7.17414039309694,
+    "maximum_world_y": -133.01012540608644,
     "sample_count": 5,
-    "observation_seconds": 0.6451500999974087
+    "observation_seconds": 0.4652377000020351
   },
   "wash_systems": {
     "activation_trigger": {
@@ -161,24 +179,24 @@
     },
     "contained_vehicle_oobb": {
       "center": [
-        -122.59169006348,
-        -165.91069030762,
-        100.86029815674
+        -122.03988647461,
+        -173.25439453125,
+        100.81538391113
       ],
       "dimensions": [
-        2.3130378494971,
-        4.9740367145278,
-        1.7487304429524
+        2.4344486780465,
+        5.0405439157039,
+        1.8118569776416
       ],
       "minimum": [
-        -123.74820898823,
-        -168.39770866488,
-        99.985932935262
+        -123.25711081363,
+        -175.7746664891,
+        99.909455422312
       ],
       "maximum": [
-        -121.43517113873,
-        -163.42367195035,
-        101.73466337821
+        -120.82266213559,
+        -170.7341225734,
+        101.72131239995
       ]
     },
     "final": {
@@ -209,6 +227,7 @@
     "session_start",
     "wash_trigger_enter",
     "wash_systems_start",
+    "launch_deferred",
     "repair_trigger_enter",
     "repair_snapshot",
     "repair_requested",
@@ -257,8 +276,17 @@
       "part_damage_count": 0,
       "broken_beam_count": 0,
       "deflated_tire_count": 0,
-      "position_drift_m": 0.01519309780694,
-      "direction_dot": 0.99967214965258
+      "position_drift_m": 0.014737530980428,
+      "direction_dot": 0.99970172513369,
+      "centerline_error_before_m": 0.64455413818359,
+      "centerline_error_m": 0.0369873046875,
+      "alignment_translation_m": 0.65845469466741,
+      "corridor_direction_dot": 0.99970172513369,
+      "upright_dot": 0.99975595047332,
+      "travel_direction_dot": 0.99880570473673,
+      "travel_sign": 1,
+      "travel_sign_preserved": true,
+      "pose_correction_attempts": 0
     }
   },
   "cleanup_note": "The lifecycle preflight proves stop/unload and full reload/start; the post-measurement vehicle reset records launch_complete without a false abort.",

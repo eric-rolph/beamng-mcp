@@ -27,6 +27,10 @@ from examples.cannon_car_wash.build_distribution import (
     build_distribution,
     validate_mod_tree,
 )
+from examples.cannon_car_wash.textures.cook_release_textures import (
+    GENERATED_ROOT,
+    _validate_cooked_pair,
+)
 
 VEHICLE_ROOT = PurePosixPath("vehicles") / MOD_ID
 LEVEL_ASSET_ROOT = PurePosixPath("art") / "shapes" / MOD_ID
@@ -120,7 +124,7 @@ def _is_namespaced(value: str) -> bool:
 
 def test_distribution_tree_contains_only_approved_runtime_files() -> None:
     files = validate_mod_tree()
-    assert len(EXPECTED_RUNTIME_FILES) == 16
+    assert len(EXPECTED_RUNTIME_FILES) == 40
     assert set(files) == set(EXPECTED_RUNTIME_FILES)
 
     forbidden_suffixes = (".blend", ".py", ".geometry.json", ".selector_handoff.json")
@@ -133,6 +137,45 @@ def test_distribution_tree_contains_only_approved_runtime_files() -> None:
         assert path.name.casefold() != "readme.md"
         assert not path.name.casefold().endswith(forbidden_suffixes)
         assert re.fullmatch(r"phase\d+_manifest\.json", path.name, re.IGNORECASE) is None
+
+
+def test_public_runtime_contains_only_cooked_textures_for_every_material_reference() -> None:
+    files = validate_mod_tree()
+    texture_prefix = f"art/shapes/{MOD_ID}/textures/"
+    cooked_members = {
+        relative
+        for relative in files
+        if relative.startswith(texture_prefix) and relative.endswith(".dds")
+    }
+    assert len(cooked_members) == 22
+    assert not any(
+        relative.startswith(texture_prefix) and relative.endswith(".png") for relative in files
+    )
+    assert all(files[relative].read_bytes()[:4] == b"DDS " for relative in cooked_members)
+    for relative in cooked_members:
+        cooked = files[relative]
+        source = GENERATED_ROOT / f"{cooked.stem}.png"
+        assert source.is_file(), f"missing source map for {relative}"
+        assert _validate_cooked_pair(source, cooked) is None
+
+    logical_references: set[str] = set()
+    material_paths = (
+        MOD_ROOT / Path((SCENARIO_ROOT / "main.materials.json").as_posix()),
+        MOD_ROOT / Path((VEHICLE_ROOT / "main.materials.json").as_posix()),
+    )
+    for material_path in material_paths:
+        for definition in _strict_json_file(material_path).values():
+            for stage in definition["Stages"]:
+                for field, value in stage.items():
+                    if field.endswith("Map") and isinstance(value, str) and "/textures/" in value:
+                        assert value.startswith("/") and value.endswith(".png")
+                        logical_references.add(value.removeprefix("/"))
+
+    assert logical_references
+    expected_cooked = {
+        PurePosixPath(reference).with_suffix(".dds").as_posix() for reference in logical_references
+    }
+    assert expected_cooked == cooked_members
 
 
 def test_every_beamng_json_artifact_uses_the_strict_json_subset() -> None:
@@ -176,7 +219,7 @@ def test_runtime_persistent_ids_are_canonical_and_globally_unique() -> None:
     assert len(identifiers) == len(set(identifiers)), "persistentId values must be globally unique"
 
     scenario_materials = _strict_json_file(
-        MOD_ROOT / Path((LEVEL_ASSET_ROOT / f"{MOD_ID}.materials.json").as_posix())
+        MOD_ROOT / Path((SCENARIO_ROOT / "main.materials.json").as_posix())
     )
     selector_materials = _strict_json_file(
         MOD_ROOT / Path((VEHICLE_ROOT / "main.materials.json").as_posix())
@@ -253,7 +296,7 @@ def test_vehicle_jbeam_model_groups_and_flexbody_are_namespaced() -> None:
 
 def test_material_roots_names_and_mapto_values_are_globally_namespaced() -> None:
     material_paths = [
-        MOD_ROOT / Path((LEVEL_ASSET_ROOT / f"{MOD_ID}.materials.json").as_posix()),
+        MOD_ROOT / Path((SCENARIO_ROOT / "main.materials.json").as_posix()),
         MOD_ROOT / Path((VEHICLE_ROOT / "main.materials.json").as_posix()),
     ]
     seen_roots: set[str] = set()
@@ -280,7 +323,7 @@ def test_collada_geometry_controller_material_and_node_ids_are_namespaced() -> N
     dae_and_materials = [
         (
             MOD_ROOT / Path((LEVEL_ASSET_ROOT / f"{MOD_ID}.dae").as_posix()),
-            MOD_ROOT / Path((LEVEL_ASSET_ROOT / f"{MOD_ID}.materials.json").as_posix()),
+            MOD_ROOT / Path((SCENARIO_ROOT / "main.materials.json").as_posix()),
             True,
         ),
         (
@@ -352,9 +395,11 @@ def test_prefab_scene_names_are_namespaced_and_stock_assets_remain_references() 
     }
     assert triggers[f"{MOD_ID}_wash_activation_trigger"]["triggerMode"] == "Overlaps"
     assert triggers[f"{MOD_ID}_repair_trigger"]["triggerMode"] == "Overlaps"
-    assert triggers[f"{MOD_ID}_repair_trigger"]["position"] == [-122.011475, -175.6, 102.1]
+    assert triggers[f"{MOD_ID}_repair_trigger"]["position"] == [-122.011475, -170.0, 102.1]
     assert triggers[f"{MOD_ID}_repair_trigger"]["scale"] == [5.4, 2.2, 4.2]
     assert triggers[f"{MOD_ID}_launch_trigger"]["triggerMode"] == "Contains"
+    assert triggers[f"{MOD_ID}_launch_trigger"]["position"] == [-122.011475, -170.0, 102.1]
+    assert triggers[f"{MOD_ID}_launch_trigger"]["scale"] == [5.8, 17.5, 4.6]
     assert all(record["triggerTestType"] == "Bounding box" for record in triggers.values())
 
     shape_references = {

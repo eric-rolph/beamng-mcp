@@ -1,6 +1,6 @@
 """Phase 2 live gate for the public Cannon Car Wash distribution artifact.
 
-The package under test is the exact 16-file Repository upload tree.  Authoring
+The package under test is the exact allowlisted Repository upload tree. Authoring
 evidence and validation manifests are read from their source-only directories
 and must never be copied into the disposable mod or resulting ZIP.
 """
@@ -27,6 +27,7 @@ from mcp.shared.memory import create_connected_server_and_client_session
 
 from beamng_mcp.config import Settings
 from beamng_mcp.mcp_adapter import create_mcp_server
+from examples.cannon_car_wash.build_distribution import EXPECTED_RUNTIME_FILES
 from tests.live_support import (
     claim_owned_beamng_process,
     cleanup_exact_live_artifacts,
@@ -43,13 +44,6 @@ MOD_ID = "ericrolph_cannon_car_wash"
 ASSET_RELATIVE_PATH = Path(f"art/shapes/{MOD_ID}/{MOD_ID}.dae")
 GEOMETRY_MANIFEST_PATH = EXAMPLE_ROOT / "authoring" / f"{MOD_ID}.geometry.json"
 PHASE2_MANIFEST_PATH = EXAMPLE_ROOT / "validation" / "manifests" / "phase2.json"
-PACKAGED_SCENARIO_DIRECTORY = Path("levels/gridmap_v2/scenarios") / MOD_ID
-PACKAGED_SCENARIO_FILES = (
-    PACKAGED_SCENARIO_DIRECTORY / f"{MOD_ID}.json",
-    PACKAGED_SCENARIO_DIRECTORY / f"{MOD_ID}.lua",
-    PACKAGED_SCENARIO_DIRECTORY / f"{MOD_ID}.prefab.json",
-    PACKAGED_SCENARIO_DIRECTORY / f"{MOD_ID}.jpg",
-)
 VIRTUAL_ASSET_PATH = ASSET_RELATIVE_PATH.as_posix()
 TRUCK_ID = f"{MOD_ID}_truck"
 SCENARIO_VISUAL_ID = f"{MOD_ID}_scenario_visual"
@@ -57,29 +51,14 @@ LAUNCH_TRIGGER_ID = f"{MOD_ID}_launch_trigger"
 WASH_TRIGGER_ID = f"{MOD_ID}_wash_activation_trigger"
 REPAIR_TRIGGER_ID = f"{MOD_ID}_repair_trigger"
 EXPECTED_EFFECT_COUNT = 16
+EXPECTED_LIGHT_COUNT = 7
 EXPECTED_EMITTER_COUNTS = {
     "BNGP_sprinkler": 6,
     "BNGP_waterfallsteam": 6,
     "BNGP_34": 2,
     "BNGP_2": 2,
 }
-PUBLIC_RUNTIME_FILES = frozenset(
-    {
-        VIRTUAL_ASSET_PATH,
-        (ASSET_RELATIVE_PATH.parent / f"{MOD_ID}.materials.json").as_posix(),
-        *(path.as_posix() for path in PACKAGED_SCENARIO_FILES),
-        f"vehicles/{MOD_ID}/{MOD_ID}.dae",
-        f"vehicles/{MOD_ID}/{MOD_ID}.jbeam",
-        f"vehicles/{MOD_ID}/default.jpg",
-        f"vehicles/{MOD_ID}/info.json",
-        f"vehicles/{MOD_ID}/info_standard.json",
-        f"vehicles/{MOD_ID}/main.materials.json",
-        f"vehicles/{MOD_ID}/standard.jpg",
-        f"vehicles/{MOD_ID}/standard.pc",
-        f"lua/ge/extensions/{MOD_ID}/runtime.lua",
-        f"vehicles/{MOD_ID}/lua/{MOD_ID}_vehicle.lua",
-    }
-)
+PUBLIC_RUNTIME_FILES = frozenset(EXPECTED_RUNTIME_FILES)
 PUBLIC_ROOTS = {"art", "levels", "lua", "vehicles"}
 
 
@@ -172,7 +151,7 @@ def _stage_public_mod(
         for path in MOD_SOURCE.rglob("*")
         if path.is_file() and not path.is_symlink()
     }
-    assert len(PUBLIC_RUNTIME_FILES) == 16
+    assert len(PUBLIC_RUNTIME_FILES) == 40
     assert set(source_files) == PUBLIC_RUNTIME_FILES
 
     mod_root = workspace / "mods" / runtime_mod_name
@@ -489,7 +468,7 @@ async def test_cannon_car_wash_phase2_visual_placement_and_trigger(tmp_path: Pat
                 artifact_path = Path(artifact["path"])
                 assert await asyncio.to_thread(artifact_path.is_file)
                 names = await asyncio.to_thread(_zip_members, artifact_path)
-                assert len(names) == 16
+                assert len(names) == len(PUBLIC_RUNTIME_FILES)
                 assert names == PUBLIC_RUNTIME_FILES
                 assert {name.partition("/")[0] for name in names} == PUBLIC_ROOTS
                 installed = _structured(
@@ -603,6 +582,24 @@ async def test_cannon_car_wash_phase2_visual_placement_and_trigger(tmp_path: Pat
                     assert packaged_effect["fields"]["emitter"] == effect["emitter"]
                     live_emitter_counts[effect["emitter"]] += 1
                 assert live_emitter_counts == EXPECTED_EMITTER_COUNTS
+
+                assert phase2_manifest["lighting"]["light_count"] == EXPECTED_LIGHT_COUNT
+                for light in phase2_manifest["lighting"]["lights"]:
+                    packaged_light = _structured(
+                        await session.call_tool("map_object_get", {"object_id": light["name"]})
+                    )
+                    assert packaged_light["class"] == light["class"]
+                    assert packaged_light["managed"] is False
+                    assert tuple(
+                        packaged_light["position"][axis] for axis in ("x", "y", "z")
+                    ) == pytest.approx(light["world_position"])
+                    assert float(packaged_light["fields"]["brightness"]) == pytest.approx(
+                        light["brightness"]
+                    )
+                    # The bridge's safe PointLight/SpotLight schema exposes the
+                    # engine field as ``enabled``. Persistent prefab JSON uses
+                    # Torque's serialized ``isEnabled`` spelling.
+                    assert str(packaged_light["fields"]["enabled"]).lower() in {"1", "true"}
 
                 packaged_ai_disabled = _structured(
                     await session.call_tool(

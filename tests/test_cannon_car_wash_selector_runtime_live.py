@@ -32,6 +32,8 @@ from tests.test_cannon_car_wash_phase3_live import _configured_runtime
 MOD_ID = "ericrolph_cannon_car_wash"
 PROP_NAME = f"{MOD_ID}_freeroam_prop"
 SUBJECT_NAME = f"{MOD_ID}_freeroam_subject"
+OCCUPANT_A_NAME = f"{MOD_ID}_occupant_a"
+OCCUPANT_B_NAME = f"{MOD_ID}_occupant_b"
 RUNTIME_EXTENSION = "ericrolph__cannon__car__wash_runtime"
 LOG_TAG = "ERICROLPH_CANNON_CAR_WASH_RUNTIME"
 RUNTIME_NAMESPACE_PREFIXES = (
@@ -39,28 +41,42 @@ RUNTIME_NAMESPACE_PREFIXES = (
     f"vehicles/{MOD_ID}/",
     f"lua/ge/extensions/{MOD_ID}/",
 )
-ANIMATED_VISUAL_SHAPE = "/art/shapes/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae"
-ANIMATED_MATERIALS_PATH = (
-    "/art/shapes/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.materials.json"
+ANIMATED_VISUAL_SHAPE = (
+    "/vehicles/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash_runtime_visual.dae"
 )
+ANIMATED_MATERIALS_PATH = "vehicles/ericrolph_cannon_car_wash/main.materials.json"
 EXPECTED_MATERIALS = (
-    "ericrolph_cannon_car_wash_concrete",
-    "ericrolph_cannon_car_wash_deep_blue",
-    "ericrolph_cannon_car_wash_cyan_trim",
-    "ericrolph_cannon_car_wash_stainless",
-    "ericrolph_cannon_car_wash_glass",
-    "ericrolph_cannon_car_wash_brush_blue",
-    "ericrolph_cannon_car_wash_brush_aqua",
-    "ericrolph_cannon_car_wash_safety_orange",
-    "ericrolph_cannon_car_wash_hazard_yellow",
-    "ericrolph_cannon_car_wash_rubber",
-    "ericrolph_cannon_car_wash_screen",
-    "ericrolph_cannon_car_wash_led",
+    "ericrolph_cannon_car_wash_selector_concrete",
+    "ericrolph_cannon_car_wash_selector_deep_blue",
+    "ericrolph_cannon_car_wash_selector_cyan_trim",
+    "ericrolph_cannon_car_wash_selector_stainless",
+    "ericrolph_cannon_car_wash_selector_glass",
+    "ericrolph_cannon_car_wash_selector_brush_blue",
+    "ericrolph_cannon_car_wash_selector_brush_aqua",
+    "ericrolph_cannon_car_wash_selector_safety_orange",
+    "ericrolph_cannon_car_wash_selector_hazard_yellow",
+    "ericrolph_cannon_car_wash_selector_rubber",
+    "ericrolph_cannon_car_wash_selector_screen",
+    "ericrolph_cannon_car_wash_selector_led",
+    "ericrolph_cannon_car_wash_selector_brush_cards",
+    "ericrolph_cannon_car_wash_selector_corrugated_blue",
+    "ericrolph_cannon_car_wash_selector_exterior_cmu",
+    "ericrolph_cannon_car_wash_selector_interior_brick",
+    "ericrolph_cannon_car_wash_selector_sign_face",
+    "ericrolph_cannon_car_wash_selector_wet_concrete",
 )
 PROP_XY = (0.0, 0.0)
-SUBJECT_MEASUREMENT_POSITION = (0.0, 12.5, 20.0)
-SUBJECT_ROTATION = (0, 0, 0, 1)
+SUBJECT_APPROACH_LATERAL_OFFSET = -0.65
+SUBJECT_APPROACH_YAW_RADIANS = math.radians(2.0)
+SUBJECT_MEASUREMENT_POSITION = (SUBJECT_APPROACH_LATERAL_OFFSET, 20.0, 20.0)
+SUBJECT_ROTATION = (
+    0,
+    0,
+    math.sin(SUBJECT_APPROACH_YAW_RADIANS / 2.0),
+    math.cos(SUBJECT_APPROACH_YAW_RADIANS / 2.0),
+)
 PROP_ROTATED_QUATERNION = (0, 0, math.sqrt(0.5), math.sqrt(0.5))
+PROP_DEFAULT_QUATERNION = (0, 0, 0, 1)
 APPROACH_SPEED_MPS = 2.0
 CAPTURE_RESOLUTION = (640, 360)
 EXPECTED_EMITTER_COUNTS = {
@@ -101,6 +117,114 @@ def _runtime_state(bng: BeamNGpy) -> dict[str, Any]:
         "state.visual_exists = visual ~= nil; "
         "state.visual_play_ambient = visual and visual:getField('playAmbient', 0) or nil; "
         "return jsonEncode(state)",
+    )
+
+
+def _material_loader_diagnostics(bng: BeamNGpy) -> dict[str, Any]:
+    material_names = json.dumps(EXPECTED_MATERIALS, separators=(",", ":"))
+    return _lua_json(
+        bng,
+        f"local path = {ANIMATED_MATERIALS_PATH!r}; "
+        f"local names = jsonDecode({material_names!r}); "
+        "local function countMaterials() local count = 0; local classes = {}; "
+        "for _, name in ipairs(names) do local object = scenetree.findObject(name); "
+        "if object then count = count + 1; classes[name] = object:getClassName() end; end; "
+        "return count, classes end; "
+        "local beforeCount, beforeClasses = countMaterials(); "
+        "local exists = FS:fileExists(path); "
+        "local contents = exists and readFile(path) or nil; "
+        "local ok, result = pcall(loadJsonMaterialsFile, path); "
+        "local afterCount, afterClasses = countMaterials(); "
+        "return jsonEncode({file_exists = exists, byte_count = contents and #contents or -1, "
+        "load_ok = ok, load_result = tostring(result), before_count = beforeCount, "
+        "after_count = afterCount, before_classes = beforeClasses, "
+        "after_classes = afterClasses})",
+    )
+
+
+def _vehicle_origin_clearance(bng: BeamNGpy, vehicle_name: str) -> float:
+    state = _lua_json(
+        bng,
+        f"local vehicle = scenetree.findObject({vehicle_name!r}); "
+        "if not vehicle then return jsonEncode({ok = false}) end; "
+        "local box = vehicle:getSpawnWorldOOBB(); "
+        "local minimumZ = math.huge; "
+        "for index = 0, 7 do minimumZ = math.min(minimumZ, box:getPoint(index).z) end; "
+        "local position = vehicle:getPosition(); "
+        "return jsonEncode({ok = true, clearance = position.z - minimumZ})",
+    )
+    assert state["ok"] is True, state
+    return float(state["clearance"])
+
+
+def _wait_for_occupancy(
+    bng: BeamNGpy,
+    *,
+    count: int,
+    active: bool,
+    attempts: int = 120,
+) -> dict[str, Any]:
+    state: dict[str, Any] = {}
+    for _ in range(attempts):
+        bng.control.step(3, wait=True)
+        state = _runtime_state(bng)
+        if int(state.get("wash_subject_count", -1)) == count and state.get("wash_active") is active:
+            return state
+    pytest.fail({"expected_count": count, "expected_active": active, "state": state})
+
+
+def _launch_containment_state(bng: BeamNGpy) -> dict[str, Any]:
+    return _lua_json(
+        bng,
+        f"local extension = extensions[{RUNTIME_EXTENSION!r}]; "
+        f"local prop = scenetree.findObject({PROP_NAME!r}); "
+        f"local subject = scenetree.findObject({SUBJECT_NAME!r}); "
+        "if not extension or not prop or not subject then "
+        "return jsonEncode({ok = false}) end; "
+        "local state = extension.getSystemState(prop:getID()); "
+        "local trigger = state.launch_trigger and "
+        "scenetree.findObject(state.launch_trigger.name) or nil; "
+        "if not trigger then return jsonEncode({ok = false}) end; "
+        "local center = trigger:getPosition(); local scale = trigger:getScale(); "
+        "local box = subject:getSpawnWorldOOBB(); "
+        "local minimum = vec3(math.huge, math.huge, math.huge); "
+        "local maximum = vec3(-math.huge, -math.huge, -math.huge); "
+        "for index = 0, 7 do local point = box:getPoint(index); "
+        "minimum.x = math.min(minimum.x, point.x); "
+        "minimum.y = math.min(minimum.y, point.y); "
+        "minimum.z = math.min(minimum.z, point.z); "
+        "maximum.x = math.max(maximum.x, point.x); "
+        "maximum.y = math.max(maximum.y, point.y); "
+        "maximum.z = math.max(maximum.z, point.z); end; "
+        "return jsonEncode({ok = true, center = {center.x, center.y, center.z}, "
+        "scale = {scale.x, scale.y, scale.z}, "
+        "vehicle_min = {minimum.x, minimum.y, minimum.z}, "
+        "vehicle_max = {maximum.x, maximum.y, maximum.z}})",
+    )
+
+
+def _runtime_trigger_transform(bng: BeamNGpy, state_key: str) -> dict[str, Any]:
+    assert state_key in {"wash_trigger", "repair_trigger", "launch_trigger"}
+    return _lua_json(
+        bng,
+        f"local extension = extensions[{RUNTIME_EXTENSION!r}]; "
+        f"local prop = scenetree.findObject({PROP_NAME!r}); "
+        "if not extension or not prop then return jsonEncode({ok = false}) end; "
+        "local state = extension.getSystemState(prop:getID()); "
+        f"local description = state[{state_key!r}]; "
+        "local trigger = description and scenetree.findObject(description.name) or nil; "
+        "if not trigger then return jsonEncode({ok = false}) end; "
+        "local position = trigger:getPosition(); local scale = trigger:getScale(); "
+        "local rotation = quat(trigger:getRotation()); "
+        "local forward = rotation * vec3(0, 1, 0); forward:normalize(); "
+        "local up = rotation * vec3(0, 0, 1); up:normalize(); "
+        "return jsonEncode({ok = true, "
+        "position = {position.x, position.y, position.z}, "
+        "scale = {scale.x, scale.y, scale.z}, "
+        "forward = {forward.x, forward.y, forward.z}, "
+        "up = {up.x, up.y, up.z}, "
+        "mode = trigger:getField('triggerMode', 0), "
+        "test_type = trigger:getField('triggerTestType', 0)})",
     )
 
 
@@ -250,7 +374,9 @@ def _subject_pose(bng: BeamNGpy) -> dict[str, Any]:
         "if not vehicle then return jsonEncode({ok = false}) end; "
         "local position = vehicle:getPosition(); "
         "local direction = vehicle:getDirectionVector(); direction:normalize(); "
+        "local up = vehicle:getDirectionVectorUp(); up:normalize(); "
         "local box = vehicle:getSpawnWorldOOBB(); "
+        "local center = box:getCenter(); "
         "local minimumZ = math.huge; local maximumZ = -math.huge; "
         "for index = 0, 7 do "
         "local point = box:getPoint(index); "
@@ -260,6 +386,8 @@ def _subject_pose(bng: BeamNGpy) -> dict[str, Any]:
         "return jsonEncode({ok = true, "
         "position = {position.x, position.y, position.z}, "
         "direction = {direction.x, direction.y, direction.z}, "
+        "up = {up.x, up.y, up.z}, "
+        "bounding_center = {center.x, center.y, center.z}, "
         "minimum_z = minimumZ, maximum_z = maximumZ})",
     )
 
@@ -269,8 +397,10 @@ def _inject_forward_velocity(bng: BeamNGpy, speed_mps: float) -> list[float]:
         bng,
         f"local vehicle = scenetree.findObject({SUBJECT_NAME!r}); "
         "if not vehicle then return jsonEncode({ok = false}) end; "
-        "local facing = vehicle:getDirectionVector(); "
-        "local direction = vec3(facing.x, facing.y, 0); direction:normalize(); "
+        # Translate along the authored corridor without steering the vehicle.
+        # Its deliberately offset 2-degree heading must survive until the repair
+        # zone so the alignment policy, rather than the test driver, corrects it.
+        "local direction = vec3(0, -1, 0); "
         f"local velocity = direction * {speed_mps:.6f}; "
         "vehicle:applyClusterVelocityScaleAdd(vehicle:getRefNodeId(), 0, "
         "velocity.x, velocity.y, velocity.z); "
@@ -345,6 +475,8 @@ def _trajectory_sample(
         "wash_active": runtime_state.get("wash_active"),
         "wash_subject_count": runtime_state.get("wash_subject_count"),
         "effect_active_count": runtime_state.get("effect_active_count"),
+        "light_present_count": runtime_state.get("light_present_count"),
+        "light_expected_count": runtime_state.get("light_expected_count"),
         "repair_pending_count": runtime_state.get("repair_pending_count"),
         "repaired_subject_count": runtime_state.get("repaired_subject_count"),
         "active_phase": runtime_state.get("active_phase"),
@@ -621,13 +753,33 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                 scenario_name,
                 description="Disposable selector-prop free-roam acceptance fixture",
             )
-            subject = Vehicle(SUBJECT_NAME, "etk800", license="WASHTEST", color="White")
+            subject = Vehicle(
+                SUBJECT_NAME,
+                "citybus",
+                part_config="vehicles/citybus/city.pc",
+                license="BUSWASH",
+                color="White",
+            )
+            occupant_a = Vehicle(OCCUPANT_A_NAME, "pigeon", license="WASH-A")
+            occupant_b = Vehicle(OCCUPANT_B_NAME, "pigeon", license="WASH-B")
             # Start clear of all geometry solely to measure this model/config's
             # exact origin-to-OOBB clearance before placing it on the raycast map
             # surface. This avoids both guessed Z offsets and BeamNGpy cling.
             scenario.add_vehicle(
                 subject,
                 pos=SUBJECT_MEASUREMENT_POSITION,
+                rot_quat=SUBJECT_ROTATION,
+                cling=False,
+            )
+            scenario.add_vehicle(
+                occupant_a,
+                pos=(-10.0, 25.0, 20.0),
+                rot_quat=SUBJECT_ROTATION,
+                cling=False,
+            )
+            scenario.add_vehicle(
+                occupant_b,
+                pos=(10.0, 25.0, 20.0),
                 rot_quat=SUBJECT_ROTATION,
                 cling=False,
             )
@@ -662,7 +814,13 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             prop_position = (PROP_XY[0], PROP_XY[1], surface_z)
 
             prop = Vehicle(PROP_NAME, MOD_ID, license="WASH")
-            spawned = bng.vehicles.spawn(prop, prop_position, (0, 0, 0, 1), False, True)
+            spawned = bng.vehicles.spawn(
+                prop,
+                prop_position,
+                PROP_DEFAULT_QUATERNION,
+                False,
+                True,
+            )
             assert spawned is True
 
             runtime_state: dict[str, Any] = {}
@@ -672,12 +830,16 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                 if runtime_state.get("registered"):
                     break
             assert runtime_state["loaded"] is True
+            if runtime_state.get("registered") is not True:
+                runtime_state["material_loader_diagnostics"] = _material_loader_diagnostics(bng)
             assert runtime_state["registered"] is True, runtime_state
             assert runtime_state["arbitrary_vehicle_support"] is True
             assert runtime_state["visual_exists"] is True
             assert runtime_state["effect_present_count"] == 16
             assert runtime_state["effect_expected_count"] == 16
             assert runtime_state["effect_active_count"] == 0
+            assert runtime_state["light_present_count"] == 7
+            assert runtime_state["light_expected_count"] == 7
             assert runtime_state["emitter_present_counts"] == EXPECTED_EMITTER_COUNTS
             assert runtime_state.get("emitter_active_counts") in ({}, None)
             assert runtime_state["wash_trigger"] == {
@@ -757,6 +919,8 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                     rotated_runtime_state = runtime_state
                     break
             assert rotated_runtime_state is not None, runtime_state
+            assert rotated_runtime_state["light_present_count"] == 7
+            assert rotated_runtime_state["light_expected_count"] == 7
 
             effect_orientation = _runtime_effect_orientation_state(bng)
             assert effect_orientation["ok"] is True, effect_orientation
@@ -783,7 +947,7 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                 bng.vehicles.teleport(
                     prop,
                     prop_position,
-                    SUBJECT_ROTATION,
+                    PROP_DEFAULT_QUATERNION,
                     True,
                 )
                 is True
@@ -803,7 +967,93 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                     restored_runtime_state = runtime_state
                     break
             assert restored_runtime_state is not None, runtime_state
+            assert restored_runtime_state["light_present_count"] == 7
             assert restored_runtime_state["ground_origin"][2] == pytest.approx(surface_z, abs=0.03)
+            repair_transform = _runtime_trigger_transform(bng, "repair_trigger")
+            assert repair_transform == {
+                "ok": True,
+                "position": pytest.approx([0.0, 0.0, surface_z + 2.1], abs=0.03),
+                "scale": pytest.approx([5.4, 2.2, 4.2], abs=0.001),
+                "forward": pytest.approx([0.0, -1.0, 0.0], abs=0.001),
+                "up": pytest.approx([0.0, 0.0, 1.0], abs=0.001),
+                "mode": "Overlaps",
+                "test_type": "Bounding box",
+            }
+            launch_transform = _runtime_trigger_transform(bng, "launch_trigger")
+            assert launch_transform == {
+                "ok": True,
+                "position": pytest.approx([0.0, 0.0, surface_z + 2.1], abs=0.03),
+                "scale": pytest.approx([5.8, 17.5, 4.6], abs=0.001),
+                "forward": pytest.approx([0.0, -1.0, 0.0], abs=0.001),
+                "up": pytest.approx([0.0, 0.0, 1.0], abs=0.001),
+                "mode": "Contains",
+                "test_type": "Bounding box",
+            }
+
+            # Exercise the wash as a true occupancy set. Two compact vehicles
+            # overlap the entrance end without reaching the launch or repair
+            # zones. Removing either one must leave every roller and particle
+            # layer active for the remaining occupant.
+            occupant_positions = (
+                (
+                    occupant_a,
+                    OCCUPANT_A_NAME,
+                    (
+                        -1.65,
+                        7.6,
+                        surface_z + _vehicle_origin_clearance(bng, OCCUPANT_A_NAME) + 0.02,
+                    ),
+                ),
+                (
+                    occupant_b,
+                    OCCUPANT_B_NAME,
+                    (1.65, 7.6, surface_z + _vehicle_origin_clearance(bng, OCCUPANT_B_NAME) + 0.02),
+                ),
+            )
+            for occupant, _name, position in occupant_positions:
+                assert (
+                    bng.vehicles.teleport(
+                        occupant,
+                        position,
+                        SUBJECT_ROTATION,
+                        True,
+                    )
+                    is True
+                )
+                _set_subject_frozen(occupant, True)
+            occupancy_two = _wait_for_occupancy(bng, count=2, active=True)
+            assert occupancy_two["effect_active_count"] == 16
+            assert occupancy_two["emitter_active_counts"] == EXPECTED_EMITTER_COUNTS
+            assert str(occupancy_two["visual_play_ambient"]).casefold() in {"1", "true"}
+
+            assert (
+                bng.vehicles.teleport(
+                    occupant_a,
+                    (-10.0, 25.0, occupant_positions[0][2][2]),
+                    SUBJECT_ROTATION,
+                    True,
+                )
+                is True
+            )
+            occupancy_one = _wait_for_occupancy(bng, count=1, active=True)
+            assert occupancy_one["effect_active_count"] == 16
+            assert occupancy_one["emitter_active_counts"] == EXPECTED_EMITTER_COUNTS
+            assert str(occupancy_one["visual_play_ambient"]).casefold() in {"1", "true"}
+
+            assert (
+                bng.vehicles.teleport(
+                    occupant_b,
+                    (10.0, 25.0, occupant_positions[1][2][2]),
+                    SUBJECT_ROTATION,
+                    True,
+                )
+                is True
+            )
+            occupancy_zero = _wait_for_occupancy(bng, count=0, active=False)
+            assert occupancy_zero["effect_active_count"] == 0
+            assert str(occupancy_zero["visual_play_ambient"]).casefold() in {"0", "false"}
+            bng.vehicles.despawn(occupant_a)
+            bng.vehicles.despawn(occupant_b)
 
             placement = _lua_json(
                 bng,
@@ -836,8 +1086,8 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             grounded = _subject_pose(bng)
             assert grounded["ok"] is True
             assert grounded["minimum_z"] == pytest.approx(surface_z, abs=0.08)
-            assert grounded["direction"][0] == pytest.approx(0.0, abs=0.02)
-            assert grounded["direction"][1] <= -0.98, grounded
+            assert 0.02 <= abs(float(grounded["direction"][0])) <= 0.08, grounded
+            assert grounded["direction"][1] <= -0.99, grounded
             assert grounded["direction"][2] == pytest.approx(0.0, abs=0.02)
 
             clean_integrity = _subject_integrity_state(subject)
@@ -862,11 +1112,11 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             )
             trajectory: list[dict[str, Any]] = []
             active_snapshot: dict[str, Any] | None = None
-            for _ in range(180):
+            for _ in range(300):
                 direction = _inject_forward_velocity(bng, APPROACH_SPEED_MPS)
-                assert direction[0] == pytest.approx(0.0, abs=0.02)
+                assert direction[0] == pytest.approx(0.0, abs=0.05)
                 assert direction[1] <= -0.98, direction
-                assert direction[2] == pytest.approx(0.0, abs=0.02)
+                assert direction[2] == pytest.approx(0.0, abs=0.05)
                 bng.control.step(3, wait=True)
                 runtime_state = _runtime_state(bng)
                 _remember_trajectory(
@@ -942,6 +1192,47 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                 "true",
             }
             render_difference = _assert_temporal_pixel_difference(first_capture, second_capture)
+            pre_midpoint_integrity = _subject_integrity_state(subject)
+            pre_midpoint_pose = _subject_pose(bng)
+            assert pre_midpoint_integrity["damage"] > 0.01
+            assert pre_midpoint_integrity["broken_beam_count"] >= 3
+            assert pre_midpoint_integrity["deflated_tire_count"] > 0
+            assert pre_midpoint_pose["position"][1] > 1.1, pre_midpoint_pose
+            trigger_forward = [float(value) for value in repair_transform["forward"]]
+            trigger_up = [float(value) for value in repair_transform["up"]]
+            incoming_direction = [float(value) for value in pre_midpoint_pose["direction"]]
+            incoming_trigger_dot = sum(
+                incoming_direction[axis] * trigger_forward[axis] for axis in range(3)
+            )
+            expected_corridor_direction = [
+                value if incoming_trigger_dot >= 0 else -value for value in trigger_forward
+            ]
+            corridor_right = [
+                expected_corridor_direction[1] * trigger_up[2]
+                - expected_corridor_direction[2] * trigger_up[1],
+                expected_corridor_direction[2] * trigger_up[0]
+                - expected_corridor_direction[0] * trigger_up[2],
+                expected_corridor_direction[0] * trigger_up[1]
+                - expected_corridor_direction[1] * trigger_up[0],
+            ]
+            right_length = math.sqrt(sum(value * value for value in corridor_right))
+            corridor_right = [value / right_length for value in corridor_right]
+            repair_center = [float(value) for value in repair_transform["position"]]
+            centerline_error_before = abs(
+                sum(
+                    (float(pre_midpoint_pose["bounding_center"][axis]) - repair_center[axis])
+                    * corridor_right[axis]
+                    for axis in range(3)
+                )
+            )
+            assert centerline_error_before >= 0.05, pre_midpoint_pose
+            assert (
+                sum(
+                    incoming_direction[axis] * expected_corridor_direction[axis]
+                    for axis in range(3)
+                )
+                > 0
+            )
             _set_subject_frozen(subject, False)
             subject.control(
                 throttle=0.0,
@@ -955,9 +1246,17 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             repair_complete_snapshot: dict[str, Any] | None = None
             repaired_integrity: dict[str, Any] | None = None
             repaired_pose: dict[str, Any] | None = None
+            repair_pose_samples: list[dict[str, Any]] = []
             countdown_snapshot: dict[str, Any] | None = None
             for _ in range(900):
-                _inject_forward_velocity(bng, APPROACH_SPEED_MPS)
+                # Once the runtime has acknowledged the repair trigger, stop
+                # applying external cluster velocity until its reset/pose/verify
+                # handshake completes. Controller freeze cannot cancel a direct
+                # test-side physics injection, and doing so would fight the very
+                # alignment policy this gate is intended to measure.
+                repair_is_settling = repair_pending_observed and repair_complete_snapshot is None
+                if not repair_is_settling:
+                    _inject_forward_velocity(bng, APPROACH_SPEED_MPS)
                 # Sample every simulation frame so the two-frame repair settle
                 # window and its acknowledgement boundary cannot be skipped.
                 bng.control.step(1, wait=True)
@@ -965,10 +1264,12 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                 repair_pending_observed = repair_pending_observed or (
                     int(runtime_state.get("repair_pending_count", 0)) > 0
                 )
-                _remember_trajectory(
-                    trajectory,
-                    _trajectory_sample(bng, subject, runtime_state, "launch_approach"),
-                )
+                pose_sample = _trajectory_sample(bng, subject, runtime_state, "launch_approach")
+                _remember_trajectory(trajectory, pose_sample)
+                if int(runtime_state.get("repair_pending_count", 0)) > 0 or (
+                    repair_pending_observed and repair_complete_snapshot is None
+                ):
+                    repair_pose_samples.append(pose_sample)
                 if (
                     runtime_state.get("repaired_subject_count") == 1
                     and runtime_state.get("repair_pending_count") == 0
@@ -1002,9 +1303,34 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             assert repaired_integrity["broken_beam_count"] == 0
             assert repaired_integrity["deflated_tire_count"] == 0
             assert repaired_pose is not None and repaired_pose["ok"] is True
-            assert repaired_pose["direction"][0] == pytest.approx(0.0, abs=0.02)
-            assert repaired_pose["direction"][1] <= -0.98, repaired_pose
-            assert repaired_pose["direction"][2] == pytest.approx(0.0, abs=0.02)
+            repaired_direction = [float(value) for value in repaired_pose["direction"]]
+            repaired_up = [float(value) for value in repaired_pose["up"]]
+            repaired_centerline_error = abs(
+                sum(
+                    (float(repaired_pose["bounding_center"][axis]) - repair_center[axis])
+                    * corridor_right[axis]
+                    for axis in range(3)
+                )
+            )
+            repaired_corridor_dot = sum(
+                repaired_direction[axis] * expected_corridor_direction[axis] for axis in range(3)
+            )
+            repaired_upright_dot = sum(repaired_up[axis] * trigger_up[axis] for axis in range(3))
+            repaired_travel_dot = sum(
+                repaired_direction[axis] * incoming_direction[axis] for axis in range(3)
+            )
+            assert repaired_centerline_error <= 0.15, repaired_pose
+            assert repaired_corridor_dot >= 0.999, repaired_pose
+            assert repaired_upright_dot >= 0.999, repaired_pose
+            assert repaired_travel_dot > 0, repaired_pose
+            assert repair_pose_samples
+            assert all(
+                sum(
+                    float(sample["direction"][axis]) * incoming_direction[axis] for axis in range(3)
+                )
+                > 0
+                for sample in repair_pose_samples
+            ), repair_pose_samples
 
             assert countdown_snapshot is not None, {
                 "runtime_state": runtime_state,
@@ -1014,6 +1340,24 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             assert countdown_snapshot["active_phase"] == "countdown"
             assert countdown_snapshot["repaired_subject_count"] == 1
             assert countdown_snapshot["repair_pending_count"] == 0
+            launch_containment = _launch_containment_state(bng)
+            assert launch_containment["ok"] is True, launch_containment
+            containment_tolerance = 0.06
+            for axis in range(3):
+                trigger_minimum = (
+                    float(launch_containment["center"][axis])
+                    - float(launch_containment["scale"][axis]) / 2.0
+                )
+                trigger_maximum = (
+                    float(launch_containment["center"][axis])
+                    + float(launch_containment["scale"][axis]) / 2.0
+                )
+                assert float(launch_containment["vehicle_min"][axis]) >= (
+                    trigger_minimum - containment_tolerance
+                ), launch_containment
+                assert float(launch_containment["vehicle_max"][axis]) <= (
+                    trigger_maximum + containment_tolerance
+                ), launch_containment
 
             pre_go_integrity_baseline = _subject_integrity_state(subject)
             assert pre_go_integrity_baseline["controller_frozen"] is True
@@ -1140,6 +1484,7 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
         "repair_reset_ack",
         "repair_complete",
         "containment_verified",
+        "containment_exit_suppressed",
         "hold_requested",
         "hold_ack",
         "countdown_3",
@@ -1156,7 +1501,11 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
     ):
         assert required in events, {"missing": required, "events": events}
 
-    assert "subject_reset" not in events, records
+    subject_reset_records = [record for record in records if record["event"] == "subject_reset"]
+    assert len(subject_reset_records) == 2, subject_reset_records
+    assert [int(record["remaining_subject_count"]) for record in subject_reset_records] == [1, 0]
+    assert subject_reset_records[0]["wash_systems_active"] is True
+    assert subject_reset_records[1]["wash_systems_active"] is False
     vehicle_reset_aborts = [
         record
         for record in records
@@ -1197,6 +1546,14 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
     assert int(after_repair["deflated_tires_after"]) == 0
     assert float(after_repair["position_drift_m"]) <= 0.15
     assert float(after_repair["direction_dot"]) >= 0.999
+    assert float(after_repair["centerline_error_before_m"]) >= 0.05
+    assert float(after_repair["centerline_error_m"]) <= 0.15
+    assert float(after_repair["alignment_translation_m"]) >= 0.05
+    assert float(after_repair["corridor_direction_dot"]) >= 0.999
+    assert float(after_repair["upright_dot"]) >= 0.999
+    assert float(after_repair["travel_direction_dot"]) > 0
+    assert after_repair["travel_sign_preserved"] is True
+    assert int(after_repair["travel_sign"]) in {-1, 1}
 
     prop_reset_records = [record for record in records if record["event"] == "prop_reset"]
     assert len(prop_reset_records) >= 2, records
@@ -1273,7 +1630,8 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             {
                 "level": "smallgrid",
                 "surface_z": surface_z,
-                "subject_model": "etk800",
+                "subject_model": "citybus",
+                "subject_configuration": "city",
                 "sequence_names": asset_state["sequence_names"],
                 "material_count": len(asset_state["materials"]),
                 "effect_active_count": countdown_snapshot["effect_active_count"],
@@ -1291,6 +1649,24 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                     "samples": effect_orientation["samples"],
                 },
                 "render_difference": render_difference,
+                "occupancy_reference_count": {
+                    "two": {
+                        "subject_count": occupancy_two["wash_subject_count"],
+                        "wash_active": occupancy_two["wash_active"],
+                        "effect_active_count": occupancy_two["effect_active_count"],
+                    },
+                    "one": {
+                        "subject_count": occupancy_one["wash_subject_count"],
+                        "wash_active": occupancy_one["wash_active"],
+                        "effect_active_count": occupancy_one["effect_active_count"],
+                    },
+                    "zero": {
+                        "subject_count": occupancy_zero["wash_subject_count"],
+                        "wash_active": occupancy_zero["wash_active"],
+                        "effect_active_count": occupancy_zero["effect_active_count"],
+                    },
+                },
+                "launch_containment": launch_containment,
                 "repair": {
                     "token": repair_token,
                     "pending_observed": repair_pending_observed,
@@ -1308,8 +1684,27 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                         "deflated_tire_count": int(after_repair["deflated_tires_after"]),
                         "position_drift_m": float(after_repair["position_drift_m"]),
                         "direction_dot": float(after_repair["direction_dot"]),
+                        "centerline_error_before_m": float(
+                            after_repair["centerline_error_before_m"]
+                        ),
+                        "centerline_error_m": float(after_repair["centerline_error_m"]),
+                        "alignment_translation_m": float(after_repair["alignment_translation_m"]),
+                        "corridor_direction_dot": float(after_repair["corridor_direction_dot"]),
+                        "upright_dot": float(after_repair["upright_dot"]),
+                        "travel_direction_dot": float(after_repair["travel_direction_dot"]),
+                        "travel_sign_preserved": after_repair["travel_sign_preserved"],
+                        "travel_sign": int(after_repair["travel_sign"]),
+                    },
+                    "independent_pose_readback": {
+                        "centerline_error_m": repaired_centerline_error,
+                        "corridor_direction_dot": repaired_corridor_dot,
+                        "upright_dot": repaired_upright_dot,
+                        "travel_direction_dot": repaired_travel_dot,
+                        "repair_frame_sample_count": len(repair_pose_samples),
                     },
                     "external_after": repaired_integrity,
+                    "pre_midpoint_integrity": pre_midpoint_integrity,
+                    "pre_midpoint_pose": pre_midpoint_pose,
                     "ordered_events": list(repair_event_names),
                 },
                 "prop_reset_count": max(

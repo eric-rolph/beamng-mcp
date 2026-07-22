@@ -3,17 +3,17 @@
   "title": "Cannon Car Wash",
   "internal_name": "ericrolph_cannon_car_wash",
   "stable_zip_filename": "cannon_car_wash_ericrolph.zip",
-  "version": "1.6.0",
+  "version": "1.8.0",
   "type": "Other",
   "author": "Eric Rolph",
   "tag_line": "Water, layered air drying, full repair, then a 360 km/h launch",
-  "description": "Drive a Gavril D-Series through a detailed Gridmap V2 car wash, or place the fully functional rigid structure from the Props vehicle selector on a flat surface in free roam. Any real vehicle entering the bay starts five animated brushes, six water jets, and a layered mist, steam, and dust dryer. The entry-water arch restores transient vehicle damage before a fully contained 3-2-1-GO launch at 360 km/h.",
+  "description": "Drive a Gavril D-Series through a detailed Gridmap V2 car wash, or place the fully functional rigid structure from the Props vehicle selector on a flat surface in free roam. Standard and large vehicles, including the stock Wentward city bus, start five animated brushes, six water jets, and a layered mist, steam, and dust dryer. A midpoint restore cycle must complete before the fully contained 3-2-1-GO launch at 360 km/h, and the wash remains active until its final occupant exits.",
   "categories": [
     "Gameplay",
     "Scenarios",
     "Props"
   ],
-  "update_summary": "Replaced the exit rinse with a layered six-jet waterfall mist, two-jet exhaust steam, and two-jet ambient dust dryer. Added a dedicated entry-water repair trigger using an acknowledged freeze, full physics/flex-mesh reset, exact pose restoration, post-reset integrity proof, and acknowledged release, guarded against recursive trigger/reset callbacks in both scenario and free-roam runtimes.",
+  "update_summary": "Preserved and corridor-aligned vehicle pose through midpoint repair, replaced block brushes with optimized alpha-card fans, added authored CMU/brick/wet-concrete/corrugated PBR textures, emissive signage, tunnel and entrance lighting, and strengthened cooked-texture and incremental Lua-log validation.",
   "gallery_images": [
     "images/01_exterior.png",
     "images/02_wash_active.png"
@@ -29,13 +29,14 @@
       1280,
       720
     ],
-    "source": "tests/test_cannon_car_wash_phase3_live.py"
+    "source": "tests/test_cannon_car_wash_phase4_live.py",
+    "captured_at": "2026-07-21T21:42:18-06:00"
   },
   "release_artifact": {
     "filename": "cannon_car_wash_ericrolph.zip",
-    "sha256": "93f946e585c77a1a5dc98400a9144dbf7edc9b16d774f39474fccd197f2b9ad3",
-    "size_bytes": 11844763,
-    "member_count": 16
+    "sha256": "bdd54a270311fbc5b3d6ffb46022c0fac0474225b355e106f85260e50fd9d583",
+    "size_bytes": 23754854,
+    "member_count": 40
   },
   "release_validation": {
     "beamng_drive": "0.38.6.0.19963",
@@ -48,7 +49,38 @@
     "selector_runtime_cross_map_level": "smallgrid",
     "selector_runtime_common_art_resolved": true,
     "selector_runtime_arbitrary_vehicle": true,
+    "selector_runtime_large_vehicle_model": "citybus",
+    "selector_runtime_large_vehicle_configuration": "city",
+    "selector_runtime_large_vehicle_metadata_dimensions_m": [
+      3.11,
+      12.63,
+      2.994
+    ],
+    "selector_runtime_midpoint_repair_verified": true,
+    "selector_runtime_launch_requires_completed_repair": true,
+    "selector_runtime_two_vehicle_occupancy_verified": true,
+    "selector_runtime_remaining_vehicle_keeps_wash_active": true,
+    "selector_runtime_containment_exit_stabilized": true,
+    "selector_runtime_occupancy_evidence": {
+      "two_vehicles": {
+        "subject_count": 2,
+        "wash_active": true,
+        "effect_active_count": 16
+      },
+      "one_vehicle": {
+        "subject_count": 1,
+        "wash_active": true,
+        "effect_active_count": 16
+      },
+      "zero_vehicles": {
+        "subject_count": 0,
+        "wash_active": false,
+        "effect_active_count": 0
+      }
+    },
     "selector_runtime_effect_count": 16,
+    "selector_runtime_material_count": 18,
+    "selector_runtime_light_count": 7,
     "selector_runtime_emitter_counts": {
       "BNGP_sprinkler": 6,
       "BNGP_waterfallsteam": 6,
@@ -58,10 +90,36 @@
     "selector_runtime_rotated_effect_minimum_inward_dot": 0.99999999999998,
     "selector_runtime_repair_verified": true,
     "selector_runtime_repair_count": 1,
-    "selector_runtime_repair_position_drift_m": 0.0887491217673,
+    "selector_runtime_repair_position_drift_m": 0.0043196832906604,
+    "selector_runtime_repair_centerline_error_before_m": 0.43114733695984,
+    "selector_runtime_repair_centerline_error_m": 0.00079983472824097,
+    "selector_runtime_repair_alignment_translation_m": 0.7704204737998,
+    "selector_runtime_repair_corridor_direction_dot": 0.99999573401305,
+    "selector_runtime_repair_upright_dot": 0.99999550695098,
+    "selector_runtime_repair_travel_direction_dot": 0.99638558919562,
+    "selector_runtime_repair_travel_sign_preserved": true,
+    "selector_runtime_repair_pose_correction_attempts": 1,
     "selector_runtime_post_repair_damage": 0.0,
-    "scenario_repair_position_drift_m": 0.01519309780694,
+    "scenario_repair_position_drift_m": 0.014737530980428,
+    "scenario_repair_centerline_error_before_m": 0.64455413818359,
+    "scenario_repair_centerline_error_m": 0.0369873046875,
+    "scenario_repair_alignment_translation_m": 0.65845469466741,
+    "scenario_repair_corridor_direction_dot": 0.99970172513369,
+    "scenario_repair_upright_dot": 0.99975595047332,
+    "scenario_repair_travel_direction_dot": 0.99880570473673,
+    "scenario_repair_travel_sign_preserved": true,
+    "scenario_repair_pose_correction_attempts": 0,
     "scenario_post_repair_damage": 0.0,
+    "scenario_launch_peak_speed_mps": 98.36522085906223,
+    "scenario_launch_peak_speed_kph": 354.11479509262404,
+    "scenario_launch_forward_alignment": 0.9999600428428329,
+    "scenario_impact_damage_delta": 14162682.0,
+    "scenario_impact_part_damage_count": 45,
+    "scenario_effect_count": 16,
+    "scenario_light_count": 7,
+    "scenario_material_count": 18,
+    "scenario_dae_triangle_count": 10714,
+    "scenario_dae_primitive_group_count": 33,
     "selector_runtime_rendered_effects": true,
     "selector_runtime_repair_reset_callbacks_consumed": true,
     "selector_runtime_prop_reset_recovered": true,

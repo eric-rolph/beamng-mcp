@@ -4,11 +4,35 @@ local LOG_TAG = "ERICROLPH_CANNON_CAR_WASH_RUNTIME"
 local RUNTIME_EXTENSION_NAME = "ericrolph__cannon__car__wash_runtime"
 local PROP_MODEL = "ericrolph_cannon_car_wash"
 local PROP_VISUAL_MESH = "ericrolph_cannon_car_wash_selector_visual"
-local VISUAL_SHAPE = "/art/shapes/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae"
+local VISUAL_SHAPE = (
+  "/vehicles/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash_runtime_visual.dae"
+)
+local VISUAL_MATERIALS_PATH = "vehicles/ericrolph_cannon_car_wash/main.materials.json"
+local REQUIRED_VISUAL_MATERIALS = {
+  "ericrolph_cannon_car_wash_selector_brush_aqua",
+  "ericrolph_cannon_car_wash_selector_brush_blue",
+  "ericrolph_cannon_car_wash_selector_brush_cards",
+  "ericrolph_cannon_car_wash_selector_concrete",
+  "ericrolph_cannon_car_wash_selector_corrugated_blue",
+  "ericrolph_cannon_car_wash_selector_cyan_trim",
+  "ericrolph_cannon_car_wash_selector_deep_blue",
+  "ericrolph_cannon_car_wash_selector_exterior_cmu",
+  "ericrolph_cannon_car_wash_selector_glass",
+  "ericrolph_cannon_car_wash_selector_hazard_yellow",
+  "ericrolph_cannon_car_wash_selector_interior_brick",
+  "ericrolph_cannon_car_wash_selector_led",
+  "ericrolph_cannon_car_wash_selector_rubber",
+  "ericrolph_cannon_car_wash_selector_safety_orange",
+  "ericrolph_cannon_car_wash_selector_screen",
+  "ericrolph_cannon_car_wash_selector_sign_face",
+  "ericrolph_cannon_car_wash_selector_stainless",
+  "ericrolph_cannon_car_wash_selector_wet_concrete",
+}
 local UI_CATEGORY = "ericrolph_cannon_car_wash_runtime_countdown"
 local TRIGGER_CLASS = "BeamNGTrigger"
 local VISUAL_CLASS = "TSStatic"
 local EFFECT_CLASS = "ParticleEmitterNode"
+local LIGHT_SPECS = require("common/ericrolph_cannon_car_wash/lighting")
 local COUNTDOWN_INTERVAL_SECONDS = 1
 local COUNTDOWN_MESSAGES = {"3...", "2...", "1..."}
 local COUNTDOWN_EVENTS = {"countdown_3", "countdown_2", "countdown_1"}
@@ -17,6 +41,10 @@ local TRANSFORM_REFRESH_SECONDS = 0.1
 local VEHICLE_ACK_TIMEOUT_SECONDS = 1
 local REPAIR_ACK_TIMEOUT_SECONDS = 2
 local REPAIR_SETTLE_SIM_FRAMES = 2
+local REPAIR_MAX_CENTERLINE_ERROR_METERS = 0.15
+local REPAIR_MIN_CORRIDOR_DOT = 0.999
+local REPAIR_MIN_UPRIGHT_DOT = 0.999
+local REPAIR_MAX_POSE_CORRECTION_ATTEMPTS = 2
 local RELEASE_GRACE_SIM_FRAMES = 2
 
 -- The selector handoff uses a ground-plane reference node. The authored
@@ -26,10 +54,10 @@ local PROP_REF_OFFSET = vec3(0, 0, 0)
 local MODEL_ALIGNMENT_ROTATION = quat(0, 0, 1, 0)
 local WASH_TRIGGER_LOCAL_POSITION = vec3(0, 0, 2.2)
 local WASH_TRIGGER_SCALE = vec3(5.8, 17.5, 4.4)
-local REPAIR_TRIGGER_LOCAL_POSITION = vec3(0, -5.6, 2.1)
+local REPAIR_TRIGGER_LOCAL_POSITION = vec3(0, 0, 2.1)
 local REPAIR_TRIGGER_SCALE = vec3(5.4, 2.2, 4.2)
-local LAUNCH_TRIGGER_LOCAL_POSITION = vec3(0, 5, 2.1)
-local LAUNCH_TRIGGER_SCALE = vec3(5.8, 7.5, 4.6)
+local LAUNCH_TRIGGER_LOCAL_POSITION = vec3(0, 0, 2.1)
+local LAUNCH_TRIGGER_SCALE = vec3(5.8, 17.5, 4.6)
 local EFFECT_OFFSETS = {
   {suffix = "mister_PreSoak_L_1", emitter = "BNGP_sprinkler", position = vec3(-2.62, -5.6, 1.25), inward = vec3(1, 0, 0)},
   {suffix = "mister_PreSoak_L_2", emitter = "BNGP_sprinkler", position = vec3(-2.62, -5.6, 2.1), inward = vec3(1, 0, 0)},
@@ -253,6 +281,158 @@ local function exactSceneObject(name, expectedClass)
   return object
 end
 
+local function finiteVector3(value)
+  return value
+    and finiteNumber(value.x)
+    and finiteNumber(value.y)
+    and finiteNumber(value.z)
+end
+
+local function finiteQuaternion(value)
+  return value
+    and finiteNumber(value.x)
+    and finiteNumber(value.y)
+    and finiteNumber(value.z)
+    and finiteNumber(value.w)
+end
+
+-- Construct the repaired pose from the live trigger frame instead of assuming
+-- any vehicle model's internal forward axis. The source/target frame delta
+-- preserves BeamNG's own vehicle quaternion convention while aligning the
+-- visible vehicle with the wash corridor.
+local function repairTargetPose(vehicle, trigger)
+  if not vehicle or not trigger then return nil, "repair target objects are unavailable" end
+  local position = vehicle:getPosition()
+  local rotation = quat(vehicle:getRotation())
+  local direction = vec3(vehicle:getDirectionVector())
+  local vehicleUp = vec3(vehicle:getDirectionVectorUp())
+  local triggerPosition = trigger:getPosition()
+  local triggerRotation = quat(trigger:getRotation())
+  local boundingBox = vehicle:getSpawnWorldOOBB()
+  local boundingCenter = boundingBox and boundingBox:getCenter() or nil
+  if not finiteVector3(position)
+    or not finiteQuaternion(rotation)
+    or not finiteVector3(direction)
+    or not finiteVector3(vehicleUp)
+    or not finiteVector3(triggerPosition)
+    or not finiteQuaternion(triggerRotation)
+    or not finiteVector3(boundingCenter)
+    or direction:length() < 0.000001
+    or vehicleUp:length() < 0.000001 then
+    return nil, "repair pose snapshot is invalid"
+  end
+  direction:normalize()
+  vehicleUp:normalize()
+
+  local corridorUp = triggerRotation * vec3(0, 0, 1)
+  local corridorForward = triggerRotation * vec3(0, 1, 0)
+  if not finiteVector3(corridorUp)
+    or not finiteVector3(corridorForward)
+    or corridorUp:length() < 0.000001 then
+    return nil, "repair trigger frame is invalid"
+  end
+  corridorUp:normalize()
+  corridorForward = corridorForward - corridorUp * corridorForward:dot(corridorUp)
+  if corridorForward:length() < 0.000001 then
+    return nil, "repair trigger corridor axis is invalid"
+  end
+  corridorForward:normalize()
+
+  local travelSign = 1
+  if direction:dot(corridorForward) < 0 then
+    corridorForward = -corridorForward
+    travelSign = -1
+  end
+  local travelDirectionDotBefore = direction:dot(corridorForward)
+  if travelDirectionDotBefore <= 0.000001 then
+    return nil, "vehicle travel direction is perpendicular to the wash corridor"
+  end
+
+  local corridorRight = corridorForward:cross(corridorUp)
+  if not finiteVector3(corridorRight) or corridorRight:length() < 0.000001 then
+    return nil, "repair trigger lateral axis is invalid"
+  end
+  corridorRight:normalize()
+  local sourceUp = vehicleUp - direction * vehicleUp:dot(direction)
+  if sourceUp:length() < 0.000001 then
+    return nil, "vehicle forward/up basis is degenerate"
+  end
+  sourceUp:normalize()
+  local forwardAlignment = direction:getRotationTo(corridorForward)
+  local alignedUp = forwardAlignment * sourceUp
+  alignedUp = alignedUp - corridorForward * alignedUp:dot(corridorForward)
+  if alignedUp:length() < 0.000001 then
+    return nil, "aligned vehicle up axis is degenerate"
+  end
+  alignedUp:normalize()
+  -- Both vectors are perpendicular to corridorForward, so this second,
+  -- shortest-arc rotation is around the corridor axis and cannot undo the
+  -- forward alignment. This avoids quatFromDir basis ambiguity on vehicles
+  -- such as the city bus while removing roll/pitch explicitly.
+  local upAlignment = alignedUp:getRotationTo(corridorUp)
+  local alignmentRotation = (upAlignment * forwardAlignment):normalized()
+  local targetRotation = (alignmentRotation * rotation):normalized()
+  local alignedBoundingOffset = alignmentRotation * (boundingCenter - position)
+  local alignedBoundingCenter = position + alignedBoundingOffset
+  local centerlineOffset = (alignedBoundingCenter - triggerPosition):dot(corridorRight)
+  local targetPosition = position - corridorRight * centerlineOffset
+  if not finiteVector3(targetPosition) or not finiteQuaternion(targetRotation) then
+    return nil, "repair target transform is invalid"
+  end
+
+  return {
+    positionBefore = vec3(position.x, position.y, position.z),
+    rotationBefore = quat(rotation.x, rotation.y, rotation.z, rotation.w),
+    directionBefore = vec3(direction.x, direction.y, direction.z),
+    upBefore = vec3(vehicleUp.x, vehicleUp.y, vehicleUp.z),
+    targetPosition = targetPosition,
+    targetRotation = targetRotation,
+    targetDirection = corridorForward,
+    targetUp = corridorUp,
+    corridorRight = corridorRight,
+    corridorCenter = vec3(triggerPosition.x, triggerPosition.y, triggerPosition.z),
+    centerlineErrorBefore = math.abs(
+      (boundingCenter - triggerPosition):dot(corridorRight)
+    ),
+    alignmentTranslation = (targetPosition - position):length(),
+    travelDirectionDotBefore = travelDirectionDotBefore,
+    travelSign = travelSign,
+  }
+end
+
+local function repairedPoseMetrics(vehicle, repair)
+  if not vehicle or not repair then return nil end
+  local position = vehicle:getPosition()
+  local direction = vec3(vehicle:getDirectionVector())
+  local vehicleUp = vec3(vehicle:getDirectionVectorUp())
+  local boundingBox = vehicle:getSpawnWorldOOBB()
+  local boundingCenter = boundingBox and boundingBox:getCenter() or nil
+  if not finiteVector3(position)
+    or not finiteVector3(direction)
+    or not finiteVector3(vehicleUp)
+    or not finiteVector3(boundingCenter)
+    or direction:length() < 0.000001
+    or vehicleUp:length() < 0.000001 then
+    return nil
+  end
+  direction:normalize()
+  vehicleUp:normalize()
+  local centerlineError = math.abs(
+    (boundingCenter - repair.corridorCenter):dot(repair.corridorRight)
+  )
+  local corridorDirectionDot = direction:dot(repair.targetDirection)
+  local uprightDot = vehicleUp:dot(repair.targetUp)
+  local travelDirectionDot = direction:dot(repair.directionBefore)
+  return {
+    targetPositionDrift = (position - repair.targetPosition):length(),
+    centerlineError = centerlineError,
+    corridorDirectionDot = corridorDirectionDot,
+    uprightDot = uprightDot,
+    travelDirectionDot = travelDirectionDot,
+    travelSignPreserved = travelDirectionDot > 0,
+  }
+end
+
 local function queueVehicleCommand(vehicle, command, state, failureReason, reportFailure)
   local ok, commandError = pcall(function() vehicle:queueLuaCommand(command) end)
   if not ok then
@@ -309,6 +489,35 @@ local function registerInMission(object, name)
     end
   end)
   if not registered then return false, tostring(registerError) end
+  return true
+end
+
+local function ensureVisualMaterials()
+  local missing = {}
+  for _, name in ipairs(REQUIRED_VISUAL_MATERIALS) do
+    local material = scenetree.findObject(name)
+    local className = material and string.lower(tostring(material:getClassName())) or ""
+    if className ~= "material" then
+      missing[#missing + 1] = name
+    end
+  end
+  if #missing == 0 then return true end
+  if type(loadJsonMaterialsFile) ~= "function" then
+    return false, "loadJsonMaterialsFile is unavailable"
+  end
+  local loaded, loadError = pcall(loadJsonMaterialsFile, VISUAL_MATERIALS_PATH)
+  if not loaded then return false, tostring(loadError) end
+  missing = {}
+  for _, name in ipairs(REQUIRED_VISUAL_MATERIALS) do
+    local material = scenetree.findObject(name)
+    local className = material and string.lower(tostring(material:getClassName())) or ""
+    if className ~= "material" then
+      missing[#missing + 1] = name
+    end
+  end
+  if #missing > 0 then
+    return false, "material mappings remain unavailable: " .. table.concat(missing, ",")
+  end
   return true
 end
 
@@ -402,6 +611,86 @@ local function createEffect(spec)
   return object
 end
 
+local function lightSpecs(prefix)
+  local specs = {}
+  local sourcePrefix = PROP_MODEL .. "_"
+  for _, source in ipairs(LIGHT_SPECS) do
+    if type(source.name) ~= "string"
+      or source.name:sub(1, #sourcePrefix) ~= sourcePrefix
+      or (source.class ~= "PointLight" and source.class ~= "SpotLight") then
+      error("invalid authored light specification")
+    end
+    local spec = {
+      name = prefix .. "_" .. source.name:sub(#sourcePrefix + 1),
+      role = source.role,
+      class = source.class,
+      position = vec3(
+        source.local_position[1],
+        source.local_position[2],
+        source.local_position[3]
+      ),
+      color = source.color,
+      brightness = source.brightness,
+      castShadows = source.cast_shadows,
+      radius = source.radius,
+      range = source.range,
+      innerAngle = source.inner_angle_degrees,
+      outerAngle = source.outer_angle_degrees,
+    }
+    if source.local_direction then
+      spec.direction = vec3(
+        source.local_direction[1],
+        source.local_direction[2],
+        source.local_direction[3]
+      )
+    end
+    specs[#specs + 1] = spec
+  end
+  return specs
+end
+
+local function createLight(spec)
+  local object = createObject(spec.class)
+  if not object then return nil, "BeamNG did not create light " .. spec.name end
+  local ok, createError = pcall(function()
+    object.loadMode = 1
+    if type(object.preApply) == "function" then object:preApply() end
+    setCanSaveFalse(object)
+    object:setField("isEnabled", 0, "1")
+    object:setField(
+      "color",
+      0,
+      string.format("%.6f %.6f %.6f 1", spec.color[1], spec.color[2], spec.color[3])
+    )
+    object:setField("brightness", 0, tostring(spec.brightness))
+    object:setField("castShadows", 0, spec.castShadows and "1" or "0")
+    object:setField("priority", 0, "1")
+    object:setField("attenuationRatio", 0, "0 1 1")
+    object:setField("texSize", 0, "256")
+    if spec.class == "PointLight" then
+      object:setField("radius", 0, tostring(spec.radius))
+      object:setField("shadowType", 0, "DualParaboloidSinglePass")
+    else
+      object:setField("range", 0, tostring(spec.range))
+      object:setField("innerAngle", 0, tostring(spec.innerAngle))
+      object:setField("outerAngle", 0, tostring(spec.outerAngle))
+      object:setField("shadowSoftness", 0, "2")
+      object:setField("shadowType", 0, "Spot")
+    end
+    if type(object.postApply) == "function" then object:postApply() end
+  end)
+  if not ok then
+    pcall(function() object:delete() end)
+    return nil, tostring(createError)
+  end
+  local registered, registerError = registerInMission(object, spec.name)
+  if not registered then
+    pcall(function() object:delete() end)
+    return nil, registerError
+  end
+  return object
+end
+
 local function effectSpecs(prefix)
   local specs = {}
   for _, offset in ipairs(EFFECT_OFFSETS) do
@@ -462,6 +751,23 @@ local function synchronizeTransforms(state)
         effect,
         frame.origin + frame.modelRotation * spec.position,
         vec3(0, 0, 1):getRotationTo(worldDirection),
+        vec3(1, 1, 1)
+      )
+    end
+    local worldUp = frame.modelRotation * vec3(0, 0, 1)
+    worldUp:normalize()
+    for index, light in ipairs(state.lights) do
+      local spec = state.lightSpecs[index]
+      local rotation = frame.modelRotation
+      if spec.direction then
+        local worldDirection = frame.modelRotation * spec.direction
+        worldDirection:normalize()
+        rotation = quatFromDir(worldDirection, worldUp)
+      end
+      setObjectTransform(
+        light,
+        frame.origin + frame.modelRotation * spec.position,
+        rotation,
         vec3(1, 1, 1)
       )
     end
@@ -903,9 +1209,9 @@ local function processPendingLaunch(state, subjectId)
   local pending = state.pendingLaunchEntries[subjectId]
   if not pending or not state.washSubjects[subjectId] or not state.washSystemsActive then return end
   local repair = state.repairOccupants[subjectId]
-  if repair and (repair.phase ~= "complete"
+  if not repair or repair.phase ~= "complete"
     or repair.resetEdgeGuard
-    or repair.washExitDeferred) then return end
+    or repair.washExitDeferred then return end
   state.pendingLaunchEntries[subjectId] = nil
   handleLaunchTrigger(state, pending)
 end
@@ -1045,24 +1351,12 @@ local function onEricrolphCannonCarWashRepairIntegrityAcknowledged(
       failRepair(state, vehicleId, "repair_vehicle_missing")
       return
     end
-    local position = vehicle:getPosition()
-    local rotation = quat(vehicle:getRotation())
-    if not position
-      or not finiteNumber(position.x)
-      or not finiteNumber(position.y)
-      or not finiteNumber(position.z)
-      or not finiteNumber(rotation.x)
-      or not finiteNumber(rotation.y)
-      or not finiteNumber(rotation.z)
-      or not finiteNumber(rotation.w) then
-      failRepair(state, vehicleId, "repair_pose_snapshot_failed")
+    local target, targetError = repairTargetPose(vehicle, state.repairTrigger)
+    if not target then
+      failRepair(state, vehicleId, "repair_target_pose_failed", {detail = targetError})
       return
     end
-    local direction = vehicle:getDirectionVector()
-    if direction and direction:length() > 0.000001 then direction:normalize() else direction = nil end
-    repair.positionBefore = vec3(position.x, position.y, position.z)
-    repair.rotationBefore = quat(rotation.x, rotation.y, rotation.z, rotation.w)
-    repair.directionBefore = direction
+    for key, value in pairs(target) do repair[key] = value end
     repair.phase = "reset_pending"
     repair.elapsed = 0
     repair.resetEdgeGuard = true
@@ -1071,6 +1365,11 @@ local function onEricrolphCannonCarWashRepairIntegrityAcknowledged(
       subject_id = vehicleId,
       repair_token = token,
       strategy = "RESET_PHYSICS",
+      pose_policy = "center_oobb_on_trigger_axis_align_upright_preserve_travel_sign",
+      centerline_error_before_m = repair.centerlineErrorBefore,
+      alignment_translation_m = repair.alignmentTranslation,
+      travel_direction_dot_before = repair.travelDirectionDotBefore,
+      travel_sign = repair.travelSign,
     })
     local reset, resetError = pcall(function()
       vehicle:requestReset(RESET_PHYSICS)
@@ -1103,20 +1402,88 @@ local function onEricrolphCannonCarWashRepairIntegrityAcknowledged(
   end
 
   local vehicle = eligibleSubject(vehicleId)
-  local positionDrift = nil
-  local directionDot = nil
-  if vehicle and repair.positionBefore then
-    positionDrift = (vehicle:getPosition() - repair.positionBefore):length()
+  local poseMetrics = repairedPoseMetrics(vehicle, repair)
+  if not poseMetrics then
+    failRepair(state, vehicleId, "repair_pose_verification_unavailable")
+    return
   end
-  if vehicle and repair.directionBefore then
-    local directionAfter = vehicle:getDirectionVector()
-    if directionAfter and directionAfter:length() > 0.000001 then
-      directionAfter:normalize()
-      directionDot = directionAfter:dot(repair.directionBefore)
+  repair.positionDrift = poseMetrics.targetPositionDrift
+  repair.directionDot = poseMetrics.corridorDirectionDot
+  repair.centerlineError = poseMetrics.centerlineError
+  repair.corridorDirectionDot = poseMetrics.corridorDirectionDot
+  repair.uprightDot = poseMetrics.uprightDot
+  repair.travelDirectionDot = poseMetrics.travelDirectionDot
+  repair.travelSignPreserved = poseMetrics.travelSignPreserved
+  if repair.centerlineError > REPAIR_MAX_CENTERLINE_ERROR_METERS
+    or repair.corridorDirectionDot < REPAIR_MIN_CORRIDOR_DOT
+    or repair.uprightDot < REPAIR_MIN_UPRIGHT_DOT
+    or not repair.travelSignPreserved then
+    local correctionAttempts = repair.poseCorrectionAttempts or 0
+    if correctionAttempts < REPAIR_MAX_POSE_CORRECTION_ATTEMPTS then
+      -- RESET_PHYSICS can change the renewed vehicle's OOBB-to-origin offset.
+      -- Recompute from the live repaired geometry; reusing the pre-reset target
+      -- cannot remove that residual and is especially visible on buses.
+      local correctionTarget, correctionTargetError = repairTargetPose(
+        vehicle,
+        state.repairTrigger
+      )
+      if not correctionTarget then
+        failRepair(state, vehicleId, "repair_pose_correction_target_failed", {
+          detail = correctionTargetError,
+        })
+        return
+      end
+      if correctionTarget.targetDirection:dot(repair.targetDirection) <= 0 then
+        failRepair(state, vehicleId, "repair_pose_correction_travel_sign_changed")
+        return
+      end
+      repair.poseCorrectionAttempts = correctionAttempts + 1
+      repair.phase = "pose_restore_pending"
+      repair.elapsed = 0
+      repair.targetPosition = correctionTarget.targetPosition
+      repair.targetRotation = correctionTarget.targetRotation
+      local position = correctionTarget.targetPosition
+      local rotation = correctionTarget.targetRotation
+      local corrected, correctionError = pcall(function()
+        vehicle:setPositionRotation(
+          position.x,
+          position.y,
+          position.z,
+          rotation.x,
+          rotation.y,
+          rotation.z,
+          rotation.w
+        )
+      end)
+      if not corrected then
+        failRepair(state, vehicleId, "repair_pose_correction_failed", {
+          detail = tostring(correctionError),
+          correction_attempt = repair.poseCorrectionAttempts,
+        })
+        return
+      end
+      emitEvent(state, "I", "repair_pose_correction_requested", {
+        subject_id = vehicleId,
+        repair_token = token,
+        correction_attempt = repair.poseCorrectionAttempts,
+        centerline_error_m = repair.centerlineError,
+        corridor_direction_dot = repair.corridorDirectionDot,
+        upright_dot = repair.uprightDot,
+        travel_direction_dot = repair.travelDirectionDot,
+        correction_translation_m = correctionTarget.alignmentTranslation,
+      })
+      return
     end
+    failRepair(state, vehicleId, "repair_pose_verification_failed", {
+      centerline_error_m = repair.centerlineError,
+      corridor_direction_dot = repair.corridorDirectionDot,
+      upright_dot = repair.uprightDot,
+      travel_direction_dot = repair.travelDirectionDot,
+      travel_sign_preserved = repair.travelSignPreserved,
+      correction_attempts = correctionAttempts,
+    })
+    return
   end
-  repair.positionDrift = positionDrift
-  repair.directionDot = directionDot
   repair.phase = "release_pending"
   repair.elapsed = 0
   repair.bestEffortReleaseQueued = false
@@ -1189,6 +1556,15 @@ local function onEricrolphCannonCarWashRepairReleaseAcknowledged(
     deflated_tires_after = repair.after.deflatedTireCount,
     position_drift_m = repair.positionDrift,
     direction_dot = repair.directionDot,
+    centerline_error_before_m = repair.centerlineErrorBefore,
+    centerline_error_m = repair.centerlineError,
+    alignment_translation_m = repair.alignmentTranslation,
+    corridor_direction_dot = repair.corridorDirectionDot,
+    upright_dot = repair.uprightDot,
+    travel_direction_dot = repair.travelDirectionDot,
+    travel_sign_preserved = repair.travelSignPreserved,
+    travel_sign = repair.travelSign,
+    pose_correction_attempts = repair.poseCorrectionAttempts or 0,
   })
   processPendingLaunch(state, vehicleId)
 end
@@ -1269,8 +1645,20 @@ handleLaunchTrigger = function(state, data)
   if not vehicle then return end
   if data.event == "exit" then
     state.pendingLaunchEntries[data.subjectID] = nil
+    if state.activeRun
+      and state.activeRun.vehicleId == data.subjectID
+      and state.activeRun.phase ~= "launched"
+      and state.washSubjects[data.subjectID]
+      and state.washSystemsActive then
+      emitEvent(state, "I", "containment_exit_suppressed", {
+        vehicle_id = data.subjectID,
+        reason = "verified_subject_still_in_wash",
+        active_phase = state.activeRun.phase,
+      })
+      return
+    end
     finishActiveRunOnExit(state, data.subjectID, "launch_trigger_exit", vehicle)
-    state.armed = true
+    state.armed = state.activeRun == nil
     emitEvent(state, "I", "trigger_exit", {vehicle_id = data.subjectID})
     return
   end
@@ -1288,9 +1676,9 @@ handleLaunchTrigger = function(state, data)
     return
   end
   local repair = state.repairOccupants[data.subjectID]
-  if repair and (repair.phase ~= "complete"
+  if not repair or repair.phase ~= "complete"
     or repair.resetEdgeGuard
-    or repair.washExitDeferred) then
+    or repair.washExitDeferred then
     state.pendingLaunchEntries[data.subjectID] = {
       event = data.event,
       triggerID = data.triggerID,
@@ -1299,7 +1687,7 @@ handleLaunchTrigger = function(state, data)
     }
     emitEvent(state, "I", "launch_deferred", {
       vehicle_id = data.subjectID,
-      reason = "repair_pending",
+      reason = repair and "repair_pending" or "repair_not_started",
     })
     return
   end
@@ -1473,6 +1861,7 @@ local function cleanupInstallation(state, reason)
   deleteSceneObject(state.repairTrigger)
   deleteSceneObject(state.launchTrigger)
   for _, effect in ipairs(state.effects or {}) do deleteSceneObject(effect) end
+  for _, light in ipairs(state.lights or {}) do deleteSceneObject(light) end
   deleteSceneObject(state.visual)
   local vehicle = exactVehicle(state.propId)
   if vehicle and isWashProp(vehicle) then
@@ -1515,6 +1904,8 @@ local function registerProp(propId)
     launchTriggerName = prefix .. "_launch_trigger",
     effects = {},
     effectSpecs = effectSpecs(prefix),
+    lights = {},
+    lightSpecs = lightSpecs(prefix),
     washSubjects = {},
     repairOccupants = {},
     pendingLaunchEntries = {},
@@ -1525,6 +1916,13 @@ local function registerProp(propId)
     transformElapsed = 0,
   }
   installations[propId] = state
+
+  local materialsReady, materialError = ensureVisualMaterials()
+  if not materialsReady then
+    emitError(state, "visual_materials_unavailable", {detail = materialError})
+    cleanupInstallation(state, "registration_failed")
+    return false
+  end
 
   local visual, visualError = createVisual(state.visualName)
   if not visual then
@@ -1565,6 +1963,16 @@ local function registerProp(propId)
     state.effects[#state.effects + 1] = effect
   end
 
+  for _, spec in ipairs(state.lightSpecs) do
+    local light, lightError = createLight(spec)
+    if not light then
+      emitError(state, "light_creation_failed", {detail = lightError, name = spec.name})
+      cleanupInstallation(state, "registration_failed")
+      return false
+    end
+    state.lights[#state.lights + 1] = light
+  end
+
   local synced, syncError = synchronizeTransforms(state)
   if not synced then
     emitError(state, "transform_sync_failed", {detail = syncError})
@@ -1582,6 +1990,7 @@ local function registerProp(propId)
     repair_trigger_name = state.repairTriggerName,
     launch_trigger_name = state.launchTriggerName,
     effect_count = #state.effects,
+    light_count = #state.lights,
     ground_origin_z = state.origin.z,
   })
   return true
@@ -1693,14 +2102,14 @@ local function onVehicleResetted(vehicleId)
     local repair = installation.repairOccupants[vehicleId]
     if repair and repair.phase == "reset_pending" then
       local vehicle = eligibleSubject(vehicleId)
-      if not vehicle or not repair.positionBefore or not repair.rotationBefore then
+      if not vehicle or not repair.targetPosition or not repair.targetRotation then
         failRepair(installation, vehicleId, "repair_pose_restore_unavailable")
         return
       end
       repair.phase = "pose_restore_pending"
       repair.elapsed = 0
-      local position = repair.positionBefore
-      local rotation = repair.rotationBefore
+      local position = repair.targetPosition
+      local rotation = repair.targetRotation
       local restored, restoreError = pcall(function()
         vehicle:setPositionRotation(
           position.x,
@@ -1722,6 +2131,7 @@ local function onVehicleResetted(vehicleId)
         subject_id = vehicleId,
         repair_token = repair.token,
         pose_restore_requested = true,
+        pose_policy = "center_oobb_on_trigger_axis_align_upright_preserve_travel_sign",
       })
       return
     end
@@ -1788,19 +2198,8 @@ local function onVehicleResetted(vehicleId)
       repair.phase = "failed"
       bestEffortReleaseRepair(installation, vehicleId, repair, "unexpected_subject_reset")
     end
-    local activeVehicleId = installation.activeRun and installation.activeRun.vehicleId or nil
-    if activeVehicleId then
-      finishActiveRunOnExit(
-        installation,
-        activeVehicleId,
-        "vehicle_reset",
-        activeVehicle(installation)
-      )
-    end
-    installation.washSubjects = {}
-    installation.pendingLaunchEntries = {}
-    installation.armed = true
-    forceWashSystemsOff(installation)
+    removeWashSubject(installation, vehicleId, "unexpected_subject_reset")
+    installation.armed = installation.activeRun == nil
     local rebuilt, rebuildError = rebuildTriggersAfterReset(installation)
     if not rebuilt then
       emitError(installation, "reset_trigger_rebuild_failed", {detail = rebuildError})
@@ -1816,6 +2215,8 @@ local function onVehicleResetted(vehicleId)
         wash_trigger_name = installation.washTriggerName,
         repair_trigger_name = installation.repairTriggerName,
         launch_trigger_name = installation.launchTriggerName,
+        remaining_subject_count = washSubjectCount(installation),
+        wash_systems_active = installation.washSystemsActive,
         armed = installation.armed,
       })
     end
@@ -1840,6 +2241,7 @@ local function installationState(state)
   local emitterActiveCounts = {}
   local pendingRepairs = 0
   local completedRepairs = 0
+  local presentLights = 0
   for index, effect in ipairs(state.effects) do
     local spec = state.effectSpecs[index]
     if exactSceneObject(spec.name, EFFECT_CLASS) == effect
@@ -1852,6 +2254,10 @@ local function installationState(state)
         emitterActiveCounts[spec.emitter] = (emitterActiveCounts[spec.emitter] or 0) + 1
       end
     end
+  end
+  for index, light in ipairs(state.lights) do
+    local spec = state.lightSpecs[index]
+    if exactSceneObject(spec.name, spec.class) == light then presentLights = presentLights + 1 end
   end
   for _, repair in pairs(state.repairOccupants) do
     if repair.phase == "complete" then
@@ -1890,6 +2296,8 @@ local function installationState(state)
     effect_present_count = presentEffects,
     effect_active_count = activeEffects,
     effect_expected_count = #state.effects,
+    light_present_count = presentLights,
+    light_expected_count = #state.lights,
     emitter_present_counts = emitterPresentCounts,
     emitter_active_counts = emitterActiveCounts,
     repair_pending_count = pendingRepairs,

@@ -25,22 +25,46 @@ FILENAME_PATTERN = re.compile(r"^[A-Za-z0-9._-]+$")
 # its compiled .cdae cache, so a forever-1980 timestamp can preserve obsolete
 # animation data across mod updates. Bump this constant whenever a shipped DAE
 # changes while keeping it fixed for reproducible builds of the same release.
-ZIP_EPOCH = (2026, 7, 21, 14, 30, 0)
+ZIP_EPOCH = (2026, 7, 21, 20, 0, 0)
 LOGGER = logging.getLogger(__name__)
 
 # Public Repository contents are an explicit release decision. Never replace
 # this allowlist with a recursive "pack everything" implementation.
 EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"art/shapes/{MOD_ID}/{MOD_ID}.dae",
-    f"art/shapes/{MOD_ID}/{MOD_ID}.materials.json",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards.color.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards.normal.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards_opacity.data.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards_roughness.data.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_cmu.color.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_cmu.normal.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_cmu_ao.data.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_cmu_roughness.data.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_corrugated_blue.color.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_corrugated_blue.normal.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_corrugated_blue_ao.data.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_corrugated_blue_roughness.data.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_interior_brick.color.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_interior_brick.normal.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_interior_brick_ao.data.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_interior_brick_roughness.data.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_sign.color.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_sign_emissive.data.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_wet_concrete.color.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_wet_concrete.normal.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_wet_concrete_ao.data.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_wet_concrete_roughness.data.dds",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.jpg",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.json",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.lua",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.prefab.json",
+    f"levels/gridmap_v2/scenarios/{MOD_ID}/main.materials.json",
+    f"lua/common/{MOD_ID}/lighting.lua",
     f"lua/ge/extensions/{MOD_ID}/runtime.lua",
     f"vehicles/{MOD_ID}/default.jpg",
     f"vehicles/{MOD_ID}/{MOD_ID}.dae",
     f"vehicles/{MOD_ID}/{MOD_ID}.jbeam",
+    f"vehicles/{MOD_ID}/{MOD_ID}_runtime_visual.dae",
     f"vehicles/{MOD_ID}/info.json",
     f"vehicles/{MOD_ID}/info_standard.json",
     f"vehicles/{MOD_ID}/lua/{MOD_ID}_vehicle.lua",
@@ -70,8 +94,8 @@ def _validate_member_name(name: str) -> PurePosixPath:
 
 
 def _validate_allowlist() -> None:
-    if len(EXPECTED_RUNTIME_FILES) != 16:
-        raise DistributionError("the public runtime allowlist must contain exactly 16 files")
+    if len(EXPECTED_RUNTIME_FILES) != 40:
+        raise DistributionError("the public runtime allowlist must contain exactly 40 files")
     if tuple(sorted(EXPECTED_RUNTIME_FILES)) != EXPECTED_RUNTIME_FILES:
         raise DistributionError("the public runtime allowlist must be deterministically sorted")
     for name in EXPECTED_RUNTIME_FILES:

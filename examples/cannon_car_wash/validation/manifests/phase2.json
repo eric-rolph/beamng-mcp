@@ -4,7 +4,7 @@
   "level": "gridmap_v2",
   "asset": {
     "path": "/art/shapes/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
-    "sha256": "974f9ff240b264a082b31e4d979016af2a339f5d182908cf56746587dfc4c14c",
+    "sha256": "d6fe32c3b412b6eef1f0ea9b4c90e3bdaa1a99333a5f3bb8dc452faf28595ce8",
     "position": [
       -122.011475,
       -170.0,
@@ -32,17 +32,17 @@
     "class": "BeamNGTrigger",
     "local_center": [
       0.0,
-      5.0,
+      0.0,
       2.1
     ],
     "world_center": [
       -122.011475,
-      -165.0,
+      -170.0,
       102.1
     ],
     "dimensions": [
       5.8,
-      7.5,
+      17.5,
       4.6
     ],
     "rotation_xyzw": [
@@ -657,12 +657,12 @@
     "class": "BeamNGTrigger",
     "local_center": [
       0.0,
-      -5.6,
+      0.0,
       2.1
     ],
     "world_center": [
       -122.011475,
-      -175.6,
+      -170.0,
       102.1
     ],
     "dimensions": [
@@ -680,5 +680,212 @@
     "mode": "Overlaps",
     "test_type": "Bounding box",
     "repair_strategy": "RESET_PHYSICS"
+  },
+  "lighting": {
+    "coordinate_space": "Blender local, meters, Z-up",
+    "light_count": 7,
+    "class_counts": {
+      "PointLight": 5,
+      "SpotLight": 2
+    },
+    "lights": [
+      {
+        "name": "ericrolph_cannon_car_wash_light_anchor_tunnel_01",
+        "role": "tunnel_fluorescent_fill",
+        "class": "PointLight",
+        "local_position": [
+          0.0,
+          -6.8,
+          4.34
+        ],
+        "color": [
+          0.56,
+          0.82,
+          1.0
+        ],
+        "brightness": 1.25,
+        "radius": 4.4,
+        "cast_shadows": false,
+        "world_position": [
+          -122.011475,
+          -176.8,
+          104.34
+        ]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_light_anchor_tunnel_02",
+        "role": "tunnel_fluorescent_fill",
+        "class": "PointLight",
+        "local_position": [
+          0.0,
+          -3.4,
+          4.34
+        ],
+        "color": [
+          0.56,
+          0.82,
+          1.0
+        ],
+        "brightness": 1.25,
+        "radius": 4.4,
+        "cast_shadows": false,
+        "world_position": [
+          -122.011475,
+          -173.4,
+          104.34
+        ]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_light_anchor_tunnel_03",
+        "role": "tunnel_fluorescent_fill",
+        "class": "PointLight",
+        "local_position": [
+          0.0,
+          0.0,
+          4.34
+        ],
+        "color": [
+          0.56,
+          0.82,
+          1.0
+        ],
+        "brightness": 1.25,
+        "radius": 4.4,
+        "cast_shadows": false,
+        "world_position": [
+          -122.011475,
+          -170.0,
+          104.34
+        ]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_light_anchor_tunnel_04",
+        "role": "tunnel_fluorescent_fill",
+        "class": "PointLight",
+        "local_position": [
+          0.0,
+          3.4,
+          4.34
+        ],
+        "color": [
+          0.56,
+          0.82,
+          1.0
+        ],
+        "brightness": 1.25,
+        "radius": 4.4,
+        "cast_shadows": false,
+        "world_position": [
+          -122.011475,
+          -166.6,
+          104.34
+        ]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_light_anchor_tunnel_05",
+        "role": "tunnel_fluorescent_fill",
+        "class": "PointLight",
+        "local_position": [
+          0.0,
+          6.8,
+          4.34
+        ],
+        "color": [
+          0.56,
+          0.82,
+          1.0
+        ],
+        "brightness": 1.25,
+        "radius": 4.4,
+        "cast_shadows": false,
+        "world_position": [
+          -122.011475,
+          -163.2,
+          104.34
+        ]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_light_anchor_sign_left",
+        "role": "entrance_sign_spill",
+        "class": "SpotLight",
+        "local_position": [
+          -1.9,
+          -8.72,
+          4.08
+        ],
+        "local_direction": [
+          0.0,
+          -0.97,
+          -0.24
+        ],
+        "color": [
+          0.1,
+          0.64,
+          1.0
+        ],
+        "brightness": 1.8,
+        "range": 7.5,
+        "inner_angle_degrees": 28.0,
+        "outer_angle_degrees": 48.0,
+        "cast_shadows": false,
+        "world_position": [
+          -123.911475,
+          -178.72,
+          104.08
+        ],
+        "rotation_matrix": [
+          -1.0,
+          -0.0,
+          0.0,
+          0.0,
+          -0.970728319,
+          -0.240180203,
+          0.0,
+          -0.240180203,
+          0.970728319
+        ]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_light_anchor_sign_right",
+        "role": "entrance_sign_spill",
+        "class": "SpotLight",
+        "local_position": [
+          1.9,
+          -8.72,
+          4.08
+        ],
+        "local_direction": [
+          0.0,
+          -0.97,
+          -0.24
+        ],
+        "color": [
+          0.1,
+          0.64,
+          1.0
+        ],
+        "brightness": 1.8,
+        "range": 7.5,
+        "inner_angle_degrees": 28.0,
+        "outer_angle_degrees": 48.0,
+        "cast_shadows": false,
+        "world_position": [
+          -120.111475,
+          -178.72,
+          104.08
+        ],
+        "rotation_matrix": [
+          -1.0,
+          -0.0,
+          0.0,
+          0.0,
+          -0.970728319,
+          -0.240180203,
+          0.0,
+          -0.240180203,
+          0.970728319
+        ]
+      }
+    ]
   }
 }

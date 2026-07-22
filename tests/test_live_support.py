@@ -10,6 +10,7 @@ from typing import Any
 import pytest
 
 from tests.live_support import (
+    BeamNGLogCursor,
     claim_owned_beamng_process,
     cleanup_exact_live_artifacts,
     cleanup_owned_beamng_session,
@@ -20,9 +21,124 @@ from tests.live_support import (
 )
 
 
+def _append(path: Path, payload: bytes) -> None:
+    with path.open("ab") as handle:
+        handle.write(payload)
+
+
 class _AliveProcess:
     def poll(self) -> None:
         return None
+
+
+def test_log_cursor_reads_only_appended_complete_utf8_lines(tmp_path: Path) -> None:
+    log_path = tmp_path / "beamng.log"
+    log_path.write_text("0.0|I|old| ignored\n", encoding="utf-8")
+    cursor = BeamNGLogCursor(
+        log_path,
+        namespaces=("ERICROLPH_CANNON_CAR_WASH", "cannon_mod"),
+        json_tag="ERICROLPH_CANNON_CAR_WASH",
+        schema_version=1,
+        start_at_end=True,
+    )
+
+    encoded_event = (
+        '1.0|I|ERICROLPH_CANNON_CAR_WASH| {"schema_version":1,"event":"spray_\u6c34"}'
+    ).encode()
+    split_at = encoded_event.index("\u6c34".encode()) + 1
+    _append(log_path, encoded_event[:split_at])
+    assert cursor.read().lines == ()
+
+    _append(
+        log_path,
+        encoded_event[split_at:]
+        + b"\n2.0|W|other| irrelevant\n"
+        + b"3.0|W|cannon_mod| relevant warning\n",
+    )
+    result = cursor.read()
+
+    assert result.restarted is False
+    assert result.events == ("spray_\u6c34",)
+    assert result.records == ({"schema_version": 1, "event": "spray_\u6c34"},)
+    assert result.issues == ("3.0|W|cannon_mod| relevant warning",)
+    assert result.start_offset < result.end_offset == log_path.stat().st_size
+    assert cursor.read().lines == ()
+
+
+def test_log_cursor_start_at_end_discards_an_existing_partial_line(tmp_path: Path) -> None:
+    log_path = tmp_path / "beamng.log"
+    log_path.write_bytes(b"0|W|CANNON| warning already in progress")
+    cursor = BeamNGLogCursor(
+        log_path,
+        namespaces=("cannon",),
+        json_tag="cannon",
+        start_at_end=True,
+    )
+
+    _append(
+        log_path,
+        b' and complete\n1|I|CANNON| {"event":"new_event"}\n',
+    )
+    result = cursor.read()
+
+    assert result.events == ("new_event",)
+    assert result.issues == ()
+    assert all("already in progress" not in line for line in result.lines)
+
+
+def test_log_cursor_restarts_after_truncate_and_fast_regrow(tmp_path: Path) -> None:
+    log_path = tmp_path / "beamng.log"
+    old_line = b'1.0|I|CANNON| {"schema_version":1,"event":"old_session"}' + b"x" * 80 + b"\n"
+    log_path.write_bytes(old_line)
+    cursor = BeamNGLogCursor(log_path, json_tag="CANNON", schema_version=1)
+    assert cursor.read().events == ("old_session",)
+
+    new_line = b'0.0|I|CANNON| {"schema_version":1,"event":"new_session"}' + b"y" * 100 + b"\n"
+    assert len(new_line) >= len(old_line)
+    log_path.write_bytes(new_line)
+
+    result = cursor.read()
+    assert result.restarted is True
+    assert result.start_offset == 0
+    assert result.events == ("new_session",)
+    assert result.end_offset == len(new_line)
+
+
+def test_log_cursor_restarts_after_file_disappears(tmp_path: Path) -> None:
+    log_path = tmp_path / "beamng.log"
+    log_path.write_bytes(b'1.0|I|CANNON| {"event":"before"}\n')
+    cursor = BeamNGLogCursor(log_path, json_tag="CANNON")
+    assert cursor.read().events == ("before",)
+
+    log_path.unlink()
+    assert cursor.read().records == ()
+    log_path.write_bytes(b'0.0|I|CANNON| {"event":"after"}\n')
+
+    result = cursor.read()
+    assert result.restarted is True
+    assert result.start_offset == 0
+    assert result.events == ("after",)
+
+
+def test_log_cursor_ignores_malformed_or_wrong_schema_records(tmp_path: Path) -> None:
+    log_path = tmp_path / "beamng.log"
+    log_path.write_text(
+        "1|I|CANNON| not json\n"
+        '2|I|CANNON| {"schema_version":2,"event":"wrong"}\n'
+        '3|I|OTHER| {"schema_version":1,"event":"wrong_tag"}\n'
+        '4|I|CANNON| {"schema_version":1,"event":"ready"} trailing\n',
+        encoding="utf-8",
+    )
+
+    result = BeamNGLogCursor(
+        log_path,
+        namespaces=("cannon",),
+        json_tag="cannon",
+        schema_version=1,
+    ).read()
+
+    assert result.events == ("ready",)
+    assert result.issues == ()
 
 
 class _TerminableProcess:

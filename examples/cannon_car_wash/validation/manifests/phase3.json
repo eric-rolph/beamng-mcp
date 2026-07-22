@@ -20,8 +20,9 @@
     "repair_trigger_name": "ericrolph_cannon_car_wash_repair_trigger",
     "repair_trigger_class": "BeamNGTrigger",
     "repair_trigger_mode": "Overlaps",
-    "vehicle_name": "ericrolph_cannon_car_wash_truck",
-    "vehicle_model": "pickup"
+    "default_vehicle_name": "ericrolph_cannon_car_wash_truck",
+    "default_vehicle_model": "pickup",
+    "launcher_vehicle_scope": "any_live_vehicle"
   },
   "wash_cycle": {
     "scope": "full_bay",
@@ -39,6 +40,7 @@
       "effects_active": true
     },
     "exit": {
+      "stop_condition": "last_tracked_vehicle_removed",
       "roller_play_ambient": false,
       "effects_active": false
     },
@@ -52,7 +54,16 @@
     "vehicle_scope": "any_live_vehicle",
     "reset_strategy": "RESET_PHYSICS",
     "pre_reset_hold": "acknowledged_controller_freeze_preserving_previous_state",
-    "pose_policy": "restore_exact_pre_reset_position_and_quaternion",
+    "pose_policy": "center_oobb_on_trigger_axis_align_upright_preserve_travel_sign",
+    "center_reference": "vehicle_spawn_world_oobb",
+    "position_policy": "remove_lateral_error_preserve_longitudinal_progress_and_height",
+    "orientation_policy": "live_trigger_y_z_basis_without_hard_coded_vehicle_axis",
+    "pose_verification": {
+      "maximum_centerline_error_m": 0.15,
+      "minimum_corridor_direction_dot": 0.999,
+      "minimum_upright_dot": 0.999,
+      "require_travel_sign_preserved": true
+    },
     "reset_callback_sequence": [
       "physics_reset_acknowledgement",
       "pose_restore_acknowledgement"
@@ -69,8 +80,28 @@
     "required_test_type": "Bounding box",
     "required_vehicle_state": "previously_entered_ericrolph_cannon_car_wash_wash_activation_trigger",
     "required_wash_system_state": "active",
-    "required_repair_state": "complete_when_repair_occupant_exists",
+    "required_repair_state": "complete",
+    "launch_trigger_local_center": [
+      0.0,
+      0.0,
+      2.1
+    ],
+    "launch_trigger_dimensions": [
+      5.8,
+      17.5,
+      4.6
+    ],
+    "validated_large_vehicle": {
+      "model": "citybus",
+      "configuration": "city",
+      "metadata_dimensions_m": [
+        3.11,
+        12.63,
+        2.994
+      ]
+    },
     "out_of_order_policy": "defer_until_wash_active_and_repair_complete",
+    "prelaunch_exit_policy": "suppress_only_while_same_subject_remains_an_active_wash_occupant",
     "action": "begin_countdown"
   },
   "countdown": {
@@ -118,6 +149,7 @@
       "repair_complete"
     ],
     "launch_gate_event": "containment_verified",
-    "launch_deferred_event": "launch_deferred"
+    "launch_deferred_event": "launch_deferred",
+    "containment_exit_suppressed_event": "containment_exit_suppressed"
   }
 }

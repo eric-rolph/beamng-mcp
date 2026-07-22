@@ -13,6 +13,7 @@ import os
 import re
 from pathlib import Path
 from typing import Any
+from xml.etree import ElementTree as ET
 
 import bpy
 from mathutils import Matrix, Vector
@@ -65,6 +66,26 @@ def add_ambient_animation_clip(path: Path) -> None:
     path.write_bytes(payload.replace(anchor, clip + anchor, 1))
 
 
+def collada_export_statistics(path: Path) -> dict[str, int]:
+    """Measure rendered topology from the exported file, not Blender source polys."""
+
+    namespace = {"c": "http://www.collada.org/2005/11/COLLADASchema"}
+    root = ET.parse(path).getroot()  # noqa: S314 - parses the just-exported owned DAE
+    triangles = root.findall(".//c:triangles", namespace)
+    poly_lists = root.findall(".//c:polylist", namespace)
+    return {
+        "triangle_count": sum(int(primitive.get("count", "0")) for primitive in triangles),
+        "geometry_count": len(root.findall(".//c:library_geometries/c:geometry", namespace)),
+        "primitive_group_count": len(triangles) + len(poly_lists),
+        "material_symbol_count": len(
+            {
+                material.get("symbol")
+                for material in root.findall(".//c:instance_material", namespace)
+            }
+        ),
+    }
+
+
 def namespaced_object_name(name: str) -> str:
     """Return a globally unique DAE/scene object name.
 
@@ -87,15 +108,27 @@ def scenario_material_name(name: str) -> str:
 LAUNCH_TRIGGER_NAME = namespaced_object_name("launch_trigger")
 WASH_ACTIVATION_TRIGGER_NAME = namespaced_object_name("wash_activation_trigger")
 REPAIR_TRIGGER_NAME = namespaced_object_name("repair_trigger")
-# BeamNG's live D-Series OOBB settles roughly 1 cm below the road surface.
-# Give Contains a measured 20 cm under-floor allowance while keeping the top
-# inside the 4.48 m opening: local Z bounds are [-0.2, 4.4].
-LAUNCH_TRIGGER_CENTER = (0.0, 5.0, 2.1)
-LAUNCH_TRIGGER_DIMENSIONS = (5.8, 7.5, 4.6)
+# BeamNG's live vehicle OOBBs can settle slightly below the road surface. Give
+# Contains a measured 20 cm under-floor allowance while keeping the top inside
+# the 4.48 m opening. The complete local bounds are X [-2.9, 2.9],
+# Y [-8.75, 8.75], and Z [-0.2, 4.4]. Its full-bay 17.5 m span contains the
+# measured stock Wentward DT40L city bus with enough hold margin to prevent
+# suspension/OOBB motion from generating a false exit during countdown.
+LAUNCH_TRIGGER_CENTER = (0.0, 0.0, 2.1)
+LAUNCH_TRIGGER_DIMENSIONS = (5.8, 17.5, 4.6)
 WASH_ACTIVATION_TRIGGER_CENTER = (0.0, 0.0, 2.2)
 WASH_ACTIVATION_TRIGGER_DIMENSIONS = (5.8, 17.5, 4.4)
-REPAIR_TRIGGER_CENTER = (0.0, -5.6, 2.1)
+REPAIR_TRIGGER_CENTER = (0.0, 0.0, 2.1)
 REPAIR_TRIGGER_DIMENSIONS = (5.4, 2.2, 4.2)
+SUPPORTED_CITYBUS_ENVELOPE = {
+    "model": "citybus",
+    "configuration": "city",
+    "source": "BeamNG.drive 0.38.6 vehicles/citybus/info_city.json BoundingBox",
+    "width": 3.11,
+    "length": 12.63,
+    "height": 2.994,
+}
+LAUNCH_TARGET_SPEED_KPH = 360.0
 TRIGGER_NAMES = {LAUNCH_TRIGGER_NAME, WASH_ACTIVATION_TRIGGER_NAME, REPAIR_TRIGGER_NAME}
 
 PRIMARY_STRUCTURES = (
@@ -148,6 +181,55 @@ def assign_material(obj: bpy.types.Object, value: bpy.types.Material | None) -> 
         obj.data.materials.append(value)
 
 
+def add_metric_box_uvs(
+    obj: bpy.types.Object,
+    *,
+    meters_per_tile: tuple[float, float],
+) -> None:
+    """Author deterministic UV0 tiling plus a normalized UV2 grime/AO channel.
+
+    Blender's primitive cube UVs map every face to the full image, which would
+    stretch a single CMU block across an 18 m wall.  Dominant-axis box mapping
+    keeps texel density stable in meters while the second channel remains a
+    normalized 0..1 projection suitable for a future baked grime/AO atlas.
+    """
+
+    if obj.type != "MESH":
+        raise TypeError(f"metric box UVs require a mesh object: {obj.name}")
+    if min(meters_per_tile) <= 0.0:
+        raise ValueError("meters_per_tile values must be positive")
+    mesh = obj.data
+    uv0 = mesh.uv_layers.get("UVMap") or mesh.uv_layers.new(name="UVMap")
+    uv2 = mesh.uv_layers.get("UVMap_2") or mesh.uv_layers.new(name="UVMap_2")
+    coordinates = [vertex.co for vertex in mesh.vertices]
+    minimum = [min(co[axis] for co in coordinates) for axis in range(3)]
+    maximum = [max(co[axis] for co in coordinates) for axis in range(3)]
+    for polygon in mesh.polygons:
+        normal_axis = max(range(3), key=lambda axis: abs(polygon.normal[axis]))
+        if normal_axis == 0:
+            u_axis, v_axis = 1, 2
+        elif normal_axis == 1:
+            u_axis, v_axis = 0, 2
+        else:
+            u_axis, v_axis = 0, 1
+        u_direction = -1.0 if polygon.normal[normal_axis] < 0.0 else 1.0
+        u_extent = max(maximum[u_axis] - minimum[u_axis], 1e-9)
+        v_extent = max(maximum[v_axis] - minimum[v_axis], 1e-9)
+        for loop_index in polygon.loop_indices:
+            coordinate = mesh.vertices[mesh.loops[loop_index].vertex_index].co
+            uv0.data[loop_index].uv = (
+                u_direction * coordinate[u_axis] / meters_per_tile[0],
+                coordinate[v_axis] / meters_per_tile[1],
+            )
+            uv2.data[loop_index].uv = (
+                (coordinate[u_axis] - minimum[u_axis]) / u_extent,
+                (coordinate[v_axis] - minimum[v_axis]) / v_extent,
+            )
+    obj["uv0_projection"] = "metric dominant-axis box mapping"
+    obj["uv0_meters_per_tile"] = list(meters_per_tile)
+    obj["uv2_usage"] = "normalized future AO/grime"
+
+
 def add_box(
     name: str,
     location: tuple[float, float, float],
@@ -156,6 +238,7 @@ def add_box(
     *,
     bevel: float = 0.04,
     rotation: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    metric_uv_meters: tuple[float, float] | None = None,
 ) -> bpy.types.Object:
     bpy.ops.mesh.primitive_cube_add(location=location, rotation=rotation)
     obj = bpy.context.object
@@ -164,6 +247,8 @@ def add_box(
     obj.data.name = f"{mesh_name}_mesh"
     obj.dimensions = dimensions
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    if metric_uv_meters is not None:
+        add_metric_box_uvs(obj, meters_per_tile=metric_uv_meters)
     assign_material(obj, value)
     if bevel > 0.0:
         modifier = obj.modifiers.new("EdgeSoftening", "BEVEL")
@@ -199,6 +284,56 @@ def add_cylinder(
     return obj
 
 
+def join_static_meshes(name: str, objects: list[bpy.types.Object]) -> bpy.types.Object:
+    """Join one-material static details into a single exported submesh."""
+
+    if not objects:
+        raise ValueError(f"cannot join an empty static-mesh group: {name}")
+    material_layout = tuple(material.name for material in objects[0].data.materials)
+    for obj in objects:
+        if obj.type != "MESH":
+            raise ValueError(f"static join requires meshes: {obj.name}")
+        if tuple(material.name for material in obj.data.materials) != material_layout:
+            raise ValueError(f"static join material mismatch: {obj.name}")
+        bpy.ops.object.select_all(action="DESELECT")
+        obj.select_set(True)
+        bpy.context.view_layer.objects.active = obj
+        for modifier in list(obj.modifiers):
+            bpy.ops.object.modifier_apply(modifier=modifier.name)
+    bpy.ops.object.select_all(action="DESELECT")
+    for obj in objects:
+        obj.select_set(True)
+    result = objects[0]
+    bpy.context.view_layer.objects.active = result
+    bpy.ops.object.join()
+    result.name = namespaced_object_name(name)
+    result.data.name = f"{result.name}_mesh"
+    return result
+
+
+def consolidate_static_visuals() -> None:
+    """Batch unanimated one-material visuals without touching contract objects."""
+
+    protected = set(PRIMARY_STRUCTURES) | set(COLLISION_MESH_NAMES)
+    groups: dict[str, list[bpy.types.Object]] = {}
+    for obj in list(bpy.context.scene.objects):
+        if (
+            obj.type != "MESH"
+            or obj.name in protected
+            or obj.parent is not None
+            or obj.animation_data is not None
+            or len(obj.data.materials) != 1
+            or obj.data.materials[0] is None
+        ):
+            continue
+        material_name = obj.data.materials[0].name
+        groups.setdefault(material_name, []).append(obj)
+    for material_name, objects in sorted(groups.items()):
+        if len(objects) > 1:
+            suffix = material_name.removeprefix(f"{MOD_ID}_")
+            join_static_meshes(f"StaticBatch_{suffix}", objects)
+
+
 def parent_preserving_world(child: bpy.types.Object, parent: bpy.types.Object) -> None:
     world = child.matrix_world.copy()
     child.parent = parent
@@ -219,11 +354,48 @@ def animate_spin(obj: bpy.types.Object, axis: int) -> None:
         curve.modifiers.new("CYCLES")
 
 
+def add_card_mesh(
+    name: str,
+    location: tuple[float, float, float],
+    vertices: list[tuple[float, float, float]],
+    faces: list[tuple[int, int, int, int]],
+    value: bpy.types.Material,
+    face_uvs: list[tuple[tuple[float, float], ...]],
+    *,
+    alpha_test: bool = True,
+) -> bpy.types.Object:
+    """Create an explicitly UV-authored alpha-test card cluster."""
+
+    object_name = namespaced_object_name(name)
+    mesh = bpy.data.meshes.new(f"{object_name}_mesh")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(object_name, mesh)
+    obj.location = location
+    bpy.context.scene.collection.objects.link(obj)
+    assign_material(obj, value)
+    uv0 = mesh.uv_layers.new(name="UVMap")
+    uv2 = mesh.uv_layers.new(name="UVMap_2")
+    if len(face_uvs) != len(mesh.polygons):
+        raise RuntimeError(f"UV face count does not match {object_name}")
+    for polygon, coordinates in zip(mesh.polygons, face_uvs, strict=True):
+        if len(coordinates) != len(polygon.loop_indices):
+            raise RuntimeError(f"UV loop count does not match {object_name}")
+        for loop_index, coordinate in zip(polygon.loop_indices, coordinates, strict=True):
+            uv0.data[loop_index].uv = coordinate
+            uv2.data[loop_index].uv = coordinate
+    obj["beamng_alpha_test"] = alpha_test
+    if alpha_test:
+        obj["beamng_card_strategy"] = "radial star fan"
+        obj["uv0_usage"] = "brush card atlas"
+        obj["uv2_usage"] = "future per-card AO"
+    return obj
+
+
 def add_vertical_brush(
     name: str,
     location: tuple[float, float, float],
-    primary: bpy.types.Material,
-    accent: bpy.types.Material,
+    cards: bpy.types.Material,
     steel: bpy.types.Material,
 ) -> None:
     root = bpy.data.objects.new(namespaced_object_name(f"{name}_Spinner"), None)
@@ -232,30 +404,47 @@ def add_vertical_brush(
     bpy.context.scene.collection.objects.link(root)
     core = add_cylinder(f"{name}_Core", location, 0.16, 3.3, steel)
     parent_preserving_world(core, root)
-    for index in range(12):
-        angle = index * math.tau / 12.0
-        radius = 0.38
-        fin_location = (
-            location[0] + math.cos(angle) * radius,
-            location[1] + math.sin(angle) * radius,
-            location[2],
+    vertices: list[tuple[float, float, float]] = []
+    faces: list[tuple[int, int, int, int]] = []
+    face_uvs: list[tuple[tuple[float, float], ...]] = []
+    inner_radius = 0.18
+    outer_radius = 0.92
+    half_height = 1.525
+    for index in range(16):
+        angle = index * math.tau / 16.0
+        cosine, sine = math.cos(angle), math.sin(angle)
+        base = len(vertices)
+        vertices.extend(
+            (
+                (cosine * inner_radius, sine * inner_radius, -half_height),
+                (cosine * outer_radius, sine * outer_radius, -half_height),
+                (cosine * outer_radius, sine * outer_radius, half_height),
+                (cosine * inner_radius, sine * inner_radius, half_height),
+            )
         )
-        fin = add_box(
-            f"{name}_Bristle_{index:02d}",
-            fin_location,
-            (0.06, 0.78, 3.05),
-            primary if index % 2 == 0 else accent,
-            bevel=0.025,
-            rotation=(0.0, 0.0, angle),
-        )
-        parent_preserving_world(fin, root)
+        faces.append((base, base + 1, base + 2, base + 3))
+        # Alternate the atlas direction to break up obvious repeated highlights.
+        if index % 2:
+            face_uvs.append(((1.0, 0.0), (0.0, 0.0), (0.0, 1.0), (1.0, 1.0)))
+        else:
+            face_uvs.append(((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)))
+    card_cluster = add_card_mesh(
+        f"{name}_CardFan",
+        location,
+        vertices,
+        faces,
+        cards,
+        face_uvs,
+    )
+    card_cluster["beamng_card_count"] = len(faces)
+    card_cluster.parent = root
+    card_cluster.location = (0.0, 0.0, 0.0)
     animate_spin(root, 2)
 
 
 def add_horizontal_brush(
     location: tuple[float, float, float],
-    primary: bpy.types.Material,
-    accent: bpy.types.Material,
+    cards: bpy.types.Material,
     steel: bpy.types.Material,
 ) -> None:
     root = bpy.data.objects.new(namespaced_object_name("Brush_Overhead_Spinner"), None)
@@ -271,23 +460,43 @@ def add_horizontal_brush(
         rotation=(0.0, math.pi / 2.0, 0.0),
     )
     parent_preserving_world(core, root)
-    for index in range(10):
-        angle = index * math.tau / 10.0
-        radius = 0.36
-        fin_location = (
-            location[0],
-            location[1] + math.cos(angle) * radius,
-            location[2] + math.sin(angle) * radius,
+    vertices: list[tuple[float, float, float]] = []
+    faces: list[tuple[int, int, int, int]] = []
+    face_uvs: list[tuple[tuple[float, float], ...]] = []
+    inner_radius = 0.17
+    outer_radius = 0.68
+    half_length = 2.225
+    for index in range(14):
+        angle = index * math.tau / 14.0
+        cosine, sine = math.cos(angle), math.sin(angle)
+        base = len(vertices)
+        vertices.extend(
+            (
+                (-half_length, cosine * inner_radius, sine * inner_radius),
+                (half_length, cosine * inner_radius, sine * inner_radius),
+                (half_length, cosine * outer_radius, sine * outer_radius),
+                (-half_length, cosine * outer_radius, sine * outer_radius),
+            )
         )
-        fin = add_box(
-            f"Brush_Overhead_Bristle_{index:02d}",
-            fin_location,
-            (4.45, 0.06, 0.74),
-            primary if index % 2 == 0 else accent,
-            bevel=0.025,
-            rotation=(angle, 0.0, 0.0),
-        )
-        parent_preserving_world(fin, root)
+        faces.append((base, base + 1, base + 2, base + 3))
+        # Rotate the atlas relative to the side brushes: its alpha-separated
+        # cloth bands become many narrow strips along the shaft, each extending
+        # outward radially, instead of long nested sheets spanning the cylinder.
+        if index % 2:
+            face_uvs.append(((0.0, 1.0), (0.0, 0.0), (1.0, 0.0), (1.0, 1.0)))
+        else:
+            face_uvs.append(((0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0)))
+    card_cluster = add_card_mesh(
+        "Brush_Overhead_CardFan",
+        location,
+        vertices,
+        faces,
+        cards,
+        face_uvs,
+    )
+    card_cluster["beamng_card_count"] = len(faces)
+    card_cluster.parent = root
+    card_cluster.location = (0.0, 0.0, 0.0)
     animate_spin(root, 0)
 
 
@@ -442,6 +651,80 @@ def add_text_mesh(
     obj.select_set(False)
 
 
+def add_sign_face(
+    location: tuple[float, float, float],
+    dimensions: tuple[float, float],
+    value: bpy.types.Material,
+) -> bpy.types.Object:
+    """Create the UV-authored emissive sign face behind the channel letters."""
+
+    half_width, half_height = dimensions[0] / 2.0, dimensions[1] / 2.0
+    # Winding points toward the entrance (-Y). The BeamNG material is
+    # double-sided, but deterministic front-face orientation aids previews.
+    return add_card_mesh(
+        "EntranceSign_Face",
+        location,
+        [
+            (-half_width, 0.0, -half_height),
+            (half_width, 0.0, -half_height),
+            (half_width, 0.0, half_height),
+            (-half_width, 0.0, half_height),
+        ],
+        [(0, 1, 2, 3)],
+        value,
+        [((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))],
+        alpha_test=False,
+    )
+
+
+def lighting_specs() -> list[dict[str, Any]]:
+    """Return namespaced authoring anchors consumed by BeamNG scene/runtime setup."""
+
+    anchors: list[dict[str, Any]] = []
+    for index, y in enumerate((-6.8, -3.4, 0.0, 3.4, 6.8), start=1):
+        anchors.append(
+            {
+                "name": namespaced_object_name(f"light_anchor_tunnel_{index:02d}"),
+                "role": "tunnel_fluorescent_fill",
+                "class": "PointLight",
+                "local_position": [0.0, y, 4.34],
+                "color": [0.56, 0.82, 1.0],
+                "brightness": 1.25,
+                "radius": 4.4,
+                "cast_shadows": False,
+            }
+        )
+    for side_name, x in (("left", -1.9), ("right", 1.9)):
+        anchors.append(
+            {
+                "name": namespaced_object_name(f"light_anchor_sign_{side_name}"),
+                "role": "entrance_sign_spill",
+                "class": "SpotLight",
+                "local_position": [x, -8.72, 4.08],
+                "local_direction": [0.0, -0.97, -0.24],
+                "color": [0.1, 0.64, 1.0],
+                "brightness": 1.8,
+                "range": 7.5,
+                "inner_angle_degrees": 28.0,
+                "outer_angle_degrees": 48.0,
+                "cast_shadows": False,
+            }
+        )
+    return anchors
+
+
+def add_light_anchors() -> None:
+    for spec in lighting_specs():
+        anchor = bpy.data.objects.new(spec["name"], None)
+        anchor.empty_display_type = "SPHERE" if spec["class"] == "PointLight" else "CONE"
+        anchor.empty_display_size = 0.18
+        anchor.location = spec["local_position"]
+        for key, value in spec.items():
+            if key not in {"name", "local_position"}:
+                anchor[f"beamng_{key}"] = value
+        bpy.context.scene.collection.objects.link(anchor)
+
+
 def reset_scene() -> None:
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
@@ -469,7 +752,23 @@ def reset_scene() -> None:
 
 def build_shell() -> None:
     concrete = material(scenario_material_name("concrete"), (0.18, 0.2, 0.23, 1.0), roughness=0.82)
-    blue = material(scenario_material_name("deep_blue"), (0.015, 0.09, 0.22, 1.0), metallic=0.15)
+    exterior_cmu = material(
+        scenario_material_name("exterior_cmu"), (0.32, 0.34, 0.36, 1.0), roughness=0.88
+    )
+    interior_brick = material(
+        scenario_material_name("interior_brick"), (0.19, 0.075, 0.045, 1.0), roughness=0.82
+    )
+    wet_concrete = material(
+        scenario_material_name("wet_concrete"), (0.16, 0.18, 0.19, 1.0), roughness=0.24
+    )
+    corrugated_blue = material(
+        scenario_material_name("corrugated_blue"),
+        (0.018, 0.13, 0.34, 1.0),
+        # Factory paint is dielectric. Exposed-steel chips would require a
+        # dedicated metallic mask rather than a uniform metallic factor.
+        metallic=0.0,
+        roughness=0.31,
+    )
     cyan = material(scenario_material_name("cyan_trim"), (0.0, 0.52, 0.83, 1.0), metallic=0.25)
     steel = material(
         scenario_material_name("stainless"), (0.42, 0.46, 0.5, 1.0), metallic=0.9, roughness=0.2
@@ -478,10 +777,64 @@ def build_shell() -> None:
         scenario_material_name("glass"), (0.03, 0.32, 0.48, 0.38), metallic=0.1, roughness=0.08
     )
 
-    add_box("CarWash_Floor", (0.0, 0.0, 0.06), (6.8, 18.0, 0.12), concrete, bevel=0.025)
-    add_box("CarWash_Wall_Left", (-3.25, 0.0, 2.35), (0.3, 18.0, 4.6), blue)
-    add_box("CarWash_Wall_Right", (3.25, 0.0, 2.35), (0.3, 18.0, 4.6), blue)
-    add_box("CarWash_Roof", (0.0, 0.0, 4.78), (6.8, 18.0, 0.36), blue)
+    # Keep the source shell and collision bounds unchanged. A thin wet finish
+    # sits exactly on the structural slab instead of changing the placement datum.
+    add_box(
+        "CarWash_Floor",
+        (0.0, 0.0, 0.06),
+        (6.8, 18.0, 0.12),
+        concrete,
+        bevel=0.025,
+        metric_uv_meters=(2.0, 2.0),
+    )
+    add_box(
+        "WetFloorFinish",
+        (0.0, 0.0, 0.126),
+        (6.16, 17.7, 0.012),
+        wet_concrete,
+        bevel=0.0,
+        metric_uv_meters=(2.0, 2.0),
+    )
+    add_box(
+        "CarWash_Wall_Left",
+        (-3.25, 0.0, 2.35),
+        (0.3, 18.0, 4.6),
+        exterior_cmu,
+        metric_uv_meters=(0.8, 0.4),
+    )
+    add_box(
+        "CarWash_Wall_Right",
+        (3.25, 0.0, 2.35),
+        (0.3, 18.0, 4.6),
+        exterior_cmu,
+        metric_uv_meters=(0.8, 0.4),
+    )
+    add_box(
+        "CarWash_Roof",
+        (0.0, 0.0, 4.78),
+        (6.8, 18.0, 0.36),
+        corrugated_blue,
+        metric_uv_meters=(1.2, 1.2),
+    )
+
+    for side in (-1.0, 1.0):
+        side_name = "L" if side < 0 else "R"
+        add_box(
+            f"InteriorBrick_{side_name}",
+            (side * 3.087, 0.0, 2.37),
+            (0.025, 17.5, 4.34),
+            interior_brick,
+            bevel=0.0,
+            metric_uv_meters=(1.2, 0.6),
+        )
+    add_box(
+        "CorrugatedCeilingLiner",
+        (0.0, 0.0, 4.585),
+        (6.15, 17.5, 0.03),
+        corrugated_blue,
+        bevel=0.0,
+        metric_uv_meters=(1.2, 1.2),
+    )
 
     for side in (-1.0, 1.0):
         x = side * 3.085
@@ -502,7 +855,13 @@ def build_shell() -> None:
         )
 
     for y, label in ((-9.05, "Entrance"), (9.05, "Exit")):
-        add_box(f"Portal_{label}_Header", (0.0, y, 4.3), (7.05, 0.35, 0.62), cyan)
+        add_box(
+            f"Portal_{label}_Header",
+            (0.0, y, 4.3),
+            (7.05, 0.35, 0.62),
+            corrugated_blue,
+            metric_uv_meters=(1.2, 1.2),
+        )
         for side in (-1.0, 1.0):
             add_box(
                 f"Portal_{label}_{'L' if side < 0 else 'R'}",
@@ -525,11 +884,17 @@ def build_shell() -> None:
 
 def build_details() -> None:
     cyan = material(scenario_material_name("cyan_trim"), (0.0, 0.52, 0.83, 1.0), metallic=0.25)
+    deep_blue = material(
+        scenario_material_name("deep_blue"), (0.015, 0.09, 0.22, 1.0), metallic=0.15
+    )
     blue_brush = material(
         scenario_material_name("brush_blue"), (0.005, 0.2, 0.74, 1.0), roughness=0.72
     )
     aqua_brush = material(
         scenario_material_name("brush_aqua"), (0.0, 0.82, 0.83, 1.0), roughness=0.72
+    )
+    brush_cards = material(
+        scenario_material_name("brush_cards"), (0.005, 0.26, 0.72, 1.0), roughness=0.72
     )
     orange = material(
         scenario_material_name("safety_orange"), (1.0, 0.16, 0.015, 1.0), roughness=0.38
@@ -553,56 +918,136 @@ def build_details() -> None:
         emission=(0.5, 0.9, 1.0, 1.0),
         emission_strength=7.0,
     )
+    sign_face = material(
+        scenario_material_name("sign_face"),
+        (0.008, 0.025, 0.055, 1.0),
+        roughness=0.28,
+        emission=(0.015, 0.36, 1.0, 1.0),
+        emission_strength=4.5,
+    )
 
     for index, y in enumerate((-3.0, 1.2)):
         add_vertical_brush(
             f"Brush_Left_{index + 1}",
             (-2.28, y, 2.05),
-            blue_brush,
-            aqua_brush,
+            brush_cards,
             steel,
         )
         add_vertical_brush(
             f"Brush_Right_{index + 1}",
             (2.28, y, 2.05),
-            aqua_brush,
-            blue_brush,
+            brush_cards,
             steel,
         )
-    add_horizontal_brush((0.0, 4.15, 3.82), blue_brush, aqua_brush, steel)
+        # Compact motor housings keep the original colour accents without
+        # assigning extra materials to the alpha-card bristle cluster.
+        add_box(
+            f"BrushMotor_Left_{index + 1}",
+            (-2.28, y, 3.78),
+            (0.43, 0.43, 0.26),
+            blue_brush if index % 2 == 0 else aqua_brush,
+            bevel=0.035,
+        )
+        add_box(
+            f"BrushMotor_Right_{index + 1}",
+            (2.28, y, 3.78),
+            (0.43, 0.43, 0.26),
+            aqua_brush if index % 2 == 0 else blue_brush,
+            bevel=0.035,
+        )
+    add_horizontal_brush((0.0, 4.15, 3.82), brush_cards, steel)
 
     add_pipe_arch("PreSoakArch", -5.6, steel, orange)
     add_pipe_arch("RinseArch", 5.65, steel, cyan)
 
+    # Wall-hugging electrical details add believable industrial scale while
+    # remaining above the brush/vehicle envelope. Eight-sided conduit keeps
+    # the silhouette round at a fraction of a production-cylinder budget.
+    junction_boxes: list[bpy.types.Object] = []
     for side in (-1.0, 1.0):
+        side_name = "L" if side < 0 else "R"
+        add_cylinder(
+            f"ElectricalConduit_{side_name}",
+            (side * 3.01, 0.0, 4.18),
+            0.035,
+            15.8,
+            steel,
+            rotation=(math.pi / 2.0, 0.0, 0.0),
+            vertices=8,
+        )
+        for index, y in enumerate((-4.6, 0.0, 4.6), start=1):
+            junction_boxes.append(
+                add_box(
+                    f"JunctionBox_{side_name}_{index:02d}",
+                    (side * 3.02, y, 3.97),
+                    (0.1, 0.34, 0.34),
+                    deep_blue,
+                    bevel=0.0,
+                )
+            )
+            add_cylinder(
+                f"JunctionDrop_{side_name}_{index:02d}",
+                (side * 3.015, y, 4.08),
+                0.024,
+                0.28,
+                steel,
+                vertices=8,
+            )
+
+    join_static_meshes("JunctionBoxes", junction_boxes)
+
+    wheel_guides = [
         add_box(
             f"WheelGuide_{'L' if side < 0 else 'R'}",
             (side * 2.48, 0.0, 0.24),
             (0.13, 16.0, 0.24),
             steel,
-            bevel=0.045,
+            bevel=0.0,
         )
+        for side in (-1.0, 1.0)
+    ]
+    join_static_meshes("WheelGuides", wheel_guides)
 
+    drain_bases: list[bpy.types.Object] = []
+    drain_slots: list[bpy.types.Object] = []
     for index, y in enumerate((-6.1, -3.8, -1.5, 0.8, 3.1, 5.4)):
-        add_box(f"Drain_{index:02d}", (0.0, y, 0.135), (2.4, 0.33, 0.04), rubber, bevel=0.01)
-        for slot in range(-5, 6):
+        drain_bases.append(
             add_box(
-                f"Drain_{index:02d}_Slot_{slot:+03d}",
-                (slot * 0.2, y, 0.158),
-                (0.09, 0.29, 0.018),
-                steel,
-                bevel=0.004,
+                f"Drain_{index:02d}",
+                (0.0, y, 0.135),
+                (2.4, 0.33, 0.04),
+                rubber,
+                bevel=0.0,
             )
-
-    for index, x in enumerate((-2.35, -1.55, -0.75, 0.05, 0.85, 1.65, 2.45)):
-        add_box(
-            f"ExitHazard_{index:02d}",
-            (x, 6.55, 0.145),
-            (0.56, 0.6, 0.035),
-            yellow if index % 2 == 0 else rubber,
-            bevel=0.005,
-            rotation=(0.0, 0.0, -0.32),
         )
+        for slot in range(-5, 6):
+            drain_slots.append(
+                add_box(
+                    f"Drain_{index:02d}_Slot_{slot:+03d}",
+                    (slot * 0.2, y, 0.158),
+                    (0.09, 0.29, 0.018),
+                    steel,
+                    bevel=0.0,
+                )
+            )
+    join_static_meshes("DrainBases", drain_bases)
+    join_static_meshes("DrainSlots", drain_slots)
+
+    hazard_groups: dict[str, list[bpy.types.Object]] = {"yellow": [], "rubber": []}
+    for index, x in enumerate((-2.35, -1.55, -0.75, 0.05, 0.85, 1.65, 2.45)):
+        group = "yellow" if index % 2 == 0 else "rubber"
+        hazard_groups[group].append(
+            add_box(
+                f"ExitHazard_{index:02d}",
+                (x, 6.55, 0.145),
+                (0.56, 0.6, 0.035),
+                yellow if group == "yellow" else rubber,
+                bevel=0.0,
+                rotation=(0.0, 0.0, -0.32),
+            )
+        )
+    join_static_meshes("ExitHazardYellow", hazard_groups["yellow"])
+    join_static_meshes("ExitHazardRubber", hazard_groups["rubber"])
 
     add_box("PayKiosk_Body", (-2.65, -7.0, 1.05), (0.55, 0.75, 1.9), orange)
     add_box("PayKiosk_Screen", (-2.64, -7.39, 1.38), (0.38, 0.035, 0.52), screen, bevel=0.008)
@@ -616,12 +1061,26 @@ def build_details() -> None:
         vertices=16,
     )
 
-    for y in (-6.8, -3.4, 0.0, 3.4, 6.8):
-        add_box(f"CeilingLight_{y}", (0.0, y, 4.54), (3.1, 0.22, 0.055), light, bevel=0.02)
+    ceiling_lights = [
+        add_box(
+            f"CeilingLight_{y}",
+            (0.0, y, 4.54),
+            (3.1, 0.22, 0.055),
+            light,
+            bevel=0.0,
+        )
+        for y in (-6.8, -3.4, 0.0, 3.4, 6.8)
+    ]
+    join_static_meshes("CeilingLights", ceiling_lights)
 
-    add_box("EntranceSign_Back", (0.0, -9.245, 4.35), (5.65, 0.08, 0.72), rubber, bevel=0.025)
-    add_text_mesh("EntranceSign_Text", "CANNON WASH", (0.0, -9.3, 4.34), light, size=0.62)
-    add_text_mesh("ExitSign_Text", "FIRE WHEN READY", (0.0, 9.26, 4.29), orange, size=0.38)
+    add_box("EntranceSign_Back", (0.0, -9.245, 4.28), (5.15, 0.08, 1.35), rubber, bevel=0.025)
+    sign = add_sign_face((0.0, -9.288, 4.28), (4.8, 1.2), sign_face)
+    sign["uv0_usage"] = "0..1 sign albedo/emissive atlas"
+    sign["uv2_usage"] = "0..1 future sign AO"
+    # The dual-layer sign atlas owns its letters and emissive halo. Separate
+    # converted font meshes duplicated the label and contributed >19k export
+    # triangles, so they are deliberately not part of the runtime asset.
+    add_light_anchors()
 
     trigger_material = material(
         scenario_material_name("trigger_invisible"),
@@ -662,7 +1121,7 @@ def build_details() -> None:
         trigger["trigger_mode"] = mode
         trigger["trigger_axis"] = "+Y"
         if name == LAUNCH_TRIGGER_NAME:
-            trigger["trigger_target_speed_kph"] = 320.0
+            trigger["trigger_target_speed_kph"] = LAUNCH_TARGET_SPEED_KPH
         elif name == REPAIR_TRIGGER_NAME:
             trigger["repair_strategy"] = "RESET_PHYSICS"
     print("CANNON_CAR_WASH_STAGE details complete")
@@ -1097,6 +1556,7 @@ def export_vehicle_selector_asset() -> None:
     VEHICLE_HANDOFF_PATH.write_text(
         json.dumps(structure, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
 
     visual_mesh = visual.data
@@ -1132,6 +1592,8 @@ def finalize() -> None:
     # selector exports on the same authored rest frame.
     bpy.context.scene.frame_set(1)
     bpy.context.view_layer.update()
+    consolidate_static_visuals()
+    bpy.context.view_layer.update()
     primary = {name: object_bounds(bpy.data.objects[name]) for name in PRIMARY_STRUCTURES}
     manifest_meshes = [
         obj
@@ -1151,6 +1613,7 @@ def finalize() -> None:
         "entrance_center": [0.0, -9.0, 0.12],
         "exit_center": [0.0, 9.0, 0.12],
         "truck_envelope": {"width": 2.4, "height": 2.6, "length": 6.2},
+        "supported_large_vehicle_envelope": SUPPORTED_CITYBUS_ENVELOPE,
         # Usable height is measured from the 0.12 m floor surface to the 4.60 m
         # roof underside, rather than from the world-space zero datum.
         "clear_opening": {"width": 6.2, "height": 4.48, "length": 18.0},
@@ -1165,7 +1628,7 @@ def finalize() -> None:
             "dimensions": list(LAUNCH_TRIGGER_DIMENSIONS),
             "mode": "Contains",
             "events": ["enter", "exit"],
-            "target_speed_kph": 320.0,
+            "target_speed_kph": LAUNCH_TARGET_SPEED_KPH,
         },
         "wash_activation_trigger": {
             "name": WASH_ACTIVATION_TRIGGER_NAME,
@@ -1193,10 +1656,35 @@ def finalize() -> None:
             },
             "effects": wash_effect_specs(),
         },
+        "visual_authoring": {
+            "uv0": "metric tile mapping on architectural materials; explicit 0..1 on cards/sign",
+            "uv2": "UVMap_2 normalized AO/grime channel",
+            "brush_strategy": {
+                "material": scenario_material_name("brush_cards"),
+                "alpha_mode": "alpha test/clip",
+                "vertical_cards_per_brush": 16,
+                "overhead_cards": 14,
+                "sorting_policy": "no alpha blending",
+            },
+            "tileable_materials": {
+                scenario_material_name("exterior_cmu"): [0.8, 0.4],
+                scenario_material_name("interior_brick"): [1.2, 0.6],
+                scenario_material_name("wet_concrete"): [2.0, 2.0],
+                scenario_material_name("corrugated_blue"): [1.2, 1.2],
+            },
+        },
+        "lighting": {
+            "coordinate_space": "Blender local, meters, Z-up",
+            "anchors": lighting_specs(),
+        },
         "mesh_statistics": mesh_statistics(manifest_meshes),
         "collision_meshes": list(COLLISION_MESH_NAMES),
     }
-    MANIFEST_PATH.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    MANIFEST_PATH.write_text(
+        json.dumps(manifest, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
 
     # Blender serializes user asset-library and file-browser paths into a .blend
     # even with --factory-startup. Save through the sanitizing helper so no
@@ -1230,6 +1718,12 @@ def finalize() -> None:
     if "FINISHED" not in result:
         raise RuntimeError(f"Collada export failed: {result}")
     add_ambient_animation_clip(DAE_PATH)
+    manifest["export_statistics"] = collada_export_statistics(DAE_PATH)
+    MANIFEST_PATH.write_text(
+        json.dumps(manifest, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
     print(
         "CANNON_CAR_WASH_STAGE finalize complete",
         json.dumps(
