@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import uuid
 from collections import Counter
 from pathlib import Path
@@ -16,6 +17,7 @@ PHASE2_PATH = EXAMPLE_ROOT / "validation" / "manifests" / "phase2.json"
 SCENARIO_ROOT = EXAMPLE_ROOT / "mod" / "levels" / "gridmap_v2" / "scenarios" / MOD_ID
 PREFAB_PATH = SCENARIO_ROOT / f"{MOD_ID}.prefab.json"
 DAE_PATH = EXAMPLE_ROOT / "mod" / "art" / "shapes" / MOD_ID / f"{MOD_ID}.dae"
+LIGHTING_LUA_PATH = EXAMPLE_ROOT / "mod" / "lua" / "common" / MOD_ID / "lighting.lua"
 GROUP_NAME = f"{MOD_ID}_group"
 WASH_TRIGGER_NAME = f"{MOD_ID}_wash_activation_trigger"
 LAUNCH_TRIGGER_NAME = f"{MOD_ID}_launch_trigger"
@@ -40,6 +42,80 @@ def _prefab_records(path: Path) -> list[dict[str, Any]]:
     if not records or not all(isinstance(record, dict) for record in records):
         raise ValueError(f"expected newline-delimited prefab objects: {path}")
     return records
+
+
+def _normalized(values: list[float]) -> list[float]:
+    length = math.sqrt(sum(value * value for value in values))
+    if not math.isfinite(length) or length < 1e-9:
+        raise ValueError("cannot normalize an invalid light direction")
+    return [value / length for value in values]
+
+
+def _direction_rotation_matrix(direction: list[float]) -> list[float]:
+    """Return BeamNG's column-major +Y-forward basis for a SpotLight."""
+
+    forward = _normalized(direction)
+    up_reference = [0.0, 0.0, 1.0]
+    right = _normalized(
+        [
+            forward[1] * up_reference[2] - forward[2] * up_reference[1],
+            forward[2] * up_reference[0] - forward[0] * up_reference[2],
+            forward[0] * up_reference[1] - forward[1] * up_reference[0],
+        ]
+    )
+    up = _normalized(
+        [
+            right[1] * forward[2] - right[2] * forward[1],
+            right[2] * forward[0] - right[0] * forward[2],
+            right[0] * forward[1] - right[1] * forward[0],
+        ]
+    )
+    return [round(value, 9) for axis in (right, forward, up) for value in axis]
+
+
+def _lua_value(value: Any) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, str):
+        return json.dumps(value)
+    if isinstance(value, (int, float)):
+        if not math.isfinite(float(value)):
+            raise ValueError("non-finite value in generated lighting Lua")
+        return repr(value)
+    if isinstance(value, list):
+        return "{" + ", ".join(_lua_value(item) for item in value) + "}"
+    raise TypeError(f"unsupported generated Lua value: {type(value)!r}")
+
+
+def _write_lighting_lua(anchors: list[dict[str, Any]]) -> None:
+    fields = (
+        "name",
+        "role",
+        "class",
+        "local_position",
+        "local_direction",
+        "color",
+        "brightness",
+        "radius",
+        "range",
+        "inner_angle_degrees",
+        "outer_angle_degrees",
+        "cast_shadows",
+    )
+    ordered_lines = [
+        "-- Generated from the Blender geometry handoff by sync_scenario_outputs.py.",
+        "-- Do not edit runtime light transforms independently.",
+        "return {",
+    ]
+    for anchor in anchors:
+        ordered_lines.append("  {")
+        for field in fields:
+            if field in anchor:
+                ordered_lines.append(f"    {field} = {_lua_value(anchor[field])},")
+        ordered_lines.append("  },")
+    ordered_lines.append("}")
+    LIGHTING_LUA_PATH.parent.mkdir(parents=True, exist_ok=True)
+    LIGHTING_LUA_PATH.write_text("\n".join(ordered_lines) + "\n", encoding="utf-8", newline="\n")
 
 
 def main() -> None:
@@ -93,47 +169,61 @@ def main() -> None:
             }
         )
 
-    repair = geometry["repair_trigger"]
-    repair_local_center = [float(value) for value in repair["center"]]
-    repair_dimensions = [float(value) for value in repair["dimensions"]]
-    repair_world_center = [
-        round(asset_position[axis] + repair_local_center[axis], 6) for axis in range(3)
-    ]
-    phase2["repair_trigger"] = {
-        "name": REPAIR_TRIGGER_NAME,
-        "class": "BeamNGTrigger",
-        "local_center": repair_local_center,
-        "world_center": repair_world_center,
-        "dimensions": repair_dimensions,
-        "rotation_xyzw": [0.0, 0.0, 0.0, 1.0],
-        "lua_function": "onBeamNGTrigger",
-        "mode": "Overlaps",
-        "test_type": "Bounding box",
-        "repair_strategy": "RESET_PHYSICS",
-    }
-
-    repair_record = {
-        "name": REPAIR_TRIGGER_NAME,
-        "class": "BeamNGTrigger",
-        "persistentId": _persistent_id(REPAIR_TRIGGER_NAME),
-        "__parent": GROUP_NAME,
-        "TriggerType": "Box",
-        "triggerMode": "Overlaps",
-        "triggerTestType": "Bounding box",
-        "luaFunction": "onBeamNGTrigger",
-        "tickPeriod": "100",
-        "debug": "0",
-        "debugInEditor": "0",
-        "ticking": "0",
-        "triggerColor": "0 220 160 40",
-        "defaultOnLeave": "0",
-        "mode": "Ignore",
-        "canSave": "1",
-        "canSaveDynamicFields": "1",
-        "position": repair_world_center,
-        "rotationMatrix": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
-        "scale": repair_dimensions,
-    }
+    trigger_definitions = (
+        ("wash_activation_trigger", WASH_TRIGGER_NAME, "Overlaps", "0 160 255 35"),
+        ("repair_trigger", REPAIR_TRIGGER_NAME, "Overlaps", "0 220 160 40"),
+        ("trigger", LAUNCH_TRIGGER_NAME, "Contains", "255 96 0 45"),
+    )
+    trigger_records: dict[str, dict[str, Any]] = {}
+    for geometry_key, name, mode, color in trigger_definitions:
+        authored = geometry[geometry_key]
+        if authored["name"] != name or authored["mode"] != mode:
+            raise ValueError(f"unexpected Blender trigger contract: {geometry_key}")
+        local_center = [float(value) for value in authored["center"]]
+        dimensions = [float(value) for value in authored["dimensions"]]
+        if (
+            len(local_center) != 3
+            or len(dimensions) != 3
+            or any(value <= 0 for value in dimensions)
+        ):
+            raise ValueError(f"invalid Blender trigger transform: {name}")
+        world_center = [round(asset_position[axis] + local_center[axis], 6) for axis in range(3)]
+        phase2_trigger = {
+            "name": name,
+            "class": "BeamNGTrigger",
+            "local_center": local_center,
+            "world_center": world_center,
+            "dimensions": dimensions,
+            "rotation_xyzw": [0.0, 0.0, 0.0, 1.0],
+            "lua_function": "onBeamNGTrigger",
+            "mode": mode,
+            "test_type": "Bounding box",
+        }
+        if geometry_key == "repair_trigger":
+            phase2_trigger["repair_strategy"] = str(authored["repair_strategy"])
+        phase2[geometry_key] = phase2_trigger
+        trigger_records[name] = {
+            "name": name,
+            "class": "BeamNGTrigger",
+            "persistentId": _persistent_id(name),
+            "__parent": GROUP_NAME,
+            "TriggerType": "Box",
+            "triggerMode": mode,
+            "triggerTestType": "Bounding box",
+            "luaFunction": "onBeamNGTrigger",
+            "tickPeriod": "100",
+            "debug": "0",
+            "debugInEditor": "0",
+            "ticking": "0",
+            "triggerColor": color,
+            "defaultOnLeave": "0",
+            "mode": "Ignore",
+            "canSave": "1",
+            "canSaveDynamicFields": "1",
+            "position": world_center,
+            "rotationMatrix": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+            "scale": dimensions,
+        }
     effect_records = [
         {
             "name": effect["name"],
@@ -150,25 +240,88 @@ def main() -> None:
         for effect in synchronized
     ]
 
-    base_records = [
-        record
-        for record in prefab
-        if record.get("class") != "ParticleEmitterNode"
-        and record.get("name") != REPAIR_TRIGGER_NAME
-    ]
+    light_anchors = geometry["lighting"]["anchors"]
+    if (
+        len(light_anchors) != 7
+        or len({anchor["name"] for anchor in light_anchors}) != 7
+        or Counter(anchor["class"] for anchor in light_anchors) != {"PointLight": 5, "SpotLight": 2}
+    ):
+        raise ValueError("Blender evidence must define five point and two spot light anchors")
+    light_records: list[dict[str, Any]] = []
+    synchronized_lights: list[dict[str, Any]] = []
+    for anchor in light_anchors:
+        local_position = [float(value) for value in anchor["local_position"]]
+        color = [float(value) for value in anchor["color"]]
+        if len(local_position) != 3 or len(color) != 3:
+            raise ValueError(f"invalid Blender light anchor: {anchor['name']}")
+        world_position = [
+            round(asset_position[axis] + local_position[axis], 6) for axis in range(3)
+        ]
+        record: dict[str, Any] = {
+            "name": str(anchor["name"]),
+            "class": str(anchor["class"]),
+            "persistentId": _persistent_id(str(anchor["name"])),
+            "__parent": GROUP_NAME,
+            "isEnabled": True,
+            "color": [*color, 1.0],
+            "brightness": float(anchor["brightness"]),
+            "castShadows": bool(anchor["cast_shadows"]),
+            "priority": 1,
+            "attenuationRatio": [0.0, 1.0, 1.0],
+            "texSize": 256,
+            "canSave": "1",
+            "canSaveDynamicFields": "1",
+            "position": world_position,
+            "scale": [1.0, 1.0, 1.0],
+        }
+        evidence = dict(anchor)
+        evidence["world_position"] = world_position
+        if anchor["class"] == "PointLight":
+            record.update(
+                {
+                    "radius": float(anchor["radius"]),
+                    "shadowType": "DualParaboloidSinglePass",
+                    "rotationMatrix": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+                }
+            )
+        else:
+            local_direction = [float(value) for value in anchor["local_direction"]]
+            if len(local_direction) != 3:
+                raise ValueError(f"invalid Blender spotlight direction: {anchor['name']}")
+            rotation_matrix = _direction_rotation_matrix(local_direction)
+            record.update(
+                {
+                    "range": float(anchor["range"]),
+                    "innerAngle": float(anchor["inner_angle_degrees"]),
+                    "outerAngle": float(anchor["outer_angle_degrees"]),
+                    "shadowSoftness": 2.0,
+                    "shadowType": "Spot",
+                    "rotationMatrix": rotation_matrix,
+                }
+            )
+            evidence["rotation_matrix"] = rotation_matrix
+        light_records.append(record)
+        synchronized_lights.append(evidence)
+    _write_lighting_lua(light_anchors)
+
     rewritten_prefab: list[dict[str, Any]] = []
-    repair_inserted = False
+    synchronized_triggers: set[str] = set()
     effects_inserted = False
-    for record in base_records:
-        rewritten_prefab.append(record)
-        if record.get("name") == WASH_TRIGGER_NAME:
-            rewritten_prefab.append(repair_record)
-            repair_inserted = True
-        if record.get("name") == LAUNCH_TRIGGER_NAME:
+    for record in prefab:
+        if record.get("class") in {"ParticleEmitterNode", "PointLight", "SpotLight"}:
+            continue
+        name = str(record.get("name"))
+        if name in trigger_records:
+            rewritten_prefab.append(trigger_records[name])
+            synchronized_triggers.add(name)
+        else:
+            rewritten_prefab.append(record)
+        if name == LAUNCH_TRIGGER_NAME:
             rewritten_prefab.extend(effect_records)
+            rewritten_prefab.extend(light_records)
             effects_inserted = True
-    if not repair_inserted or not effects_inserted:
-        raise ValueError("prefab is missing a canonical wash or launch trigger insertion point")
+    if synchronized_triggers != set(trigger_records) or not effects_inserted:
+        raise ValueError("prefab is missing a canonical trigger synchronization point")
 
     phase2["asset"]["sha256"] = hashlib.sha256(DAE_PATH.read_bytes()).hexdigest()
     phase2["wash_effects"] = {
@@ -179,6 +332,12 @@ def main() -> None:
         "requested_to_runtime": geometry["wash_effects"]["requested_to_runtime"],
         "emitter_counts": expected_counts,
         "effects": synchronized,
+    }
+    phase2["lighting"] = {
+        "coordinate_space": geometry["lighting"]["coordinate_space"],
+        "light_count": len(synchronized_lights),
+        "class_counts": {"PointLight": 5, "SpotLight": 2},
+        "lights": synchronized_lights,
     }
     PHASE2_PATH.write_text(
         json.dumps(phase2, indent=2) + "\n",
@@ -195,6 +354,7 @@ def main() -> None:
             {
                 "asset_sha256": phase2["asset"]["sha256"],
                 "effect_count": len(synchronized),
+                "light_count": len(synchronized_lights),
                 "prefab_object_count": len(rewritten_prefab),
             },
             sort_keys=True,

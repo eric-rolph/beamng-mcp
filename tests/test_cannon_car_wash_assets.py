@@ -16,7 +16,6 @@ MOD_ID = "ericrolph_cannon_car_wash"
 ASSET_ROOT = EXAMPLE_ROOT / "mod" / "art" / "shapes" / MOD_ID
 DAE_PATH = ASSET_ROOT / f"{MOD_ID}.dae"
 GEOMETRY_PATH = EXAMPLE_ROOT / "authoring" / f"{MOD_ID}.geometry.json"
-MATERIALS_PATH = ASSET_ROOT / f"{MOD_ID}.materials.json"
 MANIFEST_ROOT = EXAMPLE_ROOT / "validation" / "manifests"
 PHASE2_MANIFEST_PATH = MANIFEST_ROOT / "phase2.json"
 PHASE4_MANIFEST_PATH = MANIFEST_ROOT / "phase4.json"
@@ -26,14 +25,18 @@ MOD_ICON_PATH = REPOSITORY_ROOT / "icon.jpg"
 BLEND_PATH = EXAMPLE_ROOT / "blender" / "cannon_car_wash.blend"
 PREVIEW_PATH = EXAMPLE_ROOT / "blender" / "cannon_car_wash_preview.png"
 SCENARIO_ROOT = EXAMPLE_ROOT / "mod" / "levels" / "gridmap_v2" / "scenarios" / MOD_ID
+MATERIALS_PATH = SCENARIO_ROOT / "main.materials.json"
 SCENARIO_PREFAB_PATH = SCENARIO_ROOT / f"{MOD_ID}.prefab.json"
 SCENARIO_PATH = SCENARIO_ROOT / f"{MOD_ID}.json"
 SELECTOR_ROOT = EXAMPLE_ROOT / "mod" / "vehicles" / MOD_ID
 SELECTOR_DAE_PATH = SELECTOR_ROOT / f"{MOD_ID}.dae"
+SELECTOR_RUNTIME_DAE_PATH = SELECTOR_ROOT / f"{MOD_ID}_runtime_visual.dae"
 SELECTOR_HANDOFF_PATH = EXAMPLE_ROOT / "authoring" / f"{MOD_ID}.selector_handoff.json"
 SELECTOR_JBEAM_PATH = SELECTOR_ROOT / f"{MOD_ID}.jbeam"
 SELECTOR_MATERIALS_PATH = SELECTOR_ROOT / "main.materials.json"
 SELECTOR_RESULTS_PATH = EXAMPLE_ROOT / "telemetry" / "cannon_car_wash_selector_results.json"
+TEXTURE_MANIFEST_PATH = EXAMPLE_ROOT / "authoring" / f"{MOD_ID}.textures.json"
+GENERATED_TEXTURE_ROOT = EXAMPLE_ROOT / "textures" / "generated_png"
 COLLADA_NAMESPACE = {"c": "http://www.collada.org/2005/11/COLLADASchema"}
 LAUNCH_TRIGGER_NAME = f"{MOD_ID}_launch_trigger"
 WASH_TRIGGER_NAME = f"{MOD_ID}_wash_activation_trigger"
@@ -45,12 +48,13 @@ CRASH_WALL_NAME = f"{MOD_ID}_crash_wall"
 SELECTOR_VISUAL_NAME = f"{MOD_ID}_selector_visual"
 SELECTOR_CAGE_NAME = f"{MOD_ID}_selector_cage"
 PHYSICS_GROUP_NAME = f"{MOD_ID}_physics"
-LAUNCH_TRIGGER_CENTER = [0.0, 5.0, 2.1]
-LAUNCH_TRIGGER_DIMENSIONS = [5.8, 7.5, 4.6]
+LAUNCH_TRIGGER_CENTER = [0.0, 0.0, 2.1]
+LAUNCH_TRIGGER_DIMENSIONS = [5.8, 17.5, 4.6]
 WASH_TRIGGER_CENTER = [0.0, 0.0, 2.2]
 WASH_TRIGGER_DIMENSIONS = [5.8, 17.5, 4.4]
-REPAIR_TRIGGER_CENTER = [0.0, -5.6, 2.1]
+REPAIR_TRIGGER_CENTER = [0.0, 0.0, 2.1]
 REPAIR_TRIGGER_DIMENSIONS = [5.4, 2.2, 4.2]
+CITYBUS_ENVELOPE = {"width": 3.11, "length": 12.63, "height": 2.994}
 COLLISION_MESH_NAMES = [f"Colmesh-{index}" for index in range(1, 5)]
 EFFECT_NAMES = (
     {f"{MOD_ID}_mister_PreSoak_{side}_{height}" for side in ("L", "R") for height in range(1, 4)}
@@ -191,7 +195,7 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
         "dimensions": LAUNCH_TRIGGER_DIMENSIONS,
         "mode": "Contains",
         "events": ["enter", "exit"],
-        "target_speed_kph": 320.0,
+        "target_speed_kph": 360.0,
     }
     assert manifest["wash_activation_trigger"] == {
         "name": WASH_TRIGGER_NAME,
@@ -212,12 +216,60 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
 
     opening = manifest["clear_opening"]
     truck = manifest["truck_envelope"]
+    citybus = manifest["supported_large_vehicle_envelope"]
     assert opening["width"] - truck["width"] >= 1.0
     assert opening["height"] - truck["height"] >= 1.0
     assert manifest["trigger"]["dimensions"][1] > truck["length"]
     assert manifest["trigger"]["dimensions"][2] > truck["height"]
+    assert citybus == {
+        "model": "citybus",
+        "configuration": "city",
+        "source": "BeamNG.drive 0.38.6 vehicles/citybus/info_city.json BoundingBox",
+        **CITYBUS_ENVELOPE,
+    }
+    assert manifest["trigger"]["dimensions"][0] > citybus["width"]
+    assert manifest["trigger"]["dimensions"][1] > citybus["length"]
+    assert manifest["trigger"]["dimensions"][2] > citybus["height"]
     assert manifest["wash_activation_trigger"]["dimensions"][1] <= opening["length"]
+    entrance_y = float(manifest["entrance_center"][1])
+    exit_y = float(manifest["exit_center"][1])
+    assert manifest["repair_trigger"]["center"][1] == pytest.approx((entrance_y + exit_y) / 2.0)
+    wash_min_y = WASH_TRIGGER_CENTER[1] - WASH_TRIGGER_DIMENSIONS[1] / 2.0
+    wash_max_y = WASH_TRIGGER_CENTER[1] + WASH_TRIGGER_DIMENSIONS[1] / 2.0
+    launch_min_y = LAUNCH_TRIGGER_CENTER[1] - LAUNCH_TRIGGER_DIMENSIONS[1] / 2.0
+    launch_max_y = LAUNCH_TRIGGER_CENTER[1] + LAUNCH_TRIGGER_DIMENSIONS[1] / 2.0
+    repair_min_y = REPAIR_TRIGGER_CENTER[1] - REPAIR_TRIGGER_DIMENSIONS[1] / 2.0
+    repair_max_y = REPAIR_TRIGGER_CENTER[1] + REPAIR_TRIGGER_DIMENSIONS[1] / 2.0
+    assert wash_min_y <= launch_min_y < launch_max_y <= wash_max_y
+    assert wash_min_y <= repair_min_y < repair_max_y <= wash_max_y
     assert manifest["mesh_statistics"]["polygons"] <= 20_000
+    exported = manifest["export_statistics"]
+    actual_triangle_count = sum(
+        int(primitive.attrib["count"])
+        for primitive in root.findall(".//c:triangles", COLLADA_NAMESPACE)
+    )
+    actual_geometry_count = len(
+        root.findall(".//c:library_geometries/c:geometry", COLLADA_NAMESPACE)
+    )
+    actual_primitive_group_count = len(root.findall(".//c:triangles", COLLADA_NAMESPACE))
+    actual_material_symbol_count = len(
+        {
+            material.attrib["symbol"]
+            for material in root.findall(".//c:instance_material", COLLADA_NAMESPACE)
+        }
+    )
+    assert exported == {
+        "triangle_count": actual_triangle_count,
+        "geometry_count": actual_geometry_count,
+        "primitive_group_count": actual_primitive_group_count,
+        "material_symbol_count": actual_material_symbol_count,
+    }
+    assert actual_triangle_count <= 15_000
+    assert actual_primitive_group_count <= 36
+    assert actual_material_symbol_count == 18
+    dae_text = DAE_PATH.read_text(encoding="utf-8")
+    assert "EntranceSign_Text" not in dae_text
+    assert "ExitSign_Text" not in dae_text
     assert manifest["collision_meshes"] == COLLISION_MESH_NAMES
 
     channels = root.findall(".//c:library_animations//c:channel", COLLADA_NAMESPACE)
@@ -266,6 +318,83 @@ def test_cannon_car_wash_phase2_materials_cover_every_collada_slot() -> None:
     assert all(definition["version"] == 1.5 for definition in materials.values())
     assert all(name.startswith(f"{MOD_ID}_") for name in materials)
     assert f"{MOD_ID}_trigger_invisible" not in materials
+
+
+def test_selector_runtime_visual_preserves_animations_and_uses_vehicle_materials() -> None:
+    root = ET.parse(SELECTOR_RUNTIME_DAE_PATH).getroot()  # noqa: S314 - owned fixture
+    channels = root.findall(".//c:library_animations//c:channel", COLLADA_NAMESPACE)
+    assert len(channels) == 5
+    assert (
+        root.find(
+            "c:library_animation_clips/c:animation_clip[@name='ambient']",
+            COLLADA_NAMESPACE,
+        )
+        is not None
+    )
+
+    runtime_materials = {
+        material.attrib["name"]
+        for material in root.findall(".//c:library_materials/c:material", COLLADA_NAMESPACE)
+    }
+    selector_materials = json.loads(SELECTOR_MATERIALS_PATH.read_text(encoding="utf-8"))
+    assert runtime_materials == set(selector_materials)
+    assert len(runtime_materials) == 18
+    assert all(name.startswith(f"{MOD_ID}_selector_") for name in runtime_materials)
+
+
+def test_cannon_car_wash_pbr_authoring_maps_are_power_of_two_seamless_and_typed() -> None:
+    manifest = json.loads(TEXTURE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    assert manifest["texture_root"] == "textures/generated_png"
+    assert manifest["normal_convention"] == "OpenGL_Y_positive"
+    assert len(manifest["files"]) == 22
+    assert {entry["name"] for entry in manifest["files"]} == {
+        path.name for path in GENERATED_TEXTURE_ROOT.glob("*.png")
+    }
+
+    for entry in manifest["files"]:
+        path = GENERATED_TEXTURE_ROOT / entry["name"]
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == entry["sha256"]
+        with Image.open(path) as image:
+            assert image.width >= 16 and image.width & (image.width - 1) == 0
+            assert image.height >= 16 and image.height & (image.height - 1) == 0
+            expected_mode = "L" if path.name.endswith(".data.png") else "RGB"
+            if path.name.endswith("sign_emissive.data.png"):
+                expected_mode = "RGB"
+            assert image.mode == expected_mode
+            if any(
+                material in path.name
+                for material in ("_cmu.", "_interior_brick.", "_wet_concrete.", "_corrugated_blue.")
+            ):
+                assert list(image.crop((0, 0, 1, image.height)).getdata()) == list(
+                    image.crop((image.width - 1, 0, image.width, image.height)).getdata()
+                )
+                assert list(image.crop((0, 0, image.width, 1)).getdata()) == list(
+                    image.crop((0, image.height - 1, image.width, image.height)).getdata()
+                )
+
+
+def test_cannon_car_wash_materials_use_specialized_pbr_channels() -> None:
+    materials = json.loads(MATERIALS_PATH.read_text(encoding="utf-8"))
+    required = {
+        f"{MOD_ID}_exterior_cmu",
+        f"{MOD_ID}_interior_brick",
+        f"{MOD_ID}_wet_concrete",
+        f"{MOD_ID}_corrugated_blue",
+        f"{MOD_ID}_brush_cards",
+        f"{MOD_ID}_sign_face",
+    }
+    assert required <= set(materials)
+    for name in required - {f"{MOD_ID}_brush_cards", f"{MOD_ID}_sign_face"}:
+        stage = materials[name]["Stages"][0]
+        assert {"baseColorMap", "normalMap", "roughnessMap", "ambientOcclusionMap"} <= set(stage)
+    brush = materials[f"{MOD_ID}_brush_cards"]
+    assert brush["alphaTest"] is True
+    assert brush["doubleSided"] is True
+    assert brush["translucentBlendOp"] == "None"
+    assert brush["Stages"][0]["opacityMap"].endswith("_opacity.data.png")
+    sign_stage = materials[f"{MOD_ID}_sign_face"]["Stages"][0]
+    assert sign_stage["emissiveMap"].endswith("_sign_emissive.data.png")
+    assert min(sign_stage["emissiveFactor"]) > 1.0
 
 
 def test_cannon_car_wash_vehicle_selector_metadata_and_thumbnails() -> None:
@@ -475,7 +604,7 @@ def test_cannon_car_wash_repository_metadata_and_icon() -> None:
 
     assert repository_info["internal_name"] == MOD_ID
     assert repository_info["title"] == "Cannon Car Wash"
-    assert repository_info["version"] == "1.6.0"
+    assert repository_info["version"] == "1.8.0"
     assert repository_info["author"] == "Eric Rolph"
 
     with Image.open(MOD_ICON_PATH) as icon:
@@ -547,7 +676,7 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
     prefab_source = SCENARIO_PREFAB_PATH.read_text(encoding="utf-8")
     prefab_records = [json.loads(line) for line in prefab_source.splitlines() if line.strip()]
     prefab = {record["name"]: record for record in prefab_records}
-    assert len(prefab_records) == 23
+    assert len(prefab_records) == 30
     assert prefab[SCENARIO_GROUP_NAME]["class"] == "SimGroup"
 
     visual = prefab[SCENARIO_VISUAL_NAME]
@@ -618,6 +747,36 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
         assert effect["emitter"] == spec["emitter"]
         assert effect["active"] is False
         assert effect["__parent"] == SCENARIO_GROUP_NAME
+
+    light_specs = {light["name"]: light for light in geometry["lighting"]["anchors"]}
+    phase2_lights = {light["name"]: light for light in phase2["lighting"]["lights"]}
+    lights = {
+        name: record
+        for name, record in prefab.items()
+        if record["class"] in {"PointLight", "SpotLight"}
+    }
+    assert len(light_specs) == len(phase2_lights) == len(lights) == 7
+    assert set(light_specs) == set(phase2_lights) == set(lights)
+    assert Counter(spec["class"] for spec in light_specs.values()) == {
+        "PointLight": 5,
+        "SpotLight": 2,
+    }
+    assert phase2["lighting"]["class_counts"] == {"PointLight": 5, "SpotLight": 2}
+    for name, light in lights.items():
+        spec = light_specs[name]
+        expected_position = [
+            asset_position[axis] + spec["local_position"][axis] for axis in range(3)
+        ]
+        assert light["position"] == pytest.approx(expected_position)
+        assert light["brightness"] == spec["brightness"]
+        assert light["castShadows"] is spec["cast_shadows"]
+        assert len(light["rotationMatrix"]) == 9
+        if spec["class"] == "PointLight":
+            assert light["radius"] == spec["radius"]
+        else:
+            assert light["range"] == spec["range"]
+            assert light["innerAngle"] == spec["inner_angle_degrees"]
+            assert light["outerAngle"] == spec["outer_angle_degrees"]
 
     vehicle = prefab[TRUCK_NAME]
     assert vehicle["class"] == "BeamNGVehicle"

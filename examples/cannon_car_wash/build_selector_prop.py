@@ -21,7 +21,11 @@ AUTHORING_ROOT = EXAMPLE_ROOT / "authoring"
 VEHICLE_ROOT = MOD_ROOT / "vehicles" / MOD_ID
 HANDOFF_PATH = AUTHORING_ROOT / f"{MOD_ID}.selector_handoff.json"
 DAE_PATH = VEHICLE_ROOT / f"{MOD_ID}.dae"
-SOURCE_MATERIALS_PATH = MOD_ROOT / "art" / "shapes" / MOD_ID / f"{MOD_ID}.materials.json"
+ANIMATED_DAE_PATH = VEHICLE_ROOT / f"{MOD_ID}_runtime_visual.dae"
+SOURCE_ANIMATED_DAE_PATH = MOD_ROOT / "art" / "shapes" / MOD_ID / f"{MOD_ID}.dae"
+SOURCE_MATERIALS_PATH = (
+    MOD_ROOT / "levels" / "gridmap_v2" / "scenarios" / MOD_ID / "main.materials.json"
+)
 THUMBNAIL_SOURCE = MOD_ROOT / "levels" / "gridmap_v2" / "scenarios" / MOD_ID / f"{MOD_ID}.jpg"
 
 MODEL_ID = MOD_ID
@@ -175,6 +179,41 @@ def build_materials(handoff: dict[str, Any]) -> dict[str, Any]:
     return output
 
 
+def build_animated_runtime_visual(handoff: dict[str, Any]) -> None:
+    """Create the selector's animated TSStatic using vehicle-local material slots.
+
+    BeamNG loads vehicle materials before vehicle Lua, while material files under
+    another level are not part of the active Smallgrid load scope.  Preserve the
+    authored Collada geometry and animation byte-for-byte except for the exact
+    material/effect identifiers that must bind to the selector-prefixed material
+    definitions already present in this vehicle directory.
+    """
+
+    payload = SOURCE_ANIMATED_DAE_PATH.read_text(encoding="utf-8")
+    for selector_name in handoff["visual"]["materials"]:
+        selector_prefix = f"{MOD_ID}_selector_"
+        if not selector_name.startswith(selector_prefix):
+            raise ValueError(f"unexpected selector material name: {selector_name}")
+        source_name = f"{MOD_ID}_{selector_name.removeprefix(selector_prefix)}"
+        replacements = (
+            (f'"{source_name}-material"', f'"{selector_name}-material"'),
+            (f'"#{source_name}-material"', f'"#{selector_name}-material"'),
+            (f'"{source_name}-effect"', f'"{selector_name}-effect"'),
+            (f'"#{source_name}-effect"', f'"#{selector_name}-effect"'),
+            (f'name="{source_name}"', f'name="{selector_name}"'),
+        )
+        replacement_count = 0
+        for old, new in replacements:
+            count = payload.count(old)
+            payload = payload.replace(old, new)
+            replacement_count += count
+        if replacement_count == 0:
+            raise ValueError(f"animated Collada does not use material {source_name}")
+    if "<library_animations>" not in payload or 'animation_clip id="ambient"' not in payload:
+        raise ValueError("animated selector Collada lost its ambient brush animation")
+    ANIMATED_DAE_PATH.write_text(payload, encoding="utf-8", newline="")
+
+
 def main() -> None:
     handoff = load_handoff()
     jbeam, total_mass = build_jbeam(handoff)
@@ -182,6 +221,7 @@ def main() -> None:
 
     write_json(VEHICLE_ROOT / f"{MODEL_ID}.jbeam", jbeam)
     write_json(VEHICLE_ROOT / "main.materials.json", materials)
+    build_animated_runtime_visual(handoff)
     write_json(
         VEHICLE_ROOT / "info.json",
         {

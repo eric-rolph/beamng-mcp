@@ -22,6 +22,190 @@ from beamng_mcp.installer import BRIDGE_CONFIG, MOD_DIRECTORY, MOD_MARKER
 _DEFAULT_SERVICE_PORTS = frozenset({8765, 25252})
 _HELD_PROFILE_LOCKS: set[Path] = set()
 _PROFILE_LOCK_GUARD = threading.Lock()
+_LOG_CURSOR_ANCHOR_BYTES = 64
+
+
+@dataclass(frozen=True, slots=True)
+class BeamNGLogRead:
+    """One incremental read from a :class:`BeamNGLogCursor`."""
+
+    lines: tuple[str, ...]
+    records: tuple[dict[str, Any], ...]
+    issues: tuple[str, ...]
+    restarted: bool
+    start_offset: int
+    end_offset: int
+
+    @property
+    def events(self) -> tuple[str, ...]:
+        """Return string event names from the structured records."""
+
+        return tuple(
+            event for record in self.records if isinstance((event := record.get("event")), str)
+        )
+
+
+class BeamNGLogCursor:
+    """Incrementally inspect one BeamNG log without repeatedly rereading it.
+
+    BeamNG commonly replaces or truncates ``beamng.log`` during a process
+    restart. The cursor detects file identity, size, and content-anchor changes
+    before reading so a fast truncate-and-regrow cannot leave its byte offset in
+    the middle of an unrelated run. An incomplete final line is retained until
+    its newline arrives, which also makes split UTF-8 writes safe.
+    """
+
+    def __init__(
+        self,
+        path: Path,
+        *,
+        namespaces: Iterable[str] = (),
+        json_tag: str | None = None,
+        schema_version: int | None = None,
+        start_at_end: bool = False,
+    ) -> None:
+        self.path = path
+        self.namespaces = tuple(namespace.casefold() for namespace in namespaces if namespace)
+        self.json_tag = json_tag.casefold() if json_tag else None
+        self.schema_version = schema_version
+        self._offset = 0
+        self._pending = b""
+        self._identity: tuple[int, int] | None = None
+        self._anchor = b""
+        self._seen_file = False
+        self._missing_after_seen = False
+        self._discard_until_newline = False
+        if start_at_end:
+            self.seek_end()
+
+    @property
+    def offset(self) -> int:
+        """Current byte offset in the physical log file."""
+
+        return self._offset
+
+    def seek_end(self) -> None:
+        """Ignore existing content and begin observing future complete lines."""
+
+        try:
+            with self.path.open("rb") as handle:
+                stat_result = os.fstat(handle.fileno())
+                self._identity = (stat_result.st_dev, stat_result.st_ino)
+                self._offset = stat_result.st_size
+                self._anchor = self._read_anchor(handle, self._offset)
+                self._discard_until_newline = bool(self._offset and self._anchor[-1:] != b"\n")
+        except FileNotFoundError:
+            self._identity = None
+            self._offset = 0
+            self._anchor = b""
+            self._discard_until_newline = False
+        self._pending = b""
+        self._seen_file = self._identity is not None
+        self._missing_after_seen = False
+
+    def read(self) -> BeamNGLogRead:
+        """Return complete lines, JSON records, and relevant new warnings/errors."""
+
+        try:
+            handle = self.path.open("rb")
+        except FileNotFoundError:
+            if self._seen_file:
+                self._missing_after_seen = True
+            return BeamNGLogRead((), (), (), False, self._offset, self._offset)
+
+        with handle:
+            stat_result = os.fstat(handle.fileno())
+            identity = (stat_result.st_dev, stat_result.st_ino)
+            restarted = self._did_restart(handle, identity, stat_result.st_size)
+            if restarted:
+                self._offset = 0
+                self._pending = b""
+                self._anchor = b""
+                self._discard_until_newline = False
+
+            start_offset = self._offset
+            handle.seek(start_offset)
+            payload = handle.read()
+            self._offset += len(payload)
+            self._anchor = self._read_anchor(handle, self._offset)
+            self._identity = identity
+            self._seen_file = True
+            self._missing_after_seen = False
+
+        buffered = self._pending + payload
+        if self._discard_until_newline:
+            _, separator, buffered = buffered.partition(b"\n")
+            if not separator:
+                return BeamNGLogRead((), (), (), restarted, start_offset, self._offset)
+            self._discard_until_newline = False
+
+        complete, separator, pending = buffered.rpartition(b"\n")
+        if not separator:
+            self._pending += payload
+            lines: tuple[str, ...] = ()
+        else:
+            self._pending = pending
+            lines = tuple(
+                line.rstrip("\r") for line in complete.decode("utf-8", errors="replace").split("\n")
+            )
+
+        records = tuple(
+            record for line in lines if (record := self._structured_record(line)) is not None
+        )
+        issues = tuple(line for line in lines if self._is_relevant_issue(line))
+        return BeamNGLogRead(
+            lines=lines,
+            records=records,
+            issues=issues,
+            restarted=restarted,
+            start_offset=start_offset,
+            end_offset=self._offset,
+        )
+
+    def _did_restart(
+        self,
+        handle: Any,
+        identity: tuple[int, int],
+        size: int,
+    ) -> bool:
+        if not self._seen_file:
+            return False
+        if self._missing_after_seen or self._identity != identity or size < self._offset:
+            return True
+        if not self._anchor:
+            return False
+        anchor_start = self._offset - len(self._anchor)
+        handle.seek(anchor_start)
+        return handle.read(len(self._anchor)) != self._anchor
+
+    @staticmethod
+    def _read_anchor(handle: Any, offset: int) -> bytes:
+        anchor_start = max(0, offset - _LOG_CURSOR_ANCHOR_BYTES)
+        handle.seek(anchor_start)
+        return handle.read(offset - anchor_start)
+
+    def _structured_record(self, line: str) -> dict[str, Any] | None:
+        folded = line.casefold()
+        if self.json_tag is not None and self.json_tag not in folded:
+            return None
+        json_start = line.find("{")
+        if json_start < 0:
+            return None
+        try:
+            value, _ = json.JSONDecoder().raw_decode(line[json_start:])
+        except json.JSONDecodeError:
+            return None
+        if not isinstance(value, dict):
+            return None
+        if self.schema_version is not None and value.get("schema_version") != self.schema_version:
+            return None
+        return value
+
+    def _is_relevant_issue(self, line: str) -> bool:
+        folded = line.casefold()
+        if "|e|" not in folded and "|w|" not in folded:
+            return False
+        return not self.namespaces or any(namespace in folded for namespace in self.namespaces)
 
 
 @dataclass(slots=True)

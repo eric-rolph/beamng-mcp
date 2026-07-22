@@ -112,7 +112,7 @@ def test_phase3_payload_uses_the_scenario_owned_extension_lifecycle() -> None:
 
     repair_trigger = prefab_by_name[REPAIR_TRIGGER_NAME]
     assert repair_trigger["class"] == "BeamNGTrigger"
-    assert repair_trigger["position"] == [-122.011475, -175.6, 102.1]
+    assert repair_trigger["position"] == [-122.011475, -170.0, 102.1]
     assert repair_trigger["scale"] == [5.4, 2.2, 4.2]
     assert repair_trigger["luaFunction"] == "onBeamNGTrigger"
     assert repair_trigger["triggerMode"] == "Overlaps"
@@ -157,20 +157,17 @@ def test_phase3_payload_uses_the_scenario_owned_extension_lifecycle() -> None:
         assert f"M.{callback}" in source
 
 
-def test_trigger_callback_requires_exact_live_triggers_and_scopes_vehicle_identity() -> None:
+def test_trigger_callback_requires_exact_live_triggers_and_accepts_any_live_vehicle() -> None:
     source = extension_source()
     dispatch = _function_section(source, "onBeamNGTrigger")
     launch_callback = _function_section(source, "handleLaunchTrigger")
     repair_callback = _function_section(source, "handleRepairTrigger")
     trigger_resolver = _function_section(source, "exactTriggerFromEvent")
     vehicle_resolver = _function_section(source, "exactVehicleFromEvent")
-    truck_resolver = _function_section(source, "exactTruckFromEvent")
 
     assert _lua_string(source, "LAUNCH_TRIGGER_NAME") == LAUNCH_TRIGGER_NAME
     assert _lua_string(source, "WASH_TRIGGER_NAME") == WASH_TRIGGER_NAME
     assert _lua_string(source, "REPAIR_TRIGGER_NAME") == REPAIR_TRIGGER_NAME
-    assert _lua_string(source, "TRUCK_NAME") == TRUCK_NAME
-    assert _lua_string(source, "TRUCK_MODEL") == "pickup"
 
     assert "handleWashTrigger(data)" in dispatch
     assert "handleRepairTrigger(data)" in dispatch
@@ -201,13 +198,16 @@ def test_trigger_callback_requires_exact_live_triggers_and_scopes_vehicle_identi
         vehicle_resolver,
     )
     assert re.search(r"\w+:getId\(\)\s*~=\s*data\.subjectID", vehicle_resolver)
-    assert re.search(r"\w+:getName\(\)\s*~=\s*TRUCK_NAME", truck_resolver)
-    assert re.search(r"\w+:getJBeamFilename\(\)\s*~=\s*TRUCK_MODEL", truck_resolver)
+    assert "exactVehicleFromEvent(data)" in launch_callback
     assert "exactVehicleFromEvent(data)" in repair_callback
-    assert "exactTruckFromEvent(data)" not in repair_callback
+    for forbidden_identity in ("TRUCK_NAME", "TRUCK_MODEL", "exactTruckFromEvent"):
+        assert forbidden_identity not in source
 
     enter_guard = re.search(r"data\.event\s*~=\s*[\"']enter[\"']", launch_callback)
     assert enter_guard is not None
+    assert '"containment_exit_suppressed"' in launch_callback
+    assert "washSubjects[data.subjectID]" in launch_callback
+    assert "washSystemsActive" in launch_callback
     assert launch_callback.index("data.triggerName") < launch_callback.index("hold_requested")
 
 
@@ -218,6 +218,7 @@ def test_wash_trigger_controls_rollers_water_and_layered_dryer_effects() -> None
     wash_resolver = _function_section(source, "resolveWashObjects")
     wash_rollback = _function_section(source, "forceWashSystemsOff")
     ambient_control = _function_section(source, "setVisualAmbient")
+    remove_subject = _function_section(source, "removeWashSubject")
 
     assert _lua_string(source, "VISUAL_NAME") == SCENARIO_VISUAL_NAME
     assert _lua_string(source, "VISUAL_CLASS") == "TSStatic"
@@ -270,13 +271,14 @@ def test_wash_trigger_controls_rollers_water_and_layered_dryer_effects() -> None
     assert re.search(r"effect_count\s*=\s*#EFFECT_SPECS", wash_systems)
 
     assert re.search(r"washSubjects\[data\.subjectID\]\s*=\s*true", wash_callback)
-    assert re.search(r"washSubjects\[data\.subjectID\]\s*=\s*nil", wash_callback)
+    assert 'removeWashSubject(data.subjectID, "last_vehicle_exit")' in wash_callback
+    assert re.search(r"washSubjects\[vehicleId\]\s*=\s*nil", remove_subject)
     assert 'setWashSystemsEnabled(true, "vehicle_enter", true)' in wash_callback
     assert re.search(
         r"washSubjectCount\(\)\s*==\s*0\s+and\s+washSystemsActive",
-        wash_callback,
+        remove_subject,
     )
-    assert 'setWashSystemsEnabled(false, "last_vehicle_exit", true)' in wash_callback
+    assert "setWashSystemsEnabled(false, reason, true)" in remove_subject
     for event in (
         "wash_trigger_enter",
         "wash_systems_start",
@@ -295,11 +297,14 @@ def test_repair_trigger_resets_once_and_waits_for_post_reset_integrity_ack() -> 
     reset_callback = _function_section(source, "onVehicleResetted")
     update = _function_section(source, "onPreRender")
     pending_launch = _function_section(source, "processPendingLaunch")
+    remove_subject = _function_section(source, "removeWashSubject")
     integrity_ack_name = "onEricrolphCannonCarWashScenarioRepairIntegrityAcknowledged"
     integrity_ack = _function_section(source, integrity_ack_name)
     release_ack_name = "onEricrolphCannonCarWashScenarioRepairReleaseAcknowledged"
     release_ack = _function_section(source, release_ack_name)
     launch_callback = _function_section(source, "handleLaunchTrigger")
+    target_pose = _function_section(source, "repairTargetPose")
+    pose_metrics = _function_section(source, "repairedPoseMetrics")
 
     release_start = source.index("local function releaseVehicleCommand")
     release_string_end = source.index("]]", release_start)
@@ -339,13 +344,41 @@ def test_repair_trigger_resets_once_and_waits_for_post_reset_integrity_ack() -> 
         r"data\.event\s*~=\s*[\"']enter[\"']\s+or\s+repairOccupants\[data\.subjectID\]",
         repair_callback,
     )
-    assert re.search(r"repairOccupants\[data\.subjectID\]\s*=\s*nil", wash_callback)
+    assert re.search(r"repairOccupants\[vehicleId\]\s*=\s*nil", remove_subject)
 
     assert re.search(r"(?:obj|vehicle):requestReset\(\s*RESET_PHYSICS\s*\)", source)
     assert "resetBrokenFlexMesh" in source
     assert "beamstate.damage" in source
     assert "beamstate.getPartDamageData" in source
     assert "obj:beamIsBroken" in source
+
+    # The target is derived from the live repair trigger's Y/Z frame and the
+    # vehicle's measured direction/up basis. Center the post-alignment OOBB,
+    # preserving longitudinal progress and height without assuming BeamNG's
+    # internal vehicle quaternion convention.
+    assert "trigger:getPosition()" in target_pose
+    assert "quat(trigger:getRotation())" in target_pose
+    assert "triggerRotation * vec3(0, 1, 0)" in target_pose
+    assert "triggerRotation * vec3(0, 0, 1)" in target_pose
+    assert "vehicle:getSpawnWorldOOBB()" in target_pose
+    assert "boundingBox:getCenter()" in target_pose
+    assert "direction:dot(corridorForward) < 0" in target_pose
+    assert "corridorForward = -corridorForward" in target_pose
+    assert "vehicleUp - direction * vehicleUp:dot(direction)" in target_pose
+    assert "direction:getRotationTo(corridorForward)" in target_pose
+    assert "alignedUp:getRotationTo(corridorUp)" in target_pose
+    assert "upAlignment * forwardAlignment" in target_pose
+    assert "alignmentRotation * (boundingCenter - position)" in target_pose
+    assert "targetPosition = position - corridorRight * centerlineOffset" in target_pose
+    assert "quat(0, 0, 1, 0)" not in target_pose
+    for metric in (
+        "centerlineError",
+        "corridorDirectionDot",
+        "uprightDot",
+        "travelDirectionDot",
+        "travelSignPreserved",
+    ):
+        assert metric in pose_metrics
 
     # onVehicleResetted is the acknowledgement of the intentional reset. It
     # must recognize reset_pending before the generic path removes/aborts the
@@ -355,9 +388,12 @@ def test_repair_trigger_resets_once_and_waits_for_post_reset_integrity_ack() -> 
     assert "repairOccupants" in reset_pending_branch
     assert '"repair_reset_ack"' in reset_pending_branch
     assert "vehicle:setPositionRotation" in reset_pending_branch
-    assert "repair.positionBefore" in reset_pending_branch
-    assert "repair.rotationBefore" in reset_pending_branch
+    assert "repair.targetPosition" in reset_pending_branch
+    assert "repair.targetRotation" in reset_pending_branch
     assert "pose_restore_requested = true" in reset_pending_branch
+    assert 'pose_policy = "center_oobb_on_trigger_axis_align_upright_preserve_travel_sign"' in (
+        reset_pending_branch
+    )
     assert '"repair_pose_restore_ack"' in reset_pending_branch
     assert "return" in reset_pending_branch
 
@@ -367,8 +403,28 @@ def test_repair_trigger_resets_once_and_waits_for_post_reset_integrity_ack() -> 
     assert f"M.{integrity_ack_name}" in source
     assert "release_pending" in integrity_ack
     assert "repair_release_requested" in integrity_ack
+    assert '"repair_pose_verification_failed"' in integrity_ack
+    assert "REPAIR_MAX_CENTERLINE_ERROR_METERS" in integrity_ack
+    assert "REPAIR_MIN_CORRIDOR_DOT" in integrity_ack
+    assert "REPAIR_MIN_UPRIGHT_DOT" in integrity_ack
+    assert "repairTargetPose(" in integrity_ack
+    assert "repairTrigger" in integrity_ack
+    assert "repair.targetPosition = correctionTarget.targetPosition" in integrity_ack
+    assert "repair.targetRotation = correctionTarget.targetRotation" in integrity_ack
+    assert '"repair_pose_correction_travel_sign_changed"' in integrity_ack
     assert "repair_release_ack" in release_ack
     assert "repair_complete" in release_ack
+    for telemetry_field in (
+        "centerline_error_before_m",
+        "centerline_error_m",
+        "alignment_translation_m",
+        "corridor_direction_dot",
+        "upright_dot",
+        "travel_direction_dot",
+        "travel_sign_preserved",
+        "travel_sign",
+    ):
+        assert telemetry_field in release_ack
     assert "processPendingLaunch" in release_ack
     assert f"M.{release_ack_name}" in source
 
@@ -398,8 +454,17 @@ def test_repair_trigger_resets_once_and_waits_for_post_reset_integrity_ack() -> 
     assert "complete" in source
     assert "resetEdgeGuard" in pending_launch
     assert "washExitDeferred" in pending_launch
+    assert re.search(
+        r"if\s+not\s+repair\s+or\s+repair\.phase\s*~=\s*[\"']complete[\"']",
+        pending_launch,
+    )
     assert "resetEdgeGuard" in launch_callback
     assert "washExitDeferred" in launch_callback
+    assert re.search(
+        r"if\s+not\s+repair\s+or\s+repair\.phase\s*~=\s*[\"']complete[\"']",
+        launch_callback,
+    )
+    assert '"repair_not_started"' in launch_callback
     assert '"launch_deferred"' in launch_callback
 
 
@@ -425,8 +490,9 @@ def test_phase3_manifest_describes_wash_cycle_and_containment_gate() -> None:
         "repair_trigger_name": REPAIR_TRIGGER_NAME,
         "repair_trigger_class": "BeamNGTrigger",
         "repair_trigger_mode": "Overlaps",
-        "vehicle_name": TRUCK_NAME,
-        "vehicle_model": "pickup",
+        "default_vehicle_name": TRUCK_NAME,
+        "default_vehicle_model": "pickup",
+        "launcher_vehicle_scope": "any_live_vehicle",
     }
     assert manifest["wash_cycle"] == {
         "scope": "full_bay",
@@ -444,6 +510,7 @@ def test_phase3_manifest_describes_wash_cycle_and_containment_gate() -> None:
             "effects_active": True,
         },
         "exit": {
+            "stop_condition": "last_tracked_vehicle_removed",
             "roller_play_ambient": False,
             "effects_active": False,
         },
@@ -457,7 +524,16 @@ def test_phase3_manifest_describes_wash_cycle_and_containment_gate() -> None:
         "vehicle_scope": "any_live_vehicle",
         "reset_strategy": "RESET_PHYSICS",
         "pre_reset_hold": "acknowledged_controller_freeze_preserving_previous_state",
-        "pose_policy": "restore_exact_pre_reset_position_and_quaternion",
+        "pose_policy": "center_oobb_on_trigger_axis_align_upright_preserve_travel_sign",
+        "center_reference": "vehicle_spawn_world_oobb",
+        "position_policy": "remove_lateral_error_preserve_longitudinal_progress_and_height",
+        "orientation_policy": "live_trigger_y_z_basis_without_hard_coded_vehicle_axis",
+        "pose_verification": {
+            "maximum_centerline_error_m": 0.15,
+            "minimum_corridor_direction_dot": 0.999,
+            "minimum_upright_dot": 0.999,
+            "require_travel_sign_preserved": True,
+        },
         "reset_callback_sequence": [
             "physics_reset_acknowledgement",
             "pose_restore_acknowledgement",
@@ -474,8 +550,18 @@ def test_phase3_manifest_describes_wash_cycle_and_containment_gate() -> None:
         "required_test_type": "Bounding box",
         "required_vehicle_state": f"previously_entered_{WASH_TRIGGER_NAME}",
         "required_wash_system_state": "active",
-        "required_repair_state": "complete_when_repair_occupant_exists",
+        "required_repair_state": "complete",
+        "launch_trigger_local_center": [0.0, 0.0, 2.1],
+        "launch_trigger_dimensions": [5.8, 17.5, 4.6],
+        "validated_large_vehicle": {
+            "model": "citybus",
+            "configuration": "city",
+            "metadata_dimensions_m": [3.11, 12.63, 2.994],
+        },
         "out_of_order_policy": "defer_until_wash_active_and_repair_complete",
+        "prelaunch_exit_policy": (
+            "suppress_only_while_same_subject_remains_an_active_wash_occupant"
+        ),
         "action": "begin_countdown",
     }
     assert manifest["telemetry"]["wash_events"] == [
@@ -496,6 +582,9 @@ def test_phase3_manifest_describes_wash_cycle_and_containment_gate() -> None:
     ]
     assert manifest["telemetry"]["launch_gate_event"] == "containment_verified"
     assert manifest["telemetry"]["launch_deferred_event"] == "launch_deferred"
+    assert (
+        manifest["telemetry"]["containment_exit_suppressed_event"] == "containment_exit_suppressed"
+    )
 
 
 def test_launch_requires_prior_wash_entry_and_engine_contains_event() -> None:

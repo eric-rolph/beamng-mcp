@@ -23,7 +23,9 @@ from PIL import Image, ImageChops, ImageStat
 
 from beamng_mcp.config import Settings
 from beamng_mcp.mcp_adapter import create_mcp_server
+from examples.cannon_car_wash.build_distribution import EXPECTED_RUNTIME_FILES
 from tests.live_support import (
+    BeamNGLogCursor,
     claim_owned_beamng_process,
     cleanup_exact_live_artifacts,
     cleanup_owned_beamng_session,
@@ -58,27 +60,11 @@ EXPECTED_EMITTER_COUNTS = {
 }
 GALLERY_DIRECTORY_ENV = "BEAMNG_MCP_CANNON_GALLERY_DIR"
 GALLERY_RESOLUTION = (1280, 720)
-PUBLIC_RUNTIME_FILES = frozenset(
-    {
-        f"art/shapes/{MOD_ID}/{MOD_ID}.dae",
-        f"art/shapes/{MOD_ID}/{MOD_ID}.materials.json",
-        f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.json",
-        f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.lua",
-        f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.prefab.json",
-        f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.jpg",
-        f"vehicles/{MOD_ID}/{MOD_ID}.dae",
-        f"vehicles/{MOD_ID}/{MOD_ID}.jbeam",
-        f"vehicles/{MOD_ID}/default.jpg",
-        f"vehicles/{MOD_ID}/info.json",
-        f"vehicles/{MOD_ID}/info_standard.json",
-        f"vehicles/{MOD_ID}/main.materials.json",
-        f"vehicles/{MOD_ID}/standard.jpg",
-        f"vehicles/{MOD_ID}/standard.pc",
-        f"lua/ge/extensions/{MOD_ID}/runtime.lua",
-        f"vehicles/{MOD_ID}/lua/{MOD_ID}_vehicle.lua",
-    }
-)
+PUBLIC_RUNTIME_FILES = frozenset(EXPECTED_RUNTIME_FILES)
 PUBLIC_ROOTS = {"art", "levels", "lua", "vehicles"}
+_LOG_CURSORS: dict[Path, BeamNGLogCursor] = {}
+_LOG_RECORDS: dict[Path, list[dict[str, Any]]] = {}
+_LOG_LINES: dict[Path, list[str]] = {}
 
 
 def _configured_runtime() -> tuple[Path, Path, Path]:
@@ -123,7 +109,7 @@ def _stage_full_mod(workspace: Path, runtime_mod_name: str) -> Path:
         for source in MOD_SOURCE.rglob("*")
         if source.is_file() and not source.is_symlink()
     }
-    assert len(PUBLIC_RUNTIME_FILES) == 16
+    assert len(PUBLIC_RUNTIME_FILES) == 40
     assert set(source_files) == PUBLIC_RUNTIME_FILES
 
     mod_root = workspace / "mods" / runtime_mod_name
@@ -145,33 +131,48 @@ def _zip_members(path: Path) -> set[str]:
         return set(archive.namelist())
 
 
+def _reset_log_cursor(log_path: Path) -> None:
+    _LOG_CURSORS[log_path] = BeamNGLogCursor(
+        log_path,
+        namespaces=(LOG_TAG, MOD_ID, EXTENSION_REGISTRY_NAME),
+        json_tag=LOG_TAG,
+        schema_version=1,
+        start_at_end=True,
+    )
+    _LOG_RECORDS[log_path] = []
+    _LOG_LINES[log_path] = []
+
+
+def _read_log_delta(log_path: Path) -> None:
+    if log_path not in _LOG_CURSORS:
+        _LOG_CURSORS[log_path] = BeamNGLogCursor(
+            log_path,
+            namespaces=(LOG_TAG, MOD_ID, EXTENSION_REGISTRY_NAME),
+            json_tag=LOG_TAG,
+            schema_version=1,
+        )
+        _LOG_RECORDS[log_path] = []
+        _LOG_LINES[log_path] = []
+    delta = _LOG_CURSORS[log_path].read()
+    if delta.restarted:
+        _LOG_RECORDS[log_path].clear()
+        _LOG_LINES[log_path].clear()
+    _LOG_RECORDS[log_path].extend(delta.records)
+    _LOG_LINES[log_path].extend(delta.lines)
+
+
 def _tagged_records(log_path: Path) -> list[dict[str, Any]]:
-    if not log_path.is_file():
-        return []
-    decoder = json.JSONDecoder()
-    records: list[dict[str, Any]] = []
-    for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines():
-        if LOG_TAG not in line:
-            continue
-        start = line.find("{")
-        if start < 0:
-            continue
-        with contextlib.suppress(json.JSONDecodeError):
-            value, _ = decoder.raw_decode(line[start:])
-            if isinstance(value, dict) and value.get("schema_version") == 1:
-                records.append(value)
-    return records
+    _read_log_delta(log_path)
+    return list(_LOG_RECORDS[log_path])
 
 
 def _cannon_log_issues(log_path: Path, *, start_offset: int) -> list[str]:
-    if not log_path.is_file():
-        return []
-    payload = log_path.read_bytes()
-    current_run = payload[start_offset:] if start_offset <= len(payload) else payload
+    del start_offset  # Cursor initialization already marks the current run boundary.
+    _read_log_delta(log_path)
     tokens = (LOG_TAG.casefold(), MOD_ID, EXTENSION_REGISTRY_NAME)
     return [
         line
-        for line in current_run.decode("utf-8", errors="replace").splitlines()
+        for line in _LOG_LINES[log_path]
         if ("|E|" in line or "|W|" in line) and any(token in line.casefold() for token in tokens)
     ]
 
@@ -200,6 +201,8 @@ async def _request_gallery_capture(
     *,
     relative_path: Path,
     render_view_name: str,
+    camera_position: tuple[float, float, float],
+    camera_target: tuple[float, float, float],
 ) -> None:
     filename = relative_path.as_posix()
     directory = relative_path.parent.as_posix()
@@ -207,6 +210,12 @@ async def _request_gallery_capture(
         bng.control.queue_lua_command,
         f"local directory = '{directory}'; "
         f"local filename = '{filename}'; "
+        f"local capturePos = vec3({camera_position[0]}, {camera_position[1]}, "
+        f"{camera_position[2]}); "
+        f"local captureTarget = vec3({camera_target[0]}, {camera_target[1]}, "
+        f"{camera_target[2]}); "
+        "local captureRot = quatFromDir((captureTarget - capturePos):normalized(), "
+        "vec3(0, 0, 1)); "
         "if not FS:directoryExists(directory) then FS:directoryCreate(directory, true) end; "
         "if not render_renderViews then extensions.load('render/renderViews') end; "
         "if not render_renderViews or not render_renderViews.takeScreenshot then "
@@ -220,8 +229,8 @@ async def _request_gallery_capture(
         f"renderViewName = '{render_view_name}', "
         "filename = filename, "
         "resolution = vec3(1280, 720, 0), "
-        "pos = core_camera.getPosition(), "
-        "rot = core_camera.getQuat(), "
+        "pos = capturePos, "
+        "rot = captureRot, "
         "fov = core_camera.getFovDeg(), "
         "nearPlane = 0.1, "
         "screenshotDelay = 0.1"
@@ -493,7 +502,10 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
     assert phase in {3, 4}
     home, user, binary = _configured_runtime()
     suffix = uuid.uuid4().hex[:10]
-    gallery_output_directory = _configured_gallery_directory() if phase == 3 else None
+    # Phase 4 executes the complete Phase 3 wash path before impact telemetry,
+    # so it can publish the same canonical gallery without a redundant cold
+    # Phase 3 launch.
+    gallery_output_directory = _configured_gallery_directory()
     gallery_relative_directory = (
         Path("screenshots") / "beamng-mcp" / f"cannon-gallery-{suffix}"
         if gallery_output_directory is not None
@@ -603,7 +615,7 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 )
                 artifact_path = Path(artifact["path"])
                 members = _zip_members(artifact_path)
-                assert len(members) == 16
+                assert len(members) == len(PUBLIC_RUNTIME_FILES)
                 assert members == PUBLIC_RUNTIME_FILES
                 assert {member.partition("/")[0] for member in members} == PUBLIC_ROOTS
                 installed = _structured(
@@ -623,6 +635,7 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 assert bng is not None
                 owned_process = claim_owned_beamng_process(bng)
                 cannon_log_offset = log_path.stat().st_size if log_path.is_file() else 0
+                _reset_log_cursor(log_path)
                 assert await _extension_loaded(runtime, bng) is False
 
                 scenarios = _structured(
@@ -786,11 +799,22 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                             f"directory: {gallery_temp_directory}"
                         )
                     gallery_temp_owned = True
+                    asset_position = tuple(float(value) for value in phase2["asset"]["position"])
                     await _request_gallery_capture(
                         runtime,
                         bng,
                         relative_path=gallery_relative_directory / "01_exterior.png",
                         render_view_name=f"beamngMcpCannonExterior{suffix}",
+                        camera_position=(
+                            asset_position[0],
+                            asset_position[1] - 16.0,
+                            asset_position[2] + 3.0,
+                        ),
+                        camera_target=(
+                            asset_position[0],
+                            asset_position[1],
+                            asset_position[2] + 2.35,
+                        ),
                     )
                     gallery_exterior_image = await _wait_for_gallery_capture(
                         session, gallery_exterior_path
@@ -1013,6 +1037,12 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 assert int(repair_complete["deflated_tires_after"]) == 0
                 assert float(repair_complete["position_drift_m"]) <= 0.15
                 assert float(repair_complete["direction_dot"]) >= 0.999
+                assert float(repair_complete["centerline_error_m"]) <= 0.15
+                assert float(repair_complete["corridor_direction_dot"]) >= 0.999
+                assert float(repair_complete["upright_dot"]) >= 0.999
+                assert float(repair_complete["travel_direction_dot"]) > 0
+                assert repair_complete["travel_sign_preserved"] is True
+                assert int(repair_complete["travel_sign"]) in {-1, 1}
                 restored_integrity = await _vehicle_integrity_state(runtime, live_vehicle)
                 assert restored_integrity["damage"] <= 0.01
                 assert restored_integrity["part_damage_count"] == 0
@@ -1079,6 +1109,16 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                         bng,
                         relative_path=gallery_relative_directory / "02_wash_active.png",
                         render_view_name=f"beamngMcpCannonWashActive{suffix}",
+                        camera_position=(
+                            asset_position[0],
+                            asset_position[1] - 7.8,
+                            asset_position[2] + 2.65,
+                        ),
+                        camera_target=(
+                            asset_position[0],
+                            asset_position[1] + 4.5,
+                            asset_position[2] + 2.1,
+                        ),
                     )
                     gallery_wash_image = await _wait_for_gallery_capture(session, gallery_wash_path)
                     launch_already_occurred = any(

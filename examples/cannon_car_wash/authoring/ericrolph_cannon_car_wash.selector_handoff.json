@@ -2941,12 +2941,12 @@
       "corners": [
         [
           -2.9,
-          1.25,
+          -8.75,
           -0.2
         ],
         [
           -2.9,
-          1.25,
+          -8.75,
           4.4
         ],
         [
@@ -2961,12 +2961,12 @@
         ],
         [
           2.9,
-          1.25,
+          -8.75,
           -0.2
         ],
         [
           2.9,
-          1.25,
+          -8.75,
           4.4
         ],
         [
@@ -2987,7 +2987,7 @@
       ],
       "min": [
         -2.9,
-        1.25,
+        -8.75,
         -0.2
       ]
     },
@@ -2995,53 +2995,53 @@
       "corners": [
         [
           -2.7,
-          -6.7,
+          -1.1,
           0.0
         ],
         [
           -2.7,
-          -6.7,
+          -1.1,
           4.2
         ],
         [
           -2.7,
-          -4.5,
+          1.1,
           4.2
         ],
         [
           -2.7,
-          -4.5,
+          1.1,
           0.0
         ],
         [
           2.7,
-          -6.7,
+          -1.1,
           0.0
         ],
         [
           2.7,
-          -6.7,
+          -1.1,
           4.2
         ],
         [
           2.7,
-          -4.5,
+          1.1,
           4.2
         ],
         [
           2.7,
-          -4.5,
+          1.1,
           0.0
         ]
       ],
       "max": [
         2.7,
-        -4.5,
+        1.1,
         4.2
       ],
       "min": [
         -2.7,
-        -6.7,
+        -1.1,
         0.0
       ]
     },
@@ -4277,73 +4277,79 @@
     "bounds": {
       "corners": [
         [
-          -3.590001,
-          -9.307,
+          -3.590003,
+          -9.259998,
           0.0
         ],
         [
-          -3.590001,
-          -9.307,
+          -3.590003,
+          -9.259998,
           4.96
         ],
         [
-          -3.590001,
-          9.347,
+          -3.590003,
+          9.288,
           4.96
         ],
         [
-          -3.590001,
-          9.347,
-          0.0
-        ],
-        [
-          3.590001,
-          -9.307,
+          -3.590003,
+          9.288,
           0.0
         ],
         [
           3.590001,
-          -9.307,
+          -9.259998,
+          0.0
+        ],
+        [
+          3.590001,
+          -9.259998,
           4.96
         ],
         [
           3.590001,
-          9.347,
+          9.288,
           4.96
         ],
         [
           3.590001,
-          9.347,
+          9.288,
           0.0
         ]
       ],
       "max": [
         3.590001,
-        9.347,
+        9.288,
         4.96
       ],
       "min": [
-        -3.590001,
-        -9.307,
+        -3.590003,
+        -9.259998,
         0.0
       ]
     },
     "materials": [
       "ericrolph_cannon_car_wash_selector_brush_aqua",
       "ericrolph_cannon_car_wash_selector_brush_blue",
+      "ericrolph_cannon_car_wash_selector_brush_cards",
       "ericrolph_cannon_car_wash_selector_concrete",
+      "ericrolph_cannon_car_wash_selector_corrugated_blue",
       "ericrolph_cannon_car_wash_selector_cyan_trim",
       "ericrolph_cannon_car_wash_selector_deep_blue",
+      "ericrolph_cannon_car_wash_selector_exterior_cmu",
       "ericrolph_cannon_car_wash_selector_glass",
       "ericrolph_cannon_car_wash_selector_hazard_yellow",
+      "ericrolph_cannon_car_wash_selector_interior_brick",
       "ericrolph_cannon_car_wash_selector_led",
       "ericrolph_cannon_car_wash_selector_rubber",
       "ericrolph_cannon_car_wash_selector_safety_orange",
       "ericrolph_cannon_car_wash_selector_screen",
-      "ericrolph_cannon_car_wash_selector_stainless"
+      "ericrolph_cannon_car_wash_selector_sign_face",
+      "ericrolph_cannon_car_wash_selector_stainless",
+      "ericrolph_cannon_car_wash_selector_wet_concrete"
     ],
     "path": "vehicles/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
-    "sha256": "5e7a80536a887d247fb1ed1615164ac34977fd02a600e79e93de9fe318a59465",
-    "size": 5570645
+    "sha256": "bd6fb392a9bc47b1b07b8390b67f51dc3fe7c70f272296ff60672be4438c2d1f",
+    "size": 1623402
   }
 }

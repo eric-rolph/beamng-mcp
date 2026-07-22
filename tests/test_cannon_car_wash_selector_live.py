@@ -18,6 +18,9 @@ from mcp.shared.memory import create_connected_server_and_client_session
 
 from beamng_mcp.config import Settings
 from beamng_mcp.mcp_adapter import create_mcp_server
+from examples.cannon_car_wash.build_distribution import (
+    EXPECTED_RUNTIME_FILES as DISTRIBUTION_RUNTIME_FILES,
+)
 from tests.live_support import (
     claim_owned_beamng_process,
     cleanup_exact_live_artifacts,
@@ -44,24 +47,7 @@ SCENARIO_FRAGMENT = f"{MOD_ID}/{MOD_ID}.json"
 EXPECTED_SURFACE_Z = 100.0
 SPAWN_POSITION = [-110.0, -170.0, EXPECTED_SURFACE_Z + 0.35]
 
-EXPECTED_RUNTIME_FILES = {
-    f"vehicles/{MOD_ID}/{MOD_ID}.dae",
-    f"vehicles/{MOD_ID}/{MOD_ID}.jbeam",
-    f"vehicles/{MOD_ID}/default.jpg",
-    f"vehicles/{MOD_ID}/info.json",
-    f"vehicles/{MOD_ID}/info_{CONFIG_ID}.json",
-    f"vehicles/{MOD_ID}/main.materials.json",
-    f"vehicles/{MOD_ID}/{CONFIG_ID}.jpg",
-    f"vehicles/{MOD_ID}/{CONFIG_ID}.pc",
-    f"art/shapes/{MOD_ID}/{MOD_ID}.dae",
-    f"art/shapes/{MOD_ID}/{MOD_ID}.materials.json",
-    f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.json",
-    f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.lua",
-    f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.prefab.json",
-    f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.jpg",
-    f"lua/ge/extensions/{MOD_ID}/runtime.lua",
-    f"vehicles/{MOD_ID}/lua/{MOD_ID}_vehicle.lua",
-}
+EXPECTED_RUNTIME_FILES = set(DISTRIBUTION_RUNTIME_FILES)
 
 
 def _zip_members(path: Path) -> set[str]:

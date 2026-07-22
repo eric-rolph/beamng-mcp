@@ -9,10 +9,13 @@ MOD_ROOT = PROJECT_ROOT / "examples" / "cannon_car_wash" / "mod"
 MOD_ID = "ericrolph_cannon_car_wash"
 VEHICLE_BOOTSTRAP = MOD_ROOT / "vehicles" / MOD_ID / "lua" / f"{MOD_ID}_vehicle.lua"
 GE_RUNTIME = MOD_ROOT / "lua" / "ge" / "extensions" / MOD_ID / "runtime.lua"
+LIGHTING_RUNTIME = MOD_ROOT / "lua" / "common" / MOD_ID / "lighting.lua"
 GE_EXTENSION_PATH = f"{MOD_ID}/runtime"
 GE_EXTENSION_NAME = "ericrolph__cannon__car__wash_runtime"
-REPAIR_TRIGGER_LOCAL_POSITION = (0.0, -5.6, 2.1)
+REPAIR_TRIGGER_LOCAL_POSITION = (0.0, 0.0, 2.1)
 REPAIR_TRIGGER_SCALE = (5.4, 2.2, 4.2)
+LAUNCH_TRIGGER_LOCAL_POSITION = (0.0, 0.0, 2.1)
+LAUNCH_TRIGGER_SCALE = (5.8, 17.5, 4.6)
 
 
 def _function_section(source: str, name: str) -> str:
@@ -98,6 +101,7 @@ def test_vehicle_selector_prop_bootstraps_a_self_contained_runtime() -> None:
     assert GE_RUNTIME.is_file(), (
         f"the selector prop needs a namespaced GE runtime: {GE_RUNTIME.relative_to(PROJECT_ROOT)}"
     )
+    assert LIGHTING_RUNTIME.is_file()
     assert not any(MOD_ROOT.rglob("modScript.lua")), (
         "the selector runtime must be loaded by its vehicle, not globally at mod activation"
     )
@@ -169,10 +173,61 @@ def test_vehicle_selector_prop_bootstraps_a_self_contained_runtime() -> None:
     assert re.search(r"createTrigger\([^\n]*([\"'])Contains\1", runtime)
     assert _lua_vec3(runtime, "REPAIR_TRIGGER_LOCAL_POSITION") == REPAIR_TRIGGER_LOCAL_POSITION
     assert _lua_vec3(runtime, "REPAIR_TRIGGER_SCALE") == REPAIR_TRIGGER_SCALE
+    assert _lua_vec3(runtime, "LAUNCH_TRIGGER_LOCAL_POSITION") == LAUNCH_TRIGGER_LOCAL_POSITION
+    assert _lua_vec3(runtime, "LAUNCH_TRIGGER_SCALE") == LAUNCH_TRIGGER_SCALE
     assert runtime.count("Bounding box") >= 1
     assert re.search(r"luaFunction[^\n]*([\"'])onBeamNGTrigger\1", runtime)
     _function_section(runtime, "onBeamNGTrigger")
     _assert_exported(runtime, "onBeamNGTrigger")
+
+
+def test_selector_runtime_creates_tracks_and_cleans_authored_scene_lights() -> None:
+    runtime = GE_RUNTIME.read_text(encoding="utf-8")
+    lighting = LIGHTING_RUNTIME.read_text(encoding="utf-8")
+    assert 'require("common/ericrolph_cannon_car_wash/lighting")' in runtime
+    assert lighting.count('class = "PointLight"') == 5
+    assert lighting.count('class = "SpotLight"') == 2
+    assert lighting.count(f'name = "{MOD_ID}_light_anchor_') == 7
+    create_light = _function_section(runtime, "createLight")
+    synchronize = _function_section(runtime, "synchronizeTransforms")
+    cleanup = _function_section(runtime, "cleanupInstallation")
+    state = _function_section(runtime, "installationState")
+    assert "createObject(spec.class)" in create_light
+    for field in (
+        "isEnabled",
+        "color",
+        "brightness",
+        "castShadows",
+        "attenuationRatio",
+        "radius",
+        "range",
+        "innerAngle",
+        "outerAngle",
+    ):
+        assert f'"{field}"' in create_light
+    assert "state.lights" in synchronize
+    assert "frame.modelRotation * spec.position" in synchronize
+    assert "quatFromDir(worldDirection, worldUp)" in synchronize
+    assert "state.lights or {}" in cleanup
+    assert "light_present_count" in state
+    assert "light_expected_count" in state
+
+
+def test_selector_runtime_loads_common_visual_materials_before_creating_the_tsstatic() -> None:
+    runtime = GE_RUNTIME.read_text(encoding="utf-8")
+    ensure = _function_section(runtime, "ensureVisualMaterials")
+    register = _function_section(runtime, "registerProp")
+    assert '"vehicles/ericrolph_cannon_car_wash/main.materials.json"' in runtime
+    assert (
+        '"/vehicles/ericrolph_cannon_car_wash/'
+        'ericrolph_cannon_car_wash_runtime_visual.dae"' in runtime
+    )
+    assert "REQUIRED_VISUAL_MATERIALS" in ensure
+    assert "loadJsonMaterialsFile" in ensure
+    assert "string.lower(tostring(material:getClassName()))" in ensure
+    assert 'className ~= "material"' in ensure
+    assert '"visual_materials_unavailable"' in register
+    assert register.index("ensureVisualMaterials()") < register.index("createVisual(")
 
     # Six wash jets and ten layered dryer nodes are instantiated per prop and
     # start inactive; rollers share the same full-bay occupancy state.
@@ -286,9 +341,12 @@ def test_vehicle_selector_prop_bootstraps_a_self_contained_runtime() -> None:
     assert "rebuildTriggersAfterReset" in prop_reset_branch
     assert '"prop_reset"' in prop_reset_branch
     subject_reset_branch = reset_handler.split("local affected", maxsplit=1)[1]
-    assert "installation.washSubjects = {}" in subject_reset_branch
-    assert "installation.pendingLaunchEntries = {}" in subject_reset_branch
-    assert "forceWashSystemsOff(installation)" in subject_reset_branch
+    assert "removeWashSubject(installation, vehicleId" in subject_reset_branch
+    assert "installation.washSubjects = {}" not in subject_reset_branch
+    assert "installation.pendingLaunchEntries = {}" not in subject_reset_branch
+    assert "forceWashSystemsOff(installation)" not in subject_reset_branch
+    assert "remaining_subject_count = washSubjectCount(installation)" in subject_reset_branch
+    assert "wash_systems_active = installation.washSystemsActive" in subject_reset_branch
     assert "rebuildTriggersAfterReset(installation)" in subject_reset_branch
     assert '"subject_reset"' in subject_reset_branch
     assert ":autoplace(" not in runtime
@@ -354,6 +412,8 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     release_ack_name = "onEricrolphCannonCarWashRepairReleaseAcknowledged"
     release_ack = _function_section(runtime, release_ack_name)
     launch_callback = _function_section(runtime, "handleLaunchTrigger")
+    target_pose = _function_section(runtime, "repairTargetPose")
+    pose_metrics = _function_section(runtime, "repairedPoseMetrics")
 
     release_start = runtime.index("local function releaseVehicleCommand")
     release_string_end = runtime.index("]]", release_start)
@@ -395,6 +455,33 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     assert "beamstate.getPartDamageData" in runtime
     assert "obj:beamIsBroken" in runtime
 
+    # Runtime placement is based on the live prop-owned repair trigger and the
+    # measured vehicle basis. It must center the aligned OOBB and must not
+    # encode a model-specific 180-degree vehicle correction.
+    assert "trigger:getPosition()" in target_pose
+    assert "quat(trigger:getRotation())" in target_pose
+    assert "triggerRotation * vec3(0, 1, 0)" in target_pose
+    assert "triggerRotation * vec3(0, 0, 1)" in target_pose
+    assert "vehicle:getSpawnWorldOOBB()" in target_pose
+    assert "boundingBox:getCenter()" in target_pose
+    assert "direction:dot(corridorForward) < 0" in target_pose
+    assert "corridorForward = -corridorForward" in target_pose
+    assert "vehicleUp - direction * vehicleUp:dot(direction)" in target_pose
+    assert "direction:getRotationTo(corridorForward)" in target_pose
+    assert "alignedUp:getRotationTo(corridorUp)" in target_pose
+    assert "upAlignment * forwardAlignment" in target_pose
+    assert "alignmentRotation * (boundingCenter - position)" in target_pose
+    assert "targetPosition = position - corridorRight * centerlineOffset" in target_pose
+    assert "quat(0, 0, 1, 0)" not in target_pose
+    for metric in (
+        "centerlineError",
+        "corridorDirectionDot",
+        "uprightDot",
+        "travelDirectionDot",
+        "travelSignPreserved",
+    ):
+        assert metric in pose_metrics
+
     # Repair owns a separate token/prop-scoped Vehicle Lua hold. The precheck
     # snapshots the prior controller state, freezes first, and reports both the
     # freeze acknowledgement and integrity in one callback. After the two reset
@@ -433,8 +520,13 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     assert '"repair_reset_ack"' in intentional_reset
     assert "pose_restore_pending" in intentional_reset
     assert "vehicle:setPositionRotation(" in intentional_reset
+    assert "repair.targetPosition" in intentional_reset
+    assert "repair.targetRotation" in intentional_reset
     assert intentional_reset.index('repair.phase = "pose_restore_pending"') < (
         intentional_reset.index("vehicle:setPositionRotation(")
+    )
+    assert 'pose_policy = "center_oobb_on_trigger_axis_align_upright_preserve_travel_sign"' in (
+        intentional_reset
     )
     assert '"repair_pose_restore_ack"' in intentional_reset
     assert intentional_reset.index('repair.phase == "pose_restore_pending"') < (
@@ -454,6 +546,10 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     )
     assert "verify_pending" in integrity_ack
     assert "failed" in integrity_ack
+    assert '"repair_pose_verification_failed"' in integrity_ack
+    assert "REPAIR_MAX_CENTERLINE_ERROR_METERS" in integrity_ack
+    assert "REPAIR_MIN_CORRIDOR_DOT" in integrity_ack
+    assert "REPAIR_MIN_UPRIGHT_DOT" in integrity_ack
     assert "release_pending" in integrity_ack
     assert "repairReleaseCommand" in integrity_ack
     assert '"repair_release_requested"' in integrity_ack
@@ -469,6 +565,17 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     assert "holdMayExist = false" in release_ack
     assert '"repair_release_ack"' in release_ack
     assert '"repair_complete"' in release_ack
+    for telemetry_field in (
+        "centerline_error_before_m",
+        "centerline_error_m",
+        "alignment_translation_m",
+        "corridor_direction_dot",
+        "upright_dot",
+        "travel_direction_dot",
+        "travel_sign_preserved",
+        "travel_sign",
+    ):
+        assert telemetry_field in release_ack
     assert release_ack.index('"repair_release_ack"') < release_ack.index('"repair_complete"')
     assert release_ack.index('"repair_complete"') < release_ack.index("processPendingLaunch")
     _assert_exported(runtime, release_ack_name)
@@ -499,8 +606,20 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     )
     assert "resetEdgeGuard" in pending_launch
     assert "washExitDeferred" in pending_launch
+    assert re.search(
+        r"if\s+not\s+repair\s+or\s+repair\.phase\s*~=\s*[\"']complete[\"']",
+        pending_launch,
+    )
     assert "resetEdgeGuard" in launch_callback
     assert "washExitDeferred" in launch_callback
+    assert '"containment_exit_suppressed"' in launch_callback
+    assert "state.washSubjects[data.subjectID]" in launch_callback
+    assert "state.washSystemsActive" in launch_callback
+    assert re.search(
+        r"if\s+not\s+repair\s+or\s+repair\.phase\s*~=\s*[\"']complete[\"']",
+        launch_callback,
+    )
+    assert '"repair_not_started"' in launch_callback
     assert '"launch_deferred"' in launch_callback
     for event in (
         "repair_trigger_enter",
@@ -514,9 +633,10 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     ):
         assert f'"{event}"' in runtime or f"'{event}'" in runtime
 
-    # Repair must not stop drift by injecting impulses or using recovery
-    # placement. Exact setPositionRotation compensation is confined to the two
-    # intentional reset callbacks above.
+    # Repair must not stop drift by injecting impulses or broad recovery
+    # placement. Up to two bounded, freshly measured pose corrections are
+    # allowed when the renewed OOBB differs from the damaged pre-reset OOBB;
+    # the following integrity pass must still satisfy every geometric gate.
     repair_sections = "\n".join(
         (
             integrity_helper,
@@ -529,6 +649,14 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
         )
     )
     assert "applyClusterVelocityScaleAdd" not in repair_sections
-    assert "setPosition" not in repair_sections
+    assert "setPosition(" not in repair_sections
+    assert repair_sections.count("setPositionRotation(") == 1
+    assert "REPAIR_MAX_POSE_CORRECTION_ATTEMPTS" in integrity_ack
+    assert '"repair_pose_correction_requested"' in integrity_ack
+    assert "repairTargetPose(" in integrity_ack
+    assert "state.repairTrigger" in integrity_ack
+    assert "repair.targetPosition = correctionTarget.targetPosition" in integrity_ack
+    assert "repair.targetRotation = correctionTarget.targetRotation" in integrity_ack
+    assert '"repair_pose_correction_travel_sign_changed"' in integrity_ack
     assert "safeTeleport" not in repair_sections
     assert "safeTeleport" not in intentional_reset
