@@ -52,14 +52,14 @@
     },
     "countdown_log_elapsed_seconds": [
       0.0,
-      1.0155600000000007,
-      2.0322300000000055,
-      3.1828200000000066
+      1.0159599999999998,
+      2.0326400000000007,
+      3.2169799999999995
     ],
     "countdown_structured_elapsed_seconds": [
       0.0,
-      1.0150577,
-      2.0317298
+      1.0156824,
+      2.0323574
     ],
     "effect_active_count": 16,
     "emitter_active_counts": {
@@ -75,9 +75,7 @@
       "repair_requested",
       "repair_reset_ack",
       "repair_pose_restore_ack",
-      "repair_pose_correction_requested",
       "repair_trigger_exit",
-      "repair_pose_restore_ack",
       "repair_release_requested",
       "repair_release_ack",
       "repair_complete",
@@ -90,7 +88,10 @@
       "countdown_3",
       "containment_exit_suppressed",
       "countdown_2",
+      "containment_exit_suppressed",
       "countdown_1",
+      "containment_exit_suppressed",
+      "containment_exit_suppressed",
       "release_requested",
       "release_ack",
       "release",
@@ -117,14 +118,14 @@
         4.5999999046326
       ],
       "vehicle_max": [
-        1.5608630180359,
-        8.7422685623169,
-        3.079313993454
+        1.1798934936523,
+        8.6768665313721,
+        3.0864124298096
       ],
       "vehicle_min": [
-        -1.5744812488556,
-        -3.9020056724548,
-        0.042747974395752
+        -2.4520978927612,
+        -4.0753908157349,
+        0.036520481109619
       ]
     },
     "level": "smallgrid",
@@ -158,11 +159,11 @@
       "go",
       "launch"
     ],
-    "peak_speed_mps": 100.0000026047282,
+    "peak_speed_mps": 100.0000006620781,
     "peak_velocity_mps": [
-      -0.18179894983768463,
-      -99.98761749267578,
-      1.5632716417312622
+      -4.056868553161621,
+      -99.90473937988281,
+      1.6077933311462402
     ],
     "pre_go_integrity": {
       "baseline_damage": 0.0,
@@ -180,31 +181,26 @@
     },
     "prop_reset_count": 3,
     "render_difference": {
-      "changed_pixel_ratio": 0.366796875,
-      "changed_pixels": 84510,
+      "changed_pixel_ratio": 0.3430295138888889,
+      "changed_pixels": 79034,
       "channel_means": [
-        12.404466145833334,
-        12.01294704861111,
-        11.380251736111111
+        13.061610243055556,
+        12.753033854166667,
+        11.89529079861111
       ],
       "pixel_count": 230400
     },
     "repair": {
       "after": {
-        "alignment_translation_m": 0.7704204737998,
         "broken_beam_count": 0,
-        "centerline_error_before_m": 0.43114733695984,
-        "centerline_error_m": 0.00079983472824097,
-        "corridor_direction_dot": 0.99999573401305,
         "damage": 0.0,
         "deflated_tire_count": 0,
-        "direction_dot": 0.99999573401305,
+        "direction_dot": 0.99873092380775,
+        "independent_lateral_offset_delta_m": 0.23222017288210006,
         "part_damage_count": 0,
-        "position_drift_m": 0.0043196832906604,
-        "travel_direction_dot": 0.99638558919562,
-        "travel_sign": 1,
+        "position_drift_m": 0.0049231566179004,
         "travel_sign_preserved": true,
-        "upright_dot": 0.99999550695098
+        "upright_dot": 0.99861147843067
       },
       "before": {
         "broken_beam_count": 3,
@@ -221,11 +217,11 @@
         "part_damage_count": 0
       },
       "independent_pose_readback": {
-        "centerline_error_m": 0.00096356868743896,
-        "corridor_direction_dot": 0.99999577749098,
-        "repair_frame_sample_count": 5,
-        "travel_direction_dot": 0.9982583034551721,
-        "upright_dot": 0.99999570570348
+        "lateral_offset_after_m": 1.3249658346176,
+        "lateral_offset_before_m": 1.0927456617355,
+        "repair_frame_sample_count": 3,
+        "travel_direction_dot": 0.9996685197721183,
+        "upright_dot": 0.9999999035897
       },
       "induced_beams": [
         {
@@ -540,5 +536,5 @@
     "triangle_count": 144,
     "vehicle_directory": "/vehicles/ericrolph_cannon_car_wash/"
   },
-  "verified_on": "2026-07-22T10:58:00-06:00"
+  "verified_on": "2026-07-22T17:45:00-06:00"
 }

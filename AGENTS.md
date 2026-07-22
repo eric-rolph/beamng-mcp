@@ -150,18 +150,28 @@ under `telemetry/`.
   `[0, 0, 2.1]`, dimensions `[5.4, 2.2, 4.2]`, `Overlaps` plus `Bounding box`. The only supported
   implementation is the stock full-reset pair `vehicle:requestReset(RESET_PHYSICS)` plus
   `vehicle:resetBrokenFlexMesh()`. The repair precheck must acknowledge a dedicated controller
-  freeze while preserving its previous state, then snapshot the incoming motion and the wash
-  corridor basis. `RESET_PHYSICS` moves and can reorient a rolling vehicle even while frozen. After
-  consuming its `onVehicleResetted`, compute the renewed live OOBB, translate it back to the wash
-  centerline without changing longitudinal progress, align forward and up to the corridor, and
-  choose the corridor sign matching the incoming direction of travel. Apply that deterministic
-  source-to-target basis delta with `vehicle:setPositionRotation(...)`, consume its second callback
-  as `pose_restore_pending`, and allow at most two bounded corrective retries. After two positive
-  simulation frames, verify damage <= 0.01, no part damage, no broken beams, no deflated tires,
-  centerline error <= 0.15 m, corridor/upright dot >= 0.999, and preserved travel sign; restore the
-  prior freeze state through an acknowledged release; only then emit `repair_complete` or permit
-  launch. The isolated D-Series proof currently records 0.036987 m centerline error,
-  0.9997017 corridor-direction dot, and 0.9997559 upright dot. Every failure/teardown path must make
+  freeze while preserving its previous state, then snapshot the vehicle's exact live pose.
+  `RESET_PHYSICS` moves and can reorient a rolling vehicle even while frozen, so the pose policy
+  is `restore_exact_pre_repair_pose`: after consuming its `onVehicleResetted`, re-apply the
+  snapshot position and rotation verbatim with `vehicle:setPositionRotation(...)`, consume its
+  second callback as `pose_restore_pending`, and allow at most two bounded corrective re-applies
+  of the same snapshot. There is no corridor realignment, centerline translation, or dependence
+  on the placed prop's yaw — the corridor-basis variant misaligned vehicles at nonzero prop
+  rotations and moved the follow camera; the vehicle must end the repair precisely where and how
+  it stood. After two positive simulation frames, verify damage <= 0.01, no part damage, no broken
+  beams, no deflated tires, position drift <= 0.15 m from the snapshot, horizontal heading dot
+  >= 0.995, and upright dot >= 0.98 against the snapshot basis. The direction and upright vectors
+  derive from the node cluster, so un-crumpling a heavily damaged body legitimately shifts them a
+  few degrees while the vehicle itself does not move — the measured city-bus delta is ~2.9
+  degrees, which is why the thresholds tolerate deformation-scale shifts while still refuting
+  gross misrotation. Restore the prior freeze state through an acknowledged
+  release; only then emit `repair_complete` or permit launch. In the selector runtime the
+  authoritative midpoint detection is positional: each wash subject is projected into the prop
+  frame every frame with a previous-sample segment test across the band, because BeamNGTrigger
+  stops delivering `Overlaps` enter events for the thin transient repair band at rotated prop
+  yaws (verified live at 90 degrees with provably correct trigger transforms); the trigger object
+  remains for inspection and exit telemetry, and both detection paths funnel through one latched
+  `startRepair`. The scenario keeps its persistent fixed-yaw trigger. Every failure/teardown path must make
   a best-effort release so a subject cannot remain frozen. Never substitute `beamstate.reset()`
   (bookkeeping only), flex-mesh reset alone (visual only), recovery/safe teleport (chooses a
   different pose), a hard-coded model yaw correction, or let either intentional callback enter the
@@ -326,8 +336,8 @@ live gates:
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_distribution_live.py
 ```
 
-The v1.11.1 release lock is 40 members, 29,983,024 bytes, SHA-256
-`45fc711d3d8273f93107b43673b90c5fd002b4f85e68e6e20059e85f7d1f66ba`. It is recorded in
+The v1.12 release lock is 40 members, 29,976,373 bytes, SHA-256
+`cfe5af11256fa3f8fe430b0ec855f11a37c485219e49cb1dbda22bdc7322bf6a`. It is recorded in
 `repository/submission.json` and the exact distribution live test. A runtime-byte or builder-policy
 change requires an intentional metadata update, rebuild, new hash lock, and complete distribution
 rerun. The complete four-cold-start release matrix passed on the v1.11 payload (2026-07-22) and

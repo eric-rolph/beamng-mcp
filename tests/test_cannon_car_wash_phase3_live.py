@@ -1035,14 +1035,11 @@ async def _run_cannon_car_wash_live_gate(tmp_path: Path, *, phase: int) -> None:
                 assert int(repair_complete["part_damage_after"]) == 0
                 assert int(repair_complete["broken_beams_after"]) == 0
                 assert int(repair_complete["deflated_tires_after"]) == 0
+                assert repair_complete["pose_policy"] == "restore_exact_pre_repair_pose"
                 assert float(repair_complete["position_drift_m"]) <= 0.15
-                assert float(repair_complete["direction_dot"]) >= 0.999
-                assert float(repair_complete["centerline_error_m"]) <= 0.15
-                assert float(repair_complete["corridor_direction_dot"]) >= 0.999
-                assert float(repair_complete["upright_dot"]) >= 0.999
-                assert float(repair_complete["travel_direction_dot"]) > 0
+                assert float(repair_complete["heading_dot"]) >= 0.995
+                assert float(repair_complete["upright_dot"]) >= 0.98
                 assert repair_complete["travel_sign_preserved"] is True
-                assert int(repair_complete["travel_sign"]) in {-1, 1}
                 restored_integrity = await _vehicle_integrity_state(runtime, live_vehicle)
                 assert restored_integrity["damage"] <= 0.01
                 assert restored_integrity["part_damage_count"] == 0

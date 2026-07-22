@@ -54,14 +54,14 @@
     "vehicle_scope": "any_live_vehicle",
     "reset_strategy": "RESET_PHYSICS",
     "pre_reset_hold": "acknowledged_controller_freeze_preserving_previous_state",
-    "pose_policy": "center_oobb_on_trigger_axis_align_upright_preserve_travel_sign",
+    "pose_policy": "restore_exact_pre_repair_pose",
     "center_reference": "vehicle_spawn_world_oobb",
     "position_policy": "remove_lateral_error_preserve_longitudinal_progress_and_height",
-    "orientation_policy": "live_trigger_y_z_basis_without_hard_coded_vehicle_axis",
+    "orientation_policy": "restore_exact_pre_repair_pose_heading_preserved",
     "pose_verification": {
-      "maximum_centerline_error_m": 0.15,
-      "minimum_corridor_direction_dot": 0.999,
-      "minimum_upright_dot": 0.999,
+      "maximum_position_drift_m": 0.15,
+      "minimum_heading_dot": 0.995,
+      "minimum_upright_dot": 0.98,
       "require_travel_sign_preserved": true
     },
     "reset_callback_sequence": [
