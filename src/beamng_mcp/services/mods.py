@@ -11,7 +11,7 @@ import stat
 import tempfile
 import zipfile
 from datetime import UTC, datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from threading import RLock
 from typing import BinaryIO
 
@@ -1054,6 +1054,16 @@ class ModWorkspace:
                     f"{destination} already exists; set overwrite=true to replace it with a backup"
                 )
 
+            conflicts = self._conflicting_mod_archives(mods_dir, destination, source)
+            if conflicts:
+                raise SafetyInterlockError(
+                    "BeamNG registers every .zip under mods/ recursively, and these other "
+                    "archives ship the same mod namespace, so they would shadow the "
+                    "installed runtime files nondeterministically: "
+                    + ", ".join(sorted(conflicts))
+                    + ". Move backups and stale copies outside the mods directory, then retry."
+                )
+
             maximum_artifact_bytes = (
                 self.settings.max_mod_bytes + self.settings.max_mod_files * 1024
             )
@@ -1197,6 +1207,54 @@ class ModWorkspace:
                 sha256=installed_sha256,
                 size=installed_size,
             )
+
+    @staticmethod
+    def _mod_identity_prefixes(archive: Path) -> set[str]:
+        """Return the vehicle and GE-extension namespaces an archive ships."""
+
+        prefixes: set[str] = set()
+        try:
+            with zipfile.ZipFile(archive) as bundle:
+                for name in bundle.namelist():
+                    parts = PurePosixPath(name.replace("\\", "/")).parts
+                    if len(parts) >= 2 and parts[0] == "vehicles":
+                        prefixes.add(f"vehicles/{parts[1]}")
+                    elif len(parts) >= 4 and parts[:3] == ("lua", "ge", "extensions"):
+                        prefixes.add(f"lua/ge/extensions/{parts[3]}")
+        except (OSError, zipfile.BadZipFile):
+            return set()
+        return prefixes
+
+    def _conflicting_mod_archives(
+        self,
+        mods_dir: Path,
+        destination: Path,
+        source: Path,
+    ) -> list[str]:
+        """Find other mounted archives shipping this mod's namespaces.
+
+        BeamNG registers every ``*.zip`` under ``mods/`` recursively, so a
+        stray backup or stale copy of the same mod shadows freshly installed
+        runtime files nondeterministically. A real-profile backup zip parked
+        under ``mods/`` silently reverted Cannon Car Wash runtime behaviour;
+        installs now fail closed until such duplicates are moved out.
+        """
+
+        identity = self._mod_identity_prefixes(source)
+        if not identity:
+            return []
+        conflicts: list[str] = []
+        try:
+            candidates = [candidate for candidate in mods_dir.rglob("*.zip") if candidate.is_file()]
+        except OSError:
+            return []
+        for candidate in candidates:
+            resolved = _absolute_lexical(candidate)
+            if resolved == destination:
+                continue
+            if identity & self._mod_identity_prefixes(resolved):
+                conflicts.append(str(resolved))
+        return conflicts
 
     def _ensure_install_directory(self, path: Path, *, parents: bool = False) -> None:
         """Create one lexical install directory and reject links or special files."""
