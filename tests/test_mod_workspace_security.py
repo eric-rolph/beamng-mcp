@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import shutil
 import stat
 from pathlib import Path
 from types import SimpleNamespace
@@ -586,3 +587,36 @@ def test_install_preserves_concurrent_replacement_if_new_file_verification_fails
     assert not list(destination.parent.glob("*.install.tmp"))
     assert not list(destination.parent.glob("*.backup.tmp"))
     assert not list(destination.parent.glob("*.rollback.tmp"))
+
+
+def test_install_rejects_duplicate_mod_namespace_elsewhere_in_mods_tree(tmp_path: Path) -> None:
+    """A stray backup zip under mods/ must fail the install, not shadow it.
+
+    BeamNG registers every .zip below mods/ recursively; a stale copy of the
+    same mod (for example a backup parked in a subdirectory) shadows freshly
+    installed runtime files nondeterministically.
+    """
+
+    mods = make_workspace(tmp_path, allow_mod_install=True)
+    mods.scaffold("shadowed", title="Shadowed", author="Test")
+    mods.write_file(
+        ModFileWrite(
+            mod_name="shadowed",
+            path="lua/ge/extensions/shadowed_runtime/runtime.lua",
+            content="local M = {}\nreturn M\n",
+        )
+    )
+    user = tmp_path / "user"
+    installed = mods.install("shadowed", user)
+
+    stray_dir = user / "mods" / "old_backups"
+    stray_dir.mkdir(parents=True)
+    shutil.copy2(installed.path, stray_dir / "shadowed-old.zip")
+
+    with pytest.raises(SafetyInterlockError, match="same mod namespace"):
+        mods.install("shadowed", user, overwrite=True)
+
+    stray = stray_dir / "shadowed-old.zip"
+    stray.unlink()
+    replacement = mods.install("shadowed", user, overwrite=True)
+    assert Path(replacement.path).is_file()

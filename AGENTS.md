@@ -407,7 +407,13 @@ For installation, prefer `mod_validate -> mod_pack -> operator review ->
 mod_install(confirm=true)`. `workspace.allow_mod_install` must be explicitly enabled. An overwrite
 must produce the service's timestamped recovery backup; report and preserve that backup until the
 new package passes clean-profile validation. Do not hand-copy over an installed archive or delete
-recovery/quarantine files while diagnosing a failed atomic install.
+recovery/quarantine files while diagnosing a failed atomic install. Never park a mod backup or any
+other `.zip` anywhere under a profile's `mods/` tree: BeamNG registers every zip below `mods/`
+recursively and mounts it, so a stale copy shadows the installed runtime nondeterministically — a
+real-profile v1.7 backup zip under `mods/beamng_mcp_backups/` silently reverted Cannon Car Wash to
+its pre-pose-preservation repair. Keep backups in a profile-root sibling directory (for example
+`beamng-mcp-backups/`), and note that `install` now fails closed when another archive in the mods
+tree ships the same vehicle or GE-extension namespace.
 
 ## Verification and Git hygiene
 
