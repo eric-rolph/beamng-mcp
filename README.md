@@ -240,6 +240,8 @@ gates; comprehensive acceptance for arbitrary third-party mods remains manual.
 
 ### Cannon Car Wash end-to-end example
 
+https://youtu.be/9bT0M9PmFts
+
 [`examples/cannon_car_wash`](examples/cannon_car_wash) contains the Blender source/generator,
 Z-up Collada asset, Gridmap V2 scenario, exact trigger/placement manifests, GELua wash-cycle and
 countdown/launch extension, and a Blender-derived rigid `Type: Prop` model for the vehicle selector.
