@@ -17,6 +17,7 @@ import examples.cannon_car_wash.build_distribution as distribution
 from examples.cannon_car_wash.build_distribution import (
     ALLOWED_TOP_LEVEL_ROOTS,
     EXAMPLE_ROOT,
+    EXPECTED_ARCHIVE_MEMBERS,
     EXPECTED_RUNTIME_FILES,
     FILENAME_PATTERN,
     MOD_ID,
@@ -466,7 +467,7 @@ def test_deterministic_repository_archive_has_only_approved_root_members(tmp_pat
     assert first_archive.read_bytes() == second_archive.read_bytes()
     assert first_result["sha256"] == second_result["sha256"]
     assert first_result["size"] == first_archive.stat().st_size
-    assert first_result["member_count"] == len(EXPECTED_RUNTIME_FILES)
+    assert first_result["member_count"] == len(EXPECTED_ARCHIVE_MEMBERS)
     submission = _strict_json_file(REPOSITORY_ROOT / "submission.json")
     assert submission["release_artifact"] == {
         "filename": ZIP_NAME,
@@ -482,7 +483,7 @@ def test_deterministic_repository_archive_has_only_approved_root_members(tmp_pat
 
     with zipfile.ZipFile(first_archive) as archive:
         names = archive.namelist()
-        assert names == list(EXPECTED_RUNTIME_FILES)
+        assert names == list(EXPECTED_ARCHIVE_MEMBERS)
         assert archive.testzip() is None
         assert all(not member.is_dir() for member in archive.infolist())
         assert all(not member.flag_bits & 0x1 for member in archive.infolist())
@@ -490,8 +491,13 @@ def test_deterministic_repository_archive_has_only_approved_root_members(tmp_pat
         assert all(member.date_time == ZIP_EPOCH for member in archive.infolist())
         assert all((member.external_attr >> 16) & 0o777 == 0o644 for member in archive.infolist())
         roots = {PurePosixPath(name).parts[0] for name in names}
-        assert roots == {"art", "levels", "lua", "vehicles"}
-        assert roots == ALLOWED_TOP_LEVEL_ROOTS
+        # mod_info carries the generated offline Mods Manager metadata; the
+        # runtime roots stay exactly the reviewed four.
+        assert roots == ALLOWED_TOP_LEVEL_ROOTS | {"mod_info"}
+        runtime_roots = {
+            PurePosixPath(name).parts[0] for name in names if not name.startswith("mod_info/")
+        }
+        assert runtime_roots == ALLOWED_TOP_LEVEL_ROOTS
 
 
 def test_distribution_builder_refuses_an_unexpected_mod_file(tmp_path: Path) -> None:

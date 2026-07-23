@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+import calendar
 import hashlib
+import io
 import json
 import logging
 import os
@@ -14,18 +16,34 @@ import zipfile
 from collections.abc import Sequence
 from pathlib import Path, PurePosixPath
 
+from PIL import Image, ImageOps
+
 EXAMPLE_ROOT = Path(__file__).resolve().parent
 MOD_ROOT = EXAMPLE_ROOT / "mod"
 DEFAULT_OUTPUT_DIR = EXAMPLE_ROOT / "dist"
 MOD_ID = "ericrolph_cannon_car_wash"
 ZIP_NAME = "cannon_car_wash_ericrolph.zip"
 ALLOWED_TOP_LEVEL_ROOTS = frozenset({"art", "levels", "lua", "vehicles"})
+# Offline Mods Manager metadata: without mod_info/<tagid>/, a locally
+# installed zip renders as a generic cube with "Description Unavailable".
+# These members are generated deterministically from repository/ at pack time
+# and are never part of the runtime mod tree.
+MOD_INFO_TAGID = "CANNONWSH"
+REPOSITORY_ROOT = EXAMPLE_ROOT / "repository"
+MOD_INFO_FILES: tuple[str, ...] = (
+    f"mod_info/{MOD_INFO_TAGID}/icon.jpg",
+    f"mod_info/{MOD_INFO_TAGID}/images/1.jpg",
+    f"mod_info/{MOD_INFO_TAGID}/images/2.jpg",
+    f"mod_info/{MOD_INFO_TAGID}/info.json",
+    f"mod_info/{MOD_INFO_TAGID}/thumbs/1.jpg",
+    f"mod_info/{MOD_INFO_TAGID}/thumbs/2.jpg",
+)
 FILENAME_PATTERN = re.compile(r"^[A-Za-z0-9._-]+$")
 # Deterministic per-release timestamp. BeamNG compares Collada source mtimes to
 # its compiled .cdae cache, so a forever-1980 timestamp can preserve obsolete
 # animation data across mod updates. Bump this constant whenever a shipped DAE
 # changes while keeping it fixed for reproducible builds of the same release.
-ZIP_EPOCH = (2026, 7, 22, 18, 0, 0)
+ZIP_EPOCH = (2026, 7, 22, 20, 0, 0)
 LOGGER = logging.getLogger(__name__)
 
 # Public Repository contents are an explicit release decision. Never replace
@@ -78,7 +96,11 @@ class DistributionError(RuntimeError):
     """The source tree or requested release operation is unsafe."""
 
 
-def _validate_member_name(name: str) -> PurePosixPath:
+def _validate_member_name(
+    name: str,
+    *,
+    allowed_roots: frozenset[str] = ALLOWED_TOP_LEVEL_ROOTS,
+) -> PurePosixPath:
     if not name or "\\" in name or "\x00" in name:
         raise DistributionError(f"unsafe archive member name: {name!r}")
     member = PurePosixPath(name)
@@ -86,7 +108,7 @@ def _validate_member_name(name: str) -> PurePosixPath:
         raise DistributionError(f"archive member is not a canonical relative POSIX path: {name}")
     if len(member.parts) < 2 or any(part in {"", ".", ".."} for part in member.parts):
         raise DistributionError(f"archive member contains an unsafe path component: {name}")
-    if member.parts[0] not in ALLOWED_TOP_LEVEL_ROOTS:
+    if member.parts[0] not in allowed_roots:
         raise DistributionError(f"archive member has an unapproved top-level root: {name}")
     if not all(FILENAME_PATTERN.fullmatch(part) for part in member.parts):
         raise DistributionError(f"archive member contains unsupported filename characters: {name}")
@@ -106,9 +128,18 @@ def _validate_allowlist() -> None:
     roots = {PurePosixPath(name).parts[0] for name in EXPECTED_RUNTIME_FILES}
     if roots != ALLOWED_TOP_LEVEL_ROOTS:
         raise DistributionError(f"public runtime roots differ from the approved roots: {roots}")
+    if len(MOD_INFO_FILES) != 6 or any(
+        not name.startswith(f"mod_info/{MOD_INFO_TAGID}/") for name in MOD_INFO_FILES
+    ):
+        raise DistributionError("the mod_info metadata list must stay the reviewed six files")
+    for name in MOD_INFO_FILES:
+        _validate_member_name(name, allowed_roots=frozenset({"mod_info"}))
 
 
 _validate_allowlist()
+
+ARCHIVE_ROOTS = ALLOWED_TOP_LEVEL_ROOTS | {"mod_info"}
+EXPECTED_ARCHIVE_MEMBERS: tuple[str, ...] = tuple(sorted(EXPECTED_RUNTIME_FILES + MOD_INFO_FILES))
 
 
 def _regular_file_state(path: Path) -> os.stat_result:
@@ -155,6 +186,59 @@ def validate_mod_tree(mod_root: Path = MOD_ROOT) -> dict[str, Path]:
     return {name: actual[name] for name in EXPECTED_RUNTIME_FILES}
 
 
+def _deterministic_jpeg(image: Image.Image, *, quality: int) -> bytes:
+    buffer = io.BytesIO()
+    image.save(buffer, format="JPEG", quality=quality, optimize=True)
+    return buffer.getvalue()
+
+
+def mod_info_payloads() -> dict[str, bytes]:
+    """Generate the offline Mods Manager metadata members deterministically.
+
+    Content derives only from reviewed repository/ sources and the fixed
+    ZIP_EPOCH, so identical inputs always produce identical archive bytes.
+    """
+
+    submission = json.loads((REPOSITORY_ROOT / "submission.json").read_text(encoding="utf-8"))
+    prefix = f"mod_info/{MOD_INFO_TAGID}"
+    payloads: dict[str, bytes] = {f"{prefix}/icon.jpg": _stable_read(REPOSITORY_ROOT / "icon.jpg")}
+    attachments = []
+    gallery = ("01_exterior.png", "02_wash_active.png")
+    for index, source_name in enumerate(gallery, start=1):
+        with Image.open(REPOSITORY_ROOT / "images" / source_name) as source:
+            image = source.convert("RGB")
+        payloads[f"{prefix}/images/{index}.jpg"] = _deterministic_jpeg(image, quality=88)
+        thumb = ImageOps.fit(image, (356, 200), Image.Resampling.LANCZOS)
+        payloads[f"{prefix}/thumbs/{index}.jpg"] = _deterministic_jpeg(thumb, quality=80)
+        attachments.append(
+            {
+                "data_filename": f"{index}.jpg",
+                "original_filename": source_name,
+                "thumb_filename": f"thumbs/{index}.jpg",
+            }
+        )
+    release_epoch = calendar.timegm((*ZIP_EPOCH, 0, 0, 0))
+    info = {
+        "attachments": attachments,
+        "filename": ZIP_NAME,
+        "last_update": release_epoch,
+        "message": submission["description"],
+        "path": f"{MOD_INFO_TAGID}/local/",
+        "resource_date": release_epoch,
+        "tag_line": submission["tag_line"],
+        "tagid": MOD_INFO_TAGID,
+        "title": submission["title"],
+        "username": submission["author"],
+        "version_string": submission["version"],
+    }
+    payloads[f"{prefix}/info.json"] = (json.dumps(info, indent=2, sort_keys=True) + "\n").encode(
+        "utf-8"
+    )
+    if set(payloads) != set(MOD_INFO_FILES):
+        raise DistributionError("generated mod_info members diverged from the reviewed list")
+    return payloads
+
+
 def _stable_read(path: Path) -> bytes:
     before = _regular_file_state(path)
     try:
@@ -196,7 +280,7 @@ def _write_archive(path: Path, payloads: dict[str, bytes]) -> None:
         mode="w",
         compression=zipfile.ZIP_STORED,
     ) as archive:
-        for name in EXPECTED_RUNTIME_FILES:
+        for name in EXPECTED_ARCHIVE_MEMBERS:
             info = zipfile.ZipInfo(name, date_time=ZIP_EPOCH)
             info.compress_type = zipfile.ZIP_STORED
             info.create_system = 3
@@ -215,14 +299,14 @@ def verify_archive(path: Path) -> None:
         with zipfile.ZipFile(path) as archive:
             members = archive.infolist()
             names = [member.filename for member in members]
-            if names != list(EXPECTED_RUNTIME_FILES):
+            if names != list(EXPECTED_ARCHIVE_MEMBERS):
                 raise DistributionError(
                     f"archive members differ from the public allowlist: {names}"
                 )
             if archive.testzip() is not None:
                 raise DistributionError("archive CRC verification failed")
             for member in members:
-                _validate_member_name(member.filename)
+                _validate_member_name(member.filename, allowed_roots=ARCHIVE_ROOTS)
                 if member.is_dir() or member.filename.endswith("/"):
                     raise DistributionError(f"directory member is forbidden: {member.filename}")
                 if member.flag_bits & 0x1:
@@ -270,6 +354,11 @@ def build_distribution(
     for name, path in final_sources.items():
         if _stable_read(path) != payloads[name]:
             raise DistributionError(f"release source changed while snapshotting: {path}")
+    metadata = mod_info_payloads()
+    if mod_info_payloads() != metadata:
+        raise DistributionError("mod_info metadata generation is not deterministic")
+    payloads.update(metadata)
+    payloads = {name: payloads[name] for name in EXPECTED_ARCHIVE_MEMBERS}
 
     resolved_mod_root = mod_root.resolve()
     resolved_output_dir = output_dir.resolve()
@@ -365,7 +454,7 @@ def build_distribution(
         "archive": str(destination.resolve()),
         "sha256": digest,
         "size": size,
-        "member_count": len(EXPECTED_RUNTIME_FILES),
+        "member_count": len(EXPECTED_ARCHIVE_MEMBERS),
     }
 
 

@@ -3,7 +3,7 @@
   "title": "Cannon Car Wash",
   "internal_name": "ericrolph_cannon_car_wash",
   "stable_zip_filename": "cannon_car_wash_ericrolph.zip",
-  "version": "1.12.0",
+  "version": "1.13.0",
   "type": "Other",
   "author": "Eric Rolph",
   "tag_line": "Water, layered air drying, full repair, then a 360 km/h launch",
@@ -13,7 +13,7 @@
     "Scenarios",
     "Props"
   ],
-  "update_summary": "Pose-preserving repair: the midpoint restore now puts the vehicle back exactly where and how it stood - no corridor realignment, no dependence on the wash's placed orientation, and no camera jump - fixing misaligned repairs when the prop was spawned at an angle. Joins the interior-lighting pass (thirteen shadowless lights with a fixed light-extent bug) and the earlier visual overhaul.",
+  "update_summary": "Offline Mods Manager metadata (mod_info icon, description, and gallery) so locally installed copies show a proper tile, plus the v1.12 pose-preserving, rotation-proof midpoint repair: vehicles are restored exactly where and how they stood at any wash yaw, with positional band detection replacing the rotation-fragile trigger events.",
   "gallery_images": [
     "images/01_exterior.png",
     "images/02_wash_active.png"
@@ -34,9 +34,9 @@
   },
   "release_artifact": {
     "filename": "cannon_car_wash_ericrolph.zip",
-    "sha256": "cfe5af11256fa3f8fe430b0ec855f11a37c485219e49cb1dbda22bdc7322bf6a",
-    "size_bytes": 29976373,
-    "member_count": 40
+    "sha256": "b0b6b38e56f6886a8483cda0478fec7a2e02d31563f44a03c9e1897686a55f5f",
+    "size_bytes": 30422027,
+    "member_count": 46
   },
   "release_validation": {
     "beamng_drive": "0.38.6.0.19963",
