@@ -114,8 +114,8 @@
     "install_root": "USER_FOLDER/mods",
     "repository_metadata_present": false,
     "root_info_present": false,
-    "sha256": "b0b6b38e56f6886a8483cda0478fec7a2e02d31563f44a03c9e1897686a55f5f",
-    "size_bytes": 30422027
+    "sha256": "147f694752193b74e3f33f75120dae5f59c31e65ed5fa90dbb9b606da109fd13",
+    "size_bytes": 30423845
   },
   "launch": {
     "forward_alignment": 0.9999989273409595,
