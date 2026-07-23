@@ -43,7 +43,7 @@ from tests.test_cannon_car_wash_phase3_live import (
 
 EXAMPLE_ROOT = Path(__file__).parents[1] / "examples" / "cannon_car_wash"
 DISTRIBUTION_ARCHIVE = EXAMPLE_ROOT / "dist" / ZIP_NAME
-EXPECTED_SHA256 = "cfe5af11256fa3f8fe430b0ec855f11a37c485219e49cb1dbda22bdc7322bf6a"
+EXPECTED_SHA256 = "b0b6b38e56f6886a8483cda0478fec7a2e02d31563f44a03c9e1897686a55f5f"
 EXPECTED_GAME_VERSION = "0.38.6"
 MOD_ID = "ericrolph_cannon_car_wash"
 SCENARIO_FRAGMENT = f"{MOD_ID}/{MOD_ID}.json"

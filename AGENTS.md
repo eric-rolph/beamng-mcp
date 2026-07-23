@@ -336,8 +336,8 @@ live gates:
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_distribution_live.py
 ```
 
-The v1.12 release lock is 40 members, 29,976,373 bytes, SHA-256
-`cfe5af11256fa3f8fe430b0ec855f11a37c485219e49cb1dbda22bdc7322bf6a`. It is recorded in
+The v1.13 release lock is 46 members (40 runtime files plus six generated mod_info metadata members), 30,422,027 bytes, SHA-256
+`b0b6b38e56f6886a8483cda0478fec7a2e02d31563f44a03c9e1897686a55f5f`. It is recorded in
 `repository/submission.json` and the exact distribution live test. A runtime-byte or builder-policy
 change requires an intentional metadata update, rebuild, new hash lock, and complete distribution
 rerun. The complete four-cold-start release matrix passed on the v1.11 payload (2026-07-22) and
