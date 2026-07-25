@@ -399,8 +399,8 @@ def test_prefab_scene_names_are_namespaced_and_stock_assets_remain_references() 
     assert triggers[f"{MOD_ID}_repair_trigger"]["position"] == [-122.011475, -170.0, 102.1]
     assert triggers[f"{MOD_ID}_repair_trigger"]["scale"] == [5.4, 2.2, 4.2]
     assert triggers[f"{MOD_ID}_launch_trigger"]["triggerMode"] == "Contains"
-    assert triggers[f"{MOD_ID}_launch_trigger"]["position"] == [-122.011475, -170.0, 102.1]
-    assert triggers[f"{MOD_ID}_launch_trigger"]["scale"] == [5.8, 17.5, 4.6]
+    assert triggers[f"{MOD_ID}_launch_trigger"]["position"] == [-122.011475, -164.6, 102.1]
+    assert triggers[f"{MOD_ID}_launch_trigger"]["scale"] == [5.8, 6.7, 4.6]
     assert all(record["triggerTestType"] == "Bounding box" for record in triggers.values())
 
     shape_references = {

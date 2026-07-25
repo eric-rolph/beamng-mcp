@@ -129,8 +129,8 @@ REPAIR_TRIGGER_NAME = namespaced_object_name("repair_trigger")
 # Y [-8.75, 8.75], and Z [-0.2, 4.4]. Its full-bay 17.5 m span contains the
 # measured stock Wentward DT40L city bus with enough hold margin to prevent
 # suspension/OOBB motion from generating a false exit during countdown.
-LAUNCH_TRIGGER_CENTER = (0.0, 0.0, 2.1)
-LAUNCH_TRIGGER_DIMENSIONS = (5.8, 17.5, 4.6)
+LAUNCH_TRIGGER_CENTER = (0.0, 5.4, 2.1)
+LAUNCH_TRIGGER_DIMENSIONS = (5.8, 6.7, 4.6)
 WASH_ACTIVATION_TRIGGER_CENTER = (0.0, 0.0, 2.2)
 WASH_ACTIVATION_TRIGGER_DIMENSIONS = (5.8, 17.5, 4.4)
 REPAIR_TRIGGER_CENTER = (0.0, 0.0, 2.1)
@@ -1199,25 +1199,35 @@ def build_details() -> None:
 
     drain_bases: list[bpy.types.Object] = []
     drain_slots: list[bpy.types.Object] = []
-    # Flush trench grates (creator-round feedback: the old trays stood
-    # 0.17 m proud of the slab). Dark pit plate reads as the recess; the
-    # steel slats float 8 mm over it, wheel-flush.
+    # Flush trench grates v2 (player: v1.17's 8 mm version vanished
+    # against the slab). Still wheel-flush, but with contrast: dark pit
+    # plate, steel curb frame, and thicker bright slats at 5 cm.
     for index, y in enumerate((-6.1, -3.8, -1.5, 0.8, 3.1, 5.4)):
         drain_bases.append(
             add_box(
                 f"Drain_{index:02d}",
-                (0.0, y, 0.004),
-                (2.4, 0.33, 0.008),
+                (0.0, y, 0.012),
+                (2.5, 0.4, 0.024),
                 rubber,
                 bevel=0.0,
             )
         )
-        for slot in range(-5, 6):
+        for edge in (-1.0, 1.0):
+            drain_slots.append(
+                add_box(
+                    f"Drain_{index:02d}_Curb_{'n' if edge > 0 else 's'}",
+                    (0.0, y + edge * 0.21, 0.025),
+                    (2.5, 0.05, 0.05),
+                    steel,
+                    bevel=0.0,
+                )
+            )
+        for slot in range(-4, 4):
             drain_slots.append(
                 add_box(
                     f"Drain_{index:02d}_Slot_{slot:+03d}",
-                    (slot * 0.2, y, 0.014),
-                    (0.09, 0.29, 0.012),
+                    (slot * 0.26 + 0.13, y, 0.036),
+                    (0.09, 0.3, 0.03),
                     steel,
                     bevel=0.0,
                 )
@@ -1242,49 +1252,41 @@ def build_details() -> None:
     join_static_meshes("ExitHazardRubber", hazard_groups["rubber"])
 
     kiosk_parts = [
-        add_box("PayKiosk_Base", (-2.65, -7.0, 0.14), (0.62, 0.82, 0.28), rubber),
-        add_box("PayKiosk_Body", (-2.65, -7.0, 1.05), (0.55, 0.75, 1.62), orange, bevel=0.02),
+        add_box("PayKiosk_Base", (-2.65, -7.0, 0.09), (0.66, 0.86, 0.18), rubber),
+        add_box("PayKiosk_Body", (-2.65, -7.0, 1.31), (0.55, 0.72, 2.26), orange, bevel=0.025),
+        # Angled face plate sunk into the body's upper front: one visual
+        # mass, no floating head (player report: "weird looking" gap).
         add_box(
-            "PayKiosk_Head",
-            (-2.65, -7.05, 2.06),
-            (0.55, 0.62, 0.42),
+            "PayKiosk_Face",
+            (-2.65, -7.31, 1.98),
+            (0.5, 0.1, 0.62),
             orange,
-            bevel=0.03,
-            rotation=(-0.21, 0.0, 0.0),
+            bevel=0.02,
+            rotation=(-0.3, 0.0, 0.0),
         ),
+        add_box("PayKiosk_Keypad", (-2.64, -7.365, 1.06), (0.3, 0.03, 0.2), rubber, bevel=0.006),
         add_box(
-            "PayKiosk_Hood",
-            (-2.65, -7.16, 2.3),
-            (0.59, 0.5, 0.06),
-            rubber,
-            bevel=0.01,
-            rotation=(-0.21, 0.0, 0.0),
-        ),
-        add_box(
-            "PayKiosk_Screen",
-            (-2.64, -7.34, 2.05),
-            (0.42, 0.03, 0.3),
-            screen,
-            bevel=0.008,
-            rotation=(-0.21, 0.0, 0.0),
-        ),
-        add_box("PayKiosk_Keypad", (-2.64, -7.39, 1.52), (0.34, 0.03, 0.24), rubber, bevel=0.006),
-        add_box("PayKiosk_CardSlot", (-2.64, -7.4, 1.24), (0.22, 0.035, 0.045), rubber, bevel=0.004),
-        add_box("PayKiosk_CoinCup", (-2.64, -7.41, 0.62), (0.2, 0.05, 0.12), rubber, bevel=0.01),
-        add_cylinder(
-            "PayKiosk_Button",
-            (-2.64, -7.42, 0.92),
-            0.07,
-            0.06,
-            cyan,
-            rotation=(math.pi / 2.0, 0.0, 0.0),
-            vertices=16,
+            "PayKiosk_CardSlot", (-2.64, -7.37, 0.78), (0.22, 0.035, 0.05), rubber, bevel=0.004
         ),
     ]
     join_static_meshes("PayKioskOrange", [kiosk_parts[1], kiosk_parts[2]])
-    join_static_meshes(
-        "PayKioskTrim",
-        [kiosk_parts[0], kiosk_parts[3], kiosk_parts[5], kiosk_parts[6], kiosk_parts[7]],
+    join_static_meshes("PayKioskTrim", [kiosk_parts[0], kiosk_parts[3], kiosk_parts[4]])
+    add_box(
+        "PayKiosk_Screen",
+        (-2.64, -7.405, 2.02),
+        (0.4, 0.022, 0.42),
+        screen,
+        bevel=0.006,
+        rotation=(-0.3, 0.0, 0.0),
+    )
+    add_cylinder(
+        "PayKiosk_Button",
+        (-2.64, -7.39, 1.32),
+        0.07,
+        0.06,
+        cyan,
+        rotation=(math.pi / 2.0, 0.0, 0.0),
+        vertices=10,
     )
 
     ceiling_lights = [

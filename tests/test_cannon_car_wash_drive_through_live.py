@@ -126,6 +126,30 @@ def test_cannon_car_wash_pass_escape_and_launch(tmp_path: Path) -> None:
             "return jsonEncode({ok = true})"
         )
 
+    def creep_to_rear_zone() -> None:
+        # v1.18: the countdown arms only in the REAR wax/dry section
+        # (local y > 2.05 = world y < -2.05 at identity). Take the service
+        # where the car lands, then roll gently rearward into the zone.
+        deadline = time.time() + SERVICE_TIMEOUT_SECONDS
+        while time.time() < deadline:
+            step(0.5)
+            snapshot = wash_state()
+            if snapshot.get("repair_pending_count", 0) == 0 and snapshot.get("wash_active"):
+                break
+        while time.time() < deadline + 20:
+            snapshot = wash_state()
+            if snapshot.get("active_phase") == "countdown":
+                # Entering the rear zone can start the countdown mid-creep;
+                # stop immediately so the caller observes it.
+                push_subject(0.0)
+                return
+            if subject_state()["y"] <= -2.8:
+                break
+            push_subject(2.2)
+            step(0.7)
+        push_subject(0.0)
+        step(1.0)
+
     def wait_for_phase(target: str, timeout_seconds: float) -> bool:
         deadline = time.time() + timeout_seconds
         while time.time() < deadline:
@@ -205,6 +229,7 @@ def test_cannon_car_wash_pass_escape_and_launch(tmp_path: Path) -> None:
 
         # ---- Part 2: park, take the service, then ESCAPE the countdown. ----
         teleport_to_bay()
+        creep_to_rear_zone()
         assert wait_for_phase("countdown", SERVICE_TIMEOUT_SECONDS), {
             "detail": "countdown never started for a parked car",
             "state": wash_state(),
@@ -240,6 +265,7 @@ def test_cannon_car_wash_pass_escape_and_launch(tmp_path: Path) -> None:
 
         # ---- Part 3: park again, stay put, take the cannon. ----
         teleport_to_bay()
+        creep_to_rear_zone()
         assert wait_for_phase("countdown", SERVICE_TIMEOUT_SECONDS), {
             "detail": "countdown never re-armed after the escape",
             "state": wash_state(),

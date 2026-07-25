@@ -41,7 +41,7 @@ local TRANSFORM_REFRESH_SECONDS = 0.1
 local VEHICLE_ACK_TIMEOUT_SECONDS = 1
 local REPAIR_ACK_TIMEOUT_SECONDS = 2
 local REPAIR_SETTLE_SIM_FRAMES = 2
-local REPAIR_MAX_POSITION_DRIFT_METERS = 0.15
+local REPAIR_MAX_POSITION_DRIFT_METERS = 0.05
 local REPAIR_MIN_DIRECTION_DOT = 0.995
 local REPAIR_MIN_UPRIGHT_DOT = 0.98
 -- Prop-local midpoint band, matching the authored repair trigger's center
@@ -50,7 +50,7 @@ local REPAIR_BAND_HALF_WIDTH = 2.7
 local REPAIR_BAND_HALF_LENGTH = 1.1
 local REPAIR_BAND_MIN_Z = 0.0
 local REPAIR_BAND_MAX_Z = 4.2
-local REPAIR_MAX_POSE_CORRECTION_ATTEMPTS = 2
+local REPAIR_MAX_POSE_CORRECTION_ATTEMPTS = 1
 -- v1.14 (creator report 2026-07-24, youtu.be/OFEZ1Hjffno?t=748): the wash
 -- grabbed rolling traffic — repair snapshots taken on MOVING cars fought
 -- the settle drift and re-posed the car visibly, and the bay hold froze
@@ -74,8 +74,10 @@ local WASH_TRIGGER_LOCAL_POSITION = vec3(0, 0, 2.2)
 local WASH_TRIGGER_SCALE = vec3(5.8, 17.5, 4.4)
 local REPAIR_TRIGGER_LOCAL_POSITION = vec3(0, 0, 2.1)
 local REPAIR_TRIGGER_SCALE = vec3(5.4, 2.2, 4.2)
-local LAUNCH_TRIGGER_LOCAL_POSITION = vec3(0, 0, 2.1)
-local LAUNCH_TRIGGER_SCALE = vec3(5.8, 17.5, 4.6)
+local LAUNCH_TRIGGER_LOCAL_POSITION = vec3(0, 5.4, 2.1)
+-- v1.18: the countdown arms only in the REAR wax/dry section (player
+-- report: full-tunnel arming started the cannon far too early).
+local LAUNCH_TRIGGER_SCALE = vec3(5.8, 6.7, 4.6)
 -- v1.15: BeamNGTrigger "Bounding box" volumes silently drop DRIVEN
 -- entries at non-cardinal prop yaws (probed live at 35 deg with provably
 -- correct trigger transforms; teleport entries still fire). The wash and
@@ -1434,7 +1436,16 @@ local function onEricrolphCannonCarWashRepairIntegrityAcknowledged(
   -- exactly — only the deformation-polluted measurement moved). Heading
   -- stays in telemetry; corrections fire on real position drift or a
   -- rollover only.
+  -- v1.18: user-confirmed on v1.17 that requestReset restores the
+  -- SPAWN-time orientation, not the current one (v1.17's probe could not
+  -- distinguish the two because its car never turned from spawn). One
+  -- restorative pose apply always runs when the healed pose moved beyond
+  -- tight tolerance; attempts stay capped so it can never become the old
+  -- visible fight. Heading uses a literal ~0.5 deg tolerance rather than
+  -- the retired heading-dot constant gate: the target is the
+  -- object-transform snapshot, which deformation cannot pollute.
   if repair.positionDrift > REPAIR_MAX_POSITION_DRIFT_METERS
+    or repair.headingDot < 0.99996
     or repair.uprightDot < REPAIR_MIN_UPRIGHT_DOT then
     local correctionAttempts = repair.poseCorrectionAttempts or 0
     if correctionAttempts < REPAIR_MAX_POSE_CORRECTION_ATTEMPTS then

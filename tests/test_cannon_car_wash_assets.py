@@ -48,8 +48,8 @@ CRASH_WALL_NAME = f"{MOD_ID}_crash_wall"
 SELECTOR_VISUAL_NAME = f"{MOD_ID}_selector_visual"
 SELECTOR_CAGE_NAME = f"{MOD_ID}_selector_cage"
 PHYSICS_GROUP_NAME = f"{MOD_ID}_physics"
-LAUNCH_TRIGGER_CENTER = [0.0, 0.0, 2.1]
-LAUNCH_TRIGGER_DIMENSIONS = [5.8, 17.5, 4.6]
+LAUNCH_TRIGGER_CENTER = [0.0, 5.4, 2.1]
+LAUNCH_TRIGGER_DIMENSIONS = [5.8, 6.7, 4.6]
 WASH_TRIGGER_CENTER = [0.0, 0.0, 2.2]
 WASH_TRIGGER_DIMENSIONS = [5.8, 17.5, 4.4]
 REPAIR_TRIGGER_CENTER = [0.0, 0.0, 2.1]
@@ -228,7 +228,14 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
         **CITYBUS_ENVELOPE,
     }
     assert manifest["trigger"]["dimensions"][0] > citybus["width"]
-    assert manifest["trigger"]["dimensions"][1] > citybus["length"]
+    # v1.18: the launch zone covers only the REAR wax/dry section (player
+    # report: full-tunnel arming fired the cannon far too early). Arming
+    # is positional CENTER-in-zone since v1.15, so the zone no longer
+    # needs to contain the citybus end-to-end - a bus centred in the rear
+    # section arms with its nose past the exit. The zone must still
+    # exceed half the bus so its centre can reach the zone while the tail
+    # stays inside the tunnel.
+    assert manifest["trigger"]["dimensions"][1] > citybus["length"] / 2
     assert manifest["trigger"]["dimensions"][2] > citybus["height"]
     assert manifest["wash_activation_trigger"]["dimensions"][1] <= opening["length"]
     entrance_y = float(manifest["entrance_center"][1])
@@ -612,7 +619,7 @@ def test_cannon_car_wash_repository_metadata_and_icon() -> None:
 
     assert repository_info["internal_name"] == MOD_ID
     assert repository_info["title"] == "Cannon Car Wash"
-    assert repository_info["version"] == "1.17.0"
+    assert repository_info["version"] == "1.18.0"
     assert repository_info["author"] == "Eric Rolph"
 
     with Image.open(MOD_ICON_PATH) as icon:

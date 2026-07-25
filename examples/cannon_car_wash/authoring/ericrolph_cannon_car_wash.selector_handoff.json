@@ -2941,12 +2941,12 @@
       "corners": [
         [
           -2.9,
-          -8.75,
+          2.05,
           -0.2
         ],
         [
           -2.9,
-          -8.75,
+          2.05,
           4.4
         ],
         [
@@ -2961,12 +2961,12 @@
         ],
         [
           2.9,
-          -8.75,
+          2.05,
           -0.2
         ],
         [
           2.9,
-          -8.75,
+          2.05,
           4.4
         ],
         [
@@ -2987,7 +2987,7 @@
       ],
       "min": [
         -2.9,
-        -8.75,
+        2.05,
         -0.2
       ]
     },
@@ -4349,7 +4349,7 @@
       "ericrolph_cannon_car_wash_selector_wet_concrete"
     ],
     "path": "vehicles/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
-    "sha256": "4ef485af11ad68803157836f9e6244892fd77e1fb2e994f2fc8c3ab9cdeee0e8",
-    "size": 2183300
+    "sha256": "b5b61c1585694f2dad77c923dd88fc727b22e6ce0d059b34b767c2b8f96fc194",
+    "size": 2153342
   }
 }

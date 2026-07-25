@@ -266,7 +266,7 @@
     "ericrolph_cannon_car_wash_launch_trigger": {
       "min": [
         -2.9,
-        -8.75,
+        2.05,
         -0.2
       ],
       "max": [
@@ -277,12 +277,12 @@
       "corners": [
         [
           -2.9,
-          -8.75,
+          2.05,
           -0.2
         ],
         [
           -2.9,
-          -8.75,
+          2.05,
           4.4
         ],
         [
@@ -297,12 +297,12 @@
         ],
         [
           2.9,
-          -8.75,
+          2.05,
           -0.2
         ],
         [
           2.9,
-          -8.75,
+          2.05,
           4.4
         ],
         [
@@ -430,12 +430,12 @@
     "name": "ericrolph_cannon_car_wash_launch_trigger",
     "center": [
       0.0,
-      0.0,
+      5.4,
       2.1
     ],
     "dimensions": [
       5.8,
-      17.5,
+      6.7,
       4.6
     ],
     "mode": "Contains",
@@ -1240,8 +1240,8 @@
   },
   "mesh_statistics": {
     "objects": 37,
-    "vertices": 7496,
-    "polygons": 6277
+    "vertices": 7380,
+    "polygons": 6183
   },
   "collision_meshes": [
     "Colmesh-1",
@@ -1250,7 +1250,7 @@
     "Colmesh-4"
   ],
   "export_statistics": {
-    "triangle_count": 14526,
+    "triangle_count": 14326,
     "geometry_count": 34,
     "primitive_group_count": 34,
     "material_symbol_count": 18
