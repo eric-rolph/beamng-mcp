@@ -51,6 +51,18 @@ local REPAIR_BAND_HALF_LENGTH = 1.1
 local REPAIR_BAND_MIN_Z = 0.0
 local REPAIR_BAND_MAX_Z = 4.2
 local REPAIR_MAX_POSE_CORRECTION_ATTEMPTS = 2
+-- v1.14 (creator report 2026-07-24, youtu.be/OFEZ1Hjffno?t=748): the wash
+-- grabbed rolling traffic — repair snapshots taken on MOVING cars fought
+-- the settle drift and re-posed the car visibly, and the bay hold froze
+-- anyone who merely drove through. Service now requires intent: the reset
+-- repair engages only near-stationary, and the launch hold only engages at
+-- parking speed. Rolling traffic gets rollers and sprays, nothing else.
+local REPAIR_MAX_ENGAGE_SPEED_MPS = 1.8
+local HOLD_MAX_ENGAGE_SPEED_MPS = 3.0
+-- A launch-zone exit during the countdown at or above this speed is a
+-- deliberate escape (abort the shot); below it, treat the exit as
+-- Contains-flap from settle wobble and keep the run alive.
+local ESCAPE_MIN_EXIT_SPEED_MPS = 1.0
 local RELEASE_GRACE_SIM_FRAMES = 2
 
 -- The selector handoff uses a ground-plane reference node. The authored
@@ -872,6 +884,8 @@ end
 
 local function removeWashSubject(state, vehicleId, reason)
   state.pendingLaunchEntries[vehicleId] = nil
+  if state.repairSpeedLatch then state.repairSpeedLatch[vehicleId] = nil end
+  if state.holdSpeedLatch then state.holdSpeedLatch[vehicleId] = nil end
   local repair = state.repairOccupants[vehicleId]
   bestEffortReleaseRepair(state, vehicleId, repair, reason)
   state.repairOccupants[vehicleId] = nil
@@ -938,25 +952,16 @@ end
 
 local function requestReleaseForLaunch(state, vehicle)
   local run = state.activeRun
-  if not run or run.phase ~= "countdown" or not run.holding then return false end
-  run.phase = "release_pending"
-  run.releasePending = true
-  run.ackElapsed = 0
-  local queued = queueVehicleCommand(
-    vehicle,
-    releaseVehicleCommand(state.propId, run.number),
-    state,
-    "release_command_failed"
-  )
-  if not queued then
-    abortActiveRun(state, "release_command_failed", vehicle)
-    state.armed = true
-    return false
-  end
+  if not run or run.phase ~= "countdown" then return false end
+  -- v1.14: the car was never frozen, so there is nothing to release —
+  -- the countdown ends and the cannon simply fires.
+  run.phase = "release_grace"
+  run.releasePending = false
   emitEvent(state, "I", "release_requested", {
     reason = "launch",
     vehicle_id = run.vehicleId,
   })
+  launchVehicle(state, vehicle)
   return true
 end
 
@@ -965,9 +970,10 @@ countdownJob = function(job, propId, runNumber)
   for nextIndex = 2, #COUNTDOWN_MESSAGES do
     job.sleep(COUNTDOWN_INTERVAL_SECONDS)
     local state = installations[propId]
+    -- v1.14: no `holding` check — the countdown runs on a free car; an
+    -- escape clears activeRun and the run-number check catches restarts.
     if not state
       or not state.activeRun
-      or not state.activeRun.holding
       or state.activeRun.phase ~= "countdown"
       or state.activeRun.number ~= runNumber then
       return
@@ -991,7 +997,6 @@ countdownJob = function(job, propId, runNumber)
   local state = installations[propId]
   if not state
     or not state.activeRun
-    or not state.activeRun.holding
     or state.activeRun.phase ~= "countdown"
     or state.activeRun.number ~= runNumber then
     return
@@ -1300,6 +1305,41 @@ local function onEricrolphCannonCarWashRepairIntegrityAcknowledged(
       failRepair(state, vehicleId, "repair_vehicle_missing")
       return
     end
+    if damage <= 0.01
+      and partDamageCount == 0
+      and brokenBeamCount == 0
+      and deflatedTireCount == 0 then
+      -- Showroom-clean vehicles skip the reset entirely: nothing to fix,
+      -- so no pose snapshot, no physics reset, no visible snap.
+      repair.after = repair.before
+      repair.positionDrift = 0
+      repair.directionDot = 1
+      repair.headingDot = 1
+      repair.uprightDot = 1
+      repair.travelSignPreserved = true
+      repair.phase = "release_pending"
+      repair.elapsed = 0
+      repair.bestEffortReleaseQueued = false
+      local queuedRelease, releaseError = queueVehicleCommand(
+        vehicle,
+        repairReleaseCommand(state.propId, repair.token, previousFrozen),
+        state,
+        "repair_release_command_failed",
+        false
+      )
+      if not queuedRelease then
+        failRepair(state, vehicleId, "repair_release_command_failed", {
+          detail = releaseError,
+        })
+        return
+      end
+      showMessage("Inspected: already showroom clean!", 1.5)
+      emitEvent(state, "I", "repair_skipped_pristine", {
+        subject_id = vehicleId,
+        repair_token = token,
+      })
+      return
+    end
     local target, targetError = repairTargetPose(vehicle)
     if not target then
       failRepair(state, vehicleId, "repair_target_pose_failed", {detail = targetError})
@@ -1398,7 +1438,14 @@ local function onEricrolphCannonCarWashRepairIntegrityAcknowledged(
       })
       return
     end
-    failRepair(state, vehicleId, "repair_pose_verification_failed", {
+    -- Corrections exhausted: the DAMAGE is fixed and the pose is off by
+    -- at most a settle wobble. Accept it with a warning instead of
+    -- bricking the service — repeated setPositionRotation fights were the
+    -- visible "weird re-orientation" in the creator's video, and a failed
+    -- repair left the launch deferred forever.
+    emitEvent(state, "W", "repair_pose_accepted_with_drift", {
+      subject_id = vehicleId,
+      repair_token = token,
       position_drift_m = repair.positionDrift,
       direction_dot = repair.directionDot,
       heading_dot = repair.headingDot,
@@ -1406,7 +1453,6 @@ local function onEricrolphCannonCarWashRepairIntegrityAcknowledged(
       travel_sign_preserved = repair.travelSignPreserved,
       correction_attempts = correctionAttempts,
     })
-    return
   end
   repair.phase = "release_pending"
   repair.elapsed = 0
@@ -1492,6 +1538,24 @@ end
 local function startRepair(state, subjectId, vehicle, detection)
   if state.repairOccupants[subjectId] then return end
 
+  local speed = 0
+  pcall(function() speed = vehicle:getVelocity():length() end)
+  if speed > REPAIR_MAX_ENGAGE_SPEED_MPS then
+    -- Rolling traffic passes through unserviced. The positional band
+    -- detector retries every frame, so a car that slows inside the wash
+    -- is picked up the moment it actually stops.
+    state.repairSpeedLatch = state.repairSpeedLatch or {}
+    if not state.repairSpeedLatch[subjectId] then
+      state.repairSpeedLatch[subjectId] = true
+      emitEvent(state, "I", "repair_deferred_moving", {
+        subject_id = subjectId,
+        detection = detection,
+        speed_mps = math.floor(speed * 10) / 10,
+      })
+    end
+    return
+  end
+
   repairCounter = repairCounter + 1
   state.repairOccupants[subjectId] = {
     token = repairCounter,
@@ -1572,6 +1636,21 @@ handleLaunchTrigger = function(state, data)
     state.pendingLaunchEntries[data.subjectID] = nil
     if state.activeRun
       and state.activeRun.vehicleId == data.subjectID
+      and state.activeRun.phase == "countdown" then
+      local speed = 0
+      pcall(function() speed = vehicle:getVelocity():length() end)
+      if speed >= ESCAPE_MIN_EXIT_SPEED_MPS then
+        -- v1.14 escape hatch: driving out of the bay before zero is a
+        -- deliberate "no thanks" — cancel the shot and let them go.
+        showMessage("Chickened out before zero! The cannon lets you go... this time.", 2.6)
+        abortActiveRun(state, "left_before_launch", vehicle)
+        state.armed = true
+        emitEvent(state, "I", "trigger_exit", {vehicle_id = data.subjectID})
+        return
+      end
+    end
+    if state.activeRun
+      and state.activeRun.vehicleId == data.subjectID
       and state.activeRun.phase ~= "launched"
       and state.washSubjects[data.subjectID]
       and state.washSystemsActive then
@@ -1616,6 +1695,30 @@ handleLaunchTrigger = function(state, data)
     })
     return
   end
+  local speed = 0
+  pcall(function() speed = vehicle:getVelocity():length() end)
+  if speed > HOLD_MAX_ENGAGE_SPEED_MPS then
+    -- Rolling through the bay is allowed: the hold only engages for a car
+    -- that comes to parking speed. The entry stays pending and the
+    -- per-frame bay check re-fires it if the car stops inside.
+    state.pendingLaunchEntries[data.subjectID] = {
+      event = data.event,
+      triggerID = data.triggerID,
+      triggerName = data.triggerName,
+      subjectID = data.subjectID,
+    }
+    state.holdSpeedLatch = state.holdSpeedLatch or {}
+    if not state.holdSpeedLatch[data.subjectID] then
+      state.holdSpeedLatch[data.subjectID] = true
+      showMessage("Rolling through? Stop in the bay for MUZZLE VELOCITY service.", 2.6)
+    end
+    emitEvent(state, "I", "launch_deferred", {
+      vehicle_id = data.subjectID,
+      reason = "rolling_through",
+      speed_mps = math.floor(speed * 10) / 10,
+    })
+    return
+  end
   if not state.armed or state.activeRun then return end
 
   state.armed = false
@@ -1625,9 +1728,9 @@ handleLaunchTrigger = function(state, data)
     vehicleId = data.subjectID,
     triggerId = data.triggerID,
     holding = false,
-    holdCommandPending = true,
+    holdCommandPending = false,
     releasePending = false,
-    phase = "hold_pending",
+    phase = "countdown",
     elapsedTime = 0,
     ackElapsed = 0,
   }
@@ -1636,20 +1739,26 @@ handleLaunchTrigger = function(state, data)
     trigger_mode = state.launchTrigger:getField("triggerMode", 0),
     trigger_test_type = state.launchTrigger:getField("triggerTestType", 0),
   })
-  if not queueVehicleCommand(
-    vehicle,
-    holdVehicleCommand(state.propId, state.activeRun.number),
-    state,
-    "hold_command_failed"
-  ) then
-    abortActiveRun(state, "hold_command_failed", vehicle)
-    state.armed = true
-    return
-  end
-  emitEvent(state, "I", "hold_requested", {
+  -- v1.14: the countdown runs on a FREE car — no controller freeze, no
+  -- velocity stop. The creator's video showed the old hold locking in
+  -- players who only wanted to drive through; now staying is a choice.
+  -- Driving out of the bay before zero aborts the shot (escape hatch in
+  -- handleLaunchTrigger's exit branch).
+  showMessage("MUZZLE VELOCITY in 3... (drive out to skip)", 1.1)
+  emitEvent(state, "I", "countdown_timer_start", {vehicle_id = data.subjectID})
+  emitEvent(state, "I", COUNTDOWN_EVENTS[1], {
     vehicle_id = data.subjectID,
-    run_number = state.activeRun.number,
+    countdown_value = #COUNTDOWN_MESSAGES,
+    elapsed_time_seconds = 0,
   })
+  local scheduled, scheduleError = pcall(function()
+    extensions.core_jobsystem.create(countdownJob, nil, state.propId, state.activeRun.number)
+  end)
+  if not scheduled then
+    emitError(state, "countdown_schedule_failed", {detail = tostring(scheduleError)})
+    abortActiveRun(state, "countdown_schedule_failed", vehicle)
+    state.armed = true
+  end
 end
 
 local function onBeamNGTrigger(data)
@@ -2026,6 +2135,24 @@ local function onPreRender(dtReal, dtSim, dtRaw)
             removeWashSubject(state, vehicleId, "deferred_exit_after_repair")
           else
             processPendingLaunch(state, vehicleId)
+          end
+        end
+      end
+    end
+    -- Bay check: a car that rolled in fast (repair and/or hold deferred)
+    -- gets the full service the moment it comes to parking speed inside.
+    for subjectId in pairs(state.pendingLaunchEntries) do
+      if state.washSubjects[subjectId] and state.washSystemsActive then
+        local subject = eligibleSubject(subjectId)
+        if subject then
+          local subjectSpeed = 0
+          pcall(function() subjectSpeed = subject:getVelocity():length() end)
+          if subjectSpeed <= HOLD_MAX_ENGAGE_SPEED_MPS then
+            if not state.repairOccupants[subjectId] then
+              startRepair(state, subjectId, subject, "parked_in_bay")
+            else
+              processPendingLaunch(state, subjectId)
+            end
           end
         end
       end

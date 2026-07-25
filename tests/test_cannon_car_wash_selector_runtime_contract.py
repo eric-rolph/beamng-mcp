@@ -543,7 +543,12 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     )
     assert "verify_pending" in integrity_ack
     assert "failed" in integrity_ack
-    assert '"repair_pose_verification_failed"' in integrity_ack
+    # v1.14: exhausted pose corrections ACCEPT the pose with a warning
+    # instead of failing the whole service (creator report 2026-07-24 —
+    # repeated pose snaps then a bricked launch read as "weird
+    # re-orientation + locked in place").
+    assert '"repair_pose_accepted_with_drift"' in integrity_ack
+    assert '"repair_pose_verification_failed"' not in integrity_ack
     assert "REPAIR_MAX_POSITION_DRIFT_METERS" in integrity_ack
     assert "REPAIR_MIN_DIRECTION_DOT" in integrity_ack
     assert "REPAIR_MIN_UPRIGHT_DOT" in integrity_ack
