@@ -535,8 +535,8 @@ def test_phase3_manifest_describes_wash_cycle_and_containment_gate() -> None:
         "required_vehicle_state": f"previously_entered_{WASH_TRIGGER_NAME}",
         "required_wash_system_state": "active",
         "required_repair_state": "complete",
-        "launch_trigger_local_center": [0.0, 0.0, 2.1],
-        "launch_trigger_dimensions": [5.8, 17.5, 4.6],
+        "launch_trigger_local_center": [0.0, 5.4, 2.1],
+        "launch_trigger_dimensions": [5.8, 6.7, 4.6],
         "validated_large_vehicle": {
             "model": "citybus",
             "configuration": "city",

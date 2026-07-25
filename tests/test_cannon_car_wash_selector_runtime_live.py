@@ -983,7 +983,7 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             assert launch_transform == {
                 "ok": True,
                 "position": pytest.approx([0.0, 0.0, surface_z + 2.1], abs=0.03),
-                "scale": pytest.approx([5.8, 17.5, 4.6], abs=0.001),
+                "scale": pytest.approx([5.8, 6.7, 4.6], abs=0.001),
                 "forward": pytest.approx([0.0, -1.0, 0.0], abs=0.001),
                 "up": pytest.approx([0.0, 0.0, 1.0], abs=0.001),
                 "mode": "Contains",

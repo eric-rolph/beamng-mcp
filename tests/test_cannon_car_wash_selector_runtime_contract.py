@@ -14,8 +14,8 @@ GE_EXTENSION_PATH = f"{MOD_ID}/runtime"
 GE_EXTENSION_NAME = "ericrolph__cannon__car__wash_runtime"
 REPAIR_TRIGGER_LOCAL_POSITION = (0.0, 0.0, 2.1)
 REPAIR_TRIGGER_SCALE = (5.4, 2.2, 4.2)
-LAUNCH_TRIGGER_LOCAL_POSITION = (0.0, 0.0, 2.1)
-LAUNCH_TRIGGER_SCALE = (5.8, 17.5, 4.6)
+LAUNCH_TRIGGER_LOCAL_POSITION = (0.0, 5.4, 2.1)
+LAUNCH_TRIGGER_SCALE = (5.8, 6.7, 4.6)
 
 
 def _function_section(source: str, name: str) -> str:
