@@ -413,6 +413,38 @@ def animate_spin(obj: bpy.types.Object, axis: int) -> None:
         curve.modifiers.new("CYCLES")
 
 
+def animate_sway(
+    obj: bpy.types.Object,
+    axis: int,
+    offsets: list[float],
+) -> None:
+    """Looping positional sway in the same 61-frame ambient cycle.
+
+    ``offsets`` are five samples at frames 1/16/31/46/61; first and last
+    must match so the CYCLES modifier tiles seamlessly. Location channels
+    join the object's existing spin action, so the Collada export still
+    emits one animation per spinner (the ambient-clip writer asserts
+    exactly five).
+    """
+
+    if offsets[0] != offsets[-1]:
+        raise RuntimeError("sway offsets must loop (first == last)")
+    base = obj.location[axis]
+    for frame, offset in zip((1, 16, 31, 46, 61), offsets, strict=True):
+        obj.location[axis] = base + offset
+        obj.keyframe_insert(data_path="location", index=axis, frame=frame)
+    obj.location[axis] = base
+    if obj.animation_data is None or obj.animation_data.action is None:
+        return
+    for curve in obj.animation_data.action.fcurves:
+        if curve.data_path != "location":
+            continue
+        for point in curve.keyframe_points:
+            point.interpolation = "BEZIER"
+        if not any(m.type == "CYCLES" for m in curve.modifiers):
+            curve.modifiers.new("CYCLES")
+
+
 def add_card_mesh(
     name: str,
     location: tuple[float, float, float],
@@ -456,6 +488,7 @@ def add_vertical_brush(
     location: tuple[float, float, float],
     cards: bpy.types.Material,
     steel: bpy.types.Material,
+    sway_phase: int = 0,
 ) -> None:
     root = bpy.data.objects.new(namespaced_object_name(f"{name}_Spinner"), None)
     root.empty_display_type = "CIRCLE"
@@ -499,6 +532,14 @@ def add_vertical_brush(
     card_cluster.parent = root
     card_cluster.location = (0.0, 0.0, 0.0)
     animate_spin(root, 2)
+    # Carrier scrub: sweep the whole spinner toward the car and back each
+    # ambient cycle. Purely visual (the bristle cards carry no collision),
+    # phase-staggered per brush so the four towers do not move in lockstep.
+    inward = 0.22 if location[0] < 0 else -0.22
+    sway_cycle = [0.0, inward, 0.0, -inward * 0.35, 0.0]
+    phase = sway_phase % 4
+    looped = sway_cycle[phase:-1] + sway_cycle[: phase + 1]
+    animate_sway(root, 0, looped)
 
 
 def add_horizontal_brush(
@@ -557,6 +598,9 @@ def add_horizontal_brush(
     card_cluster.parent = root
     card_cluster.location = (0.0, 0.0, 0.0)
     animate_spin(root, 0)
+    # Press-down bob onto the roofline; stays at or below rest height so
+    # the roller never clips the ceiling. Visual only — no collision.
+    animate_sway(root, 2, [0.0, -0.24, -0.08, -0.24, 0.0])
 
 
 def add_pipe_arch(
@@ -1075,12 +1119,14 @@ def build_details() -> None:
             (-2.28, y, 2.05),
             brush_cards,
             steel,
+            sway_phase=index * 2,
         )
         add_vertical_brush(
             f"Brush_Right_{index + 1}",
             (2.28, y, 2.05),
             brush_cards,
             steel,
+            sway_phase=index * 2 + 1,
         )
         # Compact motor housings keep the original colour accents without
         # assigning extra materials to the alpha-card bristle cluster.
@@ -1153,12 +1199,15 @@ def build_details() -> None:
 
     drain_bases: list[bpy.types.Object] = []
     drain_slots: list[bpy.types.Object] = []
+    # Flush trench grates (creator-round feedback: the old trays stood
+    # 0.17 m proud of the slab). Dark pit plate reads as the recess; the
+    # steel slats float 8 mm over it, wheel-flush.
     for index, y in enumerate((-6.1, -3.8, -1.5, 0.8, 3.1, 5.4)):
         drain_bases.append(
             add_box(
                 f"Drain_{index:02d}",
-                (0.0, y, 0.135),
-                (2.4, 0.33, 0.04),
+                (0.0, y, 0.004),
+                (2.4, 0.33, 0.008),
                 rubber,
                 bevel=0.0,
             )
@@ -1167,8 +1216,8 @@ def build_details() -> None:
             drain_slots.append(
                 add_box(
                     f"Drain_{index:02d}_Slot_{slot:+03d}",
-                    (slot * 0.2, y, 0.158),
-                    (0.09, 0.29, 0.018),
+                    (slot * 0.2, y, 0.014),
+                    (0.09, 0.29, 0.012),
                     steel,
                     bevel=0.0,
                 )
@@ -1192,16 +1241,50 @@ def build_details() -> None:
     join_static_meshes("ExitHazardYellow", hazard_groups["yellow"])
     join_static_meshes("ExitHazardRubber", hazard_groups["rubber"])
 
-    add_box("PayKiosk_Body", (-2.65, -7.0, 1.05), (0.55, 0.75, 1.9), orange)
-    add_box("PayKiosk_Screen", (-2.64, -7.39, 1.38), (0.38, 0.035, 0.52), screen, bevel=0.008)
-    add_cylinder(
-        "PayKiosk_Button",
-        (-2.64, -7.42, 0.82),
-        0.09,
-        0.07,
-        cyan,
-        rotation=(math.pi / 2.0, 0.0, 0.0),
-        vertices=16,
+    kiosk_parts = [
+        add_box("PayKiosk_Base", (-2.65, -7.0, 0.14), (0.62, 0.82, 0.28), rubber),
+        add_box("PayKiosk_Body", (-2.65, -7.0, 1.05), (0.55, 0.75, 1.62), orange, bevel=0.02),
+        add_box(
+            "PayKiosk_Head",
+            (-2.65, -7.05, 2.06),
+            (0.55, 0.62, 0.42),
+            orange,
+            bevel=0.03,
+            rotation=(-0.21, 0.0, 0.0),
+        ),
+        add_box(
+            "PayKiosk_Hood",
+            (-2.65, -7.16, 2.3),
+            (0.59, 0.5, 0.06),
+            rubber,
+            bevel=0.01,
+            rotation=(-0.21, 0.0, 0.0),
+        ),
+        add_box(
+            "PayKiosk_Screen",
+            (-2.64, -7.34, 2.05),
+            (0.42, 0.03, 0.3),
+            screen,
+            bevel=0.008,
+            rotation=(-0.21, 0.0, 0.0),
+        ),
+        add_box("PayKiosk_Keypad", (-2.64, -7.39, 1.52), (0.34, 0.03, 0.24), rubber, bevel=0.006),
+        add_box("PayKiosk_CardSlot", (-2.64, -7.4, 1.24), (0.22, 0.035, 0.045), rubber, bevel=0.004),
+        add_box("PayKiosk_CoinCup", (-2.64, -7.41, 0.62), (0.2, 0.05, 0.12), rubber, bevel=0.01),
+        add_cylinder(
+            "PayKiosk_Button",
+            (-2.64, -7.42, 0.92),
+            0.07,
+            0.06,
+            cyan,
+            rotation=(math.pi / 2.0, 0.0, 0.0),
+            vertices=16,
+        ),
+    ]
+    join_static_meshes("PayKioskOrange", [kiosk_parts[1], kiosk_parts[2]])
+    join_static_meshes(
+        "PayKioskTrim",
+        [kiosk_parts[0], kiosk_parts[3], kiosk_parts[5], kiosk_parts[6], kiosk_parts[7]],
     )
 
     ceiling_lights = [
