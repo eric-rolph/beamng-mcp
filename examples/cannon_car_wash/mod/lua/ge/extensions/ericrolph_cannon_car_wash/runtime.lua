@@ -1425,8 +1425,16 @@ local function onEricrolphCannonCarWashRepairIntegrityAcknowledged(
   repair.headingDot = poseMetrics.headingDot
   repair.uprightDot = poseMetrics.uprightDot
   repair.travelSignPreserved = poseMetrics.travelSignPreserved
+  -- v1.17: heading NEVER gates corrections. The pre-repair direction
+  -- snapshot comes from getDirectionVector() on a CRUMPLED node cloud, so
+  -- heavy damage skews it by several degrees; the healed car can never
+  -- match that phantom, and chasing it with setPositionRotation fights
+  -- was the visible "weird re-orientation" (probed live 2026-07-25:
+  -- requestReset and both pose-setters preserve the object heading
+  -- exactly — only the deformation-polluted measurement moved). Heading
+  -- stays in telemetry; corrections fire on real position drift or a
+  -- rollover only.
   if repair.positionDrift > REPAIR_MAX_POSITION_DRIFT_METERS
-    or repair.headingDot < REPAIR_MIN_DIRECTION_DOT
     or repair.uprightDot < REPAIR_MIN_UPRIGHT_DOT then
     local correctionAttempts = repair.poseCorrectionAttempts or 0
     if correctionAttempts < REPAIR_MAX_POSE_CORRECTION_ATTEMPTS then

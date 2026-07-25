@@ -550,7 +550,12 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     assert '"repair_pose_accepted_with_drift"' in integrity_ack
     assert '"repair_pose_verification_failed"' not in integrity_ack
     assert "REPAIR_MAX_POSITION_DRIFT_METERS" in integrity_ack
-    assert "REPAIR_MIN_DIRECTION_DOT" in integrity_ack
+    # v1.17: heading must NEVER gate pose corrections — the pre-repair
+    # direction snapshot reads a crumpled node cloud, so heavy damage
+    # skews it and the healed car can never match (the correction fight
+    # was the creator's visible "weird re-orientation"). Heading stays in
+    # telemetry only; position drift and rollover remain the gates.
+    assert "REPAIR_MIN_DIRECTION_DOT" not in integrity_ack
     assert "REPAIR_MIN_UPRIGHT_DOT" in integrity_ack
     assert "release_pending" in integrity_ack
     assert "repairReleaseCommand" in integrity_ack
