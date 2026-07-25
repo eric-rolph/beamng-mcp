@@ -76,6 +76,34 @@ local REPAIR_TRIGGER_LOCAL_POSITION = vec3(0, 0, 2.1)
 local REPAIR_TRIGGER_SCALE = vec3(5.4, 2.2, 4.2)
 local LAUNCH_TRIGGER_LOCAL_POSITION = vec3(0, 0, 2.1)
 local LAUNCH_TRIGGER_SCALE = vec3(5.8, 17.5, 4.6)
+-- v1.15: BeamNGTrigger "Bounding box" volumes silently drop DRIVEN
+-- entries at non-cardinal prop yaws (probed live at 35 deg with provably
+-- correct trigger transforms; teleport entries still fire). The wash and
+-- launch zones therefore synthesize enter/exit from per-frame prop-frame
+-- containment — the same cure the thin repair band got in v1.12. Real
+-- trigger events still arrive at cardinal yaws; a shared occupancy table
+-- makes whichever source fires first win and dedupes the other.
+local POSITIONAL_ZONE_MARGIN = 0.05
+local POSITIONAL_ZONES = {
+  {
+    kind = "wash",
+    center = WASH_TRIGGER_LOCAL_POSITION,
+    half = vec3(
+      WASH_TRIGGER_SCALE.x / 2 + POSITIONAL_ZONE_MARGIN,
+      WASH_TRIGGER_SCALE.y / 2 + POSITIONAL_ZONE_MARGIN,
+      WASH_TRIGGER_SCALE.z / 2 + POSITIONAL_ZONE_MARGIN
+    ),
+  },
+  {
+    kind = "launch",
+    center = LAUNCH_TRIGGER_LOCAL_POSITION,
+    half = vec3(
+      LAUNCH_TRIGGER_SCALE.x / 2 + POSITIONAL_ZONE_MARGIN,
+      LAUNCH_TRIGGER_SCALE.y / 2 + POSITIONAL_ZONE_MARGIN,
+      LAUNCH_TRIGGER_SCALE.z / 2 + POSITIONAL_ZONE_MARGIN
+    ),
+  },
+}
 local EFFECT_OFFSETS = {
   {suffix = "mister_PreSoak_L_1", emitter = "BNGP_sprinkler", position = vec3(-2.62, -5.6, 1.25), inward = vec3(1, 0, 0)},
   {suffix = "mister_PreSoak_L_2", emitter = "BNGP_sprinkler", position = vec3(-2.62, -5.6, 2.1), inward = vec3(1, 0, 0)},
@@ -1761,6 +1789,79 @@ handleLaunchTrigger = function(state, data)
   end
 end
 
+local function markZoneOccupancy(state, kind, subjectId, entered)
+  state.positionalOccupancy = state.positionalOccupancy or {wash = {}, launch = {}}
+  local zone = state.positionalOccupancy[kind]
+  if zone == nil then return end
+  if entered == (zone[subjectId] == true) then return end
+  zone[subjectId] = entered or nil
+  local trigger = kind == "wash" and state.washTrigger or state.launchTrigger
+  local name = kind == "wash" and state.washTriggerName or state.launchTriggerName
+  if not trigger or not name then return end
+  local resolvedId = nil
+  pcall(function() resolvedId = trigger:getId() end)
+  if not integer(resolvedId) then return end
+  local data = {
+    event = entered and "enter" or "exit",
+    triggerID = resolvedId,
+    triggerName = name,
+    subjectID = subjectId,
+  }
+  if kind == "wash" then
+    handleWashTrigger(state, data)
+  else
+    handleLaunchTrigger(state, data)
+  end
+end
+
+local function positionalZoneSweep(state)
+  -- Use the installation frame the v1.12 repair band already proved live
+  -- at rotated yaws (set by synchronizeTransforms), not a fresh
+  -- propFrame() derivation.
+  if not state.origin or not state.modelRotation then return end
+  local inverseRotation = state.modelRotation:inversed()
+  state.sweepChecks = (state.sweepChecks or 0) + 1
+  local seen = {wash = {}, launch = {}}
+  local vehicles = {}
+  if type(getAllVehicles) == "function" then
+    vehicles = getAllVehicles() or {}
+  end
+  if #vehicles == 0 and be then
+    local count = be:getObjectCount() or 0
+    for index = 0, count - 1 do
+      vehicles[#vehicles + 1] = be:getObject(index)
+    end
+  end
+  for _, vehicle in ipairs(vehicles) do
+    local resolved, vehicleId = pcall(function() return vehicle:getId() end)
+    if resolved and integer(vehicleId) and not installations[vehicleId] then
+      local position = nil
+      pcall(function() position = vehicle:getPosition() end)
+      if position and finiteNumber(position.x) and finiteNumber(position.y)
+        and finiteNumber(position.z) then
+        local localPosition = inverseRotation * (position - state.origin)
+        state.lastSweepLocal = {localPosition.x, localPosition.y, localPosition.z}
+        for _, zone in ipairs(POSITIONAL_ZONES) do
+          local inside = math.abs(localPosition.x - zone.center.x) <= zone.half.x
+            and math.abs(localPosition.y - zone.center.y) <= zone.half.y
+            and math.abs(localPosition.z - zone.center.z) <= zone.half.z
+          if inside then seen[zone.kind][vehicleId] = true end
+          markZoneOccupancy(state, zone.kind, vehicleId, inside)
+        end
+      end
+    end
+  end
+  -- Vehicles deleted while inside never produce an exit event: sweep them.
+  local occupancy = state.positionalOccupancy or {}
+  for _, zone in ipairs(POSITIONAL_ZONES) do
+    for vehicleId in pairs(occupancy[zone.kind] or {}) do
+      if not seen[zone.kind][vehicleId] then
+        markZoneOccupancy(state, zone.kind, vehicleId, false)
+      end
+    end
+  end
+end
+
 local function onBeamNGTrigger(data)
   if type(data) ~= "table" or not integer(data.triggerID) then return end
   if installations[data.subjectID] then return end
@@ -1768,12 +1869,16 @@ local function onBeamNGTrigger(data)
   if not owner then return end
   local state = installations[owner.propId]
   if not state then return end
-  if owner.kind == "wash" then
-    handleWashTrigger(state, data)
-  elseif owner.kind == "repair" then
+  if owner.kind == "repair" then
     handleRepairTrigger(state, data)
-  elseif owner.kind == "launch" then
-    handleLaunchTrigger(state, data)
+  elseif owner.kind == "wash" or owner.kind == "launch" then
+    -- Wash/launch transitions flow through the shared occupancy gate so a
+    -- real trigger event and the positional sweep never double-fire.
+    if type(data) == "table"
+      and integer(data.subjectID)
+      and (data.event == "enter" or data.event == "exit") then
+      markZoneOccupancy(state, owner.kind, data.subjectID, data.event == "enter")
+    end
   end
 end
 
@@ -1851,6 +1956,7 @@ local function rebuildTriggersAfterReset(state)
     state.launchTrigger = nil
     return false, syncError
   end
+  state.positionalOccupancy = nil
   triggerOwners[washTrigger:getId()] = {propId = state.propId, kind = "wash"}
   triggerOwners[repairTrigger:getId()] = {propId = state.propId, kind = "repair"}
   triggerOwners[launchTrigger:getId()] = {propId = state.propId, kind = "launch"}
@@ -2139,6 +2245,7 @@ local function onPreRender(dtReal, dtSim, dtRaw)
         end
       end
     end
+    positionalZoneSweep(state)
     -- Bay check: a car that rolled in fast (repair and/or hold deferred)
     -- gets the full service the moment it comes to parking speed inside.
     for subjectId in pairs(state.pendingLaunchEntries) do
@@ -2392,6 +2499,8 @@ local function installationState(state)
     repair_pending_count = pendingRepairs,
     repaired_subject_count = completedRepairs,
     positional_check_count = state.positionalChecks or 0,
+    sweep_check_count = state.sweepChecks or 0,
+    last_sweep_local = state.lastSweepLocal,
     last_local_position = state.lastLocalPosition,
     armed = state.armed,
     active_vehicle_id = state.activeRun and state.activeRun.vehicleId or nil,
