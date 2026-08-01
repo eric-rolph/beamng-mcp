@@ -413,38 +413,6 @@ def animate_spin(obj: bpy.types.Object, axis: int) -> None:
         curve.modifiers.new("CYCLES")
 
 
-def animate_sway(
-    obj: bpy.types.Object,
-    axis: int,
-    offsets: list[float],
-) -> None:
-    """Looping positional sway in the same 61-frame ambient cycle.
-
-    ``offsets`` are five samples at frames 1/16/31/46/61; first and last
-    must match so the CYCLES modifier tiles seamlessly. Location channels
-    join the object's existing spin action, so the Collada export still
-    emits one animation per spinner (the ambient-clip writer asserts
-    exactly five).
-    """
-
-    if offsets[0] != offsets[-1]:
-        raise RuntimeError("sway offsets must loop (first == last)")
-    base = obj.location[axis]
-    for frame, offset in zip((1, 16, 31, 46, 61), offsets, strict=True):
-        obj.location[axis] = base + offset
-        obj.keyframe_insert(data_path="location", index=axis, frame=frame)
-    obj.location[axis] = base
-    if obj.animation_data is None or obj.animation_data.action is None:
-        return
-    for curve in obj.animation_data.action.fcurves:
-        if curve.data_path != "location":
-            continue
-        for point in curve.keyframe_points:
-            point.interpolation = "BEZIER"
-        if not any(m.type == "CYCLES" for m in curve.modifiers):
-            curve.modifiers.new("CYCLES")
-
-
 def add_card_mesh(
     name: str,
     location: tuple[float, float, float],
@@ -490,9 +458,23 @@ def add_vertical_brush(
     steel: bpy.types.Material,
     sway_phase: int = 0,
 ) -> None:
+    # Off-axis spin pivot: the root sits 0.12 m off the brush's geometric
+    # axis (azimuth staggered per tower via sway_phase), and the core and
+    # card fan are offset back so they start at the authored position. The
+    # single supported ROTATION channel then both spins the fan and
+    # orbits the whole tower - the in/out scrub BeamNG's ambient loader
+    # cannot express with translation channels (which it ignores) or
+    # nested animated empties (which break the Collada export).
+    wobble = 0.12
+    wobble_angle = (sway_phase % 4) * math.tau / 4.0
+    pivot = (
+        location[0] + math.cos(wobble_angle) * wobble,
+        location[1] + math.sin(wobble_angle) * wobble,
+        location[2],
+    )
     root = bpy.data.objects.new(namespaced_object_name(f"{name}_Spinner"), None)
     root.empty_display_type = "CIRCLE"
-    root.location = location
+    root.location = pivot
     bpy.context.scene.collection.objects.link(root)
     core = add_cylinder(f"{name}_Core", location, 0.16, 3.3, steel)
     parent_preserving_world(core, root)
@@ -530,16 +512,8 @@ def add_vertical_brush(
     )
     card_cluster["beamng_card_count"] = len(faces)
     card_cluster.parent = root
-    card_cluster.location = (0.0, 0.0, 0.0)
+    card_cluster.location = (location[0] - pivot[0], location[1] - pivot[1], 0.0)
     animate_spin(root, 2)
-    # Carrier scrub: sweep the whole spinner toward the car and back each
-    # ambient cycle. Purely visual (the bristle cards carry no collision),
-    # phase-staggered per brush so the four towers do not move in lockstep.
-    inward = 0.22 if location[0] < 0 else -0.22
-    sway_cycle = [0.0, inward, 0.0, -inward * 0.35, 0.0]
-    phase = sway_phase % 4
-    looped = sway_cycle[phase:-1] + sway_cycle[: phase + 1]
-    animate_sway(root, 0, looped)
 
 
 def add_horizontal_brush(
@@ -547,9 +521,13 @@ def add_horizontal_brush(
     cards: bpy.types.Material,
     steel: bpy.types.Material,
 ) -> None:
+    # Off-axis pivot 0.05 m below the roller axis: the spin orbit presses
+    # the roller down-and-up subtly each revolution (capped so its crown
+    # only grazes the ceiling light plane at the top of the orbit).
+    pivot = (location[0], location[1], location[2] - 0.05)
     root = bpy.data.objects.new(namespaced_object_name("Brush_Overhead_Spinner"), None)
     root.empty_display_type = "CIRCLE"
-    root.location = location
+    root.location = pivot
     bpy.context.scene.collection.objects.link(root)
     core = add_cylinder(
         "Brush_Overhead_Core",
@@ -596,11 +574,8 @@ def add_horizontal_brush(
     )
     card_cluster["beamng_card_count"] = len(faces)
     card_cluster.parent = root
-    card_cluster.location = (0.0, 0.0, 0.0)
+    card_cluster.location = (0.0, 0.0, location[2] - pivot[2])
     animate_spin(root, 0)
-    # Press-down bob onto the roofline; stays at or below rest height so
-    # the roller never clips the ceiling. Visual only — no collision.
-    animate_sway(root, 2, [0.0, -0.24, -0.08, -0.24, 0.0])
 
 
 def add_pipe_arch(
