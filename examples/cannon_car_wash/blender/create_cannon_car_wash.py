@@ -2272,6 +2272,65 @@ def _selector_structure() -> dict[str, Any]:
                 )
             )
 
+    # v1.20.1: the ramp aprons must exist in the CAGE, not just the scenario
+    # colmesh - a placed selector prop collides through these jbeam triangles,
+    # so the v1.20 visual ramps left a 13 cm invisible cliff at both portals
+    # (player report: "running into it I seem to warp into it slightly" - the
+    # wheel nodes caught the unsupported floor-band edge). Apron stations sit
+    # at -1 and 7 so every triangle still spans exactly two adjacent stations
+    # and the drive-through portals stay open.
+    apron_tracks = ("apron_left", "apron_center", "apron_right")
+    apron_x = (left_wall["max"][0], 0.0, right_wall["min"][0])
+    ramp_length = 1.3
+    apron_specs = (
+        ("f", -1, 0, y_min - ramp_length),
+        ("r", len(stations), len(stations) - 1, y_max + ramp_length),
+    )
+    floor_edge_tracks = ("floor_inner_left", "floor_center", "floor_inner_right")
+    for end_name, apron_station, portal_station, apron_y in apron_specs:
+        for track_index, (track_name, track_x) in enumerate(
+            zip(apron_tracks, apron_x, strict=True)
+        ):
+            identifier = f"{MOD_ID}_apron_{end_name}_t{track_index:02d}"
+            source = Vector((track_x, apron_y, floor["min"][2]))
+            mapped = rotation @ source
+            node_id[(apron_station, track_name)] = identifier
+            nodes.append(
+                {
+                    "id": identifier,
+                    "source_object": VEHICLE_CAGE_NAME,
+                    "source_vertex_index": len(nodes),
+                    "source_world_position": [round(value, 6) for value in source],
+                    "position": [round(value, 6) for value in mapped],
+                    "station": apron_station,
+                    "track": track_name,
+                }
+            )
+        for first_index in range(len(apron_tracks) - 1):
+            add_beam(
+                node_id[(apron_station, apron_tracks[first_index])],
+                node_id[(apron_station, apron_tracks[first_index + 1])],
+            )
+        for apron_track, floor_track in zip(apron_tracks, floor_edge_tracks, strict=True):
+            add_beam(
+                node_id[(apron_station, apron_track)],
+                node_id[(portal_station, floor_track)],
+            )
+        for band_index in range(len(apron_tracks) - 1):
+            first_apron = node_id[(apron_station, apron_tracks[band_index])]
+            second_apron = node_id[(apron_station, apron_tracks[band_index + 1])]
+            first_floor = node_id[(portal_station, floor_edge_tracks[band_index])]
+            second_floor = node_id[(portal_station, floor_edge_tracks[band_index + 1])]
+            add_beam(first_apron, second_floor)
+            add_beam(second_apron, first_floor)
+            surface = f"ramp_apron_{end_name}"
+            triangles.extend(
+                (
+                    {"nodes": [first_apron, second_apron, first_floor], "surface": surface},
+                    {"nodes": [second_apron, second_floor, first_floor], "surface": surface},
+                )
+            )
+
     base_nodes = [
         node_id[(station_index, track_name)]
         for station_index in range(len(stations))

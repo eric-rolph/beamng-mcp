@@ -22,6 +22,78 @@
   ],
   "beams": [
     [
+      "ericrolph_cannon_car_wash_apron_f_t00",
+      "ericrolph_cannon_car_wash_apron_f_t01"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_f_t00",
+      "ericrolph_cannon_car_wash_s00_t01"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_f_t00",
+      "ericrolph_cannon_car_wash_s00_t02"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_f_t01",
+      "ericrolph_cannon_car_wash_apron_f_t02"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_f_t01",
+      "ericrolph_cannon_car_wash_s00_t01"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_f_t01",
+      "ericrolph_cannon_car_wash_s00_t02"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_f_t01",
+      "ericrolph_cannon_car_wash_s00_t03"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_f_t02",
+      "ericrolph_cannon_car_wash_s00_t02"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_f_t02",
+      "ericrolph_cannon_car_wash_s00_t03"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_r_t00",
+      "ericrolph_cannon_car_wash_apron_r_t01"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_r_t00",
+      "ericrolph_cannon_car_wash_s06_t01"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_r_t00",
+      "ericrolph_cannon_car_wash_s06_t02"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_r_t01",
+      "ericrolph_cannon_car_wash_apron_r_t02"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_r_t01",
+      "ericrolph_cannon_car_wash_s06_t01"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_r_t01",
+      "ericrolph_cannon_car_wash_s06_t02"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_r_t01",
+      "ericrolph_cannon_car_wash_s06_t03"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_r_t02",
+      "ericrolph_cannon_car_wash_s06_t02"
+    ],
+    [
+      "ericrolph_cannon_car_wash_apron_r_t02",
+      "ericrolph_cannon_car_wash_s06_t03"
+    ],
+    [
       "ericrolph_cannon_car_wash_ground_back",
       "ericrolph_cannon_car_wash_ground_reference"
     ],
@@ -2711,6 +2783,108 @@
       ],
       "station": 2,
       "track": "ground_back"
+    },
+    {
+      "id": "ericrolph_cannon_car_wash_apron_f_t00",
+      "position": [
+        3.100001,
+        10.3,
+        0.0
+      ],
+      "source_object": "ericrolph_cannon_car_wash_selector_cage",
+      "source_vertex_index": 79,
+      "source_world_position": [
+        -3.1,
+        -10.3,
+        0.0
+      ],
+      "station": -1,
+      "track": "apron_left"
+    },
+    {
+      "id": "ericrolph_cannon_car_wash_apron_f_t01",
+      "position": [
+        1e-06,
+        10.3,
+        0.0
+      ],
+      "source_object": "ericrolph_cannon_car_wash_selector_cage",
+      "source_vertex_index": 80,
+      "source_world_position": [
+        0.0,
+        -10.3,
+        0.0
+      ],
+      "station": -1,
+      "track": "apron_center"
+    },
+    {
+      "id": "ericrolph_cannon_car_wash_apron_f_t02",
+      "position": [
+        -3.099999,
+        10.3,
+        0.0
+      ],
+      "source_object": "ericrolph_cannon_car_wash_selector_cage",
+      "source_vertex_index": 81,
+      "source_world_position": [
+        3.1,
+        -10.3,
+        0.0
+      ],
+      "station": -1,
+      "track": "apron_right"
+    },
+    {
+      "id": "ericrolph_cannon_car_wash_apron_r_t00",
+      "position": [
+        3.099999,
+        -10.3,
+        0.0
+      ],
+      "source_object": "ericrolph_cannon_car_wash_selector_cage",
+      "source_vertex_index": 82,
+      "source_world_position": [
+        -3.1,
+        10.3,
+        0.0
+      ],
+      "station": 7,
+      "track": "apron_left"
+    },
+    {
+      "id": "ericrolph_cannon_car_wash_apron_r_t01",
+      "position": [
+        -1e-06,
+        -10.3,
+        0.0
+      ],
+      "source_object": "ericrolph_cannon_car_wash_selector_cage",
+      "source_vertex_index": 83,
+      "source_world_position": [
+        0.0,
+        10.3,
+        0.0
+      ],
+      "station": 7,
+      "track": "apron_center"
+    },
+    {
+      "id": "ericrolph_cannon_car_wash_apron_r_t02",
+      "position": [
+        -3.100001,
+        -10.3,
+        0.0
+      ],
+      "source_object": "ericrolph_cannon_car_wash_selector_cage",
+      "source_vertex_index": 84,
+      "source_world_position": [
+        3.1,
+        10.3,
+        0.0
+      ],
+      "station": 7,
+      "track": "apron_right"
     }
   ],
   "refnodes": {
@@ -4271,6 +4445,70 @@
         "ericrolph_cannon_car_wash_s06_t08"
       ],
       "surface": "wall_outer_left"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_apron_f_t00",
+        "ericrolph_cannon_car_wash_apron_f_t01",
+        "ericrolph_cannon_car_wash_s00_t01"
+      ],
+      "surface": "ramp_apron_f"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_apron_f_t01",
+        "ericrolph_cannon_car_wash_s00_t02",
+        "ericrolph_cannon_car_wash_s00_t01"
+      ],
+      "surface": "ramp_apron_f"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_apron_f_t01",
+        "ericrolph_cannon_car_wash_apron_f_t02",
+        "ericrolph_cannon_car_wash_s00_t02"
+      ],
+      "surface": "ramp_apron_f"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_apron_f_t02",
+        "ericrolph_cannon_car_wash_s00_t03",
+        "ericrolph_cannon_car_wash_s00_t02"
+      ],
+      "surface": "ramp_apron_f"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_apron_r_t00",
+        "ericrolph_cannon_car_wash_apron_r_t01",
+        "ericrolph_cannon_car_wash_s06_t01"
+      ],
+      "surface": "ramp_apron_r"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_apron_r_t01",
+        "ericrolph_cannon_car_wash_s06_t02",
+        "ericrolph_cannon_car_wash_s06_t01"
+      ],
+      "surface": "ramp_apron_r"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_apron_r_t01",
+        "ericrolph_cannon_car_wash_apron_r_t02",
+        "ericrolph_cannon_car_wash_s06_t02"
+      ],
+      "surface": "ramp_apron_r"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_apron_r_t02",
+        "ericrolph_cannon_car_wash_s06_t03",
+        "ericrolph_cannon_car_wash_s06_t02"
+      ],
+      "surface": "ramp_apron_r"
     }
   ],
   "visual": {
@@ -4349,7 +4587,7 @@
       "ericrolph_cannon_car_wash_selector_wet_concrete"
     ],
     "path": "vehicles/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
-    "sha256": "c79a9d2d78a066dba4894f74b3b181c01ca87ed599ad417f5193bc998307aa1a",
-    "size": 2556159
+    "sha256": "72b426563d11e13e9bc6a66326ba7aa552bc57898ccb9d4cc21483a19dd8350c",
+    "size": 2555603
   }
 }

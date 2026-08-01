@@ -103,7 +103,7 @@ async def _shell_snapshot(runtime: Any, vehicle: Any) -> dict[str, Any]:
         True,
     )
     snapshot = json.loads(payload)
-    assert len(snapshot["nodes"]) == 79
+    assert len(snapshot["nodes"]) == 85
     return snapshot
 
 
@@ -344,16 +344,16 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                 topology["engine_collision_mode_3_count"] = int(
                     engine_collision_modes["collision_mode_3_count"]
                 )
-                assert topology["node_count"] == 79
-                assert topology["fixed_node_count"] == 79
+                assert topology["node_count"] == 85
+                assert topology["fixed_node_count"] == 85
                 assert engine_collision_modes == {
                     "ok": True,
                     "collision_mode_3_count": 8,
                 }
-                assert topology["beam_count"] == 329
-                assert topology["triangle_count"] == 144
+                assert topology["beam_count"] == 347
+                assert topology["triangle_count"] == 152
                 assert topology["flexbody_count"] == 1
-                assert topology["total_mass_kg"] == pytest.approx(15125.0, rel=1e-5)
+                assert topology["total_mass_kg"] == pytest.approx(15875.0, rel=1e-5)
                 assert topology["vehicle_directory"] == f"/vehicles/{MOD_ID}/"
                 initial_shell = await _shell_snapshot(runtime, prop_vehicle)
 
