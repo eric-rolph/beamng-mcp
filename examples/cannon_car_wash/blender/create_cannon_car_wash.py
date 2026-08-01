@@ -1372,8 +1372,9 @@ def build_details() -> None:
                 mitter_uvs.append(((1.0, 1.0), (0.0, 1.0), (0.0, 0.0), (1.0, 0.0)))
             else:
                 mitter_uvs.append(((0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0)))
-    add_card_mesh("MitterCurtain", (0.0, 2.55, 0.0), mitter_vertices, mitter_faces,
-                  brush_cards, mitter_uvs)
+    add_card_mesh(
+        "MitterCurtain", (0.0, 2.55, 0.0), mitter_vertices, mitter_faces, brush_cards, mitter_uvs
+    )
     add_box("MitterBeam", (0.0, 2.65, 4.36), (5.0, 0.16, 0.14), steel, bevel=0.0)
 
     # Equipment mounting: the brushes no longer float. A ceiling gantry
