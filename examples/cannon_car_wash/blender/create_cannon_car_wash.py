@@ -1671,7 +1671,9 @@ def build_details() -> None:
     kiosk_rubber = [
         add_box("PayKiosk_CardReader", (-2.46, -7.19, 1.15), (0.06, 0.14, 0.09), rubber, bevel=0.0),
         add_box("PayKiosk_CoinSlot", (-2.462, -6.85, 1.12), (0.02, 0.05, 0.014), rubber, bevel=0.0),
-        add_box("PayKiosk_ReceiptSlot", (-2.465, -7.0, 0.92), (0.025, 0.20, 0.03), rubber, bevel=0.0),
+        add_box(
+            "PayKiosk_ReceiptSlot", (-2.465, -7.0, 0.92), (0.025, 0.20, 0.03), rubber, bevel=0.0
+        ),
     ]
     for row, button_z in enumerate((1.31, 1.355, 1.40, 1.445)):
         for column, button_y in enumerate((-7.09, -7.0, -6.91)):
