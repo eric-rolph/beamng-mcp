@@ -304,6 +304,7 @@ def test_cannon_car_wash_pass_escape_and_launch(tmp_path: Path) -> None:
         finally:
             shutil.rmtree(staged, ignore_errors=True)
 
+
 def test_cannon_car_wash_rotated_service_and_launch(tmp_path: Path) -> None:
     """v1.19 belt-and-suspenders: the full service-to-cannon chain at a
     35-degree placement. BeamNGTrigger volumes silently drop driven entries
@@ -489,4 +490,3 @@ def test_cannon_car_wash_rotated_service_and_launch(tmp_path: Path) -> None:
                     bng.process.terminate()
         finally:
             shutil.rmtree(staged, ignore_errors=True)
-
