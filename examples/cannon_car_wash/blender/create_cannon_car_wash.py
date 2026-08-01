@@ -45,9 +45,10 @@ def add_ambient_animation_clip(path: Path) -> None:
     if b'<animation_clip id="ambient" name="ambient"' in payload:
         raise RuntimeError("Collada already contains an ambient animation clip")
     animation_ids = re.findall(rb'^    <animation id="([A-Za-z0-9_.-]+)"', payload, re.MULTILINE)
-    if len(animation_ids) != 5 or len(set(animation_ids)) != 5:
+    # Four tower spinners + overhead roller + two tire scrubbers (v1.20).
+    if len(animation_ids) != 7 or len(set(animation_ids)) != 7:
         raise RuntimeError(
-            f"expected exactly five top-level spinner animations, found {len(animation_ids)}"
+            f"expected exactly seven top-level spinner animations, found {len(animation_ids)}"
         )
     newline = b"\r\n" if b"\r\n" in payload else b"\n"
     clip_lines = [
@@ -281,6 +282,7 @@ def add_cylinder(
     *,
     rotation: tuple[float, float, float] = (0.0, 0.0, 0.0),
     vertices: int = 20,
+    bevel: float = 0.025,
 ) -> bpy.types.Object:
     bpy.ops.mesh.primitive_cylinder_add(
         vertices=vertices,
@@ -293,9 +295,81 @@ def add_cylinder(
     obj.name = namespaced_object_name(name)
     obj.data.name = f"{obj.name}_mesh"
     assign_material(obj, value)
-    bevel = obj.modifiers.new("EdgeSoftening", "BEVEL")
-    bevel.width = 0.025
-    bevel.segments = 2
+    if bevel > 0.0:
+        modifier = obj.modifiers.new("EdgeSoftening", "BEVEL")
+        modifier.width = bevel
+        modifier.segments = 2
+    return obj
+
+
+def add_cone(
+    name: str,
+    location: tuple[float, float, float],
+    radius_base: float,
+    radius_tip: float,
+    depth: float,
+    value: bpy.types.Material | None,
+    *,
+    rotation: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    vertices: int = 14,
+) -> bpy.types.Object:
+    """Tapered cylinder (frustum) — the profile of a real spray-nozzle tip."""
+
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=vertices,
+        radius1=radius_base,
+        radius2=radius_tip,
+        depth=depth,
+        location=location,
+        rotation=rotation,
+    )
+    obj = bpy.context.object
+    obj.name = namespaced_object_name(name)
+    obj.data.name = f"{obj.name}_mesh"
+    assign_material(obj, value)
+    return obj
+
+
+def add_ramp_wedge(
+    name: str,
+    sign: float,
+    value: bpy.types.Material | None,
+) -> bpy.types.Object:
+    """Portal apron wedge: slab-top height at the floor edge tapering to grade.
+
+    The structural slab stands 0.132 m proud of the placement datum, which
+    played as a hard curb hit at both portals (player report). A 1.3 m apron
+    keeps the datum and selector cage untouched while cars roll in flush.
+    """
+
+    high_y = 9.0 * sign
+    toe_y = 10.3 * sign
+    top_z = 0.132
+    object_name = namespaced_object_name(name)
+    vertices = [
+        (-3.08, high_y, 0.0),
+        (3.08, high_y, 0.0),
+        (3.08, high_y, top_z),
+        (-3.08, high_y, top_z),
+        (-3.08, toe_y, 0.0),
+        (3.08, toe_y, 0.0),
+    ]
+    faces = [(0, 1, 2, 3), (3, 2, 5, 4), (0, 4, 5, 1), (0, 3, 4), (1, 5, 2)]
+    mesh = bpy.data.meshes.new(f"{object_name}_mesh")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(object_name, mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    bpy.ops.object.select_all(action="DESELECT")
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.normals_make_consistent(inside=False)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    if value is not None:
+        assign_material(obj, value)
+        add_metric_box_uvs(obj, meters_per_tile=(2.0, 2.0))
     return obj
 
 
@@ -399,11 +473,13 @@ def parent_preserving_world(child: bpy.types.Object, parent: bpy.types.Object) -
     child.matrix_world = world
 
 
-def animate_spin(obj: bpy.types.Object, axis: int) -> None:
+def animate_spin(obj: bpy.types.Object, axis: int, direction: float = 1.0) -> None:
+    # direction -1 counter-rotates: real wash brushes spin toward the car on
+    # both sides (mirrored pairs), and the top roller scrubs against travel.
     obj.rotation_mode = "XYZ"
     obj.rotation_euler[axis] = 0.0
     obj.keyframe_insert(data_path="rotation_euler", index=axis, frame=1)
-    obj.rotation_euler[axis] = math.tau
+    obj.rotation_euler[axis] = math.tau * (1.0 if direction >= 0 else -1.0)
     obj.keyframe_insert(data_path="rotation_euler", index=axis, frame=61)
     if obj.animation_data is None or obj.animation_data.action is None:
         return
@@ -457,6 +533,7 @@ def add_vertical_brush(
     cards: bpy.types.Material,
     steel: bpy.types.Material,
     sway_phase: int = 0,
+    spin_direction: float = 1.0,
 ) -> None:
     # Off-axis spin pivot: the root sits 0.12 m off the brush's geometric
     # axis (azimuth staggered per tower via sway_phase), and the core and
@@ -476,32 +553,49 @@ def add_vertical_brush(
     root.empty_display_type = "CIRCLE"
     root.location = pivot
     bpy.context.scene.collection.objects.link(root)
+    # Slight static spin-axis tilt (~3.5 deg, azimuth staggered with the
+    # orbit): the fan sweeps a shallow cone every revolution, reading as the
+    # floppy bristle flutter a rigid rotation cannot fake. Static base
+    # rotations ride in the node transform, so the ambient clip still
+    # carries exactly one animated channel per spinner.
+    tilt = 0.06
+    root.rotation_mode = "XYZ"
+    root.rotation_euler[0] = math.sin(wobble_angle) * tilt
+    root.rotation_euler[1] = math.cos(wobble_angle) * tilt
     core = add_cylinder(f"{name}_Core", location, 0.16, 3.3, steel)
     parent_preserving_world(core, root)
     vertices: list[tuple[float, float, float]] = []
     faces: list[tuple[int, int, int, int]] = []
     face_uvs: list[tuple[tuple[float, float], ...]] = []
-    inner_radius = 0.18
-    outer_radius = 0.92
     half_height = 1.525
-    for index in range(16):
-        angle = index * math.tau / 16.0
-        cosine, sine = math.cos(angle), math.sin(angle)
-        base = len(vertices)
-        vertices.extend(
-            (
-                (cosine * inner_radius, sine * inner_radius, -half_height),
-                (cosine * outer_radius, sine * outer_radius, -half_height),
-                (cosine * outer_radius, sine * outer_radius, half_height),
-                (cosine * inner_radius, sine * inner_radius, half_height),
+
+    def append_ring(count, inner_radius, outer_radius, ring_half, phase, jitter):
+        for index in range(count):
+            angle = index * math.tau / count + phase
+            cosine, sine = math.cos(angle), math.sin(angle)
+            # Deterministic per-card raggedness: radius and edge heights vary
+            # so the silhouette is a worn bristle pack, not a perfect pinwheel.
+            reach = outer_radius + jitter * math.sin(index * 2.7 + phase * 5.0)
+            drop = ring_half - 0.10 * abs(math.sin(index * 1.9 + phase))
+            rise = ring_half - 0.06 * abs(math.sin(index * 3.3 + phase * 2.0))
+            base = len(vertices)
+            vertices.extend(
+                (
+                    (cosine * inner_radius, sine * inner_radius, -ring_half),
+                    (cosine * reach, sine * reach, -drop),
+                    (cosine * reach, sine * reach, rise),
+                    (cosine * inner_radius, sine * inner_radius, ring_half),
+                )
             )
-        )
-        faces.append((base, base + 1, base + 2, base + 3))
-        # Alternate the atlas direction to break up obvious repeated highlights.
-        if index % 2:
-            face_uvs.append(((1.0, 0.0), (0.0, 0.0), (0.0, 1.0), (1.0, 1.0)))
-        else:
-            face_uvs.append(((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)))
+            faces.append((base, base + 1, base + 2, base + 3))
+            if index % 2:
+                face_uvs.append(((1.0, 0.0), (0.0, 0.0), (0.0, 1.0), (1.0, 1.0)))
+            else:
+                face_uvs.append(((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)))
+
+    append_ring(16, 0.18, 0.92, half_height, 0.0, 0.07)
+    # Offset inner ring fills the see-through gap between core and card tips.
+    append_ring(10, 0.17, 0.55, half_height * 0.9, math.tau / 20.0, 0.04)
     card_cluster = add_card_mesh(
         f"{name}_CardFan",
         location,
@@ -513,7 +607,54 @@ def add_vertical_brush(
     card_cluster["beamng_card_count"] = len(faces)
     card_cluster.parent = root
     card_cluster.location = (location[0] - pivot[0], location[1] - pivot[1], 0.0)
-    animate_spin(root, 2)
+    animate_spin(root, 2, spin_direction)
+
+
+def add_wheel_scrubber(
+    name: str,
+    location: tuple[float, float, float],
+    side: float,
+    cards: bpy.types.Material,
+    steel: bpy.types.Material,
+) -> None:
+    """Small tilted tire brush at wheel height — spins like the towers."""
+
+    root = bpy.data.objects.new(namespaced_object_name(f"{name}_Spinner"), None)
+    root.empty_display_type = "CIRCLE"
+    root.location = location
+    root.rotation_mode = "XYZ"
+    # Top leans toward the lane so the bristles meet the tire sidewall.
+    root.rotation_euler[1] = -side * 0.24
+    bpy.context.scene.collection.objects.link(root)
+    core = add_cylinder(f"{name}_Core", location, 0.09, 0.85, steel, vertices=12, bevel=0.0)
+    parent_preserving_world(core, root)
+    vertices: list[tuple[float, float, float]] = []
+    faces: list[tuple[int, int, int, int]] = []
+    face_uvs: list[tuple[tuple[float, float], ...]] = []
+    for index in range(10):
+        angle = index * math.tau / 10.0
+        cosine, sine = math.cos(angle), math.sin(angle)
+        reach = 0.42 + 0.04 * math.sin(index * 2.7)
+        drop = 0.40 - 0.06 * abs(math.sin(index * 1.9))
+        base = len(vertices)
+        vertices.extend(
+            (
+                (cosine * 0.10, sine * 0.10, -0.40),
+                (cosine * reach, sine * reach, -drop),
+                (cosine * reach, sine * reach, 0.36),
+                (cosine * 0.10, sine * 0.10, 0.40),
+            )
+        )
+        faces.append((base, base + 1, base + 2, base + 3))
+        if index % 2:
+            face_uvs.append(((1.0, 0.0), (0.0, 0.0), (0.0, 1.0), (1.0, 1.0)))
+        else:
+            face_uvs.append(((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)))
+    card_cluster = add_card_mesh(f"{name}_CardFan", location, vertices, faces, cards, face_uvs)
+    card_cluster["beamng_card_count"] = len(faces)
+    card_cluster.parent = root
+    card_cluster.location = (0.0, 0.0, 0.0)
+    animate_spin(root, 2, -side)
 
 
 def add_horizontal_brush(
@@ -541,29 +682,35 @@ def add_horizontal_brush(
     vertices: list[tuple[float, float, float]] = []
     faces: list[tuple[int, int, int, int]] = []
     face_uvs: list[tuple[tuple[float, float], ...]] = []
-    inner_radius = 0.17
-    outer_radius = 0.68
     half_length = 2.225
-    for index in range(14):
-        angle = index * math.tau / 14.0
-        cosine, sine = math.cos(angle), math.sin(angle)
-        base = len(vertices)
-        vertices.extend(
-            (
-                (-half_length, cosine * inner_radius, sine * inner_radius),
-                (half_length, cosine * inner_radius, sine * inner_radius),
-                (half_length, cosine * outer_radius, sine * outer_radius),
-                (-half_length, cosine * outer_radius, sine * outer_radius),
+
+    def append_ring(count, inner_radius, outer_radius, ring_half, phase, jitter):
+        for index in range(count):
+            angle = index * math.tau / count + phase
+            cosine, sine = math.cos(angle), math.sin(angle)
+            reach = outer_radius + jitter * math.sin(index * 2.7 + phase * 5.0)
+            left = ring_half - 0.09 * abs(math.sin(index * 1.9 + phase))
+            right = ring_half - 0.09 * abs(math.sin(index * 3.3 + phase * 2.0))
+            base = len(vertices)
+            vertices.extend(
+                (
+                    (-ring_half, cosine * inner_radius, sine * inner_radius),
+                    (ring_half, cosine * inner_radius, sine * inner_radius),
+                    (right, cosine * reach, sine * reach),
+                    (-left, cosine * reach, sine * reach),
+                )
             )
-        )
-        faces.append((base, base + 1, base + 2, base + 3))
-        # Rotate the atlas relative to the side brushes: its alpha-separated
-        # cloth bands become many narrow strips along the shaft, each extending
-        # outward radially, instead of long nested sheets spanning the cylinder.
-        if index % 2:
-            face_uvs.append(((0.0, 1.0), (0.0, 0.0), (1.0, 0.0), (1.0, 1.0)))
-        else:
-            face_uvs.append(((0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0)))
+            faces.append((base, base + 1, base + 2, base + 3))
+            # Rotate the atlas relative to the side brushes: its alpha-separated
+            # cloth bands become many narrow strips along the shaft, each
+            # extending outward radially, instead of long nested sheets.
+            if index % 2:
+                face_uvs.append(((0.0, 1.0), (0.0, 0.0), (1.0, 0.0), (1.0, 1.0)))
+            else:
+                face_uvs.append(((0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0)))
+
+    append_ring(18, 0.17, 0.68, half_length, 0.0, 0.05)
+    append_ring(8, 0.16, 0.42, half_length * 0.94, math.tau / 36.0, 0.03)
     card_cluster = add_card_mesh(
         "Brush_Overhead_CardFan",
         location,
@@ -575,7 +722,8 @@ def add_horizontal_brush(
     card_cluster["beamng_card_count"] = len(faces)
     card_cluster.parent = root
     card_cluster.location = (0.0, 0.0, location[2] - pivot[2])
-    animate_spin(root, 0)
+    # Counter-scrub: the roller's contact crown moves against vehicle travel.
+    animate_spin(root, 0, -1.0)
 
 
 def add_pipe_arch(
@@ -586,18 +734,44 @@ def add_pipe_arch(
 ) -> None:
     for side in (-1.0, 1.0):
         x = side * 2.72
-        add_cylinder(f"{prefix}_Post_{'L' if side < 0 else 'R'}", (x, y, 2.3), 0.075, 4.2, steel)
+        side_name = "L" if side < 0 else "R"
+        add_cylinder(f"{prefix}_Post_{side_name}", (x, y, 2.3), 0.075, 4.2, steel)
         for z in (1.25, 2.1, 3.0):
-            jet = add_cylinder(
-                f"{prefix}_Jet_{'L' if side < 0 else 'R'}_{z}",
-                (x - side * 0.1, y, z),
-                0.055,
-                0.22,
-                nozzle,
+            # Real spray-nozzle profile (player: plain stub cylinders read
+            # "clunky"): supply elbow off the post, a colored nozzle body,
+            # and a tapered tip aimed slightly down into the lane.
+            pitch = math.pi / 2.0 + side * 0.17
+            add_cylinder(
+                f"{prefix}_Elbow_{side_name}_{z}",
+                (x - side * 0.055, y, z),
+                0.032,
+                0.11,
+                steel,
                 rotation=(0.0, math.pi / 2.0, 0.0),
-                vertices=12,
+                vertices=10,
+                bevel=0.0,
+            )
+            jet = add_cylinder(
+                f"{prefix}_Jet_{side_name}_{z}",
+                (x - side * 0.14, y, z - 0.008),
+                0.05,
+                0.11,
+                nozzle,
+                rotation=(0.0, pitch, 0.0),
+                vertices=16,
+                bevel=0.0,
             )
             jet["water_jet"] = True
+            add_cone(
+                f"{prefix}_Tip_{side_name}_{z}",
+                (x - side * 0.225, y, z - 0.022),
+                0.048,
+                0.02,
+                0.09,
+                steel,
+                rotation=(0.0, pitch + (0.0 if side < 0 else math.pi), 0.0),
+                vertices=14,
+            )
     add_cylinder(
         f"{prefix}_Header",
         (0.0, y, 4.36),
@@ -1032,10 +1206,28 @@ def build_shell() -> None:
                 steel,
             )
 
+    # Flush portal aprons: visual concrete wedges plus matching collision
+    # wedges folded into the floor colmesh so the ramp actually carries wheels.
+    add_ramp_wedge("RampApron_Entrance", -1.0, concrete)
+    add_ramp_wedge("RampApron_Exit", 1.0, concrete)
+
     add_box("Colmesh-1", (0.0, 0.0, 0.06), (6.8, 18.0, 0.12), None, bevel=0.0)
     add_box("Colmesh-2", (-3.25, 0.0, 2.35), (0.3, 18.0, 4.6), None, bevel=0.0)
     add_box("Colmesh-3", (3.25, 0.0, 2.35), (0.3, 18.0, 4.6), None, bevel=0.0)
     add_box("Colmesh-4", (0.0, 0.0, 4.78), (6.8, 18.0, 0.36), None, bevel=0.0)
+    collision_wedges = [
+        add_ramp_wedge("ColmeshRamp_Entrance", -1.0, None),
+        add_ramp_wedge("ColmeshRamp_Exit", 1.0, None),
+    ]
+    floor_colmesh = bpy.data.objects["Colmesh-1"]
+    floor_colmesh_data_name = floor_colmesh.data.name
+    bpy.ops.object.select_all(action="DESELECT")
+    for wedge in collision_wedges:
+        wedge.select_set(True)
+    floor_colmesh.select_set(True)
+    bpy.context.view_layer.objects.active = floor_colmesh
+    bpy.ops.object.join()
+    floor_colmesh.data.name = floor_colmesh_data_name
     for name in COLLISION_MESH_NAMES:
         collision = bpy.data.objects[name]
         collision.display_type = "WIRE"
@@ -1095,6 +1287,7 @@ def build_details() -> None:
             brush_cards,
             steel,
             sway_phase=index * 2,
+            spin_direction=1.0,
         )
         add_vertical_brush(
             f"Brush_Right_{index + 1}",
@@ -1102,6 +1295,7 @@ def build_details() -> None:
             brush_cards,
             steel,
             sway_phase=index * 2 + 1,
+            spin_direction=-1.0,
         )
         # Compact motor housings keep the original colour accents without
         # assigning extra materials to the alpha-card bristle cluster.
@@ -1123,6 +1317,199 @@ def build_details() -> None:
 
     add_pipe_arch("PreSoakArch", -5.6, steel, orange)
     add_pipe_arch("RinseArch", 5.65, steel, cyan)
+
+    # --- Interior realism pass (player request 2026-08-01) -----------------
+
+    # Spinning tire scrubbers just inside the entrance, leaning into the
+    # wheel line like real tunnel tire brushes.
+    for side in (-1.0, 1.0):
+        scrub_name = f"WheelScrub_{'L' if side < 0 else 'R'}"
+        add_wheel_scrubber(scrub_name, (side * 2.05, -6.7, 0.55), side, brush_cards, steel)
+        add_box(
+            f"{scrub_name}_Motor",
+            (side * 2.05, -6.7, 1.14),
+            (0.22, 0.22, 0.18),
+            blue_brush,
+            bevel=0.02,
+        )
+
+    # Entrance rubber curtain flaps: the strips every real wash noses through.
+    entry_flaps = [
+        add_box(
+            f"EntryFlap_{index:02d}",
+            (-2.5 + index * 0.5, -8.72, 2.78),
+            (0.46, 0.035, 2.35),
+            rubber,
+            bevel=0.0,
+            rotation=(0.05 if index % 2 else -0.04, 0.0, 0.0),
+        )
+        for index in range(11)
+    ]
+    join_static_meshes("EntryFlaps", entry_flaps)
+
+    # Mitter curtain mid-tunnel: two staggered rows of cloth strips posed
+    # mid-sway (ambient clips cannot oscillate, so the pose carries the
+    # motion read), hung from a visible gantry beam.
+    mitter_vertices: list[tuple[float, float, float]] = []
+    mitter_faces: list[tuple[int, int, int, int]] = []
+    mitter_uvs: list[tuple[tuple[float, float], ...]] = []
+    for row, (row_y, base_lean) in enumerate(((0.0, 0.34), (0.20, 0.16))):
+        for index in range(12):
+            x = -2.31 + index * 0.42
+            lean = base_lean + 0.16 * math.sin(index * 1.7 + row * 2.1)
+            hem = 2.02 + 0.12 * abs(math.sin(index * 2.3 + row))
+            base = len(mitter_vertices)
+            mitter_vertices.extend(
+                (
+                    (x - 0.19, row_y, 4.22),
+                    (x + 0.19, row_y, 4.22),
+                    (x + 0.19, row_y + lean, hem),
+                    (x - 0.19, row_y + lean, hem),
+                )
+            )
+            mitter_faces.append((base, base + 1, base + 2, base + 3))
+            if index % 2:
+                mitter_uvs.append(((1.0, 1.0), (0.0, 1.0), (0.0, 0.0), (1.0, 0.0)))
+            else:
+                mitter_uvs.append(((0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0)))
+    add_card_mesh("MitterCurtain", (0.0, 2.55, 0.0), mitter_vertices, mitter_faces,
+                  brush_cards, mitter_uvs)
+    add_box("MitterBeam", (0.0, 2.65, 4.36), (5.0, 0.16, 0.14), steel, bevel=0.0)
+
+    # Equipment mounting: the brushes no longer float. A ceiling gantry
+    # carries the tower spinners, and columns brace the overhead roller.
+    gantry_parts = [
+        add_box("MitterHanger_L", (-2.2, 2.65, 4.27), (0.12, 0.14, 0.10), steel, bevel=0.0),
+        add_box("MitterHanger_R", (2.2, 2.65, 4.27), (0.12, 0.14, 0.10), steel, bevel=0.0),
+        add_box("OverheadCross", (0.0, 4.15, 4.50), (5.44, 0.14, 0.10), steel, bevel=0.0),
+    ]
+    for side in (-1.0, 1.0):
+        side_name = "L" if side < 0 else "R"
+        gantry_parts.append(
+            add_box(
+                f"BrushGantry_{side_name}",
+                (side * 2.28, -0.9, 4.44),
+                (0.14, 6.2, 0.13),
+                steel,
+                bevel=0.0,
+            )
+        )
+        for y in (-3.0, 1.2):
+            gantry_parts.append(
+                add_box(
+                    f"GantryDrop_{side_name}_{y}",
+                    (side * 2.28, y, 4.10),
+                    (0.09, 0.09, 0.62),
+                    steel,
+                    bevel=0.0,
+                )
+            )
+        gantry_parts.append(
+            add_box(
+                f"OverheadColumn_{side_name}",
+                (side * 2.60, 4.15, 4.02),
+                (0.12, 0.12, 1.00),
+                steel,
+                bevel=0.0,
+            )
+        )
+    join_static_meshes("EquipmentGantry", gantry_parts)
+
+    # Exit dryer battery: blower housings with tapered snouts aimed down
+    # into the lane where the dryer particle effects already blow.
+    add_box("DryerBeam", (0.0, 7.9, 3.85), (5.2, 0.16, 0.16), steel, bevel=0.0)
+    dryer_housings = [
+        add_box(
+            f"DryerHousing_{'L' if side < 0 else 'R'}",
+            (side * 1.1, 7.85, 3.42),
+            (0.85, 0.60, 0.70),
+            deep_blue,
+            bevel=0.03,
+            rotation=(-0.32, 0.0, 0.0),
+        )
+        for side in (-1.0, 1.0)
+    ]
+    join_static_meshes("DryerHousings", dryer_housings)
+    for side in (-1.0, 1.0):
+        add_cone(
+            f"DryerSnout_{'L' if side < 0 else 'R'}",
+            (side * 1.1, 7.45, 2.98),
+            0.24,
+            0.15,
+            0.5,
+            steel,
+            rotation=(2.35, 0.0, 0.0),
+            vertices=14,
+        )
+
+    # Supply plumbing: wall mains feeding each spray arch.
+    for side in (-1.0, 1.0):
+        side_name = "L" if side < 0 else "R"
+        add_cylinder(
+            f"SupplyMain_{side_name}",
+            (side * 2.98, 0.02, 3.62),
+            0.055,
+            13.4,
+            steel,
+            rotation=(math.pi / 2.0, 0.0, 0.0),
+            vertices=10,
+            bevel=0.0,
+        )
+        for index, y in enumerate((-5.6, 5.65), start=1):
+            add_cylinder(
+                f"SupplyDrop_{side_name}_{index}",
+                (side * 2.9, y, 3.0),
+                0.05,
+                1.3,
+                steel,
+                vertices=10,
+                bevel=0.0,
+            )
+
+    # Floor conveyor track between the wheel paths: belt strip, cleats,
+    # and end drums. Visual only - Colmesh-1 stays flat.
+    add_box("ConveyorBelt", (0.0, 0.1, 0.138), (0.55, 16.6, 0.012), rubber, bevel=0.0)
+    conveyor_cleats = [
+        add_box(
+            f"ConveyorCleat_{index:02d}",
+            (0.0, -7.4 + index * 1.5, 0.150),
+            (0.50, 0.06, 0.028),
+            yellow,
+            bevel=0.0,
+        )
+        for index in range(11)
+    ]
+    join_static_meshes("ConveyorCleats", conveyor_cleats)
+    for end_name, y in (("F", -8.55), ("R", 8.55)):
+        add_cylinder(
+            f"ConveyorDrum_{end_name}",
+            (0.0, y, 0.14),
+            0.06,
+            0.5,
+            steel,
+            rotation=(0.0, math.pi / 2.0, 0.0),
+            vertices=10,
+            bevel=0.0,
+        )
+
+    # Stage lighting: glowing wall bars marking each tunnel stage.
+    for side in (-1.0, 1.0):
+        side_name = "L" if side < 0 else "R"
+        for index, y in enumerate((-5.0, -0.9, 5.0), start=1):
+            add_box(
+                f"StageLED_{side_name}_{index}",
+                (side * 3.05, y, 2.55),
+                (0.035, 0.09, 1.50),
+                screen,
+                bevel=0.0,
+            )
+        add_box(
+            f"StageLED_{side_name}_dry",
+            (side * 3.05, 7.2, 2.55),
+            (0.035, 0.09, 1.50),
+            light,
+            bevel=0.0,
+        )
 
     # Wall-hugging electrical details add believable industrial scale while
     # remaining above the brush/vehicle envelope. Eight-sided conduit keeps
@@ -1172,37 +1559,59 @@ def build_details() -> None:
     ]
     join_static_meshes("WheelGuides", wheel_guides)
 
+    # Recessed trench drains v3. The v1.18 "flush" grates were authored
+    # against the placement datum (z 0) and ended up BURIED inside the
+    # 0.12 m slab — invisible in-game (player report x3). This version cuts
+    # real pockets through the slab top and wet finish, then builds the
+    # grate inside the reveal: dark pit floor, bright steel bars 7 mm below
+    # the surface, and a thin surface frame. Reads as a real trench drain
+    # from driver height, with no collision change (Colmesh-1 stays solid).
+    drain_rows = (-6.1, -3.8, -1.5, 0.8, 3.1, 5.4)
+    floor = bpy.data.objects[namespaced_object_name("CarWash_Floor")]
+    finish = bpy.data.objects[namespaced_object_name("WetFloorFinish")]
+    cut_rect_openings(
+        [floor, finish],
+        [((0.0, y, 0.13), (2.4, 0.36, 0.16)) for y in drain_rows],
+    )
+    add_metric_box_uvs(floor, meters_per_tile=(2.0, 2.0))
+    add_metric_box_uvs(finish, meters_per_tile=(2.0, 2.0))
     drain_bases: list[bpy.types.Object] = []
     drain_slots: list[bpy.types.Object] = []
-    # Flush trench grates v2 (player: v1.17's 8 mm version vanished
-    # against the slab). Still wheel-flush, but with contrast: dark pit
-    # plate, steel curb frame, and thicker bright slats at 5 cm.
-    for index, y in enumerate((-6.1, -3.8, -1.5, 0.8, 3.1, 5.4)):
+    for index, y in enumerate(drain_rows):
         drain_bases.append(
             add_box(
                 f"Drain_{index:02d}",
-                (0.0, y, 0.012),
-                (2.5, 0.4, 0.024),
+                (0.0, y, 0.06),
+                (2.38, 0.35, 0.02),
                 rubber,
                 bevel=0.0,
             )
         )
-        for edge in (-1.0, 1.0):
+        for slot in range(-4, 5):
             drain_slots.append(
                 add_box(
-                    f"Drain_{index:02d}_Curb_{'n' if edge > 0 else 's'}",
-                    (0.0, y + edge * 0.21, 0.025),
-                    (2.5, 0.05, 0.05),
+                    f"Drain_{index:02d}_Bar_{slot:+03d}",
+                    (slot * 0.26, y, 0.10),
+                    (0.07, 0.34, 0.05),
                     steel,
                     bevel=0.0,
                 )
             )
-        for slot in range(-4, 4):
+        for edge in (-1.0, 1.0):
             drain_slots.append(
                 add_box(
-                    f"Drain_{index:02d}_Slot_{slot:+03d}",
-                    (slot * 0.26 + 0.13, y, 0.036),
-                    (0.09, 0.3, 0.03),
+                    f"Drain_{index:02d}_Frame_{'n' if edge > 0 else 's'}",
+                    (0.0, y + edge * 0.195, 0.134),
+                    (2.46, 0.03, 0.02),
+                    steel,
+                    bevel=0.0,
+                )
+            )
+            drain_slots.append(
+                add_box(
+                    f"Drain_{index:02d}_Cap_{'e' if edge > 0 else 'w'}",
+                    (edge * 1.245, y, 0.134),
+                    (0.03, 0.42, 0.02),
                     steel,
                     bevel=0.0,
                 )
@@ -1226,43 +1635,83 @@ def build_details() -> None:
     join_static_meshes("ExitHazardYellow", hazard_groups["yellow"])
     join_static_meshes("ExitHazardRubber", hazard_groups["rubber"])
 
-    kiosk_parts = [
-        add_box("PayKiosk_Base", (-2.65, -7.0, 0.09), (0.66, 0.86, 0.18), rubber),
-        add_box("PayKiosk_Body", (-2.65, -7.0, 1.31), (0.55, 0.72, 2.26), orange, bevel=0.025),
-        # Angled face plate sunk into the body's upper front: one visual
-        # mass, no floating head (player report: "weird looking" gap).
+    # Drive-up pay station v3 (player: "could use some realism work"). Real
+    # proportions instead of a 2.6 m monolith: concrete curb island, steel
+    # pedestal, waist-high cabinet, and a driver-tilted head with screen,
+    # rain visor, keypad grid, card reader, coin slot, and speaker — all
+    # facing the LANE (+x) where the driver's window actually is.
+    concrete = material(scenario_material_name("concrete"), (0.18, 0.2, 0.23, 1.0), roughness=0.82)
+    head_tilt = -0.22
+    kiosk_orange = [
+        add_box("PayKiosk_Cabinet", (-2.65, -7.0, 1.19), (0.34, 0.55, 0.85), orange, bevel=0.02),
         add_box(
-            "PayKiosk_Face",
-            (-2.65, -7.31, 1.98),
-            (0.5, 0.1, 0.62),
+            "PayKiosk_Head",
+            (-2.65, -7.0, 1.80),
+            (0.40, 0.50, 0.35),
             orange,
             bevel=0.02,
-            rotation=(-0.3, 0.0, 0.0),
+            rotation=(0.0, head_tilt, 0.0),
         ),
-        add_box("PayKiosk_Keypad", (-2.64, -7.365, 1.06), (0.3, 0.03, 0.2), rubber, bevel=0.006),
         add_box(
-            "PayKiosk_CardSlot", (-2.64, -7.37, 0.78), (0.22, 0.035, 0.05), rubber, bevel=0.004
+            "PayKiosk_Visor",
+            (-2.60, -7.0, 2.02),
+            (0.46, 0.54, 0.04),
+            orange,
+            bevel=0.01,
+            rotation=(0.0, head_tilt, 0.0),
         ),
     ]
-    join_static_meshes("PayKioskOrange", [kiosk_parts[1], kiosk_parts[2]])
-    join_static_meshes("PayKioskTrim", [kiosk_parts[0], kiosk_parts[3], kiosk_parts[4]])
+    join_static_meshes("PayKioskOrange", kiosk_orange)
+    add_box("PayKiosk_Island", (-2.65, -7.0, 0.20), (0.60, 1.05, 0.14), concrete, bevel=0.02)
+    kiosk_trim = [
+        add_box("PayKiosk_Pedestal", (-2.65, -7.0, 0.52), (0.18, 0.26, 0.50), steel, bevel=0.01),
+        add_box("PayKiosk_KeypadPlate", (-2.47, -7.0, 1.38), (0.03, 0.30, 0.20), steel, bevel=0.0),
+    ]
+    join_static_meshes("PayKioskSteel", kiosk_trim)
+    kiosk_rubber = [
+        add_box("PayKiosk_CardReader", (-2.46, -7.19, 1.15), (0.06, 0.14, 0.09), rubber, bevel=0.0),
+        add_box("PayKiosk_CoinSlot", (-2.462, -6.85, 1.12), (0.02, 0.05, 0.014), rubber, bevel=0.0),
+        add_box("PayKiosk_ReceiptSlot", (-2.465, -7.0, 0.92), (0.025, 0.20, 0.03), rubber, bevel=0.0),
+    ]
+    for row, button_z in enumerate((1.31, 1.355, 1.40, 1.445)):
+        for column, button_y in enumerate((-7.09, -7.0, -6.91)):
+            kiosk_rubber.append(
+                add_box(
+                    f"PayKiosk_Key_{row}{column}",
+                    (-2.452, button_y, button_z),
+                    (0.014, 0.055, 0.032),
+                    rubber,
+                    bevel=0.0,
+                )
+            )
+    join_static_meshes("PayKioskRubber", kiosk_rubber)
     add_box(
         "PayKiosk_Screen",
-        (-2.64, -7.405, 2.02),
-        (0.4, 0.022, 0.42),
+        (-2.43, -7.0, 1.82),
+        (0.03, 0.36, 0.22),
         screen,
         bevel=0.006,
-        rotation=(-0.3, 0.0, 0.0),
+        rotation=(0.0, head_tilt, 0.0),
     )
     add_cylinder(
-        "PayKiosk_Button",
-        (-2.64, -7.39, 1.32),
-        0.07,
+        "PayKiosk_Speaker",
+        (-2.46, -6.82, 1.55),
         0.06,
-        cyan,
-        rotation=(math.pi / 2.0, 0.0, 0.0),
-        vertices=10,
+        0.025,
+        steel,
+        rotation=(0.0, math.pi / 2.0, 0.0),
+        vertices=16,
+        bevel=0.0,
     )
+    for post_offset in (-0.42, 0.42):
+        add_cylinder(
+            f"PayKiosk_Guard_{'S' if post_offset < 0 else 'N'}",
+            (-2.60, -7.0 + post_offset, 0.62),
+            0.05,
+            0.75,
+            yellow,
+            vertices=14,
+        )
 
     ceiling_lights = [
         add_box(
@@ -1471,12 +1920,25 @@ def build_details() -> None:
         (-4.95, -10.90),
     )
     for index, (x, y) in enumerate(bollard_positions, start=1):
-        add_cylinder(f"Bollard_{index:02d}", (x, y, 0.50), 0.10, 1.00, orange, vertices=8)
-    for end_name, y in (("Entrance", -9.42), ("Exit", 9.42)):
+        # 18 sides + a hazard band: the 8-sided version read as a faceted
+        # prism at bumper distance (player screenshot).
+        add_cylinder(f"Bollard_{index:02d}", (x, y, 0.50), 0.10, 1.00, orange, vertices=18)
+        add_cylinder(
+            f"BollardBand_{index:02d}",
+            (x, y, 0.80),
+            0.104,
+            0.10,
+            yellow,
+            vertices=18,
+            bevel=0.0,
+        )
+    # Threshold stripes sit at the ramp apron toes now that the portals have
+    # flush entry wedges (previously they floated where the ramps now stand).
+    for end_name, y in (("Entrance", -10.55), ("Exit", 10.55)):
         add_box(
             f"ThresholdStripe_{end_name}",
             (0.0, y, 0.008),
-            (6.16, 0.60, 0.016),
+            (6.16, 0.50, 0.016),
             yellow,
             bevel=0.0,
         )
@@ -1533,7 +1995,7 @@ def build_details() -> None:
         bevel=0.0,
         metric_uv_meters=(1.2, 1.2),
     )
-    add_cylinder("RoofVent", (-1.80, 6.50, 5.41), 0.14, 0.90, steel, vertices=8)
+    add_cylinder("RoofVent", (-1.80, 6.50, 5.41), 0.14, 0.90, steel, vertices=14)
     add_box("RoofDuct", (-0.50, 5.60, 5.11), (0.30, 1.20, 0.30), steel, bevel=0.0)
 
     add_light_anchors()
@@ -2118,8 +2580,10 @@ def finalize() -> None:
             "brush_strategy": {
                 "material": scenario_material_name("brush_cards"),
                 "alpha_mode": "alpha test/clip",
-                "vertical_cards_per_brush": 16,
-                "overhead_cards": 14,
+                "vertical_cards_per_brush": 26,
+                "overhead_cards": 26,
+                "card_layout": "jittered outer ring + offset inner ring",
+                "motion": "off-axis orbit + 3.4 deg axis tilt, mirrored pairs counter-rotate",
                 "sorting_policy": "no alpha blending",
             },
             "tileable_materials": {

@@ -271,8 +271,8 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
         "primitive_group_count": actual_primitive_group_count,
         "material_symbol_count": actual_material_symbol_count,
     }
-    assert actual_triangle_count <= 15_000
-    assert actual_primitive_group_count <= 36
+    assert actual_triangle_count <= 18_000
+    assert actual_primitive_group_count <= 42
     assert actual_material_symbol_count == 18
     dae_text = DAE_PATH.read_text(encoding="utf-8")
     assert "EntranceSign_Text" not in dae_text
@@ -291,6 +291,8 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
         f"{MOD_ID}_Brush_Right_1_Spinner/transform",
         f"{MOD_ID}_Brush_Right_2_Spinner/transform",
         f"{MOD_ID}_Brush_Overhead_Spinner/transform",
+        f"{MOD_ID}_WheelScrub_L_Spinner/transform",
+        f"{MOD_ID}_WheelScrub_R_Spinner/transform",
     }
     ambient = root.find(
         "c:library_animation_clips/c:animation_clip[@name='ambient']",
@@ -307,7 +309,7 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
         instance.attrib["url"].removeprefix("#")
         for instance in ambient.findall("c:instance_animation", COLLADA_NAMESPACE)
     }
-    assert len(animation_ids) == 5
+    assert len(animation_ids) == 7
     assert clip_targets == animation_ids
     cyclic = ambient.find(
         "c:extra/c:technique[@profile='Torque']/c:cyclic",
@@ -335,7 +337,7 @@ def test_cannon_car_wash_phase2_materials_cover_every_collada_slot() -> None:
 def test_selector_runtime_visual_preserves_animations_and_uses_vehicle_materials() -> None:
     root = ET.parse(SELECTOR_RUNTIME_DAE_PATH).getroot()  # noqa: S314 - owned fixture
     channels = root.findall(".//c:library_animations//c:channel", COLLADA_NAMESPACE)
-    assert len(channels) == 5
+    assert len(channels) == 7
     runtime_ambient = root.find(
         "c:library_animation_clips/c:animation_clip[@name='ambient']",
         COLLADA_NAMESPACE,
@@ -619,7 +621,7 @@ def test_cannon_car_wash_repository_metadata_and_icon() -> None:
 
     assert repository_info["internal_name"] == MOD_ID
     assert repository_info["title"] == "Cannon Car Wash"
-    assert repository_info["version"] == "1.19.1"
+    assert repository_info["version"] == "1.20"
     assert repository_info["author"] == "Eric Rolph"
 
     with Image.open(MOD_ICON_PATH) as icon:
