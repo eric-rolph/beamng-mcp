@@ -303,3 +303,190 @@ def test_cannon_car_wash_pass_escape_and_launch(tmp_path: Path) -> None:
                     bng.process.terminate()
         finally:
             shutil.rmtree(staged, ignore_errors=True)
+
+def test_cannon_car_wash_rotated_service_and_launch(tmp_path: Path) -> None:
+    """v1.19 belt-and-suspenders: the full service-to-cannon chain at a
+    35-degree placement. BeamNGTrigger volumes silently drop driven entries
+    at non-cardinal yaws, so this exercises the v1.15 positional zone
+    detection end to end. Frame-independence comes from the runtime's own
+    last_sweep_local report rather than any hand-derived axis math (the
+    hand-derived kind parked three probe cars beside the building)."""
+
+    import math
+
+    home, user, binary = _configured_runtime()
+
+    from beamngpy import BeamNGpy, Scenario, Vehicle
+
+    dist_zip = WASH_ROOT / "dist" / "cannon_car_wash_ericrolph.zip"
+    assert dist_zip.is_file(), "run build_distribution.py first"
+    suffix = uuid.uuid4().hex[:8]
+    staged = user / "mods" / "unpacked" / f"rotated_gate_{suffix}"
+    with zipfile.ZipFile(dist_zip) as archive:
+        archive.extractall(staged)
+
+    yaw = math.radians(35.0)
+    rot = (0.0, 0.0, math.sin(yaw / 2.0), math.cos(yaw / 2.0))
+    bng = BeamNGpy(
+        "127.0.0.1",
+        25265,
+        home=str(home),
+        binary=str(binary),
+        user=str(user.parent),
+        quit_on_close=False,
+        headless=True,
+    )
+
+    def lua(cmd: str):
+        return json.loads(bng.control.queue_lua_command(cmd, response=True))
+
+    def step(seconds: float) -> None:
+        steps = max(1, int(seconds * 60))
+        while steps > 0:
+            chunk = min(steps, 30)
+            bng.control.step(chunk, wait=True)
+            steps -= chunk
+
+    def wash_state() -> dict:
+        return lua(
+            f"local ext = extensions['{EXTENSION_NAME}']; "
+            "local prop = scenetree.findObject('wash_prop'); "
+            "if not ext or not prop then return jsonEncode({registered = false}) end; "
+            "return jsonEncode(ext.getSystemState(prop:getID()))"
+        )
+
+    def subject_local_y() -> float:
+        # Direct trigger-frame projection of THIS subject: last_sweep_local
+        # reports whichever vehicle the sweep touched last (the scenario
+        # anchor masked the car in the first run of this gate).
+        result = lua(
+            "local st = extensions['" + EXTENSION_NAME + "'].getSystemState("
+            "scenetree.findObject('wash_prop'):getID()); "
+            "local trigger = scenetree.findObject(st.wash_trigger.name); "
+            "local subject = scenetree.findObject('rot_subject'); "
+            "if not trigger or not subject then return jsonEncode({y = -99}) end; "
+            "local delta = subject:getPosition() - trigger:getPosition(); "
+            "local column = trigger:getTransform():getColumn(1); "
+            "return jsonEncode({y = delta.x * column.x + delta.y * column.y})"
+        )
+        return result["y"]
+
+    def push_local_forward(speed_mps: float) -> None:
+        # Drive direction is prop-local -Y; convert through the wash trigger
+        # frame measured from the live object (never hand-derived).
+        lua(
+            "local st = extensions['" + EXTENSION_NAME + "'].getSystemState("
+            "scenetree.findObject('wash_prop'):getID()); "
+            "local trigger = scenetree.findObject(st.wash_trigger.name); "
+            "local column = trigger:getTransform():getColumn(1); "
+            "local subject = scenetree.findObject('rot_subject'); "
+            f"subject:applyClusterVelocityScaleAdd(subject:getRefNodeId(), 0, "
+            f"column.x * {speed_mps}, column.y * {speed_mps}, 0); "
+            "return jsonEncode({ok = true})"
+        )
+
+    try:
+        bng.open(launch=True, listen_ip="127.0.0.1")
+        scenario = Scenario("smallgrid", f"rotated_gate_{suffix}", description="rotated gate")
+        anchor = Vehicle("gate_anchor", "pigeon")
+        scenario.add_vehicle(anchor, pos=(-120, -120, 20), rot_quat=(0, 0, 0, 1), cling=False)
+        scenario.make(bng)
+        bng.control.pause()
+        bng.scenario.load(scenario, precompile_shaders=False)
+        bng.scenario.start()
+        bng.settings.set_deterministic(steps_per_second=60, speed_factor=1)
+        bng.control.pause()
+        bng.control.step(3, wait=True)
+
+        wash = Vehicle("wash_prop", MOD_ID)
+        assert bng.vehicles.spawn(wash, (0.0, 0.0, 0.0), rot, False, True)
+        registered = False
+        deadline = time.time() + 90
+        while time.time() < deadline:
+            step(0.5)
+            if wash_state().get("registered"):
+                registered = True
+                break
+        assert registered, {"detail": "rotated wash never registered"}
+
+        # Spawn the subject at the WASH TRIGGER's measured world centre —
+        # NOT the prop origin, which sits ~12 m outside the tunnel (a probe
+        # discovered every earlier attempt had parked the car beside the
+        # building).
+        bay = lua(
+            "local st = extensions['" + EXTENSION_NAME + "'].getSystemState("
+            "scenetree.findObject('wash_prop'):getID()); "
+            "local trigger = scenetree.findObject(st.wash_trigger.name); "
+            "local p = trigger:getPosition(); "
+            "return jsonEncode({x = p.x, y = p.y})"
+        )
+        # Spawn CLEAR of the prop (BeamNG safe-placement silently
+        # relocates a vehicle spawned inside another vehicle's bounds —
+        # probed: every spawn-at-bay attempt landed 12.5 m outside), then
+        # teleport in exactly, matching how players actually arrive.
+        subject = Vehicle("rot_subject", "etk800")
+        assert bng.vehicles.spawn(
+            subject, (bay["x"] + 40.0, bay["y"] + 40.0, 0.3), rot, False, True
+        )
+        step(1.5)
+        lua(
+            "local s = scenetree.findObject('rot_subject'); "
+            f"s:setPositionRotation({bay['x']}, {bay['y']}, 0.35, "
+            f"{rot[0]}, {rot[1]}, {rot[2]}, {rot[3]}); "
+            "return jsonEncode({ok = true})"
+        )
+        lua(
+            "local s = scenetree.findObject('rot_subject'); "
+            "s:queueLuaCommand('input.event(\"parkingbrake\", 0, FILTER_DIRECT)'); "
+            "return jsonEncode({ok = true})"
+        )
+        serviced = False
+        deadline = time.time() + SERVICE_TIMEOUT_SECONDS
+        while time.time() < deadline:
+            step(0.5)
+            snapshot = wash_state()
+            if snapshot.get("wash_active") and snapshot.get("repair_pending_count", 0) == 0:
+                serviced = True
+                break
+        assert serviced, {"detail": "rotated wash never serviced the car", "state": wash_state()}
+
+        # Creep rearward in the PROP frame until the rear launch zone.
+        launched = False
+        peak = [0.0]
+
+        def observe() -> None:
+            speed = lua(
+                "local s = scenetree.findObject('rot_subject'); "
+                "return jsonEncode({speed = s:getVelocity():length()})"
+            )["speed"]
+            peak[0] = max(peak[0], speed)
+
+        deadline = time.time() + SERVICE_TIMEOUT_SECONDS
+        while time.time() < deadline:
+            snapshot = wash_state()
+            if snapshot.get("active_phase") == "countdown":
+                break
+            if subject_local_y() < 2.4:
+                push_local_forward(2.2)
+            step(0.7)
+        deadline = time.time() + 45
+        while time.time() < deadline:
+            step(0.5)
+            observe()
+            if wash_state().get("active_phase") == "launched" or peak[0] >= LAUNCH_MIN_SPEED_MPS:
+                launched = True
+                break
+        assert launched, {
+            "detail": "rotated cannon never fired",
+            "state": wash_state(),
+            "peak_speed": peak[0],
+        }
+    finally:
+        try:
+            if bng.process is not None:
+                bng.close()
+                if bng.process is not None and bng.process.poll() is None:
+                    bng.process.terminate()
+        finally:
+            shutil.rmtree(staged, ignore_errors=True)
+

@@ -1809,6 +1809,14 @@ handleLaunchTrigger = function(state, data)
 end
 
 local function markZoneOccupancy(state, kind, subjectId, entered)
+  -- v1.19.1: never LATCH an enter for a subject the handlers would
+  -- reject. A car freshly SPAWNED inside a zone gets swept on its first
+  -- frame, before the vehicle is fully alive; latching then consumed the
+  -- only enter transition and the service never started (rotated-gate
+  -- discovery 2026-08-01 — driven entries never hit this because the
+  -- vehicle is long-alive when it crosses the boundary). Exits stay
+  -- unconditional so dead vehicles still clear.
+  if entered and not eligibleSubject(subjectId) then return end
   state.positionalOccupancy = state.positionalOccupancy or {wash = {}, launch = {}}
   local zone = state.positionalOccupancy[kind]
   if zone == nil then return end
