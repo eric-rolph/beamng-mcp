@@ -465,8 +465,14 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     # The repair target is the vehicle's exact live pose snapshot: the vehicle
     # is put back precisely where and how it stood, independent of the placed
     # prop's yaw, so the follow camera never jumps.
+    # v1.20: the rotation MUST come from the live node-cloud frame
+    # (quatFromDir over getDirectionVector/Up), never vehicle:getRotation() —
+    # the object transform refreshes only on spawn/teleport/reset, so it goes
+    # stale as soon as the player steers and the restore then snaps the car to
+    # its pre-turn heading on a later service (proven live 2026-08-01).
     assert "vehicle:getPosition()" in target_pose
-    assert "quat(vehicle:getRotation())" in target_pose
+    assert "vehicle:getRotation()" not in target_pose
+    assert "quatFromDir(-direction, vehicleUp)" in target_pose
     assert "targetPosition = vec3(position.x, position.y, position.z)" in target_pose
     assert "targetRotation = quat(rotation.x, rotation.y, rotation.z, rotation.w)" in (target_pose)
     assert "corridor" not in target_pose

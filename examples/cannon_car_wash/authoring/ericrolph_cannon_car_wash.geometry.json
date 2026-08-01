@@ -36,14 +36,14 @@
   },
   "scene_bounds": {
     "min": [
-      -9.437926,
-      -13.510325,
-      -0.2
+      -5.481014,
+      -11.847336,
+      -5.479662
     ],
     "max": [
-      9.734701,
-      11.559362,
-      6.406807
+      3.73,
+      10.800001,
+      11.023128
     ]
   },
   "primary_structures": {
@@ -948,8 +948,10 @@
     "brush_strategy": {
       "material": "ericrolph_cannon_car_wash_brush_cards",
       "alpha_mode": "alpha test/clip",
-      "vertical_cards_per_brush": 16,
-      "overhead_cards": 14,
+      "vertical_cards_per_brush": 26,
+      "overhead_cards": 26,
+      "card_layout": "jittered outer ring + offset inner ring",
+      "motion": "off-axis orbit + 3.4 deg axis tilt, mirrored pairs counter-rotate",
       "sorting_policy": "no alpha blending"
     },
     "tileable_materials": {
@@ -1239,9 +1241,9 @@
     ]
   },
   "mesh_statistics": {
-    "objects": 37,
-    "vertices": 7380,
-    "polygons": 6183
+    "objects": 43,
+    "vertices": 9415,
+    "polygons": 7147
   },
   "collision_meshes": [
     "Colmesh-1",
@@ -1250,9 +1252,9 @@
     "Colmesh-4"
   ],
   "export_statistics": {
-    "triangle_count": 14326,
-    "geometry_count": 34,
-    "primitive_group_count": 34,
+    "triangle_count": 17132,
+    "geometry_count": 40,
+    "primitive_group_count": 40,
     "material_symbol_count": 18
   }
 }

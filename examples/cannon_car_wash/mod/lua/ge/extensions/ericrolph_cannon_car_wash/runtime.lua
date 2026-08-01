@@ -352,11 +352,9 @@ end
 local function repairTargetPose(vehicle)
   if not vehicle then return nil, "repair target vehicle is unavailable" end
   local position = vehicle:getPosition()
-  local rotation = quat(vehicle:getRotation())
   local direction = vec3(vehicle:getDirectionVector())
   local vehicleUp = vec3(vehicle:getDirectionVectorUp())
   if not finiteVector3(position)
-    or not finiteQuaternion(rotation)
     or not finiteVector3(direction)
     or not finiteVector3(vehicleUp)
     or direction:length() < 0.000001
@@ -365,6 +363,20 @@ local function repairTargetPose(vehicle)
   end
   direction:normalize()
   vehicleUp:normalize()
+  -- v1.20: never snapshot the restore rotation from the object-transform
+  -- rotation getter. That transform only refreshes on spawn/teleport/reset,
+  -- so it goes stale the moment the player steers (proven live 2026-08-01:
+  -- after a driven U-turn the object quat still read the spawn heading
+  -- while the car faced 137 deg away, and the second service's "exact
+  -- restore" snapped the car to its pre-turn angle - the reported two-pass
+  -- bug). Derive the rotation from the live node-cloud frame instead.
+  -- quatFromDir differs from the vehicle-object convention by exactly a
+  -- 180 deg spin about up (measured: quat dot 0.0 on a fresh spawn), hence
+  -- the negated direction.
+  local rotation = quatFromDir(-direction, vehicleUp)
+  if not finiteQuaternion(rotation) then
+    return nil, "repair pose snapshot is invalid"
+  end
 
   return {
     positionBefore = vec3(position.x, position.y, position.z),
