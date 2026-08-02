@@ -34,8 +34,8 @@
   },
   "release_artifact": {
     "filename": "cannon_car_wash_ericrolph.zip",
-    "sha256": "533c21705d2fdc08553f3dba9f8fe17035c5326f2b054e66139d66e5aeaeccd4",
-    "size_bytes": 51340804,
+    "sha256": "8a4dd9bc88c410f092710815d00a6412d412ec9029d7e9029130912a97819361",
+    "size_bytes": 51340536,
     "member_count": 62
   },
   "release_validation": {

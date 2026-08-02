@@ -831,7 +831,10 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
             asset_position[axis] + spec["local_position"][axis] for axis in range(3)
         ]
         assert light["position"] == pytest.approx(expected_position)
-        assert light["brightness"] == spec["brightness"]
+        assert light["intensity"] == spec["intensity"]
+        assert light["intensityUnit"] == spec["intensity_unit"]
+        assert "brightness" not in light
+        assert "attenuationRatio" not in light
         assert light["castShadows"] is spec["cast_shadows"]
         assert len(light["rotationMatrix"]) == 9
         if spec["class"] == "PointLight":

@@ -990,8 +990,9 @@
           0.82,
           1.0
         ],
-        "brightness": 3.2,
-        "radius": 5.6,
+        "intensity": 8000.0,
+        "intensity_unit": "lm",
+        "radius": 7.0,
         "cast_shadows": false
       },
       {
@@ -1008,8 +1009,9 @@
           0.82,
           1.0
         ],
-        "brightness": 3.2,
-        "radius": 5.6,
+        "intensity": 8000.0,
+        "intensity_unit": "lm",
+        "radius": 7.0,
         "cast_shadows": false
       },
       {
@@ -1026,8 +1028,9 @@
           0.82,
           1.0
         ],
-        "brightness": 3.2,
-        "radius": 5.6,
+        "intensity": 8000.0,
+        "intensity_unit": "lm",
+        "radius": 7.0,
         "cast_shadows": false
       },
       {
@@ -1044,8 +1047,9 @@
           0.82,
           1.0
         ],
-        "brightness": 3.2,
-        "radius": 5.6,
+        "intensity": 8000.0,
+        "intensity_unit": "lm",
+        "radius": 7.0,
         "cast_shadows": false
       },
       {
@@ -1062,8 +1066,9 @@
           0.82,
           1.0
         ],
-        "brightness": 3.2,
-        "radius": 5.6,
+        "intensity": 8000.0,
+        "intensity_unit": "lm",
+        "radius": 7.0,
         "cast_shadows": false
       },
       {
@@ -1080,8 +1085,9 @@
           0.96,
           1.0
         ],
-        "brightness": 2.4,
-        "radius": 4.4,
+        "intensity": 4000.0,
+        "intensity_unit": "lm",
+        "radius": 5.0,
         "cast_shadows": false
       },
       {
@@ -1098,8 +1104,9 @@
           0.96,
           1.0
         ],
-        "brightness": 2.4,
-        "radius": 4.4,
+        "intensity": 4000.0,
+        "intensity_unit": "lm",
+        "radius": 5.0,
         "cast_shadows": false
       },
       {
@@ -1116,8 +1123,9 @@
           0.96,
           1.0
         ],
-        "brightness": 2.4,
-        "radius": 4.4,
+        "intensity": 4000.0,
+        "intensity_unit": "lm",
+        "radius": 5.0,
         "cast_shadows": false
       },
       {
@@ -1134,8 +1142,9 @@
           0.96,
           1.0
         ],
-        "brightness": 2.4,
-        "radius": 4.4,
+        "intensity": 4000.0,
+        "intensity_unit": "lm",
+        "radius": 5.0,
         "cast_shadows": false
       },
       {
@@ -1157,8 +1166,9 @@
           0.64,
           1.0
         ],
-        "brightness": 3.0,
-        "range": 9.0,
+        "intensity": 2500.0,
+        "intensity_unit": "cd",
+        "range": 10.0,
         "inner_angle_degrees": 28.0,
         "outer_angle_degrees": 48.0,
         "cast_shadows": false
@@ -1182,8 +1192,9 @@
           0.64,
           1.0
         ],
-        "brightness": 3.0,
-        "range": 9.0,
+        "intensity": 2500.0,
+        "intensity_unit": "cd",
+        "range": 10.0,
         "inner_angle_degrees": 28.0,
         "outer_angle_degrees": 48.0,
         "cast_shadows": false
@@ -1207,8 +1218,9 @@
           0.64,
           1.0
         ],
-        "brightness": 3.0,
-        "range": 9.0,
+        "intensity": 2500.0,
+        "intensity_unit": "cd",
+        "range": 10.0,
         "inner_angle_degrees": 28.0,
         "outer_angle_degrees": 48.0,
         "cast_shadows": false
@@ -1232,8 +1244,9 @@
           0.64,
           1.0
         ],
-        "brightness": 3.0,
-        "range": 9.0,
+        "intensity": 2500.0,
+        "intensity_unit": "cd",
+        "range": 10.0,
         "inner_angle_degrees": 28.0,
         "outer_angle_degrees": 48.0,
         "cast_shadows": false

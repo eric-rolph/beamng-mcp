@@ -621,7 +621,10 @@ local function lightSpecs(prefix)
         source.local_position[3]
       ),
       color = source.color,
-      brightness = source.brightness,
+      -- 0.39 calibrated lighting: physical intensity (lm for PointLight,
+      -- cd for SpotLight) replaces the legacy brightness scale.
+      intensity = source.intensity,
+      intensityUnit = source.intensity_unit,
       castShadows = source.cast_shadows,
       radius = source.radius,
       range = source.range,
@@ -653,10 +656,10 @@ local function createLight(spec)
       0,
       string.format("%.6f %.6f %.6f 1", spec.color[1], spec.color[2], spec.color[3])
     )
-    object:setField("brightness", 0, tostring(spec.brightness))
+    object:setField("intensity", 0, tostring(spec.intensity))
+    object:setField("intensityUnit", 0, spec.intensityUnit)
     object:setField("castShadows", 0, spec.castShadows and "1" or "0")
     object:setField("priority", 0, "1")
-    object:setField("attenuationRatio", 0, "0 1 1")
     object:setField("texSize", 0, "256")
     if spec.class == "PointLight" then
       object:setField("radius", 0, tostring(spec.radius))
