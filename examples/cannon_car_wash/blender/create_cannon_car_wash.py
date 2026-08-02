@@ -738,6 +738,15 @@ def add_pipe_arch(
         x = side * 2.72
         side_name = "L" if side < 0 else "R"
         add_cylinder(f"{prefix}_Post_{side_name}", (x, y, 2.3), 0.075, 4.2, steel)
+        add_cylinder(
+            f"{prefix}_PostFlange_{side_name}",
+            (x, y, 0.152),
+            0.14,
+            0.04,
+            steel,
+            vertices=16,
+            bevel=0.0,
+        )
         for z in (1.25, 2.1, 3.0):
             # Real spray-nozzle profile: supply elbow off the post, a colored
             # body, and a tapered tip, ALL collinear along one pitched spray
@@ -1416,6 +1425,16 @@ def build_details() -> None:
     # Only the support beam remains in the static scenery; the TSStatic
     # visual must not carry ghost strips over the physical ones.
     add_box("MitterBeam", (0.0, -4.35, 4.38), (5.0, 0.16, 0.14), steel, bevel=0.0)
+    for rod_x in (-1.8, 1.8):
+        add_cylinder(
+            f"MitterDropRod_{'L' if rod_x < 0 else 'R'}",
+            (rod_x, -4.35, 4.51),
+            0.03,
+            0.18,
+            steel,
+            vertices=10,
+            bevel=0.0,
+        )
 
     # Equipment mounting: the brushes no longer float. A ceiling gantry
     # carries the tower spinners, and columns brace the overhead roller.
@@ -1454,6 +1473,17 @@ def build_details() -> None:
                 bevel=0.0,
             )
         )
+    for side in (-1.0, 1.0):
+        for riser_y in (-3.95, 2.15):
+            gantry_parts.append(
+                add_box(
+                    f"GantryRiser_{'L' if side < 0 else 'R'}_{riser_y}",
+                    (side * 2.28, riser_y, 4.53),
+                    (0.16, 0.16, 0.06),
+                    steel,
+                    bevel=0.0,
+                )
+            )
     join_static_meshes("EquipmentGantry", gantry_parts)
 
     # Exit dryer battery: blower housings with tapered snouts aimed down
@@ -1471,6 +1501,15 @@ def build_details() -> None:
         for side in (-1.0, 1.0)
     ]
     join_static_meshes("DryerHousings", dryer_housings)
+    for side in (-1.0, 1.0):
+        add_box(
+            f"DryerIntake_{'L' if side < 0 else 'R'}",
+            (side * 1.1, 8.12, 3.52),
+            (0.60, 0.04, 0.45),
+            rubber,
+            bevel=0.0,
+            rotation=(-0.32, 0.0, 0.0),
+        )
     for side in (-1.0, 1.0):
         add_cone(
             f"DryerSnout_{'L' if side < 0 else 'R'}",
@@ -1634,6 +1673,18 @@ def build_details() -> None:
         )
         for side in (-1.0, 1.0)
     ]
+    for side in (-1.0, 1.0):
+        for end in (-1.0, 1.0):
+            wheel_guides.append(
+                add_box(
+                    f"WheelGuideTaper_{'L' if side < 0 else 'R'}_{'F' if end < 0 else 'R'}",
+                    (side * 2.60, end * 8.22, 0.24),
+                    (0.13, 0.55, 0.24),
+                    steel,
+                    bevel=0.0,
+                    rotation=(0.0, 0.0, side * end * 0.30),
+                )
+            )
     join_static_meshes("WheelGuides", wheel_guides)
 
     # Recessed trench drains v3. The v1.18 "flush" grates were authored
@@ -1732,19 +1783,69 @@ def build_details() -> None:
             rotation=(0.0, head_tilt, 0.0),
         ),
         add_box(
-            "PayKiosk_Visor",
-            (-2.60, -8.25, 2.02),
-            (0.46, 0.54, 0.04),
+            "PayKiosk_Canopy_A",
+            (-2.72, -8.25, 2.055),
+            (0.20, 0.56, 0.025),
             orange,
             bevel=0.01,
             rotation=(0.0, head_tilt, 0.0),
         ),
+        add_box(
+            "PayKiosk_Canopy_B",
+            (-2.55, -8.25, 2.03),
+            (0.20, 0.56, 0.025),
+            orange,
+            bevel=0.01,
+            rotation=(0.0, head_tilt - 0.28, 0.0),
+        ),
+        add_box(
+            "PayKiosk_Canopy_C",
+            (-2.40, -8.25, 1.965),
+            (0.18, 0.56, 0.025),
+            orange,
+            bevel=0.01,
+            rotation=(0.0, head_tilt - 0.56, 0.0),
+        ),
     ]
+    # Rounded crown over the head cabinet - real pay pylons are not slabs.
+    add_cylinder(
+        "PayKiosk_Crown",
+        (-2.70, -8.25, 1.955),
+        0.19,
+        0.50,
+        orange,
+        rotation=(math.pi / 2.0, head_tilt, 0.0),
+        vertices=20,
+    )
     join_static_meshes("PayKioskOrange", kiosk_orange)
     add_box("PayKiosk_Island", (-2.65, -8.25, 0.20), (0.60, 1.05, 0.14), concrete, bevel=0.02)
     kiosk_trim = [
         add_box("PayKiosk_Pedestal", (-2.65, -8.25, 0.52), (0.18, 0.26, 0.50), steel, bevel=0.01),
         add_box("PayKiosk_KeypadPlate", (-2.47, -8.25, 1.38), (0.03, 0.30, 0.20), steel, bevel=0.0),
+        add_box(
+            "PayKiosk_ScreenBezel",
+            (-2.445, -8.25, 1.82),
+            (0.028, 0.42, 0.28),
+            steel,
+            bevel=0.006,
+            rotation=(0.0, head_tilt, 0.0),
+        ),
+        add_box(
+            "PayKiosk_PinWing_S",
+            (-2.44, -8.42, 1.38),
+            (0.10, 0.015, 0.18),
+            steel,
+            bevel=0.0,
+            rotation=(0.35, 0.0, 0.0),
+        ),
+        add_box(
+            "PayKiosk_PinWing_N",
+            (-2.44, -8.08, 1.38),
+            (0.10, 0.015, 0.18),
+            steel,
+            bevel=0.0,
+            rotation=(-0.35, 0.0, 0.0),
+        ),
     ]
     join_static_meshes("PayKioskSteel", kiosk_trim)
     kiosk_rubber = [
@@ -1754,6 +1855,18 @@ def build_details() -> None:
             "PayKiosk_ReceiptSlot", (-2.465, -8.25, 0.92), (0.025, 0.20, 0.03), rubber, bevel=0.0
         ),
     ]
+    kiosk_rubber.append(
+        add_cylinder(
+            "PayKiosk_CoinReturn",
+            (-2.465, -8.10, 1.02),
+            0.035,
+            0.03,
+            rubber,
+            rotation=(0.0, math.pi / 2.0, 0.0),
+            vertices=14,
+            bevel=0.0,
+        )
+    )
     for row, button_z in enumerate((1.31, 1.355, 1.40, 1.445)):
         for column, button_y in enumerate((-8.34, -8.25, -8.16)):
             kiosk_rubber.append(
@@ -1784,15 +1897,25 @@ def build_details() -> None:
         vertices=16,
         bevel=0.0,
     )
-    for post_offset in (-0.42, 0.42):
-        add_cylinder(
-            f"PayKiosk_Guard_{'S' if post_offset < 0 else 'N'}",
-            (-2.60, -7.0 + post_offset, 0.62),
-            0.05,
-            0.75,
-            yellow,
-            vertices=14,
-        )
+    add_box("PayKiosk_TapPad", (-2.463, -8.44, 1.30), (0.02, 0.12, 0.12), cyan, bevel=0.006)
+    add_box("PayKiosk_Instructions", (-2.487, -8.25, 1.55), (0.012, 0.26, 0.09), cyan, bevel=0.0)
+    add_box(
+        "PayKiosk_IslandStripe",
+        (-2.36, -8.25, 0.278),
+        (0.04, 1.05, 0.018),
+        yellow,
+        bevel=0.0,
+    )
+    add_cylinder(
+        "PayKiosk_SpeakerInner",
+        (-2.452, -8.07, 1.55),
+        0.042,
+        0.028,
+        rubber,
+        rotation=(0.0, math.pi / 2.0, 0.0),
+        vertices=14,
+        bevel=0.0,
+    )
 
     ceiling_lights = [
         add_box(
@@ -1992,25 +2115,34 @@ def build_details() -> None:
     )
     menu_screen["uv0_usage"] = "signage-atlas menu region"
     add_box("MenuTopCap", (-4.30, -11.20, 2.425), (1.50, 0.20, 0.05), steel, bevel=0.0)
+    # The entrance-portal pair moved inside to guard the pay kiosk (third
+    # coordinate = local floor height: slab-top for interior bollards).
     bollard_positions = (
-        (-3.38, -9.80),
-        (3.38, -9.80),
-        (-3.38, 9.80),
-        (3.38, 9.80),
-        (-3.65, -10.90),
-        (-4.95, -10.90),
+        (-2.55, -8.95, 0.132),
+        (-2.55, -7.55, 0.132),
+        (-3.38, 9.80, 0.0),
+        (3.38, 9.80, 0.0),
+        (-3.65, -10.90, 0.0),
+        (-4.95, -10.90, 0.0),
     )
-    for index, (x, y) in enumerate(bollard_positions, start=1):
-        # 18 sides + a hazard band: the 8-sided version read as a faceted
-        # prism at bumper distance (player screenshot).
-        add_cylinder(f"Bollard_{index:02d}", (x, y, 0.50), 0.10, 1.00, orange, vertices=24)
+    for index, (x, y, base_z) in enumerate(bollard_positions, start=1):
+        add_cylinder(f"Bollard_{index:02d}", (x, y, base_z + 0.50), 0.10, 1.00, orange, vertices=24)
         add_cylinder(
             f"BollardBand_{index:02d}",
-            (x, y, 0.80),
+            (x, y, base_z + 0.80),
             0.104,
             0.10,
             yellow,
             vertices=24,
+            bevel=0.0,
+        )
+        add_cylinder(
+            f"BollardBaseRing_{index:02d}",
+            (x, y, base_z + 0.015),
+            0.135,
+            0.03,
+            steel,
+            vertices=20,
             bevel=0.0,
         )
     # Threshold stripes sit at the ramp apron toes now that the portals have
