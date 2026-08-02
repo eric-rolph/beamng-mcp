@@ -628,7 +628,7 @@ def add_wheel_scrubber(
     # Top leans toward the lane so the bristles meet the tire sidewall.
     root.rotation_euler[1] = -side * 0.24
     bpy.context.scene.collection.objects.link(root)
-    core = add_cylinder(f"{name}_Core", location, 0.09, 0.85, steel, vertices=12, bevel=0.0)
+    core = add_cylinder(f"{name}_Core", location, 0.09, 0.85, steel, vertices=16, bevel=0.0)
     parent_preserving_world(core, root)
     vertices: list[tuple[float, float, float]] = []
     faces: list[tuple[int, int, int, int]] = []
@@ -1377,7 +1377,7 @@ def build_details() -> None:
             0.20,
             steel,
             rotation=(0.0, -side * 0.24, 0.0),
-            vertices=10,
+            vertices=16,
             bevel=0.0,
         )
         add_box(
@@ -1406,7 +1406,7 @@ def build_details() -> None:
                 0.075,
                 0.34,
                 steel,
-                vertices=8,
+                vertices=16,
                 bevel=0.0,
             )
 
@@ -2003,14 +2003,14 @@ def build_details() -> None:
     for index, (x, y) in enumerate(bollard_positions, start=1):
         # 18 sides + a hazard band: the 8-sided version read as a faceted
         # prism at bumper distance (player screenshot).
-        add_cylinder(f"Bollard_{index:02d}", (x, y, 0.50), 0.10, 1.00, orange, vertices=18)
+        add_cylinder(f"Bollard_{index:02d}", (x, y, 0.50), 0.10, 1.00, orange, vertices=24)
         add_cylinder(
             f"BollardBand_{index:02d}",
             (x, y, 0.80),
             0.104,
             0.10,
             yellow,
-            vertices=18,
+            vertices=24,
             bevel=0.0,
         )
     # Threshold stripes sit at the ramp apron toes now that the portals have

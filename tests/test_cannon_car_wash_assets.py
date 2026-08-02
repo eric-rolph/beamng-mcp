@@ -271,7 +271,12 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
         "primitive_group_count": actual_primitive_group_count,
         "material_symbol_count": actual_material_symbol_count,
     }
-    assert actual_triangle_count <= 18_000
+    # The triangle budget is a regression TRIPWIRE (it caught the v1.18
+    # bevel explosion and a v1.22.2 overrun), not a performance ceiling -
+    # vanilla vehicles run 100k+. Keep it loose enough that visible
+    # curvature never has to be faceted away; draw calls are governed by
+    # the primitive-group cap below.
+    assert actual_triangle_count <= 40_000
     assert actual_primitive_group_count <= 42
     assert actual_material_symbol_count == 18
     dae_text = DAE_PATH.read_text(encoding="utf-8")
@@ -662,7 +667,7 @@ def test_cannon_car_wash_repository_metadata_and_icon() -> None:
 
     assert repository_info["internal_name"] == MOD_ID
     assert repository_info["title"] == "Cannon Car Wash"
-    assert repository_info["version"] == "1.22.2"
+    assert repository_info["version"] == "1.22.3"
     assert repository_info["author"] == "Eric Rolph"
 
     with Image.open(MOD_ICON_PATH) as icon:
