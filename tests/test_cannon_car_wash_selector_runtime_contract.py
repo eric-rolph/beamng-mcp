@@ -196,9 +196,11 @@ def test_selector_runtime_creates_tracks_and_cleans_authored_scene_lights() -> N
     for field in (
         "isEnabled",
         "color",
-        "brightness",
+        # 0.39 calibrated lighting: physical intensity replaces the legacy
+        # brightness scale, and the old attenuation model is gone.
+        "intensity",
+        "intensityUnit",
         "castShadows",
-        "attenuationRatio",
         "radius",
         "range",
         "innerAngle",

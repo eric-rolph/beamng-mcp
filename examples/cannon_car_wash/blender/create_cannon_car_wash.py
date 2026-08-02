@@ -969,8 +969,11 @@ def lighting_specs() -> list[dict[str, Any]]:
                 "class": "PointLight",
                 "local_position": [0.0, y, 4.34],
                 "color": [0.56, 0.82, 1.0],
-                "brightness": 3.2,
-                "radius": 5.6,
+                # v1.23.1: BeamNG 0.39 calibrated lighting - PointLight
+                # intensity is physical LUMENS (a dual-tube LED batten).
+                "intensity": 8000.0,
+                "intensity_unit": "lm",
+                "radius": 7.0,
                 "cast_shadows": False,
             }
         )
@@ -985,8 +988,9 @@ def lighting_specs() -> list[dict[str, Any]]:
                 "class": "PointLight",
                 "local_position": [x, y, 3.9],
                 "color": [0.92, 0.96, 1.0],
-                "brightness": 2.4,
-                "radius": 4.4,
+                "intensity": 4000.0,
+                "intensity_unit": "lm",
+                "radius": 5.0,
                 "cast_shadows": False,
             }
         )
@@ -999,8 +1003,11 @@ def lighting_specs() -> list[dict[str, Any]]:
                 "local_position": [x, -8.72, 4.08],
                 "local_direction": [0.0, -0.97, -0.24],
                 "color": [0.1, 0.64, 1.0],
-                "brightness": 3.0,
-                "range": 9.0,
+                # SpotLight intensity is CANDELAS: ~4000 lm flood over a
+                # 48-degree cone (solid angle ~2.1 sr).
+                "intensity": 2500.0,
+                "intensity_unit": "cd",
+                "range": 10.0,
                 "inner_angle_degrees": 28.0,
                 "outer_angle_degrees": 48.0,
                 "cast_shadows": False,
@@ -1017,8 +1024,9 @@ def lighting_specs() -> list[dict[str, Any]]:
                 "local_position": [x, 8.72, 4.08],
                 "local_direction": [0.0, 0.97, -0.24],
                 "color": [0.1, 0.64, 1.0],
-                "brightness": 3.0,
-                "range": 9.0,
+                "intensity": 2500.0,
+                "intensity_unit": "cd",
+                "range": 10.0,
                 "inner_angle_degrees": 28.0,
                 "outer_angle_degrees": 48.0,
                 "cast_shadows": False,

@@ -264,10 +264,13 @@ def main() -> None:
             "__parent": GROUP_NAME,
             "isEnabled": True,
             "color": [*color, 1.0],
-            "brightness": float(anchor["brightness"]),
+            # 0.39 calibrated lighting: physical intensity (lm/cd) replaces
+            # the legacy brightness scale; the old attenuationRatio model is
+            # gone (inverse-square only).
+            "intensity": float(anchor["intensity"]),
+            "intensityUnit": str(anchor["intensity_unit"]),
             "castShadows": bool(anchor["cast_shadows"]),
             "priority": 1,
-            "attenuationRatio": [0.0, 1.0, 1.0],
             "texSize": 256,
             "canSave": "1",
             "canSaveDynamicFields": "1",

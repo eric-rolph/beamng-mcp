@@ -4,7 +4,7 @@
   "level": "gridmap_v2",
   "asset": {
     "path": "/art/shapes/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
-    "sha256": "0cc6354d092835b5c9d9000f41a808de67cfaee98a2200b5829541bb1a121811",
+    "sha256": "db42168efdfadb90b2eea3295d999e24fbd2c2f0e6371cf51585e53a81df9afd",
     "position": [
       -122.011475,
       -170.0,
@@ -703,8 +703,9 @@
           0.82,
           1.0
         ],
-        "brightness": 3.2,
-        "radius": 5.6,
+        "intensity": 8000.0,
+        "intensity_unit": "lm",
+        "radius": 7.0,
         "cast_shadows": false,
         "world_position": [
           -122.011475,
@@ -726,8 +727,9 @@
           0.82,
           1.0
         ],
-        "brightness": 3.2,
-        "radius": 5.6,
+        "intensity": 8000.0,
+        "intensity_unit": "lm",
+        "radius": 7.0,
         "cast_shadows": false,
         "world_position": [
           -122.011475,
@@ -749,8 +751,9 @@
           0.82,
           1.0
         ],
-        "brightness": 3.2,
-        "radius": 5.6,
+        "intensity": 8000.0,
+        "intensity_unit": "lm",
+        "radius": 7.0,
         "cast_shadows": false,
         "world_position": [
           -122.011475,
@@ -772,8 +775,9 @@
           0.82,
           1.0
         ],
-        "brightness": 3.2,
-        "radius": 5.6,
+        "intensity": 8000.0,
+        "intensity_unit": "lm",
+        "radius": 7.0,
         "cast_shadows": false,
         "world_position": [
           -122.011475,
@@ -795,8 +799,9 @@
           0.82,
           1.0
         ],
-        "brightness": 3.2,
-        "radius": 5.6,
+        "intensity": 8000.0,
+        "intensity_unit": "lm",
+        "radius": 7.0,
         "cast_shadows": false,
         "world_position": [
           -122.011475,
@@ -818,8 +823,9 @@
           0.96,
           1.0
         ],
-        "brightness": 2.4,
-        "radius": 4.4,
+        "intensity": 4000.0,
+        "intensity_unit": "lm",
+        "radius": 5.0,
         "cast_shadows": false,
         "world_position": [
           -124.711475,
@@ -841,8 +847,9 @@
           0.96,
           1.0
         ],
-        "brightness": 2.4,
-        "radius": 4.4,
+        "intensity": 4000.0,
+        "intensity_unit": "lm",
+        "radius": 5.0,
         "cast_shadows": false,
         "world_position": [
           -119.311475,
@@ -864,8 +871,9 @@
           0.96,
           1.0
         ],
-        "brightness": 2.4,
-        "radius": 4.4,
+        "intensity": 4000.0,
+        "intensity_unit": "lm",
+        "radius": 5.0,
         "cast_shadows": false,
         "world_position": [
           -124.711475,
@@ -887,8 +895,9 @@
           0.96,
           1.0
         ],
-        "brightness": 2.4,
-        "radius": 4.4,
+        "intensity": 4000.0,
+        "intensity_unit": "lm",
+        "radius": 5.0,
         "cast_shadows": false,
         "world_position": [
           -119.311475,
@@ -915,8 +924,9 @@
           0.64,
           1.0
         ],
-        "brightness": 3.0,
-        "range": 9.0,
+        "intensity": 2500.0,
+        "intensity_unit": "cd",
+        "range": 10.0,
         "inner_angle_degrees": 28.0,
         "outer_angle_degrees": 48.0,
         "cast_shadows": false,
@@ -956,8 +966,9 @@
           0.64,
           1.0
         ],
-        "brightness": 3.0,
-        "range": 9.0,
+        "intensity": 2500.0,
+        "intensity_unit": "cd",
+        "range": 10.0,
         "inner_angle_degrees": 28.0,
         "outer_angle_degrees": 48.0,
         "cast_shadows": false,
@@ -997,8 +1008,9 @@
           0.64,
           1.0
         ],
-        "brightness": 3.0,
-        "range": 9.0,
+        "intensity": 2500.0,
+        "intensity_unit": "cd",
+        "range": 10.0,
         "inner_angle_degrees": 28.0,
         "outer_angle_degrees": 48.0,
         "cast_shadows": false,
@@ -1038,8 +1050,9 @@
           0.64,
           1.0
         ],
-        "brightness": 3.0,
-        "range": 9.0,
+        "intensity": 2500.0,
+        "intensity_unit": "cd",
+        "range": 10.0,
         "inner_angle_degrees": 28.0,
         "outer_angle_degrees": 48.0,
         "cast_shadows": false,
