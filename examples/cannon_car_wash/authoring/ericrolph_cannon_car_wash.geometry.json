@@ -1241,9 +1241,9 @@
     ]
   },
   "mesh_statistics": {
-    "objects": 43,
-    "vertices": 9743,
-    "polygons": 7383
+    "objects": 42,
+    "vertices": 9647,
+    "polygons": 7359
   },
   "collision_meshes": [
     "Colmesh-1",
@@ -1252,9 +1252,9 @@
     "Colmesh-4"
   ],
   "export_statistics": {
-    "triangle_count": 17788,
-    "geometry_count": 40,
-    "primitive_group_count": 40,
+    "triangle_count": 17740,
+    "geometry_count": 39,
+    "primitive_group_count": 39,
     "material_symbol_count": 18
   }
 }

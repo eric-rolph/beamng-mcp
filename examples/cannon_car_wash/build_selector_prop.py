@@ -35,6 +35,22 @@ AUTHOR = "Eric Rolph"
 GROUP = f"{MOD_ID}_physics"
 BASE_NODE_MASS_KG = 500.0
 STRUCTURE_NODE_MASS_KG = 125.0
+# v1.22 mitter cloth: light free nodes on soft beams so the strips drape,
+# flap, and get shouldered aside by traffic. Spring/mass sized for solver
+# stability (omega = sqrt(12000/6) ~= 45 rad/s, far under the ~2 kHz step)
+# with near-critical damping so strips flop once and settle instead of
+# oscillating; scaled down from the proven spider-web strand recipe.
+# First live tune caught cars like the spider web (48 kg strips on
+# unbreakable anchored chains slung an etk800 120 m back out the door).
+# Real mitter strips are feather-light, floppy, and slippery: they must
+# LOSE every argument with a bumper.
+CLOTH_NODE_MASS_KG = 1.0
+CLOTH_STRUCTURAL_SPRING = 2500.0
+CLOTH_STRUCTURAL_DAMP = 60.0
+CLOTH_SHEAR_SPRING = 800.0
+CLOTH_SHEAR_DAMP = 25.0
+ANCHOR_SPRING = 15000000.0
+ANCHOR_DAMP = 1500.0
 
 
 def canonical_bytes(value: Any) -> bytes:
@@ -128,8 +144,70 @@ def build_jbeam(handoff: dict[str, Any]) -> tuple[dict[str, Any], float]:
     refnodes = handoff["refnodes"]
     if not set(refnodes.values()) <= node_ids:
         raise ValueError("reference nodes are missing from the cage")
+
+    # v1.22 mitter cloth lattice: anchors pin to world space exactly like the
+    # rest of the (entirely fixed) cage; the free nodes below them are the
+    # only mobile physics in the prop and carry the vehicle-facing collision.
+    cloth = handoff["cloth"]
+    cloth_group = cloth["group"]
+    cloth_node_ids = {node["id"] for node in cloth["nodes"]}
+    if cloth_node_ids & node_ids:
+        raise ValueError("cloth node ids collide with cage node ids")
+    if len(cloth_node_ids) != len(cloth["nodes"]):
+        raise ValueError("cloth handoff contains duplicate node ids")
+    cloth_free_count = 0
+    for node in cloth["nodes"]:
+        fixed = bool(node["fixed"])
+        if not fixed:
+            cloth_free_count += 1
+        node_rows.append(
+            [
+                node["id"],
+                *node["position"],
+                {
+                    "collision": not fixed,
+                    "fixed": fixed,
+                    "frictionCoef": 0.2,
+                    "group": cloth_group,
+                    "nodeMaterial": "|NM_RUBBER",
+                    "nodeWeight": CLOTH_NODE_MASS_KG,
+                    "selfCollision": False,
+                    "staticCollision": False,
+                },
+            ]
+        )
+    cloth_beam_options = {
+        "anchor": (ANCHOR_SPRING, ANCHOR_DAMP),
+        "structural": (CLOTH_STRUCTURAL_SPRING, CLOTH_STRUCTURAL_DAMP),
+        "shear": (CLOTH_SHEAR_SPRING, CLOTH_SHEAR_DAMP),
+    }
+    for beam in cloth["beams"]:
+        first, second = beam["nodes"]
+        if first not in cloth_node_ids or second not in cloth_node_ids:
+            raise ValueError(f"cloth beam references unknown node: {first}, {second}")
+        spring, damp = cloth_beam_options[beam["class"]]
+        beam_rows.append(
+            [
+                first,
+                second,
+                {
+                    "beamDamp": damp,
+                    "beamDeform": "FLT_MAX",
+                    "beamSpring": spring,
+                    "beamStrength": "FLT_MAX",
+                },
+            ]
+        )
+    for triangle in cloth["triangles"]:
+        triangle_nodes = triangle["nodes"]
+        if len(triangle_nodes) != 3 or not set(triangle_nodes) <= cloth_node_ids:
+            raise ValueError(f"cloth triangle references invalid nodes: {triangle_nodes}")
+        triangle_rows.append([*triangle_nodes, {"groundModel": "metal"}])
+
     total_mass = (
-        len(base_ids) * BASE_NODE_MASS_KG + (len(nodes) - len(base_ids)) * STRUCTURE_NODE_MASS_KG
+        len(base_ids) * BASE_NODE_MASS_KG
+        + (len(nodes) - len(base_ids)) * STRUCTURE_NODE_MASS_KG
+        + len(cloth["nodes"]) * CLOTH_NODE_MASS_KG
     )
     part = {
         "information": {"authors": AUTHOR, "name": DISPLAY_NAME},
@@ -147,6 +225,7 @@ def build_jbeam(handoff: dict[str, Any]) -> tuple[dict[str, Any], float]:
         "flexbodies": [
             ["mesh", "[group]:"],
             [handoff["asset"]["visual_mesh"], [GROUP]],
+            [cloth["mesh"], [cloth_group]],
         ],
         "nodes": node_rows,
         "beams": beam_rows,
@@ -258,6 +337,9 @@ def main() -> None:
                 "nodes": len(handoff["nodes"]),
                 "beams": len(handoff["beams"]),
                 "triangles": len(handoff["triangles"]),
+                "cloth_nodes": len(handoff["cloth"]["nodes"]),
+                "cloth_beams": len(handoff["cloth"]["beams"]),
+                "cloth_triangles": len(handoff["cloth"]["triangles"]),
                 "mass_kg": total_mass,
                 "visual_sha256": handoff["visual"]["sha256"],
             },

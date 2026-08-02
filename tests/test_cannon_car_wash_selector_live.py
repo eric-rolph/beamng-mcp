@@ -81,13 +81,21 @@ def _selector_error_lines(log_path: Path) -> list[str]:
     return issues
 
 
+CAGE_NODE_COUNT = 85
+CLOTH_NODE_COUNT = 96
+
+
 async def _shell_snapshot(runtime: Any, vehicle: Any) -> dict[str, Any]:
-    """Read every live shell node so transient flex cannot hide in the ref node."""
+    """Read the rigid shell nodes so transient flex cannot hide in the ref node.
+
+    v1.22: the mitter cloth nodes (cids >= CAGE_NODE_COUNT) are deliberately
+    mobile physics and are excluded from the rigidity sweep.
+    """
 
     payload = await runtime.simulator._call(
         vehicle.queue_lua_command,
         "local nodes = {}; local maxSpeed = 0; "
-        "for nodeId = 0, obj:getNodeCount() - 1 do "
+        f"for nodeId = 0, {CAGE_NODE_COUNT - 1} do "
         "local position = obj:getNodePosition(nodeId); "
         "local velocity = obj:getNodeVelocityVector(nodeId); "
         "local speed = velocity:length(); "
@@ -103,7 +111,7 @@ async def _shell_snapshot(runtime: Any, vehicle: Any) -> dict[str, Any]:
         True,
     )
     snapshot = json.loads(payload)
-    assert len(snapshot["nodes"]) == 85
+    assert len(snapshot["nodes"]) == CAGE_NODE_COUNT
     return snapshot
 
 
@@ -207,7 +215,16 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                 assert list(jbeam) == [MOD_ID]
                 part = jbeam[MOD_ID]
                 assert part["flexbodies"][1] == [SELECTOR_VISUAL_NAME, [PHYSICS_GROUP_NAME]]
-                assert all(row[-1]["group"] == PHYSICS_GROUP_NAME for row in part["nodes"][1:])
+                # v1.22: nodes belong to the rigid cage group or the mitter
+                # cloth group (the curtain's own flexbody lattice).
+                assert part["flexbodies"][2] == [
+                    f"{MOD_ID}_MitterStrips",
+                    [f"{MOD_ID}_mitter"],
+                ]
+                assert all(
+                    row[-1]["group"] in (PHYSICS_GROUP_NAME, f"{MOD_ID}_mitter")
+                    for row in part["nodes"][1:]
+                )
                 installed = _structured(
                     await session.call_tool(
                         "mod_install",
@@ -344,16 +361,16 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                 topology["engine_collision_mode_3_count"] = int(
                     engine_collision_modes["collision_mode_3_count"]
                 )
-                assert topology["node_count"] == 85
-                assert topology["fixed_node_count"] == 85
+                assert topology["node_count"] == CAGE_NODE_COUNT + CLOTH_NODE_COUNT
+                assert topology["fixed_node_count"] == CAGE_NODE_COUNT + 24
                 assert engine_collision_modes == {
                     "ok": True,
                     "collision_mode_3_count": 8,
                 }
-                assert topology["beam_count"] == 347
-                assert topology["triangle_count"] == 152
-                assert topology["flexbody_count"] == 1
-                assert topology["total_mass_kg"] == pytest.approx(15875.0, rel=1e-5)
+                assert topology["beam_count"] == 347 + 192
+                assert topology["triangle_count"] == 152 + 72
+                assert topology["flexbody_count"] == 2
+                assert topology["total_mass_kg"] == pytest.approx(15971.0, rel=1e-5)
                 assert topology["vehicle_directory"] == f"/vehicles/{MOD_ID}/"
                 initial_shell = await _shell_snapshot(runtime, prop_vehicle)
 

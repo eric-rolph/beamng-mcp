@@ -982,7 +982,9 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             launch_transform = _runtime_trigger_transform(bng, "launch_trigger")
             assert launch_transform == {
                 "ok": True,
-                "position": pytest.approx([0.0, 0.0, surface_z + 2.1], abs=0.03),
+                # v1.18 moved the launch zone to the REAR wax/dry section:
+                # local +5.4 maps to world -5.4 through the vehicle-frame flip.
+                "position": pytest.approx([0.0, -5.4, surface_z + 2.1], abs=0.03),
                 "scale": pytest.approx([5.8, 6.7, 4.6], abs=0.001),
                 "forward": pytest.approx([0.0, -1.0, 0.0], abs=0.001),
                 "up": pytest.approx([0.0, 0.0, 1.0], abs=0.001),

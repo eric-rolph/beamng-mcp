@@ -7,19 +7,19 @@
   },
   "collision_contact": {
     "final_truck_position": [
-      -108.73361938144171,
-      -170.26923342426835,
-      100.4080509184123
+      -108.68562028920132,
+      -170.29825134882412,
+      100.41592238723388
     ],
     "final_truck_velocity_mps": [
-      -0.002388773951679468,
-      -0.002081809099763632,
-      -0.0016744467429816723
+      -0.01250497531145811,
+      0.005800577811896801,
+      -0.018449528142809868
     ],
-    "injected_velocity_x_mps": 30.0,
-    "maximum_world_x": -108.08724442124367,
-    "minimum_post_impact_velocity_x_mps": -0.41943395137786865,
-    "peak_positive_velocity_x_mps": 29.55270767211914,
+    "injected_velocity_x_mps": 30,
+    "maximum_world_x": -108.09097295999527,
+    "minimum_post_impact_velocity_x_mps": -0.6411958932876587,
+    "peak_positive_velocity_x_mps": 29.551429748535156,
     "prop_position_after_contact": [
       -110.0,
       -170.0,
@@ -512,7 +512,7 @@
     ],
     "rigidity": {
       "maximum_shell_node_displacement_m": 0.0,
-      "maximum_shell_node_speed_mps": 0.0
+      "maximum_shell_node_speed_mps": 0
     },
     "settled_position": [
       -110.0,
@@ -527,14 +527,14 @@
   },
   "test": "tests/test_cannon_car_wash_selector_live.py",
   "topology": {
-    "beam_count": 347,
+    "beam_count": 539,
     "engine_collision_mode_3_count": 8,
-    "fixed_node_count": 85,
-    "flexbody_count": 1,
-    "node_count": 85,
-    "total_mass_kg": 15875.0,
-    "triangle_count": 152,
+    "fixed_node_count": 109,
+    "flexbody_count": 2,
+    "node_count": 181,
+    "total_mass_kg": 15971.0,
+    "triangle_count": 224,
     "vehicle_directory": "/vehicles/ericrolph_cannon_car_wash/"
   },
-  "verified_on": "2026-07-22T17:45:00-06:00"
+  "verified_on": "2026-08-01T20:52:42-06:00"
 }
