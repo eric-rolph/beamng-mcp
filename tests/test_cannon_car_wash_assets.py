@@ -369,7 +369,7 @@ def test_cannon_car_wash_pbr_authoring_maps_are_power_of_two_seamless_and_typed(
     manifest = json.loads(TEXTURE_MANIFEST_PATH.read_text(encoding="utf-8"))
     assert manifest["texture_root"] == "textures/generated_png"
     assert manifest["normal_convention"] == "OpenGL_Y_positive"
-    assert len(manifest["files"]) == 38
+    assert len(manifest["files"]) == 40
     assert {entry["name"] for entry in manifest["files"]} == {
         path.name for path in GENERATED_TEXTURE_ROOT.glob("*.png")
     }
@@ -394,6 +394,25 @@ def test_cannon_car_wash_pbr_authoring_maps_are_power_of_two_seamless_and_typed(
                 assert list(image.crop((0, 0, image.width, 1)).getdata()) == list(
                     image.crop((0, image.height - 1, image.width, image.height)).getdata()
                 )
+
+
+def test_cannon_car_wash_materials_use_engine_capability_fields() -> None:
+    """v1.25: the calibrated-lighting and detail-mapping fields BeamNG 0.39
+    materials v1.5 support (field names verified against vanilla level
+    content) are wired: micro-detail normals + UV2 grime AO on the
+    architectural set, physical nits on every emissive."""
+    materials = json.loads(MATERIALS_PATH.read_text(encoding="utf-8"))
+    for short in ("concrete", "wet_concrete", "exterior_cmu", "interior_brick"):
+        stage = materials[f"{MOD_ID}_{short}"]["Stages"][0]
+        assert stage["detailNormalMap"].endswith(f"{MOD_ID}_detail.normal.png")
+        assert stage["detailScale"] >= 8.0
+        assert 0.0 < stage["detailNormalMapStrength"] <= 1.0
+        assert stage["ambientOcclusionMap"].endswith(f"{MOD_ID}_grime.data.png")
+        assert stage["ambientOcclusionMapUseUV"] == 1
+    for short, minimum_nits in (("sign_face", 200), ("screen", 200), ("led", 300)):
+        stage = materials[f"{MOD_ID}_{short}"]["Stages"][0]
+        assert stage["emissive"] is True
+        assert stage["emissiveIntensityNits"] >= minimum_nits
 
 
 def test_cannon_car_wash_materials_use_specialized_pbr_channels() -> None:
@@ -667,7 +686,7 @@ def test_cannon_car_wash_repository_metadata_and_icon() -> None:
 
     assert repository_info["internal_name"] == MOD_ID
     assert repository_info["title"] == "Cannon Car Wash"
-    assert repository_info["version"] == "1.24"
+    assert repository_info["version"] == "1.25"
     assert repository_info["author"] == "Eric Rolph"
 
     with Image.open(MOD_ICON_PATH) as icon:

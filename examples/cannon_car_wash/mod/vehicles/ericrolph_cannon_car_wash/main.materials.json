@@ -75,7 +75,8 @@
   "ericrolph_cannon_car_wash_selector_concrete": {
     "Stages": [
       {
-        "ambientOcclusionMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_concrete_ao.data.png",
+        "ambientOcclusionMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_grime.data.png",
+        "ambientOcclusionMapUseUV": 1,
         "baseColorFactor": [
           0.18,
           0.2,
@@ -83,6 +84,9 @@
           1.0
         ],
         "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_concrete.color.png",
+        "detailNormalMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_detail.normal.png",
+        "detailNormalMapStrength": 0.65,
+        "detailScale": 10.0,
         "metallicFactor": 0.0,
         "normalMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_concrete.normal.png",
         "roughnessFactor": 0.82,
@@ -173,10 +177,15 @@
   "ericrolph_cannon_car_wash_selector_exterior_cmu": {
     "Stages": [
       {
-        "ambientOcclusionMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_cmu_ao.data.png",
+        "ambientOcclusionMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_grime.data.png",
+        "ambientOcclusionMapUseUV": 1,
         "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_cmu.color.png",
+        "detailNormalMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_detail.normal.png",
+        "detailNormalMapStrength": 0.6,
+        "detailScale": 8.0,
         "metallicFactor": 0.0,
         "normalMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_cmu.normal.png",
+        "normalMapStrength": 1.15,
         "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_cmu_roughness.data.png"
       },
       {},
@@ -250,10 +259,15 @@
   "ericrolph_cannon_car_wash_selector_interior_brick": {
     "Stages": [
       {
-        "ambientOcclusionMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_interior_brick_ao.data.png",
+        "ambientOcclusionMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_grime.data.png",
+        "ambientOcclusionMapUseUV": 1,
         "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_interior_brick.color.png",
+        "detailNormalMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_detail.normal.png",
+        "detailNormalMapStrength": 0.55,
+        "detailScale": 8.0,
         "metallicFactor": 0.0,
         "normalMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_interior_brick.normal.png",
+        "normalMapStrength": 1.15,
         "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_interior_brick_roughness.data.png"
       },
       {},
@@ -283,6 +297,7 @@
           6.3,
           7.0
         ],
+        "emissiveIntensityNits": 400,
         "metallicFactor": 0.0,
         "roughnessFactor": 0.5
       },
@@ -363,6 +378,7 @@
           2.2,
           4.0
         ],
+        "emissiveIntensityNits": 250,
         "metallicFactor": 0.0,
         "roughnessFactor": 0.5
       },
@@ -388,6 +404,7 @@
           3.2,
           4.0
         ],
+        "emissiveIntensityNits": 300,
         "emissiveMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_sign_emissive.data.png",
         "metallicFactor": 0.0,
         "roughnessFactor": 0.32
@@ -434,8 +451,12 @@
   "ericrolph_cannon_car_wash_selector_wet_concrete": {
     "Stages": [
       {
-        "ambientOcclusionMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_wet_concrete_ao.data.png",
+        "ambientOcclusionMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_grime.data.png",
+        "ambientOcclusionMapUseUV": 1,
         "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_wet_concrete.color.png",
+        "detailNormalMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_detail.normal.png",
+        "detailNormalMapStrength": 0.5,
+        "detailScale": 12.0,
         "metallicFactor": 0.0,
         "normalMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_wet_concrete.normal.png",
         "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_wet_concrete_roughness.data.png"

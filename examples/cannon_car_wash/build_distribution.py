@@ -56,11 +56,9 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards_roughness.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_cmu.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_cmu.normal.dds",
-    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_cmu_ao.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_cmu_roughness.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_concrete.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_concrete.normal.dds",
-    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_concrete_ao.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_concrete_roughness.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_corrugated_blue.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_corrugated_blue.normal.dds",
@@ -69,12 +67,14 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_deep_blue.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_deep_blue.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_deep_blue_roughness.data.dds",
+    # v1.25 engine-capability pass: shared detail micro-normal + UV2 grime AO.
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_detail.normal.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_grime.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_hazard_yellow.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_hazard_yellow.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_hazard_yellow_roughness.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_interior_brick.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_interior_brick.normal.dds",
-    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_interior_brick_ao.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_interior_brick_roughness.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_safety_orange.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_safety_orange.normal.dds",
@@ -86,7 +86,6 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_stainless_roughness.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_wet_concrete.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_wet_concrete.normal.dds",
-    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_wet_concrete_ao.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_wet_concrete_roughness.data.dds",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.jpg",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.json",
@@ -132,8 +131,8 @@ def _validate_member_name(
 
 
 def _validate_allowlist() -> None:
-    if len(EXPECTED_RUNTIME_FILES) != 56:
-        raise DistributionError("the public runtime allowlist must contain exactly 56 files")
+    if len(EXPECTED_RUNTIME_FILES) != 54:
+        raise DistributionError("the public runtime allowlist must contain exactly 54 files")
     if tuple(sorted(EXPECTED_RUNTIME_FILES)) != EXPECTED_RUNTIME_FILES:
         raise DistributionError("the public runtime allowlist must be deterministically sorted")
     for name in EXPECTED_RUNTIME_FILES:

@@ -138,6 +138,20 @@
       "sha256": "045d64ddffe3b6ea5bd204f580de00081b6f97f8b3a9d47ec3fff711c130aca4"
     },
     {
+      "name": "ericrolph_cannon_car_wash_detail.normal.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "sha256": "85ca8c7e0c30f371ca4e50670b1de0ccc35e30668589c58e535f4899ba97559d"
+    },
+    {
+      "name": "ericrolph_cannon_car_wash_grime.data.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "L",
+      "sha256": "88b265221948eb3c75248a4386ec42923cbdbb49d865df743568a087a349bf43"
+    },
+    {
       "name": "ericrolph_cannon_car_wash_hazard_yellow.color.png",
       "width": 1024,
       "height": 1024,
