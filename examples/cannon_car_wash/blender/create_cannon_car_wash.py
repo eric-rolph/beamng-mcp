@@ -1340,32 +1340,75 @@ def build_details() -> None:
     # wheel line like real tunnel tire brushes. v1.21: each unit hangs off a
     # visible pedestal arm from the wall side (player: "make the scrubbers
     # look more realistic" - they previously floated with a loose motor cap).
+    # v1.22.2 coherent drivetrain (player: "disconnected from the structure
+    # mechanically"): base plate -> post -> angled arm reaching the AXLE
+    # HOUSING that sits ON the spin axis just above the fan, with the motor
+    # bolted to the housing. Every piece touches the next; the axle tilt
+    # equals the spinner tilt so the brush visibly hangs from its drive.
     for side in (-1.0, 1.0):
         scrub_name = f"WheelScrub_{'L' if side < 0 else 'R'}"
         add_wheel_scrubber(scrub_name, (side * 2.05, -6.7, 0.55), side, brush_cards, steel)
         add_box(
-            f"{scrub_name}_Pedestal",
-            (side * 2.75, -6.7, 0.45),
-            (0.16, 0.24, 0.62),
+            f"{scrub_name}_Base",
+            (side * 2.75, -6.7, 0.157),
+            (0.30, 0.34, 0.05),
+            steel,
+            bevel=0.0,
+        )
+        add_box(
+            f"{scrub_name}_Post",
+            (side * 2.75, -6.7, 0.72),
+            (0.14, 0.18, 1.10),
             steel,
             bevel=0.0,
         )
         add_box(
             f"{scrub_name}_Arm",
-            (side * 2.42, -6.7, 0.94),
-            (0.55, 0.14, 0.10),
+            (side * 2.34, -6.7, 1.13),
+            (0.88, 0.12, 0.09),
             steel,
             bevel=0.0,
-            rotation=(0.0, -side * 0.22, 0.0),
+            rotation=(0.0, -side * 0.174, 0.0),
+        )
+        add_cylinder(
+            f"{scrub_name}_AxleHousing",
+            (side * 1.926, -6.7, 1.055),
+            0.075,
+            0.20,
+            steel,
+            rotation=(0.0, -side * 0.24, 0.0),
+            vertices=10,
+            bevel=0.0,
         )
         add_box(
             f"{scrub_name}_Motor",
-            (side * 2.10, -6.7, 1.12),
-            (0.24, 0.24, 0.20),
+            (side * 1.883, -6.7, 1.23),
+            (0.20, 0.20, 0.15),
             blue_brush,
             bevel=0.02,
             rotation=(0.0, -side * 0.24, 0.0),
         )
+        add_box(
+            f"{scrub_name}_WallBrace",
+            (side * 2.87, -6.7, 1.00),
+            (0.22, 0.10, 0.08),
+            steel,
+            bevel=0.0,
+        )
+
+    # Tower bearing sleeves: static stubs coupling each spinning core's top
+    # to its gantry motor housing, so the towers read as driven machines.
+    for side in (-1.0, 1.0):
+        for tower_index, tower_y in enumerate((-3.0, 1.2), start=1):
+            add_cylinder(
+                f"TowerBearing_{'L' if side < 0 else 'R'}_{tower_index}",
+                (side * 2.28, tower_y, 3.83),
+                0.075,
+                0.34,
+                steel,
+                vertices=8,
+                bevel=0.0,
+            )
 
     # v1.22: the mitter curtain is now PHYSICS - individual strips built as
     # jbeam cloth lattices on the selector vehicle (see _selector_structure's
@@ -1615,8 +1658,8 @@ def build_details() -> None:
         drain_bases.append(
             add_box(
                 f"Drain_{index:02d}",
-                (0.0, y, 0.06),
-                (2.38, 0.35, 0.02),
+                (0.0, y, 0.089),
+                (2.398, 0.358, 0.078),
                 rubber,
                 bevel=0.0,
             )
@@ -1625,8 +1668,8 @@ def build_details() -> None:
             drain_slots.append(
                 add_box(
                     f"Drain_{index:02d}_Bar_{slot:+03d}",
-                    (slot * 0.26, y, 0.10),
-                    (0.07, 0.34, 0.05),
+                    (slot * 0.26, y, 0.121),
+                    (0.07, 0.34, 0.03),
                     steel,
                     bevel=0.0,
                 )
