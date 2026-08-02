@@ -188,6 +188,13 @@ def test_selector_runtime_creates_tracks_and_cleans_authored_scene_lights() -> N
     assert lighting.count('class = "PointLight"') == 9
     assert lighting.count('class = "SpotLight"') == 4
     assert lighting.count(f'name = "{MOD_ID}_light_anchor_') == 13
+    # Every generated light spec must ship the 0.39 physical intensity the
+    # runtime reads; the legacy brightness scale is banned (v1.23.1 shipped
+    # a generator whose field list silently dropped both, leaving nil
+    # intensity for all thirteen runtime lights).
+    assert lighting.count("intensity = ") == 13
+    assert lighting.count("intensity_unit = ") == 13
+    assert "brightness" not in lighting
     create_light = _function_section(runtime, "createLight")
     synchronize = _function_section(runtime, "synchronizeTransforms")
     cleanup = _function_section(runtime, "cleanupInstallation")

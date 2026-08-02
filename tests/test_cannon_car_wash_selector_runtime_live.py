@@ -78,6 +78,16 @@ SUBJECT_ROTATION = (
 PROP_ROTATED_QUATERNION = (0, 0, math.sqrt(0.5), math.sqrt(0.5))
 PROP_DEFAULT_QUATERNION = (0, 0, 0, 1)
 APPROACH_SPEED_MPS = 2.0
+# The v1.14 runtime services parked traffic only: the repair engages below
+# REPAIR_MAX_ENGAGE_SPEED_MPS (1.8), so the repair band is approached slower
+# than that, while the rear-zone transit runs above HOLD_MAX_ENGAGE_SPEED_MPS
+# (3.0) so the countdown provably cannot arm until the subject parks.
+REPAIR_APPROACH_SPEED_MPS = 1.5
+LAUNCH_TRANSIT_SPEED_MPS = 4.0
+# v1.18 moved the countdown to the REAR wax/dry section: the launch zone is
+# centered at local +5.4, which is world -5.4 at identity yaw through the
+# vehicle-frame flip. The subject parks its reference position at the center.
+LAUNCH_ZONE_CENTER_WORLD_Y = -5.4
 CAPTURE_RESOLUTION = (640, 360)
 EXPECTED_EMITTER_COUNTS = {
     "BNGP_sprinkler": 6,
@@ -186,6 +196,8 @@ def _launch_containment_state(bng: BeamNGpy) -> dict[str, Any]:
         "scenetree.findObject(state.launch_trigger.name) or nil; "
         "if not trigger then return jsonEncode({ok = false}) end; "
         "local center = trigger:getPosition(); local scale = trigger:getScale(); "
+        "local position = subject:getPosition(); "
+        "local velocity = subject:getVelocity(); "
         "local box = subject:getSpawnWorldOOBB(); "
         "local minimum = vec3(math.huge, math.huge, math.huge); "
         "local maximum = vec3(-math.huge, -math.huge, -math.huge); "
@@ -198,6 +210,8 @@ def _launch_containment_state(bng: BeamNGpy) -> dict[str, Any]:
         "maximum.z = math.max(maximum.z, point.z); end; "
         "return jsonEncode({ok = true, center = {center.x, center.y, center.z}, "
         "scale = {scale.x, scale.y, scale.z}, "
+        "subject_position = {position.x, position.y, position.z}, "
+        "subject_speed = velocity:length(), "
         "vehicle_min = {minimum.x, minimum.y, minimum.z}, "
         "vehicle_max = {maximum.x, maximum.y, maximum.z}})",
     )
@@ -392,7 +406,9 @@ def _subject_pose(bng: BeamNGpy) -> dict[str, Any]:
     )
 
 
-def _inject_forward_velocity(bng: BeamNGpy, speed_mps: float) -> list[float]:
+def _inject_forward_velocity(
+    bng: BeamNGpy, speed_mps: float, lateral_speed_mps: float = 0.0
+) -> list[float]:
     result = _lua_json(
         bng,
         f"local vehicle = scenetree.findObject({SUBJECT_NAME!r}); "
@@ -400,8 +416,13 @@ def _inject_forward_velocity(bng: BeamNGpy, speed_mps: float) -> list[float]:
         # Translate along the authored corridor without steering the vehicle.
         # Its deliberately offset 2-degree heading must survive until the repair
         # zone so the alignment policy, rather than the test driver, corrects it.
+        # The optional lateral component is a position-only lane hold: the
+        # surviving yaw makes a free-rolling bus walk sideways (~1.4 m across
+        # the tunnel, measured live), which is a driver concern - the heading
+        # itself is never touched, so the alignment contract stays measured.
         "local direction = vec3(0, -1, 0); "
-        f"local velocity = direction * {speed_mps:.6f}; "
+        f"local velocity = direction * {speed_mps:.6f} "
+        f"+ vec3({lateral_speed_mps:.6f}, 0, 0); "
         "vehicle:applyClusterVelocityScaleAdd(vehicle:getRefNodeId(), 0, "
         "velocity.x, velocity.y, velocity.z); "
         "return jsonEncode({ok = true, direction = {direction.x, direction.y, direction.z}})",
@@ -741,7 +762,9 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                 if process is not None and process.poll() is None:
                     process.terminate()
 
-            timer = threading.Timer(240.0, watchdog)
+            # 300 seconds: the v1.18 rear-zone flow adds a full tunnel transit
+            # (repair spot to the wax/dry bay) on top of the original budget.
+            timer = threading.Timer(300.0, watchdog)
             timer.daemon = True
             timer.start()
             reservation.release()
@@ -1115,6 +1138,10 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             trajectory: list[dict[str, Any]] = []
             active_snapshot: dict[str, Any] | None = None
             for _ in range(300):
+                # No lane hold before the repair: lateral injections torque a
+                # small yaw into the bus (measured ~7 degrees over the two
+                # approach legs live), which would corrupt the heading the
+                # repair pose policy must preserve and re-measure.
                 direction = _inject_forward_velocity(bng, APPROACH_SPEED_MPS)
                 assert direction[0] == pytest.approx(0.0, abs=0.05)
                 assert direction[1] <= -0.98, direction
@@ -1252,7 +1279,6 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             repaired_integrity: dict[str, Any] | None = None
             repaired_pose: dict[str, Any] | None = None
             repair_pose_samples: list[dict[str, Any]] = []
-            countdown_snapshot: dict[str, Any] | None = None
             for _ in range(900):
                 # Once the runtime has acknowledged the repair trigger, stop
                 # applying external cluster velocity until its reset/pose/verify
@@ -1261,15 +1287,16 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                 # alignment policy this gate is intended to measure.
                 repair_is_settling = repair_pending_observed and repair_complete_snapshot is None
                 if not repair_is_settling:
-                    _inject_forward_velocity(bng, APPROACH_SPEED_MPS)
-                # Sample every simulation frame so the two-frame repair settle
-                # window and its acknowledgement boundary cannot be skipped.
-                bng.control.step(1, wait=True)
+                    _inject_forward_velocity(bng, REPAIR_APPROACH_SPEED_MPS)
+                # Sample every simulation frame once the repair engages so the
+                # two-frame settle window and its acknowledgement boundary
+                # cannot be skipped; plain approach travel may cover three.
+                bng.control.step(1 if repair_pending_observed else 3, wait=True)
                 runtime_state = _runtime_state(bng)
                 repair_pending_observed = repair_pending_observed or (
                     int(runtime_state.get("repair_pending_count", 0)) > 0
                 )
-                pose_sample = _trajectory_sample(bng, subject, runtime_state, "launch_approach")
+                pose_sample = _trajectory_sample(bng, subject, runtime_state, "repair_approach")
                 _remember_trajectory(trajectory, pose_sample)
                 if int(runtime_state.get("repair_pending_count", 0)) > 0 or (
                     repair_pending_observed and repair_complete_snapshot is None
@@ -1278,16 +1305,10 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                 if (
                     runtime_state.get("repaired_subject_count") == 1
                     and runtime_state.get("repair_pending_count") == 0
-                    and repair_complete_snapshot is None
                 ):
                     repair_complete_snapshot = runtime_state
                     repaired_integrity = _subject_integrity_state(subject)
                     repaired_pose = _subject_pose(bng)
-                if (
-                    repair_complete_snapshot is not None
-                    and runtime_state.get("active_phase") == "countdown"
-                ):
-                    countdown_snapshot = runtime_state
                     break
 
             assert repair_complete_snapshot is not None, {
@@ -1351,6 +1372,89 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                 for sample in repair_pose_samples
             ), repair_pose_samples
 
+            # v1.18: the countdown arms only in the rear wax/dry zone. Roll
+            # the repaired subject rearward ABOVE the hold engage speed so the
+            # runtime keeps deferring the zone entry (v1.14 lets traffic pass
+            # through unserviced); no run may start while the subject rolls.
+            parked_pose: dict[str, Any] | None = None
+            for _ in range(400):
+                pose = _subject_pose(bng)
+                assert pose["ok"] is True
+                if float(pose["position"][1]) <= LAUNCH_ZONE_CENTER_WORLD_Y:
+                    parked_pose = pose
+                    break
+                # Lane hold (post-repair only): the preserved 2-degree yaw
+                # walks a free-rolling bus sideways at transit speed, so pin
+                # the authored corridor offset or the left flank exits the bay
+                # laterally. Kept gentle - lateral injections also torque a
+                # slight yaw - and even at full correction the zone entry
+                # stays above the 3.0 m/s hold gate. The heading contract is
+                # already re-measured by this point, so the hold cannot
+                # contaminate the repair pose assertions.
+                lateral_error = SUBJECT_APPROACH_LATERAL_OFFSET - float(pose["position"][0])
+                _inject_forward_velocity(
+                    bng,
+                    LAUNCH_TRANSIT_SPEED_MPS,
+                    max(-0.7, min(0.7, 1.0 * lateral_error)),
+                )
+                bng.control.step(3, wait=True)
+                runtime_state = _runtime_state(bng)
+                assert runtime_state.get("active_phase") is None, {
+                    "detail": "a run started while the subject was still rolling through",
+                    "runtime_state": runtime_state,
+                }
+                _remember_trajectory(
+                    trajectory,
+                    _trajectory_sample(bng, subject, runtime_state, "launch_transit"),
+                )
+            assert parked_pose is not None, {
+                "runtime_state": runtime_state,
+                "trajectory": trajectory,
+                "events": _runtime_log_events(log_path, log_start)[0],
+            }
+
+            # Park the subject's reference position at the zone center. The
+            # per-frame bay check then re-fires the deferred entry the moment
+            # the subject reaches parking speed, arming the countdown while
+            # provably stationary in the rear zone.
+            subject.control(
+                throttle=0.0,
+                brake=1.0,
+                parkingbrake=1.0,
+                steering=0.0,
+                is_adas=True,
+            )
+            _inject_forward_velocity(bng, 0.0)
+            # Suspension and tire wind-up from the transit releases as a brief
+            # wobble once the cluster velocity is zeroed: settle on physics
+            # alone (no further injections that could fight the launch).
+            parked_state = _subject_state(subject)
+            parked_speed = math.inf
+            for _ in range(30):
+                bng.control.step(6, wait=True)
+                parked_state = _subject_state(subject)
+                parked_speed = math.sqrt(sum(value * value for value in parked_state["velocity"]))
+                if parked_speed <= 0.15:
+                    break
+            assert parked_speed <= 0.15, parked_state
+            parked_pose = _subject_pose(bng)
+            assert parked_pose["ok"] is True
+            assert parked_pose["position"][1] == pytest.approx(
+                LAUNCH_ZONE_CENTER_WORLD_Y, abs=0.8
+            ), parked_pose
+
+            countdown_snapshot: dict[str, Any] | None = None
+            for _ in range(240):
+                bng.control.step(1, wait=True)
+                runtime_state = _runtime_state(bng)
+                _remember_trajectory(
+                    trajectory,
+                    _trajectory_sample(bng, subject, runtime_state, "countdown_arm"),
+                )
+                if runtime_state.get("active_phase") == "countdown":
+                    countdown_snapshot = runtime_state
+                    break
+
             assert countdown_snapshot is not None, {
                 "runtime_state": runtime_state,
                 "trajectory": trajectory,
@@ -1362,46 +1466,84 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             launch_containment = _launch_containment_state(bng)
             assert launch_containment["ok"] is True, launch_containment
             containment_tolerance = 0.06
-            for axis in range(3):
-                trigger_minimum = (
-                    float(launch_containment["center"][axis])
-                    - float(launch_containment["scale"][axis]) / 2.0
-                )
-                trigger_maximum = (
-                    float(launch_containment["center"][axis])
-                    + float(launch_containment["scale"][axis]) / 2.0
-                )
+            zone_minimum = [
+                float(launch_containment["center"][axis])
+                - float(launch_containment["scale"][axis]) / 2.0
+                for axis in range(3)
+            ]
+            zone_maximum = [
+                float(launch_containment["center"][axis])
+                + float(launch_containment["scale"][axis]) / 2.0
+                for axis in range(3)
+            ]
+            # v1.18 rear-zone containment contract: arming is positional
+            # centre-in-zone (the runtime projects the subject's reference
+            # position into the prop frame), and the 6.7 m wax/dry zone
+            # deliberately covers only about half the bus, so end-to-end OOBB
+            # containment binds the lateral and vertical axes only.
+            for axis in (0, 2):
                 assert float(launch_containment["vehicle_min"][axis]) >= (
-                    trigger_minimum - containment_tolerance
+                    zone_minimum[axis] - containment_tolerance
                 ), launch_containment
                 assert float(launch_containment["vehicle_max"][axis]) <= (
-                    trigger_maximum + containment_tolerance
+                    zone_maximum[axis] + containment_tolerance
                 ), launch_containment
+            subject_reference = [float(value) for value in launch_containment["subject_position"]]
+            for axis in range(3):
+                assert subject_reference[axis] >= (zone_minimum[axis] - containment_tolerance), (
+                    launch_containment
+                )
+                assert subject_reference[axis] <= (zone_maximum[axis] + containment_tolerance), (
+                    launch_containment
+                )
+            # Parked at the zone centre with margin toward both zone ends, so
+            # the stationary countdown cannot flap the Contains occupancy.
+            assert subject_reference[1] == pytest.approx(
+                float(launch_containment["center"][1]), abs=1.0
+            ), launch_containment
+            # Half-length coverage: the subject footprint overlaps about half
+            # of the zone depth even though the bus overhangs it. The 0.5 m
+            # slack absorbs the parking overshoot and the model's reference
+            # node placement along the body.
+            coverage_overlap = min(
+                float(launch_containment["vehicle_max"][1]), zone_maximum[1]
+            ) - max(float(launch_containment["vehicle_min"][1]), zone_minimum[1])
+            assert coverage_overlap >= (float(launch_containment["scale"][1]) / 2.0 - 0.5), (
+                launch_containment
+            )
+            assert float(launch_containment["subject_speed"]) <= 0.15, launch_containment
 
             pre_go_integrity_baseline = _subject_integrity_state(subject)
-            assert pre_go_integrity_baseline["controller_frozen"] is True
+            # v1.14 removed the countdown hold: the parked subject stays a
+            # free car for the whole countdown (driving out is the escape
+            # hatch), so the runtime must never freeze its controller.
+            assert pre_go_integrity_baseline["controller_frozen"] is False
             pre_go_integrity_samples: list[dict[str, Any]] = [
                 {
                     "phase": str(countdown_snapshot["active_phase"]),
                     **pre_go_integrity_baseline,
                 }
             ]
+            observed_run_phases: set[str] = {str(countdown_snapshot["active_phase"])}
             peak_speed = 0.0
             peak_velocity = [0.0, 0.0, 0.0]
-            for _ in range(900):
-                # A one-frame cadence is deliberate: release_grace is only two
-                # simulation frames and is the critical boundary where the
-                # controller must already be unfrozen but launch is not applied.
+            # Wall-clock bound, not an iteration bound: the countdown job runs
+            # on real time while one-frame sampling iterations complete in a
+            # few milliseconds each on a warm sentinel, so a fixed iteration
+            # budget can expire before the three-second countdown reaches GO.
+            pre_go_deadline = monotonic() + 30.0
+            while monotonic() < pre_go_deadline:
+                # A one-frame cadence is deliberate: the free countdown ends in
+                # a synchronous release_grace-to-launch transition, so the only
+                # observable pre-go phase is "countdown" and every observable
+                # countdown frame must uphold the zero-damage service contract.
                 bng.control.step(1, wait=True)
                 runtime_state = _runtime_state(bng)
                 active_phase = runtime_state.get("active_phase")
-                integrity_state = _subject_integrity_state(subject)
-                if active_phase in {
-                    "hold_pending",
-                    "countdown",
-                    "release_pending",
-                    "release_grace",
-                }:
+                if active_phase is not None:
+                    observed_run_phases.add(str(active_phase))
+                if active_phase == "countdown":
+                    integrity_state = _subject_integrity_state(subject)
                     pre_go_integrity_samples.append({"phase": str(active_phase), **integrity_state})
                 subject_state = _subject_state(subject)
                 speed = math.sqrt(sum(value * value for value in subject_state["velocity"]))
@@ -1414,23 +1556,27 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                 )
                 if peak_speed >= 83.33:
                     break
+                if (
+                    active_phase is None
+                    and "launched" not in observed_run_phases
+                    and peak_speed < 1.0
+                ):
+                    # The run ended with the subject still parked (abort or
+                    # escape): fail fast with the runtime's own event trail
+                    # instead of waiting out the deadline.
+                    break
 
-            assert any(sample["phase"] == "release_grace" for sample in pre_go_integrity_samples), (
-                pre_go_integrity_samples
-            )
+            # The "launched" phase is transient - GO to zone exit spans about
+            # two physics frames at 100 m/s - so sampling it is a race. The
+            # launch is proven by the measured peak speed here plus the
+            # go/launch/launch_complete records in the post-run event log.
             countdown_integrity_samples = [
                 sample for sample in pre_go_integrity_samples if sample["phase"] == "countdown"
             ]
-            release_grace_integrity_samples = [
-                sample for sample in pre_go_integrity_samples if sample["phase"] == "release_grace"
-            ]
-            assert countdown_integrity_samples
+            assert len(countdown_integrity_samples) >= 2, pre_go_integrity_samples
             assert all(
-                sample["controller_frozen"] is True for sample in countdown_integrity_samples
+                sample["controller_frozen"] is False for sample in countdown_integrity_samples
             ), countdown_integrity_samples
-            assert all(
-                sample["controller_frozen"] is False for sample in release_grace_integrity_samples
-            ), release_grace_integrity_samples
 
             pre_go_damage_delta = max(
                 abs(float(sample["damage"]) - pre_go_integrity_baseline["damage"])
@@ -1452,7 +1598,12 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                 "events": _runtime_log_events(log_path, log_start)[0],
             }
             assert peak_velocity[1] <= -83.0
-            assert abs(peak_velocity[0]) <= 5.0
+            # The v1.14 cannon fires along the vehicle's CURRENT forward axis
+            # by design: the parked bus may carry a few degrees of transit yaw,
+            # so only bound the lateral component loosely here - exact axis
+            # alignment is asserted against the runtime's own launch vector
+            # once the post-run log is parsed.
+            assert abs(peak_velocity[0]) <= 25.0
 
             bng.control.step(120, wait=True)
             bng.vehicles.despawn(prop)
@@ -1493,6 +1644,9 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
     # be flushed to disk.
     records, issues = _runtime_log_records(log_path, log_start)
     events = [str(record["event"]) for record in records]
+    # v1.14 dropped the countdown hold (no hold_requested/hold_ack/release
+    # events on a free car) and v1.18 added the rolling-through deferral that
+    # precedes every parked arming, so the lifecycle contract is:
     for required in (
         "prop_registered",
         "wash_trigger_enter",
@@ -1502,29 +1656,37 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
         "repair_requested",
         "repair_reset_ack",
         "repair_complete",
+        "launch_deferred",
         "containment_verified",
-        "containment_exit_suppressed",
-        "hold_requested",
-        "hold_ack",
+        "countdown_timer_start",
         "countdown_3",
         "countdown_2",
         "countdown_1",
         "release_requested",
-        "release_ack",
         "go",
         "launch",
         "launch_complete",
-        "release",
         "prop_reset",
         "prop_unregistered",
     ):
         assert required in events, {"missing": required, "events": events}
 
     subject_reset_records = [record for record in records if record["event"] == "subject_reset"]
+    # BeamNG 0.39 delivers a teleport's trigger events before its vehicle
+    # reset, so the occupants' ARRIVAL teleports produce the subject_reset
+    # records (enter, reset-removal, immediate positional re-enter) while
+    # their exit teleports leave through plain trigger exits. The graceful
+    # handling contract: one record per occupant arrival, the expected
+    # remaining counts across both, and no aborts - the live occupancy waits
+    # above already pin the 2 -> 1 -> 0 service sequence independently.
     assert len(subject_reset_records) == 2, subject_reset_records
-    assert [int(record["remaining_subject_count"]) for record in subject_reset_records] == [1, 0]
-    assert subject_reset_records[0]["wash_systems_active"] is True
-    assert subject_reset_records[1]["wash_systems_active"] is False
+    assert len({record["subject_id"] for record in subject_reset_records}) == 2, (
+        subject_reset_records
+    )
+    assert sorted(int(record["remaining_subject_count"]) for record in subject_reset_records) == [
+        0,
+        1,
+    ], subject_reset_records
     vehicle_reset_aborts = [
         record
         for record in records
@@ -1578,6 +1740,28 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
     ]
     assert len(containment_indices) == 1, records
     assert repair_indices[-1] < containment_indices[0]
+
+    # The rear-zone entry at transit speed must have been deferred exactly
+    # once as rolling traffic, after the repair and before the parked arming.
+    launch_deferred_records = [
+        (index, record)
+        for index, record in enumerate(records)
+        if record["event"] == "launch_deferred"
+    ]
+    assert launch_deferred_records, records
+    assert {str(record.get("reason")) for _, record in launch_deferred_records} <= {
+        "rolling_through",
+        "repair_pending",
+    }, launch_deferred_records
+    rolling_deferrals = [
+        (index, record)
+        for index, record in launch_deferred_records
+        if record.get("reason") == "rolling_through"
+    ]
+    assert len(rolling_deferrals) == 1, launch_deferred_records
+    rolling_deferral_index, rolling_deferral = rolling_deferrals[0]
+    assert float(rolling_deferral["speed_mps"]) > 3.0, rolling_deferral
+    assert repair_indices[-1] < rolling_deferral_index < containment_indices[0]
     final_start = repair_indices[0]
     final_records = records[final_start:]
     final_events = [str(record["event"]) for record in final_records]
@@ -1617,13 +1801,12 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
         if record["event"] == "prop_unregistered"
     )
     ordered_launch_events = (
-        "hold_requested",
-        "hold_ack",
+        "containment_verified",
+        "countdown_timer_start",
         "countdown_3",
         "countdown_2",
         "countdown_1",
         "release_requested",
-        "release_ack",
         "go",
         "launch",
     )
@@ -1637,6 +1820,24 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
     assert ordered_launch_indices == sorted(ordered_launch_indices)
     assert timed_indices[-1] < launch_index < launch_complete_index < cleanup_index
     assert float(final_records[launch_index]["target_speed_mps"]) >= 100.0
+    # The independently measured peak velocity must point along the runtime's
+    # own launch vector: the v1.14 cannon fires wherever the parked vehicle's
+    # forward axis points, and this pins the mechanism without dictating a
+    # perfectly straight park.
+    launch_vector = [
+        float(final_records[launch_index][key])
+        for key in ("velocity_x", "velocity_y", "velocity_z")
+    ]
+    launch_alignment = sum(
+        peak * launched for peak, launched in zip(peak_velocity, launch_vector, strict=True)
+    ) / (
+        math.sqrt(sum(value * value for value in peak_velocity))
+        * math.sqrt(sum(value * value for value in launch_vector))
+    )
+    assert launch_alignment >= 0.995, {
+        "peak_velocity": peak_velocity,
+        "launch_vector": launch_vector,
+    }
     assert issues == []
     print(
         "CANNON_SELECTOR_RUNTIME_TELEMETRY "
@@ -1723,6 +1924,15 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                 "countdown_structured_elapsed_seconds": [
                     float(record["elapsed_time_seconds"]) for record in timed_records[:3]
                 ],
+                "launch_transit": {
+                    "transit_speed_mps": LAUNCH_TRANSIT_SPEED_MPS,
+                    "deferral_reasons": [
+                        str(record.get("reason")) for _, record in launch_deferred_records
+                    ],
+                    "rolling_deferral_speed_mps": float(rolling_deferral["speed_mps"]),
+                    "parked_position": parked_pose["position"],
+                    "parked_speed_mps": parked_speed,
+                },
                 "pre_go_integrity": {
                     "baseline_damage": pre_go_integrity_baseline["damage"],
                     "maximum_damage_delta": pre_go_damage_delta,
@@ -1733,18 +1943,16 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                     "observed_phases": sorted(
                         {sample["phase"] for sample in pre_go_integrity_samples}
                     ),
-                    "countdown_controller_frozen": all(
-                        sample["controller_frozen"] is True
-                        for sample in countdown_integrity_samples
-                    ),
-                    "release_grace_controller_unfrozen": all(
+                    "observed_run_phases": sorted(observed_run_phases),
+                    "countdown_controller_free": all(
                         sample["controller_frozen"] is False
-                        for sample in release_grace_integrity_samples
+                        for sample in countdown_integrity_samples
                     ),
                 },
                 "ordered_launch_events": list(ordered_launch_events),
                 "peak_speed_mps": peak_speed,
                 "peak_velocity_mps": peak_velocity,
+                "launch_alignment": launch_alignment,
                 "target_speed_mps": float(final_records[launch_index]["target_speed_mps"]),
                 "final_events": final_events,
                 "cleanup": cleanup_state,

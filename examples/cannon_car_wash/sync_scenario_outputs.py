@@ -95,7 +95,10 @@ def _write_lighting_lua(anchors: list[dict[str, Any]]) -> None:
         "local_position",
         "local_direction",
         "color",
-        "brightness",
+        # 0.39 calibrated lighting: the runtime reads physical intensity
+        # (lm for PointLight, cd for SpotLight) from these specs.
+        "intensity",
+        "intensity_unit",
         "radius",
         "range",
         "inner_angle_degrees",
