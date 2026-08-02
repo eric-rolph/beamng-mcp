@@ -591,9 +591,9 @@ def add_vertical_brush(
             )
             faces.append((base, base + 1, base + 2, base + 3))
             if index % 2:
-                face_uvs.append(((1.0, 0.0), (0.0, 0.0), (0.0, 1.0), (1.0, 1.0)))
+                face_uvs.append(((1.0, 0.0), (0.0, 0.0), (0.0, 0.75), (1.0, 0.75)))
             else:
-                face_uvs.append(((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)))
+                face_uvs.append(((0.0, 0.0), (1.0, 0.0), (1.0, 0.75), (0.0, 0.75)))
 
     append_ring(16, 0.18, 0.92, half_height, 0.0, 0.07)
     # Offset inner ring fills the see-through gap between core and card tips.
@@ -649,9 +649,9 @@ def add_wheel_scrubber(
         )
         faces.append((base, base + 1, base + 2, base + 3))
         if index % 2:
-            face_uvs.append(((1.0, 0.0), (0.0, 0.0), (0.0, 1.0), (1.0, 1.0)))
+            face_uvs.append(((1.0, 0.0), (0.0, 0.0), (0.0, 0.75), (1.0, 0.75)))
         else:
-            face_uvs.append(((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)))
+            face_uvs.append(((0.0, 0.0), (1.0, 0.0), (1.0, 0.75), (0.0, 0.75)))
     card_cluster = add_card_mesh(f"{name}_CardFan", location, vertices, faces, cards, face_uvs)
     card_cluster["beamng_card_count"] = len(faces)
     card_cluster.parent = root
@@ -707,9 +707,9 @@ def add_horizontal_brush(
             # cloth bands become many narrow strips along the shaft, each
             # extending outward radially, instead of long nested sheets.
             if index % 2:
-                face_uvs.append(((0.0, 1.0), (0.0, 0.0), (1.0, 0.0), (1.0, 1.0)))
+                face_uvs.append(((0.0, 0.75), (0.0, 0.0), (1.0, 0.0), (1.0, 0.75)))
             else:
-                face_uvs.append(((0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0)))
+                face_uvs.append(((0.0, 0.0), (0.0, 0.75), (1.0, 0.75), (1.0, 0.0)))
 
     append_ring(18, 0.17, 0.68, half_length, 0.0, 0.05)
     append_ring(8, 0.16, 0.42, half_length * 0.94, math.tau / 36.0, 0.03)
@@ -2463,6 +2463,19 @@ def _selector_structure() -> dict[str, Any]:
             fourth = strip_ids[(0, level + 1)]
             cloth_triangles.append({"nodes": [first, second, third], "surface": "mitter"})
             cloth_triangles.append({"nodes": [first, third, fourth], "surface": "mitter"})
+            # The strips map into the atlas's dedicated MITTER RIBBON BAND
+            # (v 0.765..0.995): continuous lanes tileable along U, so the
+            # strip length runs along U with a per-strip offset for
+            # variety. The card fringe region tore into floating bands
+            # (player screenshot); the ribbon band is solid cloth.
+            along_top = (level / 3.0) * 1.5 + strip * 0.13
+            along_bottom = ((level + 1) / 3.0) * 1.5 + strip * 0.13
+            quad_uvs = [
+                [along_top, 0.765],
+                [along_top, 0.995],
+                [along_bottom, 0.995],
+                [along_bottom, 0.765],
+            ]
             cloth_quads.append(
                 {
                     "positions": [
@@ -2471,12 +2484,7 @@ def _selector_structure() -> dict[str, Any]:
                         cloth_position[third],
                         cloth_position[fourth],
                     ],
-                    "uvs": [
-                        [0.0, 1.0 - level / 3.0],
-                        [1.0, 1.0 - level / 3.0],
-                        [1.0, 1.0 - (level + 1) / 3.0],
-                        [0.0, 1.0 - (level + 1) / 3.0],
-                    ],
+                    "uvs": quad_uvs,
                 }
             )
 
