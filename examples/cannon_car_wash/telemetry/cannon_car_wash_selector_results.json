@@ -38,7 +38,7 @@
   },
   "result": "passed",
   "runtime": {
-    "beamng_drive": "0.38.6",
+    "beamng_drive": "0.39.2.1",
     "beamngpy": "1.35.1",
     "profile": "sentinel-isolated"
   },
@@ -52,14 +52,14 @@
     },
     "countdown_log_elapsed_seconds": [
       0.0,
-      1.0159599999999998,
-      2.0326400000000007,
-      3.2169799999999995
+      1.0152,
+      2.0318799999999975,
+      3.049069999999997
     ],
     "countdown_structured_elapsed_seconds": [
       0.0,
-      1.0156824,
-      2.0323574
+      1.0000179,
+      2.0166917
     ],
     "effect_active_count": 16,
     "emitter_active_counts": {
@@ -73,60 +73,75 @@
       "repair_hold_ack",
       "repair_snapshot",
       "repair_requested",
+      "wash_trigger_exit_suppressed",
       "repair_reset_ack",
       "repair_pose_restore_ack",
-      "repair_trigger_exit",
       "repair_release_requested",
       "repair_release_ack",
       "repair_complete",
       "repair_trigger_exit",
+      "launch_deferred",
       "containment_verified",
-      "hold_requested",
-      "hold_ack",
-      "hold_start",
       "countdown_timer_start",
       "countdown_3",
-      "containment_exit_suppressed",
       "countdown_2",
-      "containment_exit_suppressed",
       "countdown_1",
-      "containment_exit_suppressed",
-      "containment_exit_suppressed",
       "release_requested",
-      "release_ack",
-      "release",
       "go",
       "launch",
       "wash_trigger_exit",
       "launch_complete",
       "wash_subject_removed",
       "wash_systems_stop",
+      "trigger_exit",
+      "repair_deferred_moving",
+      "repair_trigger_exit",
       "prop_unregistered",
       "extension_unload_attempt",
       "extension_unloaded"
     ],
+    "launch_alignment": 0.99999862598113,
     "launch_containment": {
       "center": [
         0,
-        0,
+        -5.399998664856,
         2.0999999046326
       ],
       "ok": true,
       "scale": [
         5.8000001907349,
-        17.5,
+        6.6999998092651,
         4.5999999046326
       ],
+      "subject_position": [
+        -1.2549088001251,
+        -5.7705874443054,
+        0.4808064699173
+      ],
+      "subject_speed": 0.13071107990116,
       "vehicle_max": [
-        1.1798934936523,
-        8.6768665313721,
-        3.0864124298096
+        2.6062905788422,
+        5.3408861160278,
+        3.1653709411621
       ],
       "vehicle_min": [
-        -2.4520978927612,
-        -4.0753908157349,
-        0.036520481109619
+        -2.4981281757355,
+        -7.6293792724609,
+        0.14558970928192
       ]
+    },
+    "launch_transit": {
+      "deferral_reasons": [
+        "rolling_through"
+      ],
+      "parked_position": [
+        -1.248382806778,
+        -5.7709422111511,
+        0.48080030083656
+      ],
+      "parked_speed_mps": 0.13479117467859422,
+      "rolling_deferral_speed_mps": 3.3,
+      "transit_speed_mps": 4.0
     },
     "level": "smallgrid",
     "log_issues": [],
@@ -149,44 +164,44 @@
       }
     },
     "ordered_launch_events": [
-      "hold_requested",
-      "hold_ack",
+      "containment_verified",
+      "countdown_timer_start",
       "countdown_3",
       "countdown_2",
       "countdown_1",
       "release_requested",
-      "release_ack",
       "go",
       "launch"
     ],
-    "peak_speed_mps": 100.0000006620781,
+    "peak_speed_mps": 99.27123946514163,
     "peak_velocity_mps": [
-      -4.056868553161621,
-      -99.90473937988281,
-      1.6077933311462402
+      -16.065053939819336,
+      -97.96240997314453,
+      -0.2434319406747818
     ],
     "pre_go_integrity": {
       "baseline_damage": 0.0,
       "broken_beam_count": 0,
-      "countdown_controller_frozen": true,
+      "countdown_controller_free": true,
       "deflated_tire_count": 0,
       "maximum_damage_delta": 0.0,
       "observed_phases": [
-        "countdown",
-        "release_grace"
+        "countdown"
+      ],
+      "observed_run_phases": [
+        "countdown"
       ],
       "part_damage_count": 0,
-      "release_grace_controller_unfrozen": true,
-      "sample_count": 33
+      "sample_count": 25
     },
     "prop_reset_count": 3,
     "render_difference": {
-      "changed_pixel_ratio": 0.3430295138888889,
-      "changed_pixels": 79034,
+      "changed_pixel_ratio": 0.7997612847222222,
+      "changed_pixels": 184265,
       "channel_means": [
-        13.061610243055556,
-        12.753033854166667,
-        11.89529079861111
+        19.941254340277776,
+        21.95253472222222,
+        24.211896701388888
       ],
       "pixel_count": 230400
     },
@@ -195,12 +210,12 @@
         "broken_beam_count": 0,
         "damage": 0.0,
         "deflated_tire_count": 0,
-        "direction_dot": 0.99873092380775,
-        "independent_lateral_offset_delta_m": 0.23222017288210006,
+        "direction_dot": 0.99999821209824,
+        "independent_lateral_offset_delta_m": 0.4515032768248999,
         "part_damage_count": 0,
-        "position_drift_m": 0.0049231566179004,
+        "position_drift_m": 0.0058327064055982,
         "travel_sign_preserved": true,
-        "upright_dot": 0.99861147843067
+        "upright_dot": 0.99999735130044
       },
       "before": {
         "broken_beam_count": 3,
@@ -217,11 +232,11 @@
         "part_damage_count": 0
       },
       "independent_pose_readback": {
-        "lateral_offset_after_m": 1.3249658346176,
-        "lateral_offset_before_m": 1.0927456617355,
-        "repair_frame_sample_count": 3,
-        "travel_direction_dot": 0.9996685197721183,
-        "upright_dot": 0.9999999035897
+        "lateral_offset_after_m": 1.6184431314468,
+        "lateral_offset_before_m": 1.1669398546219,
+        "repair_frame_sample_count": 4,
+        "travel_direction_dot": 0.9982926277762167,
+        "upright_dot": 0.9994360892634
       },
       "induced_beams": [
         {
@@ -261,27 +276,27 @@
       },
       "pre_midpoint_pose": {
         "bounding_center": [
-          -0.34060251712799,
-          14.809661865234,
-          1.4981846809387
+          -0.39655941724777,
+          13.381062507629,
+          1.5622251033783
         ],
         "direction": [
-          -0.057235318810509,
-          -0.99828355882002,
-          -0.012411868122317
+          -0.05968107972398,
+          -0.99820136091048,
+          0.0056755439779231
         ],
-        "maximum_z": 3.1674604415894,
-        "minimum_z": -0.17109107971191,
+        "maximum_z": 3.1825671195984,
+        "minimum_z": -0.058117032051086,
         "ok": true,
         "position": [
-          -1.0927456617355,
-          10.085357666016,
-          0.22870683670044
+          -1.1669398546219,
+          8.6368026733398,
+          0.38118577003479
         ],
         "up": [
-          -0.062940191383413,
-          -0.0087994797403388,
-          0.99797850751653
+          -0.057460757424733,
+          0.0091116392291913,
+          0.99830618518906
         ]
       },
       "token": 1
@@ -536,5 +551,5 @@
     "triangle_count": 224,
     "vehicle_directory": "/vehicles/ericrolph_cannon_car_wash/"
   },
-  "verified_on": "2026-08-01T20:52:42-06:00"
+  "verified_on": "2026-08-02T01:40:00-06:00"
 }
