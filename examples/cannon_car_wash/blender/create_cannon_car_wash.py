@@ -45,11 +45,12 @@ def add_ambient_animation_clip(path: Path) -> None:
     if b'<animation_clip id="ambient" name="ambient"' in payload:
         raise RuntimeError("Collada already contains an ambient animation clip")
     animation_ids = re.findall(rb'^    <animation id="([A-Za-z0-9_.-]+)"', payload, re.MULTILINE)
-    # Four tower spinners + overhead roller + two tire scrubbers (v1.20)
-    # + the swaying mitter curtain (v1.21).
-    if len(animation_ids) != 8 or len(set(animation_ids)) != 8:
+    # Four tower spinners + overhead roller + two tire scrubbers. The
+    # mitter curtain is jbeam cloth on the selector vehicle (v1.22), so it
+    # deliberately has no ambient channel.
+    if len(animation_ids) != 7 or len(set(animation_ids)) != 7:
         raise RuntimeError(
-            f"expected exactly eight top-level spinner animations, found {len(animation_ids)}"
+            f"expected exactly seven top-level spinner animations, found {len(animation_ids)}"
         )
     newline = b"\r\n" if b"\r\n" in payload else b"\n"
     clip_lines = [
@@ -609,26 +610,6 @@ def add_vertical_brush(
     card_cluster.parent = root
     card_cluster.location = (location[0] - pivot[0], location[1] - pivot[1], 0.0)
     animate_spin(root, 2, spin_direction)
-
-
-def animate_sway(obj: bpy.types.Object, axis: int, amplitude: float) -> None:
-    """Gentle pendulum oscillation on one rotation channel.
-
-    The ambient loader plays rotation fcurves as authored, so a triangle
-    wave (0 -> +A -> 0 -> -A -> 0) over the same 61-frame cycle the
-    spinners use loops seamlessly alongside them.
-    """
-
-    obj.rotation_mode = "XYZ"
-    for frame, value in ((1, 0.0), (16, amplitude), (31, 0.0), (46, -amplitude), (61, 0.0)):
-        obj.rotation_euler[axis] = value
-        obj.keyframe_insert(data_path="rotation_euler", index=axis, frame=frame)
-    if obj.animation_data is None or obj.animation_data.action is None:
-        return
-    for curve in obj.animation_data.action.fcurves:
-        for point in curve.keyframe_points:
-            point.interpolation = "LINEAR"
-        curve.modifiers.new("CYCLES")
 
 
 def add_wheel_scrubber(
@@ -1386,44 +1367,11 @@ def build_details() -> None:
             rotation=(0.0, -side * 0.24, 0.0),
         )
 
-    # Mitter curtain in the pre-soak zone (v1.21: moved from between the
-    # brush stations - real mitters hang early in the tunnel right after
-    # first wetting - and it now genuinely SWAYS side to side: the strips
-    # hang from an animated root that rolls gently about the travel axis,
-    # one more rotation channel in the ambient clip).
-    mitter_pivot = (0.0, -4.35, 4.30)
-    mitter_root = bpy.data.objects.new(namespaced_object_name("MitterSway"), None)
-    mitter_root.empty_display_type = "CIRCLE"
-    mitter_root.location = mitter_pivot
-    bpy.context.scene.collection.objects.link(mitter_root)
-    mitter_vertices: list[tuple[float, float, float]] = []
-    mitter_faces: list[tuple[int, int, int, int]] = []
-    mitter_uvs: list[tuple[tuple[float, float], ...]] = []
-    for row, (row_y, base_lean) in enumerate(((-0.05, 0.16), (0.15, 0.08))):
-        for index in range(12):
-            x = -2.31 + index * 0.42
-            lean = base_lean + 0.10 * math.sin(index * 1.7 + row * 2.1)
-            hem = 0.12 * abs(math.sin(index * 2.3 + row)) - 2.28
-            base = len(mitter_vertices)
-            mitter_vertices.extend(
-                (
-                    (x - 0.19, row_y, -0.08),
-                    (x + 0.19, row_y, -0.08),
-                    (x + 0.19, row_y + lean, hem),
-                    (x - 0.19, row_y + lean, hem),
-                )
-            )
-            mitter_faces.append((base, base + 1, base + 2, base + 3))
-            if index % 2:
-                mitter_uvs.append(((1.0, 1.0), (0.0, 1.0), (0.0, 0.0), (1.0, 0.0)))
-            else:
-                mitter_uvs.append(((0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0)))
-    mitter_cards = add_card_mesh(
-        "MitterCurtain", mitter_pivot, mitter_vertices, mitter_faces, brush_cards, mitter_uvs
-    )
-    mitter_cards.parent = mitter_root
-    mitter_cards.location = (0.0, 0.0, 0.0)
-    animate_sway(mitter_root, 1, 0.10)
+    # v1.22: the mitter curtain is now PHYSICS - individual strips built as
+    # jbeam cloth lattices on the selector vehicle (see _selector_structure's
+    # cloth section) with a flexbody card mesh that drapes over vehicles.
+    # Only the support beam remains in the static scenery; the TSStatic
+    # visual must not carry ghost strips over the physical ones.
     add_box("MitterBeam", (0.0, -4.35, 4.38), (5.0, 0.16, 0.14), steel, bevel=0.0)
 
     # Equipment mounting: the brushes no longer float. A ceiling gantry
@@ -1731,10 +1679,10 @@ def build_details() -> None:
     concrete = material(scenario_material_name("concrete"), (0.18, 0.2, 0.23, 1.0), roughness=0.82)
     head_tilt = -0.22
     kiosk_orange = [
-        add_box("PayKiosk_Cabinet", (-2.65, -7.0, 1.19), (0.34, 0.55, 0.85), orange, bevel=0.02),
+        add_box("PayKiosk_Cabinet", (-2.65, -8.25, 1.19), (0.34, 0.55, 0.85), orange, bevel=0.02),
         add_box(
             "PayKiosk_Head",
-            (-2.65, -7.0, 1.80),
+            (-2.65, -8.25, 1.80),
             (0.40, 0.50, 0.35),
             orange,
             bevel=0.02,
@@ -1742,7 +1690,7 @@ def build_details() -> None:
         ),
         add_box(
             "PayKiosk_Visor",
-            (-2.60, -7.0, 2.02),
+            (-2.60, -8.25, 2.02),
             (0.46, 0.54, 0.04),
             orange,
             bevel=0.01,
@@ -1750,21 +1698,21 @@ def build_details() -> None:
         ),
     ]
     join_static_meshes("PayKioskOrange", kiosk_orange)
-    add_box("PayKiosk_Island", (-2.65, -7.0, 0.20), (0.60, 1.05, 0.14), concrete, bevel=0.02)
+    add_box("PayKiosk_Island", (-2.65, -8.25, 0.20), (0.60, 1.05, 0.14), concrete, bevel=0.02)
     kiosk_trim = [
-        add_box("PayKiosk_Pedestal", (-2.65, -7.0, 0.52), (0.18, 0.26, 0.50), steel, bevel=0.01),
-        add_box("PayKiosk_KeypadPlate", (-2.47, -7.0, 1.38), (0.03, 0.30, 0.20), steel, bevel=0.0),
+        add_box("PayKiosk_Pedestal", (-2.65, -8.25, 0.52), (0.18, 0.26, 0.50), steel, bevel=0.01),
+        add_box("PayKiosk_KeypadPlate", (-2.47, -8.25, 1.38), (0.03, 0.30, 0.20), steel, bevel=0.0),
     ]
     join_static_meshes("PayKioskSteel", kiosk_trim)
     kiosk_rubber = [
-        add_box("PayKiosk_CardReader", (-2.46, -7.19, 1.15), (0.06, 0.14, 0.09), rubber, bevel=0.0),
-        add_box("PayKiosk_CoinSlot", (-2.462, -6.85, 1.12), (0.02, 0.05, 0.014), rubber, bevel=0.0),
+        add_box("PayKiosk_CardReader", (-2.46, -8.44, 1.15), (0.06, 0.14, 0.09), rubber, bevel=0.0),
+        add_box("PayKiosk_CoinSlot", (-2.462, -8.1, 1.12), (0.02, 0.05, 0.014), rubber, bevel=0.0),
         add_box(
-            "PayKiosk_ReceiptSlot", (-2.465, -7.0, 0.92), (0.025, 0.20, 0.03), rubber, bevel=0.0
+            "PayKiosk_ReceiptSlot", (-2.465, -8.25, 0.92), (0.025, 0.20, 0.03), rubber, bevel=0.0
         ),
     ]
     for row, button_z in enumerate((1.31, 1.355, 1.40, 1.445)):
-        for column, button_y in enumerate((-7.09, -7.0, -6.91)):
+        for column, button_y in enumerate((-8.34, -8.25, -8.16)):
             kiosk_rubber.append(
                 add_box(
                     f"PayKiosk_Key_{row}{column}",
@@ -1777,7 +1725,7 @@ def build_details() -> None:
     join_static_meshes("PayKioskRubber", kiosk_rubber)
     add_box(
         "PayKiosk_Screen",
-        (-2.43, -7.0, 1.82),
+        (-2.43, -8.25, 1.82),
         (0.03, 0.36, 0.22),
         screen,
         bevel=0.006,
@@ -1785,7 +1733,7 @@ def build_details() -> None:
     )
     add_cylinder(
         "PayKiosk_Speaker",
-        (-2.46, -6.82, 1.55),
+        (-2.46, -8.07, 1.55),
         0.06,
         0.025,
         steel,
@@ -2447,12 +2395,107 @@ def _selector_structure() -> dict[str, Any]:
         "left": node_id[(middle_station, "floor_outer_left")],
         "up": node_id[(middle_station, "roof_bottom_center")],
     }
+    # v1.22 physics mitter curtain: twelve cloth strips as light node/beam
+    # lattices. Anchor nodes are FIXED at the support beam; the free nodes
+    # below carry collision triangles so the strips drape over and get
+    # shoved aside by vehicles - real engine physics instead of an ambient
+    # pose. A separate flexbody card mesh (built in the selector export
+    # from these exact vehicle-space positions) deforms with the nodes.
+    cloth_nodes: list[dict[str, Any]] = []
+    cloth_beams: list[dict[str, Any]] = []
+    cloth_triangles: list[dict[str, Any]] = []
+    cloth_quads: list[dict[str, Any]] = []
+    cloth_position: dict[str, list[float]] = {}
+    # Hem at 1.0 m: the strips must actually reach vehicles (first cloth
+    # probe: a 2.05 m hem cleared an etk800 roof by 60 cm and the curtain
+    # never moved). Real mitters drag across the hood and roof.
+    strip_levels = (4.30, 3.25, 2.18, 1.10)
+    mitter_y = -4.35
+    for strip in range(12):
+        strip_x = -2.31 + strip * 0.42
+        strip_ids: dict[tuple[int, int], str] = {}
+        for column, x in enumerate((strip_x - 0.19, strip_x + 0.19)):
+            for level, z in enumerate(strip_levels):
+                identifier = f"{MOD_ID}_mitter_s{strip:02d}_c{column}_l{level}"
+                source = Vector((x, mitter_y, z))
+                mapped = rotation @ source
+                strip_ids[(column, level)] = identifier
+                cloth_position[identifier] = [round(value, 6) for value in mapped]
+                cloth_nodes.append(
+                    {
+                        "id": identifier,
+                        "position": cloth_position[identifier],
+                        "source_world_position": [round(value, 6) for value in source],
+                        "fixed": level == 0,
+                    }
+                )
+        for column in range(2):
+            for level in range(3):
+                cloth_beams.append(
+                    {
+                        "nodes": [strip_ids[(column, level)], strip_ids[(column, level + 1)]],
+                        "class": "structural",
+                    }
+                )
+        for level in range(4):
+            cloth_beams.append(
+                {
+                    "nodes": [strip_ids[(0, level)], strip_ids[(1, level)]],
+                    "class": "anchor" if level == 0 else "structural",
+                }
+            )
+        for level in range(3):
+            cloth_beams.append(
+                {
+                    "nodes": [strip_ids[(0, level)], strip_ids[(1, level + 1)]],
+                    "class": "shear",
+                }
+            )
+            cloth_beams.append(
+                {
+                    "nodes": [strip_ids[(1, level)], strip_ids[(0, level + 1)]],
+                    "class": "shear",
+                }
+            )
+            first = strip_ids[(0, level)]
+            second = strip_ids[(1, level)]
+            third = strip_ids[(1, level + 1)]
+            fourth = strip_ids[(0, level + 1)]
+            cloth_triangles.append({"nodes": [first, second, third], "surface": "mitter"})
+            cloth_triangles.append({"nodes": [first, third, fourth], "surface": "mitter"})
+            cloth_quads.append(
+                {
+                    "positions": [
+                        cloth_position[first],
+                        cloth_position[second],
+                        cloth_position[third],
+                        cloth_position[fourth],
+                    ],
+                    "uvs": [
+                        [0.0, 1.0 - level / 3.0],
+                        [1.0, 1.0 - level / 3.0],
+                        [1.0, 1.0 - (level + 1) / 3.0],
+                        [0.0, 1.0 - (level + 1) / 3.0],
+                    ],
+                }
+            )
+
     return {
         "schema": "ericrolph-cannon-car-wash-selector-handoff-v1",
         "asset": {
             "id": MOD_ID,
             "physics_cage": VEHICLE_CAGE_NAME,
             "visual_mesh": VEHICLE_VISUAL_NAME,
+            "cloth_mesh": f"{MOD_ID}_MitterStrips",
+        },
+        "cloth": {
+            "group": f"{MOD_ID}_mitter",
+            "mesh": f"{MOD_ID}_MitterStrips",
+            "material": f"{MOD_ID}_selector_brush_cards",
+            "nodes": cloth_nodes,
+            "beams": cloth_beams,
+            "triangles": cloth_triangles,
+            "visual_quads": cloth_quads,
         },
         "coordinate_system": {
             "source": "right-handed, meters, Z-up, +Y drive direction",
@@ -2592,8 +2635,40 @@ def export_vehicle_selector_asset() -> None:
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     visual_bounds = object_bounds(visual)
 
+    # v1.22: the mitter curtain ships as its OWN mesh in the vehicle DAE so
+    # jbeam can bind it as a per-group flexbody that deforms with the cloth
+    # nodes. Quad positions come straight from the handoff (already in
+    # BeamNG vehicle space), so the strips and the physics lattice are the
+    # same geometry by construction.
+    cloth = structure["cloth"]
+    strips_vertices: list[tuple[float, float, float]] = []
+    strips_faces: list[tuple[int, int, int, int]] = []
+    strips_uvs: list[tuple[tuple[float, float], ...]] = []
+    for quad in cloth["visual_quads"]:
+        base = len(strips_vertices)
+        strips_vertices.extend(tuple(position) for position in quad["positions"])
+        strips_faces.append((base, base + 1, base + 2, base + 3))
+        strips_uvs.append(tuple(tuple(uv) for uv in quad["uvs"]))
+    strips_mesh = bpy.data.meshes.new(f"{cloth['mesh']}_mesh")
+    strips_mesh.from_pydata(strips_vertices, [], strips_faces)
+    strips_mesh.update()
+    strips = bpy.data.objects.new(cloth["mesh"], strips_mesh)
+    temporary_collection.objects.link(strips)
+    cards_material = selector_materials.get(f"{MOD_ID}_brush_cards")
+    if cards_material is None:
+        raise RuntimeError("selector brush_cards material missing for the mitter strips")
+    strips_mesh.materials.append(cards_material)
+    uv0 = strips_mesh.uv_layers.new(name="UVMap")
+    uv2 = strips_mesh.uv_layers.new(name="UVMap_2")
+    for polygon, coordinates in zip(strips_mesh.polygons, strips_uvs, strict=True):
+        for loop_index, coordinate in zip(polygon.loop_indices, coordinates, strict=True):
+            uv0.data[loop_index].uv = coordinate
+            uv2.data[loop_index].uv = coordinate
+    strips["beamng_alpha_test"] = True
+
     bpy.ops.object.select_all(action="DESELECT")
     visual.select_set(True)
+    strips.select_set(True)
     bpy.context.view_layer.objects.active = visual
     result = bpy.ops.wm.collada_export(
         filepath=str(VEHICLE_DAE_PATH),
@@ -2630,6 +2705,9 @@ def export_vehicle_selector_asset() -> None:
     bpy.data.objects.remove(visual, do_unlink=True)
     if visual_mesh.users == 0:
         bpy.data.meshes.remove(visual_mesh)
+    bpy.data.objects.remove(strips, do_unlink=True)
+    if strips_mesh.users == 0:
+        bpy.data.meshes.remove(strips_mesh)
     for selector_material in selector_materials.values():
         if selector_material.users == 0:
             bpy.data.materials.remove(selector_material)

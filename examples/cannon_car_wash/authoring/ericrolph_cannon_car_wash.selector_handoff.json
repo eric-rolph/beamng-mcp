@@ -1,5 +1,6 @@
 {
   "asset": {
+    "cloth_mesh": "ericrolph_cannon_car_wash_MitterStrips",
     "id": "ericrolph_cannon_car_wash",
     "physics_cage": "ericrolph_cannon_car_wash_selector_cage",
     "visual_mesh": "ericrolph_cannon_car_wash_selector_visual"
@@ -1410,6 +1411,4795 @@
       "ericrolph_cannon_car_wash_s06_t10"
     ]
   ],
+  "cloth": {
+    "beams": [
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l3"
+        ]
+      },
+      {
+        "class": "anchor",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l0"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l3",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l3"
+        ]
+      },
+      {
+        "class": "anchor",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l0"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l3",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l3"
+        ]
+      },
+      {
+        "class": "anchor",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l0"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l3",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l3"
+        ]
+      },
+      {
+        "class": "anchor",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l0"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l3",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l3"
+        ]
+      },
+      {
+        "class": "anchor",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l0"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l3",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l3"
+        ]
+      },
+      {
+        "class": "anchor",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l0"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l3",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l3"
+        ]
+      },
+      {
+        "class": "anchor",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l0"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l3",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l3"
+        ]
+      },
+      {
+        "class": "anchor",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l0"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l3",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l3"
+        ]
+      },
+      {
+        "class": "anchor",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l0"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l3",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l3"
+        ]
+      },
+      {
+        "class": "anchor",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l0"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l3",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l3"
+        ]
+      },
+      {
+        "class": "anchor",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l0"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l3",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l3"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l3"
+        ]
+      },
+      {
+        "class": "anchor",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l0"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l1"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l2"
+        ]
+      },
+      {
+        "class": "structural",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l3",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l1"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l2"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l3"
+        ]
+      },
+      {
+        "class": "shear",
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l3"
+        ]
+      }
+    ],
+    "group": "ericrolph_cannon_car_wash_mitter",
+    "material": "ericrolph_cannon_car_wash_selector_brush_cards",
+    "mesh": "ericrolph_cannon_car_wash_MitterStrips",
+    "nodes": [
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s00_c0_l0",
+        "position": [
+          2.5,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          -2.5,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s00_c0_l1",
+        "position": [
+          2.5,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          -2.5,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s00_c0_l2",
+        "position": [
+          2.5,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          -2.5,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s00_c0_l3",
+        "position": [
+          2.5,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          -2.5,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s00_c1_l0",
+        "position": [
+          2.12,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          -2.12,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s00_c1_l1",
+        "position": [
+          2.12,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          -2.12,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s00_c1_l2",
+        "position": [
+          2.12,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          -2.12,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s00_c1_l3",
+        "position": [
+          2.12,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          -2.12,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s01_c0_l0",
+        "position": [
+          2.08,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          -2.08,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s01_c0_l1",
+        "position": [
+          2.08,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          -2.08,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s01_c0_l2",
+        "position": [
+          2.08,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          -2.08,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s01_c0_l3",
+        "position": [
+          2.08,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          -2.08,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s01_c1_l0",
+        "position": [
+          1.7,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          -1.7,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s01_c1_l1",
+        "position": [
+          1.7,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          -1.7,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s01_c1_l2",
+        "position": [
+          1.7,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          -1.7,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s01_c1_l3",
+        "position": [
+          1.7,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          -1.7,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s02_c0_l0",
+        "position": [
+          1.66,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          -1.66,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s02_c0_l1",
+        "position": [
+          1.66,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          -1.66,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s02_c0_l2",
+        "position": [
+          1.66,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          -1.66,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s02_c0_l3",
+        "position": [
+          1.66,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          -1.66,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s02_c1_l0",
+        "position": [
+          1.28,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          -1.28,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s02_c1_l1",
+        "position": [
+          1.28,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          -1.28,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s02_c1_l2",
+        "position": [
+          1.28,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          -1.28,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s02_c1_l3",
+        "position": [
+          1.28,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          -1.28,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s03_c0_l0",
+        "position": [
+          1.24,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          -1.24,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s03_c0_l1",
+        "position": [
+          1.24,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          -1.24,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s03_c0_l2",
+        "position": [
+          1.24,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          -1.24,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s03_c0_l3",
+        "position": [
+          1.24,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          -1.24,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s03_c1_l0",
+        "position": [
+          0.86,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          -0.86,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s03_c1_l1",
+        "position": [
+          0.86,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          -0.86,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s03_c1_l2",
+        "position": [
+          0.86,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          -0.86,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s03_c1_l3",
+        "position": [
+          0.86,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          -0.86,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s04_c0_l0",
+        "position": [
+          0.82,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          -0.82,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s04_c0_l1",
+        "position": [
+          0.82,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          -0.82,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s04_c0_l2",
+        "position": [
+          0.82,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          -0.82,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s04_c0_l3",
+        "position": [
+          0.82,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          -0.82,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s04_c1_l0",
+        "position": [
+          0.44,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          -0.44,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s04_c1_l1",
+        "position": [
+          0.44,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          -0.44,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s04_c1_l2",
+        "position": [
+          0.44,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          -0.44,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s04_c1_l3",
+        "position": [
+          0.44,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          -0.44,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s05_c0_l0",
+        "position": [
+          0.4,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          -0.4,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s05_c0_l1",
+        "position": [
+          0.4,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          -0.4,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s05_c0_l2",
+        "position": [
+          0.4,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          -0.4,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s05_c0_l3",
+        "position": [
+          0.4,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          -0.4,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s05_c1_l0",
+        "position": [
+          0.02,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          -0.02,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s05_c1_l1",
+        "position": [
+          0.02,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          -0.02,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s05_c1_l2",
+        "position": [
+          0.02,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          -0.02,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s05_c1_l3",
+        "position": [
+          0.02,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          -0.02,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s06_c0_l0",
+        "position": [
+          -0.02,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          0.02,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s06_c0_l1",
+        "position": [
+          -0.02,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          0.02,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s06_c0_l2",
+        "position": [
+          -0.02,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          0.02,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s06_c0_l3",
+        "position": [
+          -0.02,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          0.02,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s06_c1_l0",
+        "position": [
+          -0.4,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          0.4,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s06_c1_l1",
+        "position": [
+          -0.4,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          0.4,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s06_c1_l2",
+        "position": [
+          -0.4,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          0.4,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s06_c1_l3",
+        "position": [
+          -0.4,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          0.4,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s07_c0_l0",
+        "position": [
+          -0.44,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          0.44,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s07_c0_l1",
+        "position": [
+          -0.44,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          0.44,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s07_c0_l2",
+        "position": [
+          -0.44,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          0.44,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s07_c0_l3",
+        "position": [
+          -0.44,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          0.44,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s07_c1_l0",
+        "position": [
+          -0.82,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          0.82,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s07_c1_l1",
+        "position": [
+          -0.82,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          0.82,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s07_c1_l2",
+        "position": [
+          -0.82,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          0.82,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s07_c1_l3",
+        "position": [
+          -0.82,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          0.82,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s08_c0_l0",
+        "position": [
+          -0.86,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          0.86,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s08_c0_l1",
+        "position": [
+          -0.86,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          0.86,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s08_c0_l2",
+        "position": [
+          -0.86,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          0.86,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s08_c0_l3",
+        "position": [
+          -0.86,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          0.86,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s08_c1_l0",
+        "position": [
+          -1.24,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          1.24,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s08_c1_l1",
+        "position": [
+          -1.24,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          1.24,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s08_c1_l2",
+        "position": [
+          -1.24,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          1.24,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s08_c1_l3",
+        "position": [
+          -1.24,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          1.24,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s09_c0_l0",
+        "position": [
+          -1.28,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          1.28,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s09_c0_l1",
+        "position": [
+          -1.28,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          1.28,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s09_c0_l2",
+        "position": [
+          -1.28,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          1.28,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s09_c0_l3",
+        "position": [
+          -1.28,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          1.28,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s09_c1_l0",
+        "position": [
+          -1.66,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          1.66,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s09_c1_l1",
+        "position": [
+          -1.66,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          1.66,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s09_c1_l2",
+        "position": [
+          -1.66,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          1.66,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s09_c1_l3",
+        "position": [
+          -1.66,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          1.66,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s10_c0_l0",
+        "position": [
+          -1.7,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          1.7,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s10_c0_l1",
+        "position": [
+          -1.7,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          1.7,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s10_c0_l2",
+        "position": [
+          -1.7,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          1.7,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s10_c0_l3",
+        "position": [
+          -1.7,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          1.7,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s10_c1_l0",
+        "position": [
+          -2.079999,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          2.08,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s10_c1_l1",
+        "position": [
+          -2.079999,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          2.08,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s10_c1_l2",
+        "position": [
+          -2.079999,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          2.08,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s10_c1_l3",
+        "position": [
+          -2.079999,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          2.08,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s11_c0_l0",
+        "position": [
+          -2.119999,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          2.12,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s11_c0_l1",
+        "position": [
+          -2.119999,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          2.12,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s11_c0_l2",
+        "position": [
+          -2.119999,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          2.12,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s11_c0_l3",
+        "position": [
+          -2.119999,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          2.12,
+          -4.35,
+          1.1
+        ]
+      },
+      {
+        "fixed": true,
+        "id": "ericrolph_cannon_car_wash_mitter_s11_c1_l0",
+        "position": [
+          -2.5,
+          4.35,
+          4.3
+        ],
+        "source_world_position": [
+          2.5,
+          -4.35,
+          4.3
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s11_c1_l1",
+        "position": [
+          -2.5,
+          4.35,
+          3.25
+        ],
+        "source_world_position": [
+          2.5,
+          -4.35,
+          3.25
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s11_c1_l2",
+        "position": [
+          -2.5,
+          4.35,
+          2.18
+        ],
+        "source_world_position": [
+          2.5,
+          -4.35,
+          2.18
+        ]
+      },
+      {
+        "fixed": false,
+        "id": "ericrolph_cannon_car_wash_mitter_s11_c1_l3",
+        "position": [
+          -2.5,
+          4.35,
+          1.1
+        ],
+        "source_world_position": [
+          2.5,
+          -4.35,
+          1.1
+        ]
+      }
+    ],
+    "triangles": [
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s00_c1_l3",
+          "ericrolph_cannon_car_wash_mitter_s00_c0_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s01_c1_l3",
+          "ericrolph_cannon_car_wash_mitter_s01_c0_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s02_c1_l3",
+          "ericrolph_cannon_car_wash_mitter_s02_c0_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s03_c1_l3",
+          "ericrolph_cannon_car_wash_mitter_s03_c0_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s04_c1_l3",
+          "ericrolph_cannon_car_wash_mitter_s04_c0_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s05_c1_l3",
+          "ericrolph_cannon_car_wash_mitter_s05_c0_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s06_c1_l3",
+          "ericrolph_cannon_car_wash_mitter_s06_c0_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s07_c1_l3",
+          "ericrolph_cannon_car_wash_mitter_s07_c0_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s08_c1_l3",
+          "ericrolph_cannon_car_wash_mitter_s08_c0_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s09_c1_l3",
+          "ericrolph_cannon_car_wash_mitter_s09_c0_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s10_c1_l3",
+          "ericrolph_cannon_car_wash_mitter_s10_c0_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l0",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l0",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l1"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l1",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l1",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l2"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l2",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l3"
+        ],
+        "surface": "mitter"
+      },
+      {
+        "nodes": [
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l2",
+          "ericrolph_cannon_car_wash_mitter_s11_c1_l3",
+          "ericrolph_cannon_car_wash_mitter_s11_c0_l3"
+        ],
+        "surface": "mitter"
+      }
+    ],
+    "visual_quads": [
+      {
+        "positions": [
+          [
+            2.5,
+            4.35,
+            4.3
+          ],
+          [
+            2.12,
+            4.35,
+            4.3
+          ],
+          [
+            2.12,
+            4.35,
+            3.25
+          ],
+          [
+            2.5,
+            4.35,
+            3.25
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            0.0,
+            0.6666666666666667
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            2.5,
+            4.35,
+            3.25
+          ],
+          [
+            2.12,
+            4.35,
+            3.25
+          ],
+          [
+            2.12,
+            4.35,
+            2.18
+          ],
+          [
+            2.5,
+            4.35,
+            2.18
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            0.0,
+            0.33333333333333337
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            2.5,
+            4.35,
+            2.18
+          ],
+          [
+            2.12,
+            4.35,
+            2.18
+          ],
+          [
+            2.12,
+            4.35,
+            1.1
+          ],
+          [
+            2.5,
+            4.35,
+            1.1
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            2.08,
+            4.35,
+            4.3
+          ],
+          [
+            1.7,
+            4.35,
+            4.3
+          ],
+          [
+            1.7,
+            4.35,
+            3.25
+          ],
+          [
+            2.08,
+            4.35,
+            3.25
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            0.0,
+            0.6666666666666667
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            2.08,
+            4.35,
+            3.25
+          ],
+          [
+            1.7,
+            4.35,
+            3.25
+          ],
+          [
+            1.7,
+            4.35,
+            2.18
+          ],
+          [
+            2.08,
+            4.35,
+            2.18
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            0.0,
+            0.33333333333333337
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            2.08,
+            4.35,
+            2.18
+          ],
+          [
+            1.7,
+            4.35,
+            2.18
+          ],
+          [
+            1.7,
+            4.35,
+            1.1
+          ],
+          [
+            2.08,
+            4.35,
+            1.1
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            1.66,
+            4.35,
+            4.3
+          ],
+          [
+            1.28,
+            4.35,
+            4.3
+          ],
+          [
+            1.28,
+            4.35,
+            3.25
+          ],
+          [
+            1.66,
+            4.35,
+            3.25
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            0.0,
+            0.6666666666666667
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            1.66,
+            4.35,
+            3.25
+          ],
+          [
+            1.28,
+            4.35,
+            3.25
+          ],
+          [
+            1.28,
+            4.35,
+            2.18
+          ],
+          [
+            1.66,
+            4.35,
+            2.18
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            0.0,
+            0.33333333333333337
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            1.66,
+            4.35,
+            2.18
+          ],
+          [
+            1.28,
+            4.35,
+            2.18
+          ],
+          [
+            1.28,
+            4.35,
+            1.1
+          ],
+          [
+            1.66,
+            4.35,
+            1.1
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            1.24,
+            4.35,
+            4.3
+          ],
+          [
+            0.86,
+            4.35,
+            4.3
+          ],
+          [
+            0.86,
+            4.35,
+            3.25
+          ],
+          [
+            1.24,
+            4.35,
+            3.25
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            0.0,
+            0.6666666666666667
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            1.24,
+            4.35,
+            3.25
+          ],
+          [
+            0.86,
+            4.35,
+            3.25
+          ],
+          [
+            0.86,
+            4.35,
+            2.18
+          ],
+          [
+            1.24,
+            4.35,
+            2.18
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            0.0,
+            0.33333333333333337
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            1.24,
+            4.35,
+            2.18
+          ],
+          [
+            0.86,
+            4.35,
+            2.18
+          ],
+          [
+            0.86,
+            4.35,
+            1.1
+          ],
+          [
+            1.24,
+            4.35,
+            1.1
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            0.82,
+            4.35,
+            4.3
+          ],
+          [
+            0.44,
+            4.35,
+            4.3
+          ],
+          [
+            0.44,
+            4.35,
+            3.25
+          ],
+          [
+            0.82,
+            4.35,
+            3.25
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            0.0,
+            0.6666666666666667
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            0.82,
+            4.35,
+            3.25
+          ],
+          [
+            0.44,
+            4.35,
+            3.25
+          ],
+          [
+            0.44,
+            4.35,
+            2.18
+          ],
+          [
+            0.82,
+            4.35,
+            2.18
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            0.0,
+            0.33333333333333337
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            0.82,
+            4.35,
+            2.18
+          ],
+          [
+            0.44,
+            4.35,
+            2.18
+          ],
+          [
+            0.44,
+            4.35,
+            1.1
+          ],
+          [
+            0.82,
+            4.35,
+            1.1
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            0.4,
+            4.35,
+            4.3
+          ],
+          [
+            0.02,
+            4.35,
+            4.3
+          ],
+          [
+            0.02,
+            4.35,
+            3.25
+          ],
+          [
+            0.4,
+            4.35,
+            3.25
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            0.0,
+            0.6666666666666667
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            0.4,
+            4.35,
+            3.25
+          ],
+          [
+            0.02,
+            4.35,
+            3.25
+          ],
+          [
+            0.02,
+            4.35,
+            2.18
+          ],
+          [
+            0.4,
+            4.35,
+            2.18
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            0.0,
+            0.33333333333333337
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            0.4,
+            4.35,
+            2.18
+          ],
+          [
+            0.02,
+            4.35,
+            2.18
+          ],
+          [
+            0.02,
+            4.35,
+            1.1
+          ],
+          [
+            0.4,
+            4.35,
+            1.1
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -0.02,
+            4.35,
+            4.3
+          ],
+          [
+            -0.4,
+            4.35,
+            4.3
+          ],
+          [
+            -0.4,
+            4.35,
+            3.25
+          ],
+          [
+            -0.02,
+            4.35,
+            3.25
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            0.0,
+            0.6666666666666667
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -0.02,
+            4.35,
+            3.25
+          ],
+          [
+            -0.4,
+            4.35,
+            3.25
+          ],
+          [
+            -0.4,
+            4.35,
+            2.18
+          ],
+          [
+            -0.02,
+            4.35,
+            2.18
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            0.0,
+            0.33333333333333337
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -0.02,
+            4.35,
+            2.18
+          ],
+          [
+            -0.4,
+            4.35,
+            2.18
+          ],
+          [
+            -0.4,
+            4.35,
+            1.1
+          ],
+          [
+            -0.02,
+            4.35,
+            1.1
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -0.44,
+            4.35,
+            4.3
+          ],
+          [
+            -0.82,
+            4.35,
+            4.3
+          ],
+          [
+            -0.82,
+            4.35,
+            3.25
+          ],
+          [
+            -0.44,
+            4.35,
+            3.25
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            0.0,
+            0.6666666666666667
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -0.44,
+            4.35,
+            3.25
+          ],
+          [
+            -0.82,
+            4.35,
+            3.25
+          ],
+          [
+            -0.82,
+            4.35,
+            2.18
+          ],
+          [
+            -0.44,
+            4.35,
+            2.18
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            0.0,
+            0.33333333333333337
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -0.44,
+            4.35,
+            2.18
+          ],
+          [
+            -0.82,
+            4.35,
+            2.18
+          ],
+          [
+            -0.82,
+            4.35,
+            1.1
+          ],
+          [
+            -0.44,
+            4.35,
+            1.1
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -0.86,
+            4.35,
+            4.3
+          ],
+          [
+            -1.24,
+            4.35,
+            4.3
+          ],
+          [
+            -1.24,
+            4.35,
+            3.25
+          ],
+          [
+            -0.86,
+            4.35,
+            3.25
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            0.0,
+            0.6666666666666667
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -0.86,
+            4.35,
+            3.25
+          ],
+          [
+            -1.24,
+            4.35,
+            3.25
+          ],
+          [
+            -1.24,
+            4.35,
+            2.18
+          ],
+          [
+            -0.86,
+            4.35,
+            2.18
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            0.0,
+            0.33333333333333337
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -0.86,
+            4.35,
+            2.18
+          ],
+          [
+            -1.24,
+            4.35,
+            2.18
+          ],
+          [
+            -1.24,
+            4.35,
+            1.1
+          ],
+          [
+            -0.86,
+            4.35,
+            1.1
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -1.28,
+            4.35,
+            4.3
+          ],
+          [
+            -1.66,
+            4.35,
+            4.3
+          ],
+          [
+            -1.66,
+            4.35,
+            3.25
+          ],
+          [
+            -1.28,
+            4.35,
+            3.25
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            0.0,
+            0.6666666666666667
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -1.28,
+            4.35,
+            3.25
+          ],
+          [
+            -1.66,
+            4.35,
+            3.25
+          ],
+          [
+            -1.66,
+            4.35,
+            2.18
+          ],
+          [
+            -1.28,
+            4.35,
+            2.18
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            0.0,
+            0.33333333333333337
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -1.28,
+            4.35,
+            2.18
+          ],
+          [
+            -1.66,
+            4.35,
+            2.18
+          ],
+          [
+            -1.66,
+            4.35,
+            1.1
+          ],
+          [
+            -1.28,
+            4.35,
+            1.1
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -1.7,
+            4.35,
+            4.3
+          ],
+          [
+            -2.079999,
+            4.35,
+            4.3
+          ],
+          [
+            -2.079999,
+            4.35,
+            3.25
+          ],
+          [
+            -1.7,
+            4.35,
+            3.25
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            0.0,
+            0.6666666666666667
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -1.7,
+            4.35,
+            3.25
+          ],
+          [
+            -2.079999,
+            4.35,
+            3.25
+          ],
+          [
+            -2.079999,
+            4.35,
+            2.18
+          ],
+          [
+            -1.7,
+            4.35,
+            2.18
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            0.0,
+            0.33333333333333337
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -1.7,
+            4.35,
+            2.18
+          ],
+          [
+            -2.079999,
+            4.35,
+            2.18
+          ],
+          [
+            -2.079999,
+            4.35,
+            1.1
+          ],
+          [
+            -1.7,
+            4.35,
+            1.1
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -2.119999,
+            4.35,
+            4.3
+          ],
+          [
+            -2.5,
+            4.35,
+            4.3
+          ],
+          [
+            -2.5,
+            4.35,
+            3.25
+          ],
+          [
+            -2.119999,
+            4.35,
+            3.25
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            0.0,
+            0.6666666666666667
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -2.119999,
+            4.35,
+            3.25
+          ],
+          [
+            -2.5,
+            4.35,
+            3.25
+          ],
+          [
+            -2.5,
+            4.35,
+            2.18
+          ],
+          [
+            -2.119999,
+            4.35,
+            2.18
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.6666666666666667
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            0.0,
+            0.33333333333333337
+          ]
+        ]
+      },
+      {
+        "positions": [
+          [
+            -2.119999,
+            4.35,
+            2.18
+          ],
+          [
+            -2.5,
+            4.35,
+            2.18
+          ],
+          [
+            -2.5,
+            4.35,
+            1.1
+          ],
+          [
+            -2.119999,
+            4.35,
+            1.1
+          ]
+        ],
+        "uvs": [
+          [
+            0.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.33333333333333337
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      }
+    ]
+  },
   "coordinate_system": {
     "source": "right-handed, meters, Z-up, +Y drive direction",
     "source_world_to_beamng_vehicle": [
@@ -4587,7 +9377,7 @@
       "ericrolph_cannon_car_wash_selector_wet_concrete"
     ],
     "path": "vehicles/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
-    "sha256": "4177098ec0b58157818ffbf819e38ae693d596e4c1d3ce240eaa78abdfd8e08d",
-    "size": 2659547
+    "sha256": "72d2a75bac5a9fd42a2f8d85a665b721fb9c8d9b23b25c7c1c2cdb94a9d7fd79",
+    "size": 2665804
   }
 }

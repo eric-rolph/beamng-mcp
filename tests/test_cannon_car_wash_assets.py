@@ -294,7 +294,6 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
         f"{MOD_ID}_Brush_Overhead_Spinner/transform",
         f"{MOD_ID}_WheelScrub_L_Spinner/transform",
         f"{MOD_ID}_WheelScrub_R_Spinner/transform",
-        f"{MOD_ID}_MitterSway/transform",
     }
     ambient = root.find(
         "c:library_animation_clips/c:animation_clip[@name='ambient']",
@@ -311,7 +310,7 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
         instance.attrib["url"].removeprefix("#")
         for instance in ambient.findall("c:instance_animation", COLLADA_NAMESPACE)
     }
-    assert len(animation_ids) == 8
+    assert len(animation_ids) == 7
     assert clip_targets == animation_ids
     cyclic = ambient.find(
         "c:extra/c:technique[@profile='Torque']/c:cyclic",
@@ -339,7 +338,7 @@ def test_cannon_car_wash_phase2_materials_cover_every_collada_slot() -> None:
 def test_selector_runtime_visual_preserves_animations_and_uses_vehicle_materials() -> None:
     root = ET.parse(SELECTOR_RUNTIME_DAE_PATH).getroot()  # noqa: S314 - owned fixture
     channels = root.findall(".//c:library_animations//c:channel", COLLADA_NAMESPACE)
-    assert len(channels) == 8
+    assert len(channels) == 7
     runtime_ambient = root.find(
         "c:library_animation_clips/c:animation_clip[@name='ambient']",
         COLLADA_NAMESPACE,
@@ -462,7 +461,12 @@ def test_cannon_car_wash_selector_collada_is_a_clean_single_flexbody() -> None:
     assert root.findtext("c:asset/c:up_axis", namespaces=COLLADA_NAMESPACE) == "Z_UP"
 
     scene_nodes = root.findall(".//c:library_visual_scenes//c:node", COLLADA_NAMESPACE)
-    assert [node.attrib["name"] for node in scene_nodes] == [SELECTOR_VISUAL_NAME]
+    # v1.22: the vehicle DAE carries exactly two flexbody meshes - the rigid
+    # visual and the mitter cloth strips that deform with the physics lattice.
+    assert sorted(node.attrib["name"] for node in scene_nodes) == [
+        f"{MOD_ID}_MitterStrips",
+        SELECTOR_VISUAL_NAME,
+    ]
     assert LAUNCH_TRIGGER_NAME.encode() not in dae_bytes
     assert WASH_TRIGGER_NAME.encode() not in dae_bytes
     assert b"Colmesh-" not in dae_bytes
@@ -495,6 +499,9 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
     assert part["flexbodies"] == [
         ["mesh", "[group]:"],
         [SELECTOR_VISUAL_NAME, [PHYSICS_GROUP_NAME]],
+        # v1.22: the mitter curtain is its own flexbody bound to the cloth
+        # node group so the strips deform with the physics lattice.
+        [f"{MOD_ID}_MitterStrips", [f"{MOD_ID}_mitter"]],
     ]
     assert part["cameraExternal"]["distance"] >= 20.0
     assert part["refNodes"] == [
@@ -507,8 +514,15 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
         ],
     ]
 
+    # v1.22: the jbeam carries the rigid cage PLUS the mitter cloth lattice.
+    # Cage assertions below run on the cage subset; the cloth block after
+    # them pins the soft section separately.
+    cloth = handoff["cloth"]
+    cloth_ids = {node["id"] for node in cloth["nodes"]}
+    cage_node_rows = [row for row in part["nodes"][1:] if row[0] not in cloth_ids]
+    cloth_node_rows = [row for row in part["nodes"][1:] if row[0] in cloth_ids]
     expected_positions = {node["id"]: node["position"] for node in handoff["nodes"]}
-    actual_nodes = {row[0]: row for row in part["nodes"][1:]}
+    actual_nodes = {row[0]: row for row in cage_node_rows}
     assert set(actual_nodes) == set(expected_positions)
     for node_id, expected_position in expected_positions.items():
         assert actual_nodes[node_id][1:4] == expected_position
@@ -549,13 +563,15 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
         if node_id not in base_nodes
     )
 
-    actual_beams = {tuple(sorted(row[:2])) for row in part["beams"][1:]}
+    cage_beam_rows = [row for row in part["beams"][1:] if row[0] not in cloth_ids]
+    cloth_beam_rows = [row for row in part["beams"][1:] if row[0] in cloth_ids]
+    actual_beams = {tuple(sorted(row[:2])) for row in cage_beam_rows}
     expected_beams = {tuple(sorted(pair)) for pair in handoff["beams"]}
     assert actual_beams == expected_beams
     assert all(row[2]["beamStrength"] == "FLT_MAX" for row in part["beams"][1:])
 
     expected_triangles = [triangle["nodes"] for triangle in handoff["triangles"]]
-    actual_triangles = [row[:3] for row in part["triangles"][1:]]
+    actual_triangles = [row[:3] for row in part["triangles"][1:] if row[0] not in cloth_ids]
     assert actual_triangles == expected_triangles
     assert {node_id for triangle in actual_triangles for node_id in triangle} <= fixed_nodes
     station_by_node = {node["id"]: node["station"] for node in handoff["nodes"]}
@@ -569,7 +585,30 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
             second = triangle[(index + 1) % len(triangle)]
             assert tuple(sorted((first, second))) in expected_beams
 
-    total_mass = math.fsum(row[4]["nodeWeight"] for row in actual_nodes.values())
+    # Cloth lattice: 12 strips x 2 columns x 4 levels; the top level is
+    # anchored (fixed like the cage), everything below is free, light, and
+    # collidable so vehicles brush the strips aside.
+    assert len(cloth_node_rows) == 96
+    cloth_rows_by_id = {row[0]: row for row in cloth_node_rows}
+    expected_cloth_fixed = {node["id"] for node in cloth["nodes"] if node["fixed"]}
+    assert len(expected_cloth_fixed) == 24
+    for node in cloth["nodes"]:
+        row = cloth_rows_by_id[node["id"]]
+        assert row[1:4] == node["position"]
+        options = row[4]
+        assert options["group"] == f"{MOD_ID}_mitter"
+        assert options["fixed"] is bool(node["fixed"])
+        assert options["collision"] is (not node["fixed"])
+        assert options["nodeWeight"] == 1.0
+        assert options["selfCollision"] is False
+        assert options["staticCollision"] is False
+    actual_cloth_beams = {tuple(sorted(row[:2])) for row in cloth_beam_rows}
+    expected_cloth_beams = {tuple(sorted(beam["nodes"])) for beam in cloth["beams"]}
+    assert actual_cloth_beams == expected_cloth_beams
+    actual_cloth_triangles = [row[:3] for row in part["triangles"][1:] if row[0] in cloth_ids]
+    assert actual_cloth_triangles == [triangle["nodes"] for triangle in cloth["triangles"]]
+
+    total_mass = math.fsum(row[4]["nodeWeight"] for row in part["nodes"][1:])
     config_info = json.loads((SELECTOR_ROOT / "info_standard.json").read_text(encoding="utf-8"))
     assert total_mass == config_info["Weight"]
 
@@ -582,13 +621,13 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
         "type": "Prop",
     }
     assert live_result["topology"] == {
-        "beam_count": len(handoff["beams"]),
+        "beam_count": len(handoff["beams"]) + len(cloth["beams"]),
         "engine_collision_mode_3_count": len(spawn_envelope_nodes),
-        "fixed_node_count": len(handoff["nodes"]),
-        "flexbody_count": 1,
-        "node_count": len(handoff["nodes"]),
+        "fixed_node_count": len(handoff["nodes"]) + len(expected_cloth_fixed),
+        "flexbody_count": 2,
+        "node_count": len(handoff["nodes"]) + len(cloth["nodes"]),
         "total_mass_kg": total_mass,
-        "triangle_count": len(handoff["triangles"]),
+        "triangle_count": len(handoff["triangles"]) + len(cloth["triangles"]),
         "vehicle_directory": f"/vehicles/{MOD_ID}/",
     }
     collision = live_result["collision_contact"]
@@ -623,7 +662,7 @@ def test_cannon_car_wash_repository_metadata_and_icon() -> None:
 
     assert repository_info["internal_name"] == MOD_ID
     assert repository_info["title"] == "Cannon Car Wash"
-    assert repository_info["version"] == "1.21"
+    assert repository_info["version"] == "1.22"
     assert repository_info["author"] == "Eric Rolph"
 
     with Image.open(MOD_ICON_PATH) as icon:
