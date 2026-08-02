@@ -544,7 +544,18 @@ def _build_tileables(output_root: Path) -> list[Path]:
 
 
 def _build_brush_cards(output_root: Path) -> list[Path]:
+    """Partitioned atlas: wavy bristle cards on top, mitter ribbons below.
+
+    v1.22.1: the physics mitter needs CONTINUOUS cloth ribbons, but the
+    card fringe pattern is torn by design - mapped onto the strips it read
+    as stacks of floating horizontal bands (player screenshot). The bottom
+    quarter (v 0.75..1.0) is now solid ribbon lanes, tileable along U so a
+    strip's length can wrap; the card meshes compress their UVs into the
+    top three quarters.
+    """
+
     size = 512
+    card_region = int(size * 0.75)
     colour = Image.new("RGB", (size, size), (7, 25, 68))
     opacity = Image.new("L", (size, size), 0)
     colour_draw = ImageDraw.Draw(colour)
@@ -552,7 +563,7 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
     palette = ((4, 64, 178), (0, 125, 214), (0, 177, 204), (7, 44, 129))
     strip_height = 15
     gap = 7
-    for index, y in enumerate(range(4, size - strip_height, strip_height + gap)):
+    for index, y in enumerate(range(4, card_region - strip_height, strip_height + gap)):
         phase = index * 0.71
         points_top: list[tuple[int, int]] = []
         points_bottom: list[tuple[int, int]] = []
@@ -566,11 +577,33 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
         # A thin highlight and shadow give each EVA strip volume in the card.
         colour_draw.line(points_top, fill=(18, 194, 236), width=2)
         colour_draw.line(points_bottom, fill=(2, 19, 61), width=2)
+    # Mitter ribbon band: straight continuous lanes along U. Tone varies
+    # with sin() at whole-cycle counts so the band tiles seamlessly along U.
+    lane_height = 14
+    lane_gap = 3
+    band_top = card_region + 2
+    for lane_index, y in enumerate(range(band_top, size - lane_height, lane_height + lane_gap)):
+        base = palette[lane_index % len(palette)]
+        for x in range(size):
+            tone = 1.0 + 0.14 * math.sin(math.tau * (2.0 * x / size) + lane_index * 1.9)
+            shade = 1.0 + 0.06 * math.sin(math.tau * (5.0 * x / size) + lane_index * 0.7)
+            fill = tuple(min(255, max(0, round(channel * tone * shade))) for channel in base)
+            colour_draw.line([(x, y), (x, y + lane_height - 1)], fill=fill)
+        opacity_draw.rectangle([(0, y), (size - 1, y + lane_height - 1)], fill=255)
+        colour_draw.line([(0, y), (size - 1, y)], fill=(18, 194, 236), width=1)
+        colour_draw.line(
+            [(0, y + lane_height - 1), (size - 1, y + lane_height - 1)], fill=(2, 19, 61), width=1
+        )
     # Break up only the free outer edge of the cards; the hub edge remains
-    # opaque so no radial holes appear around the rotating shaft.
+    # opaque so no radial holes appear around the rotating shaft. Never fray
+    # the ribbon band.
     opacity_array = np.asarray(opacity, dtype=np.uint8).copy()
     yy, xx = np.indices(opacity_array.shape)
-    fray = (xx > int(size * 0.82)) & (((xx * 17 + yy * 31) % 47) < 4)
+    fray = (
+        (xx > int(size * 0.82))
+        & (yy < card_region)
+        & (((xx * 17 + yy * 31) % 47) < 4)
+    )
     opacity_array[fray] = 0
     opacity = Image.fromarray(opacity_array)
     colour = _dilate_alpha_colour(colour, opacity)
