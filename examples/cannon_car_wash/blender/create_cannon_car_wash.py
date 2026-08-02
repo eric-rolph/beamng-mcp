@@ -544,7 +544,7 @@ def add_vertical_brush(
     # orbits the whole tower - the in/out scrub BeamNG's ambient loader
     # cannot express with translation channels (which it ignores) or
     # nested animated empties (which break the Collada export).
-    wobble = 0.16
+    wobble = 0.19
     wobble_angle = (sway_phase % 4) * math.tau / 4.0
     pivot = (
         location[0] + math.cos(wobble_angle) * wobble,
@@ -1364,7 +1364,7 @@ def build_details() -> None:
     # equals the spinner tilt so the brush visibly hangs from its drive.
     for side in (-1.0, 1.0):
         scrub_name = f"WheelScrub_{'L' if side < 0 else 'R'}"
-        add_wheel_scrubber(scrub_name, (side * 2.05, -6.7, 0.55), side, brush_cards, steel)
+        add_wheel_scrubber(scrub_name, (side * 2.05, -6.7, 0.68), side, brush_cards, steel)
         add_box(
             f"{scrub_name}_Base",
             (side * 2.75, -6.7, 0.157),
@@ -1374,14 +1374,14 @@ def build_details() -> None:
         )
         add_box(
             f"{scrub_name}_Post",
-            (side * 2.75, -6.7, 0.72),
-            (0.14, 0.18, 1.10),
+            (side * 2.75, -6.7, 0.79),
+            (0.14, 0.18, 1.26),
             steel,
             bevel=0.0,
         )
         add_box(
             f"{scrub_name}_Arm",
-            (side * 2.34, -6.7, 1.13),
+            (side * 2.34, -6.7, 1.28),
             (0.88, 0.12, 0.09),
             steel,
             bevel=0.0,
@@ -1389,7 +1389,7 @@ def build_details() -> None:
         )
         add_cylinder(
             f"{scrub_name}_AxleHousing",
-            (side * 1.926, -6.7, 1.055),
+            (side * 1.926, -6.7, 1.185),
             0.075,
             0.20,
             steel,
@@ -1399,7 +1399,7 @@ def build_details() -> None:
         )
         add_box(
             f"{scrub_name}_Motor",
-            (side * 1.883, -6.7, 1.23),
+            (side * 1.883, -6.7, 1.36),
             (0.20, 0.20, 0.15),
             blue_brush,
             bevel=0.02,
@@ -1407,7 +1407,7 @@ def build_details() -> None:
         )
         add_box(
             f"{scrub_name}_WallBrace",
-            (side * 2.87, -6.7, 1.00),
+            (side * 2.87, -6.7, 1.12),
             (0.22, 0.10, 0.08),
             steel,
             bevel=0.0,
@@ -1672,27 +1672,11 @@ def build_details() -> None:
     join_static_meshes("JunctionBoxes", junction_boxes)
 
     wheel_guides = [
-        add_box(
-            f"WheelGuide_{'L' if side < 0 else 'R'}",
-            (side * 2.48, 0.0, 0.24),
-            (0.13, 16.0, 0.24),
-            steel,
-            bevel=0.0,
-        )
-        for side in (-1.0, 1.0)
+        add_box("WheelGuide_L", (-2.48, 0.25, 0.24), (0.13, 15.5, 0.24), steel, bevel=0.0),
+        add_box("WheelGuide_R", (2.48, 0.0, 0.24), (0.13, 16.0, 0.24), steel, bevel=0.0),
     ]
-    for side in (-1.0, 1.0):
-        for end in (-1.0, 1.0):
-            wheel_guides.append(
-                add_box(
-                    f"WheelGuideTaper_{'L' if side < 0 else 'R'}_{'F' if end < 0 else 'R'}",
-                    (side * 2.60, end * 8.22, 0.24),
-                    (0.13, 0.55, 0.24),
-                    steel,
-                    bevel=0.0,
-                    rotation=(0.0, 0.0, side * end * 0.30),
-                )
-            )
+    # v1.24: the v1.23 flared entry tapers are gone - rotated about Z
+    # they jutted into the lane as stray angled blocks (player report).
     join_static_meshes("WheelGuides", wheel_guides)
 
     # Recessed trench drains v3. The v1.18 "flush" grates were authored
@@ -1717,12 +1701,31 @@ def build_details() -> None:
         drain_bases.append(
             add_box(
                 f"Drain_{index:02d}",
-                (0.0, y, 0.089),
-                (2.398, 0.358, 0.078),
+                (0.0, y, 0.05),
+                (2.398, 0.358, 0.07),
                 rubber,
                 bevel=0.0,
             )
         )
+        for liner_edge in (-1.0, 1.0):
+            drain_bases.append(
+                add_box(
+                    f"Drain_{index:02d}_Liner_{'n' if liner_edge > 0 else 's'}",
+                    (0.0, y + liner_edge * 0.174, 0.087),
+                    (2.398, 0.012, 0.09),
+                    rubber,
+                    bevel=0.0,
+                )
+            )
+            drain_bases.append(
+                add_box(
+                    f"Drain_{index:02d}_LinerCap_{'e' if liner_edge > 0 else 'w'}",
+                    (liner_edge * 1.193, y, 0.087),
+                    (0.012, 0.358, 0.09),
+                    rubber,
+                    bevel=0.0,
+                )
+            )
         for slot in range(-4, 5):
             drain_slots.append(
                 add_box(
@@ -1773,155 +1776,84 @@ def build_details() -> None:
     ]
     join_static_meshes("ExitHazardStripes", hazard_stripes)
 
-    # Drive-up pay station v3 (player: "could use some realism work"). Real
-    # proportions instead of a 2.6 m monolith: concrete curb island, steel
-    # pedestal, waist-high cabinet, and a driver-tilted head with screen,
-    # rain visor, keypad grid, card reader, coin slot, and speaker — all
-    # facing the LANE (+x) where the driver's window actually is.
+    # Drive-up pay station v4 (player: "disjointed look, strange blocky
+    # placement of items"). v3's additive detailing - three canopy segments
+    # at three tilts, a punched-through crown, angled PIN wings, plates at
+    # varied depths - read as a jumble. v4 is ONE mass: island -> monolith
+    # body -> rounded crown -> single hood, and every control is a thin
+    # COPLANAR inset on one dark face panel. Nothing tilts but the hood;
+    # total relief stays under 15 mm.
     concrete = material(scenario_material_name("concrete"), (0.18, 0.2, 0.23, 1.0), roughness=0.82)
-    head_tilt = -0.22
-    kiosk_orange = [
-        add_box("PayKiosk_Cabinet", (-2.65, -8.25, 1.19), (0.34, 0.55, 0.85), orange, bevel=0.02),
-        add_box(
-            "PayKiosk_Head",
-            (-2.65, -8.25, 1.80),
-            (0.40, 0.50, 0.35),
-            orange,
-            bevel=0.02,
-            rotation=(0.0, head_tilt, 0.0),
-        ),
-        add_box(
-            "PayKiosk_Canopy_A",
-            (-2.72, -8.25, 2.055),
-            (0.20, 0.56, 0.025),
-            orange,
-            bevel=0.01,
-            rotation=(0.0, head_tilt, 0.0),
-        ),
-        add_box(
-            "PayKiosk_Canopy_B",
-            (-2.55, -8.25, 2.03),
-            (0.20, 0.56, 0.025),
-            orange,
-            bevel=0.01,
-            rotation=(0.0, head_tilt - 0.28, 0.0),
-        ),
-        add_box(
-            "PayKiosk_Canopy_C",
-            (-2.40, -8.25, 1.965),
-            (0.18, 0.56, 0.025),
-            orange,
-            bevel=0.01,
-            rotation=(0.0, head_tilt - 0.56, 0.0),
-        ),
-    ]
-    # Rounded crown over the head cabinet - real pay pylons are not slabs.
+    add_box("PayKiosk_Island", (-2.65, -8.25, 0.20), (0.60, 1.05, 0.14), concrete, bevel=0.02)
+    add_box("PayKiosk_Body", (-2.65, -8.25, 1.075), (0.36, 0.52, 1.55), orange, bevel=0.03)
     add_cylinder(
         "PayKiosk_Crown",
-        (-2.70, -8.25, 1.955),
-        0.19,
-        0.50,
+        (-2.65, -8.25, 1.85),
+        0.18,
+        0.52,
         orange,
-        rotation=(math.pi / 2.0, head_tilt, 0.0),
+        rotation=(math.pi / 2.0, 0.0, 0.0),
         vertices=20,
     )
-    join_static_meshes("PayKioskOrange", kiosk_orange)
-    add_box("PayKiosk_Island", (-2.65, -8.25, 0.20), (0.60, 1.05, 0.14), concrete, bevel=0.02)
-    kiosk_trim = [
-        add_box("PayKiosk_Pedestal", (-2.65, -8.25, 0.52), (0.18, 0.26, 0.50), steel, bevel=0.01),
-        add_box("PayKiosk_KeypadPlate", (-2.47, -8.25, 1.38), (0.03, 0.30, 0.20), steel, bevel=0.0),
-        add_box(
-            "PayKiosk_ScreenBezel",
-            (-2.445, -8.25, 1.82),
-            (0.028, 0.42, 0.28),
-            steel,
-            bevel=0.006,
-            rotation=(0.0, head_tilt, 0.0),
-        ),
-        add_box(
-            "PayKiosk_PinWing_S",
-            (-2.44, -8.42, 1.38),
-            (0.10, 0.015, 0.18),
-            steel,
-            bevel=0.0,
-            rotation=(0.35, 0.0, 0.0),
-        ),
-        add_box(
-            "PayKiosk_PinWing_N",
-            (-2.44, -8.08, 1.38),
-            (0.10, 0.015, 0.18),
-            steel,
-            bevel=0.0,
-            rotation=(-0.35, 0.0, 0.0),
-        ),
-    ]
-    join_static_meshes("PayKioskSteel", kiosk_trim)
-    kiosk_rubber = [
-        add_box("PayKiosk_CardReader", (-2.46, -8.44, 1.15), (0.06, 0.14, 0.09), rubber, bevel=0.0),
-        add_box("PayKiosk_CoinSlot", (-2.462, -8.1, 1.12), (0.02, 0.05, 0.014), rubber, bevel=0.0),
-        add_box(
-            "PayKiosk_ReceiptSlot", (-2.465, -8.25, 0.92), (0.025, 0.20, 0.03), rubber, bevel=0.0
-        ),
-    ]
-    kiosk_rubber.append(
-        add_cylinder(
-            "PayKiosk_CoinReturn",
-            (-2.465, -8.10, 1.02),
-            0.035,
-            0.03,
-            rubber,
-            rotation=(0.0, math.pi / 2.0, 0.0),
-            vertices=14,
-            bevel=0.0,
-        )
-    )
-    for row, button_z in enumerate((1.31, 1.355, 1.40, 1.445)):
-        for column, button_y in enumerate((-8.34, -8.25, -8.16)):
-            kiosk_rubber.append(
-                add_box(
-                    f"PayKiosk_Key_{row}{column}",
-                    (-2.452, button_y, button_z),
-                    (0.014, 0.055, 0.032),
-                    rubber,
-                    bevel=0.0,
-                )
-            )
-    join_static_meshes("PayKioskRubber", kiosk_rubber)
     add_box(
-        "PayKiosk_Screen",
-        (-2.43, -8.25, 1.82),
-        (0.03, 0.36, 0.22),
-        screen,
-        bevel=0.006,
-        rotation=(0.0, head_tilt, 0.0),
+        "PayKiosk_Hood",
+        (-2.52, -8.25, 1.97),
+        (0.30, 0.56, 0.03),
+        steel,
+        bevel=0.01,
+        rotation=(0.0, -0.28, 0.0),
     )
+    add_box("PayKiosk_FacePanel", (-2.465, -8.25, 1.26), (0.02, 0.42, 1.06), rubber, bevel=0.01)
+    add_box("PayKiosk_ScreenBezel", (-2.457, -8.25, 1.60), (0.014, 0.38, 0.30), steel, bevel=0.006)
+    add_box("PayKiosk_Screen", (-2.452, -8.25, 1.60), (0.015, 0.34, 0.24), screen, bevel=0.006)
+    add_box("PayKiosk_KeypadPlate", (-2.457, -8.31, 1.27), (0.014, 0.26, 0.20), steel, bevel=0.0)
+    for row, key_z in enumerate((1.20, 1.245, 1.29, 1.335)):
+        for column, key_y in enumerate((-8.40, -8.31, -8.22)):
+            add_box(
+                f"PayKiosk_Key_{row}{column}",
+                (-2.449, key_y, key_z),
+                (0.012, 0.05, 0.03),
+                rubber,
+                bevel=0.0,
+            )
+    add_box("PayKiosk_TapPad", (-2.455, -8.06, 1.30), (0.016, 0.12, 0.12), cyan, bevel=0.006)
+    add_box("PayKiosk_CardSlot", (-2.453, -8.06, 1.16), (0.014, 0.14, 0.03), steel, bevel=0.0)
+    add_cylinder(
+        "PayKiosk_CoinReturn",
+        (-2.454, -8.06, 1.06),
+        0.035,
+        0.02,
+        steel,
+        rotation=(0.0, math.pi / 2.0, 0.0),
+        vertices=14,
+        bevel=0.0,
+    )
+    add_box("PayKiosk_ReceiptSlot", (-2.454, -8.25, 0.90), (0.014, 0.20, 0.028), steel, bevel=0.0)
     add_cylinder(
         "PayKiosk_Speaker",
-        (-2.46, -8.07, 1.55),
-        0.06,
-        0.025,
+        (-2.454, -8.25, 1.44),
+        0.05,
+        0.018,
         steel,
         rotation=(0.0, math.pi / 2.0, 0.0),
         vertices=16,
         bevel=0.0,
     )
-    add_box("PayKiosk_TapPad", (-2.463, -8.44, 1.30), (0.02, 0.12, 0.12), cyan, bevel=0.006)
-    add_box("PayKiosk_Instructions", (-2.487, -8.25, 1.55), (0.012, 0.26, 0.09), cyan, bevel=0.0)
+    add_cylinder(
+        "PayKiosk_SpeakerInner",
+        (-2.448, -8.25, 1.44),
+        0.036,
+        0.014,
+        rubber,
+        rotation=(0.0, math.pi / 2.0, 0.0),
+        vertices=14,
+        bevel=0.0,
+    )
     add_box(
         "PayKiosk_IslandStripe",
         (-2.36, -8.25, 0.278),
         (0.04, 1.05, 0.018),
         yellow,
-        bevel=0.0,
-    )
-    add_cylinder(
-        "PayKiosk_SpeakerInner",
-        (-2.452, -8.07, 1.55),
-        0.042,
-        0.028,
-        rubber,
-        rotation=(0.0, math.pi / 2.0, 0.0),
-        vertices=14,
         bevel=0.0,
     )
 
@@ -2218,6 +2150,47 @@ def build_details() -> None:
     )
     add_cylinder("RoofVent", (-1.80, 6.50, 5.41), 0.14, 0.90, steel, vertices=14)
     add_box("RoofDuct", (-0.50, 5.60, 5.11), (0.30, 1.20, 0.30), steel, bevel=0.0)
+
+    # Small equipment-wall props: instantly readable realism anchors.
+    add_cylinder(
+        "FireExtinguisher",
+        (3.0, -7.6, 1.05),
+        0.085,
+        0.52,
+        orange,
+        vertices=14,
+    )
+    add_box("FireExtinguisherBracket", (3.045, -7.6, 1.05), (0.05, 0.10, 0.30), steel, bevel=0.0)
+    add_cylinder(
+        "FireExtinguisherBand",
+        (3.0, -7.6, 1.22),
+        0.087,
+        0.06,
+        steel,
+        vertices=14,
+        bevel=0.0,
+    )
+    add_cylinder(
+        "HoseReel_Drum",
+        (3.02, 6.4, 1.45),
+        0.24,
+        0.16,
+        cyan,
+        rotation=(0.0, math.pi / 2.0, 0.0),
+        vertices=18,
+    )
+    add_cylinder(
+        "HoseReel_Hose",
+        (3.02, 6.4, 1.45),
+        0.19,
+        0.10,
+        rubber,
+        rotation=(0.0, math.pi / 2.0, 0.0),
+        vertices=18,
+        bevel=0.0,
+    )
+    add_box("HoseReel_Mount", (3.06, 6.4, 1.45), (0.06, 0.16, 0.34), steel, bevel=0.0)
+    add_box("HoseReel_Guide", (2.94, 6.4, 1.12), (0.05, 0.12, 0.05), steel, bevel=0.0)
 
     add_light_anchors()
 
@@ -2653,11 +2626,14 @@ def _selector_structure() -> dict[str, Any]:
             # (player screenshot); the ribbon band is solid cloth.
             along_top = (level / 3.0) * 1.5 + strip * 0.13
             along_bottom = ((level + 1) / 3.0) * 1.5 + strip * 0.13
+            # Window inset from the band edges: mips average across the
+            # card/band boundary, so sampling too close ghosts the wavy
+            # card fringe into the lanes (player: jagged mid-strip band).
             quad_uvs = [
-                [along_top, 0.765],
-                [along_top, 0.995],
-                [along_bottom, 0.995],
-                [along_bottom, 0.765],
+                [along_top, 0.79],
+                [along_top, 0.985],
+                [along_bottom, 0.985],
+                [along_bottom, 0.79],
             ]
             cloth_quads.append(
                 {

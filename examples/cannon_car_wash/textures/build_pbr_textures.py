@@ -581,7 +581,15 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
     # with sin() at whole-cycle counts so the band tiles seamlessly along U.
     lane_height = 14
     lane_gap = 3
-    band_top = card_region + 2
+    # Opaque padding apron between the card region and the sampled lanes:
+    # transparent inset rows let mip averaging bleed alpha and card waves
+    # into the first lanes at distance (player: jagged mid-strip band).
+    band_top = card_region + 22
+    for x in range(size):
+        tone = 1.0 + 0.14 * math.sin(math.tau * (2.0 * x / size))
+        fill = tuple(min(255, max(0, round(channel * tone))) for channel in palette[0])
+        colour_draw.line([(x, card_region), (x, band_top - 1)], fill=fill)
+    opacity_draw.rectangle([(0, card_region), (size - 1, band_top - 1)], fill=255)
     for lane_index, y in enumerate(range(band_top, size - lane_height, lane_height + lane_gap)):
         base = palette[lane_index % len(palette)]
         for x in range(size):
