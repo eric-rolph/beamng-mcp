@@ -52,14 +52,14 @@
     },
     "countdown_log_elapsed_seconds": [
       0.0,
-      1.0152,
-      2.0318799999999975,
-      3.049069999999997
+      1.0152900000000002,
+      2.031970000000001,
+      3.04918
     ],
     "countdown_structured_elapsed_seconds": [
       0.0,
-      1.0000179,
-      2.0166917
+      1.0000147,
+      2.0166928
     ],
     "effect_active_count": 16,
     "emitter_active_counts": {
@@ -196,12 +196,12 @@
     },
     "prop_reset_count": 3,
     "render_difference": {
-      "changed_pixel_ratio": 0.7997612847222222,
-      "changed_pixels": 184265,
+      "changed_pixel_ratio": 0.7175607638888889,
+      "changed_pixels": 165326,
       "channel_means": [
-        19.941254340277776,
-        21.95253472222222,
-        24.211896701388888
+        17.127547743055555,
+        19.79047309027778,
+        23.497057291666668
       ],
       "pixel_count": 230400
     },
@@ -551,5 +551,5 @@
     "triangle_count": 224,
     "vehicle_directory": "/vehicles/ericrolph_cannon_car_wash/"
   },
-  "verified_on": "2026-08-02T01:40:00-06:00"
+  "verified_on": "2026-08-02T13:08:00-06:00"
 }
