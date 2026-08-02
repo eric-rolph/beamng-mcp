@@ -599,11 +599,7 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
     # the ribbon band.
     opacity_array = np.asarray(opacity, dtype=np.uint8).copy()
     yy, xx = np.indices(opacity_array.shape)
-    fray = (
-        (xx > int(size * 0.82))
-        & (yy < card_region)
-        & (((xx * 17 + yy * 31) % 47) < 4)
-    )
+    fray = (xx > int(size * 0.82)) & (yy < card_region) & (((xx * 17 + yy * 31) % 47) < 4)
     opacity_array[fray] = 0
     opacity = Image.fromarray(opacity_array)
     colour = _dilate_alpha_colour(colour, opacity)
