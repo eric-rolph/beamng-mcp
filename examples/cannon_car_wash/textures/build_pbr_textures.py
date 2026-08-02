@@ -424,12 +424,122 @@ def _build_wet_concrete(output_root: Path) -> list[Path]:
     return outputs
 
 
+def _build_dry_concrete(output_root: Path) -> list[Path]:
+    """Dry structural concrete for the slab edges, portal ramps, and island.
+
+    Shares the wet-concrete 2 x 2 m control-joint grid so the ramp aprons
+    read as the same pour as the interior slab, minus the sealed-wet sheen.
+    """
+
+    tile_m = (2.0, 2.0)
+    base_rgb = np.array((0.18, 0.20, 0.23), dtype=np.float32)
+    mottle = _periodic_fbm((TILE, TILE), 5, 4, 61)
+    speckle = _periodic_fbm((TILE, TILE), 128, 2, 62)
+    colour = np.ones((TILE, TILE, 3), dtype=np.float32) * base_rgb
+    colour *= (0.90 + (mottle - 0.5) * 0.22 + (speckle - 0.5) * 0.10)[..., None]
+
+    joint_half_m = 0.004
+    px_m = tile_m[0] / TILE
+    axis_m = (np.arange(TILE, dtype=np.float32) + 0.5) * px_m
+    distance_edge = np.minimum(axis_m, tile_m[0] - axis_m)
+    joint_line = np.clip(1.0 - distance_edge / (joint_half_m + 2.0 * px_m), 0.0, 1.0)
+    joint = np.maximum(joint_line[:, None], joint_line[None, :])
+    colour *= (1.0 - joint * 0.38)[..., None]
+
+    height = 0.0018 * (speckle - 0.5) - joint * 0.006
+    roughness = 0.80 + (mottle - 0.5) * 0.10 + (speckle - 0.5) * 0.08 + joint * 0.10
+
+    paths = {
+        _texture_name("concrete", "color"): _to_srgb_image(colour),
+        _texture_name("concrete", "normal"): _normal_from_metric_height(height, tile_m),
+        _texture_name("concrete_roughness", "data"): _to_data_image(roughness),
+        _texture_name("concrete_ao", "data"): _ao_from_metric_height(height, 20.0),
+    }
+    outputs: list[Path] = []
+    for name, image in paths.items():
+        path = output_root / name
+        _save(_seal_edges(image), path)
+        outputs.append(path)
+    return outputs
+
+
+def _build_stainless(output_root: Path) -> list[Path]:
+    """Brushed stainless for the gantry, plumbing, frames, and pedestals.
+
+    Anisotropic streaks: fbm stretched hard along X reads as brush grain on
+    every part regardless of the per-face 0..1 primitive UVs (the streak has
+    no recognizable scale, so non-metric mapping cannot betray it).
+    """
+
+    tile_m = (0.5, 0.5)
+    base_rgb = np.array((0.42, 0.46, 0.50), dtype=np.float32)
+    streak = _periodic_fbm((TILE, TILE), 6, 3, 71)
+    grain = (
+        np.asarray(
+            Image.fromarray(
+                (_periodic_fbm((TILE, TILE // 8), 48, 2, 72) * 255).astype("uint8")
+            ).resize((TILE, TILE), Image.Resampling.BILINEAR),
+            dtype=np.float32,
+        )
+        / 255.0
+    )
+    colour = np.ones((TILE, TILE, 3), dtype=np.float32) * base_rgb
+    colour *= (0.94 + (grain - 0.5) * 0.10 + (streak - 0.5) * 0.05)[..., None]
+
+    height = 0.00035 * (grain - 0.5)
+    roughness = 0.22 + (grain - 0.5) * 0.10 + (streak - 0.5) * 0.06
+
+    paths = {
+        _texture_name("stainless", "color"): _to_srgb_image(colour),
+        _texture_name("stainless", "normal"): _normal_from_metric_height(height, tile_m),
+        _texture_name("stainless_roughness", "data"): _to_data_image(roughness),
+    }
+    outputs: list[Path] = []
+    for name, image in paths.items():
+        path = output_root / name
+        _save(_seal_edges(image), path)
+        outputs.append(path)
+    return outputs
+
+
+def _build_powder_coat(output_root: Path, stem: str, base_rgb_tuple, salt: int) -> list[Path]:
+    """Powder-coated equipment paint: orange-peel micro texture + scuffs."""
+
+    tile_m = (0.5, 0.5)
+    base_rgb = np.array(base_rgb_tuple, dtype=np.float32)
+    peel = _periodic_fbm((TILE, TILE), 160, 2, salt)
+    scuff = _smoothstep((_periodic_fbm((TILE, TILE), 7, 3, salt + 1) - 0.62) / 0.10)
+    colour = np.ones((TILE, TILE, 3), dtype=np.float32) * base_rgb
+    colour *= (0.97 + (peel - 0.5) * 0.05)[..., None]
+    colour = colour * (1.0 - scuff[..., None] * 0.18) + scuff[..., None] * 0.06
+
+    height = 0.00025 * (peel - 0.5)
+    roughness = 0.38 + (peel - 0.5) * 0.10 + scuff * 0.30
+
+    paths = {
+        _texture_name(stem, "color"): _to_srgb_image(np.clip(colour, 0.0, 1.0)),
+        _texture_name(stem, "normal"): _normal_from_metric_height(height, tile_m),
+        _texture_name(f"{stem}_roughness", "data"): _to_data_image(roughness),
+    }
+    outputs: list[Path] = []
+    for name, image in paths.items():
+        path = output_root / name
+        _save(_seal_edges(image), path)
+        outputs.append(path)
+    return outputs
+
+
 def _build_tileables(output_root: Path) -> list[Path]:
     return (
         _build_cmu(output_root)
         + _build_interior_brick(output_root)
         + _build_corrugated_blue(output_root)
         + _build_wet_concrete(output_root)
+        + _build_dry_concrete(output_root)
+        + _build_stainless(output_root)
+        + _build_powder_coat(output_root, "safety_orange", (1.0, 0.16, 0.015), 81)
+        + _build_powder_coat(output_root, "hazard_yellow", (1.0, 0.68, 0.015), 84)
+        + _build_powder_coat(output_root, "deep_blue", (0.015, 0.09, 0.22), 87)
     )
 
 

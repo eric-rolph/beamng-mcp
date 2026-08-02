@@ -36,13 +36,13 @@
   },
   "scene_bounds": {
     "min": [
-      -5.481014,
-      -11.847336,
+      -14.937485,
+      -15.44807,
       -5.479662
     ],
     "max": [
-      3.73,
-      10.800001,
+      14.390142,
+      13.879999,
       11.023128
     ]
   },
@@ -1242,8 +1242,8 @@
   },
   "mesh_statistics": {
     "objects": 43,
-    "vertices": 9415,
-    "polygons": 7147
+    "vertices": 9743,
+    "polygons": 7383
   },
   "collision_meshes": [
     "Colmesh-1",
@@ -1252,7 +1252,7 @@
     "Colmesh-4"
   ],
   "export_statistics": {
-    "triangle_count": 17132,
+    "triangle_count": 17788,
     "geometry_count": 40,
     "primitive_group_count": 40,
     "material_symbol_count": 18

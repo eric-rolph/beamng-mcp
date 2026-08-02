@@ -45,10 +45,11 @@ def add_ambient_animation_clip(path: Path) -> None:
     if b'<animation_clip id="ambient" name="ambient"' in payload:
         raise RuntimeError("Collada already contains an ambient animation clip")
     animation_ids = re.findall(rb'^    <animation id="([A-Za-z0-9_.-]+)"', payload, re.MULTILINE)
-    # Four tower spinners + overhead roller + two tire scrubbers (v1.20).
-    if len(animation_ids) != 7 or len(set(animation_ids)) != 7:
+    # Four tower spinners + overhead roller + two tire scrubbers (v1.20)
+    # + the swaying mitter curtain (v1.21).
+    if len(animation_ids) != 8 or len(set(animation_ids)) != 8:
         raise RuntimeError(
-            f"expected exactly seven top-level spinner animations, found {len(animation_ids)}"
+            f"expected exactly eight top-level spinner animations, found {len(animation_ids)}"
         )
     newline = b"\r\n" if b"\r\n" in payload else b"\n"
     clip_lines = [
@@ -542,7 +543,7 @@ def add_vertical_brush(
     # orbits the whole tower - the in/out scrub BeamNG's ambient loader
     # cannot express with translation channels (which it ignores) or
     # nested animated empties (which break the Collada export).
-    wobble = 0.12
+    wobble = 0.16
     wobble_angle = (sway_phase % 4) * math.tau / 4.0
     pivot = (
         location[0] + math.cos(wobble_angle) * wobble,
@@ -558,7 +559,7 @@ def add_vertical_brush(
     # floppy bristle flutter a rigid rotation cannot fake. Static base
     # rotations ride in the node transform, so the ambient clip still
     # carries exactly one animated channel per spinner.
-    tilt = 0.06
+    tilt = 0.08
     root.rotation_mode = "XYZ"
     root.rotation_euler[0] = math.sin(wobble_angle) * tilt
     root.rotation_euler[1] = math.cos(wobble_angle) * tilt
@@ -608,6 +609,26 @@ def add_vertical_brush(
     card_cluster.parent = root
     card_cluster.location = (location[0] - pivot[0], location[1] - pivot[1], 0.0)
     animate_spin(root, 2, spin_direction)
+
+
+def animate_sway(obj: bpy.types.Object, axis: int, amplitude: float) -> None:
+    """Gentle pendulum oscillation on one rotation channel.
+
+    The ambient loader plays rotation fcurves as authored, so a triangle
+    wave (0 -> +A -> 0 -> -A -> 0) over the same 61-frame cycle the
+    spinners use loops seamlessly alongside them.
+    """
+
+    obj.rotation_mode = "XYZ"
+    for frame, value in ((1, 0.0), (16, amplitude), (31, 0.0), (46, -amplitude), (61, 0.0)):
+        obj.rotation_euler[axis] = value
+        obj.keyframe_insert(data_path="rotation_euler", index=axis, frame=frame)
+    if obj.animation_data is None or obj.animation_data.action is None:
+        return
+    for curve in obj.animation_data.action.fcurves:
+        for point in curve.keyframe_points:
+            point.interpolation = "LINEAR"
+        curve.modifiers.new("CYCLES")
 
 
 def add_wheel_scrubber(
@@ -665,7 +686,7 @@ def add_horizontal_brush(
     # Off-axis pivot 0.05 m below the roller axis: the spin orbit presses
     # the roller down-and-up subtly each revolution (capped so its crown
     # only grazes the ceiling light plane at the top of the orbit).
-    pivot = (location[0], location[1], location[2] - 0.05)
+    pivot = (location[0], location[1], location[2] - 0.09)
     root = bpy.data.objects.new(namespaced_object_name("Brush_Overhead_Spinner"), None)
     root.empty_display_type = "CIRCLE"
     root.location = pivot
@@ -737,39 +758,53 @@ def add_pipe_arch(
         side_name = "L" if side < 0 else "R"
         add_cylinder(f"{prefix}_Post_{side_name}", (x, y, 2.3), 0.075, 4.2, steel)
         for z in (1.25, 2.1, 3.0):
-            # Real spray-nozzle profile (player: plain stub cylinders read
-            # "clunky"): supply elbow off the post, a colored nozzle body,
-            # and a tapered tip aimed slightly down into the lane.
-            pitch = math.pi / 2.0 + side * 0.17
+            # Real spray-nozzle profile: supply elbow off the post, a colored
+            # body, and a tapered tip, ALL collinear along one pitched spray
+            # axis (v1.20 laid the centers on a horizontal line while pitching
+            # each part - the assembly read visibly off-center/kinked, and the
+            # right-side cones pointed upward from a sign slip).
+            drop = 0.18  # tan(~10 deg) downward pitch into the lane
+            axis = Vector((-side, 0.0, -drop)).normalized()
+            pitch_angle = math.asin(drop / math.hypot(1.0, drop))
+            # Y-rotation by theta maps the primitive +Z axis to
+            # (sin theta, 0, cos theta); -side*(pi/2+pitch) lands exactly on
+            # the spray axis for BOTH walls, so the cone needs no flip.
+            rotation = (0.0, -side * (math.pi / 2.0 + pitch_angle), 0.0)
+            start = Vector((x, y, z))
+
+            def along(distance, start=start, axis=axis):
+                point = start + axis * distance
+                return (point.x, point.y, point.z)
+
             add_cylinder(
                 f"{prefix}_Elbow_{side_name}_{z}",
-                (x - side * 0.055, y, z),
+                along(0.055),
                 0.032,
                 0.11,
                 steel,
-                rotation=(0.0, math.pi / 2.0, 0.0),
+                rotation=rotation,
                 vertices=10,
                 bevel=0.0,
             )
             jet = add_cylinder(
                 f"{prefix}_Jet_{side_name}_{z}",
-                (x - side * 0.14, y, z - 0.008),
+                along(0.14),
                 0.05,
                 0.11,
                 nozzle,
-                rotation=(0.0, pitch, 0.0),
+                rotation=rotation,
                 vertices=16,
                 bevel=0.0,
             )
             jet["water_jet"] = True
             add_cone(
                 f"{prefix}_Tip_{side_name}_{z}",
-                (x - side * 0.225, y, z - 0.022),
+                along(0.225),
                 0.048,
                 0.02,
                 0.09,
                 steel,
-                rotation=(0.0, pitch + (0.0 if side < 0 else math.pi), 0.0),
+                rotation=rotation,
                 vertices=14,
             )
     add_cylinder(
@@ -1321,48 +1356,59 @@ def build_details() -> None:
     # --- Interior realism pass (player request 2026-08-01) -----------------
 
     # Spinning tire scrubbers just inside the entrance, leaning into the
-    # wheel line like real tunnel tire brushes.
+    # wheel line like real tunnel tire brushes. v1.21: each unit hangs off a
+    # visible pedestal arm from the wall side (player: "make the scrubbers
+    # look more realistic" - they previously floated with a loose motor cap).
     for side in (-1.0, 1.0):
         scrub_name = f"WheelScrub_{'L' if side < 0 else 'R'}"
         add_wheel_scrubber(scrub_name, (side * 2.05, -6.7, 0.55), side, brush_cards, steel)
         add_box(
+            f"{scrub_name}_Pedestal",
+            (side * 2.75, -6.7, 0.45),
+            (0.16, 0.24, 0.62),
+            steel,
+            bevel=0.0,
+        )
+        add_box(
+            f"{scrub_name}_Arm",
+            (side * 2.42, -6.7, 0.94),
+            (0.55, 0.14, 0.10),
+            steel,
+            bevel=0.0,
+            rotation=(0.0, -side * 0.22, 0.0),
+        )
+        add_box(
             f"{scrub_name}_Motor",
-            (side * 2.05, -6.7, 1.14),
-            (0.22, 0.22, 0.18),
+            (side * 2.10, -6.7, 1.12),
+            (0.24, 0.24, 0.20),
             blue_brush,
             bevel=0.02,
+            rotation=(0.0, -side * 0.24, 0.0),
         )
 
-    # Entrance rubber curtain flaps: the strips every real wash noses through.
-    entry_flaps = [
-        add_box(
-            f"EntryFlap_{index:02d}",
-            (-2.5 + index * 0.5, -8.72, 2.78),
-            (0.46, 0.035, 2.35),
-            rubber,
-            bevel=0.0,
-            rotation=(0.05 if index % 2 else -0.04, 0.0, 0.0),
-        )
-        for index in range(11)
-    ]
-    join_static_meshes("EntryFlaps", entry_flaps)
-
-    # Mitter curtain mid-tunnel: two staggered rows of cloth strips posed
-    # mid-sway (ambient clips cannot oscillate, so the pose carries the
-    # motion read), hung from a visible gantry beam.
+    # Mitter curtain in the pre-soak zone (v1.21: moved from between the
+    # brush stations - real mitters hang early in the tunnel right after
+    # first wetting - and it now genuinely SWAYS side to side: the strips
+    # hang from an animated root that rolls gently about the travel axis,
+    # one more rotation channel in the ambient clip).
+    mitter_pivot = (0.0, -4.35, 4.30)
+    mitter_root = bpy.data.objects.new(namespaced_object_name("MitterSway"), None)
+    mitter_root.empty_display_type = "CIRCLE"
+    mitter_root.location = mitter_pivot
+    bpy.context.scene.collection.objects.link(mitter_root)
     mitter_vertices: list[tuple[float, float, float]] = []
     mitter_faces: list[tuple[int, int, int, int]] = []
     mitter_uvs: list[tuple[tuple[float, float], ...]] = []
-    for row, (row_y, base_lean) in enumerate(((0.0, 0.34), (0.20, 0.16))):
+    for row, (row_y, base_lean) in enumerate(((-0.05, 0.16), (0.15, 0.08))):
         for index in range(12):
             x = -2.31 + index * 0.42
-            lean = base_lean + 0.16 * math.sin(index * 1.7 + row * 2.1)
-            hem = 2.02 + 0.12 * abs(math.sin(index * 2.3 + row))
+            lean = base_lean + 0.10 * math.sin(index * 1.7 + row * 2.1)
+            hem = 0.12 * abs(math.sin(index * 2.3 + row)) - 2.28
             base = len(mitter_vertices)
             mitter_vertices.extend(
                 (
-                    (x - 0.19, row_y, 4.22),
-                    (x + 0.19, row_y, 4.22),
+                    (x - 0.19, row_y, -0.08),
+                    (x + 0.19, row_y, -0.08),
                     (x + 0.19, row_y + lean, hem),
                     (x - 0.19, row_y + lean, hem),
                 )
@@ -1372,16 +1418,19 @@ def build_details() -> None:
                 mitter_uvs.append(((1.0, 1.0), (0.0, 1.0), (0.0, 0.0), (1.0, 0.0)))
             else:
                 mitter_uvs.append(((0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0)))
-    add_card_mesh(
-        "MitterCurtain", (0.0, 2.55, 0.0), mitter_vertices, mitter_faces, brush_cards, mitter_uvs
+    mitter_cards = add_card_mesh(
+        "MitterCurtain", mitter_pivot, mitter_vertices, mitter_faces, brush_cards, mitter_uvs
     )
-    add_box("MitterBeam", (0.0, 2.65, 4.36), (5.0, 0.16, 0.14), steel, bevel=0.0)
+    mitter_cards.parent = mitter_root
+    mitter_cards.location = (0.0, 0.0, 0.0)
+    animate_sway(mitter_root, 1, 0.10)
+    add_box("MitterBeam", (0.0, -4.35, 4.38), (5.0, 0.16, 0.14), steel, bevel=0.0)
 
     # Equipment mounting: the brushes no longer float. A ceiling gantry
     # carries the tower spinners, and columns brace the overhead roller.
     gantry_parts = [
-        add_box("MitterHanger_L", (-2.2, 2.65, 4.27), (0.12, 0.14, 0.10), steel, bevel=0.0),
-        add_box("MitterHanger_R", (2.2, 2.65, 4.27), (0.12, 0.14, 0.10), steel, bevel=0.0),
+        add_box("MitterHanger_L", (-2.2, -4.35, 4.29), (0.12, 0.14, 0.10), steel, bevel=0.0),
+        add_box("MitterHanger_R", (2.2, -4.35, 4.29), (0.12, 0.14, 0.10), steel, bevel=0.0),
         add_box("OverheadCross", (0.0, 4.15, 4.50), (5.44, 0.14, 0.10), steel, bevel=0.0),
     ]
     for side in (-1.0, 1.0):
@@ -1443,7 +1492,9 @@ def build_details() -> None:
             vertices=14,
         )
 
-    # Supply plumbing: wall mains feeding each spray arch.
+    # Supply plumbing (v1.21 expanded): wall mains feed each arch through a
+    # valved drop with a pressure gauge, flexible feed hoses run to the
+    # brush motors, and a chemical dosing station stands in the dry zone.
     for side in (-1.0, 1.0):
         side_name = "L" if side < 0 else "R"
         add_cylinder(
@@ -1466,32 +1517,66 @@ def build_details() -> None:
                 vertices=10,
                 bevel=0.0,
             )
-
-    # Floor conveyor track between the wheel paths: belt strip, cleats,
-    # and end drums. Visual only - Colmesh-1 stays flat.
-    add_box("ConveyorBelt", (0.0, 0.1, 0.138), (0.55, 16.6, 0.012), rubber, bevel=0.0)
-    conveyor_cleats = [
-        add_box(
-            f"ConveyorCleat_{index:02d}",
-            (0.0, -7.4 + index * 1.5, 0.150),
-            (0.50, 0.06, 0.028),
-            yellow,
-            bevel=0.0,
-        )
-        for index in range(11)
-    ]
-    join_static_meshes("ConveyorCleats", conveyor_cleats)
-    for end_name, y in (("F", -8.55), ("R", 8.55)):
+            add_cylinder(
+                f"SupplyValve_{side_name}_{index}",
+                (side * 2.83, y, 2.62),
+                0.075,
+                0.035,
+                cyan,
+                rotation=(0.0, math.pi / 2.0, 0.0),
+                vertices=12,
+                bevel=0.0,
+            )
+            add_cylinder(
+                f"SupplyGauge_{side_name}_{index}",
+                (side * 2.845, y + 0.16, 3.42),
+                0.045,
+                0.04,
+                steel,
+                rotation=(0.0, math.pi / 2.0, 0.0),
+                vertices=10,
+                bevel=0.0,
+            )
+        for index, y in enumerate((-3.0, 1.2), start=1):
+            add_cylinder(
+                f"BrushFeed_{side_name}_{index}",
+                (side * 2.62, y + 0.1, 3.72),
+                0.025,
+                0.68,
+                steel,
+                rotation=(0.0, side * 1.35, 0.0),
+                vertices=8,
+                bevel=0.0,
+            )
+    for index, tank_material in enumerate((blue_brush, aqua_brush, orange)):
         add_cylinder(
-            f"ConveyorDrum_{end_name}",
-            (0.0, y, 0.14),
-            0.06,
-            0.5,
-            steel,
-            rotation=(0.0, math.pi / 2.0, 0.0),
-            vertices=10,
-            bevel=0.0,
+            f"DosingTank_{index}",
+            (-2.8, 6.2 + index * 0.34, 0.42),
+            0.13,
+            0.56,
+            tank_material,
+            vertices=12,
         )
+    add_box("DosingShelf", (-2.8, 6.55, 0.10), (0.44, 1.20, 0.06), steel, bevel=0.0)
+    add_cylinder(
+        "DosingManifold",
+        (-2.8, 6.55, 0.86),
+        0.028,
+        1.1,
+        steel,
+        rotation=(math.pi / 2.0, 0.0, 0.0),
+        vertices=8,
+        bevel=0.0,
+    )
+    add_cylinder(
+        "DosingRiser",
+        (-2.85, 6.9, 2.2),
+        0.025,
+        2.7,
+        steel,
+        vertices=8,
+        bevel=0.0,
+    )
 
     # Stage lighting: glowing wall bars marking each tunnel stage.
     for side in (-1.0, 1.0):
@@ -1620,21 +1705,23 @@ def build_details() -> None:
     join_static_meshes("DrainBases", drain_bases)
     join_static_meshes("DrainSlots", drain_slots)
 
-    hazard_groups: dict[str, list[bpy.types.Object]] = {"yellow": [], "rubber": []}
-    for index, x in enumerate((-2.35, -1.55, -0.75, 0.05, 0.85, 1.65, 2.45)):
-        group = "yellow" if index % 2 == 0 else "rubber"
-        hazard_groups[group].append(
-            add_box(
-                f"ExitHazard_{index:02d}",
-                (x, 6.55, 0.145),
-                (0.56, 0.6, 0.035),
-                yellow if group == "yellow" else rubber,
-                bevel=0.0,
-                rotation=(0.0, 0.0, -0.32),
-            )
+    # Exit warning band v2 (player screenshot: the old rotated pads read as
+    # scattered diamonds floating off the slab). One thin black base strip
+    # sits 5 mm proud of the wet finish with diagonal yellow chevron stripes
+    # 8 mm over it - a painted-band look, visually flush from driver height.
+    add_box("ExitHazardBase", (0.0, 6.55, 0.1365), (5.8, 0.64, 0.009), rubber, bevel=0.0)
+    hazard_stripes = [
+        add_box(
+            f"ExitHazard_{index:02d}",
+            (-2.48 + index * 0.62, 6.55, 0.1445),
+            (0.28, 0.82, 0.008),
+            yellow,
+            bevel=0.0,
+            rotation=(0.0, 0.0, -0.785),
         )
-    join_static_meshes("ExitHazardYellow", hazard_groups["yellow"])
-    join_static_meshes("ExitHazardRubber", hazard_groups["rubber"])
+        for index in range(9)
+    ]
+    join_static_meshes("ExitHazardStripes", hazard_stripes)
 
     # Drive-up pay station v3 (player: "could use some realism work"). Real
     # proportions instead of a 2.6 m monolith: concrete curb island, steel
