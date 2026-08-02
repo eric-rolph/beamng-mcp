@@ -540,7 +540,48 @@ def _build_tileables(output_root: Path) -> list[Path]:
         + _build_powder_coat(output_root, "safety_orange", (1.0, 0.16, 0.015), 81)
         + _build_powder_coat(output_root, "hazard_yellow", (1.0, 0.68, 0.015), 84)
         + _build_powder_coat(output_root, "deep_blue", (0.015, 0.09, 0.22), 87)
+        + _build_shared_detail(output_root)
     )
+
+
+def _build_shared_detail(output_root: Path) -> list[Path]:
+    """Engine-capability pass (v1.25): shared detail micro-normal + grime AO.
+
+    detail.normal tiles at detailScale on top of each material's base
+    normal (concrete pores / aggregate grain at close range). grime.data
+    is sampled through UV CHANNEL 2 - the normalized per-object box
+    projection every mesh has carried since the texture framework - via
+    ambientOcclusionMapUseUV 1: a corner-weighted vignette with blotches
+    and drip streaks, so every wall and slab darkens toward its edges
+    like real weathering.
+    """
+
+    grain_a = _periodic_fbm((TILE, TILE), 96, 2, 91)
+    grain_b = _periodic_fbm((TILE, TILE), 192, 2, 92)
+    height = 0.0006 * (grain_a - 0.5) + 0.0004 * (grain_b - 0.5)
+    detail_normal = _normal_from_metric_height(height, (0.25, 0.25))
+
+    axis = (np.arange(TILE, dtype=np.float32) + 0.5) / TILE
+    edge = np.minimum(axis, 1.0 - axis) * 2.0
+    vignette = np.clip(np.minimum(edge[:, None], edge[None, :]) * 2.2, 0.0, 1.0)
+    blotch = _periodic_fbm((TILE, TILE), 6, 3, 93)
+    streaks = _periodic_fbm((TILE, 8), 4, 2, 94)
+    streak_field = np.repeat(streaks, TILE // 8, axis=1)[:TILE, :TILE]
+    grime = 0.62 + 0.38 * vignette
+    grime -= (blotch - 0.5) * 0.16
+    grime -= np.clip(0.5 - streak_field, 0.0, 0.5) * 0.18 * (1.0 - vignette)
+    grime = np.clip(grime, 0.45, 1.0)
+
+    paths = {
+        _texture_name("detail", "normal"): detail_normal,
+        _texture_name("grime", "data"): _to_data_image(grime),
+    }
+    outputs: list[Path] = []
+    for name, image in paths.items():
+        path = output_root / name
+        _save(_seal_edges(image), path)
+        outputs.append(path)
+    return outputs
 
 
 def _build_brush_cards(output_root: Path) -> list[Path]:
