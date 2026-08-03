@@ -2097,10 +2097,59 @@ local function cleanupAll(reason)
   triggerOwners = {}
 end
 
+-- v1.25.2: the Vehicle Selector's safe placement fits a plane through
+-- three corner raycasts and aligns the vehicle to it - right for cars,
+-- wrong for a 21 m building (one corner ray on a curb or drainage grade
+-- pitches the whole structure, burying a portal - player report). A
+-- placed wash must stand PLUMB: strip pitch/roll, keep yaw and position;
+-- the portal ramp aprons absorb the ground slope. quatFromDir differs
+-- from the vehicle-object convention by exactly 180 deg about up, hence
+-- the negated direction (proven live 2026-08-01).
+local LEVEL_MIN_UP_DOT = 0.999996  -- ~0.16 deg
+local function levelPropIfTilted(vehicle)
+  if not vehicle then return false end
+  local up = vec3(vehicle:getDirectionVectorUp())
+  if not finiteVector3(up) or up:length() < 0.000001 then return false end
+  up:normalize()
+  if up.z >= LEVEL_MIN_UP_DOT then return false end
+  local direction = vec3(vehicle:getDirectionVector())
+  direction.z = 0
+  if direction:length() < 0.000001 then return false end
+  direction:normalize()
+  local position = vehicle:getPosition()
+  local leveled = quatFromDir(-direction, vec3(0, 0, 1))
+  if not finiteVector3(position) or not finiteQuaternion(leveled) then return false end
+  local applied = pcall(function()
+    vehicle:setPosRot(
+      position.x,
+      position.y,
+      position.z,
+      leveled.x,
+      leveled.y,
+      leveled.z,
+      leveled.w
+    )
+    vehicle:setOriginalTransform(
+      position.x,
+      position.y,
+      position.z,
+      leveled.x,
+      leveled.y,
+      leveled.z,
+      leveled.w
+    )
+  end)
+  return applied == true
+end
+
 local function registerProp(propId)
   if not integer(propId) then return false end
   local vehicle = exactVehicle(propId)
   if not vehicle or not isWashProp(vehicle) then return false end
+  -- Level BEFORE reading the pose: registration continues in this same
+  -- pass with the plumb transform (a plain setPosRot is not guaranteed
+  -- to re-fire the bootstrap's reset hook, so never early-return here).
+  levelPropIfTilted(vehicle)
   local existing = installations[propId]
   if existing then
     local synced, syncError = synchronizeTransforms(existing)
