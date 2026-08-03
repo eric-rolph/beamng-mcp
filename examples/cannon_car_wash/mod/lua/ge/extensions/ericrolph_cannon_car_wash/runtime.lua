@@ -1247,10 +1247,45 @@ local function validateTriggerEvent(state, data, kind)
   return eligibleSubject(data.subjectID)
 end
 
+-- v1.25.1: every repair restore teleport RE-HOMES the vehicle as an
+-- engine side effect, silently making the wash bay the player's reset
+-- point (player report: "a new reset point is created within the car
+-- wash"). The intentional reset returns the vehicle to its TRUE home
+-- first - that pose is captured there, and this puts it back once the
+-- last pose apply is done, via the same setter the game's own spawn
+-- code uses.
+local function restoreRepairHome(state, vehicleId, repair)
+  if not repair or not repair.homePosition or not repair.homeRotation then return end
+  local position = repair.homePosition
+  local rotation = repair.homeRotation
+  repair.homePosition = nil
+  repair.homeRotation = nil
+  local vehicle = eligibleSubject(vehicleId)
+  if not vehicle then return end
+  local restored = pcall(function()
+    vehicle:setOriginalTransform(
+      position.x,
+      position.y,
+      position.z,
+      rotation.x,
+      rotation.y,
+      rotation.z,
+      rotation.w
+    )
+  end)
+  if restored then
+    emitEvent(state, "I", "repair_home_restored", {
+      subject_id = vehicleId,
+      repair_token = repair.token,
+    })
+  end
+end
+
 local function failRepair(state, vehicleId, reason, fields)
   local repair = state.repairOccupants[vehicleId]
   local deferredWashExit = repair and repair.washExitDeferred == true
   if repair then
+    restoreRepairHome(state, vehicleId, repair)
     repair.phase = "failed"
     repair.elapsed = 0
     repair.resetEdgeGuard = false
@@ -1516,6 +1551,7 @@ local function onEricrolphCannonCarWashRepairIntegrityAcknowledged(
       correction_attempts = correctionAttempts,
     })
   end
+  restoreRepairHome(state, vehicleId, repair)
   repair.phase = "release_pending"
   repair.elapsed = 0
   repair.bestEffortReleaseQueued = false
@@ -2342,6 +2378,15 @@ local function onVehicleResetted(vehicleId)
       if not vehicle or not repair.targetPosition or not repair.targetRotation then
         failRepair(installation, vehicleId, "repair_pose_restore_unavailable")
         return
+      end
+      -- The reset just returned the vehicle to its true HOME pose, and
+      -- the teleport freshly synced the object transform - capture it so
+      -- restoreRepairHome can put the player's reset point back.
+      local homePosition = vehicle:getPosition()
+      local homeRotation = quat(vehicle:getRotation())
+      if finiteVector3(homePosition) and finiteQuaternion(homeRotation) then
+        repair.homePosition = vec3(homePosition.x, homePosition.y, homePosition.z)
+        repair.homeRotation = quat(homeRotation.x, homeRotation.y, homeRotation.z, homeRotation.w)
       end
       repair.phase = "pose_restore_pending"
       repair.elapsed = 0

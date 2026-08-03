@@ -677,3 +677,14 @@ def test_selector_runtime_repairs_once_and_waits_for_integrity_ack() -> None:
     assert "repair.targetRotation" in integrity_ack
     assert "safeTeleport" not in repair_sections
     assert "safeTeleport" not in intentional_reset
+
+    # v1.25.1: restore teleports re-home the vehicle as an engine side
+    # effect. The repair must capture the true home at intentional-reset
+    # ack and put it back via setOriginalTransform once pose applies are
+    # done - on BOTH the release path and the failure path - so the wash
+    # never becomes the player's reset point.
+    assert "repair.homePosition" in intentional_reset
+    assert "repair.homeRotation" in intentional_reset
+    assert "vehicle:setOriginalTransform(" in runtime
+    assert '"repair_home_restored"' in runtime
+    assert runtime.count("restoreRepairHome(state, vehicleId, repair)") >= 2
