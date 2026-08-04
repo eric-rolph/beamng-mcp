@@ -8234,6 +8234,646 @@
           "beamSpring": 800.0,
           "beamStrength": "FLT_MAX"
         }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l0",
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l1",
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l2",
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l0",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l1",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l2",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l0",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l1",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l2",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l3",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l0",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l0",
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l1",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l1",
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l2",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l2",
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l0",
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l1",
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l2",
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l0",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l1",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l2",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l0",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l1",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l2",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l3",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l0",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l0",
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l1",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l1",
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l2",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l2",
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l0",
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l1",
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l2",
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l0",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l1",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l2",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l0",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l1",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l2",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l3",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l0",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l0",
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l1",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l1",
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l2",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l2",
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l0",
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l1",
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l2",
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l0",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l1",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l2",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l0",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l1",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l2",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l3",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l0",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l0",
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l1",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l1",
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l2",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l2",
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
       ]
     ],
     "cameraExternal": {
@@ -13346,6 +13986,518 @@
           "selfCollision": false,
           "staticCollision": false
         }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l0",
+        0.550001,
+        6.99,
+        1.15,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l1",
+        0.550001,
+        6.99,
+        0.87,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l2",
+        0.550001,
+        6.99,
+        0.58,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l3",
+        0.550001,
+        6.99,
+        0.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l0",
+        0.550001,
+        6.71,
+        1.15,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l1",
+        0.550001,
+        6.71,
+        0.87,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l2",
+        0.550001,
+        6.71,
+        0.58,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l3",
+        0.550001,
+        6.71,
+        0.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l0",
+        0.550001,
+        6.69,
+        1.15,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l1",
+        0.550001,
+        6.69,
+        0.87,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l2",
+        0.550001,
+        6.69,
+        0.58,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l3",
+        0.550001,
+        6.69,
+        0.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l0",
+        0.550001,
+        6.41,
+        1.15,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l1",
+        0.550001,
+        6.41,
+        0.87,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l2",
+        0.550001,
+        6.41,
+        0.58,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l3",
+        0.550001,
+        6.41,
+        0.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l0",
+        -0.549999,
+        6.99,
+        1.15,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l1",
+        -0.549999,
+        6.99,
+        0.87,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l2",
+        -0.549999,
+        6.99,
+        0.58,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l3",
+        -0.549999,
+        6.99,
+        0.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l0",
+        -0.549999,
+        6.71,
+        1.15,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l1",
+        -0.549999,
+        6.71,
+        0.87,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l2",
+        -0.549999,
+        6.71,
+        0.58,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l3",
+        -0.549999,
+        6.71,
+        0.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l0",
+        -0.549999,
+        6.69,
+        1.15,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l1",
+        -0.549999,
+        6.69,
+        0.87,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l2",
+        -0.549999,
+        6.69,
+        0.58,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l3",
+        -0.549999,
+        6.69,
+        0.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l0",
+        -0.549999,
+        6.41,
+        1.15,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l1",
+        -0.549999,
+        6.41,
+        0.87,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l2",
+        -0.549999,
+        6.41,
+        0.58,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l3",
+        -0.549999,
+        6.41,
+        0.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
       ]
     ],
     "refNodes": [
@@ -16053,6 +17205,198 @@
         "ericrolph_cannon_car_wash_top_s07_c0_l2",
         "ericrolph_cannon_car_wash_top_s07_c1_l3",
         "ericrolph_cannon_car_wash_top_s07_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l0",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l0",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l0",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l1",
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l1",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l1",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l1",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l2",
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l2",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l2",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l2",
+        "ericrolph_cannon_car_wash_tirel_s00_c1_l3",
+        "ericrolph_cannon_car_wash_tirel_s00_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l0",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l0",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l0",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l1",
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l1",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l1",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l1",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l2",
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l2",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l2",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l2",
+        "ericrolph_cannon_car_wash_tirel_s01_c1_l3",
+        "ericrolph_cannon_car_wash_tirel_s01_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l0",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l0",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l0",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l1",
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l1",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l1",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l1",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l2",
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l2",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l2",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l2",
+        "ericrolph_cannon_car_wash_tirer_s00_c1_l3",
+        "ericrolph_cannon_car_wash_tirer_s00_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l0",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l0",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l0",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l1",
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l1",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l1",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l1",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l2",
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l2",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l2",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l2",
+        "ericrolph_cannon_car_wash_tirer_s01_c1_l3",
+        "ericrolph_cannon_car_wash_tirer_s01_c0_l3",
         {
           "groundModel": "metal"
         }
