@@ -2106,24 +2106,59 @@ end
 -- from the vehicle-object convention by exactly 180 deg about up, hence
 -- the negated direction (proven live 2026-08-01).
 local LEVEL_MIN_UP_DOT = 0.999996  -- ~0.16 deg
-local function levelPropIfTilted(vehicle)
+local GROUND_TOLERANCE_METERS = 0.02
+local GROUND_MAX_ADJUST_METERS = 1.5
+-- Sample the terrain just OUTSIDE the collision footprint (floor colmesh
+-- spans |x| 3.4, |y| 10.3 with the aprons) so the rays never hit the
+-- wash's own static meshes; castRayStatic ignores vehicles but the
+-- runtime visual is a TSStatic with collision.
+local GROUND_SAMPLE_OFFSETS = {
+  vec3(3.8, 11.0, 0), vec3(-3.8, 11.0, 0), vec3(3.8, -11.0, 0), vec3(-3.8, -11.0, 0),
+}
+local function groundHeightUnderProp(position, direction)
+  if type(castRayStatic) ~= "function" then return nil end
+  local right = vec3(direction.y, -direction.x, 0)
+  local best = nil
+  for _, offset in ipairs(GROUND_SAMPLE_OFFSETS) do
+    local sample = position + right * offset.x + direction * offset.y
+    local start = vec3(sample.x, sample.y, position.z + 2.0)
+    local hit = castRayStatic(start, vec3(0, 0, -1), 12.0)
+    if hit and hit < 12.0 then
+      local groundZ = start.z - hit
+      -- Highest hit wins: a corner over a dip must not bury the slab.
+      if not best or groundZ > best then best = groundZ end
+    end
+  end
+  return best
+end
+
+local function levelAndGroundProp(vehicle)
   if not vehicle then return false end
   local up = vec3(vehicle:getDirectionVectorUp())
   if not finiteVector3(up) or up:length() < 0.000001 then return false end
   up:normalize()
-  if up.z >= LEVEL_MIN_UP_DOT then return false end
   local direction = vec3(vehicle:getDirectionVector())
   direction.z = 0
   if direction:length() < 0.000001 then return false end
   direction:normalize()
   local position = vehicle:getPosition()
+  if not finiteVector3(position) then return false end
+  local tilted = up.z < LEVEL_MIN_UP_DOT
+  -- The refnode datum IS the slab underside: grounding means putting the
+  -- object z on the terrain the corner rays actually find.
+  local groundZ = groundHeightUnderProp(position, direction)
+  local floating = groundZ ~= nil
+    and math.abs(position.z - groundZ) > GROUND_TOLERANCE_METERS
+    and math.abs(position.z - groundZ) < GROUND_MAX_ADJUST_METERS
+  if not tilted and not floating then return false end
+  local targetZ = floating and groundZ or position.z
   local leveled = quatFromDir(-direction, vec3(0, 0, 1))
-  if not finiteVector3(position) or not finiteQuaternion(leveled) then return false end
+  if not finiteQuaternion(leveled) then return false end
   local applied = pcall(function()
     vehicle:setPosRot(
       position.x,
       position.y,
-      position.z,
+      targetZ,
       leveled.x,
       leveled.y,
       leveled.z,
@@ -2132,7 +2167,7 @@ local function levelPropIfTilted(vehicle)
     vehicle:setOriginalTransform(
       position.x,
       position.y,
-      position.z,
+      targetZ,
       leveled.x,
       leveled.y,
       leveled.z,
@@ -2146,10 +2181,11 @@ local function registerProp(propId)
   if not integer(propId) then return false end
   local vehicle = exactVehicle(propId)
   if not vehicle or not isWashProp(vehicle) then return false end
-  -- Level BEFORE reading the pose: registration continues in this same
-  -- pass with the plumb transform (a plain setPosRot is not guaranteed
-  -- to re-fire the bootstrap's reset hook, so never early-return here).
-  levelPropIfTilted(vehicle)
+  -- Level and ground BEFORE reading the pose: registration continues in
+  -- this same pass with the corrected transform (a plain setPosRot is
+  -- not guaranteed to re-fire the bootstrap's reset hook, so never
+  -- early-return here).
+  levelAndGroundProp(vehicle)
   local existing = installations[propId]
   if existing then
     local synced, syncError = synchronizeTransforms(existing)
