@@ -85,6 +85,9 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_mini_car_paint.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_mini_car_paint.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_mini_car_paint_roughness.data.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_mini_wheel.color.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_mini_wheel.normal.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_mini_wheel_roughness.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_safety_orange.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_safety_orange.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_safety_orange_roughness.data.dds",
@@ -142,8 +145,8 @@ def _validate_member_name(
 
 
 def _validate_allowlist() -> None:
-    if len(EXPECTED_RUNTIME_FILES) != 65:
-        raise DistributionError("the public runtime allowlist must contain exactly 65 files")
+    if len(EXPECTED_RUNTIME_FILES) != 68:
+        raise DistributionError("the public runtime allowlist must contain exactly 68 files")
     if tuple(sorted(EXPECTED_RUNTIME_FILES)) != EXPECTED_RUNTIME_FILES:
         raise DistributionError("the public runtime allowlist must be deterministically sorted")
     for name in EXPECTED_RUNTIME_FILES:

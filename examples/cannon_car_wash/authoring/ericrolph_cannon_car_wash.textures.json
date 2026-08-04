@@ -27,31 +27,31 @@
     },
     {
       "name": "ericrolph_cannon_car_wash_brush_cards.color.png",
-      "width": 512,
-      "height": 512,
+      "width": 1024,
+      "height": 1024,
       "mode": "RGB",
-      "sha256": "64ad261d01b05db0f158afb1d59fb938ec5fdbea7c2851a5604609dad1e4cbe7"
+      "sha256": "b10660e17368afd26e3e523f58b72b81dbeaafd2913b7270a89729a01a084dae"
     },
     {
       "name": "ericrolph_cannon_car_wash_brush_cards.normal.png",
-      "width": 512,
-      "height": 512,
+      "width": 1024,
+      "height": 1024,
       "mode": "RGB",
-      "sha256": "c248f1a07221f5ecd5ff2bc0efbc8c22e49168567c461fa7c376e2102465ffed"
+      "sha256": "5ff6548e5cad223dd7d000de4972768d6166aebb539e2b05282aaa8429091c70"
     },
     {
       "name": "ericrolph_cannon_car_wash_brush_cards_opacity.data.png",
-      "width": 512,
-      "height": 512,
+      "width": 1024,
+      "height": 1024,
       "mode": "L",
-      "sha256": "223de437e8bd5f4777db52a72a4149f391c0890e80cd0c5cf90b8b8a058a77c3"
+      "sha256": "c7b1b3dff76041dd2c8786274f68d7ed20f5d9ea5b3f88a9a1074b912cc48c51"
     },
     {
       "name": "ericrolph_cannon_car_wash_brush_cards_roughness.data.png",
-      "width": 512,
-      "height": 512,
+      "width": 1024,
+      "height": 1024,
       "mode": "L",
-      "sha256": "9ddfe7280671b15f92975ae64dd61f9abdf011b739f6d01bf3ac6b0d2dad0648"
+      "sha256": "2a782f644672d908cb1656a69fe7915a221e68bf58678363e311ae4dfebb2ade"
     },
     {
       "name": "ericrolph_cannon_car_wash_cmu.color.png",
@@ -220,6 +220,27 @@
       "height": 256,
       "mode": "L",
       "sha256": "0ca88595b31378257682a4513434ae30a5898e86067ef017e06349db7f5a7c9d"
+    },
+    {
+      "name": "ericrolph_cannon_car_wash_mini_wheel.color.png",
+      "width": 128,
+      "height": 128,
+      "mode": "RGB",
+      "sha256": "b36d2ea85286b3140b4b6aedd99ddfc6f5bc806cd0c3f5782da5b235bdfb03d9"
+    },
+    {
+      "name": "ericrolph_cannon_car_wash_mini_wheel.normal.png",
+      "width": 128,
+      "height": 128,
+      "mode": "RGB",
+      "sha256": "4201f16300f9123a3f5910d9c80b347e59ef7199dc6327cbadabbd74953633ce"
+    },
+    {
+      "name": "ericrolph_cannon_car_wash_mini_wheel_roughness.data.png",
+      "width": 128,
+      "height": 128,
+      "mode": "L",
+      "sha256": "f45f2f42e85cda7f73daad60e33797d16168063dd662cf8525a33721570b3191"
     },
     {
       "name": "ericrolph_cannon_car_wash_safety_orange.color.png",

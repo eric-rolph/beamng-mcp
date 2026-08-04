@@ -369,7 +369,7 @@ def test_cannon_car_wash_pbr_authoring_maps_are_power_of_two_seamless_and_typed(
     manifest = json.loads(TEXTURE_MANIFEST_PATH.read_text(encoding="utf-8"))
     assert manifest["texture_root"] == "textures/generated_png"
     assert manifest["normal_convention"] == "OpenGL_Y_positive"
-    assert len(manifest["files"]) == 42
+    assert len(manifest["files"]) == 45
     assert {entry["name"] for entry in manifest["files"]} == {
         path.name for path in GENERATED_TEXTURE_ROOT.glob("*.png")
     }
@@ -686,7 +686,7 @@ def test_cannon_car_wash_repository_metadata_and_icon() -> None:
 
     assert repository_info["internal_name"] == MOD_ID
     assert repository_info["title"] == "Cannon Car Wash"
-    assert repository_info["version"] == "1.33"
+    assert repository_info["version"] == "1.34"
     assert repository_info["author"] == "Eric Rolph"
 
     with Image.open(MOD_ICON_PATH) as icon:
