@@ -49,6 +49,7 @@ LOGGER = logging.getLogger(__name__)
 # Public Repository contents are an explicit release decision. Never replace
 # this allowlist with a recursive "pack everything" implementation.
 EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
+    f"art/shapes/{MOD_ID}/cannon.dae",
     f"art/shapes/{MOD_ID}/{MOD_ID}.dae",
     f"art/shapes/{MOD_ID}/mini_car.dae",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards.color.dds",
@@ -88,6 +89,8 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_wet_concrete.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_wet_concrete.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_wet_concrete_roughness.data.dds",
+    f"art/sound/{MOD_ID}_report.wav",
+    f"art/sound/{MOD_ID}_whistle.wav",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.jpg",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.json",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.lua",
@@ -95,6 +98,7 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"levels/gridmap_v2/scenarios/{MOD_ID}/main.materials.json",
     f"lua/common/{MOD_ID}/lighting.lua",
     f"lua/ge/extensions/{MOD_ID}/runtime.lua",
+    f"vehicles/{MOD_ID}/cannon.dae",
     f"vehicles/{MOD_ID}/default.jpg",
     f"vehicles/{MOD_ID}/{MOD_ID}.dae",
     f"vehicles/{MOD_ID}/{MOD_ID}.jbeam",
@@ -133,8 +137,8 @@ def _validate_member_name(
 
 
 def _validate_allowlist() -> None:
-    if len(EXPECTED_RUNTIME_FILES) != 56:
-        raise DistributionError("the public runtime allowlist must contain exactly 56 files")
+    if len(EXPECTED_RUNTIME_FILES) != 60:
+        raise DistributionError("the public runtime allowlist must contain exactly 60 files")
     if tuple(sorted(EXPECTED_RUNTIME_FILES)) != EXPECTED_RUNTIME_FILES:
         raise DistributionError("the public runtime allowlist must be deterministically sorted")
     for name in EXPECTED_RUNTIME_FILES:

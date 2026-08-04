@@ -14,15 +14,77 @@ local VISUAL_SHAPE = (
 -- broke module load with "more than 60 upvalues").
 local Attract = {
   shape = "/vehicles/ericrolph_cannon_car_wash/mini_car.dae",
+  cannonShape = "/vehicles/ericrolph_cannon_car_wash/cannon.dae",
+  whistleSound = "/art/sound/ericrolph_cannon_car_wash_whistle.wav",
+  reportSound = "/art/sound/ericrolph_cannon_car_wash_report.wav",
   intervalSeconds = 120,
   firstDelaySeconds = 25,
-  speedMps = 7.5,
+  speedMps = 16.0,
   gravityMps2 = -9.81,
-  flightMaxSeconds = 6.0,
-  muzzleLocal = vec3(1.62, -10.02, 6.38),
+  flightMaxSeconds = 9.0,
+  restSeconds = 25.0,
+  bounceRestitution = 0.35,
+  bounceKeep = 0.4,
+  maxBounces = 2,
+  mountLocal = vec3(1.62, -9.60, 5.74),
   aimLocal = vec3(0.0, -0.573576, 0.819152),
-  tumbleRate = 7.0,
+  barrelLength = 0.86,
+  tumbleRate = 9.0,
+  sunUpdateSeconds = 5.0,
+  sunElevationMinDeg = 25.0,
+  sunElevationMaxDeg = 70.0,
 }
+
+function Attract.playSound(path, position)
+  pcall(function()
+    Engine.Audio.playOnce("AudioMaster", path, {
+      position = position,
+      volume = 1.6,
+      minDistance = 6,
+      maxDistance = 220,
+    })
+  end)
+end
+
+function Attract.sunAim(state)
+  -- Aim at the sun when a ScatterSky is available; clamp elevation so a
+  -- low sun never fires flat into the street. Falls back to the authored
+  -- barrel aim rotated into the prop frame.
+  local sky = scenetree.findObject("sunsky")
+  if sky then
+    local azimuth = tonumber(sky:getField("azimuth", 0))
+    local elevation = tonumber(sky:getField("elevation", 0))
+    if azimuth and elevation then
+      elevation = math.max(
+        Attract.sunElevationMinDeg, math.min(Attract.sunElevationMaxDeg, elevation)
+      )
+      local azr = math.rad(azimuth)
+      local elr = math.rad(elevation)
+      return vec3(
+        math.sin(azr) * math.cos(elr),
+        math.cos(azr) * math.cos(elr),
+        math.sin(elr)
+      )
+    end
+  end
+  return state.modelRotation * Attract.aimLocal
+end
+
+function Attract.updateCannonAim(state)
+  local attract = state.attract
+  if not attract or not attract.cannon then return end
+  local aim = Attract.sunAim(state)
+  attract.aimVector = aim
+  local mount = Attract.world(state, Attract.mountLocal)
+  attract.mountWorld = mount
+  local rotation = vec3(0, 0, 1):getRotationTo(aim)
+  pcall(function()
+    attract.cannon:setPosRot(
+      mount.x, mount.y, mount.z, rotation.x, rotation.y, rotation.z, rotation.w
+    )
+  end)
+end
+
 local VISUAL_MATERIALS_PATH = "vehicles/ericrolph_cannon_car_wash/main.materials.json"
 local REQUIRED_VISUAL_MATERIALS = {
   "ericrolph_cannon_car_wash_selector_brush_aqua",
@@ -610,6 +672,30 @@ function Attract.createProjectile(name)
   return object
 end
 
+function Attract.createCannon(name)
+  local object = createObject(VISUAL_CLASS)
+  if not object then return nil end
+  local ok = pcall(function()
+    object.loadMode = 1
+    if type(object.preApply) == "function" then object:preApply() end
+    setCanSaveFalse(object)
+    object:setField("shapeName", 0, Attract.cannonShape)
+    object:setField("collisionType", 0, "None")
+    object:setField("decalType", 0, "None")
+    if type(object.postApply) == "function" then object:postApply() end
+  end)
+  if not ok then
+    pcall(function() object:delete() end)
+    return nil
+  end
+  local registered = registerInMission(object, name)
+  if not registered then
+    pcall(function() object:delete() end)
+    return nil
+  end
+  return object
+end
+
 function Attract.world(state, localPosition)
   return state.origin + state.modelRotation * localPosition
 end
@@ -617,10 +703,19 @@ end
 function Attract.start(state)
   local attract = state.attract
   if not attract or not attract.projectile or attract.flying then return false end
+  Attract.updateCannonAim(state)
+  local aim = attract.aimVector or (state.modelRotation * Attract.aimLocal)
+  local mount = attract.mountWorld or Attract.world(state, Attract.mountLocal)
   attract.flying = true
   attract.flightTime = 0
-  attract.launchOrigin = Attract.world(state, Attract.muzzleLocal)
-  attract.velocity = (state.modelRotation * Attract.aimLocal) * Attract.speedMps
+  attract.bounces = 0
+  attract.reported = false
+  attract.launchOrigin = mount + aim * Attract.barrelLength
+  attract.velocity = aim * Attract.speedMps
+  attract.position = vec3(
+    attract.launchOrigin.x, attract.launchOrigin.y, attract.launchOrigin.z
+  )
+  Attract.playSound(Attract.whistleSound, attract.launchOrigin)
   attract.tumblePhase = 0
   if attract.muzzleEmitter then
     local muzzle = attract.launchOrigin
@@ -673,33 +768,94 @@ function Attract.update(state, dt)
       end
     end
   end
+  if attract.resting then
+    attract.restTimer = attract.restTimer - dt
+    if attract.restTimer <= 0 then
+      attract.resting = false
+      Attract.finish(state, false)
+    end
+    return
+  end
   if attract.flying then
     attract.flightTime = attract.flightTime + dt
-    local t = attract.flightTime
-    local position = attract.launchOrigin + attract.velocity * t
-    position.z = position.z + 0.5 * Attract.gravityMps2 * t * t
+    local previousVz = attract.velocity.z
+    attract.velocity.z = attract.velocity.z + Attract.gravityMps2 * dt
+    attract.position = attract.position + attract.velocity * dt
+    -- Bottle-rocket report at apex: the moment vertical velocity flips.
+    if not attract.reported and previousVz > 0 and attract.velocity.z <= 0 then
+      attract.reported = true
+      Attract.playSound(Attract.reportSound, attract.position)
+      if attract.muzzleEmitter then
+        pcall(function()
+          attract.muzzleEmitter:setPosRot(
+            attract.position.x, attract.position.y, attract.position.z, 0, 0, 0, 1
+          )
+          attract.muzzleEmitter:setActive(true)
+        end)
+        attract.muzzleTimer = 0.4
+      end
+    end
     attract.tumblePhase = attract.tumblePhase + Attract.tumbleRate * dt
     local half = attract.tumblePhase * 0.5
     local tumble = {x = math.sin(half), y = 0, z = 0, w = math.cos(half)}
     if attract.projectile then
       pcall(function()
         attract.projectile:setPosRot(
-          position.x, position.y, position.z,
+          attract.position.x, attract.position.y, attract.position.z,
           tumble.x, tumble.y, tumble.z, tumble.w
         )
       end)
     end
-    if attract.muzzleEmitter and attract.muzzleTimer then
-      pcall(function()
-        attract.muzzleEmitter:setPosRot(position.x, position.y, position.z, 0, 0, 0, 1)
-      end)
-    end
-    local groundZ = state.origin.z + 0.05
-    if position.z <= groundZ or t > Attract.flightMaxSeconds then
-      attract.landPosition = vec3(position.x, position.y, math.max(position.z, groundZ))
-      Attract.finish(state, position.z <= groundZ)
+    local groundZ = state.origin.z + 0.04
+    if attract.position.z <= groundZ and attract.velocity.z < 0 then
+      if attract.bounces < Attract.maxBounces
+        and math.abs(attract.velocity.z) > 1.5 then
+        attract.bounces = attract.bounces + 1
+        attract.position.z = groundZ
+        attract.velocity.z = -attract.velocity.z * Attract.bounceRestitution
+        attract.velocity.x = attract.velocity.x * Attract.bounceKeep
+        attract.velocity.y = attract.velocity.y * Attract.bounceKeep
+        if attract.landEmitter then
+          pcall(function()
+            attract.landEmitter:setPosRot(
+              attract.position.x, attract.position.y, groundZ, 0, 0, 0, 1
+            )
+            attract.landEmitter:setActive(true)
+          end)
+          attract.landTimer = 0.6
+        end
+      else
+        -- Settle at the landing spot and stay a while before the reset.
+        attract.flying = false
+        attract.resting = true
+        attract.restTimer = Attract.restSeconds
+        attract.position.z = groundZ
+        if attract.projectile then
+          pcall(function()
+            attract.projectile:setPosRot(
+              attract.position.x, attract.position.y, groundZ, 0, 0, 0, 1
+            )
+          end)
+        end
+        if attract.landEmitter then
+          pcall(function()
+            attract.landEmitter:setPosRot(
+              attract.position.x, attract.position.y, groundZ, 0, 0, 0, 1
+            )
+            attract.landEmitter:setActive(true)
+          end)
+          attract.landTimer = 0.8
+        end
+      end
+    elseif attract.flightTime > Attract.flightMaxSeconds then
+      Attract.finish(state, false)
     end
     return
+  end
+  attract.sunTimer = (attract.sunTimer or 0) - dt
+  if attract.sunTimer <= 0 then
+    attract.sunTimer = Attract.sunUpdateSeconds
+    Attract.updateCannonAim(state)
   end
   attract.timer = (attract.timer or Attract.firstDelaySeconds) - dt
   if attract.timer <= 0 then Attract.start(state) end
@@ -2221,6 +2377,7 @@ local function cleanupInstallation(state, reason)
     deleteSceneObject(state.attract.projectile)
     deleteSceneObject(state.attract.muzzleEmitter)
     deleteSceneObject(state.attract.landEmitter)
+    deleteSceneObject(state.attract.cannon)
     state.attract = nil
   end
   deleteSceneObject(state.visual)
@@ -2426,9 +2583,13 @@ local function registerProp(propId)
       projectile = projectile,
       muzzleEmitter = muzzleEmitter,
       landEmitter = landEmitter,
-      timer = ATTRACT_FIRST_DELAY_SECONDS,
+      cannon = Attract.createCannon(prefix .. "_attract_cannon"),
+      timer = Attract.firstDelaySeconds,
       flying = false,
+      resting = false,
+      sunTimer = 0,
     }
+    Attract.updateCannonAim(state)
   end
 
   for _, spec in ipairs(state.lightSpecs) do
