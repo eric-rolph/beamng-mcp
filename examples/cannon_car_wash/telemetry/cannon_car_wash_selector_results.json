@@ -542,13 +542,13 @@
   },
   "test": "tests/test_cannon_car_wash_selector_live.py",
   "topology": {
-    "beam_count": 1271,
+    "beam_count": 1079,
     "engine_collision_mode_3_count": 8,
-    "fixed_node_count": 205,
+    "fixed_node_count": 181,
     "flexbody_count": 2,
-    "node_count": 541,
-    "total_mass_kg": 17323.0,
-    "triangle_count": 504,
+    "node_count": 445,
+    "total_mass_kg": 17227.0,
+    "triangle_count": 432,
     "vehicle_directory": "/vehicles/ericrolph_cannon_car_wash/"
   },
   "verified_on": "2026-08-02T13:08:00-06:00"
