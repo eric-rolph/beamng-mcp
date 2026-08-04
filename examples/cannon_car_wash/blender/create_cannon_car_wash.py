@@ -628,23 +628,27 @@ def add_wheel_scrubber(
     # Top leans toward the lane so the bristles meet the tire sidewall.
     root.rotation_euler[1] = -side * 0.24
     bpy.context.scene.collection.objects.link(root)
-    core = add_cylinder(f"{name}_Core", location, 0.09, 0.85, steel, vertices=16, bevel=0.0)
+    # Fat bristle-body core in brush blue: the see-through middle was what
+    # made the fan read as loose flat cards (player screenshot).
+    core = add_cylinder(f"{name}_Core", location, 0.13, 0.82, cards, vertices=16, bevel=0.0)
     parent_preserving_world(core, root)
+    axle = add_cylinder(f"{name}_Axle", location, 0.045, 0.95, steel, vertices=10, bevel=0.0)
+    parent_preserving_world(axle, root)
     vertices: list[tuple[float, float, float]] = []
     faces: list[tuple[int, int, int, int]] = []
     face_uvs: list[tuple[tuple[float, float], ...]] = []
-    for index in range(10):
-        angle = index * math.tau / 10.0
+    for index in range(14):
+        angle = index * math.tau / 14.0
         cosine, sine = math.cos(angle), math.sin(angle)
-        reach = 0.42 + 0.04 * math.sin(index * 2.7)
-        drop = 0.40 - 0.06 * abs(math.sin(index * 1.9))
+        reach = 0.40 + 0.025 * math.sin(index * 2.7)
+        drop = 0.40 - 0.05 * abs(math.sin(index * 1.9))
         base = len(vertices)
         vertices.extend(
             (
-                (cosine * 0.10, sine * 0.10, -0.40),
+                (cosine * 0.13, sine * 0.13, -0.40),
                 (cosine * reach, sine * reach, -drop),
                 (cosine * reach, sine * reach, 0.36),
-                (cosine * 0.10, sine * 0.10, 0.40),
+                (cosine * 0.13, sine * 0.13, 0.40),
             )
         )
         faces.append((base, base + 1, base + 2, base + 3))
@@ -1436,6 +1440,40 @@ def build_details() -> None:
             steel,
             bevel=0.0,
         )
+        # Compliance piston on the arm: sleeve, rod, and coil rings - the
+        # visible "spring mechanism" that presses the brush toward the lane.
+        add_cylinder(
+            f"{scrub_name}_PistonSleeve",
+            (side * 2.42, -6.7, 1.265),
+            0.052,
+            0.26,
+            steel,
+            rotation=(0.0, math.pi / 2.0 - side * 0.174, 0.0),
+            vertices=12,
+            bevel=0.0,
+        )
+        add_cylinder(
+            f"{scrub_name}_PistonRod",
+            (side * 2.20, -6.7, 1.228),
+            0.028,
+            0.24,
+            rubber,
+            rotation=(0.0, math.pi / 2.0 - side * 0.174, 0.0),
+            vertices=10,
+            bevel=0.0,
+        )
+        for ring_index in range(3):
+            offset = 0.05 + ring_index * 0.055
+            add_cylinder(
+                f"{scrub_name}_Coil_{ring_index}",
+                (side * (2.20 - offset * 0.984), -6.7, 1.228 - offset * 0.173),
+                0.048,
+                0.018,
+                steel,
+                rotation=(0.0, math.pi / 2.0 - side * 0.174, 0.0),
+                vertices=12,
+                bevel=0.0,
+            )
 
     # Tower bearing sleeves: static stubs coupling each spinning core's top
     # to its gantry motor housing, so the towers read as driven machines.
@@ -2743,6 +2781,91 @@ def _selector_structure() -> dict[str, Any]:
                 # Window inset from the band edges: mips average across the
                 # card/band boundary, so sampling too close ghosts the wavy
                 # card fringe into the lanes (player: jagged mid-strip band).
+                quad_uvs = [
+                    [along_top, 0.79],
+                    [along_top, 0.985],
+                    [along_bottom, 0.985],
+                    [along_bottom, 0.79],
+                ]
+                cloth_quads.append(
+                    {
+                        "positions": [
+                            cloth_position[first],
+                            cloth_position[second],
+                            cloth_position[third],
+                            cloth_position[fourth],
+                        ],
+                        "uvs": quad_uvs,
+                    }
+                )
+
+    # v1.26.1 tire-skirt strips (player: tire brushes "should extend out on
+    # a spring to meet the vehicle"): two short cloth strips per side hang
+    # from the scrubber arms at the WHEEL TRACK (x +/-0.55: vehicle body
+    # envelopes sit asymmetric to their refnodes by up to ~0.35 m, so a
+    # flank-line hang misses whole models; tire brushes wash wheels,
+    # not flanks) with hems at wheel height. Strip planes face the lane
+    # (columns run along Y),
+    # so lower bodywork and tires drag through them - the same soft-spring
+    # cloth contact as the curtain rows.
+    tire_levels = (1.15, 0.87, 0.58, 0.30)
+    for side_value, row_name in ((-1.0, "tirel"), (1.0, "tirer")):
+        for strip in range(2):
+            strip_y = -6.85 + strip * 0.30
+            strip_ids = {}
+            for column, column_y in enumerate((strip_y - 0.14, strip_y + 0.14)):
+                for level, z in enumerate(tire_levels):
+                    identifier = f"{MOD_ID}_{row_name}_s{strip:02d}_c{column}_l{level}"
+                    source = Vector((side_value * 0.55, column_y, z))
+                    mapped = rotation @ source
+                    strip_ids[(column, level)] = identifier
+                    cloth_position[identifier] = [round(value, 6) for value in mapped]
+                    cloth_nodes.append(
+                        {
+                            "id": identifier,
+                            "position": cloth_position[identifier],
+                            "source_world_position": [round(value, 6) for value in source],
+                            "fixed": level == 0,
+                        }
+                    )
+            for column in range(2):
+                for level in range(3):
+                    cloth_beams.append(
+                        {
+                            "nodes": [strip_ids[(column, level)], strip_ids[(column, level + 1)]],
+                            "class": "structural",
+                        }
+                    )
+            for level in range(4):
+                cloth_beams.append(
+                    {
+                        "nodes": [strip_ids[(0, level)], strip_ids[(1, level)]],
+                        "class": "anchor" if level == 0 else "structural",
+                    }
+                )
+            for level in range(3):
+                cloth_beams.append(
+                    {
+                        "nodes": [strip_ids[(0, level)], strip_ids[(1, level + 1)]],
+                        "class": "shear",
+                    }
+                )
+                cloth_beams.append(
+                    {
+                        "nodes": [strip_ids[(1, level)], strip_ids[(0, level + 1)]],
+                        "class": "shear",
+                    }
+                )
+                first = strip_ids[(0, level)]
+                second = strip_ids[(1, level)]
+                third = strip_ids[(1, level + 1)]
+                fourth = strip_ids[(0, level + 1)]
+                cloth_triangles.append({"nodes": [first, second, third], "surface": "mitter"})
+                cloth_triangles.append({"nodes": [first, third, fourth], "surface": "mitter"})
+                along_top = (level / 3.0) * 0.8 + strip * 0.29 + (0.9 if side_value > 0 else 0.2)
+                along_bottom = (
+                    ((level + 1) / 3.0) * 0.8 + strip * 0.29 + (0.9 if side_value > 0 else 0.2)
+                )
                 quad_uvs = [
                     [along_top, 0.79],
                     [along_top, 0.985],
