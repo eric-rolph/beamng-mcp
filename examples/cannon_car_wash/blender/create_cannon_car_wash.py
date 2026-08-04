@@ -1494,23 +1494,26 @@ def build_details() -> None:
     # cloth section) with a flexbody card mesh that drapes over vehicles.
     # Only the support beam remains in the static scenery; the TSStatic
     # visual must not carry ghost strips over the physical ones.
-    add_box("MitterBeam", (0.0, -4.35, 4.38), (5.0, 0.16, 0.14), steel, bevel=0.0)
-    for rod_x in (-1.8, 1.8):
-        add_cylinder(
-            f"MitterDropRod_{'L' if rod_x < 0 else 'R'}",
-            (rod_x, -4.35, 4.51),
-            0.03,
-            0.18,
-            steel,
-            vertices=10,
-            bevel=0.0,
+    for beam_index, beam_y in enumerate((-5.30, -4.85, -4.40), start=1):
+        add_box(
+            f"CurtainBeam_{beam_index}", (0.0, beam_y, 4.38), (5.0, 0.14, 0.12), steel, bevel=0.0
         )
+        for rod_x in (-1.8, 1.8):
+            add_cylinder(
+                f"CurtainRod_{beam_index}_{'L' if rod_x < 0 else 'R'}",
+                (rod_x, beam_y, 4.51),
+                0.03,
+                0.18,
+                steel,
+                vertices=10,
+                bevel=0.0,
+            )
+    add_box("CurtainRail_L", (-2.35, -4.85, 4.38), (0.12, 1.10, 0.12), steel, bevel=0.0)
+    add_box("CurtainRail_R", (2.35, -4.85, 4.38), (0.12, 1.10, 0.12), steel, bevel=0.0)
 
     # Equipment mounting: the brushes no longer float. A ceiling gantry
     # carries the tower spinners, and columns brace the overhead roller.
     gantry_parts = [
-        add_box("MitterHanger_L", (-2.2, -4.35, 4.29), (0.12, 0.14, 0.10), steel, bevel=0.0),
-        add_box("MitterHanger_R", (2.2, -4.35, 4.29), (0.12, 0.14, 0.10), steel, bevel=0.0),
         add_box("OverheadCross", (0.0, 4.15, 4.50), (5.44, 0.14, 0.10), steel, bevel=0.0),
     ]
     for side in (-1.0, 1.0):
@@ -2709,10 +2712,14 @@ def _selector_structure() -> dict[str, Any]:
     # bristle contact on the upper body and roof exactly where the
     # spinning visuals are scrubbing. Anchor springs are the "soft spring
     # mechanism"; the spinning-physics ban stands (v1.22 catapult lesson).
+    # v1.27 (player): one dense TRIPLE CURTAIN in a ~0.9 m band right
+    # after the pre-soak arch instead of rows scattered down the tunnel
+    # (mid-tunnel strips read as hanging from air). Staggered hems and
+    # strip offsets give layered depth like a real mitter bank.
     cloth_rows = (
-        ("mitter", -4.35, 12, 0.42, 0.19, (4.30, 3.25, 2.18, 1.10)),
-        ("scrub", 1.2, 8, 0.62, 0.26, (4.30, 3.25, 2.18, 1.10)),
-        ("top", 4.15, 8, 0.62, 0.26, (4.30, 3.30, 2.30, 1.30)),
+        ("mitter", -5.30, 12, 0.42, 0.19, (4.30, 3.25, 2.18, 1.10)),
+        ("scrub", -4.85, 10, 0.50, 0.22, (4.30, 3.28, 2.24, 1.20)),
+        ("top", -4.40, 12, 0.42, 0.19, (4.30, 3.25, 2.18, 1.10)),
     )
     for row_index, (row_name, row_y, strip_count, spacing, half_width, strip_levels) in enumerate(
         cloth_rows
@@ -2781,91 +2788,6 @@ def _selector_structure() -> dict[str, Any]:
                 # Window inset from the band edges: mips average across the
                 # card/band boundary, so sampling too close ghosts the wavy
                 # card fringe into the lanes (player: jagged mid-strip band).
-                quad_uvs = [
-                    [along_top, 0.79],
-                    [along_top, 0.985],
-                    [along_bottom, 0.985],
-                    [along_bottom, 0.79],
-                ]
-                cloth_quads.append(
-                    {
-                        "positions": [
-                            cloth_position[first],
-                            cloth_position[second],
-                            cloth_position[third],
-                            cloth_position[fourth],
-                        ],
-                        "uvs": quad_uvs,
-                    }
-                )
-
-    # v1.26.1 tire-skirt strips (player: tire brushes "should extend out on
-    # a spring to meet the vehicle"): two short cloth strips per side hang
-    # from the scrubber arms at the WHEEL TRACK (x +/-0.55: vehicle body
-    # envelopes sit asymmetric to their refnodes by up to ~0.35 m, so a
-    # flank-line hang misses whole models; tire brushes wash wheels,
-    # not flanks) with hems at wheel height. Strip planes face the lane
-    # (columns run along Y),
-    # so lower bodywork and tires drag through them - the same soft-spring
-    # cloth contact as the curtain rows.
-    tire_levels = (1.15, 0.87, 0.58, 0.30)
-    for side_value, row_name in ((-1.0, "tirel"), (1.0, "tirer")):
-        for strip in range(2):
-            strip_y = -6.85 + strip * 0.30
-            strip_ids = {}
-            for column, column_y in enumerate((strip_y - 0.14, strip_y + 0.14)):
-                for level, z in enumerate(tire_levels):
-                    identifier = f"{MOD_ID}_{row_name}_s{strip:02d}_c{column}_l{level}"
-                    source = Vector((side_value * 0.55, column_y, z))
-                    mapped = rotation @ source
-                    strip_ids[(column, level)] = identifier
-                    cloth_position[identifier] = [round(value, 6) for value in mapped]
-                    cloth_nodes.append(
-                        {
-                            "id": identifier,
-                            "position": cloth_position[identifier],
-                            "source_world_position": [round(value, 6) for value in source],
-                            "fixed": level == 0,
-                        }
-                    )
-            for column in range(2):
-                for level in range(3):
-                    cloth_beams.append(
-                        {
-                            "nodes": [strip_ids[(column, level)], strip_ids[(column, level + 1)]],
-                            "class": "structural",
-                        }
-                    )
-            for level in range(4):
-                cloth_beams.append(
-                    {
-                        "nodes": [strip_ids[(0, level)], strip_ids[(1, level)]],
-                        "class": "anchor" if level == 0 else "structural",
-                    }
-                )
-            for level in range(3):
-                cloth_beams.append(
-                    {
-                        "nodes": [strip_ids[(0, level)], strip_ids[(1, level + 1)]],
-                        "class": "shear",
-                    }
-                )
-                cloth_beams.append(
-                    {
-                        "nodes": [strip_ids[(1, level)], strip_ids[(0, level + 1)]],
-                        "class": "shear",
-                    }
-                )
-                first = strip_ids[(0, level)]
-                second = strip_ids[(1, level)]
-                third = strip_ids[(1, level + 1)]
-                fourth = strip_ids[(0, level + 1)]
-                cloth_triangles.append({"nodes": [first, second, third], "surface": "mitter"})
-                cloth_triangles.append({"nodes": [first, third, fourth], "surface": "mitter"})
-                along_top = (level / 3.0) * 0.8 + strip * 0.29 + (0.9 if side_value > 0 else 0.2)
-                along_bottom = (
-                    ((level + 1) / 3.0) * 0.8 + strip * 0.29 + (0.9 if side_value > 0 else 0.2)
-                )
                 quad_uvs = [
                     [along_top, 0.79],
                     [along_top, 0.985],
