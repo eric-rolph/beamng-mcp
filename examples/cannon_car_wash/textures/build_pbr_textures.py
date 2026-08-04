@@ -612,18 +612,22 @@ def _build_shared_detail(output_root: Path) -> list[Path]:
 
 
 def _build_brush_cards(output_root: Path) -> list[Path]:
-    """Partitioned atlas: wavy bristle cards on top, mitter ribbons below.
+    """Partitioned atlas: mitter ribbon band in the TOP quarter, cards below.
 
     v1.22.1: the physics mitter needs CONTINUOUS cloth ribbons, but the
     card fringe pattern is torn by design - mapped onto the strips it read
-    as stacks of floating horizontal bands (player screenshot). The bottom
-    quarter (v 0.75..1.0) is now solid ribbon lanes, tileable along U so a
-    strip's length can wrap; the card meshes compress their UVs into the
-    top three quarters.
+    as stacks of floating horizontal bands (player screenshot).
+    v1.32 MARKER-PROBE LESSON: BeamNG samples this atlas with V measured
+    from the image BOTTOM - a live marker texture (green/blue/red thirds)
+    proved the strips' DAE v 0.79..0.985 window reads IMAGE ROWS 8..108
+    and the card meshes' v 0..0.75 read image rows 128..512. The band
+    therefore lives in the TOP image quarter (rows 0..128) and the cards
+    fill the rest; the old bottom-quarter layout had the strips sampling
+    the wavy card fringe (invisible while both regions were blue).
     """
 
     size = 512
-    card_region = int(size * 0.75)
+    band_region = size // 4
     colour = Image.new("RGB", (size, size), (7, 25, 68))
     opacity = Image.new("L", (size, size), 0)
     colour_draw = ImageDraw.Draw(colour)
@@ -631,7 +635,7 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
     palette = ((4, 64, 178), (0, 125, 214), (0, 177, 204), (7, 44, 129))
     strip_height = 15
     gap = 7
-    for index, y in enumerate(range(4, card_region - strip_height, strip_height + gap)):
+    for index, y in enumerate(range(band_region + 4, size - strip_height, strip_height + gap)):
         phase = index * 0.71
         points_top: list[tuple[int, int]] = []
         points_bottom: list[tuple[int, int]] = []
@@ -645,37 +649,62 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
         # A thin highlight and shadow give each EVA strip volume in the card.
         colour_draw.line(points_top, fill=(18, 194, 236), width=2)
         colour_draw.line(points_bottom, fill=(2, 19, 61), width=2)
-    # Mitter ribbon band: straight continuous lanes along U. Tone varies
-    # with sin() at whole-cycle counts so the band tiles seamlessly along U.
+    # Mitter ribbon band: straight continuous lanes along U in image rows
+    # 0..band_region. v1.32 (player reference photo of a real gantry wash):
+    # the lanes read as non-woven needle-punched polyester felt in SUBTLE
+    # SHADES OF RED - a dense per-pixel fiber speckle (the needle-punch
+    # dimples), faint filament striations running along the strip's hang
+    # direction (U), and macro tone that still varies only at whole-cycle
+    # counts so the band tiles seamlessly along U. Per-pixel hash speckle
+    # needs no wrap treatment. The strips sample image rows 8..108 (their
+    # DAE window under the engine's bottom-origin V), so opaque felt
+    # aprons fill rows 0..8 and 108..band_region against mip bleed from
+    # the transparent lane gaps and the card region below.
     lane_height = 14
     lane_gap = 3
-    # Opaque padding apron between the card region and the sampled lanes:
-    # transparent inset rows let mip averaging bleed alpha and card waves
-    # into the first lanes at distance (player: jagged mid-strip band).
-    band_top = card_region + 22
-    for x in range(size):
-        tone = 1.0 + 0.14 * math.sin(math.tau * (2.0 * x / size))
-        fill = tuple(min(255, max(0, round(channel * tone))) for channel in palette[0])
-        colour_draw.line([(x, card_region), (x, band_top - 1)], fill=fill)
-    opacity_draw.rectangle([(0, card_region), (size - 1, band_top - 1)], fill=255)
-    for lane_index, y in enumerate(range(band_top, size - lane_height, lane_height + lane_gap)):
-        base = palette[lane_index % len(palette)]
-        for x in range(size):
-            tone = 1.0 + 0.14 * math.sin(math.tau * (2.0 * x / size) + lane_index * 1.9)
-            shade = 1.0 + 0.06 * math.sin(math.tau * (5.0 * x / size) + lane_index * 0.7)
-            fill = tuple(min(255, max(0, round(channel * tone * shade))) for channel in base)
-            colour_draw.line([(x, y), (x, y + lane_height - 1)], fill=fill)
+    felt_palette = ((146, 38, 42), (128, 30, 36), (161, 50, 48), (118, 27, 34))
+    felt_rng = np.random.default_rng(20260806)
+    xs = np.arange(size, dtype=np.float32)
+
+    def _felt_rows(base_rgb: tuple[int, int, int], rows: int, phase: float) -> np.ndarray:
+        macro = 1.0 + 0.09 * np.sin(math.tau * (2.0 * xs / size) + phase)
+        weave = 1.0 + 0.03 * np.sin(math.tau * (7.0 * xs / size) + phase * 1.7)
+        speckle = 1.0 + 0.055 * felt_rng.standard_normal((rows, size)).astype(np.float32)
+        filament = 1.0 + 0.04 * felt_rng.standard_normal((rows, 1)).astype(np.float32)
+        shade = (macro * weave)[None, :] * speckle * filament
+        block = np.asarray(base_rgb, dtype=np.float32)[None, None, :] * shade[:, :, None]
+        return np.clip(block, 0.0, 255.0).astype(np.uint8)
+
+    lane_first = 8
+    lane_last = 108
+    colour.paste(Image.fromarray(_felt_rows(felt_palette[0], lane_first, 0.0)), (0, 0))
+    opacity_draw.rectangle([(0, 0), (size - 1, lane_first - 1)], fill=255)
+    colour.paste(
+        Image.fromarray(_felt_rows(felt_palette[0], band_region - lane_last, 0.35)),
+        (0, lane_last),
+    )
+    opacity_draw.rectangle([(0, lane_last), (size - 1, band_region - 1)], fill=255)
+    for lane_index, y in enumerate(
+        range(lane_first, lane_last - lane_height + 1, lane_height + lane_gap)
+    ):
+        base = felt_palette[lane_index % len(felt_palette)]
+        colour.paste(
+            Image.fromarray(_felt_rows(base, lane_height, lane_index * 1.9)),
+            (0, y),
+        )
         opacity_draw.rectangle([(0, y), (size - 1, y + lane_height - 1)], fill=255)
-        colour_draw.line([(0, y), (size - 1, y)], fill=(18, 194, 236), width=1)
+        # Soft felt hems: a slightly lifted top edge and a shadowed fold at
+        # the bottom - warm reds, not the EVA cards' cyan/navy trim.
+        colour_draw.line([(0, y), (size - 1, y)], fill=(186, 88, 84), width=1)
         colour_draw.line(
-            [(0, y + lane_height - 1), (size - 1, y + lane_height - 1)], fill=(2, 19, 61), width=1
+            [(0, y + lane_height - 1), (size - 1, y + lane_height - 1)], fill=(70, 16, 20), width=1
         )
     # Break up only the free outer edge of the cards; the hub edge remains
     # opaque so no radial holes appear around the rotating shaft. Never fray
     # the ribbon band.
     opacity_array = np.asarray(opacity, dtype=np.uint8).copy()
     yy, xx = np.indices(opacity_array.shape)
-    fray = (xx > int(size * 0.82)) & (yy < card_region) & (((xx * 17 + yy * 31) % 47) < 4)
+    fray = (xx > int(size * 0.82)) & (yy >= band_region) & (((xx * 17 + yy * 31) % 47) < 4)
     opacity_array[fray] = 0
     opacity = Image.fromarray(opacity_array)
     colour = _dilate_alpha_colour(colour, opacity)
@@ -685,7 +714,13 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
     normal_vectors = np.dstack((-dx * 1.1, dy * 1.1, np.ones_like(luminance)))
     normal_vectors /= np.linalg.norm(normal_vectors, axis=2, keepdims=True).clip(min=1e-6)
     normal = Image.fromarray(np.clip((normal_vectors * 0.5 + 0.5) * 255.0, 0, 255).astype(np.uint8))
+    # Split roughness: matte needle-punched felt (the fiber mat scatters
+    # light diffusely) across the top-quarter ribbon band, glossier EVA
+    # cards below.
     roughness = Image.new("L", (size, size), round(0.72 * 255))
+    ImageDraw.Draw(roughness).rectangle(
+        [(0, 0), (size - 1, band_region - 1)], fill=round(0.88 * 255)
+    )
     outputs = {
         _texture_name("brush_cards", "color"): colour,
         _texture_name("brush_cards", "normal"): normal,

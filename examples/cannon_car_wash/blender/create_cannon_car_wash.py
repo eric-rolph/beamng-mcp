@@ -1511,8 +1511,14 @@ def build_details() -> None:
     # v1.22: the mitter curtain is now PHYSICS - individual strips built as
     # jbeam cloth lattices on the selector vehicle (see _selector_structure's
     # cloth section) with a flexbody card mesh that drapes over vehicles.
-    # Only the support beam remains in the static scenery; the TSStatic
+    # Only the support structure remains in the static scenery; the TSStatic
     # visual must not carry ghost strips over the physical ones.
+    # v1.32 (player reference photo of a real gantry wash): the hanger beams
+    # now ride under a proper BOX TRUSS bridge - four chords spanning the
+    # lane, warren diagonals on both vertical faces, cross lacing on top,
+    # and shallow-angled pneumatic actuator cylinders mounted across the
+    # truss top reaching down toward the front and rear hanger beams. The
+    # roof underside sits at z 4.60, so the truss lives in 4.30..4.585.
     for beam_index, beam_y in enumerate((-5.30, -4.85, -4.40), start=1):
         add_box(
             f"CurtainBeam_{beam_index}", (0.0, beam_y, 4.38), (5.0, 0.14, 0.12), steel, bevel=0.0
@@ -1527,8 +1533,119 @@ def build_details() -> None:
                 vertices=10,
                 bevel=0.0,
             )
-    add_box("CurtainRail_L", (-2.35, -4.85, 4.38), (0.12, 1.10, 0.12), steel, bevel=0.0)
-    add_box("CurtainRail_R", (2.35, -4.85, 4.38), (0.12, 1.10, 0.12), steel, bevel=0.0)
+    truss_front_y = -5.42
+    truss_back_y = -4.28
+    truss_bot_z = 4.34
+    truss_top_z = 4.56
+    for face_y, face_name in ((truss_front_y, "F"), (truss_back_y, "B")):
+        for chord_z, chord_name in ((truss_bot_z, "Bot"), (truss_top_z, "Top")):
+            add_box(
+                f"CurtainTrussChord_{face_name}_{chord_name}",
+                (0.0, face_y, chord_z),
+                (5.0, 0.07, 0.07),
+                steel,
+                bevel=0.0,
+            )
+    truss_stations = (-2.4, -1.2, 0.0, 1.2, 2.4)
+    for station_index, station_x in enumerate(truss_stations, start=1):
+        station_name = str(station_index)
+        for face_y, face_name in ((truss_front_y, "F"), (truss_back_y, "B")):
+            add_box(
+                f"CurtainTrussPost_{face_name}_{station_name}",
+                (station_x, face_y, (truss_bot_z + truss_top_z) / 2.0),
+                (0.05, 0.05, truss_top_z - truss_bot_z),
+                steel,
+                bevel=0.0,
+            )
+        add_box(
+            f"CurtainTrussLacing_{station_name}",
+            (station_x, (truss_front_y + truss_back_y) / 2.0, truss_top_z),
+            (0.05, truss_back_y - truss_front_y, 0.05),
+            steel,
+            bevel=0.0,
+        )
+    # Warren diagonals: alternate slope between adjacent stations on both
+    # vertical faces. A diagonal spans dx 1.2 / dz 0.22 - a thin rotated box.
+    diagonal_rise = truss_top_z - truss_bot_z
+    diagonal_run = truss_stations[1] - truss_stations[0]
+    diagonal_length = math.hypot(diagonal_run, diagonal_rise)
+    diagonal_pitch = math.atan2(diagonal_rise, diagonal_run)
+    for face_y, face_name in ((truss_front_y, "F"), (truss_back_y, "B")):
+        for bay_index in range(len(truss_stations) - 1):
+            bay_mid_x = (truss_stations[bay_index] + truss_stations[bay_index + 1]) / 2.0
+            slope = 1.0 if bay_index % 2 == 0 else -1.0
+            add_box(
+                f"CurtainTrussDiag_{face_name}_{bay_index + 1}",
+                (bay_mid_x, face_y, (truss_bot_z + truss_top_z) / 2.0),
+                (diagonal_length, 0.045, 0.045),
+                steel,
+                bevel=0.0,
+                rotation=(0.0, -slope * diagonal_pitch, 0.0),
+            )
+    # Top-mounted angled actuators (the reference's tilt cylinders): each
+    # lies across the truss top at a shallow pitch, sleeve anchored near the
+    # rear chord, rod reaching down toward a front hanger beam.
+    for actuator_x, target_y, target_name in ((-1.5, -5.30, "F"), (1.5, -4.40, "B")):
+        anchor_y = truss_back_y if target_name == "F" else truss_front_y
+        anchor_z = truss_top_z - 0.01
+        target_z = 4.45
+        reach_y = target_y - anchor_y
+        reach_z = target_z - anchor_z
+        # Cylinder axis is +z; rotating by roll about x maps it to
+        # (0, -sin(roll), cos(roll)) - solve that against the reach vector.
+        roll = math.atan2(-reach_y, reach_z)
+        length = math.hypot(reach_y, reach_z)
+        sleeve_frac = 0.42
+        rod_frac = 0.80
+        sleeve_center = (
+            actuator_x,
+            anchor_y + reach_y * sleeve_frac / 2.0,
+            anchor_z + reach_z * sleeve_frac / 2.0,
+        )
+        rod_center = (
+            actuator_x,
+            anchor_y + reach_y * (sleeve_frac + rod_frac) / 2.0,
+            anchor_z + reach_z * (sleeve_frac + rod_frac) / 2.0,
+        )
+        add_cylinder(
+            f"CurtainActuatorSleeve_{target_name}",
+            sleeve_center,
+            0.045,
+            length * sleeve_frac,
+            steel,
+            vertices=14,
+            rotation=(roll, 0.0, 0.0),
+            bevel=0.0,
+        )
+        add_cylinder(
+            f"CurtainActuatorRod_{target_name}",
+            rod_center,
+            0.02,
+            length * (rod_frac - sleeve_frac),
+            steel,
+            vertices=10,
+            rotation=(roll, 0.0, 0.0),
+            bevel=0.0,
+        )
+        add_box(
+            f"CurtainActuatorMount_{target_name}",
+            (actuator_x, anchor_y, truss_top_z),
+            (0.10, 0.08, 0.07),
+            steel,
+            bevel=0.0,
+        )
+    add_box("CurtainRail_L", (-2.35, -4.85, 4.38), (0.12, 1.30, 0.12), steel, bevel=0.0)
+    add_box("CurtainRail_R", (2.35, -4.85, 4.38), (0.12, 1.30, 0.12), steel, bevel=0.0)
+    # End posts carry the truss chords down onto the wall rails.
+    for rail_x, rail_name in ((-2.35, "L"), (2.35, "R")):
+        for face_y, face_name in ((truss_front_y, "F"), (truss_back_y, "B")):
+            add_box(
+                f"CurtainTrussBearing_{rail_name}_{face_name}",
+                (rail_x, face_y, 4.40),
+                (0.14, 0.12, 0.16),
+                steel,
+                bevel=0.0,
+            )
 
     # Equipment mounting: the brushes no longer float. A ceiling gantry
     # carries the tower spinners, and columns brace the overhead roller.
