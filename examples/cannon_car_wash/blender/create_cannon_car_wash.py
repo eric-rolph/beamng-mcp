@@ -614,9 +614,9 @@ def add_vertical_brush(
             else:
                 face_uvs.append(((0.0, 0.0), (1.0, 0.0), (1.0, 0.75), (0.0, 0.75)))
 
-    append_ring(16, 0.18, 0.92, half_height, 0.0, 0.07)
+    append_ring(22, 0.18, 0.92, half_height, 0.0, 0.07)
     # Offset inner ring fills the see-through gap between core and card tips.
-    append_ring(10, 0.17, 0.55, half_height * 0.9, math.tau / 20.0, 0.04)
+    append_ring(14, 0.17, 0.55, half_height * 0.9, math.tau / 20.0, 0.04)
     card_cluster = add_card_mesh(
         f"{name}_CardFan",
         location,
@@ -662,7 +662,7 @@ def add_wheel_scrubber(
     vertices: list[tuple[float, float, float]] = []
     faces: list[tuple[int, int, int, int]] = []
     face_uvs: list[tuple[tuple[float, float], ...]] = []
-    for index in range(14):
+    for index in range(18):
         angle = index * math.tau / 14.0
         cosine, sine = math.cos(angle), math.sin(angle)
         reach = 0.40 + 0.025 * math.sin(index * 2.7)
@@ -740,8 +740,8 @@ def add_horizontal_brush(
             else:
                 face_uvs.append(((0.0, 0.0), (0.0, 0.75), (1.0, 0.75), (1.0, 0.0)))
 
-    append_ring(18, 0.17, 0.68, half_length, 0.0, 0.05)
-    append_ring(8, 0.16, 0.42, half_length * 0.94, math.tau / 36.0, 0.03)
+    append_ring(24, 0.17, 0.68, half_length, 0.0, 0.05)
+    append_ring(12, 0.16, 0.42, half_length * 0.94, math.tau / 36.0, 0.03)
     card_cluster = add_card_mesh(
         "Brush_Overhead_CardFan",
         location,
@@ -3330,15 +3330,40 @@ def build_cannon() -> None:
         metallic=0.85,
         roughness=0.55,
     )
-    yellow = material(
-        scenario_material_name("hazard_yellow"), (1.0, 0.68, 0.015, 1.0), roughness=0.45
+    bore_dark = material(
+        scenario_material_name("rubber"), (0.012, 0.014, 0.018, 1.0), roughness=0.9
     )
     prefix = f"{MOD_ID}_cannonshape_"
+    # v1.34 (player): the muzzle must read as an OPEN BORE, not a capped
+    # disc. Iron ring collar + a near-black disc proud of the ring's top
+    # cap + a raised iron lip torus wrapping it, so the dark circle reads
+    # as the hole down the barrel from every angle.
     parts = [
         add_cylinder(f"{prefix}Barrel", (0.0, 0.0, 0.40), 0.085, 0.80, iron, vertices=16),
-        add_cylinder(f"{prefix}Muzzle", (0.0, 0.0, 0.815), 0.105, 0.09, yellow, vertices=16),
+        add_cylinder(f"{prefix}Muzzle", (0.0, 0.0, 0.825), 0.105, 0.07, iron, vertices=16),
+        add_cylinder(
+            f"{prefix}Bore",
+            (0.0, 0.0, 0.868),
+            0.080,
+            0.014,
+            bore_dark,
+            vertices=16,
+            bevel=0.0,
+        ),
         add_cylinder(f"{prefix}Breech", (0.0, 0.0, 0.03), 0.11, 0.12, iron, vertices=16),
     ]
+    bpy.ops.mesh.primitive_torus_add(
+        location=(0.0, 0.0, 0.872),
+        major_radius=0.094,
+        minor_radius=0.014,
+        major_segments=16,
+        minor_segments=8,
+    )
+    lip = bpy.context.object
+    lip.name = namespaced_object_name(f"{prefix}MuzzleLip")
+    lip.data.name = f"{lip.name}_mesh"
+    assign_material(lip, iron)
+    parts.append(lip)
     bpy.ops.object.select_all(action="DESELECT")
     for obj in parts:
         obj.select_set(True)
@@ -3382,7 +3407,12 @@ def build_mini_car() -> None:
         metallic=0.35,
         roughness=0.3,
     )
-    rubber = material(scenario_material_name("rubber"), (0.012, 0.014, 0.018, 1.0), roughness=0.9)
+    # v1.34 (player): wheels get their own treaded charcoal tire texture
+    # and a modeled stainless hub cap instead of flat black rubber.
+    tire = material(scenario_material_name("mini_wheel"), (0.14, 0.14, 0.16, 1.0), roughness=0.85)
+    hub = material(
+        scenario_material_name("stainless"), (0.42, 0.46, 0.5, 1.0), metallic=0.9, roughness=0.2
+    )
     glass = material(
         scenario_material_name("glass"), (0.03, 0.32, 0.48, 0.38), metallic=0.1, roughness=0.08
     )
@@ -3413,9 +3443,21 @@ def build_mini_car() -> None:
                     (wheel_x, wheel_side * 0.05, 0.03),
                     0.028,
                     0.02,
-                    rubber,
+                    tire,
                     rotation=(math.pi / 2.0, 0.0, 0.0),
                     vertices=12,
+                    bevel=0.0,
+                )
+            )
+            parts.append(
+                add_cylinder(
+                    f"{MINI_CAR_PREFIX}Hub_{wheel_x}_{wheel_side}",
+                    (wheel_x, wheel_side * 0.0615, 0.03),
+                    0.013,
+                    0.006,
+                    hub,
+                    rotation=(math.pi / 2.0, 0.0, 0.0),
+                    vertices=10,
                     bevel=0.0,
                 )
             )

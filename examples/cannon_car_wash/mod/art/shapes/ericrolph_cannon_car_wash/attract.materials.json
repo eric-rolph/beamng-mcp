@@ -40,5 +40,26 @@
     "persistentId": "57cf499b-e60e-5f36-8c95-9eb533be8dea",
     "translucentBlendOp": "None",
     "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_mini_wheel": {
+    "Stages": [
+      {
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_mini_wheel.color.png",
+        "metallicFactor": 0.0,
+        "normalMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_mini_wheel.normal.png",
+        "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_mini_wheel_roughness.data.png"
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": true,
+    "class": "Material",
+    "mapTo": "ericrolph_cannon_car_wash_mini_wheel",
+    "materialTag0": "ericrolph_cannon_car_wash",
+    "name": "ericrolph_cannon_car_wash_mini_wheel",
+    "persistentId": "d46567fa-ef63-55d5-b108-3d5f60ea0cd8",
+    "translucentBlendOp": "None",
+    "version": 1.5
   }
 }

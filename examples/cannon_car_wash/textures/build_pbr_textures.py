@@ -626,29 +626,45 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
     the wavy card fringe (invisible while both regions were blue).
     """
 
-    size = 512
+    # v1.34 (player + reference photo of a real gantry brush): 1024 atlas.
+    # The card region is now a dense pack of RADIAL EVA STRANDS - each
+    # strand runs hub-to-tip along U with a slight wave, ragged random
+    # length, and thin transparent gaps between strands - in the
+    # reference's TWO-TONE scheme: red strand pack on the card tops
+    # (image rows below the band, card v 0.45..0.75) and blue on the card
+    # bottoms (card v 0..0.45; V samples from the image bottom).
+    size = 1024
     band_region = size // 4
     colour = Image.new("RGB", (size, size), (7, 25, 68))
     opacity = Image.new("L", (size, size), 0)
     colour_draw = ImageDraw.Draw(colour)
     opacity_draw = ImageDraw.Draw(opacity)
     palette = ((4, 64, 178), (0, 125, 214), (0, 177, 204), (7, 44, 129))
-    strip_height = 15
-    gap = 7
-    for index, y in enumerate(range(band_region + 4, size - strip_height, strip_height + gap)):
-        phase = index * 0.71
-        points_top: list[tuple[int, int]] = []
-        points_bottom: list[tuple[int, int]] = []
-        for x in range(0, size + 1, 16):
-            wave = round(math.sin(x * 0.045 + phase) * 2.0)
-            points_top.append((x, y + wave))
-            points_bottom.append((x, y + strip_height + wave))
-        polygon = points_top + list(reversed(points_bottom))
-        colour_draw.polygon(polygon, fill=palette[index % len(palette)])
-        opacity_draw.polygon(polygon, fill=255)
-        # A thin highlight and shadow give each EVA strip volume in the card.
-        colour_draw.line(points_top, fill=(18, 194, 236), width=2)
-        colour_draw.line(points_bottom, fill=(2, 19, 61), width=2)
+    red_palette = ((214, 54, 52), (188, 40, 44), (230, 76, 64), (172, 34, 40))
+    strand_rng = np.random.default_rng(20260807)
+    two_tone_split = band_region + round((1.0 - 0.45 / 0.75) * (size - band_region))
+    strand_y = band_region + 3
+    strand_index = 0
+    while strand_y < size - 3:
+        thickness = int(strand_rng.integers(3, 5))
+        blend = strand_y + strand_rng.integers(-14, 14) < two_tone_split
+        zone = red_palette if blend else palette
+        base = zone[strand_index % len(zone)]
+        tone = 0.82 + 0.33 * float(strand_rng.random())
+        fill = tuple(min(255, max(0, round(channel * tone))) for channel in base)
+        length = int(size * (0.86 + 0.14 * float(strand_rng.random())))
+        phase = float(strand_rng.random()) * math.tau
+        points = []
+        for x in range(0, length + 1, 16):
+            wave = round(math.sin(x * 0.012 + phase) * 2.4)
+            points.append((x, strand_y + wave))
+        colour_draw.line(points, fill=fill, width=thickness)
+        opacity_draw.line(points, fill=255, width=thickness)
+        # Slim bright spine catches the light like a folded EVA edge.
+        spine = tuple(min(255, round(channel * 1.25)) for channel in fill)
+        colour_draw.line([(p[0], p[1] - thickness // 2) for p in points], fill=spine, width=1)
+        strand_y += thickness + int(strand_rng.integers(1, 3))
+        strand_index += 1
     # Mitter ribbon band: straight continuous lanes along U in image rows
     # 0..band_region. v1.32 (player reference photo of a real gantry wash):
     # the lanes read as non-woven needle-punched polyester felt in SUBTLE
@@ -660,9 +676,11 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
     # DAE window under the engine's bottom-origin V), so opaque felt
     # aprons fill rows 0..8 and 108..band_region against mip bleed from
     # the transparent lane gaps and the card region below.
-    lane_height = 14
-    lane_gap = 3
-    felt_palette = ((146, 38, 42), (128, 30, 36), (161, 50, 48), (118, 27, 34))
+    # v1.34 (player): BRIGHTER reds, matching the interior's safety-red
+    # accent family rather than the muted maroon of v1.32.
+    lane_height = 28
+    lane_gap = 6
+    felt_palette = ((216, 58, 54), (196, 46, 48), (232, 78, 66), (182, 40, 44))
     felt_rng = np.random.default_rng(20260806)
     xs = np.arange(size, dtype=np.float32)
 
@@ -675,8 +693,8 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
         block = np.asarray(base_rgb, dtype=np.float32)[None, None, :] * shade[:, :, None]
         return np.clip(block, 0.0, 255.0).astype(np.uint8)
 
-    lane_first = 8
-    lane_last = 108
+    lane_first = 16
+    lane_last = 215
     colour.paste(Image.fromarray(_felt_rows(felt_palette[0], lane_first, 0.0)), (0, 0))
     opacity_draw.rectangle([(0, 0), (size - 1, lane_first - 1)], fill=255)
     colour.paste(
@@ -695,18 +713,14 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
         opacity_draw.rectangle([(0, y), (size - 1, y + lane_height - 1)], fill=255)
         # Soft felt hems: a slightly lifted top edge and a shadowed fold at
         # the bottom - warm reds, not the EVA cards' cyan/navy trim.
-        colour_draw.line([(0, y), (size - 1, y)], fill=(186, 88, 84), width=1)
+        colour_draw.line([(0, y), (size - 1, y)], fill=(246, 134, 122), width=2)
         colour_draw.line(
-            [(0, y + lane_height - 1), (size - 1, y + lane_height - 1)], fill=(70, 16, 20), width=1
+            [(0, y + lane_height - 1), (size - 1, y + lane_height - 1)],
+            fill=(112, 26, 26),
+            width=2,
         )
-    # Break up only the free outer edge of the cards; the hub edge remains
-    # opaque so no radial holes appear around the rotating shaft. Never fray
-    # the ribbon band.
-    opacity_array = np.asarray(opacity, dtype=np.uint8).copy()
-    yy, xx = np.indices(opacity_array.shape)
-    fray = (xx > int(size * 0.82)) & (yy >= band_region) & (((xx * 17 + yy * 31) % 47) < 4)
-    opacity_array[fray] = 0
-    opacity = Image.fromarray(opacity_array)
+    # No extra fray pass: strand raggedness now lives in the random strand
+    # lengths, and the hub edge (x = 0) stays fully opaque by construction.
     colour = _dilate_alpha_colour(colour, opacity)
     luminance = np.asarray(colour.convert("L"), dtype=np.float32) / 255.0
     dx = (np.roll(luminance, -1, axis=1) - np.roll(luminance, 1, axis=1)) * 0.5
@@ -1197,6 +1211,39 @@ def _build_mini_car(output_root: Path) -> list[Path]:
     return paths
 
 
+def _build_mini_wheel(output_root: Path) -> list[Path]:
+    """Treaded toy-tire skin for the mini car's wheels (v1.34).
+
+    Cylinder side UVs wrap U around the tire, so vertical stripes here
+    read as tread blocks. Charcoal with a warm sidewall tone; the hub
+    shine comes from the modeled stainless caps, not this map.
+    """
+
+    size = 128
+    rng = np.random.default_rng(20260808)
+    xs = np.arange(size, dtype=np.float32)[None, :]
+    tread = 0.86 + 0.14 * np.sign(np.sin(math.tau * (12.0 * xs / size)))
+    grain = 1.0 + 0.06 * rng.standard_normal((size, size)).astype(np.float32)
+    shade = np.broadcast_to(tread, (size, size)) * grain
+    base = np.array([0.16, 0.155, 0.17], dtype=np.float32)
+    colour = _to_srgb_image(np.clip(base[None, None, :] * shade[:, :, None], 0.0, 1.0))
+    height = ((shade - shade.min()) * 0.0012).astype(np.float32)
+    normal = _normal_from_metric_height(height, (0.09, 0.02))
+    rough = np.clip(0.82 + 0.06 * rng.standard_normal((size, size)), 0.6, 0.95)
+    roughness = _to_data_image(rough.astype(np.float32))
+    outputs = {
+        _texture_name("mini_wheel", "color"): colour,
+        _texture_name("mini_wheel", "normal"): normal,
+        _texture_name("mini_wheel_roughness", "data"): roughness,
+    }
+    paths: list[Path] = []
+    for name, image in outputs.items():
+        path = output_root / name
+        _save(image, path)
+        paths.append(path)
+    return paths
+
+
 def build(output_root: Path) -> dict[str, object]:
     output_root.mkdir(parents=True, exist_ok=True)
     expected = set()
@@ -1206,6 +1253,7 @@ def build(output_root: Path) -> dict[str, object]:
         + _build_sign(output_root)
         + _build_attract_cannon(output_root)
         + _build_mini_car(output_root)
+        + _build_mini_wheel(output_root)
     )
     expected.update(path.name for path in outputs)
     for existing in output_root.glob("*.png"):

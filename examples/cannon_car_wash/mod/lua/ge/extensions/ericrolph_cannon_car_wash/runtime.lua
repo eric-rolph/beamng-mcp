@@ -41,6 +41,7 @@ local Attract = {
   requiredMaterials = {
     "ericrolph_cannon_car_wash_attract_cannon",
     "ericrolph_cannon_car_wash_mini_car_paint",
+    "ericrolph_cannon_car_wash_mini_wheel",
   },
 }
 
@@ -724,40 +725,40 @@ function Attract.start(state)
   attract.flying = true
   attract.flightTime = 0
   attract.bounces = 0
-  attract.reported = false
   attract.launchOrigin = mount + aim * Attract.barrelLength
   attract.velocity = aim * Attract.speedMps
   attract.position = vec3(
     attract.launchOrigin.x, attract.launchOrigin.y, attract.launchOrigin.z
   )
   attract.tumblePhase = 0
+  -- v1.34 (player): the effect stays AT the bore - a light wisp plus a
+  -- brief shower of brake-style sparks, nothing downrange.
+  local muzzle = mount + aim * (Attract.barrelLength * 0.95)
   if attract.muzzleEmitter then
-    local muzzle = attract.launchOrigin
     pcall(function()
       attract.muzzleEmitter:setPosRot(muzzle.x, muzzle.y, muzzle.z, 0, 0, 0, 1)
       attract.muzzleEmitter:setActive(true)
     end)
-    attract.muzzleTimer = 0.7
+    attract.muzzleTimer = 0.5
+  end
+  if attract.sparkEmitter then
+    pcall(function()
+      attract.sparkEmitter:setPosRot(muzzle.x, muzzle.y, muzzle.z, 0, 0, 0, 1)
+      attract.sparkEmitter:setActive(true)
+    end)
+    attract.sparkTimer = 0.3
   end
   emitEvent(state, "I", "attract_volley_fired", {prop_id = state.propId})
   return true
 end
 
-function Attract.finish(state, landed)
+function Attract.finish(state)
   local attract = state.attract
   if not attract then return end
   attract.flying = false
   attract.timer = Attract.intervalSeconds
   if attract.projectile then
     pcall(function() attract.projectile:setPosRot(0, 0, -220, 0, 0, 0, 1) end)
-  end
-  if landed and attract.landEmitter and attract.landPosition then
-    local landing = attract.landPosition
-    pcall(function()
-      attract.landEmitter:setPosRot(landing.x, landing.y, landing.z, 0, 0, 0, 1)
-      attract.landEmitter:setActive(true)
-    end)
-    attract.landTimer = 0.8
   end
 end
 
@@ -773,12 +774,12 @@ function Attract.update(state, dt)
       end
     end
   end
-  if attract.landTimer then
-    attract.landTimer = attract.landTimer - dt
-    if attract.landTimer <= 0 then
-      attract.landTimer = nil
-      if attract.landEmitter then
-        pcall(function() attract.landEmitter:setActive(false) end)
+  if attract.sparkTimer then
+    attract.sparkTimer = attract.sparkTimer - dt
+    if attract.sparkTimer <= 0 then
+      attract.sparkTimer = nil
+      if attract.sparkEmitter then
+        pcall(function() attract.sparkEmitter:setActive(false) end)
       end
     end
   end
@@ -786,29 +787,14 @@ function Attract.update(state, dt)
     attract.restTimer = attract.restTimer - dt
     if attract.restTimer <= 0 then
       attract.resting = false
-      Attract.finish(state, false)
+      Attract.finish(state)
     end
     return
   end
   if attract.flying then
     attract.flightTime = attract.flightTime + dt
-    local previousVz = attract.velocity.z
     attract.velocity.z = attract.velocity.z + Attract.gravityMps2 * dt
     attract.position = attract.position + attract.velocity * dt
-    -- Apex puff (v1.33: silent - the firework sounds were removed) at the
-    -- moment vertical velocity flips.
-    if not attract.reported and previousVz > 0 and attract.velocity.z <= 0 then
-      attract.reported = true
-      if attract.muzzleEmitter then
-        pcall(function()
-          attract.muzzleEmitter:setPosRot(
-            attract.position.x, attract.position.y, attract.position.z, 0, 0, 0, 1
-          )
-          attract.muzzleEmitter:setActive(true)
-        end)
-        attract.muzzleTimer = 0.4
-      end
-    end
     attract.tumblePhase = attract.tumblePhase + Attract.tumbleRate * dt
     local half = attract.tumblePhase * 0.5
     local tumble = {x = math.sin(half), y = 0, z = 0, w = math.cos(half)}
@@ -829,17 +815,9 @@ function Attract.update(state, dt)
         attract.velocity.z = -attract.velocity.z * Attract.bounceRestitution
         attract.velocity.x = attract.velocity.x * Attract.bounceKeep
         attract.velocity.y = attract.velocity.y * Attract.bounceKeep
-        if attract.landEmitter then
-          pcall(function()
-            attract.landEmitter:setPosRot(
-              attract.position.x, attract.position.y, groundZ, 0, 0, 0, 1
-            )
-            attract.landEmitter:setActive(true)
-          end)
-          attract.landTimer = 0.6
-        end
       else
         -- Settle at the landing spot and stay a while before the reset.
+        -- v1.34: no landing effect (player request) - the car just rests.
         attract.flying = false
         attract.resting = true
         attract.restTimer = Attract.restSeconds
@@ -851,18 +829,9 @@ function Attract.update(state, dt)
             )
           end)
         end
-        if attract.landEmitter then
-          pcall(function()
-            attract.landEmitter:setPosRot(
-              attract.position.x, attract.position.y, groundZ, 0, 0, 0, 1
-            )
-            attract.landEmitter:setActive(true)
-          end)
-          attract.landTimer = 0.8
-        end
       end
     elseif attract.flightTime > Attract.flightMaxSeconds then
-      Attract.finish(state, false)
+      Attract.finish(state)
     end
     return
   end
@@ -1252,7 +1221,13 @@ local function removeWashSubject(state, vehicleId, reason)
     reason = reason,
   })
   if washSubjectCount(state) == 0 and state.washSystemsActive then
-    setWashSystemsEnabled(state, false, reason)
+    -- v1.34 (player: rollers seemed to start and stop): never cut the
+    -- ambient clip on a momentary exit. Contains-mode triggers flap on
+    -- suspension wobble, and toggling playAmbient RESTARTS the clip from
+    -- frame one - a visible jerk. Hold the systems on through a grace
+    -- window; onPreRender turns them off only if the bay stays empty.
+    state.washSystemsOffGraceSeconds = 3.0
+    state.washSystemsOffReason = reason
   end
 end
 
@@ -2011,6 +1986,7 @@ local function handleWashTrigger(state, data)
     if repair and repair.resetEdgeGuard then repair.washExitDeferred = false end
     if state.washSubjects[data.subjectID] then return end
     state.washSubjects[data.subjectID] = true
+    state.washSystemsOffGraceSeconds = nil
     emitEvent(state, "I", "wash_trigger_enter", {subject_id = data.subjectID})
     if not state.washSystemsActive and not setWashSystemsEnabled(state, true, "vehicle_enter") then
       state.washSubjects[data.subjectID] = nil
@@ -2390,7 +2366,7 @@ local function cleanupInstallation(state, reason)
   if state.attract then
     deleteSceneObject(state.attract.projectile)
     deleteSceneObject(state.attract.muzzleEmitter)
-    deleteSceneObject(state.attract.landEmitter)
+    deleteSceneObject(state.attract.sparkEmitter)
     deleteSceneObject(state.attract.cannon)
     state.attract = nil
   end
@@ -2581,22 +2557,24 @@ local function registerProp(propId)
     state.effects[#state.effects + 1] = effect
   end
 
-  -- Sign-cannon attract volley kit: projectile + muzzle smoke + landing
-  -- dust. Non-fatal on failure - the wash works without its showpiece.
+  -- Sign-cannon attract volley kit: projectile + a light localized muzzle
+  -- wisp and a few brake-style sparks right at the bore (v1.34 player:
+  -- no landing dust, keep the effect at the cannon top only). Non-fatal
+  -- on failure - the wash works without its showpiece.
   local projectile = Attract.createProjectile(prefix .. "_attract_car")
   if projectile then
     local muzzleEmitter = createEffect({
       name = prefix .. "_attract_muzzle",
-      emitter = "BNGP_34",
+      emitter = "BNGP_22",
     })
-    local landEmitter = createEffect({
-      name = prefix .. "_attract_land",
-      emitter = "BNGP_2",
+    local sparkEmitter = createEffect({
+      name = prefix .. "_attract_sparks",
+      emitter = "BNGP_82",
     })
     state.attract = {
       projectile = projectile,
       muzzleEmitter = muzzleEmitter,
-      landEmitter = landEmitter,
+      sparkEmitter = sparkEmitter,
       cannon = Attract.createCannon(prefix .. "_attract_cannon"),
       timer = Attract.firstDelaySeconds,
       flying = false,
@@ -2748,6 +2726,21 @@ local function onPreRender(dtReal, dtSim, dtRaw)
       end
     end
     Attract.update(state, elapsed)
+    -- Deferred wash-system shutdown (v1.34): only after the bay has stayed
+    -- empty through the whole grace window. Momentary Contains-flap exits
+    -- cancel via the re-enter path, so the ambient clip never restarts
+    -- while a vehicle is actually inside.
+    if state.washSystemsOffGraceSeconds and state.washSystemsActive then
+      if washSubjectCount(state) > 0 then
+        state.washSystemsOffGraceSeconds = nil
+      else
+        state.washSystemsOffGraceSeconds = state.washSystemsOffGraceSeconds - elapsed
+        if state.washSystemsOffGraceSeconds <= 0 then
+          state.washSystemsOffGraceSeconds = nil
+          setWashSystemsEnabled(state, false, state.washSystemsOffReason or "bay_empty")
+        end
+      end
+    end
     positionalZoneSweep(state)
     -- Bay check: a car that rolled in fast (repair and/or hold deferred)
     -- gets the full service the moment it comes to parking speed inside.
