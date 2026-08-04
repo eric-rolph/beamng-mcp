@@ -612,10 +612,10 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
     # Cloth lattice: 12 strips x 2 columns x 4 levels; the top level is
     # anchored (fixed like the cage), everything below is free, light, and
     # collidable so vehicles brush the strips aside.
-    assert len(cloth_node_rows) == 96
+    assert len(cloth_node_rows) == 224
     cloth_rows_by_id = {row[0]: row for row in cloth_node_rows}
     expected_cloth_fixed = {node["id"] for node in cloth["nodes"] if node["fixed"]}
-    assert len(expected_cloth_fixed) == 24
+    assert len(expected_cloth_fixed) == 56
     for node in cloth["nodes"]:
         row = cloth_rows_by_id[node["id"]]
         assert row[1:4] == node["position"]
@@ -686,7 +686,7 @@ def test_cannon_car_wash_repository_metadata_and_icon() -> None:
 
     assert repository_info["internal_name"] == MOD_ID
     assert repository_info["title"] == "Cannon Car Wash"
-    assert repository_info["version"] == "1.25.5"
+    assert repository_info["version"] == "1.26"
     assert repository_info["author"] == "Eric Rolph"
 
     with Image.open(MOD_ICON_PATH) as icon:

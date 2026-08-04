@@ -5674,6 +5674,2566 @@
           "beamSpring": 800.0,
           "beamStrength": "FLT_MAX"
         }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l3",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l3",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l3",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l3",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l3",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l3",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l3",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l3",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l0",
+        "ericrolph_cannon_car_wash_top_s00_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l1",
+        "ericrolph_cannon_car_wash_top_s00_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l2",
+        "ericrolph_cannon_car_wash_top_s00_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c1_l0",
+        "ericrolph_cannon_car_wash_top_s00_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c1_l1",
+        "ericrolph_cannon_car_wash_top_s00_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c1_l2",
+        "ericrolph_cannon_car_wash_top_s00_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l0",
+        "ericrolph_cannon_car_wash_top_s00_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l1",
+        "ericrolph_cannon_car_wash_top_s00_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l2",
+        "ericrolph_cannon_car_wash_top_s00_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l3",
+        "ericrolph_cannon_car_wash_top_s00_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l0",
+        "ericrolph_cannon_car_wash_top_s00_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c1_l0",
+        "ericrolph_cannon_car_wash_top_s00_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l1",
+        "ericrolph_cannon_car_wash_top_s00_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c1_l1",
+        "ericrolph_cannon_car_wash_top_s00_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l2",
+        "ericrolph_cannon_car_wash_top_s00_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c1_l2",
+        "ericrolph_cannon_car_wash_top_s00_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l0",
+        "ericrolph_cannon_car_wash_top_s01_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l1",
+        "ericrolph_cannon_car_wash_top_s01_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l2",
+        "ericrolph_cannon_car_wash_top_s01_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c1_l0",
+        "ericrolph_cannon_car_wash_top_s01_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c1_l1",
+        "ericrolph_cannon_car_wash_top_s01_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c1_l2",
+        "ericrolph_cannon_car_wash_top_s01_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l0",
+        "ericrolph_cannon_car_wash_top_s01_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l1",
+        "ericrolph_cannon_car_wash_top_s01_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l2",
+        "ericrolph_cannon_car_wash_top_s01_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l3",
+        "ericrolph_cannon_car_wash_top_s01_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l0",
+        "ericrolph_cannon_car_wash_top_s01_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c1_l0",
+        "ericrolph_cannon_car_wash_top_s01_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l1",
+        "ericrolph_cannon_car_wash_top_s01_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c1_l1",
+        "ericrolph_cannon_car_wash_top_s01_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l2",
+        "ericrolph_cannon_car_wash_top_s01_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c1_l2",
+        "ericrolph_cannon_car_wash_top_s01_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l0",
+        "ericrolph_cannon_car_wash_top_s02_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l1",
+        "ericrolph_cannon_car_wash_top_s02_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l2",
+        "ericrolph_cannon_car_wash_top_s02_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c1_l0",
+        "ericrolph_cannon_car_wash_top_s02_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c1_l1",
+        "ericrolph_cannon_car_wash_top_s02_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c1_l2",
+        "ericrolph_cannon_car_wash_top_s02_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l0",
+        "ericrolph_cannon_car_wash_top_s02_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l1",
+        "ericrolph_cannon_car_wash_top_s02_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l2",
+        "ericrolph_cannon_car_wash_top_s02_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l3",
+        "ericrolph_cannon_car_wash_top_s02_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l0",
+        "ericrolph_cannon_car_wash_top_s02_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c1_l0",
+        "ericrolph_cannon_car_wash_top_s02_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l1",
+        "ericrolph_cannon_car_wash_top_s02_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c1_l1",
+        "ericrolph_cannon_car_wash_top_s02_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l2",
+        "ericrolph_cannon_car_wash_top_s02_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c1_l2",
+        "ericrolph_cannon_car_wash_top_s02_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l0",
+        "ericrolph_cannon_car_wash_top_s03_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l1",
+        "ericrolph_cannon_car_wash_top_s03_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l2",
+        "ericrolph_cannon_car_wash_top_s03_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c1_l0",
+        "ericrolph_cannon_car_wash_top_s03_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c1_l1",
+        "ericrolph_cannon_car_wash_top_s03_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c1_l2",
+        "ericrolph_cannon_car_wash_top_s03_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l0",
+        "ericrolph_cannon_car_wash_top_s03_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l1",
+        "ericrolph_cannon_car_wash_top_s03_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l2",
+        "ericrolph_cannon_car_wash_top_s03_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l3",
+        "ericrolph_cannon_car_wash_top_s03_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l0",
+        "ericrolph_cannon_car_wash_top_s03_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c1_l0",
+        "ericrolph_cannon_car_wash_top_s03_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l1",
+        "ericrolph_cannon_car_wash_top_s03_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c1_l1",
+        "ericrolph_cannon_car_wash_top_s03_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l2",
+        "ericrolph_cannon_car_wash_top_s03_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c1_l2",
+        "ericrolph_cannon_car_wash_top_s03_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l0",
+        "ericrolph_cannon_car_wash_top_s04_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l1",
+        "ericrolph_cannon_car_wash_top_s04_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l2",
+        "ericrolph_cannon_car_wash_top_s04_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c1_l0",
+        "ericrolph_cannon_car_wash_top_s04_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c1_l1",
+        "ericrolph_cannon_car_wash_top_s04_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c1_l2",
+        "ericrolph_cannon_car_wash_top_s04_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l0",
+        "ericrolph_cannon_car_wash_top_s04_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l1",
+        "ericrolph_cannon_car_wash_top_s04_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l2",
+        "ericrolph_cannon_car_wash_top_s04_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l3",
+        "ericrolph_cannon_car_wash_top_s04_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l0",
+        "ericrolph_cannon_car_wash_top_s04_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c1_l0",
+        "ericrolph_cannon_car_wash_top_s04_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l1",
+        "ericrolph_cannon_car_wash_top_s04_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c1_l1",
+        "ericrolph_cannon_car_wash_top_s04_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l2",
+        "ericrolph_cannon_car_wash_top_s04_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c1_l2",
+        "ericrolph_cannon_car_wash_top_s04_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l0",
+        "ericrolph_cannon_car_wash_top_s05_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l1",
+        "ericrolph_cannon_car_wash_top_s05_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l2",
+        "ericrolph_cannon_car_wash_top_s05_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c1_l0",
+        "ericrolph_cannon_car_wash_top_s05_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c1_l1",
+        "ericrolph_cannon_car_wash_top_s05_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c1_l2",
+        "ericrolph_cannon_car_wash_top_s05_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l0",
+        "ericrolph_cannon_car_wash_top_s05_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l1",
+        "ericrolph_cannon_car_wash_top_s05_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l2",
+        "ericrolph_cannon_car_wash_top_s05_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l3",
+        "ericrolph_cannon_car_wash_top_s05_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l0",
+        "ericrolph_cannon_car_wash_top_s05_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c1_l0",
+        "ericrolph_cannon_car_wash_top_s05_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l1",
+        "ericrolph_cannon_car_wash_top_s05_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c1_l1",
+        "ericrolph_cannon_car_wash_top_s05_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l2",
+        "ericrolph_cannon_car_wash_top_s05_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c1_l2",
+        "ericrolph_cannon_car_wash_top_s05_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l0",
+        "ericrolph_cannon_car_wash_top_s06_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l1",
+        "ericrolph_cannon_car_wash_top_s06_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l2",
+        "ericrolph_cannon_car_wash_top_s06_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c1_l0",
+        "ericrolph_cannon_car_wash_top_s06_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c1_l1",
+        "ericrolph_cannon_car_wash_top_s06_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c1_l2",
+        "ericrolph_cannon_car_wash_top_s06_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l0",
+        "ericrolph_cannon_car_wash_top_s06_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l1",
+        "ericrolph_cannon_car_wash_top_s06_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l2",
+        "ericrolph_cannon_car_wash_top_s06_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l3",
+        "ericrolph_cannon_car_wash_top_s06_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l0",
+        "ericrolph_cannon_car_wash_top_s06_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c1_l0",
+        "ericrolph_cannon_car_wash_top_s06_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l1",
+        "ericrolph_cannon_car_wash_top_s06_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c1_l1",
+        "ericrolph_cannon_car_wash_top_s06_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l2",
+        "ericrolph_cannon_car_wash_top_s06_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c1_l2",
+        "ericrolph_cannon_car_wash_top_s06_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l0",
+        "ericrolph_cannon_car_wash_top_s07_c0_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l1",
+        "ericrolph_cannon_car_wash_top_s07_c0_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l2",
+        "ericrolph_cannon_car_wash_top_s07_c0_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c1_l0",
+        "ericrolph_cannon_car_wash_top_s07_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c1_l1",
+        "ericrolph_cannon_car_wash_top_s07_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c1_l2",
+        "ericrolph_cannon_car_wash_top_s07_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l0",
+        "ericrolph_cannon_car_wash_top_s07_c1_l0",
+        {
+          "beamDamp": 1500.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 15000000.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l1",
+        "ericrolph_cannon_car_wash_top_s07_c1_l1",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l2",
+        "ericrolph_cannon_car_wash_top_s07_c1_l2",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l3",
+        "ericrolph_cannon_car_wash_top_s07_c1_l3",
+        {
+          "beamDamp": 60.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 2500.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l0",
+        "ericrolph_cannon_car_wash_top_s07_c1_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c1_l0",
+        "ericrolph_cannon_car_wash_top_s07_c0_l1",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l1",
+        "ericrolph_cannon_car_wash_top_s07_c1_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c1_l1",
+        "ericrolph_cannon_car_wash_top_s07_c0_l2",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l2",
+        "ericrolph_cannon_car_wash_top_s07_c1_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c1_l2",
+        "ericrolph_cannon_car_wash_top_s07_c0_l3",
+        {
+          "beamDamp": 25.0,
+          "beamDeform": "FLT_MAX",
+          "beamSpring": 800.0,
+          "beamStrength": "FLT_MAX"
+        }
       ]
     ],
     "cameraExternal": {
@@ -8738,6 +11298,2054 @@
           "selfCollision": false,
           "staticCollision": false
         }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l0",
+        2.43,
+        -1.2,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l1",
+        2.43,
+        -1.2,
+        3.25,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l2",
+        2.43,
+        -1.2,
+        2.18,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l3",
+        2.43,
+        -1.2,
+        1.1,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l0",
+        1.91,
+        -1.2,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l1",
+        1.91,
+        -1.2,
+        3.25,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l2",
+        1.91,
+        -1.2,
+        2.18,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l3",
+        1.91,
+        -1.2,
+        1.1,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l0",
+        1.81,
+        -1.2,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l1",
+        1.81,
+        -1.2,
+        3.25,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l2",
+        1.81,
+        -1.2,
+        2.18,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l3",
+        1.81,
+        -1.2,
+        1.1,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l0",
+        1.29,
+        -1.2,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l1",
+        1.29,
+        -1.2,
+        3.25,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l2",
+        1.29,
+        -1.2,
+        2.18,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l3",
+        1.29,
+        -1.2,
+        1.1,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l0",
+        1.19,
+        -1.2,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l1",
+        1.19,
+        -1.2,
+        3.25,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l2",
+        1.19,
+        -1.2,
+        2.18,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l3",
+        1.19,
+        -1.2,
+        1.1,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l0",
+        0.67,
+        -1.2,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l1",
+        0.67,
+        -1.2,
+        3.25,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l2",
+        0.67,
+        -1.2,
+        2.18,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l3",
+        0.67,
+        -1.2,
+        1.1,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l0",
+        0.57,
+        -1.2,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l1",
+        0.57,
+        -1.2,
+        3.25,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l2",
+        0.57,
+        -1.2,
+        2.18,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l3",
+        0.57,
+        -1.2,
+        1.1,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l0",
+        0.05,
+        -1.2,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l1",
+        0.05,
+        -1.2,
+        3.25,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l2",
+        0.05,
+        -1.2,
+        2.18,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l3",
+        0.05,
+        -1.2,
+        1.1,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l0",
+        -0.05,
+        -1.2,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l1",
+        -0.05,
+        -1.2,
+        3.25,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l2",
+        -0.05,
+        -1.2,
+        2.18,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l3",
+        -0.05,
+        -1.2,
+        1.1,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l0",
+        -0.57,
+        -1.2,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l1",
+        -0.57,
+        -1.2,
+        3.25,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l2",
+        -0.57,
+        -1.2,
+        2.18,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l3",
+        -0.57,
+        -1.2,
+        1.1,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l0",
+        -0.67,
+        -1.2,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l1",
+        -0.67,
+        -1.2,
+        3.25,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l2",
+        -0.67,
+        -1.2,
+        2.18,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l3",
+        -0.67,
+        -1.2,
+        1.1,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l0",
+        -1.19,
+        -1.2,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l1",
+        -1.19,
+        -1.2,
+        3.25,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l2",
+        -1.19,
+        -1.2,
+        2.18,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l3",
+        -1.19,
+        -1.2,
+        1.1,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l0",
+        -1.29,
+        -1.2,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l1",
+        -1.29,
+        -1.2,
+        3.25,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l2",
+        -1.29,
+        -1.2,
+        2.18,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l3",
+        -1.29,
+        -1.2,
+        1.1,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l0",
+        -1.81,
+        -1.2,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l1",
+        -1.81,
+        -1.2,
+        3.25,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l2",
+        -1.81,
+        -1.2,
+        2.18,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l3",
+        -1.81,
+        -1.2,
+        1.1,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l0",
+        -1.91,
+        -1.2,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l1",
+        -1.91,
+        -1.2,
+        3.25,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l2",
+        -1.91,
+        -1.2,
+        2.18,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l3",
+        -1.91,
+        -1.2,
+        1.1,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l0",
+        -2.43,
+        -1.2,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l1",
+        -2.43,
+        -1.2,
+        3.25,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l2",
+        -2.43,
+        -1.2,
+        2.18,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l3",
+        -2.43,
+        -1.2,
+        1.1,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l0",
+        2.43,
+        -4.15,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l1",
+        2.43,
+        -4.15,
+        3.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l2",
+        2.43,
+        -4.15,
+        2.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l3",
+        2.43,
+        -4.15,
+        1.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c1_l0",
+        1.91,
+        -4.15,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c1_l1",
+        1.91,
+        -4.15,
+        3.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c1_l2",
+        1.91,
+        -4.15,
+        2.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c1_l3",
+        1.91,
+        -4.15,
+        1.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l0",
+        1.81,
+        -4.15,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l1",
+        1.81,
+        -4.15,
+        3.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l2",
+        1.81,
+        -4.15,
+        2.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l3",
+        1.81,
+        -4.15,
+        1.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c1_l0",
+        1.29,
+        -4.15,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c1_l1",
+        1.29,
+        -4.15,
+        3.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c1_l2",
+        1.29,
+        -4.15,
+        2.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c1_l3",
+        1.29,
+        -4.15,
+        1.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l0",
+        1.19,
+        -4.15,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l1",
+        1.19,
+        -4.15,
+        3.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l2",
+        1.19,
+        -4.15,
+        2.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l3",
+        1.19,
+        -4.15,
+        1.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c1_l0",
+        0.67,
+        -4.15,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c1_l1",
+        0.67,
+        -4.15,
+        3.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c1_l2",
+        0.67,
+        -4.15,
+        2.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c1_l3",
+        0.67,
+        -4.15,
+        1.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l0",
+        0.57,
+        -4.15,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l1",
+        0.57,
+        -4.15,
+        3.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l2",
+        0.57,
+        -4.15,
+        2.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l3",
+        0.57,
+        -4.15,
+        1.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c1_l0",
+        0.05,
+        -4.15,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c1_l1",
+        0.05,
+        -4.15,
+        3.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c1_l2",
+        0.05,
+        -4.15,
+        2.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c1_l3",
+        0.05,
+        -4.15,
+        1.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l0",
+        -0.05,
+        -4.15,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l1",
+        -0.05,
+        -4.15,
+        3.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l2",
+        -0.05,
+        -4.15,
+        2.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l3",
+        -0.05,
+        -4.15,
+        1.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c1_l0",
+        -0.57,
+        -4.15,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c1_l1",
+        -0.57,
+        -4.15,
+        3.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c1_l2",
+        -0.57,
+        -4.15,
+        2.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c1_l3",
+        -0.57,
+        -4.15,
+        1.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l0",
+        -0.67,
+        -4.15,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l1",
+        -0.67,
+        -4.15,
+        3.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l2",
+        -0.67,
+        -4.15,
+        2.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l3",
+        -0.67,
+        -4.15,
+        1.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c1_l0",
+        -1.19,
+        -4.15,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c1_l1",
+        -1.19,
+        -4.15,
+        3.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c1_l2",
+        -1.19,
+        -4.15,
+        2.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c1_l3",
+        -1.19,
+        -4.15,
+        1.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l0",
+        -1.29,
+        -4.15,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l1",
+        -1.29,
+        -4.15,
+        3.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l2",
+        -1.29,
+        -4.15,
+        2.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l3",
+        -1.29,
+        -4.15,
+        1.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c1_l0",
+        -1.81,
+        -4.15,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c1_l1",
+        -1.81,
+        -4.15,
+        3.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c1_l2",
+        -1.81,
+        -4.15,
+        2.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c1_l3",
+        -1.81,
+        -4.15,
+        1.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l0",
+        -1.91,
+        -4.15,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l1",
+        -1.91,
+        -4.15,
+        3.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l2",
+        -1.91,
+        -4.15,
+        2.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l3",
+        -1.91,
+        -4.15,
+        1.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c1_l0",
+        -2.430001,
+        -4.15,
+        4.3,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c1_l1",
+        -2.430001,
+        -4.15,
+        3.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c1_l2",
+        -2.430001,
+        -4.15,
+        2.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c1_l3",
+        -2.430001,
+        -4.15,
+        1.3,
+        {
+          "collision": true,
+          "fixed": false,
+          "frictionCoef": 0.2,
+          "group": "ericrolph_cannon_car_wash_mitter",
+          "nodeMaterial": "|NM_RUBBER",
+          "nodeWeight": 1.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
       ]
     ],
     "refNodes": [
@@ -10677,6 +15285,774 @@
         "ericrolph_cannon_car_wash_mitter_s11_c0_l2",
         "ericrolph_cannon_car_wash_mitter_s11_c1_l3",
         "ericrolph_cannon_car_wash_mitter_s11_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s00_c1_l3",
+        "ericrolph_cannon_car_wash_scrub_s00_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s01_c1_l3",
+        "ericrolph_cannon_car_wash_scrub_s01_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s02_c1_l3",
+        "ericrolph_cannon_car_wash_scrub_s02_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s03_c1_l3",
+        "ericrolph_cannon_car_wash_scrub_s03_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s04_c1_l3",
+        "ericrolph_cannon_car_wash_scrub_s04_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s05_c1_l3",
+        "ericrolph_cannon_car_wash_scrub_s05_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s06_c1_l3",
+        "ericrolph_cannon_car_wash_scrub_s06_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l0",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l0",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l1",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l1",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l2",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l2",
+        "ericrolph_cannon_car_wash_scrub_s07_c1_l3",
+        "ericrolph_cannon_car_wash_scrub_s07_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l0",
+        "ericrolph_cannon_car_wash_top_s00_c1_l0",
+        "ericrolph_cannon_car_wash_top_s00_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l0",
+        "ericrolph_cannon_car_wash_top_s00_c1_l1",
+        "ericrolph_cannon_car_wash_top_s00_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l1",
+        "ericrolph_cannon_car_wash_top_s00_c1_l1",
+        "ericrolph_cannon_car_wash_top_s00_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l1",
+        "ericrolph_cannon_car_wash_top_s00_c1_l2",
+        "ericrolph_cannon_car_wash_top_s00_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l2",
+        "ericrolph_cannon_car_wash_top_s00_c1_l2",
+        "ericrolph_cannon_car_wash_top_s00_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s00_c0_l2",
+        "ericrolph_cannon_car_wash_top_s00_c1_l3",
+        "ericrolph_cannon_car_wash_top_s00_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l0",
+        "ericrolph_cannon_car_wash_top_s01_c1_l0",
+        "ericrolph_cannon_car_wash_top_s01_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l0",
+        "ericrolph_cannon_car_wash_top_s01_c1_l1",
+        "ericrolph_cannon_car_wash_top_s01_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l1",
+        "ericrolph_cannon_car_wash_top_s01_c1_l1",
+        "ericrolph_cannon_car_wash_top_s01_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l1",
+        "ericrolph_cannon_car_wash_top_s01_c1_l2",
+        "ericrolph_cannon_car_wash_top_s01_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l2",
+        "ericrolph_cannon_car_wash_top_s01_c1_l2",
+        "ericrolph_cannon_car_wash_top_s01_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s01_c0_l2",
+        "ericrolph_cannon_car_wash_top_s01_c1_l3",
+        "ericrolph_cannon_car_wash_top_s01_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l0",
+        "ericrolph_cannon_car_wash_top_s02_c1_l0",
+        "ericrolph_cannon_car_wash_top_s02_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l0",
+        "ericrolph_cannon_car_wash_top_s02_c1_l1",
+        "ericrolph_cannon_car_wash_top_s02_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l1",
+        "ericrolph_cannon_car_wash_top_s02_c1_l1",
+        "ericrolph_cannon_car_wash_top_s02_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l1",
+        "ericrolph_cannon_car_wash_top_s02_c1_l2",
+        "ericrolph_cannon_car_wash_top_s02_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l2",
+        "ericrolph_cannon_car_wash_top_s02_c1_l2",
+        "ericrolph_cannon_car_wash_top_s02_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s02_c0_l2",
+        "ericrolph_cannon_car_wash_top_s02_c1_l3",
+        "ericrolph_cannon_car_wash_top_s02_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l0",
+        "ericrolph_cannon_car_wash_top_s03_c1_l0",
+        "ericrolph_cannon_car_wash_top_s03_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l0",
+        "ericrolph_cannon_car_wash_top_s03_c1_l1",
+        "ericrolph_cannon_car_wash_top_s03_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l1",
+        "ericrolph_cannon_car_wash_top_s03_c1_l1",
+        "ericrolph_cannon_car_wash_top_s03_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l1",
+        "ericrolph_cannon_car_wash_top_s03_c1_l2",
+        "ericrolph_cannon_car_wash_top_s03_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l2",
+        "ericrolph_cannon_car_wash_top_s03_c1_l2",
+        "ericrolph_cannon_car_wash_top_s03_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s03_c0_l2",
+        "ericrolph_cannon_car_wash_top_s03_c1_l3",
+        "ericrolph_cannon_car_wash_top_s03_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l0",
+        "ericrolph_cannon_car_wash_top_s04_c1_l0",
+        "ericrolph_cannon_car_wash_top_s04_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l0",
+        "ericrolph_cannon_car_wash_top_s04_c1_l1",
+        "ericrolph_cannon_car_wash_top_s04_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l1",
+        "ericrolph_cannon_car_wash_top_s04_c1_l1",
+        "ericrolph_cannon_car_wash_top_s04_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l1",
+        "ericrolph_cannon_car_wash_top_s04_c1_l2",
+        "ericrolph_cannon_car_wash_top_s04_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l2",
+        "ericrolph_cannon_car_wash_top_s04_c1_l2",
+        "ericrolph_cannon_car_wash_top_s04_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s04_c0_l2",
+        "ericrolph_cannon_car_wash_top_s04_c1_l3",
+        "ericrolph_cannon_car_wash_top_s04_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l0",
+        "ericrolph_cannon_car_wash_top_s05_c1_l0",
+        "ericrolph_cannon_car_wash_top_s05_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l0",
+        "ericrolph_cannon_car_wash_top_s05_c1_l1",
+        "ericrolph_cannon_car_wash_top_s05_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l1",
+        "ericrolph_cannon_car_wash_top_s05_c1_l1",
+        "ericrolph_cannon_car_wash_top_s05_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l1",
+        "ericrolph_cannon_car_wash_top_s05_c1_l2",
+        "ericrolph_cannon_car_wash_top_s05_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l2",
+        "ericrolph_cannon_car_wash_top_s05_c1_l2",
+        "ericrolph_cannon_car_wash_top_s05_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s05_c0_l2",
+        "ericrolph_cannon_car_wash_top_s05_c1_l3",
+        "ericrolph_cannon_car_wash_top_s05_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l0",
+        "ericrolph_cannon_car_wash_top_s06_c1_l0",
+        "ericrolph_cannon_car_wash_top_s06_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l0",
+        "ericrolph_cannon_car_wash_top_s06_c1_l1",
+        "ericrolph_cannon_car_wash_top_s06_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l1",
+        "ericrolph_cannon_car_wash_top_s06_c1_l1",
+        "ericrolph_cannon_car_wash_top_s06_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l1",
+        "ericrolph_cannon_car_wash_top_s06_c1_l2",
+        "ericrolph_cannon_car_wash_top_s06_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l2",
+        "ericrolph_cannon_car_wash_top_s06_c1_l2",
+        "ericrolph_cannon_car_wash_top_s06_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s06_c0_l2",
+        "ericrolph_cannon_car_wash_top_s06_c1_l3",
+        "ericrolph_cannon_car_wash_top_s06_c0_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l0",
+        "ericrolph_cannon_car_wash_top_s07_c1_l0",
+        "ericrolph_cannon_car_wash_top_s07_c1_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l0",
+        "ericrolph_cannon_car_wash_top_s07_c1_l1",
+        "ericrolph_cannon_car_wash_top_s07_c0_l1",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l1",
+        "ericrolph_cannon_car_wash_top_s07_c1_l1",
+        "ericrolph_cannon_car_wash_top_s07_c1_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l1",
+        "ericrolph_cannon_car_wash_top_s07_c1_l2",
+        "ericrolph_cannon_car_wash_top_s07_c0_l2",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l2",
+        "ericrolph_cannon_car_wash_top_s07_c1_l2",
+        "ericrolph_cannon_car_wash_top_s07_c1_l3",
+        {
+          "groundModel": "metal"
+        }
+      ],
+      [
+        "ericrolph_cannon_car_wash_top_s07_c0_l2",
+        "ericrolph_cannon_car_wash_top_s07_c1_l3",
+        "ericrolph_cannon_car_wash_top_s07_c0_l3",
         {
           "groundModel": "metal"
         }
