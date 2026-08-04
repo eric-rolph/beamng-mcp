@@ -1,0 +1,556 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 4.5.4 LTS commit date:2025-10-27, commit time:12:46, hash:b3efe983cc58</authoring_tool>
+    </contributor>
+    <created>2026-08-04T12:46:17</created>
+    <modified>2026-08-04T12:46:17</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_effects>
+    <effect id="ericrolph_cannon_car_wash_ramp_flap-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <lambert>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <diffuse>
+              <color sid="diffuse">0.5 0.52 0.55 1</color>
+            </diffuse>
+            <reflectivity>
+              <float sid="specular">0.85</float>
+            </reflectivity>
+            <index_of_refraction>
+              <float sid="ior">1.5</float>
+            </index_of_refraction>
+          </lambert>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="ericrolph_cannon_car_wash_rubber-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <lambert>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <diffuse>
+              <color sid="diffuse">0.012 0.014 0.018 1</color>
+            </diffuse>
+            <index_of_refraction>
+              <float sid="ior">1.5</float>
+            </index_of_refraction>
+          </lambert>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_images/>
+  <library_materials>
+    <material id="ericrolph_cannon_car_wash_ramp_flap-material" name="ericrolph_cannon_car_wash_ramp_flap">
+      <instance_effect url="#ericrolph_cannon_car_wash_ramp_flap-effect"/>
+    </material>
+    <material id="ericrolph_cannon_car_wash_rubber-material" name="ericrolph_cannon_car_wash_rubber">
+      <instance_effect url="#ericrolph_cannon_car_wash_rubber-effect"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh">
+      <mesh>
+        <source id="ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh-mesh-positions">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh-mesh-positions-array" count="24">-0.03999996 -0.85 -0.04499995 -0.03999996 -0.85 0.04499995 -0.03999996 0.85 -0.04499995 -0.03999996 0.85 0.04499995 0.03999996 -0.85 -0.04499995 0.03999996 -0.85 0.04499995 0.03999996 0.85 -0.04499995 0.03999996 0.85 0.04499995</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh-mesh-normals">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh-mesh-normals-array" count="36">-1 0 0 0 1 0 1 0 0 0 -1 0 0 0 -1 0 0 1 -1 0 0 0 1 0 1 0 0 0 -1 0 0 0 -1 0 0 1</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh-mesh-normals-array" count="12" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh-mesh-map-0">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh-mesh-map-0-array" count="72">0.625 0 0.375 0.25 0.375 0 0.625 0.25 0.375 0.5 0.375 0.25 0.625 0.5 0.375 0.75 0.375 0.5 0.625 0.75 0.375 1 0.375 0.75 0.375 0.5 0.125 0.75 0.125 0.5 0.875 0.5 0.625 0.75 0.625 0.5 0.625 0 0.625 0.25 0.375 0.25 0.625 0.25 0.625 0.5 0.375 0.5 0.625 0.5 0.625 0.75 0.375 0.75 0.625 0.75 0.625 1 0.375 1 0.375 0.5 0.375 0.75 0.125 0.75 0.875 0.5 0.875 0.75 0.625 0.75</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh-mesh-map-0-array" count="36" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh-mesh-vertices">
+          <input semantic="POSITION" source="#ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh-mesh-positions"/>
+        </vertices>
+        <triangles material="ericrolph_cannon_car_wash_ramp_flap-material" count="12">
+          <input semantic="VERTEX" source="#ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh-mesh-map-0" offset="2" set="0"/>
+          <p>1 0 0 2 0 1 0 0 2 3 1 3 6 1 4 2 1 5 7 2 6 4 2 7 6 2 8 5 3 9 0 3 10 4 3 11 6 4 12 0 4 13 2 4 14 3 5 15 5 5 16 7 5 17 1 6 18 3 6 19 2 6 20 3 7 21 7 7 22 6 7 23 7 8 24 5 8 25 4 8 26 5 9 27 1 9 28 0 9 29 6 10 30 4 10 31 0 10 32 3 11 33 1 11 34 5 11 35</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh">
+      <mesh>
+        <source id="ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh-mesh-positions">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh-mesh-positions-array" count="24">-0.03999996 -0.85 -0.04499995 -0.03999996 -0.85 0.04499995 -0.03999996 0.85 -0.04499995 -0.03999996 0.85 0.04499995 0.03999996 -0.85 -0.04499995 0.03999996 -0.85 0.04499995 0.03999996 0.85 -0.04499995 0.03999996 0.85 0.04499995</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh-mesh-normals">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh-mesh-normals-array" count="36">-1 0 0 0 1 0 1 0 0 0 -1 0 0 0 -1 0 0 1 -1 0 0 0 1 0 1 0 0 0 -1 0 0 0 -1 0 0 1</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh-mesh-normals-array" count="12" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh-mesh-map-0">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh-mesh-map-0-array" count="72">0.625 0 0.375 0.25 0.375 0 0.625 0.25 0.375 0.5 0.375 0.25 0.625 0.5 0.375 0.75 0.375 0.5 0.625 0.75 0.375 1 0.375 0.75 0.375 0.5 0.125 0.75 0.125 0.5 0.875 0.5 0.625 0.75 0.625 0.5 0.625 0 0.625 0.25 0.375 0.25 0.625 0.25 0.625 0.5 0.375 0.5 0.625 0.5 0.625 0.75 0.375 0.75 0.625 0.75 0.625 1 0.375 1 0.375 0.5 0.375 0.75 0.125 0.75 0.875 0.5 0.875 0.75 0.625 0.75</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh-mesh-map-0-array" count="36" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh-mesh-vertices">
+          <input semantic="POSITION" source="#ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh-mesh-positions"/>
+        </vertices>
+        <triangles material="ericrolph_cannon_car_wash_ramp_flap-material" count="12">
+          <input semantic="VERTEX" source="#ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh-mesh-map-0" offset="2" set="0"/>
+          <p>1 0 0 2 0 1 0 0 2 3 1 3 6 1 4 2 1 5 7 2 6 4 2 7 6 2 8 5 3 9 0 3 10 4 3 11 6 4 12 0 4 13 2 4 14 3 5 15 5 5 16 7 5 17 1 6 18 3 6 19 2 6 20 3 7 21 7 7 22 6 7 23 7 8 24 5 8 25 4 8 26 5 9 27 1 9 28 0 9 29 6 10 30 4 10 31 0 10 32 3 11 33 1 11 34 5 11 35</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="ericrolph_cannon_car_wash_rampflap_Deck_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Deck_mesh">
+      <mesh>
+        <source id="ericrolph_cannon_car_wash_rampflap_Deck_mesh-mesh-positions">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Deck_mesh-mesh-positions-array" count="168">-2.69 -0.84 -0.03499996 -2.69 -0.85 -0.02499997 -2.7 -0.84 -0.02499997 -2.69 -0.8470712 -0.03207105 -2.695774 -0.8457736 -0.03077346 -2.697071 -0.8470712 -0.02499997 -2.697071 -0.8400001 -0.03207105 -2.69 -0.85 0.02499997 -2.69 -0.84 0.03499996 -2.7 -0.84 0.02499997 -2.69 -0.8470712 0.03207105 -2.695774 -0.8457736 0.03077346 -2.697071 -0.8400001 0.03207105 -2.697071 -0.8470712 0.02499997 -2.69 0.84 -0.03499996 -2.7 0.84 -0.02499997 -2.69 0.85 -0.02499997 -2.697071 0.8400001 -0.03207105 -2.695774 0.8457736 -0.03077346 -2.697071 0.8470712 -0.02499997 -2.69 0.8470712 -0.03207105 -2.69 0.84 0.03499996 -2.69 0.85 0.02499997 -2.7 0.84 0.02499997 -2.69 0.8470712 0.03207105 -2.695774 0.8457736 0.03077346 -2.697071 0.8470712 0.02499997 -2.697071 0.8400001 0.03207105 2.69 -0.84 -0.03499996 2.7 -0.84 -0.02499997 2.69 -0.85 -0.02499997 2.697071 -0.8400001 -0.03207105 2.695774 -0.8457736 -0.03077346 2.697071 -0.8470712 -0.02499997 2.69 -0.8470712 -0.03207105 2.69 -0.84 0.03499996 2.69 -0.85 0.02499997 2.7 -0.84 0.02499997 2.69 -0.8470712 0.03207105 2.695774 -0.8457736 0.03077346 2.697071 -0.8470712 0.02499997 2.697071 -0.8400001 0.03207105 2.69 0.84 -0.03499996 2.69 0.85 -0.02499997 2.7 0.84 -0.02499997 2.69 0.8470712 -0.03207105 2.695774 0.8457736 -0.03077346 2.697071 0.8470712 -0.02499997 2.697071 0.8400001 -0.03207105 2.69 0.84 0.03499996 2.7 0.84 0.02499997 2.69 0.85 0.02499997 2.697071 0.8400001 0.03207105 2.695774 0.8457736 0.03077346 2.697071 0.8470712 0.02499997 2.69 0.8470712 0.03207105</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Deck_mesh-mesh-positions-array" count="56" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Deck_mesh-mesh-normals">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Deck_mesh-mesh-normals-array" count="324">-0.3671805 -0.2817431 -0.8864532 -0.2817484 -0.8864552 -0.3671718 -0.8864544 -0.3671828 -0.2817364 -0.3671742 -0.8864551 0.2817453 -0.2817466 -0.3671773 0.8864535 -0.8864542 -0.2817357 0.3671839 -0.2817466 0.3671777 -0.8864532 -0.8864541 0.2817357 -0.3671841 -0.3671744 0.8864551 -0.2817453 -0.3671805 0.2817431 0.8864532 -0.2817484 0.8864552 0.3671718 -0.8864544 0.3671828 0.2817364 0.2817466 -0.3671777 -0.8864532 0.8864541 -0.2817357 -0.3671841 0.3671744 -0.8864551 -0.2817453 0.3671805 -0.2817431 0.8864532 0.2817484 -0.8864552 0.3671718 0.8864544 -0.3671828 0.2817364 0.3671805 0.2817431 -0.8864532 0.2817484 0.8864552 -0.3671718 0.8864544 0.3671828 -0.2817364 0.2817466 0.3671777 0.8864532 0.8864541 0.2817357 0.3671841 0.3671744 0.8864551 0.2817453 -0.3826856 0 -0.9238786 -0.9238777 0 -0.3826879 -0.3826768 -0.9238823 0 -0.9238791 -0.3826847 0 -0.3826852 0 0.9238788 -0.9238777 0 0.3826878 -0.3826769 0.9238823 0 -0.9238791 0.3826847 0 0 0.3826801 -0.9238809 0 0.9238832 -0.3826746 0 0.3826801 0.9238809 0 0.9238832 0.3826746 0.9238791 0.3826847 0 0.3826769 0.9238823 0 0.3826856 0 -0.9238786 0.9238777 0 -0.3826879 0.3826856 0 0.9238786 0.9238777 0 0.3826879 0.3826769 -0.9238823 0 0.9238791 -0.3826847 0 0 -0.3826801 -0.9238809 0 -0.9238832 -0.3826746 0 -0.3826801 0.9238809 0 -0.9238832 0.3826746 0 0 -1 -1 0 0 0 -1 0 0 0 1 0 1 0 1 0 0 -0.2817465 -0.3671773 -0.8864535 -0.3671742 -0.8864551 -0.2817453 -0.8864542 -0.2817357 -0.3671839 -0.2817484 -0.8864552 0.3671718 -0.3671805 -0.2817431 0.8864532 -0.8864545 -0.3671828 0.2817363 -0.367181 0.2817432 -0.886453 -0.8864544 0.3671829 -0.2817364 -0.2817484 0.8864551 -0.367172 -0.2817465 0.3671773 0.8864535 -0.3671742 0.8864551 0.2817453 -0.8864542 0.2817357 0.3671839 0.367181 -0.2817432 -0.886453 0.8864544 -0.3671829 -0.2817364 0.2817484 -0.8864551 -0.367172 0.2817465 -0.3671773 0.8864535 0.3671742 -0.8864551 0.2817453 0.8864542 -0.2817357 0.3671839 0.2817465 0.3671773 -0.8864535 0.3671742 0.8864551 -0.2817453 0.8864542 0.2817357 -0.3671839 0.367181 0.2817432 0.886453 0.8864544 0.3671829 0.2817364 0.2817484 0.8864551 0.367172 -0.3826852 0 -0.9238787 -0.9238777 0 -0.3826878 -0.3826769 -0.9238823 0 -0.9238791 -0.3826847 0 -0.3826852 0 0.9238787 -0.9238777 0 0.3826878 -0.3826769 0.9238823 0 -0.9238791 0.3826847 0 0 0.3826805 -0.9238808 0 0.9238831 -0.3826747 0 0.3826805 0.9238808 0 0.9238831 0.3826747 0.9238791 0.3826847 0 0.3826769 0.9238823 0 0.3826852 0 -0.9238787 0.9238777 0 -0.3826878 0.3826852 0 0.9238787 0.9238777 0 0.3826878 0.3826769 -0.9238823 0 0.9238791 -0.3826847 0 0 -0.3826805 -0.9238808 0 -0.9238831 -0.3826747 0 -0.3826801 0.9238809 0 -0.9238832 0.3826746 0 0 -1 -1 0 0 0 -1 0 0 0 1 0 1 0 1 0 0</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Deck_mesh-mesh-normals-array" count="108" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Deck_mesh-mesh-map-0">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Deck_mesh-mesh-map-0-array" count="648">0.125463 0.7485294 0.1251956 0.75 0.125 0.7485294 0.4107143 0.999537 0.3900946 1 0.375 0.9995371 0.4107143 0.001470565 0.375 6.21542e-4 0.4107142 0 0.5892857 0.999537 0.625 0.9998044 0.5892857 1 0.874537 0.7485294 0.875 0.7493785 0.8745371 0.75 0.5892858 0.001470565 0.6099054 0 0.625 0.001470565 0.125463 0.5014706 0.125 0.5006216 0.1254629 0.5 0.4107142 0.2485294 0.3825474 0.2500978 0.375 0.2485294 0.4107143 0.250463 0.3825474 0.2500978 0.4107143 0.25 0.874537 0.5014705 0.8748043 0.5 0.875 0.5014706 0.5892856 0.2504629 0.6174527 0.2496892 0.625 0.250463 0.5892857 0.2485294 0.6174527 0.2496892 0.5892857 0.25 0.3745371 0.7485294 0.3800315 0.749858 0.3747685 0.7502314 0.4107142 0.7485294 0.3800315 0.749858 0.375 0.7485294 0.4107142 0.750463 0.3800315 0.749858 0.4107143 0.75 0.625463 0.7485294 0.6200337 0.7497929 0.625 0.7485295 0.5892857 0.750463 0.6200337 0.7497929 0.6252315 0.7502315 0.5892857 0.7485294 0.6200337 0.7497929 0.5892857 0.75 0.3745371 0.5014705 0.3799663 0.5002072 0.375 0.5014706 0.4107143 0.4995371 0.3799663 0.5002072 0.3747685 0.4997684 0.4107143 0.5014706 0.3799663 0.5002072 0.4107143 0.5 0.625463 0.5014706 0.6199684 0.500142 0.6252315 0.4997684 0.5892858 0.5014706 0.6199684 0.500142 0.625 0.5014706 0.5892857 0.4995371 0.6199684 0.500142 0.5892857 0.5 0.125463 0.7485294 0.125 0.5014706 0.125463 0.5014706 0.375 0.001470565 0.4107142 0.2485294 0.375 0.2485294 0.5892857 0.999537 0.4107142 1 0.4107143 0.999537 0.5892857 0 0.4107143 0.001470565 0.4107142 0 0.874537 0.5014705 0.875 0.7485294 0.874537 0.7485294 0.6250001 0.2485294 0.5892858 0.001470565 0.625 0.001470565 0.5892856 0.2504629 0.4107143 0.25 0.5892857 0.25 0.4107143 0.25 0.5892857 0.2485294 0.5892857 0.25 0.125463 0.5014706 0.3747685 0.4997684 0.3745371 0.5014705 0.375 0.250463 0.4107143 0.4995371 0.3747685 0.4997684 0.625463 0.5014706 0.8745371 0.5 0.874537 0.5014705 0.6252315 0.4997684 0.5892856 0.2504629 0.625 0.250463 0.4107143 0.5014706 0.5892857 0.5 0.5892858 0.5014706 0.5892857 0.5 0.4107143 0.4995371 0.5892857 0.4995371 0.3745371 0.5014705 0.375 0.7485294 0.3745371 0.7485294 0.375 0.5014706 0.4107142 0.7485294 0.375 0.7485294 0.625463 0.7485294 0.625 0.5014706 0.625463 0.5014706 0.625 0.7485295 0.5892858 0.5014706 0.625 0.5014706 0.5892857 0.750463 0.4107143 0.75 0.5892857 0.75 0.4107143 0.75 0.5892857 0.7485294 0.5892857 0.75 0.3745371 0.7485294 0.1254629 0.75 0.125463 0.7485294 0.3747685 0.7502314 0.4107143 0.999537 0.375 0.9995371 0.874537 0.7485294 0.6252315 0.7502315 0.625463 0.7485294 0.625 0.9995371 0.5892857 0.750463 0.6252315 0.7502315 0.3745371 0.5014705 0.125463 0.7485294 0.125463 0.5014706 0.5892858 0.001470565 0.4107142 0.2485294 0.4107143 0.001470565 0.5892857 0.750463 0.4107143 0.999537 0.4107142 0.750463 0.874537 0.5014705 0.625463 0.7485294 0.625463 0.5014706 0.5892856 0.2504629 0.4107143 0.4995371 0.4107143 0.250463 0.5892858 0.5014706 0.4107142 0.7485294 0.4107143 0.5014706 0.125463 0.7485294 0.1254629 0.75 0.1251956 0.75 0.4107143 0.999537 0.4107142 1 0.3900946 1 0.4107143 0.001470565 0.375 0.001470565 0.375 6.21542e-4 0.5892857 0.999537 0.625 0.9995371 0.625 0.9998044 0.874537 0.7485294 0.875 0.7485294 0.875 0.7493785 0.5892858 0.001470565 0.5892857 0 0.6099054 0 0.125463 0.5014706 0.125 0.5014706 0.125 0.5006216 0.4107142 0.2485294 0.4107143 0.25 0.3825474 0.2500978 0.4107143 0.250463 0.375 0.250463 0.3825474 0.2500978 0.874537 0.5014705 0.8745371 0.5 0.8748043 0.5 0.5892856 0.2504629 0.5892857 0.25 0.6174527 0.2496892 0.5892857 0.2485294 0.6250001 0.2485294 0.6174527 0.2496892 0.3745371 0.7485294 0.375 0.7485294 0.3800315 0.749858 0.4107142 0.7485294 0.4107143 0.75 0.3800315 0.749858 0.4107142 0.750463 0.3747685 0.7502314 0.3800315 0.749858 0.625463 0.7485294 0.6252315 0.7502315 0.6200337 0.7497929 0.5892857 0.750463 0.5892857 0.75 0.6200337 0.7497929 0.5892857 0.7485294 0.625 0.7485295 0.6200337 0.7497929 0.3745371 0.5014705 0.3747685 0.4997684 0.3799663 0.5002072 0.4107143 0.4995371 0.4107143 0.5 0.3799663 0.5002072 0.4107143 0.5014706 0.375 0.5014706 0.3799663 0.5002072 0.625463 0.5014706 0.625 0.5014706 0.6199684 0.500142 0.5892858 0.5014706 0.5892857 0.5 0.6199684 0.500142 0.5892857 0.4995371 0.6252315 0.4997684 0.6199684 0.500142 0.125463 0.7485294 0.125 0.7485294 0.125 0.5014706 0.375 0.001470565 0.4107143 0.001470565 0.4107142 0.2485294 0.5892857 0.999537 0.5892857 1 0.4107142 1 0.5892857 0 0.5892858 0.001470565 0.4107143 0.001470565 0.874537 0.5014705 0.875 0.5014706 0.875 0.7485294 0.6250001 0.2485294 0.5892857 0.2485294 0.5892858 0.001470565 0.5892856 0.2504629 0.4107143 0.250463 0.4107143 0.25 0.4107143 0.25 0.4107142 0.2485294 0.5892857 0.2485294 0.125463 0.5014706 0.1254629 0.5 0.3747685 0.4997684 0.375 0.250463 0.4107143 0.250463 0.4107143 0.4995371 0.625463 0.5014706 0.6252315 0.4997684 0.8745371 0.5 0.6252315 0.4997684 0.5892857 0.4995371 0.5892856 0.2504629 0.4107143 0.5014706 0.4107143 0.5 0.5892857 0.5 0.5892857 0.5 0.4107143 0.5 0.4107143 0.4995371 0.3745371 0.5014705 0.375 0.5014706 0.375 0.7485294 0.375 0.5014706 0.4107143 0.5014706 0.4107142 0.7485294 0.625463 0.7485294 0.625 0.7485295 0.625 0.5014706 0.625 0.7485295 0.5892857 0.7485294 0.5892858 0.5014706 0.5892857 0.750463 0.4107142 0.750463 0.4107143 0.75 0.4107143 0.75 0.4107142 0.7485294 0.5892857 0.7485294 0.3745371 0.7485294 0.3747685 0.7502314 0.1254629 0.75 0.3747685 0.7502314 0.4107142 0.750463 0.4107143 0.999537 0.874537 0.7485294 0.8745371 0.75 0.6252315 0.7502315 0.625 0.9995371 0.5892857 0.999537 0.5892857 0.750463 0.3745371 0.5014705 0.3745371 0.7485294 0.125463 0.7485294 0.5892858 0.001470565 0.5892857 0.2485294 0.4107142 0.2485294 0.5892857 0.750463 0.5892857 0.999537 0.4107143 0.999537 0.874537 0.5014705 0.874537 0.7485294 0.625463 0.7485294 0.5892856 0.2504629 0.5892857 0.4995371 0.4107143 0.4995371 0.5892858 0.5014706 0.5892857 0.7485294 0.4107142 0.7485294</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Deck_mesh-mesh-map-0-array" count="324" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="ericrolph_cannon_car_wash_rampflap_Deck_mesh-mesh-vertices">
+          <input semantic="POSITION" source="#ericrolph_cannon_car_wash_rampflap_Deck_mesh-mesh-positions"/>
+        </vertices>
+        <triangles material="ericrolph_cannon_car_wash_ramp_flap-material" count="108">
+          <input semantic="VERTEX" source="#ericrolph_cannon_car_wash_rampflap_Deck_mesh-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#ericrolph_cannon_car_wash_rampflap_Deck_mesh-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#ericrolph_cannon_car_wash_rampflap_Deck_mesh-mesh-map-0" offset="2" set="0"/>
+          <p>0 0 0 4 0 1 6 0 2 1 1 3 4 1 4 3 1 5 2 2 6 4 2 7 5 2 8 7 3 9 11 3 10 13 3 11 8 4 12 11 4 13 10 4 14 9 5 15 11 5 16 12 5 17 14 6 18 18 6 19 20 6 20 15 7 21 18 7 22 17 7 23 16 8 24 18 8 25 19 8 26 21 9 27 25 9 28 27 9 29 22 10 30 25 10 31 24 10 32 23 11 33 25 11 34 26 11 35 28 12 36 32 12 37 34 12 38 29 13 39 32 13 40 31 13 41 30 14 42 32 14 43 33 14 44 35 15 45 39 15 46 41 15 47 36 16 48 39 16 49 38 16 50 37 17 51 39 17 52 40 17 53 42 18 54 46 18 55 48 18 56 43 19 57 46 19 58 45 19 59 44 20 60 46 20 61 47 20 62 49 21 63 53 21 64 55 21 65 50 22 66 53 22 67 52 22 68 51 23 69 53 23 70 54 23 71 0 24 72 17 24 73 14 24 74 6 25 75 15 25 76 17 25 77 7 26 78 5 26 79 1 26 80 13 27 81 2 27 82 5 27 83 21 28 84 12 28 85 8 28 86 27 29 87 9 29 88 12 29 89 22 30 90 19 30 91 26 30 92 19 31 93 23 31 94 26 31 95 14 32 96 45 32 97 42 32 98 20 33 99 43 33 100 45 33 101 49 34 102 24 34 103 21 34 104 55 35 105 22 35 106 24 35 107 44 36 108 54 36 109 50 36 110 54 37 111 43 37 112 51 37 113 42 38 114 31 38 115 28 38 116 48 39 117 29 39 118 31 39 119 35 40 120 52 40 121 49 40 122 41 41 123 50 41 124 52 41 125 36 42 126 33 42 127 40 42 128 33 43 129 37 43 130 40 43 131 28 44 132 3 44 133 0 44 134 34 45 135 1 45 136 3 45 137 8 46 138 38 46 139 35 46 140 10 47 141 36 47 142 38 47 143 42 48 144 0 48 145 14 48 146 9 49 147 15 49 148 2 49 149 36 50 150 1 50 151 30 50 152 21 51 153 35 51 154 49 51 155 22 52 156 43 52 157 16 52 158 50 53 159 29 53 160 44 53 161 0 54 162 3 54 163 4 54 164 1 55 165 5 55 166 4 55 167 2 56 168 6 56 169 4 56 170 7 57 171 10 57 172 11 57 173 8 58 174 12 58 175 11 58 176 9 59 177 13 59 178 11 59 179 14 60 180 17 60 181 18 60 182 15 61 183 19 61 184 18 61 185 16 62 186 20 62 187 18 62 188 21 63 189 24 63 190 25 63 191 22 64 192 26 64 193 25 64 194 23 65 195 27 65 196 25 65 197 28 66 198 31 66 199 32 66 200 29 67 201 33 67 202 32 67 203 30 68 204 34 68 205 32 68 206 35 69 207 38 69 208 39 69 209 36 70 210 40 70 211 39 70 212 37 71 213 41 71 214 39 71 215 42 72 216 45 72 217 46 72 218 43 73 219 47 73 220 46 73 221 44 74 222 48 74 223 46 74 224 49 75 225 52 75 226 53 75 227 50 76 228 54 76 229 53 76 230 51 77 231 55 77 232 53 77 233 0 78 234 6 78 235 17 78 236 6 79 237 2 79 238 15 79 239 7 80 240 13 80 241 5 80 242 13 81 243 9 81 244 2 81 245 21 82 246 27 82 247 12 82 248 27 83 249 23 83 250 9 83 251 22 84 252 16 84 253 19 84 254 19 85 255 15 85 256 23 85 257 14 86 258 20 86 259 45 86 260 20 87 261 16 87 262 43 87 263 49 88 264 55 88 265 24 88 266 55 89 267 51 89 268 22 89 269 44 90 270 47 90 271 54 90 272 54 91 273 47 91 274 43 91 275 42 92 276 48 92 277 31 92 278 48 93 279 44 93 280 29 93 281 35 94 282 41 94 283 52 94 284 41 95 285 37 95 286 50 95 287 36 96 288 30 96 289 33 96 290 33 97 291 29 97 292 37 97 293 28 98 294 34 98 295 3 98 296 34 99 297 30 99 298 1 99 299 8 100 300 10 100 301 38 100 302 10 101 303 7 101 304 36 101 305 42 102 306 28 102 307 0 102 308 9 103 309 23 103 310 15 103 311 36 104 312 7 104 313 1 104 314 21 105 315 8 105 316 35 105 317 22 106 318 51 106 319 43 106 320 50 107 321 37 107 322 29 107 323</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Knuckle_-1.1_mesh">
+      <mesh>
+        <source id="ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1_mesh-mesh-positions">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1_mesh-mesh-positions-array" count="60">0 0.04499995 -0.25 0 0.04499995 0.25 0.02645033 0.03640574 -0.25 0.02645033 0.03640574 0.25 0.0427975 0.01390576 -0.25 0.0427975 0.01390576 0.25 0.0427975 -0.01390576 -0.25 0.0427975 -0.01390576 0.25 0.02645033 -0.03640574 -0.25 0.02645033 -0.03640574 0.25 0 -0.04499995 -0.25 0 -0.04499995 0.25 -0.02645033 -0.03640574 -0.25 -0.02645033 -0.03640574 0.25 -0.0427975 -0.01390576 -0.25 -0.0427975 -0.01390576 0.25 -0.0427975 0.01390576 -0.25 -0.0427975 0.01390576 0.25 -0.02645033 0.03640574 -0.25 -0.02645033 0.03640574 0.25</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1_mesh-mesh-positions-array" count="20" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1_mesh-mesh-normals">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1_mesh-mesh-normals-array" count="108">0.3090169 0.9510565 0 0.809017 0.5877853 0 1 0 0 0.809017 -0.5877853 0 0.3090169 -0.9510565 0 -0.3090169 -0.9510565 0 -0.809017 -0.5877853 0 -1 0 0 0 0 1 -0.809017 0.5877853 0 -0.3090169 0.9510565 0 0 0 -1 0.3090169 0.9510565 0 0.809017 0.5877853 0 1 0 0 0.809017 -0.5877853 0 0.3090169 -0.9510565 0 -0.3090169 -0.9510565 0 -0.809017 -0.5877853 0 -1 0 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 -0.809017 0.5877853 0 -0.3090169 0.9510565 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1_mesh-mesh-normals-array" count="36" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1_mesh-mesh-map-0">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1_mesh-mesh-map-0-array" count="216">1 1 0.9 0.5 1 0.5 0.9 1 0.8 0.5 0.9 0.5 0.8 1 0.6999999 0.5 0.8 0.5 0.6999999 1 0.5999999 0.5 0.6999999 0.5 0.5999999 1 0.4999999 0.5 0.5999999 0.5 0.4999999 1 0.3999999 0.5 0.4999999 0.5 0.3999999 1 0.2999999 0.5 0.3999999 0.5 0.2999999 1 0.1999999 0.5 0.2999999 0.5 0.02174639 0.3241641 0.3910685 0.0558359 0.4782536 0.3241641 0.1999999 1 0.0999999 0.5 0.1999999 0.5 0.0999999 1 0 0.5 0.0999999 0.5 0.9782536 0.1758359 0.5217464 0.1758359 0.6089316 0.4441641 1 1 0.9 1 0.9 0.5 0.9 1 0.8 1 0.8 0.5 0.8 1 0.6999999 1 0.6999999 0.5 0.6999999 1 0.5999999 1 0.5999999 0.5 0.5999999 1 0.4999999 1 0.4999999 0.5 0.4999999 1 0.3999999 1 0.3999999 0.5 0.3999999 1 0.2999999 1 0.2999999 0.5 0.2999999 1 0.1999999 1 0.1999999 0.5 0.4782536 0.3241641 0.3910685 0.4441641 0.25 0.49 0.25 0.49 0.1089315 0.4441641 0.02174639 0.3241641 0.02174639 0.3241641 0.02174639 0.1758359 0.1089315 0.0558359 0.1089315 0.0558359 0.25 0.00999999 0.3910685 0.0558359 0.3910685 0.0558359 0.4782536 0.1758359 0.4782536 0.3241641 0.4782536 0.3241641 0.25 0.49 0.02174639 0.3241641 0.02174639 0.3241641 0.1089315 0.0558359 0.3910685 0.0558359 0.1999999 1 0.0999999 1 0.0999999 0.5 0.0999999 1 0 1 0 0.5 0.6089316 0.4441641 0.75 0.49 0.8910685 0.4441641 0.8910685 0.4441641 0.9782536 0.3241641 0.9782536 0.1758359 0.9782536 0.1758359 0.8910685 0.0558359 0.75 0.00999999 0.75 0.00999999 0.6089316 0.0558359 0.5217464 0.1758359 0.5217464 0.1758359 0.5217464 0.3241641 0.6089316 0.4441641 0.6089316 0.4441641 0.8910685 0.4441641 0.9782536 0.1758359 0.9782536 0.1758359 0.75 0.00999999 0.5217464 0.1758359</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1_mesh-mesh-map-0-array" count="108" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1_mesh-mesh-vertices">
+          <input semantic="POSITION" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1_mesh-mesh-positions"/>
+        </vertices>
+        <triangles material="ericrolph_cannon_car_wash_rubber-material" count="36">
+          <input semantic="VERTEX" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1_mesh-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1_mesh-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1_mesh-mesh-map-0" offset="2" set="0"/>
+          <p>1 0 0 2 0 1 0 0 2 3 1 3 4 1 4 2 1 5 5 2 6 6 2 7 4 2 8 7 3 9 8 3 10 6 3 11 9 4 12 10 4 13 8 4 14 11 5 15 12 5 16 10 5 17 13 6 18 14 6 19 12 6 20 15 7 21 16 7 22 14 7 23 17 8 24 9 8 25 5 8 26 17 9 27 18 9 28 16 9 29 19 10 30 0 10 31 18 10 32 6 11 33 14 11 34 18 11 35 1 12 36 3 12 37 2 12 38 3 13 39 5 13 40 4 13 41 5 14 42 7 14 43 6 14 44 7 15 45 9 15 46 8 15 47 9 16 48 11 16 49 10 16 50 11 17 51 13 17 52 12 17 53 13 18 54 15 18 55 14 18 56 15 19 57 17 19 58 16 19 59 5 20 60 3 20 61 1 20 62 1 21 63 19 21 64 17 21 65 17 22 66 15 22 67 13 22 68 13 23 69 11 23 70 9 23 71 9 24 72 7 24 73 5 24 74 5 25 75 1 25 76 17 25 77 17 26 78 13 26 79 9 26 80 17 27 81 19 27 82 18 27 83 19 28 84 1 28 85 0 28 86 18 29 87 0 29 88 2 29 89 2 30 90 4 30 91 6 30 92 6 31 93 8 31 94 10 31 95 10 32 96 12 32 97 14 32 98 14 33 99 16 33 100 18 33 101 18 34 102 2 34 103 6 34 104 6 35 105 10 35 106 14 35 107</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Knuckle_-2.2_mesh">
+      <mesh>
+        <source id="ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2_mesh-mesh-positions">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2_mesh-mesh-positions-array" count="60">0 0.04499995 -0.25 0 0.04499995 0.25 0.02645033 0.03640574 -0.25 0.02645033 0.03640574 0.25 0.0427975 0.01390576 -0.25 0.0427975 0.01390576 0.25 0.0427975 -0.01390576 -0.25 0.0427975 -0.01390576 0.25 0.02645033 -0.03640574 -0.25 0.02645033 -0.03640574 0.25 0 -0.04499995 -0.25 0 -0.04499995 0.25 -0.02645033 -0.03640574 -0.25 -0.02645033 -0.03640574 0.25 -0.0427975 -0.01390576 -0.25 -0.0427975 -0.01390576 0.25 -0.0427975 0.01390576 -0.25 -0.0427975 0.01390576 0.25 -0.02645033 0.03640574 -0.25 -0.02645033 0.03640574 0.25</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2_mesh-mesh-positions-array" count="20" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2_mesh-mesh-normals">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2_mesh-mesh-normals-array" count="108">0.3090169 0.9510565 0 0.809017 0.5877853 0 1 0 0 0.809017 -0.5877853 0 0.3090169 -0.9510565 0 -0.3090169 -0.9510565 0 -0.809017 -0.5877853 0 -1 0 0 0 0 1 -0.809017 0.5877853 0 -0.3090169 0.9510565 0 0 0 -1 0.3090169 0.9510565 0 0.809017 0.5877853 0 1 0 0 0.809017 -0.5877853 0 0.3090169 -0.9510565 0 -0.3090169 -0.9510565 0 -0.809017 -0.5877853 0 -1 0 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 -0.809017 0.5877853 0 -0.3090169 0.9510565 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2_mesh-mesh-normals-array" count="36" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2_mesh-mesh-map-0">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2_mesh-mesh-map-0-array" count="216">1 1 0.9 0.5 1 0.5 0.9 1 0.8 0.5 0.9 0.5 0.8 1 0.6999999 0.5 0.8 0.5 0.6999999 1 0.5999999 0.5 0.6999999 0.5 0.5999999 1 0.4999999 0.5 0.5999999 0.5 0.4999999 1 0.3999999 0.5 0.4999999 0.5 0.3999999 1 0.2999999 0.5 0.3999999 0.5 0.2999999 1 0.1999999 0.5 0.2999999 0.5 0.02174639 0.3241641 0.3910685 0.0558359 0.4782536 0.3241641 0.1999999 1 0.0999999 0.5 0.1999999 0.5 0.0999999 1 0 0.5 0.0999999 0.5 0.9782536 0.1758359 0.5217464 0.1758359 0.6089316 0.4441641 1 1 0.9 1 0.9 0.5 0.9 1 0.8 1 0.8 0.5 0.8 1 0.6999999 1 0.6999999 0.5 0.6999999 1 0.5999999 1 0.5999999 0.5 0.5999999 1 0.4999999 1 0.4999999 0.5 0.4999999 1 0.3999999 1 0.3999999 0.5 0.3999999 1 0.2999999 1 0.2999999 0.5 0.2999999 1 0.1999999 1 0.1999999 0.5 0.4782536 0.3241641 0.3910685 0.4441641 0.25 0.49 0.25 0.49 0.1089315 0.4441641 0.02174639 0.3241641 0.02174639 0.3241641 0.02174639 0.1758359 0.1089315 0.0558359 0.1089315 0.0558359 0.25 0.00999999 0.3910685 0.0558359 0.3910685 0.0558359 0.4782536 0.1758359 0.4782536 0.3241641 0.4782536 0.3241641 0.25 0.49 0.02174639 0.3241641 0.02174639 0.3241641 0.1089315 0.0558359 0.3910685 0.0558359 0.1999999 1 0.0999999 1 0.0999999 0.5 0.0999999 1 0 1 0 0.5 0.6089316 0.4441641 0.75 0.49 0.8910685 0.4441641 0.8910685 0.4441641 0.9782536 0.3241641 0.9782536 0.1758359 0.9782536 0.1758359 0.8910685 0.0558359 0.75 0.00999999 0.75 0.00999999 0.6089316 0.0558359 0.5217464 0.1758359 0.5217464 0.1758359 0.5217464 0.3241641 0.6089316 0.4441641 0.6089316 0.4441641 0.8910685 0.4441641 0.9782536 0.1758359 0.9782536 0.1758359 0.75 0.00999999 0.5217464 0.1758359</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2_mesh-mesh-map-0-array" count="108" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2_mesh-mesh-vertices">
+          <input semantic="POSITION" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2_mesh-mesh-positions"/>
+        </vertices>
+        <triangles material="ericrolph_cannon_car_wash_rubber-material" count="36">
+          <input semantic="VERTEX" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2_mesh-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2_mesh-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2_mesh-mesh-map-0" offset="2" set="0"/>
+          <p>1 0 0 2 0 1 0 0 2 3 1 3 4 1 4 2 1 5 5 2 6 6 2 7 4 2 8 7 3 9 8 3 10 6 3 11 9 4 12 10 4 13 8 4 14 11 5 15 12 5 16 10 5 17 13 6 18 14 6 19 12 6 20 15 7 21 16 7 22 14 7 23 17 8 24 9 8 25 5 8 26 17 9 27 18 9 28 16 9 29 19 10 30 0 10 31 18 10 32 6 11 33 14 11 34 18 11 35 1 12 36 3 12 37 2 12 38 3 13 39 5 13 40 4 13 41 5 14 42 7 14 43 6 14 44 7 15 45 9 15 46 8 15 47 9 16 48 11 16 49 10 16 50 11 17 51 13 17 52 12 17 53 13 18 54 15 18 55 14 18 56 15 19 57 17 19 58 16 19 59 5 20 60 3 20 61 1 20 62 1 21 63 19 21 64 17 21 65 17 22 66 15 22 67 13 22 68 13 23 69 11 23 70 9 23 71 9 24 72 7 24 73 5 24 74 5 25 75 1 25 76 17 25 77 17 26 78 13 26 79 9 26 80 17 27 81 19 27 82 18 27 83 19 28 84 1 28 85 0 28 86 18 29 87 0 29 88 2 29 89 2 30 90 4 30 91 6 30 92 6 31 93 8 31 94 10 31 95 10 32 96 12 32 97 14 32 98 14 33 99 16 33 100 18 33 101 18 34 102 2 34 103 6 34 104 6 35 105 10 35 106 14 35 107</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Knuckle_0.0_mesh">
+      <mesh>
+        <source id="ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-positions">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-positions-array" count="60">0 0.04499995 -0.25 0 0.04499995 0.25 0.02645033 0.03640574 -0.25 0.02645033 0.03640574 0.25 0.0427975 0.01390576 -0.25 0.0427975 0.01390576 0.25 0.0427975 -0.01390576 -0.25 0.0427975 -0.01390576 0.25 0.02645033 -0.03640574 -0.25 0.02645033 -0.03640574 0.25 0 -0.04499995 -0.25 0 -0.04499995 0.25 -0.02645033 -0.03640574 -0.25 -0.02645033 -0.03640574 0.25 -0.0427975 -0.01390576 -0.25 -0.0427975 -0.01390576 0.25 -0.0427975 0.01390576 -0.25 -0.0427975 0.01390576 0.25 -0.02645033 0.03640574 -0.25 -0.02645033 0.03640574 0.25</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-positions-array" count="20" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-normals">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-normals-array" count="108">0.3090169 0.9510565 0 0.809017 0.5877853 0 1 0 0 0.809017 -0.5877853 0 0.3090169 -0.9510565 0 -0.3090169 -0.9510565 0 -0.809017 -0.5877853 0 -1 0 0 0 0 1 -0.809017 0.5877853 0 -0.3090169 0.9510565 0 0 0 -1 0.3090169 0.9510565 0 0.809017 0.5877853 0 1 0 0 0.809017 -0.5877853 0 0.3090169 -0.9510565 0 -0.3090169 -0.9510565 0 -0.809017 -0.5877853 0 -1 0 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 -0.809017 0.5877853 0 -0.3090169 0.9510565 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-normals-array" count="36" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-map-0">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-map-0-array" count="216">1 1 0.9 0.5 1 0.5 0.9 1 0.8 0.5 0.9 0.5 0.8 1 0.6999999 0.5 0.8 0.5 0.6999999 1 0.5999999 0.5 0.6999999 0.5 0.5999999 1 0.4999999 0.5 0.5999999 0.5 0.4999999 1 0.3999999 0.5 0.4999999 0.5 0.3999999 1 0.2999999 0.5 0.3999999 0.5 0.2999999 1 0.1999999 0.5 0.2999999 0.5 0.02174639 0.3241641 0.3910685 0.0558359 0.4782536 0.3241641 0.1999999 1 0.0999999 0.5 0.1999999 0.5 0.0999999 1 0 0.5 0.0999999 0.5 0.9782536 0.1758359 0.5217464 0.1758359 0.6089316 0.4441641 1 1 0.9 1 0.9 0.5 0.9 1 0.8 1 0.8 0.5 0.8 1 0.6999999 1 0.6999999 0.5 0.6999999 1 0.5999999 1 0.5999999 0.5 0.5999999 1 0.4999999 1 0.4999999 0.5 0.4999999 1 0.3999999 1 0.3999999 0.5 0.3999999 1 0.2999999 1 0.2999999 0.5 0.2999999 1 0.1999999 1 0.1999999 0.5 0.4782536 0.3241641 0.3910685 0.4441641 0.25 0.49 0.25 0.49 0.1089315 0.4441641 0.02174639 0.3241641 0.02174639 0.3241641 0.02174639 0.1758359 0.1089315 0.0558359 0.1089315 0.0558359 0.25 0.00999999 0.3910685 0.0558359 0.3910685 0.0558359 0.4782536 0.1758359 0.4782536 0.3241641 0.4782536 0.3241641 0.25 0.49 0.02174639 0.3241641 0.02174639 0.3241641 0.1089315 0.0558359 0.3910685 0.0558359 0.1999999 1 0.0999999 1 0.0999999 0.5 0.0999999 1 0 1 0 0.5 0.6089316 0.4441641 0.75 0.49 0.8910685 0.4441641 0.8910685 0.4441641 0.9782536 0.3241641 0.9782536 0.1758359 0.9782536 0.1758359 0.8910685 0.0558359 0.75 0.00999999 0.75 0.00999999 0.6089316 0.0558359 0.5217464 0.1758359 0.5217464 0.1758359 0.5217464 0.3241641 0.6089316 0.4441641 0.6089316 0.4441641 0.8910685 0.4441641 0.9782536 0.1758359 0.9782536 0.1758359 0.75 0.00999999 0.5217464 0.1758359</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-map-0-array" count="108" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-vertices">
+          <input semantic="POSITION" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-positions"/>
+        </vertices>
+        <triangles material="ericrolph_cannon_car_wash_rubber-material" count="36">
+          <input semantic="VERTEX" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-map-0" offset="2" set="0"/>
+          <p>1 0 0 2 0 1 0 0 2 3 1 3 4 1 4 2 1 5 5 2 6 6 2 7 4 2 8 7 3 9 8 3 10 6 3 11 9 4 12 10 4 13 8 4 14 11 5 15 12 5 16 10 5 17 13 6 18 14 6 19 12 6 20 15 7 21 16 7 22 14 7 23 17 8 24 9 8 25 5 8 26 17 9 27 18 9 28 16 9 29 19 10 30 0 10 31 18 10 32 6 11 33 14 11 34 18 11 35 1 12 36 3 12 37 2 12 38 3 13 39 5 13 40 4 13 41 5 14 42 7 14 43 6 14 44 7 15 45 9 15 46 8 15 47 9 16 48 11 16 49 10 16 50 11 17 51 13 17 52 12 17 53 13 18 54 15 18 55 14 18 56 15 19 57 17 19 58 16 19 59 5 20 60 3 20 61 1 20 62 1 21 63 19 21 64 17 21 65 17 22 66 15 22 67 13 22 68 13 23 69 11 23 70 9 23 71 9 24 72 7 24 73 5 24 74 5 25 75 1 25 76 17 25 77 17 26 78 13 26 79 9 26 80 17 27 81 19 27 82 18 27 83 19 28 84 1 28 85 0 28 86 18 29 87 0 29 88 2 29 89 2 30 90 4 30 91 6 30 92 6 31 93 8 31 94 10 31 95 10 32 96 12 32 97 14 32 98 14 33 99 16 33 100 18 33 101 18 34 102 2 34 103 6 34 104 6 35 105 10 35 106 14 35 107</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="ericrolph_cannon_car_wash_rampflap_Knuckle_1_1_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Knuckle_1.1_mesh">
+      <mesh>
+        <source id="ericrolph_cannon_car_wash_rampflap_Knuckle_1_1_mesh-mesh-positions">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Knuckle_1_1_mesh-mesh-positions-array" count="60">0 0.04499995 -0.25 0 0.04499995 0.25 0.02645033 0.03640574 -0.25 0.02645033 0.03640574 0.25 0.0427975 0.01390576 -0.25 0.0427975 0.01390576 0.25 0.0427975 -0.01390576 -0.25 0.0427975 -0.01390576 0.25 0.02645033 -0.03640574 -0.25 0.02645033 -0.03640574 0.25 0 -0.04499995 -0.25 0 -0.04499995 0.25 -0.02645033 -0.03640574 -0.25 -0.02645033 -0.03640574 0.25 -0.0427975 -0.01390576 -0.25 -0.0427975 -0.01390576 0.25 -0.0427975 0.01390576 -0.25 -0.0427975 0.01390576 0.25 -0.02645033 0.03640574 -0.25 -0.02645033 0.03640574 0.25</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Knuckle_1_1_mesh-mesh-positions-array" count="20" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Knuckle_1_1_mesh-mesh-normals">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Knuckle_1_1_mesh-mesh-normals-array" count="108">0.3090169 0.9510565 0 0.809017 0.5877853 0 1 0 0 0.809017 -0.5877853 0 0.3090169 -0.9510565 0 -0.3090169 -0.9510565 0 -0.809017 -0.5877853 0 -1 0 0 0 0 1 -0.809017 0.5877853 0 -0.3090169 0.9510565 0 0 0 -1 0.3090169 0.9510565 0 0.809017 0.5877853 0 1 0 0 0.809017 -0.5877853 0 0.3090169 -0.9510565 0 -0.3090169 -0.9510565 0 -0.809017 -0.5877853 0 -1 0 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 -0.809017 0.5877853 0 -0.3090169 0.9510565 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Knuckle_1_1_mesh-mesh-normals-array" count="36" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Knuckle_1_1_mesh-mesh-map-0">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Knuckle_1_1_mesh-mesh-map-0-array" count="216">1 1 0.9 0.5 1 0.5 0.9 1 0.8 0.5 0.9 0.5 0.8 1 0.6999999 0.5 0.8 0.5 0.6999999 1 0.5999999 0.5 0.6999999 0.5 0.5999999 1 0.4999999 0.5 0.5999999 0.5 0.4999999 1 0.3999999 0.5 0.4999999 0.5 0.3999999 1 0.2999999 0.5 0.3999999 0.5 0.2999999 1 0.1999999 0.5 0.2999999 0.5 0.02174639 0.3241641 0.3910685 0.0558359 0.4782536 0.3241641 0.1999999 1 0.0999999 0.5 0.1999999 0.5 0.0999999 1 0 0.5 0.0999999 0.5 0.9782536 0.1758359 0.5217464 0.1758359 0.6089316 0.4441641 1 1 0.9 1 0.9 0.5 0.9 1 0.8 1 0.8 0.5 0.8 1 0.6999999 1 0.6999999 0.5 0.6999999 1 0.5999999 1 0.5999999 0.5 0.5999999 1 0.4999999 1 0.4999999 0.5 0.4999999 1 0.3999999 1 0.3999999 0.5 0.3999999 1 0.2999999 1 0.2999999 0.5 0.2999999 1 0.1999999 1 0.1999999 0.5 0.4782536 0.3241641 0.3910685 0.4441641 0.25 0.49 0.25 0.49 0.1089315 0.4441641 0.02174639 0.3241641 0.02174639 0.3241641 0.02174639 0.1758359 0.1089315 0.0558359 0.1089315 0.0558359 0.25 0.00999999 0.3910685 0.0558359 0.3910685 0.0558359 0.4782536 0.1758359 0.4782536 0.3241641 0.4782536 0.3241641 0.25 0.49 0.02174639 0.3241641 0.02174639 0.3241641 0.1089315 0.0558359 0.3910685 0.0558359 0.1999999 1 0.0999999 1 0.0999999 0.5 0.0999999 1 0 1 0 0.5 0.6089316 0.4441641 0.75 0.49 0.8910685 0.4441641 0.8910685 0.4441641 0.9782536 0.3241641 0.9782536 0.1758359 0.9782536 0.1758359 0.8910685 0.0558359 0.75 0.00999999 0.75 0.00999999 0.6089316 0.0558359 0.5217464 0.1758359 0.5217464 0.1758359 0.5217464 0.3241641 0.6089316 0.4441641 0.6089316 0.4441641 0.8910685 0.4441641 0.9782536 0.1758359 0.9782536 0.1758359 0.75 0.00999999 0.5217464 0.1758359</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Knuckle_1_1_mesh-mesh-map-0-array" count="108" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="ericrolph_cannon_car_wash_rampflap_Knuckle_1_1_mesh-mesh-vertices">
+          <input semantic="POSITION" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_1_1_mesh-mesh-positions"/>
+        </vertices>
+        <triangles material="ericrolph_cannon_car_wash_rubber-material" count="36">
+          <input semantic="VERTEX" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_1_1_mesh-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_1_1_mesh-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_1_1_mesh-mesh-map-0" offset="2" set="0"/>
+          <p>1 0 0 2 0 1 0 0 2 3 1 3 4 1 4 2 1 5 5 2 6 6 2 7 4 2 8 7 3 9 8 3 10 6 3 11 9 4 12 10 4 13 8 4 14 11 5 15 12 5 16 10 5 17 13 6 18 14 6 19 12 6 20 15 7 21 16 7 22 14 7 23 17 8 24 9 8 25 5 8 26 17 9 27 18 9 28 16 9 29 19 10 30 0 10 31 18 10 32 6 11 33 14 11 34 18 11 35 1 12 36 3 12 37 2 12 38 3 13 39 5 13 40 4 13 41 5 14 42 7 14 43 6 14 44 7 15 45 9 15 46 8 15 47 9 16 48 11 16 49 10 16 50 11 17 51 13 17 52 12 17 53 13 18 54 15 18 55 14 18 56 15 19 57 17 19 58 16 19 59 5 20 60 3 20 61 1 20 62 1 21 63 19 21 64 17 21 65 17 22 66 15 22 67 13 22 68 13 23 69 11 23 70 9 23 71 9 24 72 7 24 73 5 24 74 5 25 75 1 25 76 17 25 77 17 26 78 13 26 79 9 26 80 17 27 81 19 27 82 18 27 83 19 28 84 1 28 85 0 28 86 18 29 87 0 29 88 2 29 89 2 30 90 4 30 91 6 30 92 6 31 93 8 31 94 10 31 95 10 32 96 12 32 97 14 32 98 14 33 99 16 33 100 18 33 101 18 34 102 2 34 103 6 34 104 6 35 105 10 35 106 14 35 107</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="ericrolph_cannon_car_wash_rampflap_Knuckle_2_2_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Knuckle_2.2_mesh">
+      <mesh>
+        <source id="ericrolph_cannon_car_wash_rampflap_Knuckle_2_2_mesh-mesh-positions">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Knuckle_2_2_mesh-mesh-positions-array" count="60">0 0.04499995 -0.25 0 0.04499995 0.25 0.02645033 0.03640574 -0.25 0.02645033 0.03640574 0.25 0.0427975 0.01390576 -0.25 0.0427975 0.01390576 0.25 0.0427975 -0.01390576 -0.25 0.0427975 -0.01390576 0.25 0.02645033 -0.03640574 -0.25 0.02645033 -0.03640574 0.25 0 -0.04499995 -0.25 0 -0.04499995 0.25 -0.02645033 -0.03640574 -0.25 -0.02645033 -0.03640574 0.25 -0.0427975 -0.01390576 -0.25 -0.0427975 -0.01390576 0.25 -0.0427975 0.01390576 -0.25 -0.0427975 0.01390576 0.25 -0.02645033 0.03640574 -0.25 -0.02645033 0.03640574 0.25</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Knuckle_2_2_mesh-mesh-positions-array" count="20" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Knuckle_2_2_mesh-mesh-normals">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Knuckle_2_2_mesh-mesh-normals-array" count="108">0.3090169 0.9510565 0 0.809017 0.5877853 0 1 0 0 0.809017 -0.5877853 0 0.3090169 -0.9510565 0 -0.3090169 -0.9510565 0 -0.809017 -0.5877853 0 -1 0 0 0 0 1 -0.809017 0.5877853 0 -0.3090169 0.9510565 0 0 0 -1 0.3090169 0.9510565 0 0.809017 0.5877853 0 1 0 0 0.809017 -0.5877853 0 0.3090169 -0.9510565 0 -0.3090169 -0.9510565 0 -0.809017 -0.5877853 0 -1 0 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 -0.809017 0.5877853 0 -0.3090169 0.9510565 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Knuckle_2_2_mesh-mesh-normals-array" count="36" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Knuckle_2_2_mesh-mesh-map-0">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Knuckle_2_2_mesh-mesh-map-0-array" count="216">1 1 0.9 0.5 1 0.5 0.9 1 0.8 0.5 0.9 0.5 0.8 1 0.6999999 0.5 0.8 0.5 0.6999999 1 0.5999999 0.5 0.6999999 0.5 0.5999999 1 0.4999999 0.5 0.5999999 0.5 0.4999999 1 0.3999999 0.5 0.4999999 0.5 0.3999999 1 0.2999999 0.5 0.3999999 0.5 0.2999999 1 0.1999999 0.5 0.2999999 0.5 0.02174639 0.3241641 0.3910685 0.0558359 0.4782536 0.3241641 0.1999999 1 0.0999999 0.5 0.1999999 0.5 0.0999999 1 0 0.5 0.0999999 0.5 0.9782536 0.1758359 0.5217464 0.1758359 0.6089316 0.4441641 1 1 0.9 1 0.9 0.5 0.9 1 0.8 1 0.8 0.5 0.8 1 0.6999999 1 0.6999999 0.5 0.6999999 1 0.5999999 1 0.5999999 0.5 0.5999999 1 0.4999999 1 0.4999999 0.5 0.4999999 1 0.3999999 1 0.3999999 0.5 0.3999999 1 0.2999999 1 0.2999999 0.5 0.2999999 1 0.1999999 1 0.1999999 0.5 0.4782536 0.3241641 0.3910685 0.4441641 0.25 0.49 0.25 0.49 0.1089315 0.4441641 0.02174639 0.3241641 0.02174639 0.3241641 0.02174639 0.1758359 0.1089315 0.0558359 0.1089315 0.0558359 0.25 0.00999999 0.3910685 0.0558359 0.3910685 0.0558359 0.4782536 0.1758359 0.4782536 0.3241641 0.4782536 0.3241641 0.25 0.49 0.02174639 0.3241641 0.02174639 0.3241641 0.1089315 0.0558359 0.3910685 0.0558359 0.1999999 1 0.0999999 1 0.0999999 0.5 0.0999999 1 0 1 0 0.5 0.6089316 0.4441641 0.75 0.49 0.8910685 0.4441641 0.8910685 0.4441641 0.9782536 0.3241641 0.9782536 0.1758359 0.9782536 0.1758359 0.8910685 0.0558359 0.75 0.00999999 0.75 0.00999999 0.6089316 0.0558359 0.5217464 0.1758359 0.5217464 0.1758359 0.5217464 0.3241641 0.6089316 0.4441641 0.6089316 0.4441641 0.8910685 0.4441641 0.9782536 0.1758359 0.9782536 0.1758359 0.75 0.00999999 0.5217464 0.1758359</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Knuckle_2_2_mesh-mesh-map-0-array" count="108" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="ericrolph_cannon_car_wash_rampflap_Knuckle_2_2_mesh-mesh-vertices">
+          <input semantic="POSITION" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_2_2_mesh-mesh-positions"/>
+        </vertices>
+        <triangles material="ericrolph_cannon_car_wash_rubber-material" count="36">
+          <input semantic="VERTEX" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_2_2_mesh-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_2_2_mesh-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_2_2_mesh-mesh-map-0" offset="2" set="0"/>
+          <p>1 0 0 2 0 1 0 0 2 3 1 3 4 1 4 2 1 5 5 2 6 6 2 7 4 2 8 7 3 9 8 3 10 6 3 11 9 4 12 10 4 13 8 4 14 11 5 15 12 5 16 10 5 17 13 6 18 14 6 19 12 6 20 15 7 21 16 7 22 14 7 23 17 8 24 9 8 25 5 8 26 17 9 27 18 9 28 16 9 29 19 10 30 0 10 31 18 10 32 6 11 33 14 11 34 18 11 35 1 12 36 3 12 37 2 12 38 3 13 39 5 13 40 4 13 41 5 14 42 7 14 43 6 14 44 7 15 45 9 15 46 8 15 47 9 16 48 11 16 49 10 16 50 11 17 51 13 17 52 12 17 53 13 18 54 15 18 55 14 18 56 15 19 57 17 19 58 16 19 59 5 20 60 3 20 61 1 20 62 1 21 63 19 21 64 17 21 65 17 22 66 15 22 67 13 22 68 13 23 69 11 23 70 9 23 71 9 24 72 7 24 73 5 24 74 5 25 75 1 25 76 17 25 77 17 26 78 13 26 79 9 26 80 17 27 81 19 27 82 18 27 83 19 28 84 1 28 85 0 28 86 18 29 87 0 29 88 2 29 89 2 30 90 4 30 91 6 30 92 6 31 93 8 31 94 10 31 95 10 32 96 12 32 97 14 32 98 14 33 99 16 33 100 18 33 101 18 34 102 2 34 103 6 34 104 6 35 105 10 35 106 14 35 107</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="ericrolph_cannon_car_wash_rampflap_Lip_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Lip_mesh">
+      <mesh>
+        <source id="ericrolph_cannon_car_wash_rampflap_Lip_mesh-mesh-positions">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Lip_mesh-mesh-positions-array" count="24">-2.7 -0.02999997 -0.02499997 -2.7 -0.02999997 0.02499997 -2.7 0.02999997 -0.02499997 -2.7 0.02999997 0.02499997 2.7 -0.02999997 -0.02499997 2.7 -0.02999997 0.02499997 2.7 0.02999997 -0.02499997 2.7 0.02999997 0.02499997</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Lip_mesh-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Lip_mesh-mesh-normals">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Lip_mesh-mesh-normals-array" count="36">-1 0 0 0 1 0 1 0 0 0 -1 0 0 0 -1 0 0 1 -1 0 0 0 1 0 1 0 0 0 -1 0 0 0 -1 0 0 1</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Lip_mesh-mesh-normals-array" count="12" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ericrolph_cannon_car_wash_rampflap_Lip_mesh-mesh-map-0">
+          <float_array id="ericrolph_cannon_car_wash_rampflap_Lip_mesh-mesh-map-0-array" count="72">0.625 0 0.375 0.25 0.375 0 0.625 0.25 0.375 0.5 0.375 0.25 0.625 0.5 0.375 0.75 0.375 0.5 0.625 0.75 0.375 1 0.375 0.75 0.375 0.5 0.125 0.75 0.125 0.5 0.875 0.5 0.625 0.75 0.625 0.5 0.625 0 0.625 0.25 0.375 0.25 0.625 0.25 0.625 0.5 0.375 0.5 0.625 0.5 0.625 0.75 0.375 0.75 0.625 0.75 0.625 1 0.375 1 0.375 0.5 0.375 0.75 0.125 0.75 0.875 0.5 0.875 0.75 0.625 0.75</float_array>
+          <technique_common>
+            <accessor source="#ericrolph_cannon_car_wash_rampflap_Lip_mesh-mesh-map-0-array" count="36" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="ericrolph_cannon_car_wash_rampflap_Lip_mesh-mesh-vertices">
+          <input semantic="POSITION" source="#ericrolph_cannon_car_wash_rampflap_Lip_mesh-mesh-positions"/>
+        </vertices>
+        <triangles material="ericrolph_cannon_car_wash_ramp_flap-material" count="12">
+          <input semantic="VERTEX" source="#ericrolph_cannon_car_wash_rampflap_Lip_mesh-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#ericrolph_cannon_car_wash_rampflap_Lip_mesh-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#ericrolph_cannon_car_wash_rampflap_Lip_mesh-mesh-map-0" offset="2" set="0"/>
+          <p>1 0 0 2 0 1 0 0 2 3 1 3 6 1 4 2 1 5 7 2 6 4 2 7 6 2 8 5 3 9 0 3 10 4 3 11 6 4 12 0 4 13 2 4 14 3 5 15 5 5 16 7 5 17 1 6 18 3 6 19 2 6 20 3 7 21 7 7 22 6 7 23 7 8 24 5 8 25 4 8 26 5 9 27 1 9 28 0 9 29 6 10 30 4 10 31 0 10 32 3 11 33 1 11 34 5 11 35</p>
+        </triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="ericrolph_cannon_car_wash_scene" name="ericrolph_cannon_car_wash_scene">
+      <node id="ericrolph_cannon_car_wash_rampflap_Cheek_L" name="ericrolph_cannon_car_wash_rampflap_Cheek_L" type="NODE">
+        <matrix sid="transform">1 0 0 -2.66 0 1 0 0.85 0 0 1 0.045 0 0 0 1</matrix>
+        <instance_geometry url="#ericrolph_cannon_car_wash_rampflap_Cheek_L_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Cheek_L">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="ericrolph_cannon_car_wash_ramp_flap-material" target="#ericrolph_cannon_car_wash_ramp_flap-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="ericrolph_cannon_car_wash_rampflap_Cheek_R" name="ericrolph_cannon_car_wash_rampflap_Cheek_R" type="NODE">
+        <matrix sid="transform">1 0 0 2.66 0 1 0 0.85 0 0 1 0.045 0 0 0 1</matrix>
+        <instance_geometry url="#ericrolph_cannon_car_wash_rampflap_Cheek_R_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Cheek_R">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="ericrolph_cannon_car_wash_ramp_flap-material" target="#ericrolph_cannon_car_wash_ramp_flap-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="ericrolph_cannon_car_wash_rampflap_Deck" name="ericrolph_cannon_car_wash_rampflap_Deck" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0.85 0 0 1 0.035 0 0 0 1</matrix>
+        <instance_geometry url="#ericrolph_cannon_car_wash_rampflap_Deck_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Deck">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="ericrolph_cannon_car_wash_ramp_flap-material" target="#ericrolph_cannon_car_wash_ramp_flap-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1" name="ericrolph_cannon_car_wash_rampflap_Knuckle_-1.1" type="NODE">
+        <matrix sid="transform">-4.37114e-8 0 1 -1.1 0 1 0 0 -1 0 -4.37114e-8 0.035 0 0 0 1</matrix>
+        <instance_geometry url="#ericrolph_cannon_car_wash_rampflap_Knuckle_-1_1_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Knuckle_-1.1">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="ericrolph_cannon_car_wash_rubber-material" target="#ericrolph_cannon_car_wash_rubber-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2" name="ericrolph_cannon_car_wash_rampflap_Knuckle_-2.2" type="NODE">
+        <matrix sid="transform">-4.37114e-8 0 1 -2.2 0 1 0 0 -1 0 -4.37114e-8 0.035 0 0 0 1</matrix>
+        <instance_geometry url="#ericrolph_cannon_car_wash_rampflap_Knuckle_-2_2_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Knuckle_-2.2">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="ericrolph_cannon_car_wash_rubber-material" target="#ericrolph_cannon_car_wash_rubber-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="ericrolph_cannon_car_wash_rampflap_Knuckle_0_0" name="ericrolph_cannon_car_wash_rampflap_Knuckle_0.0" type="NODE">
+        <matrix sid="transform">-4.37114e-8 0 1 0 0 1 0 0 -1 0 -4.37114e-8 0.035 0 0 0 1</matrix>
+        <instance_geometry url="#ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Knuckle_0.0">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="ericrolph_cannon_car_wash_rubber-material" target="#ericrolph_cannon_car_wash_rubber-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="ericrolph_cannon_car_wash_rampflap_Knuckle_1_1" name="ericrolph_cannon_car_wash_rampflap_Knuckle_1.1" type="NODE">
+        <matrix sid="transform">-4.37114e-8 0 1 1.1 0 1 0 0 -1 0 -4.37114e-8 0.035 0 0 0 1</matrix>
+        <instance_geometry url="#ericrolph_cannon_car_wash_rampflap_Knuckle_1_1_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Knuckle_1.1">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="ericrolph_cannon_car_wash_rubber-material" target="#ericrolph_cannon_car_wash_rubber-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="ericrolph_cannon_car_wash_rampflap_Knuckle_2_2" name="ericrolph_cannon_car_wash_rampflap_Knuckle_2.2" type="NODE">
+        <matrix sid="transform">-4.37114e-8 0 1 2.2 0 1 0 0 -1 0 -4.37114e-8 0.035 0 0 0 1</matrix>
+        <instance_geometry url="#ericrolph_cannon_car_wash_rampflap_Knuckle_2_2_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Knuckle_2.2">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="ericrolph_cannon_car_wash_rubber-material" target="#ericrolph_cannon_car_wash_rubber-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="ericrolph_cannon_car_wash_rampflap_Lip" name="ericrolph_cannon_car_wash_rampflap_Lip" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 1.72 0 0 1 0.025 0 0 0 1</matrix>
+        <instance_geometry url="#ericrolph_cannon_car_wash_rampflap_Lip_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Lip">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="ericrolph_cannon_car_wash_ramp_flap-material" target="#ericrolph_cannon_car_wash_ramp_flap-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#ericrolph_cannon_car_wash_scene"/>
+  </scene>
+</COLLADA>

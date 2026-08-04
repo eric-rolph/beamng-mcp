@@ -27,6 +27,8 @@ SOURCE_MINI_CAR_PATH = MOD_ROOT / "art" / "shapes" / MOD_ID / "mini_car.dae"
 MINI_CAR_DAE_PATH = VEHICLE_ROOT / "mini_car.dae"
 SOURCE_CANNON_PATH = MOD_ROOT / "art" / "shapes" / MOD_ID / "cannon.dae"
 CANNON_DAE_PATH = VEHICLE_ROOT / "cannon.dae"
+SOURCE_RAMP_FLAP_PATH = MOD_ROOT / "art" / "shapes" / MOD_ID / "ramp_flap.dae"
+RAMP_FLAP_DAE_PATH = VEHICLE_ROOT / "ramp_flap.dae"
 SOURCE_MATERIALS_PATH = (
     MOD_ROOT / "levels" / "gridmap_v2" / "scenarios" / MOD_ID / "main.materials.json"
 )
@@ -304,6 +306,9 @@ def copy_mini_car() -> None:
     if not SOURCE_CANNON_PATH.is_file():
         raise FileNotFoundError(f"cannon shape missing: {SOURCE_CANNON_PATH}")
     shutil.copyfile(SOURCE_CANNON_PATH, CANNON_DAE_PATH)
+    if not SOURCE_RAMP_FLAP_PATH.is_file():
+        raise FileNotFoundError(f"ramp flap shape missing: {SOURCE_RAMP_FLAP_PATH}")
+    shutil.copyfile(SOURCE_RAMP_FLAP_PATH, RAMP_FLAP_DAE_PATH)
 
 
 def main() -> None:

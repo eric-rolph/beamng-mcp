@@ -42,6 +42,31 @@ local Attract = {
     "ericrolph_cannon_car_wash_attract_cannon",
     "ericrolph_cannon_car_wash_mini_car_paint",
     "ericrolph_cannon_car_wash_mini_wheel",
+    "ericrolph_cannon_car_wash_ramp_flap",
+  },
+}
+
+-- v1.35 exterior control panel (player request): a wall box at the exit
+-- corner with five walk-in button zones. RAMP raises a hinged checkerplate
+-- flap over the exit apron in one-degree steps (a jump for cannon exits),
+-- POWER scales the launch cannon, and CANNON arms/safes both the launch
+-- countdown and the attract volley. One module table (60-upvalue ceiling);
+-- methods are defined after the shared helpers (lexical-binding lesson).
+local Panel = {
+  flapShape = "/vehicles/ericrolph_cannon_car_wash/ramp_flap.dae",
+  flapHingeLocal = vec3(0.0, 10.28, 0.05),
+  maxAngleDeg = 15,
+  stepDeg = 1,
+  powerFactors = {0.6, 0.8, 1.0, 1.2, 1.4},
+  defaultPowerIndex = 3,
+  cooldownSeconds = 0.5,
+  buttonScale = vec3(0.55, 0.5, 1.1),
+  buttons = {
+    {suffix = "btn_ramp_up", position = vec3(3.62, 6.40, 0.55)},
+    {suffix = "btn_ramp_down", position = vec3(3.62, 7.02, 0.55)},
+    {suffix = "btn_power_up", position = vec3(3.62, 7.64, 0.55)},
+    {suffix = "btn_power_down", position = vec3(3.62, 8.26, 0.55)},
+    {suffix = "btn_cannon", position = vec3(3.62, 8.88, 0.55)},
   },
 }
 
@@ -103,6 +128,7 @@ local REQUIRED_VISUAL_MATERIALS = {
   "ericrolph_cannon_car_wash_selector_safety_orange",
   "ericrolph_cannon_car_wash_selector_screen",
   "ericrolph_cannon_car_wash_selector_sign_face",
+  "ericrolph_cannon_car_wash_selector_control_panel",
   "ericrolph_cannon_car_wash_selector_stainless",
   "ericrolph_cannon_car_wash_selector_wet_concrete",
 }
@@ -718,6 +744,7 @@ end
 function Attract.start(state)
   local attract = state.attract
   if not attract or not attract.projectile or attract.flying then return false end
+  if state.panel and state.panel.cannonEnabled == false then return false end
   Attract.updateCannonAim(state)
   local aim = attract.aimVector or (state.modelRotation * Attract.aimLocal)
   local mount = attract.mountWorld or Attract.world(state, Attract.mountLocal)
@@ -1052,6 +1079,7 @@ local function synchronizeTransforms(state)
       end
       if type(light.postApply) == "function" then light:postApply() end
     end
+    Panel.syncTransforms(state, frame)
     vehicle:setMeshAlpha(0, PROP_VISUAL_MESH, false)
   end)
   if not ok then return false, tostring(transformError) end
@@ -1059,6 +1087,95 @@ local function synchronizeTransforms(state)
   state.vehicleRotation = frame.vehicleRotation
   state.modelRotation = frame.modelRotation
   return true
+end
+
+function Panel.createFlap(name)
+  local object = createObject(VISUAL_CLASS)
+  if not object then return nil end
+  local ok = pcall(function()
+    object.loadMode = 1
+    if type(object.preApply) == "function" then object:preApply() end
+    setCanSaveFalse(object)
+    object:setField("shapeName", 0, Panel.flapShape)
+    -- "Visible Mesh Final": rigid collision that still follows setPosRot -
+    -- plain "Visible Mesh" trips the engine's performance warning in the
+    -- selector gate's error scan.
+    object:setField("collisionType", 0, "Visible Mesh Final")
+    object:setField("decalType", 0, "None")
+    if type(object.postApply) == "function" then object:postApply() end
+  end)
+  if not ok then
+    pcall(function() object:delete() end)
+    return nil
+  end
+  local registered = registerInMission(object, name)
+  if not registered then
+    pcall(function() object:delete() end)
+    return nil
+  end
+  return object
+end
+
+function Panel.syncTransforms(state, frame)
+  local panel = state.panel
+  if not panel then return end
+  if panel.flap then
+    -- Hinge at the apron's outer edge: the flap mesh extends +Y from its
+    -- origin, so composing the prop rotation with a local +X axis tilt
+    -- raises the free tip in one-degree steps.
+    local tilt = quatFromAxisAngle(vec3(1, 0, 0), math.rad(panel.rampAngleDeg or 0))
+    setObjectTransform(
+      panel.flap,
+      frame.origin + frame.modelRotation * Panel.flapHingeLocal,
+      frame.modelRotation * tilt,
+      vec3(1, 1, 1)
+    )
+  end
+  for _, button in ipairs(Panel.buttons) do
+    local trigger = panel.triggers and panel.triggers[button.suffix]
+    if trigger then
+      setObjectTransform(
+        trigger,
+        frame.origin + frame.modelRotation * button.position,
+        frame.modelRotation,
+        Panel.buttonScale
+      )
+    end
+  end
+end
+
+function Panel.press(state, buttonSuffix)
+  local panel = state.panel
+  if not panel then return end
+  local now = state.simSeconds or 0
+  if panel.lastPress and now - panel.lastPress < Panel.cooldownSeconds then return end
+  panel.lastPress = now
+  local message
+  if buttonSuffix == "btn_ramp_up" or buttonSuffix == "btn_ramp_down" then
+    local delta = buttonSuffix == "btn_ramp_up" and Panel.stepDeg or -Panel.stepDeg
+    panel.rampAngleDeg = math.max(0, math.min(Panel.maxAngleDeg, (panel.rampAngleDeg or 0) + delta))
+    if state.origin and state.modelRotation then
+      Panel.syncTransforms(state, {origin = state.origin, modelRotation = state.modelRotation})
+    end
+    message = string.format("EXIT RAMP %d deg", panel.rampAngleDeg)
+  elseif buttonSuffix == "btn_power_up" or buttonSuffix == "btn_power_down" then
+    local delta = buttonSuffix == "btn_power_up" and 1 or -1
+    panel.powerIndex = math.max(1, math.min(#Panel.powerFactors, (panel.powerIndex or Panel.defaultPowerIndex) + delta))
+    panel.powerFactor = Panel.powerFactors[panel.powerIndex]
+    message = string.format("LAUNCH POWER %d%%", math.floor(panel.powerFactor * 100 + 0.5))
+  elseif buttonSuffix == "btn_cannon" then
+    panel.cannonEnabled = not panel.cannonEnabled
+    message = panel.cannonEnabled and "CANNON ARMED" or "CANNON SAFE"
+  else
+    return
+  end
+  showMessage(message, 2.0)
+  emitEvent(state, "I", "control_panel_pressed", {
+    button = buttonSuffix,
+    ramp_angle_deg = panel.rampAngleDeg,
+    launch_power_factor = panel.powerFactor,
+    cannon_enabled = panel.cannonEnabled,
+  })
 end
 
 local function washSubjectCount(state)
@@ -1245,7 +1362,9 @@ local function launchVehicle(state, vehicle)
     return
   end
   direction:normalize()
-  local velocity = direction * LAUNCH_SPEED_MPS
+  -- v1.35: the control panel's POWER setting scales the muzzle velocity.
+  local powerFactor = (state.panel and state.panel.powerFactor) or 1.0
+  local velocity = direction * (LAUNCH_SPEED_MPS * powerFactor)
   showMessage("GO!", 1.5)
   emitEvent(state, "I", "go", {
     vehicle_id = vehicle:getId(),
@@ -2101,6 +2220,15 @@ handleLaunchTrigger = function(state, data)
     return
   end
   if not state.armed or state.activeRun then return end
+  -- v1.35 control panel: CANNON SAFE suppresses the countdown entirely -
+  -- cars can park in the launch bay and drive out unharmed.
+  if state.panel and state.panel.cannonEnabled == false then
+    if not state.panel.safeNoticeShown then
+      state.panel.safeNoticeShown = true
+      showMessage("CANNON SAFE - launch disabled at the control panel", 2.6)
+    end
+    return
+  end
 
   state.armed = false
   runCounter = runCounter + 1
@@ -2230,7 +2358,9 @@ local function onBeamNGTrigger(data)
   if not owner then return end
   local state = installations[owner.propId]
   if not state then return end
-  if owner.kind == "repair" then
+  if owner.kind == "panel" then
+    if data.event == "enter" then Panel.press(state, owner.button) end
+  elseif owner.kind == "repair" then
     handleRepairTrigger(state, data)
   elseif owner.kind == "wash" or owner.kind == "launch" then
     -- Wash/launch transitions flow through the shared occupancy gate so a
@@ -2369,6 +2499,14 @@ local function cleanupInstallation(state, reason)
     deleteSceneObject(state.attract.sparkEmitter)
     deleteSceneObject(state.attract.cannon)
     state.attract = nil
+  end
+  if state.panel then
+    deleteSceneObject(state.panel.flap)
+    for _, buttonTrigger in pairs(state.panel.triggers or {}) do
+      forgetTriggerOwner(buttonTrigger)
+      deleteSceneObject(buttonTrigger)
+    end
+    state.panel = nil
   end
   deleteSceneObject(state.visual)
   local vehicle = exactVehicle(state.propId)
@@ -2584,6 +2722,22 @@ local function registerProp(propId)
     Attract.updateCannonAim(state)
   end
 
+  -- v1.35 control panel kit: hinged exit-ramp flap + five walk-in button
+  -- zones along the exit-corner wall. Non-fatal on failure - the wash
+  -- works without its accessories.
+  state.panel = {
+    rampAngleDeg = 0,
+    powerIndex = Panel.defaultPowerIndex,
+    powerFactor = Panel.powerFactors[Panel.defaultPowerIndex],
+    cannonEnabled = true,
+    triggers = {},
+    flap = Panel.createFlap(prefix .. "_ramp_flap"),
+  }
+  for _, button in ipairs(Panel.buttons) do
+    local buttonTrigger = createTrigger(prefix .. "_" .. button.suffix, "Overlaps")
+    if buttonTrigger then state.panel.triggers[button.suffix] = buttonTrigger end
+  end
+
   for _, spec in ipairs(state.lightSpecs) do
     local light, lightError = createLight(spec)
     if not light then
@@ -2603,6 +2757,15 @@ local function registerProp(propId)
   triggerOwners[state.washTrigger:getId()] = {propId = propId, kind = "wash"}
   triggerOwners[state.repairTrigger:getId()] = {propId = propId, kind = "repair"}
   triggerOwners[state.launchTrigger:getId()] = {propId = propId, kind = "launch"}
+  if state.panel then
+    for suffix, buttonTrigger in pairs(state.panel.triggers) do
+      triggerOwners[buttonTrigger:getId()] = {
+        propId = propId,
+        kind = "panel",
+        button = suffix,
+      }
+    end
+  end
   forceWashSystemsOff(state)
   acknowledgeRegistration(vehicle)
   emitEvent(state, "I", "prop_registered", {
@@ -2628,6 +2791,7 @@ local function onPreRender(dtReal, dtSim, dtRaw)
   local elapsed = finiteNumber(dtReal) and dtReal or 0
   local stale = {}
   for propId, state in pairs(installations) do
+    state.simSeconds = (state.simSeconds or 0) + elapsed
     state.transformElapsed = state.transformElapsed + elapsed
     if state.transformElapsed >= TRANSFORM_REFRESH_SECONDS then
       state.transformElapsed = 0
@@ -2974,6 +3138,17 @@ local function installationState(state)
     ground_origin = state.origin and {state.origin.x, state.origin.y, state.origin.z} or nil,
     visual_name = state.visualName,
     roller_play_ambient = state.visual and state.visual:getField("playAmbient", 0) or nil,
+    control_panel = state.panel and {
+      ramp_angle_deg = state.panel.rampAngleDeg,
+      launch_power_factor = state.panel.powerFactor,
+      cannon_enabled = state.panel.cannonEnabled,
+      has_flap = state.panel.flap ~= nil,
+      button_count = (function()
+        local count = 0
+        for _ in pairs(state.panel.triggers or {}) do count = count + 1 end
+        return count
+      end)(),
+    } or nil,
     wash_trigger = {
       name = state.washTriggerName,
       id = state.washTrigger and state.washTrigger:getId() or nil,
@@ -3061,6 +3236,13 @@ M.fireAttractVolley = function(propId)
   local state = installations[propId]
   if not state or not state.attract then return false end
   state.attract.timer = 0
+  return true
+end
+M.pressPanelButton = function(propId, buttonSuffix)
+  local state = installations[propId]
+  if not state or not state.panel then return false end
+  state.panel.lastPress = nil
+  Panel.press(state, buttonSuffix)
   return true
 end
 M.getSystemState = getSystemState

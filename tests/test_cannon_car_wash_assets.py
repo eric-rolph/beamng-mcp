@@ -278,7 +278,7 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
     # the primitive-group cap below.
     assert actual_triangle_count <= 40_000
     assert actual_primitive_group_count <= 48
-    assert actual_material_symbol_count == 18
+    assert actual_material_symbol_count == 19
     dae_text = DAE_PATH.read_text(encoding="utf-8")
     assert "EntranceSign_Text" not in dae_text
     assert "ExitSign_Text" not in dae_text
@@ -361,7 +361,7 @@ def test_selector_runtime_visual_preserves_animations_and_uses_vehicle_materials
     }
     selector_materials = json.loads(SELECTOR_MATERIALS_PATH.read_text(encoding="utf-8"))
     assert runtime_materials == set(selector_materials)
-    assert len(runtime_materials) == 18
+    assert len(runtime_materials) == 19
     assert all(name.startswith(f"{MOD_ID}_selector_") for name in runtime_materials)
 
 
@@ -369,7 +369,7 @@ def test_cannon_car_wash_pbr_authoring_maps_are_power_of_two_seamless_and_typed(
     manifest = json.loads(TEXTURE_MANIFEST_PATH.read_text(encoding="utf-8"))
     assert manifest["texture_root"] == "textures/generated_png"
     assert manifest["normal_convention"] == "OpenGL_Y_positive"
-    assert len(manifest["files"]) == 45
+    assert len(manifest["files"]) == 49
     assert {entry["name"] for entry in manifest["files"]} == {
         path.name for path in GENERATED_TEXTURE_ROOT.glob("*.png")
     }
@@ -686,7 +686,7 @@ def test_cannon_car_wash_repository_metadata_and_icon() -> None:
 
     assert repository_info["internal_name"] == MOD_ID
     assert repository_info["title"] == "Cannon Car Wash"
-    assert repository_info["version"] == "1.34"
+    assert repository_info["version"] == "1.35"
     assert repository_info["author"] == "Eric Rolph"
 
     with Image.open(MOD_ICON_PATH) as icon:

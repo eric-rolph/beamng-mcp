@@ -41,7 +41,7 @@
       -10.79917
     ],
     "max": [
-      3.977894,
+      4.321269,
       10.808,
       13.177073
     ]
@@ -1254,9 +1254,9 @@
     ]
   },
   "mesh_statistics": {
-    "objects": 48,
-    "vertices": 13303,
-    "polygons": 9617
+    "objects": 49,
+    "vertices": 13463,
+    "polygons": 9744
   },
   "collision_meshes": [
     "Colmesh-1",
@@ -1265,9 +1265,9 @@
     "Colmesh-4"
   ],
   "export_statistics": {
-    "triangle_count": 23952,
-    "geometry_count": 45,
-    "primitive_group_count": 45,
-    "material_symbol_count": 18
+    "triangle_count": 24218,
+    "geometry_count": 46,
+    "primitive_group_count": 46,
+    "material_symbol_count": 19
   }
 }

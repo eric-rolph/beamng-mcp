@@ -1244,6 +1244,125 @@ def _build_mini_wheel(output_root: Path) -> list[Path]:
     return paths
 
 
+def _build_control_panel(output_root: Path) -> list[Path]:
+    """Printed legend for the v1.35 exterior control box door (512x512).
+
+    Brushed light-gray door, dark title strip, five colour-dot rows that
+    match the walk-in pad colours, a DANGER sticker, and a hazard-stripe
+    footer. Drawn top-down as usual; the face quad maps v0 at its bottom
+    edge so the engine's bottom-origin V sampling shows it upright.
+    """
+
+    size = 512
+    rng = np.random.default_rng(20260809)
+    brushed = 0.83 + 0.02 * np.sin(np.arange(size, dtype=np.float32)[None, :] * 1.7)
+    grain = 1.0 + 0.015 * rng.standard_normal((size, size)).astype(np.float32)
+    base = np.clip(brushed * grain, 0.0, 1.0)
+    colour = Image.fromarray(np.dstack((base * 216, base * 219, base * 224)).astype(np.uint8))
+    draw = ImageDraw.Draw(colour)
+    title_font = _sign_font("Bold", 38, "arialbd.ttf")
+    row_font = _sign_font("SemiBold", 30, "arialbd.ttf")
+    small_font = _sign_font("Regular", 22, "arial.ttf")
+    # Door screws.
+    for corner_x in (18, size - 18):
+        for corner_y in (18, size - 18):
+            draw.ellipse(
+                [corner_x - 7, corner_y - 7, corner_x + 7, corner_y + 7], fill=(120, 122, 126)
+            )
+            draw.line([corner_x - 4, corner_y, corner_x + 4, corner_y], fill=(70, 72, 76), width=2)
+    # Title strip.
+    draw.rectangle([34, 34, size - 34, 88], fill=(24, 30, 40))
+    draw.text(
+        (size // 2, 61), "CANNON WASH CONTROLS", font=title_font, fill=(240, 244, 248), anchor="mm"
+    )
+    # DANGER sticker.
+    draw.rectangle([34, 100, 254, 138], fill=(196, 34, 30))
+    draw.text((144, 119), "DANGER 400V", font=small_font, fill=(255, 244, 240), anchor="mm")
+    draw.rectangle([270, 100, size - 34, 138], outline=(120, 122, 126), width=2)
+    draw.text(
+        ((270 + size - 34) // 2, 119),
+        "AUTH. PERSONNEL",
+        font=small_font,
+        fill=(90, 94, 100),
+        anchor="mm",
+    )
+    # Legend rows: dot colours match the walk-in pads (aqua, orange, blue,
+    # yellow, deep navy) in the same order as the runtime buttons.
+    rows = (
+        ((0, 209, 212), "RAMP RAISE  +1 DEG"),
+        ((255, 41, 4), "RAMP LOWER  -1 DEG"),
+        ((1, 51, 189), "LAUNCH POWER  +"),
+        ((255, 173, 4), "LAUNCH POWER  -"),
+        ((4, 23, 56), "CANNON ARM / SAFE"),
+    )
+    row_top = 160
+    for dot, label in rows:
+        centre_y = row_top + 27
+        draw.ellipse([48, centre_y - 15, 78, centre_y + 15], fill=dot, outline=(60, 62, 66))
+        draw.text((96, centre_y), label, font=row_font, fill=(36, 40, 46), anchor="lm")
+        draw.line([44, row_top + 56, size - 44, row_top + 56], fill=(150, 153, 158), width=2)
+        row_top += 60
+    draw.text(
+        (size // 2, row_top + 14),
+        "STAND ON MATCHING PAD TO OPERATE",
+        font=small_font,
+        fill=(90, 94, 100),
+        anchor="mm",
+    )
+    # Hazard footer.
+    footer_top = size - 44
+    for x in range(0, size, 40):
+        draw.polygon(
+            [(x, size), (x + 20, size), (x + 40, footer_top), (x + 20, footer_top)],
+            fill=(226, 178, 12),
+        )
+    draw.rectangle([0, footer_top, size, size], outline=(30, 30, 34), width=3)
+    outputs = {_texture_name("control_panel", "color"): colour}
+    paths: list[Path] = []
+    for name, image in outputs.items():
+        path = output_root / name
+        _save(image, path)
+        paths.append(path)
+    return paths
+
+
+def _build_ramp_flap(output_root: Path) -> list[Path]:
+    """Steel checkerplate for the hinged exit-ramp flap (256, tileable)."""
+
+    size = 256
+    rng = np.random.default_rng(20260810)
+    ys = np.arange(size, dtype=np.float32)[:, None]
+    xs = np.arange(size, dtype=np.float32)[None, :]
+    height = np.zeros((size, size), dtype=np.float32)
+    # Diamond-plate lugs: two interleaved grids of diagonal ovals.
+    cell = 32
+    for offset_x, offset_y, angle in ((0, 0, 0.785), (cell // 2, cell // 2, -0.785)):
+        cx = ((xs - offset_x) % cell) - cell / 2
+        cy = ((ys - offset_y) % cell) - cell / 2
+        u = cx * math.cos(angle) + cy * math.sin(angle)
+        v = -cx * math.sin(angle) + cy * math.cos(angle)
+        lug = np.clip(1.0 - ((u / 10.0) ** 2 + (v / 4.0) ** 2), 0.0, 1.0)
+        height = np.maximum(height, lug)
+    height_m = (height * 0.0015).astype(np.float32)
+    wear = 1.0 + 0.05 * rng.standard_normal((size, size)).astype(np.float32)
+    luminance = np.clip((0.52 + height * 0.18) * wear, 0.0, 1.0)
+    colour = _to_srgb_image(np.dstack((luminance * 0.52, luminance * 0.54, luminance * 0.57)))
+    normal = _normal_from_metric_height(height_m, (0.35, 0.35))
+    rough = np.clip(0.5 - height * 0.12 + 0.05 * rng.standard_normal((size, size)), 0.3, 0.7)
+    roughness = _to_data_image(rough.astype(np.float32))
+    outputs = {
+        _texture_name("ramp_flap", "color"): _seal_edges(colour),
+        _texture_name("ramp_flap", "normal"): _seal_edges(normal),
+        _texture_name("ramp_flap_roughness", "data"): _seal_edges(roughness),
+    }
+    paths: list[Path] = []
+    for name, image in outputs.items():
+        path = output_root / name
+        _save(image, path)
+        paths.append(path)
+    return paths
+
+
 def build(output_root: Path) -> dict[str, object]:
     output_root.mkdir(parents=True, exist_ok=True)
     expected = set()
@@ -1254,6 +1373,8 @@ def build(output_root: Path) -> dict[str, object]:
         + _build_attract_cannon(output_root)
         + _build_mini_car(output_root)
         + _build_mini_wheel(output_root)
+        + _build_control_panel(output_root)
+        + _build_ramp_flap(output_root)
     )
     expected.update(path.name for path in outputs)
     for existing in output_root.glob("*.png"):

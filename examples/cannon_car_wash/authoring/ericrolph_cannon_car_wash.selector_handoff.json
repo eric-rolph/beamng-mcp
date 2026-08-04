@@ -18437,22 +18437,22 @@
     "bounds": {
       "corners": [
         [
-          -3.729999,
+          -3.830001,
           -10.799999,
           -0.33
         ],
         [
-          -3.729999,
+          -3.830001,
           -10.799999,
           6.16
         ],
         [
-          -3.729999,
+          -3.830001,
           11.550001,
           6.16
         ],
         [
-          -3.729999,
+          -3.830001,
           11.550001,
           -0.33
         ],
@@ -18483,7 +18483,7 @@
         6.16
       ],
       "min": [
-        -3.729999,
+        -3.830001,
         -10.799999,
         -0.33
       ]
@@ -18493,6 +18493,7 @@
       "ericrolph_cannon_car_wash_selector_brush_blue",
       "ericrolph_cannon_car_wash_selector_brush_cards",
       "ericrolph_cannon_car_wash_selector_concrete",
+      "ericrolph_cannon_car_wash_selector_control_panel",
       "ericrolph_cannon_car_wash_selector_corrugated_blue",
       "ericrolph_cannon_car_wash_selector_cyan_trim",
       "ericrolph_cannon_car_wash_selector_deep_blue",
@@ -18509,7 +18510,7 @@
       "ericrolph_cannon_car_wash_selector_wet_concrete"
     ],
     "path": "vehicles/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
-    "sha256": "23b5b55974150a3d14b8508dd8b1d63d77b39120fa0ad92de61512be375c3dd0",
-    "size": 3588816
+    "sha256": "7febe78b3a38492fe0d18b10ff36e0515be501da02004dfaf3d7911672c936c4",
+    "size": 3628965
   }
 }
