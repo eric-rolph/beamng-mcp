@@ -55,7 +55,7 @@ def add_ambient_animation_clip(path: Path) -> None:
     newline = b"\r\n" if b"\r\n" in payload else b"\n"
     clip_lines = [
         b"  <library_animation_clips>",
-        b'    <animation_clip id="ambient" name="ambient" start="0" end="2.541667">',
+        b'    <animation_clip id="ambient" name="ambient" start="0" end="8.041667">',
     ]
     clip_lines.extend(
         b'      <instance_animation url="#' + animation_id + b'"/>'
@@ -475,14 +475,21 @@ def parent_preserving_world(child: bpy.types.Object, parent: bpy.types.Object) -
     child.matrix_world = world
 
 
-def animate_spin(obj: bpy.types.Object, axis: int, direction: float = 1.0) -> None:
+AMBIENT_END_FRAME = 193  # 8 s at 24 fps: slow tower sweep + fast spinners
+
+
+def animate_spin(
+    obj: bpy.types.Object, axis: int, direction: float = 1.0, turns: float = 1.0
+) -> None:
     # direction -1 counter-rotates: real wash brushes spin toward the car on
     # both sides (mirrored pairs), and the top roller scrubs against travel.
+    # turns = revolutions per 8 s ambient cycle: 1 for the sweeping towers
+    # (their large orbit IS the traverse), 3 for the fast spinners.
     obj.rotation_mode = "XYZ"
     obj.rotation_euler[axis] = 0.0
     obj.keyframe_insert(data_path="rotation_euler", index=axis, frame=1)
-    obj.rotation_euler[axis] = math.tau * (1.0 if direction >= 0 else -1.0)
-    obj.keyframe_insert(data_path="rotation_euler", index=axis, frame=61)
+    obj.rotation_euler[axis] = math.tau * turns * (1.0 if direction >= 0 else -1.0)
+    obj.keyframe_insert(data_path="rotation_euler", index=axis, frame=AMBIENT_END_FRAME)
     if obj.animation_data is None or obj.animation_data.action is None:
         return
     for curve in obj.animation_data.action.fcurves:
@@ -544,7 +551,7 @@ def add_vertical_brush(
     # orbits the whole tower - the in/out scrub BeamNG's ambient loader
     # cannot express with translation channels (which it ignores) or
     # nested animated empties (which break the Collada export).
-    wobble = 0.19
+    wobble = 0.30
     wobble_angle = (sway_phase % 4) * math.tau / 4.0
     pivot = (
         location[0] + math.cos(wobble_angle) * wobble,
@@ -566,6 +573,18 @@ def add_vertical_brush(
     root.rotation_euler[1] = math.cos(wobble_angle) * tilt
     core = add_cylinder(f"{name}_Core", location, 0.16, 3.3, steel)
     parent_preserving_world(core, root)
+    # Top shaft rides in the carriage rail's guide slot: the orbit sweep
+    # reads as the shaft traveling its slotted mount.
+    shaft = add_cylinder(
+        f"{name}_TopShaft",
+        (location[0], location[1], 3.90),
+        0.045,
+        0.45,
+        steel,
+        vertices=10,
+        bevel=0.0,
+    )
+    parent_preserving_world(shaft, root)
     vertices: list[tuple[float, float, float]] = []
     faces: list[tuple[int, int, int, int]] = []
     face_uvs: list[tuple[tuple[float, float], ...]] = []
@@ -609,7 +628,7 @@ def add_vertical_brush(
     card_cluster["beamng_card_count"] = len(faces)
     card_cluster.parent = root
     card_cluster.location = (location[0] - pivot[0], location[1] - pivot[1], 0.0)
-    animate_spin(root, 2, spin_direction)
+    animate_spin(root, 2, spin_direction, turns=1.0)
 
 
 def add_wheel_scrubber(
@@ -660,7 +679,7 @@ def add_wheel_scrubber(
     card_cluster["beamng_card_count"] = len(faces)
     card_cluster.parent = root
     card_cluster.location = (0.0, 0.0, 0.0)
-    animate_spin(root, 2, -side)
+    animate_spin(root, 2, -side, turns=3.0)
 
 
 def add_horizontal_brush(
@@ -729,7 +748,7 @@ def add_horizontal_brush(
     card_cluster.parent = root
     card_cluster.location = (0.0, 0.0, location[2] - pivot[2])
     # Counter-scrub: the roller's contact crown moves against vehicle travel.
-    animate_spin(root, 0, -1.0)
+    animate_spin(root, 0, -1.0, turns=3.0)
 
 
 def add_pipe_arch(
@@ -1546,19 +1565,47 @@ def build_details() -> None:
                 bevel=0.0,
             )
         )
-    # v1.28 spring-tension bar assemblies: the visible mechanism that
-    # "presses" the contact bands onto passing cars - horizontal piston
-    # bars from each tower gantry drop to the band anchors, and two
-    # vertical piston bars holding the overhead roller band.
+    # v1.29 slot-rail carriages: each sweeping tower's top shaft runs in
+    # a visible guide slot fed from the wall gantry, with a spring piston
+    # along the rail - the mechanical mount for the in/out traverse the
+    # slow orbit performs.
     for side in (-1.0, 1.0):
         side_name = "L" if side < 0 else "R"
-        for tension_index, tension_y in enumerate((-3.0, 1.2), start=1):
+        for rail_index, rail_y in enumerate((-3.0, 1.2), start=1):
+            gantry_parts.append(
+                add_box(
+                    f"CarriageRail_{side_name}_{rail_index}",
+                    (side * 2.55, rail_y, 4.10),
+                    (1.10, 0.18, 0.06),
+                    steel,
+                    bevel=0.0,
+                )
+            )
+            for lip in (-1.0, 1.0):
+                gantry_parts.append(
+                    add_box(
+                        f"CarriageLip_{side_name}_{rail_index}_{'n' if lip < 0 else 'p'}",
+                        (side * 2.55, rail_y + lip * 0.075, 3.99),
+                        (1.10, 0.03, 0.16),
+                        steel,
+                        bevel=0.0,
+                    )
+                )
+            gantry_parts.append(
+                add_box(
+                    f"CarriageWallMount_{side_name}_{rail_index}",
+                    (side * 3.02, rail_y, 4.05),
+                    (0.12, 0.24, 0.20),
+                    steel,
+                    bevel=0.0,
+                )
+            )
             gantry_parts.append(
                 add_cylinder(
-                    f"TensionSleeve_{side_name}_{tension_index}",
-                    (side * 1.90, tension_y, 2.75),
-                    0.05,
-                    0.36,
+                    f"CarriagePistonSleeve_{side_name}_{rail_index}",
+                    (side * 2.82, rail_y, 4.18),
+                    0.045,
+                    0.34,
                     steel,
                     rotation=(0.0, math.pi / 2.0, 0.0),
                     vertices=12,
@@ -1567,10 +1614,10 @@ def build_details() -> None:
             )
             gantry_parts.append(
                 add_cylinder(
-                    f"TensionRod_{side_name}_{tension_index}",
-                    (side * 1.62, tension_y, 2.75),
-                    0.028,
-                    0.28,
+                    f"CarriagePistonRod_{side_name}_{rail_index}",
+                    (side * 2.56, rail_y, 4.18),
+                    0.024,
+                    0.26,
                     steel,
                     rotation=(0.0, math.pi / 2.0, 0.0),
                     vertices=10,
@@ -1580,74 +1627,16 @@ def build_details() -> None:
             for coil in range(3):
                 gantry_parts.append(
                     add_cylinder(
-                        f"TensionCoil_{side_name}_{tension_index}_{coil}",
-                        (side * (1.74 - coil * 0.07), tension_y, 2.75),
-                        0.058,
-                        0.02,
+                        f"CarriageCoil_{side_name}_{rail_index}_{coil}",
+                        (side * (2.68 - coil * 0.06), rail_y, 4.18),
+                        0.052,
+                        0.018,
                         steel,
                         rotation=(0.0, math.pi / 2.0, 0.0),
                         vertices=12,
                         bevel=0.0,
                     )
                 )
-            gantry_parts.append(
-                add_box(
-                    f"TensionMount_{side_name}_{tension_index}",
-                    (side * 2.06, tension_y, 2.75),
-                    (0.10, 0.16, 0.16),
-                    steel,
-                    bevel=0.0,
-                )
-            )
-    for bar_x in (-1.2, 1.2):
-        bar_name = "L" if bar_x < 0 else "R"
-        gantry_parts.append(
-            add_cylinder(
-                f"RollerTensionSleeve_{bar_name}",
-                (bar_x, 4.15, 3.55),
-                0.06,
-                0.55,
-                steel,
-                vertices=12,
-                bevel=0.0,
-            )
-        )
-        gantry_parts.append(
-            add_cylinder(
-                f"RollerTensionRod_{bar_name}",
-                (bar_x, 4.15, 3.05),
-                0.034,
-                0.55,
-                steel,
-                vertices=10,
-                bevel=0.0,
-            )
-        )
-        for coil in range(3):
-            gantry_parts.append(
-                add_cylinder(
-                    f"RollerTensionCoil_{bar_name}_{coil}",
-                    (bar_x, 4.15, 3.32 - coil * 0.09),
-                    0.068,
-                    0.02,
-                    steel,
-                    vertices=12,
-                    bevel=0.0,
-                )
-            )
-    for side in (-1.0, 1.0):
-        for riser_y in (-3.95, 2.15):
-            gantry_parts.append(
-                add_box(
-                    f"GantryRiser_{'L' if side < 0 else 'R'}_{riser_y}",
-                    (side * 2.28, riser_y, 4.53),
-                    (0.16, 0.16, 0.06),
-                    steel,
-                    bevel=0.0,
-                )
-            )
-    join_static_meshes("EquipmentGantry", gantry_parts)
-
     # Exit dryer battery: blower housings with tapered snouts aimed down
     # into the lane where the dryer particle effects already blow.
     add_box("DryerBeam", (0.0, 7.9, 3.85), (5.2, 0.16, 0.16), steel, bevel=0.0)
@@ -2805,20 +2794,6 @@ def _selector_structure() -> dict[str, Any]:
     # after the pre-soak arch instead of rows scattered down the tunnel
     # (mid-tunnel strips read as hanging from air). Staggered hems and
     # strip offsets give layered depth like a real mitter bank.
-    # v1.28 brush contact bands (player: "roller brushes should come out
-    # to meet the width and height of the car through a gentle tension
-    # spring mechanism"): motorized seeking is impossible (ambient clips
-    # cannot react to vehicles), but passive SPRING COMPLIANCE is the real
-    # mechanism many washes use - the bands rest inside the car envelope
-    # and the anchor springs press them against whatever body passes.
-    # Side bands hang angled at each tower's inner face; the top band
-    # rests at hood height and rides up over the roof.
-    brush_band_rows = (
-        ("bandl1", -3.0, -1.0),
-        ("bandr1", -3.0, 1.0),
-        ("bandl2", 1.2, -1.0),
-        ("bandr2", 1.2, 1.0),
-    )
     cloth_rows = (
         ("mitter", -5.30, 12, 0.42, 0.19, (4.30, 3.25, 2.18, 1.10)),
         ("scrub", -4.85, 10, 0.50, 0.22, (4.30, 3.28, 2.24, 1.20)),
@@ -2894,84 +2869,6 @@ def _selector_structure() -> dict[str, Any]:
                 # Window inset from the band edges: mips average across the
                 # card/band boundary, so sampling too close ghosts the wavy
                 # card fringe into the lanes (player: jagged mid-strip band).
-                quad_uvs = [
-                    [along_top, 0.79],
-                    [along_top, 0.985],
-                    [along_bottom, 0.985],
-                    [along_bottom, 0.79],
-                ]
-                cloth_quads.append(
-                    {
-                        "positions": [
-                            cloth_position[first],
-                            cloth_position[second],
-                            cloth_position[third],
-                            cloth_position[fourth],
-                        ],
-                        "uvs": quad_uvs,
-                    }
-                )
-
-    band_levels_z = (2.75, 2.00, 1.30, 0.55)
-    band_levels_x = (1.55, 1.33, 1.13, 0.95)
-    for band_name, band_y, band_side in brush_band_rows:
-        for strip in range(3):
-            strip_y = band_y + (strip - 1) * 0.25
-            strip_ids = {}
-            for column, column_y in enumerate((strip_y - 0.12, strip_y + 0.12)):
-                for level in range(4):
-                    identifier = f"{MOD_ID}_{band_name}_s{strip:02d}_c{column}_l{level}"
-                    source = Vector(
-                        (band_side * band_levels_x[level], column_y, band_levels_z[level])
-                    )
-                    mapped = rotation @ source
-                    strip_ids[(column, level)] = identifier
-                    cloth_position[identifier] = [round(value, 6) for value in mapped]
-                    cloth_nodes.append(
-                        {
-                            "id": identifier,
-                            "position": cloth_position[identifier],
-                            "source_world_position": [round(value, 6) for value in source],
-                            "fixed": level == 0,
-                        }
-                    )
-            for level in range(4):
-                cloth_beams.append(
-                    {
-                        "nodes": [strip_ids[(0, level)], strip_ids[(1, level)]],
-                        "class": "structural",
-                    }
-                )
-            for level in range(3):
-                for column in range(2):
-                    cloth_beams.append(
-                        {
-                            "nodes": [strip_ids[(column, level)], strip_ids[(column, level + 1)]],
-                            "class": "structural",
-                        }
-                    )
-                cloth_beams.append(
-                    {
-                        "nodes": [strip_ids[(0, level)], strip_ids[(1, level + 1)]],
-                        "class": "shear",
-                    }
-                )
-                cloth_beams.append(
-                    {
-                        "nodes": [strip_ids[(1, level)], strip_ids[(0, level + 1)]],
-                        "class": "shear",
-                    }
-                )
-                first = strip_ids[(0, level)]
-                second = strip_ids[(1, level)]
-                third = strip_ids[(1, level + 1)]
-                fourth = strip_ids[(0, level + 1)]
-                cloth_triangles.append({"nodes": [first, second, third], "surface": "mitter"})
-                cloth_triangles.append({"nodes": [first, third, fourth], "surface": "mitter"})
-                along_top = (level / 3.0) * 0.8 + strip * 0.31 + (0.5 if band_side > 0 else 0.1)
-                along_bottom = (
-                    ((level + 1) / 3.0) * 0.8 + strip * 0.31 + (0.5 if band_side > 0 else 0.1)
-                )
                 quad_uvs = [
                     [along_top, 0.79],
                     [along_top, 0.985],
