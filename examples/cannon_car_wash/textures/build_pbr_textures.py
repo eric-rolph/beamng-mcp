@@ -240,7 +240,6 @@ def _build_cmu(output_root: Path) -> list[Path]:
         _texture_name("cmu", "color"): _to_srgb_image(colour),
         _texture_name("cmu", "normal"): _normal_from_metric_height(height, tile_m),
         _texture_name("cmu_roughness", "data"): _to_data_image(roughness),
-        _texture_name("cmu_ao", "data"): _ao_from_metric_height(height, 34.0),
     }
     outputs: list[Path] = []
     for name, image in paths.items():
@@ -306,7 +305,6 @@ def _build_interior_brick(output_root: Path) -> list[Path]:
         _texture_name("interior_brick", "color"): _to_srgb_image(colour),
         _texture_name("interior_brick", "normal"): _normal_from_metric_height(height, tile_m),
         _texture_name("interior_brick_roughness", "data"): _to_data_image(roughness),
-        _texture_name("interior_brick_ao", "data"): _ao_from_metric_height(height, 30.0),
     }
     outputs: list[Path] = []
     for name, image in paths.items():
@@ -414,7 +412,6 @@ def _build_wet_concrete(output_root: Path) -> list[Path]:
         _texture_name("wet_concrete", "color"): _to_srgb_image(colour),
         _texture_name("wet_concrete", "normal"): _normal_from_metric_height(height, tile_m),
         _texture_name("wet_concrete_roughness", "data"): _to_data_image(roughness),
-        _texture_name("wet_concrete_ao", "data"): _ao_from_metric_height(height, 22.0),
     }
     outputs: list[Path] = []
     for name, image in paths.items():
@@ -453,7 +450,6 @@ def _build_dry_concrete(output_root: Path) -> list[Path]:
         _texture_name("concrete", "color"): _to_srgb_image(colour),
         _texture_name("concrete", "normal"): _normal_from_metric_height(height, tile_m),
         _texture_name("concrete_roughness", "data"): _to_data_image(roughness),
-        _texture_name("concrete_ao", "data"): _ao_from_metric_height(height, 20.0),
     }
     outputs: list[Path] = []
     for name, image in paths.items():
@@ -502,6 +498,37 @@ def _build_stainless(output_root: Path) -> list[Path]:
     return outputs
 
 
+def _build_acm_fascia(output_root: Path, stem: str, base_rgb_tuple, salt: int) -> list[Path]:
+    """Dark ACM fascia panel: near-flat, even satin - not equipment paint.
+
+    The powder-coat orange-peel recipe read as noisy hammered shimmer when
+    stretched across the 7 m entrance tower at grazing sun (player report).
+    Composite fascia panels are optically calm: broad meter-scale tone
+    drift, an almost imperceptible surface wave, uniform satin roughness.
+    """
+
+    tile_m = (2.0, 2.0)
+    base_rgb = np.array(base_rgb_tuple, dtype=np.float32)
+    drift = _periodic_fbm((TILE, TILE), 2, 2, salt)
+    colour = np.ones((TILE, TILE, 3), dtype=np.float32) * base_rgb
+    colour *= (0.985 + (drift - 0.5) * 0.03)[..., None]
+
+    height = 0.00004 * (drift - 0.5)
+    roughness = np.full((TILE, TILE), 0.45, dtype=np.float32) + (drift - 0.5) * 0.04
+
+    paths = {
+        _texture_name(stem, "color"): _to_srgb_image(np.clip(colour, 0.0, 1.0)),
+        _texture_name(stem, "normal"): _normal_from_metric_height(height, tile_m),
+        _texture_name(f"{stem}_roughness", "data"): _to_data_image(roughness),
+    }
+    outputs: list[Path] = []
+    for name, image in paths.items():
+        path = output_root / name
+        _save(_seal_edges(image), path)
+        outputs.append(path)
+    return outputs
+
+
 def _build_powder_coat(output_root: Path, stem: str, base_rgb_tuple, salt: int) -> list[Path]:
     """Powder-coated equipment paint: orange-peel micro texture + scuffs."""
 
@@ -539,7 +566,7 @@ def _build_tileables(output_root: Path) -> list[Path]:
         + _build_stainless(output_root)
         + _build_powder_coat(output_root, "safety_orange", (1.0, 0.16, 0.015), 81)
         + _build_powder_coat(output_root, "hazard_yellow", (1.0, 0.68, 0.015), 84)
-        + _build_powder_coat(output_root, "deep_blue", (0.015, 0.09, 0.22), 87)
+        + _build_acm_fascia(output_root, "deep_blue", (0.015, 0.09, 0.22), 87)
         + _build_shared_detail(output_root)
     )
 
