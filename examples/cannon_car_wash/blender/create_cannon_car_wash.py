@@ -2522,6 +2522,79 @@ def _selector_structure() -> dict[str, Any]:
                 )
             )
 
+    # v1.25.4: chamfered corner guards. The cage walls end at the slab edge
+    # (y +/-9) but the visual facade - portal posts, entrance tower, corner
+    # brick - extends ~0.4 m further out and forward, so cars buried into
+    # the corner visuals before any collision engaged (player report:
+    # "vehicle collision is wonky"). Each corner gets a slanted guard plane
+    # from the wall end's outer edge to the facade's outer corner - it
+    # deflects like a real corner guard. Guard nodes ride the apron
+    # stations so every triangle still spans two adjacent stations and the
+    # drive-through portals stay open.
+    guard_specs = (
+        ("f", -1, 0, y_min - 0.42),
+        ("r", len(stations), len(stations) - 1, y_max + 0.42),
+    )
+    for end_name, guard_station, portal_station, guard_y in guard_specs:
+        for side_name, floor_track, roof_track, guard_x in (
+            ("left", "floor_outer_left", "roof_top_left", floor["min"][0] - 0.22),
+            ("right", "floor_outer_right", "roof_top_right", floor["max"][0] + 0.22),
+        ):
+            bottom_track = f"guard_{side_name}_bottom"
+            top_track = f"guard_{side_name}_top"
+            for track_label, guard_z in (
+                (bottom_track, floor["min"][2]),
+                (top_track, roof["max"][2]),
+            ):
+                identifier = f"{MOD_ID}_guard_{end_name}_{track_label}"
+                source = Vector((guard_x, guard_y, guard_z))
+                mapped = rotation @ source
+                node_id[(guard_station, track_label)] = identifier
+                nodes.append(
+                    {
+                        "id": identifier,
+                        "source_object": VEHICLE_CAGE_NAME,
+                        "source_vertex_index": len(nodes),
+                        "source_world_position": [round(value, 6) for value in source],
+                        "position": [round(value, 6) for value in mapped],
+                        "station": guard_station,
+                        "track": track_label,
+                    }
+                )
+            bottom_id = node_id[(guard_station, bottom_track)]
+            top_id = node_id[(guard_station, top_track)]
+            wall_bottom = node_id[(portal_station, floor_track)]
+            wall_top = node_id[(portal_station, roof_track)]
+            # The wall END FACE (its 30 cm cross-section at the portal
+            # line) was never capped either - nose-first approaches pushed
+            # straight into it. The guard is therefore a full WEDGE: one
+            # slanted face from the INNER portal jamb out to the facade
+            # corner (a beveled entrance funnel that guides cars in), and
+            # one closing the outer corner. Every triangle spans the
+            # portal and guard stations.
+            inner_track = "floor_inner_left" if side_name == "left" else "floor_inner_right"
+            inner_top_track = (
+                "wall_top_inner_left" if side_name == "left" else "wall_top_inner_right"
+            )
+            jamb_bottom = node_id[(portal_station, inner_track)]
+            jamb_top = node_id[(portal_station, inner_top_track)]
+            add_beam(bottom_id, top_id)
+            add_beam(bottom_id, wall_bottom)
+            add_beam(top_id, wall_top)
+            add_beam(bottom_id, wall_top)
+            add_beam(bottom_id, jamb_bottom)
+            add_beam(top_id, jamb_top)
+            add_beam(bottom_id, jamb_top)
+            surface = f"corner_guard_{end_name}_{side_name}"
+            triangles.extend(
+                (
+                    {"nodes": [jamb_bottom, bottom_id, jamb_top], "surface": surface},
+                    {"nodes": [bottom_id, top_id, jamb_top], "surface": surface},
+                    {"nodes": [wall_bottom, bottom_id, wall_top], "surface": surface},
+                    {"nodes": [bottom_id, top_id, wall_top], "surface": surface},
+                )
+            )
+
     base_nodes = [
         node_id[(station_index, track_name)]
         for station_index in range(len(stations))

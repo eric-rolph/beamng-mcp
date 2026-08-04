@@ -552,7 +552,7 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
         assert actual_nodes[node_id][1:4] == expected_position
         assert actual_nodes[node_id][4]["group"] == PHYSICS_GROUP_NAME
 
-    assert len(actual_nodes) == 85
+    assert len(actual_nodes) == 93
     fixed_nodes = {node_id for node_id, row in actual_nodes.items() if row[4]["fixed"]}
     assert fixed_nodes == set(actual_nodes)
     assert set(handoff["refnodes"].values()) <= fixed_nodes
@@ -686,7 +686,7 @@ def test_cannon_car_wash_repository_metadata_and_icon() -> None:
 
     assert repository_info["internal_name"] == MOD_ID
     assert repository_info["title"] == "Cannon Car Wash"
-    assert repository_info["version"] == "1.25.3"
+    assert repository_info["version"] == "1.25.4"
     assert repository_info["author"] == "Eric Rolph"
 
     with Image.open(MOD_ICON_PATH) as icon:
