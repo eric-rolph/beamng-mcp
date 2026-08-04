@@ -49,9 +49,13 @@ LOGGER = logging.getLogger(__name__)
 # Public Repository contents are an explicit release decision. Never replace
 # this allowlist with a recursive "pack everything" implementation.
 EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
+    f"art/shapes/{MOD_ID}/attract.materials.json",
     f"art/shapes/{MOD_ID}/cannon.dae",
     f"art/shapes/{MOD_ID}/{MOD_ID}.dae",
     f"art/shapes/{MOD_ID}/mini_car.dae",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_attract_cannon.color.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_attract_cannon.normal.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_attract_cannon_roughness.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards_opacity.data.dds",
@@ -78,6 +82,9 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_interior_brick.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_interior_brick.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_interior_brick_roughness.data.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_mini_car_paint.color.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_mini_car_paint.normal.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_mini_car_paint_roughness.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_safety_orange.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_safety_orange.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_safety_orange_roughness.data.dds",
@@ -89,8 +96,6 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_wet_concrete.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_wet_concrete.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_wet_concrete_roughness.data.dds",
-    f"art/sound/{MOD_ID}_report.wav",
-    f"art/sound/{MOD_ID}_whistle.wav",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.jpg",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.json",
     f"levels/gridmap_v2/scenarios/{MOD_ID}/{MOD_ID}.lua",
@@ -137,8 +142,8 @@ def _validate_member_name(
 
 
 def _validate_allowlist() -> None:
-    if len(EXPECTED_RUNTIME_FILES) != 60:
-        raise DistributionError("the public runtime allowlist must contain exactly 60 files")
+    if len(EXPECTED_RUNTIME_FILES) != 65:
+        raise DistributionError("the public runtime allowlist must contain exactly 65 files")
     if tuple(sorted(EXPECTED_RUNTIME_FILES)) != EXPECTED_RUNTIME_FILES:
         raise DistributionError("the public runtime allowlist must be deterministically sorted")
     for name in EXPECTED_RUNTIME_FILES:

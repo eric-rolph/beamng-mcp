@@ -15,8 +15,6 @@ local VISUAL_SHAPE = (
 local Attract = {
   shape = "/vehicles/ericrolph_cannon_car_wash/mini_car.dae",
   cannonShape = "/vehicles/ericrolph_cannon_car_wash/cannon.dae",
-  whistleSound = "/art/sound/ericrolph_cannon_car_wash_whistle.wav",
-  reportSound = "/art/sound/ericrolph_cannon_car_wash_report.wav",
   intervalSeconds = 120,
   firstDelaySeconds = 25,
   speedMps = 16.0,
@@ -33,18 +31,18 @@ local Attract = {
   sunUpdateSeconds = 5.0,
   sunElevationMinDeg = 25.0,
   sunElevationMaxDeg = 70.0,
+  -- The cannon + mini car materials live beside their shapes in art/shapes;
+  -- level-independent lifecycles never auto-load that file (folded into the
+  -- Attract table rather than new module locals: 60-upvalue ceiling).
+  -- NOT "main.materials.json": the engine's startup scan special-cases that
+  -- filename under art/ and later explicit loads silently no-op (proven by
+  -- probe: identical content under a custom name loads fine).
+  materialsPath = "art/shapes/ericrolph_cannon_car_wash/attract.materials.json",
+  requiredMaterials = {
+    "ericrolph_cannon_car_wash_attract_cannon",
+    "ericrolph_cannon_car_wash_mini_car_paint",
+  },
 }
-
-function Attract.playSound(path, position)
-  pcall(function()
-    Engine.Audio.playOnce("AudioMaster", path, {
-      position = position,
-      volume = 1.6,
-      minDistance = 6,
-      maxDistance = 220,
-    })
-  end)
-end
 
 function Attract.sunAim(state)
   -- Aim at the sun when a ScatterSky is available; clamp elevation so a
@@ -563,30 +561,41 @@ local function registerInMission(object, name)
 end
 
 local function ensureVisualMaterials()
-  local missing = {}
-  for _, name in ipairs(REQUIRED_VISUAL_MATERIALS) do
-    local material = scenetree.findObject(name)
-    local className = material and string.lower(tostring(material:getClassName())) or ""
-    if className ~= "material" then
-      missing[#missing + 1] = name
+  -- v1.33: two material files load on demand. The vehicles file carries the
+  -- runtime visual's selector materials; the art/shapes file carries the
+  -- attract cannon + mini car materials (they live beside the shapes, but
+  -- level-independent lifecycles never auto-load them, so pull explicitly).
+  local materialSets = {
+    {path = VISUAL_MATERIALS_PATH, names = REQUIRED_VISUAL_MATERIALS},
+    {path = Attract.materialsPath, names = Attract.requiredMaterials},
+  }
+  for _, set in ipairs(materialSets) do
+    local missing = {}
+    for _, name in ipairs(set.names) do
+      local material = scenetree.findObject(name)
+      local className = material and string.lower(tostring(material:getClassName())) or ""
+      if className ~= "material" then
+        missing[#missing + 1] = name
+      end
     end
-  end
-  if #missing == 0 then return true end
-  if type(loadJsonMaterialsFile) ~= "function" then
-    return false, "loadJsonMaterialsFile is unavailable"
-  end
-  local loaded, loadError = pcall(loadJsonMaterialsFile, VISUAL_MATERIALS_PATH)
-  if not loaded then return false, tostring(loadError) end
-  missing = {}
-  for _, name in ipairs(REQUIRED_VISUAL_MATERIALS) do
-    local material = scenetree.findObject(name)
-    local className = material and string.lower(tostring(material:getClassName())) or ""
-    if className ~= "material" then
-      missing[#missing + 1] = name
+    if #missing > 0 then
+      if type(loadJsonMaterialsFile) ~= "function" then
+        return false, "loadJsonMaterialsFile is unavailable"
+      end
+      local loaded, loadError = pcall(loadJsonMaterialsFile, set.path)
+      if not loaded then return false, tostring(loadError) end
+      missing = {}
+      for _, name in ipairs(set.names) do
+        local material = scenetree.findObject(name)
+        local className = material and string.lower(tostring(material:getClassName())) or ""
+        if className ~= "material" then
+          missing[#missing + 1] = name
+        end
+      end
+      if #missing > 0 then
+        return false, "material mappings remain unavailable: " .. table.concat(missing, ",")
+      end
     end
-  end
-  if #missing > 0 then
-    return false, "material mappings remain unavailable: " .. table.concat(missing, ",")
   end
   return true
 end
@@ -721,7 +730,6 @@ function Attract.start(state)
   attract.position = vec3(
     attract.launchOrigin.x, attract.launchOrigin.y, attract.launchOrigin.z
   )
-  Attract.playSound(Attract.whistleSound, attract.launchOrigin)
   attract.tumblePhase = 0
   if attract.muzzleEmitter then
     local muzzle = attract.launchOrigin
@@ -787,10 +795,10 @@ function Attract.update(state, dt)
     local previousVz = attract.velocity.z
     attract.velocity.z = attract.velocity.z + Attract.gravityMps2 * dt
     attract.position = attract.position + attract.velocity * dt
-    -- Bottle-rocket report at apex: the moment vertical velocity flips.
+    -- Apex puff (v1.33: silent - the firework sounds were removed) at the
+    -- moment vertical velocity flips.
     if not attract.reported and previousVz > 0 and attract.velocity.z <= 0 then
       attract.reported = true
-      Attract.playSound(Attract.reportSound, attract.position)
       if attract.muzzleEmitter then
         pcall(function()
           attract.muzzleEmitter:setPosRot(

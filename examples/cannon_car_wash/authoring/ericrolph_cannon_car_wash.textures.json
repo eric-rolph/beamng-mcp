@@ -5,6 +5,27 @@
   "normal_convention": "OpenGL_Y_positive",
   "files": [
     {
+      "name": "ericrolph_cannon_car_wash_attract_cannon.color.png",
+      "width": 256,
+      "height": 256,
+      "mode": "RGB",
+      "sha256": "a98283363e6429e303d5b9533f538c5c89421f328d5fe6677281f7bbf1c9e0c5"
+    },
+    {
+      "name": "ericrolph_cannon_car_wash_attract_cannon.normal.png",
+      "width": 256,
+      "height": 256,
+      "mode": "RGB",
+      "sha256": "3507013af766355e36b13f0f151ffaf4a8af660c7ef7d7d538935694906a1c76"
+    },
+    {
+      "name": "ericrolph_cannon_car_wash_attract_cannon_roughness.data.png",
+      "width": 256,
+      "height": 256,
+      "mode": "L",
+      "sha256": "4a8eb3289004c829ffa24303dd87fd9e716a4ffbd81327ee227db26f06c299d8"
+    },
+    {
       "name": "ericrolph_cannon_car_wash_brush_cards.color.png",
       "width": 512,
       "height": 512,
@@ -178,6 +199,27 @@
       "height": 1024,
       "mode": "L",
       "sha256": "85385a474545c9b2a424ead51e990d8e2fc44fb3c64b03a9d6de2861a770d95f"
+    },
+    {
+      "name": "ericrolph_cannon_car_wash_mini_car_paint.color.png",
+      "width": 256,
+      "height": 256,
+      "mode": "RGB",
+      "sha256": "4cf6e22f21b967eac9978743d8c8ccf8e6a4e29e43f8a07239117ab2823c7e81"
+    },
+    {
+      "name": "ericrolph_cannon_car_wash_mini_car_paint.normal.png",
+      "width": 256,
+      "height": 256,
+      "mode": "RGB",
+      "sha256": "c3954d4bc7b5d950146a7dca460f8afae480e421bcb8e8ac3a7b5007fba2836c"
+    },
+    {
+      "name": "ericrolph_cannon_car_wash_mini_car_paint_roughness.data.png",
+      "width": 256,
+      "height": 256,
+      "mode": "L",
+      "sha256": "0ca88595b31378257682a4513434ae30a5898e86067ef017e06349db7f5a7c9d"
     },
     {
       "name": "ericrolph_cannon_car_wash_safety_orange.color.png",

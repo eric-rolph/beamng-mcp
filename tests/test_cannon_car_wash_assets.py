@@ -369,7 +369,7 @@ def test_cannon_car_wash_pbr_authoring_maps_are_power_of_two_seamless_and_typed(
     manifest = json.loads(TEXTURE_MANIFEST_PATH.read_text(encoding="utf-8"))
     assert manifest["texture_root"] == "textures/generated_png"
     assert manifest["normal_convention"] == "OpenGL_Y_positive"
-    assert len(manifest["files"]) == 36
+    assert len(manifest["files"]) == 42
     assert {entry["name"] for entry in manifest["files"]} == {
         path.name for path in GENERATED_TEXTURE_ROOT.glob("*.png")
     }
@@ -612,10 +612,10 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
     # Cloth lattice: 12 strips x 2 columns x 4 levels; the top level is
     # anchored (fixed like the cage), everything below is free, light, and
     # collidable so vehicles brush the strips aside.
-    assert len(cloth_node_rows) == 352
+    assert len(cloth_node_rows) == 272
     cloth_rows_by_id = {row[0]: row for row in cloth_node_rows}
     expected_cloth_fixed = {node["id"] for node in cloth["nodes"] if node["fixed"]}
-    assert len(expected_cloth_fixed) == 88
+    assert len(expected_cloth_fixed) == 68
     for node in cloth["nodes"]:
         row = cloth_rows_by_id[node["id"]]
         assert row[1:4] == node["position"]
@@ -686,7 +686,7 @@ def test_cannon_car_wash_repository_metadata_and_icon() -> None:
 
     assert repository_info["internal_name"] == MOD_ID
     assert repository_info["title"] == "Cannon Car Wash"
-    assert repository_info["version"] == "1.32"
+    assert repository_info["version"] == "1.33"
     assert repository_info["author"] == "Eric Rolph"
 
     with Image.open(MOD_ICON_PATH) as icon:
