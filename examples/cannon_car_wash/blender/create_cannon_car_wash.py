@@ -1239,6 +1239,30 @@ def build_shell() -> None:
                 steel,
             )
 
+    # v1.25.5 foundation skirt: the exterior cladding (pilasters, wainscot,
+    # portal posts) hangs outside the slab with bottoms ~5-8 cm above the
+    # placement datum, showing daylight under the building (player
+    # screenshot). A CMU skirt strip runs below the cladding line to 30 cm
+    # below grade, with stubs under each portal post pair.
+    for side in (-1.0, 1.0):
+        add_box(
+            f"FoundationSkirt_{'L' if side < 0 else 'R'}",
+            (side * 3.485, 0.0, -0.105),
+            (0.18, 18.9, 0.45),
+            exterior_cmu,
+            bevel=0.0,
+            metric_uv_meters=(0.8, 0.4),
+        )
+        for end in (-1.0, 1.0):
+            add_box(
+                f"FoundationStub_{'L' if side < 0 else 'R'}_{'F' if end < 0 else 'R'}",
+                (side * 3.35, end * 9.28, -0.105),
+                (0.52, 0.24, 0.45),
+                exterior_cmu,
+                bevel=0.0,
+                metric_uv_meters=(0.8, 0.4),
+            )
+
     # Flush portal aprons: visual concrete wedges plus matching collision
     # wedges folded into the floor colmesh so the ramp actually carries wheels.
     add_ramp_wedge("RampApron_Entrance", -1.0, concrete)
@@ -1617,9 +1641,12 @@ def build_details() -> None:
     )
 
     # Stage lighting: glowing wall bars marking each tunnel stage.
+    # Stage bars mount on the window PIERS: the old y positions fell inside
+    # the punched window openings, so from outside the bars floated in the
+    # glass (player screenshot).
     for side in (-1.0, 1.0):
         side_name = "L" if side < 0 else "R"
-        for index, y in enumerate((-5.0, -0.9, 5.0), start=1):
+        for index, y in enumerate((-4.35, -1.45, 1.45), start=1):
             add_box(
                 f"StageLED_{side_name}_{index}",
                 (side * 3.05, y, 2.55),
@@ -1629,7 +1656,7 @@ def build_details() -> None:
             )
         add_box(
             f"StageLED_{side_name}_dry",
-            (side * 3.05, 7.2, 2.55),
+            (side * 3.05, 7.6, 2.55),
             (0.035, 0.09, 1.50),
             light,
             bevel=0.0,
