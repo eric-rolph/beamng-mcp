@@ -73,6 +73,7 @@ end
 function Attract.updateCannonAim(state)
   local attract = state.attract
   if not attract or not attract.cannon then return end
+  if not state.origin or not state.modelRotation then return end
   local aim = Attract.sunAim(state)
   attract.aimVector = aim
   local mount = Attract.world(state, Attract.mountLocal)
@@ -697,6 +698,10 @@ function Attract.createCannon(name)
 end
 
 function Attract.world(state, localPosition)
+  -- The prop frame is nil until the first transform sync; recovery
+  -- registrations reach here before it lands (gate-proven FATAL: vec3
+  -- arithmetic on nil is an engine C-type error, not a catchable nil).
+  if not state.origin or not state.modelRotation then return nil end
   return state.origin + state.modelRotation * localPosition
 end
 
@@ -706,6 +711,7 @@ function Attract.start(state)
   Attract.updateCannonAim(state)
   local aim = attract.aimVector or (state.modelRotation * Attract.aimLocal)
   local mount = attract.mountWorld or Attract.world(state, Attract.mountLocal)
+  if not mount or not aim then return false end
   attract.flying = true
   attract.flightTime = 0
   attract.bounces = 0
