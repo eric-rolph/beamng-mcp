@@ -47,13 +47,6 @@
       "sha256": "e8d8f2ac0aeb81ab1b1f6059d5f8cda110e4aa6f7d0a8ec5919db29c6fb93e08"
     },
     {
-      "name": "ericrolph_cannon_car_wash_cmu_ao.data.png",
-      "width": 1024,
-      "height": 1024,
-      "mode": "L",
-      "sha256": "7ae8714c9c21afc56d46096752819d23de069f5466456bec3c373e14d9b3acea"
-    },
-    {
       "name": "ericrolph_cannon_car_wash_cmu_roughness.data.png",
       "width": 1024,
       "height": 1024,
@@ -73,13 +66,6 @@
       "height": 1024,
       "mode": "RGB",
       "sha256": "47cd956022796910c496991311dad211d9f3d9965c2202946b5bcd969dd209bc"
-    },
-    {
-      "name": "ericrolph_cannon_car_wash_concrete_ao.data.png",
-      "width": 1024,
-      "height": 1024,
-      "mode": "L",
-      "sha256": "e95e28198696536893be877ac5f4d043921c2098f855150c1da7af9d7d8cb83b"
     },
     {
       "name": "ericrolph_cannon_car_wash_concrete_roughness.data.png",
@@ -121,21 +107,21 @@
       "width": 1024,
       "height": 1024,
       "mode": "RGB",
-      "sha256": "fcf0a1dcd175874265e7908d15181812d95c38bb0ee4c1698a06daf9ca6e6a57"
+      "sha256": "98b495b55051699cbcf969f6488151551a4df3a61c6bdb2a9cfb737ac3d10fcc"
     },
     {
       "name": "ericrolph_cannon_car_wash_deep_blue.normal.png",
       "width": 1024,
       "height": 1024,
       "mode": "RGB",
-      "sha256": "93315f5342428d890abe90fc63ed6298526e5b83bf0122a884abf64c53d511c2"
+      "sha256": "72f0f964470fea5fbc7b9ba96f8c7fb4825d380934fb8cd843edf8e5f878457e"
     },
     {
       "name": "ericrolph_cannon_car_wash_deep_blue_roughness.data.png",
       "width": 1024,
       "height": 1024,
       "mode": "L",
-      "sha256": "045d64ddffe3b6ea5bd204f580de00081b6f97f8b3a9d47ec3fff711c130aca4"
+      "sha256": "15e31a192a4c93f8ce45cd5ef35d104cef6a19da34b208ce3df6c4f1dcf99c40"
     },
     {
       "name": "ericrolph_cannon_car_wash_detail.normal.png",
@@ -185,13 +171,6 @@
       "height": 1024,
       "mode": "RGB",
       "sha256": "f169724a23d67873dd6aaa6e663f6f7e64f646c615c27cc6bc89ab50af9ff537"
-    },
-    {
-      "name": "ericrolph_cannon_car_wash_interior_brick_ao.data.png",
-      "width": 1024,
-      "height": 1024,
-      "mode": "L",
-      "sha256": "ef79178812a72052fc23cb39867274fa5c9d2ccdc099b026e4981c8e291ab151"
     },
     {
       "name": "ericrolph_cannon_car_wash_interior_brick_roughness.data.png",
@@ -269,13 +248,6 @@
       "height": 1024,
       "mode": "RGB",
       "sha256": "5a76c8fccc397f322e06bac8588d9cba5424fa442307035a443daa33008049af"
-    },
-    {
-      "name": "ericrolph_cannon_car_wash_wet_concrete_ao.data.png",
-      "width": 1024,
-      "height": 1024,
-      "mode": "L",
-      "sha256": "bbaaf2b7ab2869f54b7b061f62f8440ce75837eb1907b89142e98aebfb6c1f9b"
     },
     {
       "name": "ericrolph_cannon_car_wash_wet_concrete_roughness.data.png",
