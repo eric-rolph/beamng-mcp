@@ -650,6 +650,12 @@ def add_wheel_scrubber(
     # Fat bristle-body core in brush blue: the see-through middle was what
     # made the fan read as loose flat cards (player screenshot).
     core = add_cylinder(f"{name}_Core", location, 0.13, 0.82, cards, vertices=16, bevel=0.0)
+    # The atlas's top image quarter is the red mitter felt band (v1.32:
+    # BeamNG samples V from the image bottom), so raw 0..1 cylinder UVs
+    # wrapped the band around the core as a red stripe (player
+    # screenshot). Compress V into the blue card region.
+    for loop_uv in core.data.uv_layers.active.data:
+        loop_uv.uv[1] *= 0.72
     parent_preserving_world(core, root)
     axle = add_cylinder(f"{name}_Axle", location, 0.045, 0.95, steel, vertices=10, bevel=0.0)
     parent_preserving_world(axle, root)
@@ -1754,40 +1760,109 @@ def build_details() -> None:
                         bevel=0.0,
                     )
                 )
-    # Exit dryer battery: blower housings with tapered snouts aimed down
-    # into the lane where the dryer particle effects already blow.
+    # Exit dryer battery, v1.33 refined (player: the v1.20 housings read as
+    # crude dark monoliths). Each unit is now a composed blower on a yoke:
+    # stainless motor can with cooling ribs, rear intake bell with a dark
+    # grille, tapered nozzle with a hazard-yellow ring, and a slim
+    # deep-blue shroud - all along ONE 45-degree axis so the air visibly
+    # blows down into the lane where the dryer particles already run.
     add_box("DryerBeam", (0.0, 7.9, 3.85), (5.2, 0.16, 0.16), steel, bevel=0.0)
-    dryer_housings = [
-        add_box(
-            f"DryerHousing_{'L' if side < 0 else 'R'}",
-            (side * 1.1, 7.85, 3.42),
-            (0.85, 0.60, 0.70),
-            deep_blue,
-            bevel=0.03,
-            rotation=(-0.32, 0.0, 0.0),
-        )
-        for side in (-1.0, 1.0)
-    ]
-    join_static_meshes("DryerHousings", dryer_housings)
+    dryer_pitch = 2.35
+    dryer_axis = Vector((0.0, -math.sin(dryer_pitch), math.cos(dryer_pitch))).normalized()
     for side in (-1.0, 1.0):
-        add_box(
-            f"DryerIntake_{'L' if side < 0 else 'R'}",
-            (side * 1.1, 8.12, 3.52),
-            (0.60, 0.04, 0.45),
-            rubber,
-            bevel=0.0,
-            rotation=(-0.32, 0.0, 0.0),
-        )
-    for side in (-1.0, 1.0):
-        add_cone(
-            f"DryerSnout_{'L' if side < 0 else 'R'}",
-            (side * 1.1, 7.45, 2.98),
-            0.24,
-            0.15,
-            0.5,
+        side_name = "L" if side < 0 else "R"
+        can_center = Vector((side * 1.1, 7.78, 3.42))
+
+        def along(distance: float, center=can_center) -> tuple[float, float, float]:
+            point = center + dryer_axis * distance
+            return (point.x, point.y, point.z)
+
+        for arm_x in (-0.21, 0.21):
+            add_box(
+                f"DryerYoke_{side_name}_{'L' if arm_x < 0 else 'R'}",
+                (side * 1.1 + arm_x, 7.86, 3.64),
+                (0.05, 0.07, 0.42),
+                steel,
+                bevel=0.0,
+                rotation=(-0.32, 0.0, 0.0),
+            )
+            add_cylinder(
+                f"DryerPivot_{side_name}_{'L' if arm_x < 0 else 'R'}",
+                (side * 1.1 + arm_x, 7.78, 3.42),
+                0.045,
+                0.07,
+                deep_blue,
+                rotation=(0.0, math.pi / 2.0, 0.0),
+                vertices=10,
+                bevel=0.0,
+            )
+        add_cylinder(
+            f"DryerCan_{side_name}",
+            along(0.0),
+            0.17,
+            0.50,
             steel,
-            rotation=(2.35, 0.0, 0.0),
+            rotation=(dryer_pitch, 0.0, 0.0),
+            vertices=16,
+        )
+        for rib_index, rib_offset in enumerate((-0.12, 0.0, 0.12)):
+            add_cylinder(
+                f"DryerRib_{side_name}_{rib_index}",
+                along(rib_offset),
+                0.185,
+                0.022,
+                deep_blue,
+                rotation=(dryer_pitch, 0.0, 0.0),
+                vertices=16,
+                bevel=0.0,
+            )
+        add_cone(
+            f"DryerBell_{side_name}",
+            along(-0.32),
+            0.21,
+            0.17,
+            0.14,
+            steel,
+            rotation=(dryer_pitch, 0.0, 0.0),
             vertices=14,
+        )
+        add_cylinder(
+            f"DryerGrille_{side_name}",
+            along(-0.40),
+            0.185,
+            0.018,
+            rubber,
+            rotation=(dryer_pitch, 0.0, 0.0),
+            vertices=14,
+            bevel=0.0,
+        )
+        add_cone(
+            f"DryerSnout_{side_name}",
+            along(0.42),
+            0.17,
+            0.10,
+            0.34,
+            steel,
+            rotation=(dryer_pitch, 0.0, 0.0),
+            vertices=14,
+        )
+        add_cylinder(
+            f"DryerNozzleRing_{side_name}",
+            along(0.60),
+            0.115,
+            0.035,
+            yellow,
+            rotation=(dryer_pitch, 0.0, 0.0),
+            vertices=14,
+            bevel=0.0,
+        )
+        add_box(
+            f"DryerShroud_{side_name}",
+            along(-0.06, can_center + Vector((0.0, 0.06, 0.10))),
+            (0.42, 0.40, 0.24),
+            deep_blue,
+            bevel=0.04,
+            rotation=(-0.32, 0.0, 0.0),
         )
 
     # Supply plumbing (v1.21 expanded): wall mains feed each arch through a
@@ -2897,9 +2972,10 @@ def _selector_structure() -> dict[str, Any]:
         ("mitter", -5.30, 12, 0.42, 0.19, (4.30, 3.25, 2.18, 1.10)),
         ("scrub", -4.85, 10, 0.50, 0.22, (4.30, 3.28, 2.24, 1.20)),
         ("top", -4.40, 12, 0.42, 0.19, (4.30, 3.25, 2.18, 1.10)),
-        # Overhead roller contact band: rests at hood height under the
-        # spinning top roller and rides up over whatever passes.
-        ("roller", 4.15, 10, 0.50, 0.22, (3.70, 2.85, 2.00, 1.15)),
+        # v1.33 (player): the v1.28 overhead-roller contact band at the
+        # rear is REMOVED - hanging felt at the exit read as a stray
+        # second curtain. Soft contact now lives only in the entrance
+        # triple-curtain band; the rear roller stays a spinning visual.
     )
     for row_index, (row_name, row_y, strip_count, spacing, half_width, strip_levels) in enumerate(
         cloth_rows
@@ -3244,17 +3320,24 @@ CANNON_DAE_PATH = ASSET_DIRECTORY / "cannon.dae"
 def build_cannon() -> None:
     """Sign cannon as its own aimable shape: barrel along +Z from origin."""
 
-    steel = material(
-        scenario_material_name("stainless"), (0.42, 0.46, 0.5, 1.0), metallic=0.9, roughness=0.2
+    # v1.33 (player): the cannon gets its own cast-iron texture instead of
+    # flat stainless. Cylinder UVs wrap U around the bore and run V along
+    # the length, so the texture's horizontal bands read as machining
+    # rings on the barrel.
+    iron = material(
+        scenario_material_name("attract_cannon"),
+        (0.16, 0.17, 0.19, 1.0),
+        metallic=0.85,
+        roughness=0.55,
     )
     yellow = material(
         scenario_material_name("hazard_yellow"), (1.0, 0.68, 0.015, 1.0), roughness=0.45
     )
     prefix = f"{MOD_ID}_cannonshape_"
     parts = [
-        add_cylinder(f"{prefix}Barrel", (0.0, 0.0, 0.40), 0.085, 0.80, steel, vertices=16),
+        add_cylinder(f"{prefix}Barrel", (0.0, 0.0, 0.40), 0.085, 0.80, iron, vertices=16),
         add_cylinder(f"{prefix}Muzzle", (0.0, 0.0, 0.815), 0.105, 0.09, yellow, vertices=16),
-        add_cylinder(f"{prefix}Breech", (0.0, 0.0, 0.03), 0.11, 0.12, steel, vertices=16),
+        add_cylinder(f"{prefix}Breech", (0.0, 0.0, 0.03), 0.11, 0.12, iron, vertices=16),
     ]
     bpy.ops.object.select_all(action="DESELECT")
     for obj in parts:
@@ -3290,8 +3373,14 @@ def build_mini_car() -> None:
     scenario materials so no material slot is added.
     """
 
-    orange = material(
-        scenario_material_name("safety_orange"), (1.0, 0.16, 0.015, 1.0), roughness=0.38
+    # v1.33 (player): the body wears its own toy-paint texture - candy
+    # orange with metallic flake and a darker rocker band - instead of
+    # the flat safety_orange scenario colour.
+    paint = material(
+        scenario_material_name("mini_car_paint"),
+        (1.0, 0.22, 0.03, 1.0),
+        metallic=0.35,
+        roughness=0.3,
     )
     rubber = material(scenario_material_name("rubber"), (0.012, 0.014, 0.018, 1.0), roughness=0.9)
     glass = material(
@@ -3299,13 +3388,13 @@ def build_mini_car() -> None:
     )
     parts = [
         add_box(
-            f"{MINI_CAR_PREFIX}Body", (0.0, 0.0, 0.05), (0.20, 0.095, 0.048), orange, bevel=0.012
+            f"{MINI_CAR_PREFIX}Body", (0.0, 0.0, 0.05), (0.20, 0.095, 0.048), paint, bevel=0.012
         ),
         add_box(
             f"{MINI_CAR_PREFIX}Cabin",
             (-0.013, 0.0, 0.09),
             (0.105, 0.08, 0.038),
-            orange,
+            paint,
             bevel=0.012,
         ),
         add_box(

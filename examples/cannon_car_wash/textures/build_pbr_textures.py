@@ -1106,11 +1106,106 @@ def _build_sign(output_root: Path) -> list[Path]:
     return paths
 
 
+def _build_attract_cannon(output_root: Path) -> list[Path]:
+    """Cast-iron skin for the sign cannon's barrel and breech (v1.33).
+
+    Cylinder UVs wrap U around the bore and run V along the length, so
+    horizontal features here read as machining rings on the barrel. Dark
+    blued iron with cast-grain speckle, brighter turned bands, and a
+    touch of edge wear near the muzzle end.
+    """
+
+    size = 256
+    rng = np.random.default_rng(20260804)
+    ys = np.arange(size, dtype=np.float32)[:, None]
+    base = np.full((size, size), 0.36, dtype=np.float32)
+    # Turned reinforcing rings at classic cannon stations along the length.
+    for ring_v, ring_width, ring_gain in (
+        (0.06, 5, 1.5),
+        (0.30, 3, 1.3),
+        (0.55, 3, 1.3),
+        (0.82, 6, 1.6),
+        (0.95, 4, 1.45),
+    ):
+        distance = np.abs(ys - ring_v * size)
+        base *= 1.0 + (ring_gain - 1.0) * np.clip(1.0 - distance / ring_width, 0.0, 1.0)
+    # Cast grain: dense speckle plus faint circumferential tooling lines.
+    grain = 1.0 + 0.10 * rng.standard_normal((size, size)).astype(np.float32)
+    tooling = 1.0 + 0.05 * np.sin(ys * 1.7)
+    luminance = np.clip(base * grain * tooling, 0.0, 1.0)
+    rgb = np.dstack((luminance * 0.145, luminance * 0.155, luminance * 0.175))
+    colour = _to_srgb_image(np.clip(rgb, 0.0, 1.0))
+    height = (luminance * 0.0006).astype(np.float32)
+    normal = _normal_from_metric_height(height, (0.55, 0.9))
+    rough = np.clip(0.62 - luminance * 0.25 + 0.06 * rng.standard_normal((size, size)), 0.2, 0.9)
+    roughness = _to_data_image(rough.astype(np.float32))
+    outputs = {
+        _texture_name("attract_cannon", "color"): colour,
+        _texture_name("attract_cannon", "normal"): normal,
+        _texture_name("attract_cannon_roughness", "data"): roughness,
+    }
+    paths: list[Path] = []
+    for name, image in outputs.items():
+        path = output_root / name
+        _save(image, path)
+        paths.append(path)
+    return paths
+
+
+def _build_mini_car(output_root: Path) -> list[Path]:
+    """Toy-paint skin for the cannon's mini car (v1.33).
+
+    Candy orange with metallic flake speckle and a darker rocker band low
+    on the box UV layout; the clearcoat reads through a slightly noisy
+    low roughness. Both the Body and Cabin boxes share this material.
+    """
+
+    size = 256
+    rng = np.random.default_rng(19840704)
+    ys = np.arange(size, dtype=np.float32)[:, None]
+    paint = np.dstack(
+        (
+            np.full((size, size), 0.96, dtype=np.float32),
+            np.full((size, size), 0.30, dtype=np.float32),
+            np.full((size, size), 0.05, dtype=np.float32),
+        )
+    )
+    # Darker rocker band across the lower rows of every face region plus a
+    # thin contrasting beltline, sized to survive the default cube layout.
+    rocker = np.clip((ys / size - 0.72) / 0.28, 0.0, 1.0)
+    paint *= (1.0 - 0.45 * rocker)[:, :, None]
+    belt = np.exp(-((ys / size - 0.68) ** 2) / 0.0004)
+    paint = np.clip(paint - 0.25 * belt[:, :, None], 0.0, 1.0)
+    # Metallic flake: sparse bright speckle in the clearcoat.
+    flake = (rng.random((size, size)) > 0.985).astype(np.float32)
+    paint = np.clip(paint + 0.18 * flake[:, :, None], 0.0, 1.0)
+    colour = _to_srgb_image(paint)
+    height = (0.0002 * flake).astype(np.float32)
+    normal = _normal_from_metric_height(height, (0.2, 0.2))
+    rough = np.clip(0.26 + 0.05 * rng.standard_normal((size, size)) - 0.12 * flake, 0.12, 0.5)
+    roughness = _to_data_image(rough.astype(np.float32))
+    outputs = {
+        _texture_name("mini_car_paint", "color"): colour,
+        _texture_name("mini_car_paint", "normal"): normal,
+        _texture_name("mini_car_paint_roughness", "data"): roughness,
+    }
+    paths: list[Path] = []
+    for name, image in outputs.items():
+        path = output_root / name
+        _save(image, path)
+        paths.append(path)
+    return paths
+
+
 def build(output_root: Path) -> dict[str, object]:
     output_root.mkdir(parents=True, exist_ok=True)
     expected = set()
     outputs = (
-        _build_tileables(output_root) + _build_brush_cards(output_root) + _build_sign(output_root)
+        _build_tileables(output_root)
+        + _build_brush_cards(output_root)
+        + _build_sign(output_root)
+        + _build_attract_cannon(output_root)
+        + _build_mini_car(output_root)
     )
     expected.update(path.name for path in outputs)
     for existing in output_root.glob("*.png"):

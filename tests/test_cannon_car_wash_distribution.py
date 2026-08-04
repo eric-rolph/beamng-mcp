@@ -125,7 +125,7 @@ def _is_namespaced(value: str) -> bool:
 
 def test_distribution_tree_contains_only_approved_runtime_files() -> None:
     files = validate_mod_tree()
-    assert len(EXPECTED_RUNTIME_FILES) == 60
+    assert len(EXPECTED_RUNTIME_FILES) == 65
     assert set(files) == set(EXPECTED_RUNTIME_FILES)
 
     forbidden_suffixes = (".blend", ".py", ".geometry.json", ".selector_handoff.json")
@@ -148,7 +148,7 @@ def test_public_runtime_contains_only_cooked_textures_for_every_material_referen
         for relative in files
         if relative.startswith(texture_prefix) and relative.endswith(".dds")
     }
-    assert len(cooked_members) == 36
+    assert len(cooked_members) == 42
     assert not any(
         relative.startswith(texture_prefix) and relative.endswith(".png") for relative in files
     )
@@ -163,6 +163,10 @@ def test_public_runtime_contains_only_cooked_textures_for_every_material_referen
     material_paths = (
         MOD_ROOT / Path((SCENARIO_ROOT / "main.materials.json").as_posix()),
         MOD_ROOT / Path((VEHICLE_ROOT / "main.materials.json").as_posix()),
+        # v1.33: the attract cannon + mini car materials ship in their own
+        # art-side file (NOT main.materials.json - the engine special-cases
+        # that name under art/ and explicit loads silently no-op).
+        MOD_ROOT / Path((LEVEL_ASSET_ROOT / "attract.materials.json").as_posix()),
     )
     for material_path in material_paths:
         for definition in _strict_json_file(material_path).values():
