@@ -25,6 +25,8 @@ ANIMATED_DAE_PATH = VEHICLE_ROOT / f"{MOD_ID}_runtime_visual.dae"
 SOURCE_ANIMATED_DAE_PATH = MOD_ROOT / "art" / "shapes" / MOD_ID / f"{MOD_ID}.dae"
 SOURCE_MINI_CAR_PATH = MOD_ROOT / "art" / "shapes" / MOD_ID / "mini_car.dae"
 MINI_CAR_DAE_PATH = VEHICLE_ROOT / "mini_car.dae"
+SOURCE_CANNON_PATH = MOD_ROOT / "art" / "shapes" / MOD_ID / "cannon.dae"
+CANNON_DAE_PATH = VEHICLE_ROOT / "cannon.dae"
 SOURCE_MATERIALS_PATH = (
     MOD_ROOT / "levels" / "gridmap_v2" / "scenarios" / MOD_ID / "main.materials.json"
 )
@@ -299,6 +301,9 @@ def copy_mini_car() -> None:
     if not SOURCE_MINI_CAR_PATH.is_file():
         raise FileNotFoundError(f"mini car shape missing: {SOURCE_MINI_CAR_PATH}")
     shutil.copyfile(SOURCE_MINI_CAR_PATH, MINI_CAR_DAE_PATH)
+    if not SOURCE_CANNON_PATH.is_file():
+        raise FileNotFoundError(f"cannon shape missing: {SOURCE_CANNON_PATH}")
+    shutil.copyfile(SOURCE_CANNON_PATH, CANNON_DAE_PATH)
 
 
 def main() -> None:

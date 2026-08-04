@@ -628,7 +628,7 @@ def add_vertical_brush(
     card_cluster["beamng_card_count"] = len(faces)
     card_cluster.parent = root
     card_cluster.location = (location[0] - pivot[0], location[1] - pivot[1], 0.0)
-    animate_spin(root, 2, spin_direction, turns=1.0)
+    animate_spin(root, 2, spin_direction, turns=2.0)
 
 
 def add_wheel_scrubber(
@@ -679,7 +679,7 @@ def add_wheel_scrubber(
     card_cluster["beamng_card_count"] = len(faces)
     card_cluster.parent = root
     card_cluster.location = (0.0, 0.0, 0.0)
-    animate_spin(root, 2, -side, turns=3.0)
+    animate_spin(root, 2, -side, turns=6.0)
 
 
 def add_horizontal_brush(
@@ -748,7 +748,7 @@ def add_horizontal_brush(
     card_cluster.parent = root
     card_cluster.location = (0.0, 0.0, location[2] - pivot[2])
     # Counter-scrub: the roller's contact crown moves against vehicle travel.
-    animate_spin(root, 0, -1.0, turns=3.0)
+    animate_spin(root, 0, -1.0, turns=6.0)
 
 
 def add_pipe_arch(
@@ -2050,24 +2050,6 @@ def build_details() -> None:
     # The cannon finial is the brand landmark: a stainless barrel breaking the
     # coping line with a hazard-yellow muzzle ring, aimed along the launch arc.
     add_box("Sign_Cannon_Base", (1.62, -9.51, 5.65), (0.30, 0.26, 0.18), deep_blue, bevel=0.015)
-    add_cylinder(
-        "Sign_Cannon_Barrel",
-        (1.62, -9.74, 6.03),
-        0.085,
-        0.80,
-        steel,
-        rotation=(math.radians(35.0), 0.0, 0.0),
-        vertices=16,
-    )
-    add_cylinder(
-        "Sign_Cannon_Muzzle",
-        (1.62, -9.94, 6.32),
-        0.105,
-        0.09,
-        yellow,
-        rotation=(math.radians(35.0), 0.0, 0.0),
-        vertices=16,
-    )
     for side in (-1.0, 1.0):
         side_name = "L" if side < 0 else "R"
         add_cylinder(
@@ -3139,6 +3121,50 @@ MINI_CAR_PREFIX = f"{MOD_ID}_minicar_"
 MINI_CAR_DAE_PATH = ASSET_DIRECTORY / "mini_car.dae"
 
 
+CANNON_DAE_PATH = ASSET_DIRECTORY / "cannon.dae"
+
+
+def build_cannon() -> None:
+    """Sign cannon as its own aimable shape: barrel along +Z from origin."""
+
+    steel = material(
+        scenario_material_name("stainless"), (0.42, 0.46, 0.5, 1.0), metallic=0.9, roughness=0.2
+    )
+    yellow = material(
+        scenario_material_name("hazard_yellow"), (1.0, 0.68, 0.015, 1.0), roughness=0.45
+    )
+    prefix = f"{MOD_ID}_cannonshape_"
+    parts = [
+        add_cylinder(f"{prefix}Barrel", (0.0, 0.0, 0.40), 0.085, 0.80, steel, vertices=16),
+        add_cylinder(f"{prefix}Muzzle", (0.0, 0.0, 0.815), 0.105, 0.09, yellow, vertices=16),
+        add_cylinder(f"{prefix}Breech", (0.0, 0.0, 0.03), 0.11, 0.12, steel, vertices=16),
+    ]
+    bpy.ops.object.select_all(action="DESELECT")
+    for obj in parts:
+        obj.select_set(True)
+    bpy.context.view_layer.objects.active = parts[0]
+    result = bpy.ops.wm.collada_export(
+        filepath=str(CANNON_DAE_PATH),
+        check_existing=False,
+        selected=True,
+        include_children=True,
+        apply_modifiers=True,
+        triangulate=True,
+        apply_global_orientation=True,
+        export_global_forward_selection="Y",
+        export_global_up_selection="Z",
+        sort_by_name=True,
+    )
+    if "FINISHED" not in result:
+        raise RuntimeError(f"cannon export failed: {result}")
+    for obj in parts:
+        mesh = obj.data
+        bpy.data.objects.remove(obj, do_unlink=True)
+        if mesh.users == 0:
+            bpy.data.meshes.remove(mesh)
+    print("CANNON_CAR_WASH_STAGE cannon complete")
+
+
 def build_mini_car() -> None:
     """Tiny cartoon car fired by the sign cannon (attract volley).
 
@@ -3156,27 +3182,31 @@ def build_mini_car() -> None:
     )
     parts = [
         add_box(
-            f"{MINI_CAR_PREFIX}Body", (0.0, 0.0, 0.075), (0.30, 0.14, 0.07), orange, bevel=0.012
+            f"{MINI_CAR_PREFIX}Body", (0.0, 0.0, 0.05), (0.20, 0.095, 0.048), orange, bevel=0.012
         ),
         add_box(
-            f"{MINI_CAR_PREFIX}Cabin", (-0.02, 0.0, 0.135), (0.16, 0.12, 0.055), orange, bevel=0.012
+            f"{MINI_CAR_PREFIX}Cabin",
+            (-0.013, 0.0, 0.09),
+            (0.105, 0.08, 0.038),
+            orange,
+            bevel=0.012,
         ),
         add_box(
             f"{MINI_CAR_PREFIX}Screen",
-            (0.052, 0.0, 0.133),
-            (0.012, 0.10, 0.045),
+            (0.035, 0.0, 0.088),
+            (0.009, 0.068, 0.03),
             glass,
             bevel=0.004,
         ),
     ]
-    for wheel_x in (-0.095, 0.095):
+    for wheel_x in (-0.063, 0.063):
         for wheel_side in (-1.0, 1.0):
             parts.append(
                 add_cylinder(
                     f"{MINI_CAR_PREFIX}Wheel_{wheel_x}_{wheel_side}",
-                    (wheel_x, wheel_side * 0.075, 0.045),
-                    0.042,
-                    0.03,
+                    (wheel_x, wheel_side * 0.05, 0.03),
+                    0.028,
+                    0.02,
                     rubber,
                     rotation=(math.pi / 2.0, 0.0, 0.0),
                     vertices=12,
@@ -3375,6 +3405,7 @@ if STAGE in {"details", "all"}:
     build_details()
 if STAGE in {"finalize", "all"}:
     build_mini_car()
+    build_cannon()
     finalize()
 if STAGE in {"vehicle_prop", "all"}:
     export_vehicle_selector_asset()
