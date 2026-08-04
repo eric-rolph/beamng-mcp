@@ -894,6 +894,19 @@ def wash_effect_specs() -> list[dict[str, Any]]:
                 emitter="BNGP_sprinkler",
                 particle_data="BNG_sprinkler",
             )
+            # v1.37: mid-wash spray bank on the arch between the two
+            # roller-tower pairs, same sprinkler recipe as the pre-soak.
+            append_effect(
+                suffix=f"mister_MidWash_{side_name}_{index}",
+                side_name=side_name,
+                side=side,
+                y=-0.9,
+                z=z,
+                role="wash_water",
+                requested_particle="BNG_sprinkler",
+                emitter="BNGP_sprinkler",
+                particle_data="BNG_sprinkler",
+            )
             append_effect(
                 suffix=f"dryer_Mist_{side_name}_{index}",
                 side_name=side_name,
@@ -1402,6 +1415,10 @@ def build_details() -> None:
     add_horizontal_brush((0.0, 4.15, 3.82), brush_cards, steel)
 
     add_pipe_arch("PreSoakArch", -5.6, steel, orange)
+    # v1.37 (player): a mid-wash rinse arch in the gap between the two
+    # roller-tower pairs (towers at y -3.0 and +1.2) so cars stay soaked
+    # through the brush section.
+    add_pipe_arch("MidWashArch", -0.9, steel, blue_brush)
     add_pipe_arch("RinseArch", 5.65, steel, cyan)
 
     # --- Interior realism pass (player request 2026-08-01) -----------------
@@ -1880,7 +1897,7 @@ def build_details() -> None:
             vertices=10,
             bevel=0.0,
         )
-        for index, y in enumerate((-5.6, 5.65), start=1):
+        for index, y in enumerate((-5.6, -0.9, 5.65), start=1):
             add_cylinder(
                 f"SupplyDrop_{side_name}_{index}",
                 (side * 2.9, y, 3.0),

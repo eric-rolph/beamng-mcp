@@ -230,6 +230,13 @@ local EFFECT_OFFSETS = {
   {suffix = "mister_PreSoak_R_1", emitter = "BNGP_sprinkler", position = vec3(2.62, -5.6, 1.25), inward = vec3(-1, 0, 0)},
   {suffix = "mister_PreSoak_R_2", emitter = "BNGP_sprinkler", position = vec3(2.62, -5.6, 2.1), inward = vec3(-1, 0, 0)},
   {suffix = "mister_PreSoak_R_3", emitter = "BNGP_sprinkler", position = vec3(2.62, -5.6, 3.0), inward = vec3(-1, 0, 0)},
+  -- v1.37: mid-wash spray bank between the two roller-tower pairs.
+  {suffix = "mister_MidWash_L_1", emitter = "BNGP_sprinkler", position = vec3(-2.62, -0.9, 1.25), inward = vec3(1, 0, 0)},
+  {suffix = "mister_MidWash_L_2", emitter = "BNGP_sprinkler", position = vec3(-2.62, -0.9, 2.1), inward = vec3(1, 0, 0)},
+  {suffix = "mister_MidWash_L_3", emitter = "BNGP_sprinkler", position = vec3(-2.62, -0.9, 3.0), inward = vec3(1, 0, 0)},
+  {suffix = "mister_MidWash_R_1", emitter = "BNGP_sprinkler", position = vec3(2.62, -0.9, 1.25), inward = vec3(-1, 0, 0)},
+  {suffix = "mister_MidWash_R_2", emitter = "BNGP_sprinkler", position = vec3(2.62, -0.9, 2.1), inward = vec3(-1, 0, 0)},
+  {suffix = "mister_MidWash_R_3", emitter = "BNGP_sprinkler", position = vec3(2.62, -0.9, 3.0), inward = vec3(-1, 0, 0)},
   {suffix = "dryer_Mist_L_1", emitter = "BNGP_waterfallsteam", position = vec3(-2.62, 5.65, 1.25), inward = vec3(1, 0, 0)},
   {suffix = "dryer_Mist_L_2", emitter = "BNGP_waterfallsteam", position = vec3(-2.62, 5.65, 2.1), inward = vec3(1, 0, 0)},
   {suffix = "dryer_Mist_L_3", emitter = "BNGP_waterfallsteam", position = vec3(-2.62, 5.65, 3.0), inward = vec3(1, 0, 0)},

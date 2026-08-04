@@ -121,9 +121,9 @@ def test_phase3_payload_uses_the_scenario_owned_extension_lifecycle() -> None:
     # ParticleEmitterNode emits along the third (local +Z) matrix column.
     # Each left/right nozzle must point toward the wash centerline.
     effects = [record for record in prefab if record["class"] == "ParticleEmitterNode"]
-    assert len(effects) == 16
+    assert len(effects) == 22
     assert Counter(effect["emitter"] for effect in effects) == {
-        "BNGP_sprinkler": 6,
+        "BNGP_sprinkler": 12,
         "BNGP_waterfallsteam": 6,
         "BNGP_34": 2,
         "BNGP_2": 2,
@@ -235,10 +235,15 @@ def test_wash_trigger_controls_rollers_water_and_layered_dryer_effects() -> None
     )
     assert effect_table is not None
     effect_names = re.findall(r"\bname\s*=\s*[\"']([^\"']+)[\"']", effect_table.group("body"))
-    assert len(effect_names) == 16
+    assert len(effect_names) == 22
     assert set(effect_names) == (
         {
             f"{MOD_ID}_mister_PreSoak_{side}_{height}"
+            for side in ("L", "R")
+            for height in range(1, 4)
+        }
+        | {
+            f"{MOD_ID}_mister_MidWash_{side}_{height}"
             for side in ("L", "R")
             for height in range(1, 4)
         }
@@ -248,7 +253,7 @@ def test_wash_trigger_controls_rollers_water_and_layered_dryer_effects() -> None
     assert Counter(
         re.findall(r"\bemitter\s*=\s*[\"']([^\"']+)[\"']", effect_table.group("body"))
     ) == {
-        "BNGP_sprinkler": 6,
+        "BNGP_sprinkler": 12,
         "BNGP_waterfallsteam": 6,
         "BNGP_34": 2,
         "BNGP_2": 2,
@@ -485,12 +490,12 @@ def test_phase3_manifest_describes_wash_cycle_and_containment_gate() -> None:
             "roller_sequence": "ambient",
             "roller_play_ambient": True,
             "emitter_counts": {
-                "BNGP_sprinkler": 6,
+                "BNGP_sprinkler": 12,
                 "BNGP_waterfallsteam": 6,
                 "BNGP_34": 2,
                 "BNGP_2": 2,
             },
-            "effect_count": 16,
+            "effect_count": 22,
             "effects_active": True,
         },
         "exit": {

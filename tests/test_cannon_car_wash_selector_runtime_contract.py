@@ -247,10 +247,10 @@ def test_selector_runtime_loads_common_visual_materials_before_creating_the_tsst
     )
     assert mister_offsets is not None, "missing effect offset table"
     offsets_body = mister_offsets.group("body")
-    assert len(re.findall(r"\bposition\s*=\s*vec3\s*\(", offsets_body)) == 16
-    assert len(re.findall(r"\binward\s*=\s*vec3\s*\(", offsets_body)) == 16
+    assert len(re.findall(r"\bposition\s*=\s*vec3\s*\(", offsets_body)) == 22
+    assert len(re.findall(r"\binward\s*=\s*vec3\s*\(", offsets_body)) == 22
     assert Counter(re.findall(r"\bemitter\s*=\s*[\"']([^\"']+)[\"']", offsets_body)) == {
-        "BNGP_sprinkler": 6,
+        "BNGP_sprinkler": 12,
         "BNGP_waterfallsteam": 6,
         "BNGP_34": 2,
         "BNGP_2": 2,

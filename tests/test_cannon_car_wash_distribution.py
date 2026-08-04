@@ -381,9 +381,9 @@ def test_prefab_scene_names_are_namespaced_and_stock_assets_remain_references() 
     assert vehicles[0]["jBeam"] == "pickup"
 
     misters = [record for record in records if record.get("class") == "ParticleEmitterNode"]
-    assert len(misters) == 16
+    assert len(misters) == 22
     assert Counter(record["emitter"] for record in misters) == {
-        "BNGP_sprinkler": 6,
+        "BNGP_sprinkler": 12,
         "BNGP_waterfallsteam": 6,
         "BNGP_34": 2,
         "BNGP_2": 2,

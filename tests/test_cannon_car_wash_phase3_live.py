@@ -51,9 +51,9 @@ REPAIR_TRIGGER_NAME = f"{MOD_ID}_repair_trigger"
 SCENARIO_VISUAL_NAME = f"{MOD_ID}_scenario_visual"
 CRASH_WALL_NAME = f"{MOD_ID}_crash_wall"
 EXTENSION_REGISTRY_NAME = f"scenario_{MOD_ID}"
-EXPECTED_EFFECT_COUNT = 16
+EXPECTED_EFFECT_COUNT = 22
 EXPECTED_EMITTER_COUNTS = {
-    "BNGP_sprinkler": 6,
+    "BNGP_sprinkler": 12,
     "BNGP_waterfallsteam": 6,
     "BNGP_34": 2,
     "BNGP_2": 2,
