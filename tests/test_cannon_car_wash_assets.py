@@ -58,11 +58,12 @@ CITYBUS_ENVELOPE = {"width": 3.11, "length": 12.63, "height": 2.994}
 COLLISION_MESH_NAMES = [f"Colmesh-{index}" for index in range(1, 5)]
 EFFECT_NAMES = (
     {f"{MOD_ID}_mister_PreSoak_{side}_{height}" for side in ("L", "R") for height in range(1, 4)}
+    | {f"{MOD_ID}_mister_MidWash_{side}_{height}" for side in ("L", "R") for height in range(1, 4)}
     | {f"{MOD_ID}_dryer_Mist_{side}_{height}" for side in ("L", "R") for height in range(1, 4)}
     | {f"{MOD_ID}_dryer_{layer}_{side}" for layer in ("Steam", "Dust") for side in ("L", "R")}
 )
 EFFECT_EMITTER_COUNTS = {
-    "BNGP_sprinkler": 6,
+    "BNGP_sprinkler": 12,
     "BNGP_waterfallsteam": 6,
     "BNGP_34": 2,
     "BNGP_2": 2,
@@ -686,7 +687,7 @@ def test_cannon_car_wash_repository_metadata_and_icon() -> None:
 
     assert repository_info["internal_name"] == MOD_ID
     assert repository_info["title"] == "Cannon Car Wash"
-    assert repository_info["version"] == "1.36"
+    assert repository_info["version"] == "1.37"
     assert repository_info["author"] == "Eric Rolph"
 
     with Image.open(MOD_ICON_PATH) as icon:
@@ -758,7 +759,7 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
     prefab_source = SCENARIO_PREFAB_PATH.read_text(encoding="utf-8")
     prefab_records = [json.loads(line) for line in prefab_source.splitlines() if line.strip()]
     prefab = {record["name"]: record for record in prefab_records}
-    assert len(prefab_records) == 36
+    assert len(prefab_records) == 42
     assert prefab[SCENARIO_GROUP_NAME]["class"] == "SimGroup"
 
     visual = prefab[SCENARIO_VISUAL_NAME]
@@ -807,7 +808,7 @@ def test_cannon_car_wash_phase2_package_preserves_the_blender_coordinate_contrac
     assert geometry["wash_effects"]["requested_to_runtime"] == REQUESTED_TO_RUNTIME
     assert Counter(effect["emitter"] for effect in effect_specs.values()) == EFFECT_EMITTER_COUNTS
     assert Counter(effect["role"] for effect in effect_specs.values()) == {
-        "wash_water": 6,
+        "wash_water": 12,
         "dryer_primary": 6,
         "dryer_secondary": 2,
         "dryer_ambient": 2,

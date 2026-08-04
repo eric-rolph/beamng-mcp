@@ -132,19 +132,21 @@ def main() -> None:
     asset_position = [float(value) for value in phase2["asset"]["position"]]
     specs = geometry["wash_effects"]["effects"]
     emitter_counts = Counter(str(spec["emitter"]) for spec in specs)
+    # v1.37: the mid-wash spray arch adds six sprinklers (three per side)
+    # between the roller-tower pairs - twenty-two effect nodes total.
     expected_counts = {
-        "BNGP_sprinkler": 6,
+        "BNGP_sprinkler": 12,
         "BNGP_waterfallsteam": 6,
         "BNGP_34": 2,
         "BNGP_2": 2,
     }
     if (
-        len(specs) != 16
-        or len({spec["name"] for spec in specs}) != 16
+        len(specs) != 22
+        or len({spec["name"] for spec in specs}) != 22
         or dict(emitter_counts) != expected_counts
     ):
         raise ValueError(
-            "Blender evidence must define the exact sixteen-node water/dryer inventory"
+            "Blender evidence must define the exact twenty-two-node water/dryer inventory"
         )
 
     synchronized: list[dict[str, Any]] = []

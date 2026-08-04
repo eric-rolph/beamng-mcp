@@ -680,17 +680,19 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
     # accent family rather than the muted maroon of v1.32.
     lane_height = 28
     lane_gap = 6
-    # v1.36 (player: some strips still read duller red): every lane stays
-    # in the bright interior-accent family - variation is subtle, never dull.
-    felt_palette = ((226, 62, 56), (214, 54, 52), (238, 82, 68), (206, 48, 50))
+    # v1.37 (player screenshot: strips rendered maroon next to the vivid
+    # accent rails): the palette anchors on the accent-stripe red itself,
+    # and the fiber shading variance drops - the speckle/filament noise
+    # plus the derived micro-normal were eating a full brightness tier.
+    felt_palette = ((240, 46, 34), (230, 40, 30), (248, 66, 44), (234, 44, 36))
     felt_rng = np.random.default_rng(20260806)
     xs = np.arange(size, dtype=np.float32)
 
     def _felt_rows(base_rgb: tuple[int, int, int], rows: int, phase: float) -> np.ndarray:
-        macro = 1.0 + 0.09 * np.sin(math.tau * (2.0 * xs / size) + phase)
+        macro = 1.0 + 0.045 * np.sin(math.tau * (2.0 * xs / size) + phase)
         weave = 1.0 + 0.03 * np.sin(math.tau * (7.0 * xs / size) + phase * 1.7)
-        speckle = 1.0 + 0.055 * felt_rng.standard_normal((rows, size)).astype(np.float32)
-        filament = 1.0 + 0.04 * felt_rng.standard_normal((rows, 1)).astype(np.float32)
+        speckle = 1.0 + 0.032 * felt_rng.standard_normal((rows, size)).astype(np.float32)
+        filament = 1.0 + 0.022 * felt_rng.standard_normal((rows, 1)).astype(np.float32)
         shade = (macro * weave)[None, :] * speckle * filament
         block = np.asarray(base_rgb, dtype=np.float32)[None, None, :] * shade[:, :, None]
         return np.clip(block, 0.0, 255.0).astype(np.uint8)

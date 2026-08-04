@@ -15,6 +15,13 @@ local EFFECT_SPECS = {
   {name = "ericrolph_cannon_car_wash_mister_PreSoak_R_1", emitter = "BNGP_sprinkler"},
   {name = "ericrolph_cannon_car_wash_mister_PreSoak_R_2", emitter = "BNGP_sprinkler"},
   {name = "ericrolph_cannon_car_wash_mister_PreSoak_R_3", emitter = "BNGP_sprinkler"},
+  -- v1.37: mid-wash spray bank between the two roller-tower pairs.
+  {name = "ericrolph_cannon_car_wash_mister_MidWash_L_1", emitter = "BNGP_sprinkler"},
+  {name = "ericrolph_cannon_car_wash_mister_MidWash_L_2", emitter = "BNGP_sprinkler"},
+  {name = "ericrolph_cannon_car_wash_mister_MidWash_L_3", emitter = "BNGP_sprinkler"},
+  {name = "ericrolph_cannon_car_wash_mister_MidWash_R_1", emitter = "BNGP_sprinkler"},
+  {name = "ericrolph_cannon_car_wash_mister_MidWash_R_2", emitter = "BNGP_sprinkler"},
+  {name = "ericrolph_cannon_car_wash_mister_MidWash_R_3", emitter = "BNGP_sprinkler"},
   {name = "ericrolph_cannon_car_wash_dryer_Mist_L_1", emitter = "BNGP_waterfallsteam"},
   {name = "ericrolph_cannon_car_wash_dryer_Mist_L_2", emitter = "BNGP_waterfallsteam"},
   {name = "ericrolph_cannon_car_wash_dryer_Mist_L_3", emitter = "BNGP_waterfallsteam"},

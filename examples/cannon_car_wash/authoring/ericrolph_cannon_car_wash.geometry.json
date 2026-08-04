@@ -521,6 +521,34 @@
         ]
       },
       {
+        "name": "ericrolph_cannon_car_wash_mister_MidWash_L_1",
+        "role": "wash_water",
+        "requested_particle": "BNG_sprinkler",
+        "emitter": "BNGP_sprinkler",
+        "particle_data": "BNG_sprinkler",
+        "local_position": [
+          -2.62,
+          -0.9,
+          1.25
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      {
         "name": "ericrolph_cannon_car_wash_dryer_Mist_L_1",
         "role": "dryer_primary",
         "requested_particle": "BNG_Waterfall_Mist",
@@ -577,6 +605,34 @@
         ]
       },
       {
+        "name": "ericrolph_cannon_car_wash_mister_MidWash_L_2",
+        "role": "wash_water",
+        "requested_particle": "BNG_sprinkler",
+        "emitter": "BNGP_sprinkler",
+        "particle_data": "BNG_sprinkler",
+        "local_position": [
+          -2.62,
+          -0.9,
+          2.1
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      {
         "name": "ericrolph_cannon_car_wash_dryer_Mist_L_2",
         "role": "dryer_primary",
         "requested_particle": "BNG_Waterfall_Mist",
@@ -613,6 +669,34 @@
         "local_position": [
           -2.62,
           -5.6,
+          3.0
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_mister_MidWash_L_3",
+        "role": "wash_water",
+        "requested_particle": "BNG_sprinkler",
+        "emitter": "BNGP_sprinkler",
+        "particle_data": "BNG_sprinkler",
+        "local_position": [
+          -2.62,
+          -0.9,
           3.0
         ],
         "rotation_matrix": [
@@ -745,6 +829,34 @@
         ]
       },
       {
+        "name": "ericrolph_cannon_car_wash_mister_MidWash_R_1",
+        "role": "wash_water",
+        "requested_particle": "BNG_sprinkler",
+        "emitter": "BNGP_sprinkler",
+        "particle_data": "BNG_sprinkler",
+        "local_position": [
+          2.62,
+          -0.9,
+          1.25
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      {
         "name": "ericrolph_cannon_car_wash_dryer_Mist_R_1",
         "role": "dryer_primary",
         "requested_particle": "BNG_Waterfall_Mist",
@@ -801,6 +913,34 @@
         ]
       },
       {
+        "name": "ericrolph_cannon_car_wash_mister_MidWash_R_2",
+        "role": "wash_water",
+        "requested_particle": "BNG_sprinkler",
+        "emitter": "BNGP_sprinkler",
+        "particle_data": "BNG_sprinkler",
+        "local_position": [
+          2.62,
+          -0.9,
+          2.1
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      {
         "name": "ericrolph_cannon_car_wash_dryer_Mist_R_2",
         "role": "dryer_primary",
         "requested_particle": "BNG_Waterfall_Mist",
@@ -837,6 +977,34 @@
         "local_position": [
           2.62,
           -5.6,
+          3.0
+        ],
+        "rotation_matrix": [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      {
+        "name": "ericrolph_cannon_car_wash_mister_MidWash_R_3",
+        "role": "wash_water",
+        "requested_particle": "BNG_sprinkler",
+        "emitter": "BNGP_sprinkler",
+        "particle_data": "BNG_sprinkler",
+        "local_position": [
+          2.62,
+          -0.9,
           3.0
         ],
         "rotation_matrix": [
@@ -1255,8 +1423,8 @@
   },
   "mesh_statistics": {
     "objects": 49,
-    "vertices": 13287,
-    "polygons": 9596
+    "vertices": 14319,
+    "polygons": 10290
   },
   "collision_meshes": [
     "Colmesh-1",
@@ -1265,7 +1433,7 @@
     "Colmesh-4"
   ],
   "export_statistics": {
-    "triangle_count": 23882,
+    "triangle_count": 25830,
     "geometry_count": 46,
     "primitive_group_count": 46,
     "material_symbol_count": 19

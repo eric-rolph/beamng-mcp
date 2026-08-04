@@ -30,9 +30,9 @@
       "roller_visual": "ericrolph_cannon_car_wash_scenario_visual",
       "roller_sequence": "ambient",
       "roller_play_ambient": true,
-      "effect_count": 16,
+      "effect_count": 22,
       "emitter_counts": {
-        "BNGP_sprinkler": 6,
+        "BNGP_sprinkler": 12,
         "BNGP_waterfallsteam": 6,
         "BNGP_34": 2,
         "BNGP_2": 2
