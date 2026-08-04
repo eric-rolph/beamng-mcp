@@ -3,7 +3,7 @@
   "title": "Cannon Car Wash",
   "internal_name": "ericrolph_cannon_car_wash",
   "stable_zip_filename": "cannon_car_wash_ericrolph.zip",
-  "version": "1.29",
+  "version": "1.30",
   "type": "Other",
   "author": "Eric Rolph",
   "tag_line": "Water, layered air drying, full repair, then a 360 km/h launch",
@@ -34,9 +34,9 @@
   },
   "release_artifact": {
     "filename": "cannon_car_wash_ericrolph.zip",
-    "sha256": "22d042cb7392067875a3f938d23031b5c892a1a07419b27d8496fa6cd62c1328",
-    "size_bytes": 51885826,
-    "member_count": 60
+    "sha256": "626257c942a192ee1e5167814df2349108399cb0634ab46bf9bdf57114f9e197",
+    "size_bytes": 52058362,
+    "member_count": 62
   },
   "release_validation": {
     "beamng_drive": "0.38.6.0.19963",

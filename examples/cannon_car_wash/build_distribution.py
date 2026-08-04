@@ -50,6 +50,7 @@ LOGGER = logging.getLogger(__name__)
 # this allowlist with a recursive "pack everything" implementation.
 EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"art/shapes/{MOD_ID}/{MOD_ID}.dae",
+    f"art/shapes/{MOD_ID}/mini_car.dae",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards_opacity.data.dds",
@@ -102,6 +103,7 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"vehicles/{MOD_ID}/info_standard.json",
     f"vehicles/{MOD_ID}/lua/{MOD_ID}_vehicle.lua",
     f"vehicles/{MOD_ID}/main.materials.json",
+    f"vehicles/{MOD_ID}/mini_car.dae",
     f"vehicles/{MOD_ID}/standard.jpg",
     f"vehicles/{MOD_ID}/standard.pc",
 )
@@ -131,8 +133,8 @@ def _validate_member_name(
 
 
 def _validate_allowlist() -> None:
-    if len(EXPECTED_RUNTIME_FILES) != 54:
-        raise DistributionError("the public runtime allowlist must contain exactly 54 files")
+    if len(EXPECTED_RUNTIME_FILES) != 56:
+        raise DistributionError("the public runtime allowlist must contain exactly 56 files")
     if tuple(sorted(EXPECTED_RUNTIME_FILES)) != EXPECTED_RUNTIME_FILES:
         raise DistributionError("the public runtime allowlist must be deterministically sorted")
     for name in EXPECTED_RUNTIME_FILES:

@@ -3135,6 +3135,73 @@ def export_vehicle_selector_asset() -> None:
     )
 
 
+MINI_CAR_PREFIX = f"{MOD_ID}_minicar_"
+MINI_CAR_DAE_PATH = ASSET_DIRECTORY / "mini_car.dae"
+
+
+def build_mini_car() -> None:
+    """Tiny cartoon car fired by the sign cannon (attract volley).
+
+    Sized to the 0.085 m barrel: 0.30 m long. Own shape file so the
+    runtime can spawn and fly it as an independent TSStatic; reuses
+    scenario materials so no material slot is added.
+    """
+
+    orange = material(
+        scenario_material_name("safety_orange"), (1.0, 0.16, 0.015, 1.0), roughness=0.38
+    )
+    rubber = material(scenario_material_name("rubber"), (0.012, 0.014, 0.018, 1.0), roughness=0.9)
+    glass = material(
+        scenario_material_name("glass"), (0.03, 0.32, 0.48, 0.38), metallic=0.1, roughness=0.08
+    )
+    parts = [
+        add_box(f"{MINI_CAR_PREFIX}Body", (0.0, 0.0, 0.075), (0.30, 0.14, 0.07), orange,
+                bevel=0.012),
+        add_box(f"{MINI_CAR_PREFIX}Cabin", (-0.02, 0.0, 0.135), (0.16, 0.12, 0.055), orange,
+                bevel=0.012),
+        add_box(f"{MINI_CAR_PREFIX}Screen", (0.052, 0.0, 0.133), (0.012, 0.10, 0.045), glass,
+                bevel=0.004),
+    ]
+    for wheel_x in (-0.095, 0.095):
+        for wheel_side in (-1.0, 1.0):
+            parts.append(
+                add_cylinder(
+                    f"{MINI_CAR_PREFIX}Wheel_{wheel_x}_{wheel_side}",
+                    (wheel_x, wheel_side * 0.075, 0.045),
+                    0.042,
+                    0.03,
+                    rubber,
+                    rotation=(math.pi / 2.0, 0.0, 0.0),
+                    vertices=12,
+                    bevel=0.0,
+                )
+            )
+    bpy.ops.object.select_all(action="DESELECT")
+    for obj in parts:
+        obj.select_set(True)
+    bpy.context.view_layer.objects.active = parts[0]
+    result = bpy.ops.wm.collada_export(
+        filepath=str(MINI_CAR_DAE_PATH),
+        check_existing=False,
+        selected=True,
+        include_children=True,
+        apply_modifiers=True,
+        triangulate=True,
+        apply_global_orientation=True,
+        export_global_forward_selection="Y",
+        export_global_up_selection="Z",
+        sort_by_name=True,
+    )
+    if "FINISHED" not in result:
+        raise RuntimeError(f"mini car export failed: {result}")
+    for obj in parts:
+        mesh = obj.data
+        bpy.data.objects.remove(obj, do_unlink=True)
+        if mesh.users == 0:
+            bpy.data.meshes.remove(mesh)
+    print("CANNON_CAR_WASH_STAGE mini_car complete")
+
+
 def finalize() -> None:
     ASSET_DIRECTORY.mkdir(parents=True, exist_ok=True)
     MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -3300,6 +3367,7 @@ if STAGE in {"shell", "all"}:
 if STAGE in {"details", "all"}:
     build_details()
 if STAGE in {"finalize", "all"}:
+    build_mini_car()
     finalize()
 if STAGE in {"vehicle_prop", "all"}:
     export_vehicle_selector_asset()
