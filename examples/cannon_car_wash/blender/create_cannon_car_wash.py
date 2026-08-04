@@ -2556,6 +2556,49 @@ def build_details() -> None:
             trigger["trigger_target_speed_kph"] = LAUNCH_TARGET_SPEED_KPH
         elif name == REPAIR_TRIGGER_NAME:
             trigger["repair_strategy"] = "RESET_PHYSICS"
+
+    # v1.35 exterior control panel at the exit corner (player request): a
+    # realistic labeled wall box - enclosure, hinged door face with the
+    # printed legend texture, drip shield, latch, conduit - plus five
+    # colour-coded walk-in button pads on the apron below it. The pads
+    # match the runtime's Panel.buttons positions exactly.
+    panel_face = material(
+        scenario_material_name("control_panel"), (0.85, 0.86, 0.88, 1.0), roughness=0.5
+    )
+    add_box("CtrlEnclosure", (3.44, 7.64, 1.35), (0.13, 0.54, 0.70), steel, bevel=0.012)
+    face_half_y = 0.24
+    face_half_z = 0.31
+    add_card_mesh(
+        "CtrlFace",
+        (3.508, 7.64, 1.35),
+        [
+            (0.0, -face_half_y, -face_half_z),
+            (0.0, face_half_y, -face_half_z),
+            (0.0, face_half_y, face_half_z),
+            (0.0, -face_half_y, face_half_z),
+        ],
+        [(0, 1, 2, 3)],
+        panel_face,
+        [((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))],
+        alpha_test=False,
+    )
+    add_box("CtrlShroud", (3.46, 7.64, 1.74), (0.22, 0.60, 0.035), steel, bevel=0.0)
+    add_box("CtrlLatch", (3.515, 7.90, 1.35), (0.02, 0.03, 0.10), steel, bevel=0.0)
+    for hinge_z in (1.12, 1.58):
+        add_box(
+            f"CtrlHinge_{hinge_z}", (3.51, 7.385, hinge_z), (0.015, 0.03, 0.08), steel, bevel=0.0
+        )
+    add_cylinder("CtrlConduit", (3.44, 7.40, 0.50), 0.021, 1.0, steel, vertices=10, bevel=0.0)
+    add_box("CtrlConduitFoot", (3.44, 7.40, 0.045), (0.10, 0.10, 0.09), steel, bevel=0.0)
+    pad_colours = (aqua_brush, orange, blue_brush, yellow, deep_blue)
+    for pad_index, pad_y in enumerate((6.40, 7.02, 7.64, 8.26, 8.88)):
+        add_box(
+            f"CtrlPad_{pad_index + 1}",
+            (3.62, pad_y, 0.012),
+            (0.42, 0.46, 0.024),
+            pad_colours[pad_index],
+            bevel=0.0,
+        )
     print("CANNON_CAR_WASH_STAGE details complete")
 
 
@@ -3315,6 +3358,76 @@ MINI_CAR_DAE_PATH = ASSET_DIRECTORY / "mini_car.dae"
 
 
 CANNON_DAE_PATH = ASSET_DIRECTORY / "cannon.dae"
+RAMP_FLAP_DAE_PATH = ASSET_DIRECTORY / "ramp_flap.dae"
+
+
+def build_ramp_flap() -> None:
+    """Hinged exit-ramp flap (v1.35 control panel): origin ON the hinge line.
+
+    The runtime tilts the whole TSStatic about its local +X axis in
+    one-degree steps, so the plate extends +Y from the origin with the
+    hinge barrels at y=0. Checkerplate deck + side cheeks + hinge knuckles.
+    """
+
+    plate = material(
+        scenario_material_name("ramp_flap"),
+        (0.5, 0.52, 0.55, 1.0),
+        metallic=0.85,
+        roughness=0.45,
+    )
+    dark = material(scenario_material_name("rubber"), (0.012, 0.014, 0.018, 1.0), roughness=0.9)
+    prefix = f"{MOD_ID}_rampflap_"
+    parts = [
+        add_box(f"{prefix}Deck", (0.0, 0.85, 0.035), (5.4, 1.7, 0.07), plate, bevel=0.01),
+        add_box(f"{prefix}Lip", (0.0, 1.72, 0.025), (5.4, 0.06, 0.05), plate, bevel=0.0),
+    ]
+    for side in (-1.0, 1.0):
+        parts.append(
+            add_box(
+                f"{prefix}Cheek_{'L' if side < 0 else 'R'}",
+                (side * 2.66, 0.85, 0.045),
+                (0.08, 1.7, 0.09),
+                plate,
+                bevel=0.0,
+            )
+        )
+    for knuckle_x in (-2.2, -1.1, 0.0, 1.1, 2.2):
+        parts.append(
+            add_cylinder(
+                f"{prefix}Knuckle_{knuckle_x}",
+                (knuckle_x, 0.0, 0.035),
+                0.045,
+                0.5,
+                dark,
+                rotation=(0.0, math.pi / 2.0, 0.0),
+                vertices=10,
+                bevel=0.0,
+            )
+        )
+    bpy.ops.object.select_all(action="DESELECT")
+    for obj in parts:
+        obj.select_set(True)
+    bpy.context.view_layer.objects.active = parts[0]
+    result = bpy.ops.wm.collada_export(
+        filepath=str(RAMP_FLAP_DAE_PATH),
+        check_existing=False,
+        selected=True,
+        include_children=True,
+        apply_modifiers=True,
+        triangulate=True,
+        apply_global_orientation=True,
+        export_global_forward_selection="Y",
+        export_global_up_selection="Z",
+        sort_by_name=True,
+    )
+    if "FINISHED" not in result:
+        raise RuntimeError(f"ramp flap export failed: {result}")
+    for obj in parts:
+        mesh = obj.data
+        bpy.data.objects.remove(obj, do_unlink=True)
+        if mesh.users == 0:
+            bpy.data.meshes.remove(mesh)
+    print("CANNON_CAR_WASH_STAGE ramp_flap complete")
 
 
 def build_cannon() -> None:
@@ -3654,6 +3767,7 @@ if STAGE in {"details", "all"}:
 if STAGE in {"finalize", "all"}:
     build_mini_car()
     build_cannon()
+    build_ramp_flap()
     finalize()
 if STAGE in {"vehicle_prop", "all"}:
     export_vehicle_selector_asset()

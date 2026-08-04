@@ -53,6 +53,7 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"art/shapes/{MOD_ID}/cannon.dae",
     f"art/shapes/{MOD_ID}/{MOD_ID}.dae",
     f"art/shapes/{MOD_ID}/mini_car.dae",
+    f"art/shapes/{MOD_ID}/ramp_flap.dae",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_attract_cannon.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_attract_cannon.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_attract_cannon_roughness.data.dds",
@@ -66,6 +67,7 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_concrete.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_concrete.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_concrete_roughness.data.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_control_panel.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_corrugated_blue.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_corrugated_blue.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_corrugated_blue_ao.data.dds",
@@ -88,6 +90,9 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_mini_wheel.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_mini_wheel.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_mini_wheel_roughness.data.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_ramp_flap.color.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_ramp_flap.normal.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_ramp_flap_roughness.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_safety_orange.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_safety_orange.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_safety_orange_roughness.data.dds",
@@ -116,6 +121,7 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"vehicles/{MOD_ID}/lua/{MOD_ID}_vehicle.lua",
     f"vehicles/{MOD_ID}/main.materials.json",
     f"vehicles/{MOD_ID}/mini_car.dae",
+    f"vehicles/{MOD_ID}/ramp_flap.dae",
     f"vehicles/{MOD_ID}/standard.jpg",
     f"vehicles/{MOD_ID}/standard.pc",
 )
@@ -145,8 +151,8 @@ def _validate_member_name(
 
 
 def _validate_allowlist() -> None:
-    if len(EXPECTED_RUNTIME_FILES) != 68:
-        raise DistributionError("the public runtime allowlist must contain exactly 68 files")
+    if len(EXPECTED_RUNTIME_FILES) != 74:
+        raise DistributionError("the public runtime allowlist must contain exactly 74 files")
     if tuple(sorted(EXPECTED_RUNTIME_FILES)) != EXPECTED_RUNTIME_FILES:
         raise DistributionError("the public runtime allowlist must be deterministically sorted")
     for name in EXPECTED_RUNTIME_FILES:

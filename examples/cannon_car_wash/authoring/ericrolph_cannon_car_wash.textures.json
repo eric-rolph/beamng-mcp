@@ -96,6 +96,13 @@
       "sha256": "e397e87dca9593e93875e923566889a9b8fc2f037e0b1884a5f1b6f4cac9c5e4"
     },
     {
+      "name": "ericrolph_cannon_car_wash_control_panel.color.png",
+      "width": 512,
+      "height": 512,
+      "mode": "RGB",
+      "sha256": "22a741d287f1a18ced266528baece760c243a8be289cf7ff97596e22b6f82cd1"
+    },
+    {
       "name": "ericrolph_cannon_car_wash_corrugated_blue.color.png",
       "width": 1024,
       "height": 1024,
@@ -241,6 +248,27 @@
       "height": 128,
       "mode": "L",
       "sha256": "f45f2f42e85cda7f73daad60e33797d16168063dd662cf8525a33721570b3191"
+    },
+    {
+      "name": "ericrolph_cannon_car_wash_ramp_flap.color.png",
+      "width": 256,
+      "height": 256,
+      "mode": "RGB",
+      "sha256": "b9a64905b6d9162a7b41e2f55c621127c4ea8fc2c5cf7d6e2f9f4fb7646b713d"
+    },
+    {
+      "name": "ericrolph_cannon_car_wash_ramp_flap.normal.png",
+      "width": 256,
+      "height": 256,
+      "mode": "RGB",
+      "sha256": "ad9e4c7cc98f68342d6b5a346d002f838a41810a414bfca4e2a39d5c8a10a32a"
+    },
+    {
+      "name": "ericrolph_cannon_car_wash_ramp_flap_roughness.data.png",
+      "width": 256,
+      "height": 256,
+      "mode": "L",
+      "sha256": "9445936bd777496aaa4757e73dc090fdf59c36f11597a9b551acb186057f288d"
     },
     {
       "name": "ericrolph_cannon_car_wash_safety_orange.color.png",

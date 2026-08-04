@@ -104,6 +104,27 @@
     "persistentId": "17e7db3c-ec16-509c-97d2-017225f02abd",
     "version": 1.5
   },
+  "ericrolph_cannon_car_wash_selector_control_panel": {
+    "Stages": [
+      {
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_control_panel.color.png",
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": true,
+    "class": "Material",
+    "doubleSided": true,
+    "mapTo": "ericrolph_cannon_car_wash_selector_control_panel",
+    "materialTag0": "ericrolph_cannon_car_wash_selector",
+    "name": "ericrolph_cannon_car_wash_selector_control_panel",
+    "persistentId": "5b2cde15-02a5-5157-8d4c-5a9ff4208e81",
+    "translucentBlendOp": "None",
+    "version": 1.5
+  },
   "ericrolph_cannon_car_wash_selector_corrugated_blue": {
     "Stages": [
       {

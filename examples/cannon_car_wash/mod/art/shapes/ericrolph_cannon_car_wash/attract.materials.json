@@ -61,5 +61,26 @@
     "persistentId": "d46567fa-ef63-55d5-b108-3d5f60ea0cd8",
     "translucentBlendOp": "None",
     "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_ramp_flap": {
+    "Stages": [
+      {
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_ramp_flap.color.png",
+        "metallicFactor": 0.85,
+        "normalMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_ramp_flap.normal.png",
+        "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_ramp_flap_roughness.data.png"
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": true,
+    "class": "Material",
+    "mapTo": "ericrolph_cannon_car_wash_ramp_flap",
+    "materialTag0": "ericrolph_cannon_car_wash",
+    "name": "ericrolph_cannon_car_wash_ramp_flap",
+    "persistentId": "7be13267-7081-545c-8aeb-0015028ba0c0",
+    "translucentBlendOp": "None",
+    "version": 1.5
   }
 }
