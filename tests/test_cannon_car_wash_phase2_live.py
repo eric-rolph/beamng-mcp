@@ -151,7 +151,7 @@ def _stage_public_mod(
         for path in MOD_SOURCE.rglob("*")
         if path.is_file() and not path.is_symlink()
     }
-    assert len(PUBLIC_RUNTIME_FILES) == 40
+    assert len(PUBLIC_RUNTIME_FILES) == 60
     assert set(source_files) == PUBLIC_RUNTIME_FILES
 
     mod_root = workspace / "mods" / runtime_mod_name
@@ -593,9 +593,16 @@ async def test_cannon_car_wash_phase2_visual_placement_and_trigger(tmp_path: Pat
                     assert tuple(
                         packaged_light["position"][axis] for axis in ("x", "y", "z")
                     ) == pytest.approx(light["world_position"])
-                    assert float(packaged_light["fields"]["brightness"]) == pytest.approx(
-                        light["brightness"]
-                    )
+                    # 0.39 calibrated lighting: the manifest pins physical
+                    # intensity (lm/cd), which the bridge's safe light schema
+                    # does not expose - it surfaces only the engine-derived
+                    # legacy ``brightness``. The photometric values are
+                    # contract-pinned statically (13x intensity/intensity_unit
+                    # in the lighting lua); the live check is that the
+                    # packaged light actually carries a lit, positive output.
+                    assert light["intensity"] > 0.0
+                    assert light["intensity_unit"] in {"lm", "cd"}
+                    assert float(packaged_light["fields"]["brightness"]) > 0.0
                     # The bridge's safe PointLight/SpotLight schema exposes the
                     # engine field as ``enabled``. Persistent prefab JSON uses
                     # Torque's serialized ``isEnabled`` spelling.
