@@ -123,6 +123,118 @@
       "ericrolph_cannon_car_wash_s03_t04"
     ],
     [
+      "ericrolph_cannon_car_wash_guard_f_guard_left_bottom",
+      "ericrolph_cannon_car_wash_guard_f_guard_left_top"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_f_guard_left_bottom",
+      "ericrolph_cannon_car_wash_s00_t00"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_f_guard_left_bottom",
+      "ericrolph_cannon_car_wash_s00_t01"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_f_guard_left_bottom",
+      "ericrolph_cannon_car_wash_s00_t08"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_f_guard_left_bottom",
+      "ericrolph_cannon_car_wash_s00_t09"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_f_guard_left_top",
+      "ericrolph_cannon_car_wash_s00_t08"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_f_guard_left_top",
+      "ericrolph_cannon_car_wash_s00_t09"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_f_guard_right_bottom",
+      "ericrolph_cannon_car_wash_guard_f_guard_right_top"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_f_guard_right_bottom",
+      "ericrolph_cannon_car_wash_s00_t03"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_f_guard_right_bottom",
+      "ericrolph_cannon_car_wash_s00_t04"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_f_guard_right_bottom",
+      "ericrolph_cannon_car_wash_s00_t05"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_f_guard_right_bottom",
+      "ericrolph_cannon_car_wash_s00_t06"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_f_guard_right_top",
+      "ericrolph_cannon_car_wash_s00_t05"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_f_guard_right_top",
+      "ericrolph_cannon_car_wash_s00_t06"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_r_guard_left_bottom",
+      "ericrolph_cannon_car_wash_guard_r_guard_left_top"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_r_guard_left_bottom",
+      "ericrolph_cannon_car_wash_s06_t00"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_r_guard_left_bottom",
+      "ericrolph_cannon_car_wash_s06_t01"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_r_guard_left_bottom",
+      "ericrolph_cannon_car_wash_s06_t08"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_r_guard_left_bottom",
+      "ericrolph_cannon_car_wash_s06_t09"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_r_guard_left_top",
+      "ericrolph_cannon_car_wash_s06_t08"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_r_guard_left_top",
+      "ericrolph_cannon_car_wash_s06_t09"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_r_guard_right_bottom",
+      "ericrolph_cannon_car_wash_guard_r_guard_right_top"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_r_guard_right_bottom",
+      "ericrolph_cannon_car_wash_s06_t03"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_r_guard_right_bottom",
+      "ericrolph_cannon_car_wash_s06_t04"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_r_guard_right_bottom",
+      "ericrolph_cannon_car_wash_s06_t05"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_r_guard_right_bottom",
+      "ericrolph_cannon_car_wash_s06_t06"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_r_guard_right_top",
+      "ericrolph_cannon_car_wash_s06_t05"
+    ],
+    [
+      "ericrolph_cannon_car_wash_guard_r_guard_right_top",
+      "ericrolph_cannon_car_wash_s06_t06"
+    ],
+    [
       "ericrolph_cannon_car_wash_s00_t00",
       "ericrolph_cannon_car_wash_s00_t01"
     ],
@@ -7675,6 +7787,142 @@
       ],
       "station": 7,
       "track": "apron_right"
+    },
+    {
+      "id": "ericrolph_cannon_car_wash_guard_f_guard_left_bottom",
+      "position": [
+        3.620001,
+        9.42,
+        0.0
+      ],
+      "source_object": "ericrolph_cannon_car_wash_selector_cage",
+      "source_vertex_index": 85,
+      "source_world_position": [
+        -3.62,
+        -9.42,
+        0.0
+      ],
+      "station": -1,
+      "track": "guard_left_bottom"
+    },
+    {
+      "id": "ericrolph_cannon_car_wash_guard_f_guard_left_top",
+      "position": [
+        3.620001,
+        9.42,
+        4.96
+      ],
+      "source_object": "ericrolph_cannon_car_wash_selector_cage",
+      "source_vertex_index": 86,
+      "source_world_position": [
+        -3.62,
+        -9.42,
+        4.96
+      ],
+      "station": -1,
+      "track": "guard_left_top"
+    },
+    {
+      "id": "ericrolph_cannon_car_wash_guard_f_guard_right_bottom",
+      "position": [
+        -3.619999,
+        9.42,
+        0.0
+      ],
+      "source_object": "ericrolph_cannon_car_wash_selector_cage",
+      "source_vertex_index": 87,
+      "source_world_position": [
+        3.62,
+        -9.42,
+        0.0
+      ],
+      "station": -1,
+      "track": "guard_right_bottom"
+    },
+    {
+      "id": "ericrolph_cannon_car_wash_guard_f_guard_right_top",
+      "position": [
+        -3.619999,
+        9.42,
+        4.96
+      ],
+      "source_object": "ericrolph_cannon_car_wash_selector_cage",
+      "source_vertex_index": 88,
+      "source_world_position": [
+        3.62,
+        -9.42,
+        4.96
+      ],
+      "station": -1,
+      "track": "guard_right_top"
+    },
+    {
+      "id": "ericrolph_cannon_car_wash_guard_r_guard_left_bottom",
+      "position": [
+        3.619999,
+        -9.42,
+        0.0
+      ],
+      "source_object": "ericrolph_cannon_car_wash_selector_cage",
+      "source_vertex_index": 89,
+      "source_world_position": [
+        -3.62,
+        9.42,
+        0.0
+      ],
+      "station": 7,
+      "track": "guard_left_bottom"
+    },
+    {
+      "id": "ericrolph_cannon_car_wash_guard_r_guard_left_top",
+      "position": [
+        3.619999,
+        -9.42,
+        4.96
+      ],
+      "source_object": "ericrolph_cannon_car_wash_selector_cage",
+      "source_vertex_index": 90,
+      "source_world_position": [
+        -3.62,
+        9.42,
+        4.96
+      ],
+      "station": 7,
+      "track": "guard_left_top"
+    },
+    {
+      "id": "ericrolph_cannon_car_wash_guard_r_guard_right_bottom",
+      "position": [
+        -3.620001,
+        -9.42,
+        0.0
+      ],
+      "source_object": "ericrolph_cannon_car_wash_selector_cage",
+      "source_vertex_index": 91,
+      "source_world_position": [
+        3.62,
+        9.42,
+        0.0
+      ],
+      "station": 7,
+      "track": "guard_right_bottom"
+    },
+    {
+      "id": "ericrolph_cannon_car_wash_guard_r_guard_right_top",
+      "position": [
+        -3.620001,
+        -9.42,
+        4.96
+      ],
+      "source_object": "ericrolph_cannon_car_wash_selector_cage",
+      "source_vertex_index": 92,
+      "source_world_position": [
+        3.62,
+        9.42,
+        4.96
+      ],
+      "station": 7,
+      "track": "guard_right_top"
     }
   ],
   "refnodes": {
@@ -9299,6 +9547,134 @@
         "ericrolph_cannon_car_wash_s06_t02"
       ],
       "surface": "ramp_apron_r"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_s00_t01",
+        "ericrolph_cannon_car_wash_guard_f_guard_left_bottom",
+        "ericrolph_cannon_car_wash_s00_t09"
+      ],
+      "surface": "corner_guard_f_left"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_guard_f_guard_left_bottom",
+        "ericrolph_cannon_car_wash_guard_f_guard_left_top",
+        "ericrolph_cannon_car_wash_s00_t09"
+      ],
+      "surface": "corner_guard_f_left"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_s00_t00",
+        "ericrolph_cannon_car_wash_guard_f_guard_left_bottom",
+        "ericrolph_cannon_car_wash_s00_t08"
+      ],
+      "surface": "corner_guard_f_left"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_guard_f_guard_left_bottom",
+        "ericrolph_cannon_car_wash_guard_f_guard_left_top",
+        "ericrolph_cannon_car_wash_s00_t08"
+      ],
+      "surface": "corner_guard_f_left"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_s00_t03",
+        "ericrolph_cannon_car_wash_guard_f_guard_right_bottom",
+        "ericrolph_cannon_car_wash_s00_t05"
+      ],
+      "surface": "corner_guard_f_right"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_guard_f_guard_right_bottom",
+        "ericrolph_cannon_car_wash_guard_f_guard_right_top",
+        "ericrolph_cannon_car_wash_s00_t05"
+      ],
+      "surface": "corner_guard_f_right"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_s00_t04",
+        "ericrolph_cannon_car_wash_guard_f_guard_right_bottom",
+        "ericrolph_cannon_car_wash_s00_t06"
+      ],
+      "surface": "corner_guard_f_right"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_guard_f_guard_right_bottom",
+        "ericrolph_cannon_car_wash_guard_f_guard_right_top",
+        "ericrolph_cannon_car_wash_s00_t06"
+      ],
+      "surface": "corner_guard_f_right"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_s06_t01",
+        "ericrolph_cannon_car_wash_guard_r_guard_left_bottom",
+        "ericrolph_cannon_car_wash_s06_t09"
+      ],
+      "surface": "corner_guard_r_left"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_guard_r_guard_left_bottom",
+        "ericrolph_cannon_car_wash_guard_r_guard_left_top",
+        "ericrolph_cannon_car_wash_s06_t09"
+      ],
+      "surface": "corner_guard_r_left"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_s06_t00",
+        "ericrolph_cannon_car_wash_guard_r_guard_left_bottom",
+        "ericrolph_cannon_car_wash_s06_t08"
+      ],
+      "surface": "corner_guard_r_left"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_guard_r_guard_left_bottom",
+        "ericrolph_cannon_car_wash_guard_r_guard_left_top",
+        "ericrolph_cannon_car_wash_s06_t08"
+      ],
+      "surface": "corner_guard_r_left"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_s06_t03",
+        "ericrolph_cannon_car_wash_guard_r_guard_right_bottom",
+        "ericrolph_cannon_car_wash_s06_t05"
+      ],
+      "surface": "corner_guard_r_right"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_guard_r_guard_right_bottom",
+        "ericrolph_cannon_car_wash_guard_r_guard_right_top",
+        "ericrolph_cannon_car_wash_s06_t05"
+      ],
+      "surface": "corner_guard_r_right"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_s06_t04",
+        "ericrolph_cannon_car_wash_guard_r_guard_right_bottom",
+        "ericrolph_cannon_car_wash_s06_t06"
+      ],
+      "surface": "corner_guard_r_right"
+    },
+    {
+      "nodes": [
+        "ericrolph_cannon_car_wash_guard_r_guard_right_bottom",
+        "ericrolph_cannon_car_wash_guard_r_guard_right_top",
+        "ericrolph_cannon_car_wash_s06_t06"
+      ],
+      "surface": "corner_guard_r_right"
     }
   ],
   "visual": {
@@ -9377,7 +9753,7 @@
       "ericrolph_cannon_car_wash_selector_wet_concrete"
     ],
     "path": "vehicles/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
-    "sha256": "d2ad74745a0ee94d7c6efc4dec99ab91e294da0f9238a1ce875d97ab004016ea",
-    "size": 3077916
+    "sha256": "d01f9a4cf9be9aa0676589b4620c9ca9cae7067b053608273b9742424df9696d",
+    "size": 3078256
   }
 }

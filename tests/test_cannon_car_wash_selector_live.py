@@ -81,7 +81,7 @@ def _selector_error_lines(log_path: Path) -> list[str]:
     return issues
 
 
-CAGE_NODE_COUNT = 85
+CAGE_NODE_COUNT = 93
 CLOTH_NODE_COUNT = 96
 
 
@@ -367,10 +367,10 @@ async def test_cannon_car_wash_is_a_discoverable_stable_selector_prop(tmp_path: 
                     "ok": True,
                     "collision_mode_3_count": 8,
                 }
-                assert topology["beam_count"] == 347 + 192
-                assert topology["triangle_count"] == 152 + 72
+                assert topology["beam_count"] == 375 + 192
+                assert topology["triangle_count"] == 168 + 72
                 assert topology["flexbody_count"] == 2
-                assert topology["total_mass_kg"] == pytest.approx(15971.0, rel=1e-5)
+                assert topology["total_mass_kg"] == pytest.approx(16971.0, rel=1e-5)
                 assert topology["vehicle_directory"] == f"/vehicles/{MOD_ID}/"
                 initial_shell = await _shell_snapshot(runtime, prop_vehicle)
 
