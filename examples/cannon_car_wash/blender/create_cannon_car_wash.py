@@ -3155,12 +3155,19 @@ def build_mini_car() -> None:
         scenario_material_name("glass"), (0.03, 0.32, 0.48, 0.38), metallic=0.1, roughness=0.08
     )
     parts = [
-        add_box(f"{MINI_CAR_PREFIX}Body", (0.0, 0.0, 0.075), (0.30, 0.14, 0.07), orange,
-                bevel=0.012),
-        add_box(f"{MINI_CAR_PREFIX}Cabin", (-0.02, 0.0, 0.135), (0.16, 0.12, 0.055), orange,
-                bevel=0.012),
-        add_box(f"{MINI_CAR_PREFIX}Screen", (0.052, 0.0, 0.133), (0.012, 0.10, 0.045), glass,
-                bevel=0.004),
+        add_box(
+            f"{MINI_CAR_PREFIX}Body", (0.0, 0.0, 0.075), (0.30, 0.14, 0.07), orange, bevel=0.012
+        ),
+        add_box(
+            f"{MINI_CAR_PREFIX}Cabin", (-0.02, 0.0, 0.135), (0.16, 0.12, 0.055), orange, bevel=0.012
+        ),
+        add_box(
+            f"{MINI_CAR_PREFIX}Screen",
+            (0.052, 0.0, 0.133),
+            (0.012, 0.10, 0.045),
+            glass,
+            bevel=0.004,
+        ),
     ]
     for wheel_x in (-0.095, 0.095):
         for wheel_side in (-1.0, 1.0):
