@@ -7,6 +7,22 @@ local PROP_VISUAL_MESH = "ericrolph_cannon_car_wash_selector_visual"
 local VISUAL_SHAPE = (
   "/vehicles/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash_runtime_visual.dae"
 )
+-- Sign-cannon attract volley: a tiny car arcs from the sign barrel every
+-- couple of minutes. ONE top-level local owns the whole module - the
+-- runtime sits at LuaJIT's 60-upvalue closure limit, so features must
+-- not scatter new file-scope names (v1.30 discovery: 7 attract locals
+-- broke module load with "more than 60 upvalues").
+local Attract = {
+  shape = "/vehicles/ericrolph_cannon_car_wash/mini_car.dae",
+  intervalSeconds = 120,
+  firstDelaySeconds = 25,
+  speedMps = 7.5,
+  gravityMps2 = -9.81,
+  flightMaxSeconds = 6.0,
+  muzzleLocal = vec3(1.62, -10.02, 6.38),
+  aimLocal = vec3(0.0, -0.573576, 0.819152),
+  tumbleRate = 7.0,
+}
 local VISUAL_MATERIALS_PATH = "vehicles/ericrolph_cannon_car_wash/main.materials.json"
 local REQUIRED_VISUAL_MATERIALS = {
   "ericrolph_cannon_car_wash_selector_brush_aqua",
@@ -566,6 +582,127 @@ local function createTrigger(name, mode)
     return nil, registerError
   end
   return object
+end
+
+function Attract.createProjectile(name)
+  local object = createObject(VISUAL_CLASS)
+  if not object then return nil, "BeamNG did not create the attract projectile" end
+  local ok, createError = pcall(function()
+    object.loadMode = 1
+    if type(object.preApply) == "function" then object:preApply() end
+    setCanSaveFalse(object)
+    object:setField("shapeName", 0, Attract.shape)
+    object:setField("collisionType", 0, "None")
+    object:setField("decalType", 0, "None")
+    if type(object.postApply) == "function" then object:postApply() end
+  end)
+  if not ok then
+    pcall(function() object:delete() end)
+    return nil, tostring(createError)
+  end
+  local registered, registerError = registerInMission(object, name)
+  if not registered then
+    pcall(function() object:delete() end)
+    return nil, registerError
+  end
+  -- Parked out of sight until the cannon fires.
+  pcall(function() object:setPosRot(0, 0, -220, 0, 0, 0, 1) end)
+  return object
+end
+
+function Attract.world(state, localPosition)
+  return state.origin + state.modelRotation * localPosition
+end
+
+function Attract.start(state)
+  local attract = state.attract
+  if not attract or not attract.projectile or attract.flying then return false end
+  attract.flying = true
+  attract.flightTime = 0
+  attract.launchOrigin = Attract.world(state, Attract.muzzleLocal)
+  attract.velocity = (state.modelRotation * Attract.aimLocal) * Attract.speedMps
+  attract.tumblePhase = 0
+  if attract.muzzleEmitter then
+    local muzzle = attract.launchOrigin
+    pcall(function()
+      attract.muzzleEmitter:setPosRot(muzzle.x, muzzle.y, muzzle.z, 0, 0, 0, 1)
+      attract.muzzleEmitter:setActive(true)
+    end)
+    attract.muzzleTimer = 0.7
+  end
+  emitEvent(state, "I", "attract_volley_fired", {prop_id = state.propId})
+  return true
+end
+
+function Attract.finish(state, landed)
+  local attract = state.attract
+  if not attract then return end
+  attract.flying = false
+  attract.timer = Attract.intervalSeconds
+  if attract.projectile then
+    pcall(function() attract.projectile:setPosRot(0, 0, -220, 0, 0, 0, 1) end)
+  end
+  if landed and attract.landEmitter and attract.landPosition then
+    local landing = attract.landPosition
+    pcall(function()
+      attract.landEmitter:setPosRot(landing.x, landing.y, landing.z, 0, 0, 0, 1)
+      attract.landEmitter:setActive(true)
+    end)
+    attract.landTimer = 0.8
+  end
+end
+
+function Attract.update(state, dt)
+  local attract = state.attract
+  if not attract or not state.origin or not state.modelRotation then return end
+  if attract.muzzleTimer then
+    attract.muzzleTimer = attract.muzzleTimer - dt
+    if attract.muzzleTimer <= 0 then
+      attract.muzzleTimer = nil
+      if attract.muzzleEmitter then
+        pcall(function() attract.muzzleEmitter:setActive(false) end)
+      end
+    end
+  end
+  if attract.landTimer then
+    attract.landTimer = attract.landTimer - dt
+    if attract.landTimer <= 0 then
+      attract.landTimer = nil
+      if attract.landEmitter then
+        pcall(function() attract.landEmitter:setActive(false) end)
+      end
+    end
+  end
+  if attract.flying then
+    attract.flightTime = attract.flightTime + dt
+    local t = attract.flightTime
+    local position = attract.launchOrigin + attract.velocity * t
+    position.z = position.z + 0.5 * Attract.gravityMps2 * t * t
+    attract.tumblePhase = attract.tumblePhase + Attract.tumbleRate * dt
+    local half = attract.tumblePhase * 0.5
+    local tumble = {x = math.sin(half), y = 0, z = 0, w = math.cos(half)}
+    if attract.projectile then
+      pcall(function()
+        attract.projectile:setPosRot(
+          position.x, position.y, position.z,
+          tumble.x, tumble.y, tumble.z, tumble.w
+        )
+      end)
+    end
+    if attract.muzzleEmitter and attract.muzzleTimer then
+      pcall(function()
+        attract.muzzleEmitter:setPosRot(position.x, position.y, position.z, 0, 0, 0, 1)
+      end)
+    end
+    local groundZ = state.origin.z + 0.05
+    if position.z <= groundZ or t > Attract.flightMaxSeconds then
+      attract.landPosition = vec3(position.x, position.y, math.max(position.z, groundZ))
+      Attract.finish(state, position.z <= groundZ)
+    end
+    return
+  end
+  attract.timer = (attract.timer or Attract.firstDelaySeconds) - dt
+  if attract.timer <= 0 then Attract.start(state) end
 end
 
 local function createEffect(spec)
@@ -2080,6 +2217,12 @@ local function cleanupInstallation(state, reason)
   deleteSceneObject(state.launchTrigger)
   for _, effect in ipairs(state.effects or {}) do deleteSceneObject(effect) end
   for _, light in ipairs(state.lights or {}) do deleteSceneObject(light) end
+  if state.attract then
+    deleteSceneObject(state.attract.projectile)
+    deleteSceneObject(state.attract.muzzleEmitter)
+    deleteSceneObject(state.attract.landEmitter)
+    state.attract = nil
+  end
   deleteSceneObject(state.visual)
   local vehicle = exactVehicle(state.propId)
   if vehicle and isWashProp(vehicle) then
@@ -2267,6 +2410,27 @@ local function registerProp(propId)
     state.effects[#state.effects + 1] = effect
   end
 
+  -- Sign-cannon attract volley kit: projectile + muzzle smoke + landing
+  -- dust. Non-fatal on failure - the wash works without its showpiece.
+  local projectile = Attract.createProjectile(prefix .. "_attract_car")
+  if projectile then
+    local muzzleEmitter = createEffect({
+      name = prefix .. "_attract_muzzle",
+      emitter = "BNGP_34",
+    })
+    local landEmitter = createEffect({
+      name = prefix .. "_attract_land",
+      emitter = "BNGP_2",
+    })
+    state.attract = {
+      projectile = projectile,
+      muzzleEmitter = muzzleEmitter,
+      landEmitter = landEmitter,
+      timer = ATTRACT_FIRST_DELAY_SECONDS,
+      flying = false,
+    }
+  end
+
   for _, spec in ipairs(state.lightSpecs) do
     local light, lightError = createLight(spec)
     if not light then
@@ -2408,6 +2572,7 @@ local function onPreRender(dtReal, dtSim, dtRaw)
         end
       end
     end
+    Attract.update(state, elapsed)
     positionalZoneSweep(state)
     -- Bay check: a car that rolled in fast (repair and/or hold deferred)
     -- gets the full service the moment it comes to parking speed inside.
@@ -2724,6 +2889,12 @@ end
 
 M.registerProp = registerProp
 M.unregisterProp = unregisterProp
+M.fireAttractVolley = function(propId)
+  local state = installations[propId]
+  if not state or not state.attract then return false end
+  state.attract.timer = 0
+  return true
+end
 M.getSystemState = getSystemState
 M.onBeamNGTrigger = onBeamNGTrigger
 M.onEricrolphCannonCarWashHoldAcknowledged = onEricrolphCannonCarWashHoldAcknowledged

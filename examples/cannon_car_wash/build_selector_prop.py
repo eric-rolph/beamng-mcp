@@ -23,6 +23,8 @@ HANDOFF_PATH = AUTHORING_ROOT / f"{MOD_ID}.selector_handoff.json"
 DAE_PATH = VEHICLE_ROOT / f"{MOD_ID}.dae"
 ANIMATED_DAE_PATH = VEHICLE_ROOT / f"{MOD_ID}_runtime_visual.dae"
 SOURCE_ANIMATED_DAE_PATH = MOD_ROOT / "art" / "shapes" / MOD_ID / f"{MOD_ID}.dae"
+SOURCE_MINI_CAR_PATH = MOD_ROOT / "art" / "shapes" / MOD_ID / "mini_car.dae"
+MINI_CAR_DAE_PATH = VEHICLE_ROOT / "mini_car.dae"
 SOURCE_MATERIALS_PATH = (
     MOD_ROOT / "levels" / "gridmap_v2" / "scenarios" / MOD_ID / "main.materials.json"
 )
@@ -293,11 +295,18 @@ def build_animated_runtime_visual(handoff: dict[str, Any]) -> None:
     ANIMATED_DAE_PATH.write_text(payload, encoding="utf-8", newline="")
 
 
+def copy_mini_car() -> None:
+    if not SOURCE_MINI_CAR_PATH.is_file():
+        raise FileNotFoundError(f"mini car shape missing: {SOURCE_MINI_CAR_PATH}")
+    shutil.copyfile(SOURCE_MINI_CAR_PATH, MINI_CAR_DAE_PATH)
+
+
 def main() -> None:
     handoff = load_handoff()
     jbeam, total_mass = build_jbeam(handoff)
     materials = build_materials(handoff)
 
+    copy_mini_car()
     write_json(VEHICLE_ROOT / f"{MODEL_ID}.jbeam", jbeam)
     write_json(VEHICLE_ROOT / "main.materials.json", materials)
     build_animated_runtime_visual(handoff)
