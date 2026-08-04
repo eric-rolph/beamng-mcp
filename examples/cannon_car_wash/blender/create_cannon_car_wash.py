@@ -2665,87 +2665,101 @@ def _selector_structure() -> dict[str, Any]:
     # Hem at 1.0 m: the strips must actually reach vehicles (first cloth
     # probe: a 2.05 m hem cleared an etk800 roof by 60 cm and the curtain
     # never moved). Real mitters drag across the hood and roof.
-    strip_levels = (4.30, 3.25, 2.18, 1.10)
-    mitter_y = -4.35
-    for strip in range(12):
-        strip_x = -2.31 + strip * 0.42
-        strip_ids: dict[tuple[int, int], str] = {}
-        for column, x in enumerate((strip_x - 0.19, strip_x + 0.19)):
-            for level, z in enumerate(strip_levels):
-                identifier = f"{MOD_ID}_mitter_s{strip:02d}_c{column}_l{level}"
-                source = Vector((x, mitter_y, z))
-                mapped = rotation @ source
-                strip_ids[(column, level)] = identifier
-                cloth_position[identifier] = [round(value, 6) for value in mapped]
-                cloth_nodes.append(
+    # v1.26 contact-brush rows (player request: brushes should softly meet
+    # the vehicle): the same lose-every-argument cloth recipe hangs at the
+    # second tower pair and at the overhead roller, so cars feel soft
+    # bristle contact on the upper body and roof exactly where the
+    # spinning visuals are scrubbing. Anchor springs are the "soft spring
+    # mechanism"; the spinning-physics ban stands (v1.22 catapult lesson).
+    cloth_rows = (
+        ("mitter", -4.35, 12, 0.42, 0.19, (4.30, 3.25, 2.18, 1.10)),
+        ("scrub", 1.2, 8, 0.62, 0.26, (4.30, 3.25, 2.18, 1.10)),
+        ("top", 4.15, 8, 0.62, 0.26, (4.30, 3.30, 2.30, 1.30)),
+    )
+    for row_index, (row_name, row_y, strip_count, spacing, half_width, strip_levels) in enumerate(
+        cloth_rows
+    ):
+        mitter_y = row_y
+        row_start_x = -((strip_count - 1) / 2.0) * spacing
+        for strip in range(strip_count):
+            strip_x = row_start_x + strip * spacing
+            strip_ids: dict[tuple[int, int], str] = {}
+            for column, x in enumerate((strip_x - half_width, strip_x + half_width)):
+                for level, z in enumerate(strip_levels):
+                    identifier = f"{MOD_ID}_{row_name}_s{strip:02d}_c{column}_l{level}"
+                    source = Vector((x, mitter_y, z))
+                    mapped = rotation @ source
+                    strip_ids[(column, level)] = identifier
+                    cloth_position[identifier] = [round(value, 6) for value in mapped]
+                    cloth_nodes.append(
+                        {
+                            "id": identifier,
+                            "position": cloth_position[identifier],
+                            "source_world_position": [round(value, 6) for value in source],
+                            "fixed": level == 0,
+                        }
+                    )
+            for column in range(2):
+                for level in range(3):
+                    cloth_beams.append(
+                        {
+                            "nodes": [strip_ids[(column, level)], strip_ids[(column, level + 1)]],
+                            "class": "structural",
+                        }
+                    )
+            for level in range(4):
+                cloth_beams.append(
                     {
-                        "id": identifier,
-                        "position": cloth_position[identifier],
-                        "source_world_position": [round(value, 6) for value in source],
-                        "fixed": level == 0,
+                        "nodes": [strip_ids[(0, level)], strip_ids[(1, level)]],
+                        "class": "anchor" if level == 0 else "structural",
                     }
                 )
-        for column in range(2):
             for level in range(3):
                 cloth_beams.append(
                     {
-                        "nodes": [strip_ids[(column, level)], strip_ids[(column, level + 1)]],
-                        "class": "structural",
+                        "nodes": [strip_ids[(0, level)], strip_ids[(1, level + 1)]],
+                        "class": "shear",
                     }
                 )
-        for level in range(4):
-            cloth_beams.append(
-                {
-                    "nodes": [strip_ids[(0, level)], strip_ids[(1, level)]],
-                    "class": "anchor" if level == 0 else "structural",
-                }
-            )
-        for level in range(3):
-            cloth_beams.append(
-                {
-                    "nodes": [strip_ids[(0, level)], strip_ids[(1, level + 1)]],
-                    "class": "shear",
-                }
-            )
-            cloth_beams.append(
-                {
-                    "nodes": [strip_ids[(1, level)], strip_ids[(0, level + 1)]],
-                    "class": "shear",
-                }
-            )
-            first = strip_ids[(0, level)]
-            second = strip_ids[(1, level)]
-            third = strip_ids[(1, level + 1)]
-            fourth = strip_ids[(0, level + 1)]
-            cloth_triangles.append({"nodes": [first, second, third], "surface": "mitter"})
-            cloth_triangles.append({"nodes": [first, third, fourth], "surface": "mitter"})
-            # The strips map into the atlas's dedicated MITTER RIBBON BAND
-            # (v 0.765..0.995): continuous lanes tileable along U, so the
-            # strip length runs along U with a per-strip offset for
-            # variety. The card fringe region tore into floating bands
-            # (player screenshot); the ribbon band is solid cloth.
-            along_top = (level / 3.0) * 1.5 + strip * 0.13
-            along_bottom = ((level + 1) / 3.0) * 1.5 + strip * 0.13
-            # Window inset from the band edges: mips average across the
-            # card/band boundary, so sampling too close ghosts the wavy
-            # card fringe into the lanes (player: jagged mid-strip band).
-            quad_uvs = [
-                [along_top, 0.79],
-                [along_top, 0.985],
-                [along_bottom, 0.985],
-                [along_bottom, 0.79],
-            ]
-            cloth_quads.append(
-                {
-                    "positions": [
-                        cloth_position[first],
-                        cloth_position[second],
-                        cloth_position[third],
-                        cloth_position[fourth],
-                    ],
-                    "uvs": quad_uvs,
-                }
-            )
+                cloth_beams.append(
+                    {
+                        "nodes": [strip_ids[(1, level)], strip_ids[(0, level + 1)]],
+                        "class": "shear",
+                    }
+                )
+                first = strip_ids[(0, level)]
+                second = strip_ids[(1, level)]
+                third = strip_ids[(1, level + 1)]
+                fourth = strip_ids[(0, level + 1)]
+                cloth_triangles.append({"nodes": [first, second, third], "surface": "mitter"})
+                cloth_triangles.append({"nodes": [first, third, fourth], "surface": "mitter"})
+                # The strips map into the atlas's dedicated MITTER RIBBON BAND
+                # (v 0.765..0.995): continuous lanes tileable along U, so the
+                # strip length runs along U with a per-strip offset for
+                # variety. The card fringe region tore into floating bands
+                # (player screenshot); the ribbon band is solid cloth.
+                along_top = (level / 3.0) * 1.5 + strip * 0.13 + row_index * 0.41
+                along_bottom = ((level + 1) / 3.0) * 1.5 + strip * 0.13 + row_index * 0.41
+                # Window inset from the band edges: mips average across the
+                # card/band boundary, so sampling too close ghosts the wavy
+                # card fringe into the lanes (player: jagged mid-strip band).
+                quad_uvs = [
+                    [along_top, 0.79],
+                    [along_top, 0.985],
+                    [along_bottom, 0.985],
+                    [along_bottom, 0.79],
+                ]
+                cloth_quads.append(
+                    {
+                        "positions": [
+                            cloth_position[first],
+                            cloth_position[second],
+                            cloth_position[third],
+                            cloth_position[fourth],
+                        ],
+                        "uvs": quad_uvs,
+                    }
+                )
 
     return {
         "schema": "ericrolph-cannon-car-wash-selector-handoff-v1",
