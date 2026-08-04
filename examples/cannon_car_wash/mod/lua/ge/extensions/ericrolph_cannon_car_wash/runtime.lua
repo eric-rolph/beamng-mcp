@@ -43,6 +43,11 @@ local Attract = {
     "ericrolph_cannon_car_wash_mini_car_paint",
     "ericrolph_cannon_car_wash_mini_wheel",
     "ericrolph_cannon_car_wash_ramp_flap",
+    -- v1.36: the mini car's windshield and hub caps reference these two;
+    -- outside gridmap only THIS file defines them (the scenario set never
+    -- loads), so the toy rendered fallback-orange glass and hubs.
+    "ericrolph_cannon_car_wash_glass",
+    "ericrolph_cannon_car_wash_stainless",
   },
 }
 
@@ -54,19 +59,27 @@ local Attract = {
 -- methods are defined after the shared helpers (lexical-binding lesson).
 local Panel = {
   flapShape = "/vehicles/ericrolph_cannon_car_wash/ramp_flap.dae",
-  flapHingeLocal = vec3(0.0, 10.28, 0.05),
+  -- v1.36 (player: the plate stacked on top of the concrete apron): the
+  -- flap hinges at the SLAB EDGE and rests along the apron wedge's own
+  -- slope, so at zero degrees it reads as the exit ramp's steel surface.
+  -- Raising tilts it up from that rest pose; the concrete wedge stays
+  -- underneath as the base collision.
+  flapHingeLocal = vec3(0.0, 9.02, 0.150),
+  restAngleDeg = -5.8,
   maxAngleDeg = 15,
   stepDeg = 1,
   powerFactors = {0.6, 0.8, 1.0, 1.2, 1.4},
   defaultPowerIndex = 3,
   cooldownSeconds = 0.5,
   buttonScale = vec3(0.55, 0.5, 1.1),
+  -- v1.36: pads moved with the panel into the clear wall bay (the old row
+  -- ran under the pilaster-mounted box); positions mirror CtrlPad_1..5.
   buttons = {
-    {suffix = "btn_ramp_up", position = vec3(3.62, 6.40, 0.55)},
-    {suffix = "btn_ramp_down", position = vec3(3.62, 7.02, 0.55)},
-    {suffix = "btn_power_up", position = vec3(3.62, 7.64, 0.55)},
-    {suffix = "btn_power_down", position = vec3(3.62, 8.26, 0.55)},
-    {suffix = "btn_cannon", position = vec3(3.62, 8.88, 0.55)},
+    {suffix = "btn_ramp_up", position = vec3(3.72, 4.90, 0.55)},
+    {suffix = "btn_ramp_down", position = vec3(3.72, 5.45, 0.55)},
+    {suffix = "btn_power_up", position = vec3(3.72, 6.00, 0.55)},
+    {suffix = "btn_power_down", position = vec3(3.72, 6.55, 0.55)},
+    {suffix = "btn_cannon", position = vec3(3.72, 7.10, 0.55)},
   },
 }
 
@@ -1123,7 +1136,9 @@ function Panel.syncTransforms(state, frame)
     -- Hinge at the apron's outer edge: the flap mesh extends +Y from its
     -- origin, so composing the prop rotation with a local +X axis tilt
     -- raises the free tip in one-degree steps.
-    local tilt = quatFromAxisAngle(vec3(1, 0, 0), math.rad(panel.rampAngleDeg or 0))
+    local tilt = quatFromAxisAngle(
+      vec3(1, 0, 0), math.rad(Panel.restAngleDeg + (panel.rampAngleDeg or 0))
+    )
     setObjectTransform(
       panel.flap,
       frame.origin + frame.modelRotation * Panel.flapHingeLocal,
@@ -1179,8 +1194,19 @@ function Panel.press(state, buttonSuffix)
 end
 
 local function washSubjectCount(state)
+  -- v1.36 (player: brushes stopped while a car sat in the building): the
+  -- bay counts as occupied while ANY zone holds a subject - the wash
+  -- program's mid-tunnel box OR the rear wax/dry launch box. Every
+  -- caller of this count feeds the wash-systems lifecycle, so widening
+  -- it keeps the ambient clip rolling for parked and counting-down cars.
   local count = 0
   for _ in pairs(state.washSubjects) do count = count + 1 end
+  local launch = state.positionalOccupancy and state.positionalOccupancy.launch
+  if launch then
+    for subjectId in pairs(launch) do
+      if not state.washSubjects[subjectId] then count = count + 1 end
+    end
+  end
   return count
 end
 
