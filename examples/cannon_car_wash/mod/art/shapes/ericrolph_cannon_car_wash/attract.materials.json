@@ -20,6 +20,36 @@
     "translucentBlendOp": "None",
     "version": 1.5
   },
+  "ericrolph_cannon_car_wash_glass": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.03,
+          0.32,
+          0.48,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "opacityFactor": 0.38,
+        "roughnessFactor": 0.08
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": false,
+    "class": "Material",
+    "doubleSided": true,
+    "dynamicCubemap": true,
+    "mapTo": "ericrolph_cannon_car_wash_glass",
+    "materialTag0": "ericrolph_cannon_car_wash",
+    "name": "ericrolph_cannon_car_wash_glass",
+    "persistentId": "fa5137c1-9ee8-59ad-b857-66a6d932802e",
+    "translucent": true,
+    "translucentBlendOp": "PreMulAlpha",
+    "translucentRecvShadows": true,
+    "version": 1.5
+  },
   "ericrolph_cannon_car_wash_mini_car_paint": {
     "Stages": [
       {
@@ -81,6 +111,33 @@
     "name": "ericrolph_cannon_car_wash_ramp_flap",
     "persistentId": "7be13267-7081-545c-8aeb-0015028ba0c0",
     "translucentBlendOp": "None",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_stainless": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.42,
+          0.46,
+          0.5,
+          1.0
+        ],
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_stainless.color.png",
+        "metallicFactor": 0.9,
+        "normalMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_stainless.normal.png",
+        "roughnessFactor": 0.2,
+        "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_stainless_roughness.data.png"
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "dynamicCubemap": true,
+    "mapTo": "ericrolph_cannon_car_wash_stainless",
+    "materialTag0": "ericrolph_cannon_car_wash",
+    "name": "ericrolph_cannon_car_wash_stainless",
+    "persistentId": "b3bb7300-7ddd-5ade-8d73-45bf6118a6b8",
     "version": 1.5
   }
 }

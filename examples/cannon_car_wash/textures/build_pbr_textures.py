@@ -680,7 +680,9 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
     # accent family rather than the muted maroon of v1.32.
     lane_height = 28
     lane_gap = 6
-    felt_palette = ((216, 58, 54), (196, 46, 48), (232, 78, 66), (182, 40, 44))
+    # v1.36 (player: some strips still read duller red): every lane stays
+    # in the bright interior-accent family - variation is subtle, never dull.
+    felt_palette = ((226, 62, 56), (214, 54, 52), (238, 82, 68), (206, 48, 50))
     felt_rng = np.random.default_rng(20260806)
     xs = np.arange(size, dtype=np.float32)
 
@@ -1245,49 +1247,50 @@ def _build_mini_wheel(output_root: Path) -> list[Path]:
 
 
 def _build_control_panel(output_root: Path) -> list[Path]:
-    """Printed legend for the v1.35 exterior control box door (512x512).
+    """Panel atlas (512x512): door legend, pad stencils, painted chevrons.
 
-    Brushed light-gray door, dark title strip, five colour-dot rows that
-    match the walk-in pad colours, a DANGER sticker, and a hazard-stripe
-    footer. Drawn top-down as usual; the face quad maps v0 at its bottom
-    edge so the engine's bottom-origin V sampling shows it upright.
+    v1.36 layout (engine samples V from the image BOTTOM):
+    - rows 0..256   (v 0.5..1.0): the control box door legend
+    - rows 280..380 (v ~0.258..0.453): five 100 px pad stencil tiles,
+      text rotated 90 deg CCW so a player walking up from the street
+      reads it naturally on the ground
+    - rows 400..512 (v 0..0.219): grunge-worn yellow/black chevron band,
+      seamlessly tileable along U, for the flush exit warning decal
     """
 
     size = 512
+    door_height = 256
     rng = np.random.default_rng(20260809)
     brushed = 0.83 + 0.02 * np.sin(np.arange(size, dtype=np.float32)[None, :] * 1.7)
     grain = 1.0 + 0.015 * rng.standard_normal((size, size)).astype(np.float32)
     base = np.clip(brushed * grain, 0.0, 1.0)
     colour = Image.fromarray(np.dstack((base * 216, base * 219, base * 224)).astype(np.uint8))
     draw = ImageDraw.Draw(colour)
-    title_font = _sign_font("Bold", 38, "arialbd.ttf")
-    row_font = _sign_font("SemiBold", 30, "arialbd.ttf")
-    small_font = _sign_font("Regular", 22, "arial.ttf")
-    # Door screws.
-    for corner_x in (18, size - 18):
-        for corner_y in (18, size - 18):
+    title_font = _sign_font("Bold", 24, "arialbd.ttf")
+    row_font = _sign_font("SemiBold", 17, "arialbd.ttf")
+    small_font = _sign_font("Regular", 13, "arial.ttf")
+    pad_font = _sign_font("Bold", 24, "arialbd.ttf")
+    # --- Door legend, compressed into the top half. ---
+    for corner_x in (16, size - 16):
+        for corner_y in (14, door_height - 14):
             draw.ellipse(
-                [corner_x - 7, corner_y - 7, corner_x + 7, corner_y + 7], fill=(120, 122, 126)
+                [corner_x - 6, corner_y - 6, corner_x + 6, corner_y + 6], fill=(120, 122, 126)
             )
-            draw.line([corner_x - 4, corner_y, corner_x + 4, corner_y], fill=(70, 72, 76), width=2)
-    # Title strip.
-    draw.rectangle([34, 34, size - 34, 88], fill=(24, 30, 40))
+            draw.line([corner_x - 3, corner_y, corner_x + 3, corner_y], fill=(70, 72, 76), width=2)
+    draw.rectangle([30, 18, size - 30, 48], fill=(24, 30, 40))
     draw.text(
-        (size // 2, 61), "CANNON WASH CONTROLS", font=title_font, fill=(240, 244, 248), anchor="mm"
+        (size // 2, 33), "CANNON WASH CONTROLS", font=title_font, fill=(240, 244, 248), anchor="mm"
     )
-    # DANGER sticker.
-    draw.rectangle([34, 100, 254, 138], fill=(196, 34, 30))
-    draw.text((144, 119), "DANGER 400V", font=small_font, fill=(255, 244, 240), anchor="mm")
-    draw.rectangle([270, 100, size - 34, 138], outline=(120, 122, 126), width=2)
+    draw.rectangle([30, 56, 240, 78], fill=(196, 34, 30))
+    draw.text((135, 67), "DANGER 400V", font=small_font, fill=(255, 244, 240), anchor="mm")
+    draw.rectangle([256, 56, size - 30, 78], outline=(120, 122, 126), width=2)
     draw.text(
-        ((270 + size - 34) // 2, 119),
+        ((256 + size - 30) // 2, 67),
         "AUTH. PERSONNEL",
         font=small_font,
         fill=(90, 94, 100),
         anchor="mm",
     )
-    # Legend rows: dot colours match the walk-in pads (aqua, orange, blue,
-    # yellow, deep navy) in the same order as the runtime buttons.
     rows = (
         ((0, 209, 212), "RAMP RAISE  +1 DEG"),
         ((255, 41, 4), "RAMP LOWER  -1 DEG"),
@@ -1295,28 +1298,73 @@ def _build_control_panel(output_root: Path) -> list[Path]:
         ((255, 173, 4), "LAUNCH POWER  -"),
         ((4, 23, 56), "CANNON ARM / SAFE"),
     )
-    row_top = 160
+    row_top = 88
     for dot, label in rows:
-        centre_y = row_top + 27
-        draw.ellipse([48, centre_y - 15, 78, centre_y + 15], fill=dot, outline=(60, 62, 66))
-        draw.text((96, centre_y), label, font=row_font, fill=(36, 40, 46), anchor="lm")
-        draw.line([44, row_top + 56, size - 44, row_top + 56], fill=(150, 153, 158), width=2)
-        row_top += 60
+        centre_y = row_top + 13
+        draw.ellipse([44, centre_y - 9, 62, centre_y + 9], fill=dot, outline=(60, 62, 66))
+        draw.text((74, centre_y), label, font=row_font, fill=(36, 40, 46), anchor="lm")
+        draw.line([40, row_top + 27, size - 40, row_top + 27], fill=(150, 153, 158), width=1)
+        row_top += 29
     draw.text(
-        (size // 2, row_top + 14),
+        (size // 2, row_top + 8),
         "STAND ON MATCHING PAD TO OPERATE",
         font=small_font,
         fill=(90, 94, 100),
         anchor="mm",
     )
-    # Hazard footer.
-    footer_top = size - 44
+    footer_top = door_height - 22
     for x in range(0, size, 40):
         draw.polygon(
-            [(x, size), (x + 20, size), (x + 40, footer_top), (x + 20, footer_top)],
+            [(x, door_height), (x + 20, door_height), (x + 40, footer_top), (x + 20, footer_top)],
             fill=(226, 178, 12),
         )
-    draw.rectangle([0, footer_top, size, size], outline=(30, 30, 34), width=3)
+    draw.rectangle([0, footer_top, size, door_height], outline=(30, 30, 34), width=3)
+    # --- Pad stencil tiles (rows 280..380): background matches each pad's
+    # box colour so the label quad blends into the pad beneath it; the
+    # stencil text is rendered horizontal then rotated 90 CCW, which the
+    # V-flip sampling presents upright to a player facing the wall. ---
+    pad_tiles = (
+        ((0, 209, 212), (10, 26, 30), "RAMP +1"),
+        ((255, 41, 4), (255, 244, 240), "RAMP -1"),
+        ((1, 51, 189), (235, 240, 255), "POWER +"),
+        ((255, 173, 4), (30, 24, 4), "POWER -"),
+        ((4, 23, 56), (225, 232, 245), "ARM/SAFE"),
+    )
+    tile_top = 280
+    tile_size = 100
+    for tile_index, (background, ink, text) in enumerate(pad_tiles):
+        left = tile_index * tile_size
+        draw.rectangle(
+            [left, tile_top, left + tile_size - 1, tile_top + tile_size - 1], fill=background
+        )
+        stencil = Image.new("RGBA", (92, 30), (0, 0, 0, 0))
+        stencil_draw = ImageDraw.Draw(stencil)
+        stencil_draw.text((46, 15), text, font=pad_font, fill=ink + (255,), anchor="mm")
+        rotated = stencil.rotate(90, expand=True)
+        paste_x = left + (tile_size - rotated.width) // 2
+        paste_y = tile_top + (tile_size - rotated.height) // 2
+        colour.paste(rotated, (paste_x, paste_y), rotated)
+        draw.rectangle(
+            [left + 2, tile_top + 2, left + tile_size - 3, tile_top + tile_size - 3],
+            outline=tuple(max(0, channel - 40) for channel in background),
+            width=2,
+        )
+    # --- Painted chevron band (rows 400..512): diagonal yellow/black with
+    # concrete wear grunge, period 64 px so it tiles along U. ---
+    band_top = 400
+    band = np.zeros((size - band_top, size, 3), dtype=np.float32)
+    ys = np.arange(band_top, size, dtype=np.float32)[:, None]
+    xs = np.arange(size, dtype=np.float32)[None, :]
+    stripe_phase = ((xs + (ys - band_top)) % 64) < 32
+    band[:, :, 0] = np.where(stripe_phase, 226.0, 24.0)
+    band[:, :, 1] = np.where(stripe_phase, 178.0, 24.0)
+    band[:, :, 2] = np.where(stripe_phase, 12.0, 28.0)
+    wear = rng.random((size - band_top, size)).astype(np.float32)
+    worn = wear > 0.90
+    band[worn] = band[worn] * 0.35 + np.array([96.0, 94.0, 92.0], dtype=np.float32) * 0.65
+    speckle = 1.0 + 0.06 * rng.standard_normal((size - band_top, size, 1)).astype(np.float32)
+    band = np.clip(band * speckle, 0.0, 255.0)
+    colour.paste(Image.fromarray(band.astype(np.uint8)), (0, band_top))
     outputs = {_texture_name("control_panel", "color"): colour}
     paths: list[Path] = []
     for name, image in outputs.items():

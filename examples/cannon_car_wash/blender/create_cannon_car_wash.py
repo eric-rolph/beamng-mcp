@@ -2096,23 +2096,26 @@ def build_details() -> None:
     join_static_meshes("DrainBases", drain_bases)
     join_static_meshes("DrainSlots", drain_slots)
 
-    # Exit warning band v2 (player screenshot: the old rotated pads read as
-    # scattered diamonds floating off the slab). One thin black base strip
-    # sits 5 mm proud of the wet finish with diagonal yellow chevron stripes
-    # 8 mm over it - a painted-band look, visually flush from driver height.
-    add_box("ExitHazardBase", (0.0, 6.55, 0.1365), (5.8, 0.64, 0.009), rubber, bevel=0.0)
-    hazard_stripes = [
-        add_box(
-            f"ExitHazard_{index:02d}",
-            (-2.48 + index * 0.62, 6.55, 0.1445),
-            (0.28, 0.82, 0.008),
-            yellow,
-            bevel=0.0,
-            rotation=(0.0, 0.0, -0.785),
-        )
-        for index in range(9)
-    ]
-    join_static_meshes("ExitHazardStripes", hazard_stripes)
+    # Exit warning band v3 (player: the raised chevron boxes cast shadows
+    # and read as blocks at night - it should look PAINTED). One flat quad
+    # 3 mm over the wet finish maps the control_panel atlas's grunge-worn
+    # yellow/black chevron tile, tiled 6x along the lane width.
+    hazard_half_x = 2.9
+    hazard_half_y = 0.32
+    add_card_mesh(
+        "ExitHazardDecal",
+        (0.0, 6.55, 0.148),
+        [
+            (-hazard_half_x, -hazard_half_y, 0.0),
+            (hazard_half_x, -hazard_half_y, 0.0),
+            (hazard_half_x, hazard_half_y, 0.0),
+            (-hazard_half_x, hazard_half_y, 0.0),
+        ],
+        [(0, 1, 2, 3)],
+        material(scenario_material_name("control_panel"), (0.85, 0.86, 0.88, 1.0), roughness=0.5),
+        [((0.0, 0.0), (6.0, 0.0), (6.0, 0.219), (0.0, 0.219))],
+        alpha_test=False,
+    )
 
     # Drive-up pay station v4 (player: "disjointed look, strange blocky
     # placement of items"). v3's additive detailing - three canopy segments
@@ -2472,24 +2475,8 @@ def build_details() -> None:
     add_box("RoofDuct", (-0.50, 5.60, 5.11), (0.30, 1.20, 0.30), steel, bevel=0.0)
 
     # Small equipment-wall props: instantly readable realism anchors.
-    add_cylinder(
-        "FireExtinguisher",
-        (3.0, -7.6, 1.05),
-        0.085,
-        0.52,
-        orange,
-        vertices=14,
-    )
-    add_box("FireExtinguisherBracket", (3.045, -7.6, 1.05), (0.05, 0.10, 0.30), steel, bevel=0.0)
-    add_cylinder(
-        "FireExtinguisherBand",
-        (3.0, -7.6, 1.22),
-        0.087,
-        0.06,
-        steel,
-        vertices=14,
-        bevel=0.0,
-    )
+    # v1.36 (player): the wall-mounted fire extinguisher read as a bollard
+    # floating in mid-air against the accent stripes - removed.
     add_cylinder(
         "HoseReel_Drum",
         (3.02, 6.4, 1.45),
@@ -2562,15 +2549,23 @@ def build_details() -> None:
     # printed legend texture, drip shield, latch, conduit - plus five
     # colour-coded walk-in button pads on the apron below it. The pads
     # match the runtime's Panel.buttons positions exactly.
+    # v1.36 (player): the panel sat on the pilaster at y 7.6 and the CMU
+    # column swallowed it - the whole assembly moves to the clear wall bay
+    # between the pilasters at 4.35 and 7.6, and the enclosure stands
+    # proud of the pilaster faces (x 3.555) so nothing buries it. The
+    # pads tighten into a labeled row directly below the box; their tops
+    # carry stencil tiles from the control_panel atlas so they read as
+    # button plates, not stray colour squares.
     panel_face = material(
         scenario_material_name("control_panel"), (0.85, 0.86, 0.88, 1.0), roughness=0.5
     )
-    add_box("CtrlEnclosure", (3.44, 7.64, 1.35), (0.13, 0.54, 0.70), steel, bevel=0.012)
+    panel_y = 6.0
+    add_box("CtrlEnclosure", (3.50, panel_y, 1.35), (0.13, 0.54, 0.70), steel, bevel=0.012)
     face_half_y = 0.24
     face_half_z = 0.31
     add_card_mesh(
         "CtrlFace",
-        (3.508, 7.64, 1.35),
+        (3.568, panel_y, 1.35),
         [
             (0.0, -face_half_y, -face_half_z),
             (0.0, face_half_y, -face_half_z),
@@ -2579,25 +2574,59 @@ def build_details() -> None:
         ],
         [(0, 1, 2, 3)],
         panel_face,
-        [((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))],
+        [((0.0, 0.5), (1.0, 0.5), (1.0, 1.0), (0.0, 1.0))],
         alpha_test=False,
     )
-    add_box("CtrlShroud", (3.46, 7.64, 1.74), (0.22, 0.60, 0.035), steel, bevel=0.0)
-    add_box("CtrlLatch", (3.515, 7.90, 1.35), (0.02, 0.03, 0.10), steel, bevel=0.0)
+    add_box("CtrlShroud", (3.52, panel_y, 1.74), (0.22, 0.60, 0.035), steel, bevel=0.0)
+    add_box("CtrlLatch", (3.575, panel_y + 0.26, 1.35), (0.02, 0.03, 0.10), steel, bevel=0.0)
     for hinge_z in (1.12, 1.58):
         add_box(
-            f"CtrlHinge_{hinge_z}", (3.51, 7.385, hinge_z), (0.015, 0.03, 0.08), steel, bevel=0.0
+            f"CtrlHinge_{hinge_z}",
+            (3.57, panel_y - 0.255, hinge_z),
+            (0.015, 0.03, 0.08),
+            steel,
+            bevel=0.0,
         )
-    add_cylinder("CtrlConduit", (3.44, 7.40, 0.50), 0.021, 1.0, steel, vertices=10, bevel=0.0)
-    add_box("CtrlConduitFoot", (3.44, 7.40, 0.045), (0.10, 0.10, 0.09), steel, bevel=0.0)
+    add_cylinder(
+        "CtrlConduit", (3.50, panel_y - 0.24, 0.50), 0.021, 1.0, steel, vertices=10, bevel=0.0
+    )
+    add_box("CtrlConduitFoot", (3.50, panel_y - 0.24, 0.045), (0.10, 0.10, 0.09), steel, bevel=0.0)
     pad_colours = (aqua_brush, orange, blue_brush, yellow, deep_blue)
-    for pad_index, pad_y in enumerate((6.40, 7.02, 7.64, 8.26, 8.88)):
+    # Five 100 px square stencil tiles at image rows 280..380 (v-flip:
+    # DAE v 0.2578..0.4531), one per pad, left to right in button order.
+    pad_tile_u = 100.0 / 512.0
+    pad_label_windows = tuple(
+        (
+            (index * pad_tile_u, 0.2578),
+            ((index + 1) * pad_tile_u, 0.2578),
+            ((index + 1) * pad_tile_u, 0.4531),
+            (index * pad_tile_u, 0.4531),
+        )
+        for index in range(5)
+    )
+    for pad_index, pad_y in enumerate((4.90, 5.45, 6.00, 6.55, 7.10)):
         add_box(
             f"CtrlPad_{pad_index + 1}",
-            (3.62, pad_y, 0.012),
+            (3.72, pad_y, 0.012),
             (0.42, 0.46, 0.024),
             pad_colours[pad_index],
             bevel=0.0,
+        )
+        half_pad_x = 0.19
+        half_pad_y = 0.21
+        add_card_mesh(
+            f"CtrlPadLabel_{pad_index + 1}",
+            (3.72, pad_y, 0.0255),
+            [
+                (-half_pad_x, -half_pad_y, 0.0),
+                (half_pad_x, -half_pad_y, 0.0),
+                (half_pad_x, half_pad_y, 0.0),
+                (-half_pad_x, half_pad_y, 0.0),
+            ],
+            [(0, 1, 2, 3)],
+            panel_face,
+            [pad_label_windows[pad_index]],
+            alpha_test=False,
         )
     print("CANNON_CAR_WASH_STAGE details complete")
 
@@ -3376,28 +3405,33 @@ def build_ramp_flap() -> None:
         roughness=0.45,
     )
     dark = material(scenario_material_name("rubber"), (0.012, 0.014, 0.018, 1.0), roughness=0.9)
+    # v1.36 (player: the plate stacked on top of the concrete apron): the
+    # flap is now sized to BE the exit ramp's steel surface - it covers the
+    # apron wedge footprint, its top face passes through the hinge origin
+    # (so the rest pose lies flush along the wedge slope with the deck top
+    # meeting the slab edge), and the knuckle barrels sit at the slab lip.
     prefix = f"{MOD_ID}_rampflap_"
     parts = [
-        add_box(f"{prefix}Deck", (0.0, 0.85, 0.035), (5.4, 1.7, 0.07), plate, bevel=0.01),
-        add_box(f"{prefix}Lip", (0.0, 1.72, 0.025), (5.4, 0.06, 0.05), plate, bevel=0.0),
+        add_box(f"{prefix}Deck", (0.0, 0.68, -0.025), (6.0, 1.36, 0.05), plate, bevel=0.008),
+        add_box(f"{prefix}Lip", (0.0, 1.34, -0.032), (6.0, 0.05, 0.036), plate, bevel=0.0),
     ]
     for side in (-1.0, 1.0):
         parts.append(
             add_box(
                 f"{prefix}Cheek_{'L' if side < 0 else 'R'}",
-                (side * 2.66, 0.85, 0.045),
-                (0.08, 1.7, 0.09),
+                (side * 2.96, 0.68, -0.030),
+                (0.06, 1.36, 0.06),
                 plate,
                 bevel=0.0,
             )
         )
-    for knuckle_x in (-2.2, -1.1, 0.0, 1.1, 2.2):
+    for knuckle_x in (-2.5, -1.25, 0.0, 1.25, 2.5):
         parts.append(
             add_cylinder(
                 f"{prefix}Knuckle_{knuckle_x}",
-                (knuckle_x, 0.0, 0.035),
-                0.045,
-                0.5,
+                (knuckle_x, 0.0, -0.02),
+                0.04,
+                0.44,
                 dark,
                 rotation=(0.0, math.pi / 2.0, 0.0),
                 vertices=10,
