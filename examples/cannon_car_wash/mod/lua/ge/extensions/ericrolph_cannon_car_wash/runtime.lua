@@ -721,6 +721,8 @@ local function createTrigger(name, mode)
 end
 
 function Attract.createProjectile(name)
+  local stale = scenetree.findObject(name)
+  if stale then pcall(function() stale:delete() end) end
   local object = createObject(VISUAL_CLASS)
   if not object then return nil, "BeamNG did not create the attract projectile" end
   local ok, createError = pcall(function()
@@ -747,6 +749,8 @@ function Attract.createProjectile(name)
 end
 
 function Attract.createCannon(name)
+  local stale = scenetree.findObject(name)
+  if stale then pcall(function() stale:delete() end) end
   local object = createObject(VISUAL_CLASS)
   if not object then return nil end
   local ok = pcall(function()
@@ -1176,6 +1180,13 @@ local function synchronizeTransforms(state)
 end
 
 function Panel.createFlap(name)
+  -- v1.43 (player screenshots: flat orange orphan planks multiplying at
+  -- the exit): recovery re-registrations replaced state.panel without
+  -- deleting the previous flap object, and the orphan - spawned before
+  -- the attract materials loaded - rendered fallback-orange. The name is
+  -- stable per prop, so delete any survivor before creating.
+  local stale = scenetree.findObject(name)
+  if stale then pcall(function() stale:delete() end) end
   local object = createObject(VISUAL_CLASS)
   if not object then return nil end
   local ok = pcall(function()
@@ -1207,15 +1218,21 @@ function Panel.syncTransforms(state, frame)
   if not panel then return end
   if panel.flap then
     -- Hinge at the apron's outer edge: the flap mesh extends +Y from its
-    -- origin, so composing the prop rotation with a local +X axis tilt
-    -- raises the free tip in one-degree steps.
+    -- origin. BeamNG's Lua quat product composes LEFT-TO-RIGHT (a * b
+    -- applies a, then b) - proven by yawed-spawn world-box measurement:
+    -- the old modelRotation * tilt form read as "tilt about WORLD x
+    -- after yawing", which rolled the plate sideways on any yawed
+    -- placement while looking correct on the axis-aligned test spawns.
+    -- tilt-first pitches about the model-local hinge at every yaw; the
+    -- angle negates because the tilt now precedes the 180-degree model
+    -- flip instead of following it.
     local tilt = quatFromAxisAngle(
-      vec3(1, 0, 0), math.rad(Panel.restAngleDeg + (panel.rampAngleDeg or 0))
+      vec3(1, 0, 0), -math.rad(Panel.restAngleDeg + (panel.rampAngleDeg or 0))
     )
     setObjectTransform(
       panel.flap,
       frame.origin + frame.modelRotation * Panel.flapHingeLocal,
-      frame.modelRotation * tilt,
+      tilt * frame.modelRotation,
       vec3(1, 1, 1)
     )
   end
@@ -3228,6 +3245,9 @@ local function installationState(state)
     prop_id = state.propId,
     arbitrary_vehicle_support = true,
     ground_origin = state.origin and {state.origin.x, state.origin.y, state.origin.z} or nil,
+    model_rotation = state.modelRotation
+        and {state.modelRotation.x, state.modelRotation.y, state.modelRotation.z, state.modelRotation.w}
+      or nil,
     visual_name = state.visualName,
     roller_play_ambient = state.visual and state.visual:getField("playAmbient", 0) or nil,
     control_panel = state.panel and {
