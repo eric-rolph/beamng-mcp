@@ -3626,14 +3626,20 @@ def build_ramp_flap() -> None:
     bpy.ops.mesh.select_all(action="SELECT")
     bpy.ops.mesh.normals_make_consistent(inside=False)
     bpy.ops.object.mode_set(mode="OBJECT")
-    assign_material(wedge, plate)
-    # Top slope face maps the full atlas V (crest chevron band, rubber
-    # run, toe chevron band); every other face samples the rubber middle.
+    # Two slots: textured tread for the TOP slope, flat iron for every
+    # other face. v1.42 (probe zoom): the thin edge faces sampled a tiny
+    # dark window of the chevron atlas, and DEEP MIPS at grazing angles
+    # averaged the surrounding yellow bands into a warm orange smear (the
+    # v1.24 mip-bleed class of bug). A textureless factor material has no
+    # mips to bleed.
+    wedge.data.materials.append(plate)
+    wedge.data.materials.append(dark)
     uv_layer = wedge.data.uv_layers.new(name="UVMap")
     rubber_window = ((0.30, 0.45), (0.42, 0.45), (0.42, 0.55), (0.30, 0.55))
     for polygon in wedge.data.polygons:
         polygon_vertices = [wedge.data.vertices[i].co for i in polygon.vertices]
         is_top = all(abs(v.z - (-0.132) * (v.y / 2.6)) < 0.01 for v in polygon_vertices)
+        polygon.material_index = 0 if is_top and len(polygon_vertices) == 4 else 1
         for loop_offset, loop_index in enumerate(polygon.loop_indices):
             vertex = polygon_vertices[loop_offset]
             if is_top and len(polygon_vertices) == 4:

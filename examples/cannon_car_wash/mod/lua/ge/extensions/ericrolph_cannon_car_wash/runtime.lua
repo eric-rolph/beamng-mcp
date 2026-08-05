@@ -1095,6 +1095,14 @@ local function synchronizeTransforms(state)
         + frame.modelRotation.w * state.modelRotation.w
     )
     if originDelta < 0.002 and rotationDot > 0.9999995 then
+      -- v1.42 (player: doubled, non-spinning brushes): the jbeam flexbody
+      -- renders the SAME building as the animated visual and is hidden by
+      -- the setMeshAlpha below - which this early-return used to skip.
+      -- After any event re-shows the flexbody (resets, launches), the
+      -- static copy sat offset beside the animated one. Re-assert the
+      -- hide every tick; it touches the VEHICLE mesh, never the animated
+      -- TSStatic, so the ambient clip is not restarted.
+      pcall(function() vehicle:setMeshAlpha(0, PROP_VISUAL_MESH, false) end)
       return true
     end
   end
