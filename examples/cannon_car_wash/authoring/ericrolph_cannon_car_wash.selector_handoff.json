@@ -16681,6 +16681,53 @@
       "track": "guard_right_top"
     }
   ],
+  "panel_buttons": [
+    {
+      "source_position": [
+        3.579,
+        6.185,
+        1.415
+      ],
+      "suffix": "btn_ramp_up",
+      "title": "Exit Ramp: Raise 1\u00b0"
+    },
+    {
+      "source_position": [
+        3.579,
+        6.185,
+        1.345
+      ],
+      "suffix": "btn_ramp_down",
+      "title": "Exit Ramp: Lower 1\u00b0"
+    },
+    {
+      "source_position": [
+        3.579,
+        6.185,
+        1.275
+      ],
+      "suffix": "btn_power_up",
+      "title": "Launch Power: Increase"
+    },
+    {
+      "source_position": [
+        3.579,
+        6.185,
+        1.205
+      ],
+      "suffix": "btn_power_down",
+      "title": "Launch Power: Decrease"
+    },
+    {
+      "source_position": [
+        3.579,
+        6.185,
+        1.135
+      ],
+      "suffix": "btn_cannon",
+      "title": "Cannon: Arm / Safe"
+    }
+  ],
   "refnodes": {
     "back": "ericrolph_cannon_car_wash_ground_back",
     "left": "ericrolph_cannon_car_wash_s03_t00",
@@ -18437,22 +18484,22 @@
     "bounds": {
       "corners": [
         [
-          -3.930001,
+          -3.729999,
           -10.799999,
           -0.33
         ],
         [
-          -3.930001,
+          -3.729999,
           -10.799999,
           6.16
         ],
         [
-          -3.930001,
+          -3.729999,
           11.550001,
           6.16
         ],
         [
-          -3.930001,
+          -3.729999,
           11.550001,
           -0.33
         ],
@@ -18483,7 +18530,7 @@
         6.16
       ],
       "min": [
-        -3.930001,
+        -3.729999,
         -10.799999,
         -0.33
       ]
@@ -18510,7 +18557,7 @@
       "ericrolph_cannon_car_wash_selector_wet_concrete"
     ],
     "path": "vehicles/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
-    "sha256": "b403881ec7e16601a34831a48465a6c927e84bd58aa9bb6ddb261f77a95b7bc9",
-    "size": 3879093
+    "sha256": "9a06ae2e9e977b8a638540894c20ac459696b40934159ce91fb6b4eaf3e6129e",
+    "size": 4039461
   }
 }

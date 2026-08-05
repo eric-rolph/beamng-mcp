@@ -115,6 +115,7 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"vehicles/{MOD_ID}/default.jpg",
     f"vehicles/{MOD_ID}/{MOD_ID}.dae",
     f"vehicles/{MOD_ID}/{MOD_ID}.jbeam",
+    f"vehicles/{MOD_ID}/{MOD_ID}_default.interaction.json",
     f"vehicles/{MOD_ID}/{MOD_ID}_runtime_visual.dae",
     f"vehicles/{MOD_ID}/info.json",
     f"vehicles/{MOD_ID}/info_standard.json",
@@ -151,7 +152,7 @@ def _validate_member_name(
 
 
 def _validate_allowlist() -> None:
-    if len(EXPECTED_RUNTIME_FILES) != 74:
+    if len(EXPECTED_RUNTIME_FILES) != 75:
         raise DistributionError("the public runtime allowlist must contain exactly 74 files")
     if tuple(sorted(EXPECTED_RUNTIME_FILES)) != EXPECTED_RUNTIME_FILES:
         raise DistributionError("the public runtime allowlist must be deterministically sorted")

@@ -1,0 +1,30 @@
+{
+  "actions": {
+    "ericrolph_cannon_car_wash_btn_cannon": {
+      "onDown": "obj:queueGameEngineLua(string.format(\"extensions.ericrolph__cannon__car__wash_runtime.pressPanelButtonByVehicle(%d, 'btn_cannon')\", objectId))",
+      "order": 5.0,
+      "title": "Cannon: Arm / Safe"
+    },
+    "ericrolph_cannon_car_wash_btn_power_down": {
+      "onDown": "obj:queueGameEngineLua(string.format(\"extensions.ericrolph__cannon__car__wash_runtime.pressPanelButtonByVehicle(%d, 'btn_power_down')\", objectId))",
+      "order": 4.0,
+      "title": "Launch Power: Decrease"
+    },
+    "ericrolph_cannon_car_wash_btn_power_up": {
+      "onDown": "obj:queueGameEngineLua(string.format(\"extensions.ericrolph__cannon__car__wash_runtime.pressPanelButtonByVehicle(%d, 'btn_power_up')\", objectId))",
+      "order": 3.0,
+      "title": "Launch Power: Increase"
+    },
+    "ericrolph_cannon_car_wash_btn_ramp_down": {
+      "onDown": "obj:queueGameEngineLua(string.format(\"extensions.ericrolph__cannon__car__wash_runtime.pressPanelButtonByVehicle(%d, 'btn_ramp_down')\", objectId))",
+      "order": 2.0,
+      "title": "Exit Ramp: Lower 1\u00b0"
+    },
+    "ericrolph_cannon_car_wash_btn_ramp_up": {
+      "onDown": "obj:queueGameEngineLua(string.format(\"extensions.ericrolph__cannon__car__wash_runtime.pressPanelButtonByVehicle(%d, 'btn_ramp_up')\", objectId))",
+      "order": 1.0,
+      "title": "Exit Ramp: Raise 1\u00b0"
+    }
+  },
+  "fileversion": 2
+}

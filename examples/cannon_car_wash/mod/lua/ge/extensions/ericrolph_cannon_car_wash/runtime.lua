@@ -59,28 +59,23 @@ local Attract = {
 -- methods are defined after the shared helpers (lexical-binding lesson).
 local Panel = {
   flapShape = "/vehicles/ericrolph_cannon_car_wash/ramp_flap.dae",
-  -- v1.36 (player: the plate stacked on top of the concrete apron): the
-  -- flap hinges at the SLAB EDGE and rests along the apron wedge's own
-  -- slope, so at zero degrees it reads as the exit ramp's steel surface.
-  -- Raising tilts it up from that rest pose; the concrete wedge stays
-  -- underneath as the base collision.
-  flapHingeLocal = vec3(0.0, 9.02, 0.150),
-  restAngleDeg = -5.8,
+  -- v1.38 (player: no separate plate - the yellow-and-black incline
+  -- ITSELF tilts): the shape is now an exact replica of the exit apron
+  -- wedge with its origin on the hinge line at the slab edge, so zero
+  -- tilt IS the neutral apron pose and the static exit apron visual is
+  -- gone from the building mesh. The exit collision wedge stays under it
+  -- as the neutral base collision.
+  flapHingeLocal = vec3(0.0, 9.0, 0.132),
+  restAngleDeg = 0.0,
   maxAngleDeg = 15,
   stepDeg = 1,
   powerFactors = {0.6, 0.8, 1.0, 1.2, 1.4},
   defaultPowerIndex = 3,
   cooldownSeconds = 0.5,
-  buttonScale = vec3(0.55, 0.5, 1.1),
-  -- v1.36: pads moved with the panel into the clear wall bay (the old row
-  -- ran under the pilaster-mounted box); positions mirror CtrlPad_1..5.
-  buttons = {
-    {suffix = "btn_ramp_up", position = vec3(3.72, 4.90, 0.55)},
-    {suffix = "btn_ramp_down", position = vec3(3.72, 5.45, 0.55)},
-    {suffix = "btn_power_up", position = vec3(3.72, 6.00, 0.55)},
-    {suffix = "btn_power_down", position = vec3(3.72, 6.55, 0.55)},
-    {suffix = "btn_cannon", position = vec3(3.72, 7.10, 0.55)},
-  },
+  -- v1.38: the walk-in floor pads are gone. Presses arrive from the
+  -- selector jbeam's dashboard-style triggers2 buttons via the vehicle's
+  -- interaction actions (onDown -> queueGameEngineLua ->
+  -- M.pressPanelButtonByVehicle), exactly like in-car controls.
 }
 
 function Attract.sunAim(state)
@@ -1152,17 +1147,6 @@ function Panel.syncTransforms(state, frame)
       frame.modelRotation * tilt,
       vec3(1, 1, 1)
     )
-  end
-  for _, button in ipairs(Panel.buttons) do
-    local trigger = panel.triggers and panel.triggers[button.suffix]
-    if trigger then
-      setObjectTransform(
-        trigger,
-        frame.origin + frame.modelRotation * button.position,
-        frame.modelRotation,
-        Panel.buttonScale
-      )
-    end
   end
 end
 
@@ -2391,9 +2375,7 @@ local function onBeamNGTrigger(data)
   if not owner then return end
   local state = installations[owner.propId]
   if not state then return end
-  if owner.kind == "panel" then
-    if data.event == "enter" then Panel.press(state, owner.button) end
-  elseif owner.kind == "repair" then
+  if owner.kind == "repair" then
     handleRepairTrigger(state, data)
   elseif owner.kind == "wash" or owner.kind == "launch" then
     -- Wash/launch transitions flow through the shared occupancy gate so a
@@ -2535,10 +2517,6 @@ local function cleanupInstallation(state, reason)
   end
   if state.panel then
     deleteSceneObject(state.panel.flap)
-    for _, buttonTrigger in pairs(state.panel.triggers or {}) do
-      forgetTriggerOwner(buttonTrigger)
-      deleteSceneObject(buttonTrigger)
-    end
     state.panel = nil
   end
   deleteSceneObject(state.visual)
@@ -2763,13 +2741,8 @@ local function registerProp(propId)
     powerIndex = Panel.defaultPowerIndex,
     powerFactor = Panel.powerFactors[Panel.defaultPowerIndex],
     cannonEnabled = true,
-    triggers = {},
     flap = Panel.createFlap(prefix .. "_ramp_flap"),
   }
-  for _, button in ipairs(Panel.buttons) do
-    local buttonTrigger = createTrigger(prefix .. "_" .. button.suffix, "Overlaps")
-    if buttonTrigger then state.panel.triggers[button.suffix] = buttonTrigger end
-  end
 
   for _, spec in ipairs(state.lightSpecs) do
     local light, lightError = createLight(spec)
@@ -2790,15 +2763,6 @@ local function registerProp(propId)
   triggerOwners[state.washTrigger:getId()] = {propId = propId, kind = "wash"}
   triggerOwners[state.repairTrigger:getId()] = {propId = propId, kind = "repair"}
   triggerOwners[state.launchTrigger:getId()] = {propId = propId, kind = "launch"}
-  if state.panel then
-    for suffix, buttonTrigger in pairs(state.panel.triggers) do
-      triggerOwners[buttonTrigger:getId()] = {
-        propId = propId,
-        kind = "panel",
-        button = suffix,
-      }
-    end
-  end
   forceWashSystemsOff(state)
   acknowledgeRegistration(vehicle)
   emitEvent(state, "I", "prop_registered", {
@@ -3176,11 +3140,6 @@ local function installationState(state)
       launch_power_factor = state.panel.powerFactor,
       cannon_enabled = state.panel.cannonEnabled,
       has_flap = state.panel.flap ~= nil,
-      button_count = (function()
-        local count = 0
-        for _ in pairs(state.panel.triggers or {}) do count = count + 1 end
-        return count
-      end)(),
     } or nil,
     wash_trigger = {
       name = state.washTriggerName,
@@ -3277,6 +3236,12 @@ M.pressPanelButton = function(propId, buttonSuffix)
   state.panel.lastPress = nil
   Panel.press(state, buttonSuffix)
   return true
+end
+M.pressPanelButtonByVehicle = function(vehicleId, buttonSuffix)
+  -- Called from the selector prop's own Vehicle Lua when a dashboard-style
+  -- triggers2 button is clicked (interaction.json onDown). The wash prop's
+  -- object id IS the installation key.
+  return M.pressPanelButton(vehicleId, buttonSuffix)
 end
 M.getSystemState = getSystemState
 M.onBeamNGTrigger = onBeamNGTrigger

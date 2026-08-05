@@ -51,6 +51,7 @@ STRUCTURE_NODE_MASS_KG = 125.0
 # Real mitter strips are feather-light, floppy, and slippery: they must
 # LOSE every argument with a bumper.
 CLOTH_NODE_MASS_KG = 1.0
+PANEL_NODE_MASS_KG = 2.0
 CLOTH_STRUCTURAL_SPRING = 2500.0
 CLOTH_STRUCTURAL_DAMP = 60.0
 CLOTH_SHEAR_SPRING = 800.0
@@ -210,10 +211,102 @@ def build_jbeam(handoff: dict[str, Any]) -> tuple[dict[str, Any], float]:
             raise ValueError(f"cloth triangle references invalid nodes: {triangle_nodes}")
         triangle_rows.append([*triangle_nodes, {"groundModel": "metal"}])
 
+    # v1.38 dashboard-style panel buttons: one dedicated FIXED anchor node
+    # per button cap plus a frame node behind the wall. Each triggers2 click
+    # box sits exactly ON its own node (zero translation), so the engine's
+    # node-frame math cannot drift the button off the printed door art.
+    panel_buttons = handoff.get("panel_buttons", [])
+    if len(panel_buttons) != 5:
+        raise ValueError("selector handoff must carry exactly five panel buttons")
+    panel_node_ids: list[str] = []
+    for button in panel_buttons:
+        node_id = f"{MOD_ID}_panel_{button['suffix']}"
+        panel_node_ids.append(node_id)
+        node_rows.append(
+            [
+                node_id,
+                *[round(value, 6) for value in button["source_position"]],
+                {
+                    "collision": False,
+                    "fixed": True,
+                    "frictionCoef": 0.9,
+                    "group": GROUP,
+                    "nodeMaterial": "|NM_METAL",
+                    "nodeWeight": PANEL_NODE_MASS_KG,
+                    "selfCollision": False,
+                    "staticCollision": False,
+                },
+            ]
+        )
+    frame_node_id = f"{MOD_ID}_panel_frame"
+    frame_position = [
+        round(panel_buttons[0]["source_position"][0] - 0.35, 6),
+        round(panel_buttons[0]["source_position"][1], 6),
+        round(panel_buttons[0]["source_position"][2], 6),
+    ]
+    node_rows.append(
+        [
+            frame_node_id,
+            *frame_position,
+            {
+                "collision": False,
+                "fixed": True,
+                "frictionCoef": 0.9,
+                "group": GROUP,
+                "nodeMaterial": "|NM_METAL",
+                "nodeWeight": PANEL_NODE_MASS_KG,
+                "selfCollision": False,
+                "staticCollision": False,
+            },
+        ]
+    )
+    zero = {"x": 0, "y": 0, "z": 0}
+    trigger_rows: list[list[Any]] = [
+        [
+            "id",
+            "idRef:",
+            "idX:",
+            "idY:",
+            "type",
+            "size",
+            "baseRotation",
+            "rotation",
+            "translation",
+            "baseTranslation",
+        ]
+    ]
+    link_rows: list[list[Any]] = [["triggerId:triggers2", "triggerInput", "inputAction"]]
+    enabled_rows: list[list[Any]] = [["id"]]
+    for index, button in enumerate(panel_buttons):
+        neighbour = (
+            panel_node_ids[index + 1]
+            if index + 1 < len(panel_node_ids)
+            else panel_node_ids[index - 1]
+        )
+        trigger_id = f"panel_{button['suffix']}"
+        action_name = f"{MOD_ID}_{button['suffix']}"
+        trigger_rows.append(
+            [
+                trigger_id,
+                panel_node_ids[index],
+                neighbour,
+                frame_node_id,
+                "box",
+                {"x": 0.07, "y": 0.07, "z": 0.07},
+                dict(zero),
+                dict(zero),
+                dict(zero),
+                dict(zero),
+            ]
+        )
+        link_rows.append([trigger_id, "action0", action_name])
+        enabled_rows.append([action_name])
+
     total_mass = (
         len(base_ids) * BASE_NODE_MASS_KG
         + (len(nodes) - len(base_ids)) * STRUCTURE_NODE_MASS_KG
         + len(cloth["nodes"]) * CLOTH_NODE_MASS_KG
+        + (len(panel_buttons) + 1) * PANEL_NODE_MASS_KG
     )
     part = {
         "information": {"authors": AUTHOR, "name": DISPLAY_NAME},
@@ -233,11 +326,37 @@ def build_jbeam(handoff: dict[str, Any]) -> tuple[dict[str, Any], float]:
             [handoff["asset"]["visual_mesh"], [GROUP]],
             [cloth["mesh"], [cloth_group]],
         ],
+        "triggers2": trigger_rows,
+        "triggerEventLinks2": link_rows,
+        "actionsEnabled": enabled_rows,
         "nodes": node_rows,
         "beams": beam_rows,
         "triangles": triangle_rows,
     }
     return {MODEL_ID: part}, total_mass
+
+
+def build_interaction(handoff: dict[str, Any]) -> dict[str, Any]:
+    """Dashboard-style click actions for the panel's triggers2 buttons.
+
+    onDown runs in the wash prop's Vehicle Lua on click - exactly the
+    mechanism behind in-car dashboard controls - and forwards to the GE
+    runtime with the prop's own object id.
+    """
+
+    actions: dict[str, Any] = {}
+    for order, button in enumerate(handoff.get("panel_buttons", []), start=1):
+        suffix = button["suffix"]
+        actions[f"{MOD_ID}_{suffix}"] = {
+            "order": float(order),
+            "onDown": (
+                "obj:queueGameEngineLua(string.format("
+                f"\"extensions.ericrolph__cannon__car__wash_runtime.pressPanelButtonByVehicle(%d, '{suffix}')\""
+                ", objectId))"
+            ),
+            "title": button["title"],
+        }
+    return {"fileversion": 2, "actions": actions}
 
 
 def build_materials(handoff: dict[str, Any]) -> dict[str, Any]:
@@ -318,6 +437,10 @@ def main() -> None:
 
     copy_mini_car()
     write_json(VEHICLE_ROOT / f"{MODEL_ID}.jbeam", jbeam)
+    write_json(
+        VEHICLE_ROOT / f"{MODEL_ID}_default.interaction.json",
+        build_interaction(handoff),
+    )
     write_json(VEHICLE_ROOT / "main.materials.json", materials)
     build_animated_runtime_visual(handoff)
     write_json(

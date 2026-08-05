@@ -109,7 +109,7 @@ def _stage_full_mod(workspace: Path, runtime_mod_name: str) -> Path:
         for source in MOD_SOURCE.rglob("*")
         if source.is_file() and not source.is_symlink()
     }
-    assert len(PUBLIC_RUNTIME_FILES) == 74
+    assert len(PUBLIC_RUNTIME_FILES) == 75
     assert set(source_files) == PUBLIC_RUNTIME_FILES
 
     mod_root = workspace / "mods" / runtime_mod_name

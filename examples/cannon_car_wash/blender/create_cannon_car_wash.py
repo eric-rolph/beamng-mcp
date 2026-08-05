@@ -147,6 +147,27 @@ SUPPORTED_CITYBUS_ENVELOPE = {
     "height": 2.994,
 }
 LAUNCH_TARGET_SPEED_KPH = 360.0
+
+# v1.38 control-panel buttons: physical caps on the door face AND vehicle
+# triggers2 click boxes in the selector jbeam - one source of truth here,
+# published through the selector handoff so build_selector_prop wires the
+# interactive layer without duplicating geometry constants.
+PANEL_BUTTON_Y = 6.185
+PANEL_BUTTON_HEIGHTS = (1.415, 1.345, 1.275, 1.205, 1.135)
+PANEL_BUTTON_SUFFIXES = (
+    "btn_ramp_up",
+    "btn_ramp_down",
+    "btn_power_up",
+    "btn_power_down",
+    "btn_cannon",
+)
+PANEL_BUTTON_TITLES = (
+    "Exit Ramp: Raise 1°",
+    "Exit Ramp: Lower 1°",
+    "Launch Power: Increase",
+    "Launch Power: Decrease",
+    "Cannon: Arm / Safe",
+)
 TRIGGER_NAMES = {LAUNCH_TRIGGER_NAME, WASH_ACTIVATION_TRIGGER_NAME, REPAIR_TRIGGER_NAME}
 
 PRIMARY_STRUCTURES = (
@@ -1306,9 +1327,11 @@ def build_shell() -> None:
             )
 
     # Flush portal aprons: visual concrete wedges plus matching collision
-    # wedges folded into the floor colmesh so the ramp actually carries wheels.
+    # wedges folded into the floor colmesh so the ramp actually carries
+    # wheels. v1.38: the EXIT apron has no static visual - the runtime
+    # spawns the tilting ramp_flap wedge in exactly its place (the exit
+    # collision wedge below stays as the neutral-pose base collision).
     add_ramp_wedge("RampApron_Entrance", -1.0, concrete)
-    add_ramp_wedge("RampApron_Exit", 1.0, concrete)
 
     add_box("Colmesh-1", (0.0, 0.0, 0.06), (6.8, 18.0, 0.12), None, bevel=0.0)
     add_box("Colmesh-2", (-3.25, 0.0, 2.35), (0.3, 18.0, 4.6), None, bevel=0.0)
@@ -2608,42 +2631,33 @@ def build_details() -> None:
         "CtrlConduit", (3.50, panel_y - 0.24, 0.50), 0.021, 1.0, steel, vertices=10, bevel=0.0
     )
     add_box("CtrlConduitFoot", (3.50, panel_y - 0.24, 0.045), (0.10, 0.10, 0.09), steel, bevel=0.0)
-    pad_colours = (aqua_brush, orange, blue_brush, yellow, deep_blue)
-    # Five 100 px square stencil tiles at image rows 280..380 (v-flip:
-    # DAE v 0.2578..0.4531), one per pad, left to right in button order.
-    pad_tile_u = 100.0 / 512.0
-    pad_label_windows = tuple(
-        (
-            (index * pad_tile_u, 0.2578),
-            ((index + 1) * pad_tile_u, 0.2578),
-            ((index + 1) * pad_tile_u, 0.4531),
-            (index * pad_tile_u, 0.4531),
-        )
-        for index in range(5)
-    )
-    for pad_index, pad_y in enumerate((4.90, 5.45, 6.00, 6.55, 7.10)):
-        add_box(
-            f"CtrlPad_{pad_index + 1}",
-            (3.72, pad_y, 0.012),
-            (0.42, 0.46, 0.024),
-            pad_colours[pad_index],
+    # v1.38 (player): the walk-in floor pads are gone - the panel carries
+    # REAL pressable buttons (BeamNG vehicle triggers2, wired in the
+    # selector jbeam) exactly like in-car dashboard controls. Each legend
+    # row gets a physical button: steel bezel ring + colour-matched cap,
+    # aligned with its printed row on the door art (rows at image 101..217
+    # of the door half -> z 1.415..1.135, button column at door u ~0.89).
+    button_colours = (aqua_brush, orange, blue_brush, yellow, deep_blue)
+    for button_index, button_z in enumerate(PANEL_BUTTON_HEIGHTS):
+        add_cylinder(
+            f"CtrlButtonBezel_{button_index + 1}",
+            (3.571, PANEL_BUTTON_Y, button_z),
+            0.030,
+            0.010,
+            steel,
+            vertices=14,
+            rotation=(0.0, math.pi / 2.0, 0.0),
             bevel=0.0,
         )
-        half_pad_x = 0.19
-        half_pad_y = 0.21
-        add_card_mesh(
-            f"CtrlPadLabel_{pad_index + 1}",
-            (3.72, pad_y, 0.0255),
-            [
-                (-half_pad_x, -half_pad_y, 0.0),
-                (half_pad_x, -half_pad_y, 0.0),
-                (half_pad_x, half_pad_y, 0.0),
-                (-half_pad_x, half_pad_y, 0.0),
-            ],
-            [(0, 1, 2, 3)],
-            panel_face,
-            [pad_label_windows[pad_index]],
-            alpha_test=False,
+        add_cylinder(
+            f"CtrlButtonCap_{button_index + 1}",
+            (3.579, PANEL_BUTTON_Y, button_z),
+            0.023,
+            0.018,
+            button_colours[button_index],
+            vertices=14,
+            rotation=(0.0, math.pi / 2.0, 0.0),
+            bevel=0.004,
         )
     print("CANNON_CAR_WASH_STAGE details complete")
 
@@ -3186,6 +3200,16 @@ def _selector_structure() -> dict[str, Any]:
         "base_nodes": base_nodes,
         "spawn_envelope_nodes": spawn_envelope_nodes,
         "refnodes": refnodes,
+        "panel_buttons": [
+            {
+                "suffix": suffix,
+                "title": title,
+                "source_position": [3.579, round(PANEL_BUTTON_Y, 6), round(z, 6)],
+            }
+            for suffix, title, z in zip(
+                PANEL_BUTTON_SUFFIXES, PANEL_BUTTON_TITLES, PANEL_BUTTON_HEIGHTS, strict=True
+            )
+        ],
     }
 
 
@@ -3408,46 +3432,70 @@ RAMP_FLAP_DAE_PATH = ASSET_DIRECTORY / "ramp_flap.dae"
 
 
 def build_ramp_flap() -> None:
-    """Hinged exit-ramp flap (v1.35 control panel): origin ON the hinge line.
+    """Tilting exit apron (v1.38): the yellow-and-black incline ITSELF.
 
-    The runtime tilts the whole TSStatic about its local +X axis in
-    one-degree steps, so the plate extends +Y from the origin with the
-    hinge barrels at y=0. Checkerplate deck + side cheeks + hinge knuckles.
+    v1.37's separate grey plate stacked visibly on the concrete apron
+    (player screenshot). Now the exit apron wedge is absent from the
+    static building mesh and this shape replicates it exactly - same
+    footprint, same slope - with a rubber running surface and hazard
+    chevron bands. Local origin ON the hinge line (authored slab edge,
+    (0, 9.0, 0.132)); at zero tilt the wedge rests exactly where the
+    static apron used to be, and the runtime raises the street end in
+    one-degree steps.
     """
 
     plate = material(
         scenario_material_name("ramp_flap"),
         (0.5, 0.52, 0.55, 1.0),
-        metallic=0.85,
-        roughness=0.45,
+        roughness=0.8,
     )
     dark = material(scenario_material_name("rubber"), (0.012, 0.014, 0.018, 1.0), roughness=0.9)
-    # v1.36 (player: the plate stacked on top of the concrete apron): the
-    # flap is now sized to BE the exit ramp's steel surface - it covers the
-    # apron wedge footprint, its top face passes through the hinge origin
-    # (so the rest pose lies flush along the wedge slope with the deck top
-    # meeting the slab edge), and the knuckle barrels sit at the slab lip.
     prefix = f"{MOD_ID}_rampflap_"
-    parts = [
-        add_box(f"{prefix}Deck", (0.0, 0.68, -0.025), (6.0, 1.36, 0.05), plate, bevel=0.008),
-        add_box(f"{prefix}Lip", (0.0, 1.34, -0.032), (6.0, 0.05, 0.036), plate, bevel=0.0),
+    object_name = f"{prefix}Wedge"
+    vertices = [
+        (-3.08, 0.0, 0.0),
+        (3.08, 0.0, 0.0),
+        (3.08, 1.3, -0.132),
+        (-3.08, 1.3, -0.132),
+        (-3.08, 0.0, -0.132),
+        (3.08, 0.0, -0.132),
     ]
-    for side in (-1.0, 1.0):
-        parts.append(
-            add_box(
-                f"{prefix}Cheek_{'L' if side < 0 else 'R'}",
-                (side * 2.96, 0.68, -0.030),
-                (0.06, 1.36, 0.06),
-                plate,
-                bevel=0.0,
-            )
-        )
+    faces = [(0, 1, 2, 3), (0, 4, 5, 1), (4, 3, 2, 5), (0, 3, 4), (1, 5, 2)]
+    mesh = bpy.data.meshes.new(f"{object_name}_mesh")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    wedge = bpy.data.objects.new(object_name, mesh)
+    bpy.context.scene.collection.objects.link(wedge)
+    bpy.ops.object.select_all(action="DESELECT")
+    wedge.select_set(True)
+    bpy.context.view_layer.objects.active = wedge
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.normals_make_consistent(inside=False)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    assign_material(wedge, plate)
+    # Top slope face maps the full atlas V (crest chevron band, rubber
+    # run, toe chevron band); every other face samples the rubber middle.
+    uv_layer = wedge.data.uv_layers.new(name="UVMap")
+    rubber_window = ((0.30, 0.45), (0.42, 0.45), (0.42, 0.55), (0.30, 0.55))
+    for polygon in wedge.data.polygons:
+        polygon_vertices = [wedge.data.vertices[i].co for i in polygon.vertices]
+        is_top = all(abs(v.z - (-0.132) * (v.y / 1.3)) < 0.01 for v in polygon_vertices)
+        for loop_offset, loop_index in enumerate(polygon.loop_indices):
+            vertex = polygon_vertices[loop_offset]
+            if is_top and len(polygon_vertices) == 4:
+                u = (vertex.x + 3.08) / 6.16 * 3.0
+                v = vertex.y / 1.3
+                uv_layer.data[loop_index].uv = (u, v)
+            else:
+                uv_layer.data[loop_index].uv = rubber_window[loop_offset % 4]
+    parts = [wedge]
     for knuckle_x in (-2.5, -1.25, 0.0, 1.25, 2.5):
         parts.append(
             add_cylinder(
                 f"{prefix}Knuckle_{knuckle_x}",
-                (knuckle_x, 0.0, -0.02),
-                0.04,
+                (knuckle_x, 0.0, -0.03),
+                0.045,
                 0.44,
                 dark,
                 rotation=(0.0, math.pi / 2.0, 0.0),
