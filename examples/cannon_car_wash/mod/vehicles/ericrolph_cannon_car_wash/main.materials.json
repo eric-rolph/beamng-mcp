@@ -51,6 +51,12 @@
     "Stages": [
       {
         "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_brush_cards.color.png",
+        "emissiveFactor": [
+          0.86,
+          0.2,
+          0.16
+        ],
+        "emissiveMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_brush_cards_emissive.data.png",
         "metallicFactor": 0.0,
         "normalMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_brush_cards.normal.png",
         "opacityMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_brush_cards_opacity.data.png",
@@ -301,6 +307,27 @@
     "materialTag0": "ericrolph_cannon_car_wash_selector",
     "name": "ericrolph_cannon_car_wash_selector_interior_brick",
     "persistentId": "050d1a33-8255-5b74-a4ed-a4a481b916b4",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_selector_kiosk_face": {
+    "Stages": [
+      {
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_kiosk_face.color.png",
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": true,
+    "class": "Material",
+    "doubleSided": true,
+    "mapTo": "ericrolph_cannon_car_wash_selector_kiosk_face",
+    "materialTag0": "ericrolph_cannon_car_wash_selector",
+    "name": "ericrolph_cannon_car_wash_selector_kiosk_face",
+    "persistentId": "c6913dd3-43a6-507c-8bce-5df9dbb8d988",
+    "translucentBlendOp": "None",
     "version": 1.5
   },
   "ericrolph_cannon_car_wash_selector_led": {

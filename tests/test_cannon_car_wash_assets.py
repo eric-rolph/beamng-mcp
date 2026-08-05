@@ -278,8 +278,8 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
     # curvature never has to be faceted away; draw calls are governed by
     # the primitive-group cap below.
     assert actual_triangle_count <= 40_000
-    assert actual_primitive_group_count <= 48
-    assert actual_material_symbol_count == 19
+    assert actual_primitive_group_count <= 56
+    assert actual_material_symbol_count == 20
     dae_text = DAE_PATH.read_text(encoding="utf-8")
     assert "EntranceSign_Text" not in dae_text
     assert "ExitSign_Text" not in dae_text
@@ -362,7 +362,7 @@ def test_selector_runtime_visual_preserves_animations_and_uses_vehicle_materials
     }
     selector_materials = json.loads(SELECTOR_MATERIALS_PATH.read_text(encoding="utf-8"))
     assert runtime_materials == set(selector_materials)
-    assert len(runtime_materials) == 19
+    assert len(runtime_materials) == 20
     assert all(name.startswith(f"{MOD_ID}_selector_") for name in runtime_materials)
 
 
@@ -370,7 +370,7 @@ def test_cannon_car_wash_pbr_authoring_maps_are_power_of_two_seamless_and_typed(
     manifest = json.loads(TEXTURE_MANIFEST_PATH.read_text(encoding="utf-8"))
     assert manifest["texture_root"] == "textures/generated_png"
     assert manifest["normal_convention"] == "OpenGL_Y_positive"
-    assert len(manifest["files"]) == 49
+    assert len(manifest["files"]) == 54
     assert {entry["name"] for entry in manifest["files"]} == {
         path.name for path in GENERATED_TEXTURE_ROOT.glob("*.png")
     }
@@ -553,14 +553,15 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
         f"{MOD_ID}_panel_btn_power_up",
         f"{MOD_ID}_panel_btn_power_down",
         f"{MOD_ID}_panel_btn_cannon",
-        f"{MOD_ID}_panel_frame",
+        f"{MOD_ID}_panel_frame_x",
+        f"{MOD_ID}_panel_frame_y",
     }
     cage_node_rows = [
         row for row in part["nodes"][1:] if row[0] not in cloth_ids and row[0] not in panel_ids
     ]
     cloth_node_rows = [row for row in part["nodes"][1:] if row[0] in cloth_ids]
     panel_node_rows = [row for row in part["nodes"][1:] if row[0] in panel_ids]
-    assert len(panel_node_rows) == 6
+    assert len(panel_node_rows) == 7
     for row in panel_node_rows:
         assert row[4]["fixed"] is True
         assert row[4]["collision"] is False
@@ -677,7 +678,7 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
     }
     # v1.38: six fixed panel-button anchor nodes (five triggers2 caps + one
     # frame node) ride outside the Blender cage and the cloth lattice.
-    panel_anchor_count = 6
+    panel_anchor_count = 7
     assert live_result["topology"] == {
         "beam_count": len(handoff["beams"]) + len(cloth["beams"]),
         "engine_collision_mode_3_count": len(spawn_envelope_nodes),

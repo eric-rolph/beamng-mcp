@@ -1159,7 +1159,13 @@ def _build_attract_cannon(output_root: Path) -> list[Path]:
     grain = 1.0 + 0.10 * rng.standard_normal((size, size)).astype(np.float32)
     tooling = 1.0 + 0.05 * np.sin(ys * 1.7)
     luminance = np.clip(base * grain * tooling, 0.0, 1.0)
-    rgb = np.dstack((luminance * 0.145, luminance * 0.155, luminance * 0.175))
+    # v1.39: aged BRONZE with verdigris pooling in the recesses - the
+    # 18th-century naval gun look (was blue-grey cast iron).
+    patina = np.clip(rng.standard_normal((size, size)) * 0.5 + (1.0 - base) * 1.4 - 0.9, 0.0, 1.0)
+    bronze_r = luminance * 0.42 * (1.0 - patina) + 0.18 * patina
+    bronze_g = luminance * 0.33 * (1.0 - patina) + 0.34 * patina
+    bronze_b = luminance * 0.16 * (1.0 - patina) + 0.28 * patina
+    rgb = np.dstack((bronze_r, bronze_g, bronze_b))
     colour = _to_srgb_image(np.clip(rgb, 0.0, 1.0))
     height = (luminance * 0.0006).astype(np.float32)
     normal = _normal_from_metric_height(height, (0.55, 0.9))
@@ -1310,8 +1316,10 @@ def _build_control_panel(output_root: Path) -> list[Path]:
     row_top = 88
     for dot, label in rows:
         centre_y = row_top + 13
-        draw.ellipse([44, centre_y - 9, 62, centre_y + 9], fill=dot, outline=(60, 62, 66))
-        draw.text((74, centre_y), label, font=row_font, fill=(36, 40, 46), anchor="lm")
+        # v1.39 (player): the buttons themselves carry the colour - the
+        # redundant legend dot is gone and the label shifts left.
+        del dot
+        draw.text((52, centre_y), label, font=row_font, fill=(36, 40, 46), anchor="lm")
         draw.line([40, row_top + 27, size - 40, row_top + 27], fill=(150, 153, 158), width=1)
         row_top += 29
     draw.text(
@@ -1422,6 +1430,138 @@ def _build_ramp_flap(output_root: Path) -> list[Path]:
     return paths
 
 
+def _build_carriage_oak(output_root: Path) -> list[Path]:
+    """Oiled oak for the gun carriage (256): planks, grain, iron staining."""
+
+    size = 256
+    rng = np.random.default_rng(20260812)
+    ys = np.arange(size, dtype=np.float32)[:, None]
+    xs = np.arange(size, dtype=np.float32)[None, :]
+    # Vertical grain streaks with per-plank tone shifts every 64 px.
+    plank = (xs // 64).astype(np.int64)
+    plank_tone = 0.92 + 0.12 * ((plank * 2654435761 % 97) / 97.0)
+    grain = 1.0 + 0.09 * np.sin(xs * 0.9 + np.sin(ys * 0.05) * 3.0)
+    streak = 1.0 + 0.05 * rng.standard_normal((size, size)).astype(np.float32)
+    seam = 1.0 - 0.35 * np.clip(1.0 - np.abs((xs % 64) - 2.0), 0.0, 1.0)
+    lum = np.clip(plank_tone * grain * streak * seam, 0.0, 1.4)
+    rgb = np.dstack((lum * 0.40, lum * 0.265, lum * 0.145))
+    colour = _to_srgb_image(np.clip(rgb, 0.0, 1.0))
+    height = ((grain - 1.0) * 0.004 + (seam - 1.0) * 0.006).astype(np.float32)
+    normal = _normal_from_metric_height(height, (0.5, 0.5))
+    rough = np.clip(0.74 + 0.06 * rng.standard_normal((size, size)), 0.55, 0.9)
+    roughness = _to_data_image(rough.astype(np.float32))
+    outputs = {
+        _texture_name("carriage_oak", "color"): _seal_edges(colour),
+        _texture_name("carriage_oak", "normal"): _seal_edges(normal),
+        _texture_name("carriage_oak_roughness", "data"): _seal_edges(roughness),
+    }
+    paths: list[Path] = []
+    for name, image in outputs.items():
+        path = output_root / name
+        _save(image, path)
+        paths.append(path)
+    return paths
+
+
+def _build_kiosk_face(output_root: Path) -> list[Path]:
+    """Printed pay-station detail atlas (512): screen UI, keypad, labels.
+
+    Layout (engine samples V from image bottom):
+    - rows 0..240: live screen UI (menu, prices, highlighted selection)
+    - rows 246..410 left half: labelled keypad grid
+    - rows 246..410 right 0.55..0.84: card/tap label stack
+    - rows 416..512: speaker grille + receipt slot footer strip
+    """
+
+    size = 512
+    colour = Image.new("RGB", (size, size), (16, 18, 22))
+    draw = ImageDraw.Draw(colour)
+    title_font = _sign_font("Bold", 26, "arialbd.ttf")
+    row_font = _sign_font("SemiBold", 20, "arialbd.ttf")
+    small_font = _sign_font("Regular", 15, "arial.ttf")
+    key_font = _sign_font("Bold", 22, "arialbd.ttf")
+    # --- Screen UI (rows 0..240) ---
+    draw.rectangle([0, 0, size, 240], fill=(8, 42, 58))
+    draw.rectangle([0, 0, size, 44], fill=(4, 24, 36))
+    draw.text((size // 2, 22), "CANNON WASH", font=title_font, fill=(120, 220, 255), anchor="mm")
+    menu = (("BASIC WASH", "$8"), ("DELUXE FOAM", "$12"), ("CANNON EXIT", "$15"))
+    row_top = 58
+    for index, (label, price) in enumerate(menu):
+        if index == 2:
+            draw.rectangle([16, row_top - 14, size - 16, row_top + 16], fill=(16, 90, 130))
+        draw.text((36, row_top), label, font=row_font, fill=(210, 235, 250), anchor="lm")
+        draw.text((size - 40, row_top), price, font=row_font, fill=(255, 214, 120), anchor="rm")
+        row_top += 44
+    draw.text(
+        (size // 2, 214),
+        "SELECT WASH  -  INSERT OR TAP TO PAY",
+        font=small_font,
+        fill=(150, 200, 225),
+        anchor="mm",
+    )
+    # --- Keypad (rows 246..410, left half) ---
+    keys = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#")
+    key_index = 0
+    for key_row in range(4):
+        for key_col in range(3):
+            left = 18 + key_col * 82
+            top = 252 + key_row * 40
+            draw.rectangle([left, top, left + 68, top + 32], fill=(38, 40, 46))
+            draw.rectangle([left, top, left + 68, top + 32], outline=(90, 94, 102), width=2)
+            draw.text(
+                (left + 34, top + 16),
+                keys[key_index],
+                font=key_font,
+                fill=(225, 230, 238),
+                anchor="mm",
+            )
+            key_index += 1
+    # --- Card / tap labels (rows 246..410, right side) ---
+    draw.rectangle([290, 252, 430, 300], outline=(90, 200, 235), width=3)
+    draw.text((360, 268), "TAP CARD", font=small_font, fill=(120, 215, 245), anchor="mm")
+    draw.text((360, 286), ")))", font=row_font, fill=(120, 215, 245), anchor="mm")
+    draw.rectangle([290, 318, 430, 344], fill=(30, 32, 38))
+    draw.rectangle([300, 328, 420, 334], fill=(8, 8, 10))
+    draw.text((360, 358), "INSERT CARD", font=small_font, fill=(190, 195, 205), anchor="mm")
+    draw.polygon([(350, 372), (370, 372), (360, 384)], fill=(190, 195, 205))
+    # --- Footer strip (rows 416..512): speaker + receipt ---
+    draw.rectangle([0, 416, size, size], fill=(24, 26, 30))
+    for grille_row in range(5):
+        for grille_col in range(14):
+            cx = 40 + grille_col * 14
+            cy = 434 + grille_row * 13
+            draw.ellipse([cx - 3, cy - 3, cx + 3, cy + 3], fill=(8, 9, 11))
+    draw.rectangle([280, 446, 470, 462], fill=(6, 7, 9))
+    draw.text((375, 478), "RECEIPT", font=small_font, fill=(200, 205, 214), anchor="mm")
+    outputs = {_texture_name("kiosk_face", "color"): colour}
+    paths: list[Path] = []
+    for name, image in outputs.items():
+        path = output_root / name
+        _save(image, path)
+        paths.append(path)
+    return paths
+
+
+def _build_brush_emissive(output_root: Path) -> list[Path]:
+    """Felt-band emissive (1024): a dim self-glow that lifts the SHADED
+    face of the curtain to match the sunlit face (v1.39 player report);
+    the EVA card region stays black."""
+
+    size = 1024
+    band_region = size // 4
+    # .data maps are single-channel by contract; the red tint comes from
+    # the material's emissiveFactor instead.
+    emissive = Image.new("L", (size, size), 0)
+    ImageDraw.Draw(emissive).rectangle([(0, 0), (size - 1, band_region - 1)], fill=110)
+    outputs = {_texture_name("brush_cards_emissive", "data"): emissive}
+    paths: list[Path] = []
+    for name, image in outputs.items():
+        path = output_root / name
+        _save(image, path)
+        paths.append(path)
+    return paths
+
+
 def build(output_root: Path) -> dict[str, object]:
     output_root.mkdir(parents=True, exist_ok=True)
     expected = set()
@@ -1430,6 +1570,9 @@ def build(output_root: Path) -> dict[str, object]:
         + _build_brush_cards(output_root)
         + _build_sign(output_root)
         + _build_attract_cannon(output_root)
+        + _build_carriage_oak(output_root)
+        + _build_kiosk_face(output_root)
+        + _build_brush_emissive(output_root)
         + _build_mini_car(output_root)
         + _build_mini_wheel(output_root)
         + _build_control_panel(output_root)

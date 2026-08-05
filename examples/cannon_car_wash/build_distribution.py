@@ -49,8 +49,10 @@ LOGGER = logging.getLogger(__name__)
 # Public Repository contents are an explicit release decision. Never replace
 # this allowlist with a recursive "pack everything" implementation.
 EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
+    # v1.25 engine-capability pass: shared detail micro-normal + UV2 grime AO.
     f"art/shapes/{MOD_ID}/attract.materials.json",
     f"art/shapes/{MOD_ID}/cannon.dae",
+    f"art/shapes/{MOD_ID}/carriage.dae",
     f"art/shapes/{MOD_ID}/{MOD_ID}.dae",
     f"art/shapes/{MOD_ID}/mini_car.dae",
     f"art/shapes/{MOD_ID}/ramp_flap.dae",
@@ -59,8 +61,12 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_attract_cannon_roughness.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards.normal.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards_emissive.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards_opacity.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_brush_cards_roughness.data.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_carriage_oak.color.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_carriage_oak.normal.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_carriage_oak_roughness.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_cmu.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_cmu.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_cmu_roughness.data.dds",
@@ -75,7 +81,6 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_deep_blue.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_deep_blue.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_deep_blue_roughness.data.dds",
-    # v1.25 engine-capability pass: shared detail micro-normal + UV2 grime AO.
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_detail.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_grime.data.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_hazard_yellow.color.dds",
@@ -84,6 +89,7 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_interior_brick.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_interior_brick.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_interior_brick_roughness.data.dds",
+    f"art/shapes/{MOD_ID}/textures/{MOD_ID}_kiosk_face.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_mini_car_paint.color.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_mini_car_paint.normal.dds",
     f"art/shapes/{MOD_ID}/textures/{MOD_ID}_mini_car_paint_roughness.data.dds",
@@ -112,6 +118,7 @@ EXPECTED_RUNTIME_FILES: tuple[str, ...] = (
     f"lua/common/{MOD_ID}/lighting.lua",
     f"lua/ge/extensions/{MOD_ID}/runtime.lua",
     f"vehicles/{MOD_ID}/cannon.dae",
+    f"vehicles/{MOD_ID}/carriage.dae",
     f"vehicles/{MOD_ID}/default.jpg",
     f"vehicles/{MOD_ID}/{MOD_ID}.dae",
     f"vehicles/{MOD_ID}/{MOD_ID}.jbeam",
@@ -152,8 +159,8 @@ def _validate_member_name(
 
 
 def _validate_allowlist() -> None:
-    if len(EXPECTED_RUNTIME_FILES) != 75:
-        raise DistributionError("the public runtime allowlist must contain exactly 74 files")
+    if len(EXPECTED_RUNTIME_FILES) != 82:
+        raise DistributionError("the public runtime allowlist must contain exactly 82 files")
     if tuple(sorted(EXPECTED_RUNTIME_FILES)) != EXPECTED_RUNTIME_FILES:
         raise DistributionError("the public runtime allowlist must be deterministically sorted")
     for name in EXPECTED_RUNTIME_FILES:

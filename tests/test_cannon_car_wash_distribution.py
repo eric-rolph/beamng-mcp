@@ -125,7 +125,7 @@ def _is_namespaced(value: str) -> bool:
 
 def test_distribution_tree_contains_only_approved_runtime_files() -> None:
     files = validate_mod_tree()
-    assert len(EXPECTED_RUNTIME_FILES) == 75
+    assert len(EXPECTED_RUNTIME_FILES) == 82
     assert set(files) == set(EXPECTED_RUNTIME_FILES)
 
     forbidden_suffixes = (".blend", ".py", ".geometry.json", ".selector_handoff.json")
@@ -148,7 +148,7 @@ def test_public_runtime_contains_only_cooked_textures_for_every_material_referen
         for relative in files
         if relative.startswith(texture_prefix) and relative.endswith(".dds")
     }
-    assert len(cooked_members) == 49
+    assert len(cooked_members) == 54
     assert not any(
         relative.startswith(texture_prefix) and relative.endswith(".png") for relative in files
     )

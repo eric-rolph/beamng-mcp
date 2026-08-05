@@ -51,6 +51,12 @@
     "Stages": [
       {
         "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_brush_cards.color.png",
+        "emissiveFactor": [
+          0.86,
+          0.2,
+          0.16
+        ],
+        "emissiveMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_brush_cards_emissive.data.png",
         "metallicFactor": 0.0,
         "normalMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_brush_cards.normal.png",
         "opacityMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_brush_cards_opacity.data.png",
@@ -117,13 +123,13 @@
     ],
     "castShadows": true,
     "class": "Material",
+    "doubleSided": true,
     "mapTo": "ericrolph_cannon_car_wash_control_panel",
     "materialTag0": "ericrolph_cannon_car_wash",
     "name": "ericrolph_cannon_car_wash_control_panel",
     "persistentId": "37441dd3-4c00-5507-95b7-0e6ac7923491",
     "translucentBlendOp": "None",
-    "version": 1.5,
-    "doubleSided": true
+    "version": 1.5
   },
   "ericrolph_cannon_car_wash_corrugated_blue": {
     "Stages": [
@@ -301,6 +307,27 @@
     "materialTag0": "ericrolph_cannon_car_wash",
     "name": "ericrolph_cannon_car_wash_interior_brick",
     "persistentId": "14969363-70ea-5d7d-9f05-1df56e00e62b",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_kiosk_face": {
+    "Stages": [
+      {
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_kiosk_face.color.png",
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": true,
+    "class": "Material",
+    "doubleSided": true,
+    "mapTo": "ericrolph_cannon_car_wash_kiosk_face",
+    "materialTag0": "ericrolph_cannon_car_wash",
+    "name": "ericrolph_cannon_car_wash_kiosk_face",
+    "persistentId": "60460602-c44e-59d9-83da-ecf32287423c",
+    "translucentBlendOp": "None",
     "version": 1.5
   },
   "ericrolph_cannon_car_wash_led": {

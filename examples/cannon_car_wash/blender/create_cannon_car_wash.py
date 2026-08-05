@@ -675,11 +675,36 @@ def add_wheel_scrubber(
     # BeamNG samples V from the image bottom), so raw 0..1 cylinder UVs
     # wrapped the band around the core as a red stripe (player
     # screenshot). Compress V into the blue card region.
+    # v1.39 (player: the spindle wrapped red/blue two-tone stripes): the
+    # two-tone card art starts mid-region, so the core now samples only the
+    # PURE BLUE lower card zone, and machined steel flanges cap both ends
+    # so the spindle reads as a real driven shaft.
     for loop_uv in core.data.uv_layers.active.data:
-        loop_uv.uv[1] *= 0.72
+        loop_uv.uv[1] *= 0.26
     parent_preserving_world(core, root)
     axle = add_cylinder(f"{name}_Axle", location, 0.045, 0.95, steel, vertices=10, bevel=0.0)
     parent_preserving_world(axle, root)
+    for flange_z, flange_name in ((-0.425, "Bottom"), (0.425, "Top")):
+        flange = add_cylinder(
+            f"{name}_Flange_{flange_name}",
+            (location[0], location[1], location[2] + flange_z),
+            0.155,
+            0.025,
+            steel,
+            vertices=16,
+            bevel=0.004,
+        )
+        parent_preserving_world(flange, root)
+    hub = add_cylinder(
+        f"{name}_HubCap",
+        (location[0], location[1], location[2] + 0.455),
+        0.06,
+        0.035,
+        steel,
+        vertices=12,
+        bevel=0.006,
+    )
+    parent_preserving_world(hub, root)
     vertices: list[tuple[float, float, float]] = []
     faces: list[tuple[int, int, int, int]] = []
     face_uvs: list[tuple[tuple[float, float], ...]] = []
@@ -1472,10 +1497,23 @@ def build_details() -> None:
             steel,
             bevel=0.0,
         )
+        # v1.39 (player: "the brush mechanism looks funky... too basic"):
+        # the single thick arm becomes a twin-plate YOKE with a gusset,
+        # and the motor becomes a finned cylindrical gearmotor with a
+        # junction box and conduit - industrial, not toy blocks.
+        for plate_offset in (-0.052, 0.052):
+            add_box(
+                f"{scrub_name}_YokePlate_{'A' if plate_offset < 0 else 'B'}",
+                (side * 2.34, -6.7 + plate_offset, 1.28),
+                (0.88, 0.028, 0.075),
+                steel,
+                bevel=0.0,
+                rotation=(0.0, -side * 0.174, 0.0),
+            )
         add_box(
-            f"{scrub_name}_Arm",
-            (side * 2.34, -6.7, 1.28),
-            (0.88, 0.12, 0.09),
+            f"{scrub_name}_YokeGusset",
+            (side * 2.60, -6.7, 1.235),
+            (0.24, 0.076, 0.030),
             steel,
             bevel=0.0,
             rotation=(0.0, -side * 0.174, 0.0),
@@ -1490,13 +1528,57 @@ def build_details() -> None:
             vertices=16,
             bevel=0.0,
         )
-        add_box(
-            f"{scrub_name}_Motor",
-            (side * 1.883, -6.7, 1.36),
-            (0.20, 0.20, 0.15),
+        add_cylinder(
+            f"{scrub_name}_MotorCan",
+            (side * 1.90, -6.7, 1.415),
+            0.072,
+            0.24,
             blue_brush,
-            bevel=0.02,
             rotation=(0.0, -side * 0.24, 0.0),
+            vertices=16,
+            bevel=0.008,
+        )
+        for fin_index in range(3):
+            add_cylinder(
+                f"{scrub_name}_MotorFin_{fin_index + 1}",
+                (
+                    side * (1.90 + 0.0125 * fin_index * side * 0),
+                    -6.7,
+                    1.345 + 0.055 * fin_index,
+                ),
+                0.088,
+                0.012,
+                steel,
+                rotation=(0.0, -side * 0.24, 0.0),
+                vertices=16,
+                bevel=0.0,
+            )
+        add_box(
+            f"{scrub_name}_JunctionBox",
+            (side * 1.99, -6.82, 1.43),
+            (0.075, 0.09, 0.055),
+            steel,
+            bevel=0.006,
+        )
+        add_cylinder(
+            f"{scrub_name}_Conduit",
+            (side * 2.37, -6.82, 1.30),
+            0.014,
+            0.78,
+            steel,
+            rotation=(0.0, math.pi / 2.0 - side * 0.174, 0.0),
+            vertices=8,
+            bevel=0.0,
+        )
+        add_cylinder(
+            f"{scrub_name}_BearingCollar",
+            (side * 1.955, -6.7, 1.10),
+            0.062,
+            0.05,
+            steel,
+            rotation=(0.0, -side * 0.24, 0.0),
+            vertices=14,
+            bevel=0.004,
         )
         add_box(
             f"{scrub_name}_WallBrace",
@@ -2197,6 +2279,64 @@ def build_details() -> None:
                 rubber,
                 bevel=0.0,
             )
+    # v1.39 (player: "make it more realistic, give it more detail"): the
+    # kiosk face carries PRINTED detail from the new kiosk_face atlas -
+    # live screen UI, labelled keypad keys, card/tap labels, a speaker
+    # grille, and a receipt slot strip (engine samples V from image
+    # bottom: window v-coords below are 1 - row/512).
+    kiosk_print = material(
+        scenario_material_name("kiosk_face"), (0.85, 0.86, 0.88, 1.0), roughness=0.5
+    )
+
+    def kiosk_card(name, center, half_y, half_z, window):
+        add_card_mesh(
+            name,
+            center,
+            [
+                (0.0, -half_y, -half_z),
+                (0.0, half_y, -half_z),
+                (0.0, half_y, half_z),
+                (0.0, -half_y, half_z),
+            ],
+            [(0, 1, 2, 3)],
+            kiosk_print,
+            [window],
+            alpha_test=False,
+        )
+
+    kiosk_card(
+        "PayKiosk_ScreenArt",
+        (-2.4435, -8.25, 1.60),
+        0.165,
+        0.115,
+        ((0.0, 0.53125), (1.0, 0.53125), (1.0, 1.0), (0.0, 1.0)),
+    )
+    kiosk_card(
+        "PayKiosk_KeypadArt",
+        (-2.4415, -8.31, 1.27),
+        0.125,
+        0.095,
+        ((0.0, 0.19921875), (0.53125, 0.19921875), (0.53125, 0.51953125), (0.0, 0.51953125)),
+    )
+    kiosk_card(
+        "PayKiosk_LabelArt",
+        (-2.4415, -8.06, 1.185),
+        0.075,
+        0.115,
+        (
+            (0.546875, 0.19921875),
+            (0.84375, 0.19921875),
+            (0.84375, 0.51953125),
+            (0.546875, 0.51953125),
+        ),
+    )
+    kiosk_card(
+        "PayKiosk_FooterArt",
+        (-2.4435, -8.25, 0.86),
+        0.185,
+        0.085,
+        ((0.0, 0.0), (1.0, 0.0), (1.0, 0.1875), (0.0, 0.1875)),
+    )
     add_box("PayKiosk_TapPad", (-2.455, -8.06, 1.30), (0.016, 0.12, 0.12), cyan, bevel=0.006)
     add_box("PayKiosk_CardSlot", (-2.453, -8.06, 1.16), (0.014, 0.14, 0.03), steel, bevel=0.0)
     add_cylinder(
@@ -2284,7 +2424,11 @@ def build_details() -> None:
     add_box("Sign_Retainer_R", (2.445, -9.652, 4.90), (0.09, 0.085, 1.20), steel, bevel=0.0)
     # The cannon finial is the brand landmark: a stainless barrel breaking the
     # coping line with a hazard-yellow muzzle ring, aimed along the launch arc.
-    add_box("Sign_Cannon_Base", (1.62, -9.51, 5.65), (0.30, 0.26, 0.18), deep_blue, bevel=0.015)
+    # v1.39: the 18th-century gun stands centred on the roof lip above the
+    # sign - a proper plinth with a stainless coping edge carries the
+    # carriage trucks; the old off-centre finial base is gone.
+    add_box("CannonPlinth", (0.0, -9.51, 5.66), (0.95, 0.72, 0.12), deep_blue, bevel=0.01)
+    add_box("CannonPlinthCap", (0.0, -9.51, 5.735), (1.00, 0.77, 0.03), steel, bevel=0.0)
     for side in (-1.0, 1.0):
         side_name = "L" if side < 0 else "R"
         add_cylinder(
@@ -3428,6 +3572,7 @@ MINI_CAR_DAE_PATH = ASSET_DIRECTORY / "mini_car.dae"
 
 
 CANNON_DAE_PATH = ASSET_DIRECTORY / "cannon.dae"
+CARRIAGE_DAE_PATH = ASSET_DIRECTORY / "carriage.dae"
 RAMP_FLAP_DAE_PATH = ASSET_DIRECTORY / "ramp_flap.dae"
 
 
@@ -3530,52 +3675,94 @@ def build_ramp_flap() -> None:
 
 
 def build_cannon() -> None:
-    """Sign cannon as its own aimable shape: barrel along +Z from origin."""
+    """18th-century naval gun barrel (v1.39): origin ON the trunnion axis.
 
-    # v1.33 (player): the cannon gets its own cast-iron texture instead of
-    # flat stainless. Cylinder UVs wrap U around the bore and run V along
-    # the length, so the texture's horizontal bands read as machining
-    # rings on the barrel.
-    iron = material(
+    The runtime pitches this shape about its origin, so the trunnions sit
+    at z=0 with the chase and muzzle up +Z and the breech/cascabel down
+    -Z - the barrel elevates exactly like the real gun on its carriage.
+    Profile built from stacked frustums with ring astragals at the real
+    stations: base ring, reinforce rings, chase girdle, muzzle swell, and
+    the cascabel ball closing the breech.
+    """
+
+    bronze = material(
         scenario_material_name("attract_cannon"),
-        (0.16, 0.17, 0.19, 1.0),
-        metallic=0.85,
-        roughness=0.55,
+        (0.42, 0.33, 0.18, 1.0),
+        metallic=0.9,
+        roughness=0.45,
     )
     bore_dark = material(
         scenario_material_name("rubber"), (0.012, 0.014, 0.018, 1.0), roughness=0.9
     )
     prefix = f"{MOD_ID}_cannonshape_"
-    # v1.34 (player): the muzzle must read as an OPEN BORE, not a capped
-    # disc. Iron ring collar + a near-black disc proud of the ring's top
-    # cap + a raised iron lip torus wrapping it, so the dark circle reads
-    # as the hole down the barrel from every angle.
-    parts = [
-        add_cylinder(f"{prefix}Barrel", (0.0, 0.0, 0.40), 0.085, 0.80, iron, vertices=16),
-        add_cylinder(f"{prefix}Muzzle", (0.0, 0.0, 0.825), 0.105, 0.07, iron, vertices=16),
-        add_cylinder(
-            f"{prefix}Bore",
-            (0.0, 0.0, 0.868),
-            0.080,
-            0.014,
-            bore_dark,
-            vertices=16,
-            bevel=0.0,
-        ),
-        add_cylinder(f"{prefix}Breech", (0.0, 0.0, 0.03), 0.11, 0.12, iron, vertices=16),
-    ]
-    bpy.ops.mesh.primitive_torus_add(
-        location=(0.0, 0.0, 0.872),
-        major_radius=0.094,
-        minor_radius=0.014,
-        major_segments=16,
-        minor_segments=8,
+    parts = []
+
+    def barrel_ring(name, z, radius, height):
+        parts.append(
+            add_cylinder(
+                f"{prefix}{name}", (0.0, 0.0, z), radius, height, bronze, vertices=18, bevel=0.0
+            )
+        )
+
+    parts.append(
+        add_cone(f"{prefix}Breech", (0.0, 0.0, -0.12), 0.105, 0.092, 0.24, bronze, vertices=18)
     )
-    lip = bpy.context.object
-    lip.name = namespaced_object_name(f"{prefix}MuzzleLip")
-    lip.data.name = f"{lip.name}_mesh"
-    assign_material(lip, iron)
-    parts.append(lip)
+    parts.append(
+        add_cone(f"{prefix}Chase", (0.0, 0.0, 0.26), 0.092, 0.066, 0.52, bronze, vertices=18)
+    )
+    barrel_ring("BaseRing", -0.235, 0.112, 0.035)
+    barrel_ring("ReinforceRing1", 0.005, 0.101, 0.028)
+    barrel_ring("ReinforceRing2", 0.20, 0.089, 0.024)
+    barrel_ring("ChaseGirdle", 0.40, 0.078, 0.02)
+    parts.append(
+        add_cone(f"{prefix}MuzzleSwell", (0.0, 0.0, 0.555), 0.066, 0.088, 0.07, bronze, vertices=18)
+    )
+    barrel_ring("MuzzleFace", 0.598, 0.09, 0.016)
+    parts.append(
+        add_cylinder(
+            f"{prefix}Bore", (0.0, 0.0, 0.608), 0.058, 0.012, bore_dark, vertices=16, bevel=0.0
+        )
+    )
+    parts.append(
+        add_cylinder(f"{prefix}CascabelNeck", (0.0, 0.0, -0.265), 0.036, 0.05, bronze, vertices=12)
+    )
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=0.052, location=(0.0, 0.0, -0.315), segments=14, ring_count=10
+    )
+    ball = bpy.context.object
+    ball.name = namespaced_object_name(f"{prefix}CascabelBall")
+    ball.data.name = f"{ball.name}_mesh"
+    assign_material(ball, bronze)
+    parts.append(ball)
+    for side in (-1.0, 1.0):
+        side_name = "L" if side < 0 else "R"
+        parts.append(
+            add_cylinder(
+                f"{prefix}Trunnion_{side_name}",
+                (side * 0.115, 0.0, 0.0),
+                0.032,
+                0.10,
+                bronze,
+                rotation=(0.0, math.pi / 2.0, 0.0),
+                vertices=14,
+                bevel=0.0,
+            )
+        )
+        parts.append(
+            add_cylinder(
+                f"{prefix}Rimbase_{side_name}",
+                (side * 0.075, 0.0, 0.0),
+                0.045,
+                0.03,
+                bronze,
+                rotation=(0.0, math.pi / 2.0, 0.0),
+                vertices=14,
+                bevel=0.0,
+            )
+        )
+    parts.append(
+        add_box(f"{prefix}VentField", (0.0, -0.055, -0.16), (0.05, 0.03, 0.09), bronze, bevel=0.006)
+    )
     bpy.ops.object.select_all(action="DESELECT")
     for obj in parts:
         obj.select_set(True)
@@ -3600,6 +3787,126 @@ def build_cannon() -> None:
         if mesh.users == 0:
             bpy.data.meshes.remove(mesh)
     print("CANNON_CAR_WASH_STAGE cannon complete")
+
+
+def build_carriage() -> None:
+    """Four-truck naval gun carriage (v1.39): origin at the trunnion notch.
+
+    The runtime yaws this shape to the sun azimuth while the barrel
+    pitches independently about the shared origin. Oak cheeks in two
+    steps, transom, bed, two axletrees, four wooden trucks, a quoin
+    elevating wedge, and iron cap-squares over the trunnion notches.
+    """
+
+    oak = material(
+        scenario_material_name("carriage_oak"),
+        (0.36, 0.24, 0.13, 1.0),
+        roughness=0.75,
+    )
+    iron = material(scenario_material_name("rubber"), (0.012, 0.014, 0.018, 1.0), roughness=0.9)
+    prefix = f"{MOD_ID}_carriage_"
+    parts = []
+    for side in (-1.0, 1.0):
+        side_name = "L" if side < 0 else "R"
+        parts.append(
+            add_box(
+                f"{prefix}Cheek_{side_name}_Step1",
+                (side * 0.105, 0.02, -0.035),
+                (0.035, 0.34, 0.09),
+                oak,
+                bevel=0.006,
+            )
+        )
+        parts.append(
+            add_box(
+                f"{prefix}Cheek_{side_name}_Step2",
+                (side * 0.105, 0.075, -0.105),
+                (0.035, 0.40, 0.075),
+                oak,
+                bevel=0.006,
+            )
+        )
+        parts.append(
+            add_box(
+                f"{prefix}CapSquare_{side_name}",
+                (side * 0.105, -0.10, 0.012),
+                (0.04, 0.09, 0.022),
+                iron,
+                bevel=0.0,
+            )
+        )
+    parts.append(
+        add_box(f"{prefix}Transom", (0.0, -0.185, -0.10), (0.17, 0.05, 0.09), oak, bevel=0.006)
+    )
+    parts.append(
+        add_box(f"{prefix}Bed", (0.0, 0.055, -0.155), (0.24, 0.46, 0.035), oak, bevel=0.006)
+    )
+    parts.append(
+        add_box(f"{prefix}Quoin", (0.0, 0.135, -0.118), (0.09, 0.16, 0.045), oak, bevel=0.008)
+    )
+    parts.append(
+        add_box(f"{prefix}QuoinHandle", (0.0, 0.225, -0.118), (0.024, 0.05, 0.024), iron, bevel=0.0)
+    )
+    for axle_y, axle_name in ((-0.13, "Rear"), (0.16, "Front")):
+        parts.append(
+            add_box(
+                f"{prefix}Axletree_{axle_name}",
+                (0.0, axle_y, -0.20),
+                (0.30, 0.055, 0.05),
+                oak,
+                bevel=0.006,
+            )
+        )
+        for side in (-1.0, 1.0):
+            side_name = "L" if side < 0 else "R"
+            parts.append(
+                add_cylinder(
+                    f"{prefix}Truck_{axle_name}_{side_name}",
+                    (side * 0.155, axle_y, -0.235),
+                    0.065,
+                    0.05,
+                    oak,
+                    rotation=(0.0, math.pi / 2.0, 0.0),
+                    vertices=16,
+                    bevel=0.004,
+                )
+            )
+            parts.append(
+                add_cylinder(
+                    f"{prefix}TruckPin_{axle_name}_{side_name}",
+                    (side * 0.185, axle_y, -0.235),
+                    0.014,
+                    0.02,
+                    iron,
+                    rotation=(0.0, math.pi / 2.0, 0.0),
+                    vertices=8,
+                    bevel=0.0,
+                )
+            )
+    bpy.ops.object.select_all(action="DESELECT")
+    for obj in parts:
+        obj.select_set(True)
+    bpy.context.view_layer.objects.active = parts[0]
+    result = bpy.ops.wm.collada_export(
+        filepath=str(CARRIAGE_DAE_PATH),
+        check_existing=False,
+        selected=True,
+        include_children=True,
+        apply_modifiers=True,
+        triangulate=True,
+        apply_global_orientation=True,
+        export_global_forward_selection="Y",
+        export_global_up_selection="Z",
+        sort_by_name=True,
+    )
+    if "FINISHED" not in result:
+        raise RuntimeError(f"carriage export failed: {result}")
+    for obj in parts:
+        mesh = obj.data
+        bpy.data.objects.remove(obj, do_unlink=True)
+        if mesh.users == 0:
+            bpy.data.meshes.remove(mesh)
+    print("CANNON_CAR_WASH_STAGE carriage complete")
 
 
 def build_mini_car() -> None:
@@ -3866,6 +4173,7 @@ if STAGE in {"details", "all"}:
 if STAGE in {"finalize", "all"}:
     build_mini_car()
     build_cannon()
+    build_carriage()
     build_ramp_flap()
     finalize()
 if STAGE in {"vehicle_prop", "all"}:
