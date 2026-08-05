@@ -544,8 +544,38 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
     # them pins the soft section separately.
     cloth = handoff["cloth"]
     cloth_ids = {node["id"] for node in cloth["nodes"]}
-    cage_node_rows = [row for row in part["nodes"][1:] if row[0] not in cloth_ids]
+    # v1.38: six fixed anchor nodes carry the dashboard-style triggers2
+    # buttons (five caps + one frame node). They are massless-scale virtual
+    # anchors outside the measured Blender cage, pinned separately below.
+    panel_ids = {
+        f"{MOD_ID}_panel_btn_ramp_up",
+        f"{MOD_ID}_panel_btn_ramp_down",
+        f"{MOD_ID}_panel_btn_power_up",
+        f"{MOD_ID}_panel_btn_power_down",
+        f"{MOD_ID}_panel_btn_cannon",
+        f"{MOD_ID}_panel_frame",
+    }
+    cage_node_rows = [
+        row for row in part["nodes"][1:] if row[0] not in cloth_ids and row[0] not in panel_ids
+    ]
     cloth_node_rows = [row for row in part["nodes"][1:] if row[0] in cloth_ids]
+    panel_node_rows = [row for row in part["nodes"][1:] if row[0] in panel_ids]
+    assert len(panel_node_rows) == 6
+    for row in panel_node_rows:
+        assert row[4]["fixed"] is True
+        assert row[4]["collision"] is False
+        assert row[4]["nodeWeight"] == 2.0
+    assert {row[0] for row in part["triggers2"][1:]} == {
+        f"panel_{suffix}"
+        for suffix in (
+            "btn_ramp_up",
+            "btn_ramp_down",
+            "btn_power_up",
+            "btn_power_down",
+            "btn_cannon",
+        )
+    }
+    assert len(part["triggerEventLinks2"]) == 6
     expected_positions = {node["id"]: node["position"] for node in handoff["nodes"]}
     actual_nodes = {row[0]: row for row in cage_node_rows}
     assert set(actual_nodes) == set(expected_positions)
@@ -645,12 +675,15 @@ def test_cannon_car_wash_selector_jbeam_exactly_matches_blender_cage() -> None:
         "name": "Cannon Car Wash",
         "type": "Prop",
     }
+    # v1.38: six fixed panel-button anchor nodes (five triggers2 caps + one
+    # frame node) ride outside the Blender cage and the cloth lattice.
+    panel_anchor_count = 6
     assert live_result["topology"] == {
         "beam_count": len(handoff["beams"]) + len(cloth["beams"]),
         "engine_collision_mode_3_count": len(spawn_envelope_nodes),
-        "fixed_node_count": len(handoff["nodes"]) + len(expected_cloth_fixed),
+        "fixed_node_count": len(handoff["nodes"]) + len(expected_cloth_fixed) + panel_anchor_count,
         "flexbody_count": 2,
-        "node_count": len(handoff["nodes"]) + len(cloth["nodes"]),
+        "node_count": len(handoff["nodes"]) + len(cloth["nodes"]) + panel_anchor_count,
         "total_mass_kg": total_mass,
         "triangle_count": len(handoff["triangles"]) + len(cloth["triangles"]),
         "vehicle_directory": f"/vehicles/{MOD_ID}/",

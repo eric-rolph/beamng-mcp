@@ -731,6 +731,14 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
     dy = (np.roll(luminance, -1, axis=0) - np.roll(luminance, 1, axis=0)) * 0.5
     normal_vectors = np.dstack((-dx * 1.1, dy * 1.1, np.ones_like(luminance)))
     normal_vectors /= np.linalg.norm(normal_vectors, axis=2, keepdims=True).clip(min=1e-6)
+    # v1.38 (player: the curtain's two faces rendered different reds): the
+    # felt band's micro-normal inverts on the backface of the doubleSided
+    # strips, shading one side a tier darker. Felt is matte - the 0.9-band
+    # roughness carries the material read - so the band gets a FLAT normal
+    # and both faces light identically.
+    normal_vectors[:band_region, :, 0] = 0.0
+    normal_vectors[:band_region, :, 1] = 0.0
+    normal_vectors[:band_region, :, 2] = 1.0
     normal = Image.fromarray(np.clip((normal_vectors * 0.5 + 0.5) * 255.0, 0, 255).astype(np.uint8))
     # Split roughness: matte needle-punched felt (the fiber mat scatters
     # light diffusely) across the top-quarter ribbon band, glossier EVA
@@ -1271,7 +1279,6 @@ def _build_control_panel(output_root: Path) -> list[Path]:
     title_font = _sign_font("Bold", 24, "arialbd.ttf")
     row_font = _sign_font("SemiBold", 17, "arialbd.ttf")
     small_font = _sign_font("Regular", 13, "arial.ttf")
-    pad_font = _sign_font("Bold", 24, "arialbd.ttf")
     # --- Door legend, compressed into the top half. ---
     for corner_x in (16, size - 16):
         for corner_y in (14, door_height - 14):
@@ -1309,7 +1316,7 @@ def _build_control_panel(output_root: Path) -> list[Path]:
         row_top += 29
     draw.text(
         (size // 2, row_top + 8),
-        "STAND ON MATCHING PAD TO OPERATE",
+        "PRESS A BUTTON TO OPERATE",
         font=small_font,
         fill=(90, 94, 100),
         anchor="mm",
@@ -1321,36 +1328,9 @@ def _build_control_panel(output_root: Path) -> list[Path]:
             fill=(226, 178, 12),
         )
     draw.rectangle([0, footer_top, size, door_height], outline=(30, 30, 34), width=3)
-    # --- Pad stencil tiles (rows 280..380): background matches each pad's
-    # box colour so the label quad blends into the pad beneath it; the
-    # stencil text is rendered horizontal then rotated 90 CCW, which the
-    # V-flip sampling presents upright to a player facing the wall. ---
-    pad_tiles = (
-        ((0, 209, 212), (10, 26, 30), "RAMP +1"),
-        ((255, 41, 4), (255, 244, 240), "RAMP -1"),
-        ((1, 51, 189), (235, 240, 255), "POWER +"),
-        ((255, 173, 4), (30, 24, 4), "POWER -"),
-        ((4, 23, 56), (225, 232, 245), "ARM/SAFE"),
-    )
-    tile_top = 280
-    tile_size = 100
-    for tile_index, (background, ink, text) in enumerate(pad_tiles):
-        left = tile_index * tile_size
-        draw.rectangle(
-            [left, tile_top, left + tile_size - 1, tile_top + tile_size - 1], fill=background
-        )
-        stencil = Image.new("RGBA", (92, 30), (0, 0, 0, 0))
-        stencil_draw = ImageDraw.Draw(stencil)
-        stencil_draw.text((46, 15), text, font=pad_font, fill=ink + (255,), anchor="mm")
-        rotated = stencil.rotate(90, expand=True)
-        paste_x = left + (tile_size - rotated.width) // 2
-        paste_y = tile_top + (tile_size - rotated.height) // 2
-        colour.paste(rotated, (paste_x, paste_y), rotated)
-        draw.rectangle(
-            [left + 2, tile_top + 2, left + tile_size - 3, tile_top + tile_size - 3],
-            outline=tuple(max(0, channel - 40) for channel in background),
-            width=2,
-        )
+    # v1.38: the walk-in pad stencil tiles are gone - the legend rows line
+    # up with REAL pressable buttons (vehicle triggers2) mounted through
+    # the door at the right-hand column.
     # --- Painted chevron band (rows 400..512): diagonal yellow/black with
     # concrete wear grunge, period 64 px so it tiles along U. ---
     band_top = 400
@@ -1377,14 +1357,20 @@ def _build_control_panel(output_root: Path) -> list[Path]:
 
 
 def _build_ramp_flap(output_root: Path) -> list[Path]:
-    """Steel checkerplate for the hinged exit-ramp flap (256, tileable)."""
+    """Rubber mat + hazard chevrons for the tilting exit apron (256).
+
+    v1.38 (player): the separate grey checkerplate plate is gone - the
+    yellow-and-black incline itself tilts. V maps crest (0) to toe (1) on
+    the apron's top face: chevron warning bands at both edges, a dark
+    rubber running surface with faint tread lugs between.
+    """
 
     size = 256
     rng = np.random.default_rng(20260810)
     ys = np.arange(size, dtype=np.float32)[:, None]
     xs = np.arange(size, dtype=np.float32)[None, :]
     height = np.zeros((size, size), dtype=np.float32)
-    # Diamond-plate lugs: two interleaved grids of diagonal ovals.
+    # Faint diamond tread on the rubber running surface.
     cell = 32
     for offset_x, offset_y, angle in ((0, 0, 0.785), (cell // 2, cell // 2, -0.785)):
         cx = ((xs - offset_x) % cell) - cell / 2
@@ -1393,13 +1379,36 @@ def _build_ramp_flap(output_root: Path) -> list[Path]:
         v = -cx * math.sin(angle) + cy * math.cos(angle)
         lug = np.clip(1.0 - ((u / 10.0) ** 2 + (v / 4.0) ** 2), 0.0, 1.0)
         height = np.maximum(height, lug)
-    height_m = (height * 0.0015).astype(np.float32)
+    height_m = (height * 0.0009).astype(np.float32)
     wear = 1.0 + 0.05 * rng.standard_normal((size, size)).astype(np.float32)
-    luminance = np.clip((0.52 + height * 0.18) * wear, 0.0, 1.0)
-    colour = _to_srgb_image(np.dstack((luminance * 0.52, luminance * 0.54, luminance * 0.57)))
+    rubber = np.clip((0.115 + height * 0.05) * wear, 0.0, 1.0)
+    red = rubber * 0.98
+    green = rubber * 1.0
+    blue = rubber * 1.04
+    # Hazard chevron bands at crest and toe rows: 45-degree diagonal
+    # stripes, alternating safety yellow and near-black.
+    band = (ys < size * 0.18) | (ys >= size * 0.82)
+    stripe = (((xs + ys) // 18).astype(np.int64) % 2).astype(bool)
+    stripe = np.broadcast_to(stripe, (size, size))
+    band = np.broadcast_to(band, (size, size))
+    paint_wear = 1.0 - 0.12 * np.clip(rng.standard_normal((size, size)), 0.0, None)
+    yellow_mask = band & stripe
+    black_mask = band & ~stripe
+    red = np.where(yellow_mask, 0.85 * paint_wear, red)
+    green = np.where(yellow_mask, 0.65 * paint_wear, green)
+    blue = np.where(yellow_mask, 0.10 * paint_wear, blue)
+    red = np.where(black_mask, 0.055, red)
+    green = np.where(black_mask, 0.055, green)
+    blue = np.where(black_mask, 0.06, blue)
+    colour = _to_srgb_image(np.dstack((red, green, blue)))
+    height_m = np.where(band, 0.0, height_m).astype(np.float32)
     normal = _normal_from_metric_height(height_m, (0.35, 0.35))
-    rough = np.clip(0.5 - height * 0.12 + 0.05 * rng.standard_normal((size, size)), 0.3, 0.7)
-    roughness = _to_data_image(rough.astype(np.float32))
+    rough = np.where(
+        band,
+        0.55 + 0.04 * rng.standard_normal((size, size)),
+        0.82 - height * 0.08 + 0.04 * rng.standard_normal((size, size)),
+    )
+    roughness = _to_data_image(np.clip(rough, 0.3, 0.95).astype(np.float32))
     outputs = {
         _texture_name("ramp_flap", "color"): _seal_edges(colour),
         _texture_name("ramp_flap", "normal"): _seal_edges(normal),

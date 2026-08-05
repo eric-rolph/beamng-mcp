@@ -544,10 +544,10 @@
   "topology": {
     "beam_count": 919,
     "engine_collision_mode_3_count": 8,
-    "fixed_node_count": 161,
+    "fixed_node_count": 167,
     "flexbody_count": 2,
-    "node_count": 365,
-    "total_mass_kg": 17147.0,
+    "node_count": 371,
+    "total_mass_kg": 17159.0,
     "triangle_count": 372,
     "vehicle_directory": "/vehicles/ericrolph_cannon_car_wash/"
   },

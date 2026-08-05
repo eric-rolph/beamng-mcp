@@ -125,7 +125,7 @@ def _is_namespaced(value: str) -> bool:
 
 def test_distribution_tree_contains_only_approved_runtime_files() -> None:
     files = validate_mod_tree()
-    assert len(EXPECTED_RUNTIME_FILES) == 74
+    assert len(EXPECTED_RUNTIME_FILES) == 75
     assert set(files) == set(EXPECTED_RUNTIME_FILES)
 
     forbidden_suffixes = (".blend", ".py", ".geometry.json", ".selector_handoff.json")
