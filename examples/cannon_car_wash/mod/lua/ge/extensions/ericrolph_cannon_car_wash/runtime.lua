@@ -48,6 +48,7 @@ local Attract = {
     "ericrolph_cannon_car_wash_mini_wheel",
     "ericrolph_cannon_car_wash_ramp_flap",
     "ericrolph_cannon_car_wash_carriage_oak",
+    "ericrolph_cannon_car_wash_attract_iron",
     -- v1.36: the mini car's windshield and hub caps reference these two;
     -- outside gridmap only THIS file defines them (the scenario set never
     -- loads), so the toy rendered fallback-orange glass and hubs.

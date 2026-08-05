@@ -20,6 +20,29 @@
     "translucentBlendOp": "None",
     "version": 1.5
   },
+  "ericrolph_cannon_car_wash_attract_iron": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.016,
+          0.017,
+          0.02,
+          1.0
+        ],
+        "metallicFactor": 0.75,
+        "roughnessFactor": 0.55
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "mapTo": "ericrolph_cannon_car_wash_attract_iron",
+    "materialTag0": "ericrolph_cannon_car_wash",
+    "name": "ericrolph_cannon_car_wash_attract_iron",
+    "persistentId": "f2adb0f8-1250-58d9-b255-754efa988751",
+    "version": 1.5
+  },
   "ericrolph_cannon_car_wash_carriage_oak": {
     "Stages": [
       {

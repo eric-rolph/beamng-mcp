@@ -684,12 +684,12 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
     # accent rails): the palette anchors on the accent-stripe red itself,
     # and the fiber shading variance drops - the speckle/filament noise
     # plus the derived micro-normal were eating a full brightness tier.
-    felt_palette = ((240, 46, 34), (230, 40, 30), (248, 66, 44), (234, 44, 36))
+    felt_palette = ((252, 74, 58), (246, 62, 50), (254, 94, 72), (248, 68, 56))
     felt_rng = np.random.default_rng(20260806)
     xs = np.arange(size, dtype=np.float32)
 
     def _felt_rows(base_rgb: tuple[int, int, int], rows: int, phase: float) -> np.ndarray:
-        macro = 1.0 + 0.045 * np.sin(math.tau * (2.0 * xs / size) + phase)
+        macro = 1.0 + 0.03 * np.sin(math.tau * (2.0 * xs / size) + phase)
         weave = 1.0 + 0.03 * np.sin(math.tau * (7.0 * xs / size) + phase * 1.7)
         speckle = 1.0 + 0.032 * felt_rng.standard_normal((rows, size)).astype(np.float32)
         filament = 1.0 + 0.022 * felt_rng.standard_normal((rows, 1)).astype(np.float32)
@@ -1480,7 +1480,7 @@ def _build_kiosk_face(output_root: Path) -> list[Path]:
     draw.rectangle([0, 0, size, 240], fill=(8, 42, 58))
     draw.rectangle([0, 0, size, 44], fill=(4, 24, 36))
     draw.text((size // 2, 22), "CANNON WASH", font=title_font, fill=(120, 220, 255), anchor="mm")
-    menu = (("BASIC WASH", "$8"), ("DELUXE FOAM", "$12"), ("CANNON EXIT", "$15"))
+    menu = (("BASIC WASH", "$6"), ("DELUXE FOAM", "$12"), ("CANNON EXIT", "$24"))
     row_top = 58
     for index, (label, price) in enumerate(menu):
         if index == 2:
@@ -1548,7 +1548,7 @@ def _build_brush_emissive(output_root: Path) -> list[Path]:
     # .data maps are single-channel by contract; the red tint comes from
     # the material's emissiveFactor instead.
     emissive = Image.new("L", (size, size), 0)
-    ImageDraw.Draw(emissive).rectangle([(0, 0), (size - 1, band_region - 1)], fill=110)
+    ImageDraw.Draw(emissive).rectangle([(0, 0), (size - 1, band_region - 1)], fill=140)
     outputs = {_texture_name("brush_cards_emissive", "data"): emissive}
     paths: list[Path] = []
     for name, image in outputs.items():

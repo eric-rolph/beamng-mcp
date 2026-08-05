@@ -30,21 +30,21 @@
       "width": 1024,
       "height": 1024,
       "mode": "RGB",
-      "sha256": "4d27e069aa4b174f8b4164288c0454cf773931e16b143c9b76bf9f8ad2e64a92"
+      "sha256": "bdb0586f9f8c2bdc36d4748ed0cbb52369965cce221503ff20d9b693f6d12cc9"
     },
     {
       "name": "ericrolph_cannon_car_wash_brush_cards.normal.png",
       "width": 1024,
       "height": 1024,
       "mode": "RGB",
-      "sha256": "96f7fc6a202a956ad2d686f132c65c53d096e9fda722af7869f4b23ce169afc5"
+      "sha256": "c1c647bf819b331e9fba79c255e4ea578ba12b779fd7886f4c74a928779f88f0"
     },
     {
       "name": "ericrolph_cannon_car_wash_brush_cards_emissive.data.png",
       "width": 1024,
       "height": 1024,
       "mode": "L",
-      "sha256": "d6a41411d5a630eae9460ebb77178292ad0af4af687d067f6d100b833c952c1f"
+      "sha256": "90b2c7bf01fd06970c5ecffeabbecc3e70257549d7464b1b8fdb537f717226c1"
     },
     {
       "name": "ericrolph_cannon_car_wash_brush_cards_opacity.data.png",
@@ -240,7 +240,7 @@
       "width": 512,
       "height": 512,
       "mode": "RGB",
-      "sha256": "d95fa0a1477f2f041981a4b8c5415db732c20dfeaffc7bb86cbd098bee324961"
+      "sha256": "33d7076509419046b898ed1db169cc307cd69e6f0bfd0196262e0c29f8e81cfc"
     },
     {
       "name": "ericrolph_cannon_car_wash_mini_car_paint.color.png",
