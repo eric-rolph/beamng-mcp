@@ -15097,9 +15097,9 @@
       ],
       [
         "ericrolph_cannon_car_wash_panel_btn_ramp_up",
-        -3.579,
-        -6.185,
-        1.415,
+        -3.614,
+        -6.157,
+        1.373,
         {
           "collision": false,
           "fixed": true,
@@ -15113,9 +15113,9 @@
       ],
       [
         "ericrolph_cannon_car_wash_panel_btn_ramp_down",
-        -3.579,
-        -6.185,
-        1.345,
+        -3.614,
+        -6.157,
+        1.303,
         {
           "collision": false,
           "fixed": true,
@@ -15129,9 +15129,9 @@
       ],
       [
         "ericrolph_cannon_car_wash_panel_btn_power_up",
-        -3.579,
-        -6.185,
-        1.275,
+        -3.614,
+        -6.157,
+        1.233,
         {
           "collision": false,
           "fixed": true,
@@ -15145,9 +15145,9 @@
       ],
       [
         "ericrolph_cannon_car_wash_panel_btn_power_down",
-        -3.579,
-        -6.185,
-        1.205,
+        -3.614,
+        -6.157,
+        1.163,
         {
           "collision": false,
           "fixed": true,
@@ -15161,9 +15161,9 @@
       ],
       [
         "ericrolph_cannon_car_wash_panel_btn_cannon",
-        -3.579,
-        -6.185,
-        1.135,
+        -3.614,
+        -6.157,
+        1.093,
         {
           "collision": false,
           "fixed": true,
@@ -15177,9 +15177,9 @@
       ],
       [
         "ericrolph_cannon_car_wash_panel_frame_x",
-        -3.579,
-        -7.385,
-        1.415,
+        -3.614,
+        -7.357,
+        1.373,
         {
           "collision": false,
           "fixed": true,
@@ -15193,9 +15193,9 @@
       ],
       [
         "ericrolph_cannon_car_wash_panel_frame_y",
-        -3.579,
-        -6.185,
-        2.615,
+        -3.614,
+        -6.157,
+        2.573,
         {
           "collision": false,
           "fixed": true,

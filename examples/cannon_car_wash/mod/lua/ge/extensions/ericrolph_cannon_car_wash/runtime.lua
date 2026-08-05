@@ -28,7 +28,7 @@ local Attract = {
   -- v1.39: the 18th-century gun stands centred on the roof lip above
   -- the sign; the mount is the shared trunnion origin of barrel and
   -- carriage (plinth cap 5.75 + truck reach 0.30).
-  mountLocal = vec3(0.0, -9.51, 6.05),
+  mountLocal = vec3(0.0, -9.51, 6.44),
   aimLocal = vec3(0.0, -0.573576, 0.819152),
   barrelLength = 0.86,
   tumbleRate = 9.0,
@@ -1080,6 +1080,23 @@ local function synchronizeTransforms(state)
   local frame = propFrame(vehicle)
   if not frame then return false, "registered prop transform is invalid" end
 
+  -- v1.40 (player: brushes stop-start with a car inside): this refresh
+  -- runs at 10 Hz, and re-posing the animated TSStatic RESTARTS its
+  -- ambient clip - any numeric jitter in the frame read froze the
+  -- rollers mid-cycle (and twitched the ramp flap). An unchanged pose is
+  -- a no-op now; real moves (teleport, reset, placement) still re-pose.
+  if state.origin and state.modelRotation then
+    local originDelta = (frame.origin - state.origin):length()
+    local rotationDot = math.abs(
+      frame.modelRotation.x * state.modelRotation.x
+        + frame.modelRotation.y * state.modelRotation.y
+        + frame.modelRotation.z * state.modelRotation.z
+        + frame.modelRotation.w * state.modelRotation.w
+    )
+    if originDelta < 0.002 and rotationDot > 0.9999995 then
+      return true
+    end
+  end
   local ok, transformError = pcall(function()
     setObjectTransform(state.visual, frame.origin, frame.modelRotation, vec3(1, 1, 1))
     setObjectTransform(
@@ -2497,6 +2514,12 @@ local function rebuildTriggersAfterReset(state)
   end
   state.launchTrigger = launchTrigger
 
+  -- v1.40: the freshly created triggers sit unpositioned at the world
+  -- origin until a sync runs - but the pose-unchanged guard would skip
+  -- it (the 0.1 s refresh already recorded this pose). Clear the cached
+  -- frame so this sync always applies in full.
+  state.origin = nil
+  state.modelRotation = nil
   local synced, syncError = synchronizeTransforms(state)
   if not synced then
     deleteSceneObject(washTrigger)

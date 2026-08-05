@@ -1322,13 +1322,9 @@ def _build_control_panel(output_root: Path) -> list[Path]:
         draw.text((52, centre_y), label, font=row_font, fill=(36, 40, 46), anchor="lm")
         draw.line([40, row_top + 27, size - 40, row_top + 27], fill=(150, 153, 158), width=1)
         row_top += 29
-    draw.text(
-        (size // 2, row_top + 8),
-        "PRESS A BUTTON TO OPERATE",
-        font=small_font,
-        fill=(90, 94, 100),
-        anchor="mm",
-    )
+    # v1.40: the instruction line overlapped the hazard footer band and
+    # rendered garbled (player screenshot) - the buttons speak for
+    # themselves.
     footer_top = door_height - 22
     for x in range(0, size, 40):
         draw.polygon(
