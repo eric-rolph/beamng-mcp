@@ -27,17 +27,17 @@
     },
     {
       "name": "ericrolph_cannon_car_wash_brush_cards.color.png",
-      "width": 1024,
-      "height": 1024,
+      "width": 2048,
+      "height": 2048,
       "mode": "RGB",
-      "sha256": "bdb0586f9f8c2bdc36d4748ed0cbb52369965cce221503ff20d9b693f6d12cc9"
+      "sha256": "05ede38bc724c561d359d23625d1c0aa0729669f27ae1c763131ca0fddf66ec3"
     },
     {
       "name": "ericrolph_cannon_car_wash_brush_cards.normal.png",
-      "width": 1024,
-      "height": 1024,
+      "width": 2048,
+      "height": 2048,
       "mode": "RGB",
-      "sha256": "c1c647bf819b331e9fba79c255e4ea578ba12b779fd7886f4c74a928779f88f0"
+      "sha256": "3f1ae580cdd52fd050b84e8f05b0b5d4a2b87e33e087537a3169cde790a83867"
     },
     {
       "name": "ericrolph_cannon_car_wash_brush_cards_emissive.data.png",
@@ -48,17 +48,17 @@
     },
     {
       "name": "ericrolph_cannon_car_wash_brush_cards_opacity.data.png",
-      "width": 1024,
-      "height": 1024,
+      "width": 2048,
+      "height": 2048,
       "mode": "L",
-      "sha256": "c7b1b3dff76041dd2c8786274f68d7ed20f5d9ea5b3f88a9a1074b912cc48c51"
+      "sha256": "54ab5aca691c3e0cd5af994e87473a772682b1a2cb9154567a59338059d6ea0c"
     },
     {
       "name": "ericrolph_cannon_car_wash_brush_cards_roughness.data.png",
-      "width": 1024,
-      "height": 1024,
+      "width": 2048,
+      "height": 2048,
       "mode": "L",
-      "sha256": "2a782f644672d908cb1656a69fe7915a221e68bf58678363e311ae4dfebb2ade"
+      "sha256": "bd22810f35121919e5e5cf3fb565b67130447d3e2ae4e30bc566b4137dd3b3d2"
     },
     {
       "name": "ericrolph_cannon_car_wash_carriage_oak.color.png",

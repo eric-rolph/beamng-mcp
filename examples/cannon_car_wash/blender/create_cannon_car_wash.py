@@ -786,8 +786,11 @@ def add_horizontal_brush(
             else:
                 face_uvs.append(((0.0, 0.0), (0.0, 0.75), (1.0, 0.75), (1.0, 0.0)))
 
-    append_ring(24, 0.17, 0.68, half_length, 0.0, 0.05)
-    append_ring(12, 0.16, 0.42, half_length * 0.94, math.tau / 36.0, 0.03)
+    # v1.44 (player closeup: sparse flat fan): three offset rings pack the
+    # roller so closeups read as a full cylinder of strands, not blades.
+    append_ring(32, 0.17, 0.68, half_length, 0.0, 0.05)
+    append_ring(20, 0.165, 0.55, half_length * 0.97, math.tau / 64.0, 0.04)
+    append_ring(14, 0.16, 0.40, half_length * 0.94, math.tau / 28.0, 0.03)
     card_cluster = add_card_mesh(
         "Brush_Overhead_CardFan",
         location,
@@ -4102,8 +4105,8 @@ def finalize() -> None:
                 "material": scenario_material_name("brush_cards"),
                 "alpha_mode": "alpha test/clip",
                 "vertical_cards_per_brush": 26,
-                "overhead_cards": 26,
-                "card_layout": "jittered outer ring + offset inner ring",
+                "overhead_cards": 66,
+                "card_layout": "jittered outer ring + two offset inner rings (overhead)",
                 "motion": "off-axis orbit + 3.4 deg axis tilt, mirrored pairs counter-rotate",
                 "sorting_policy": "no alpha blending",
             },

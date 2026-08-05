@@ -626,14 +626,21 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
     the wavy card fringe (invisible while both regions were blue).
     """
 
-    # v1.34 (player + reference photo of a real gantry brush): 1024 atlas.
-    # The card region is now a dense pack of RADIAL EVA STRANDS - each
-    # strand runs hub-to-tip along U with a slight wave, ragged random
-    # length, and thin transparent gaps between strands - in the
-    # reference's TWO-TONE scheme: red strand pack on the card tops
-    # (image rows below the band, card v 0.45..0.75) and blue on the card
-    # bottoms (card v 0..0.45; V samples from the image bottom).
-    size = 1024
+    # v1.34 (player + reference photo of a real gantry brush): the card
+    # region is a dense pack of RADIAL EVA STRANDS - each strand runs
+    # hub-to-tip along U with a slight wave, ragged random length, and
+    # thin transparent gaps between strands - in the reference's TWO-TONE
+    # scheme: red strand pack on the card tops (image rows below the
+    # band, card v 0.45..0.75) and blue on the card bottoms (card v
+    # 0..0.45; V samples from the image bottom).
+    # v1.44 (player closeup: "still looks bitmap and low resolution"):
+    # 2048 atlas, and the strand pack is drawn SUPERSAMPLED at 2x then
+    # LANCZOS-downsampled - PIL lines are hard-edged, so alpha-testing
+    # the old cutout stair-stepped every silhouette; cutting the test
+    # threshold through a smoothed alpha gradient reads as clean curved
+    # strand edges. Strands also gain an under-edge shadow line and a
+    # subtle tip-fade so closeups read as shaped EVA, not flat ribbon.
+    size = 2048
     band_region = size // 4
     colour = Image.new("RGB", (size, size), (7, 25, 68))
     opacity = Image.new("L", (size, size), 0)
@@ -642,29 +649,47 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
     palette = ((4, 64, 178), (0, 125, 214), (0, 177, 204), (7, 44, 129))
     red_palette = ((214, 54, 52), (188, 40, 44), (230, 76, 64), (172, 34, 40))
     strand_rng = np.random.default_rng(20260807)
-    two_tone_split = band_region + round((1.0 - 0.45 / 0.75) * (size - band_region))
-    strand_y = band_region + 3
+    card_rows = size - band_region
+    ss = 2
+    card_colour = Image.new("RGB", (size * ss, card_rows * ss), (7, 25, 68))
+    card_opacity = Image.new("L", (size * ss, card_rows * ss), 0)
+    card_colour_draw = ImageDraw.Draw(card_colour)
+    card_opacity_draw = ImageDraw.Draw(card_opacity)
+    two_tone_split = round((1.0 - 0.45 / 0.75) * card_rows) * ss
+    strand_y = 6
     strand_index = 0
-    while strand_y < size - 3:
-        thickness = int(strand_rng.integers(3, 5))
-        blend = strand_y + strand_rng.integers(-14, 14) < two_tone_split
+    while strand_y < card_rows * ss - 6:
+        thickness = int(strand_rng.integers(6, 11))
+        blend = strand_y + strand_rng.integers(-28, 28) < two_tone_split
         zone = red_palette if blend else palette
         base = zone[strand_index % len(zone)]
         tone = 0.82 + 0.33 * float(strand_rng.random())
         fill = tuple(min(255, max(0, round(channel * tone))) for channel in base)
-        length = int(size * (0.86 + 0.14 * float(strand_rng.random())))
+        length = int(size * ss * (0.86 + 0.14 * float(strand_rng.random())))
         phase = float(strand_rng.random()) * math.tau
         points = []
         for x in range(0, length + 1, 16):
-            wave = round(math.sin(x * 0.012 + phase) * 2.4)
+            wave = round(math.sin(x * 0.006 + phase) * 4.8)
             points.append((x, strand_y + wave))
-        colour_draw.line(points, fill=fill, width=thickness)
-        opacity_draw.line(points, fill=255, width=thickness)
-        # Slim bright spine catches the light like a folded EVA edge.
-        spine = tuple(min(255, round(channel * 1.25)) for channel in fill)
-        colour_draw.line([(p[0], p[1] - thickness // 2) for p in points], fill=spine, width=1)
-        strand_y += thickness + int(strand_rng.integers(1, 3))
+        card_colour_draw.line(points, fill=fill, width=thickness)
+        card_opacity_draw.line(points, fill=255, width=thickness)
+        # Folded-EVA shading: bright spine on top, shadowed under-edge.
+        spine = tuple(min(255, round(channel * 1.28)) for channel in fill)
+        shadow = tuple(round(channel * 0.62) for channel in fill)
+        card_colour_draw.line(
+            [(p[0], p[1] - thickness // 2 + 1) for p in points], fill=spine, width=2
+        )
+        card_colour_draw.line(
+            [(p[0], p[1] + thickness // 2 - 1) for p in points], fill=shadow, width=2
+        )
+        # Sun-bleached tip: the last stretch lifts a shade lighter.
+        tip_start = max(0, len(points) - max(3, len(points) // 6))
+        tip = tuple(min(255, round(channel * 1.12)) for channel in fill)
+        card_colour_draw.line(points[tip_start:], fill=tip, width=max(2, thickness - 2))
+        strand_y += thickness + int(strand_rng.integers(2, 5))
         strand_index += 1
+    colour.paste(card_colour.resize((size, card_rows), Image.LANCZOS), (0, band_region))
+    opacity.paste(card_opacity.resize((size, card_rows), Image.LANCZOS), (0, band_region))
     # Mitter ribbon band: straight continuous lanes along U in image rows
     # 0..band_region. v1.32 (player reference photo of a real gantry wash):
     # the lanes read as non-woven needle-punched polyester felt in SUBTLE
@@ -678,8 +703,8 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
     # the transparent lane gaps and the card region below.
     # v1.34 (player): BRIGHTER reds, matching the interior's safety-red
     # accent family rather than the muted maroon of v1.32.
-    lane_height = 28
-    lane_gap = 6
+    lane_height = 56
+    lane_gap = 12
     # v1.37 (player screenshot: strips rendered maroon next to the vivid
     # accent rails): the palette anchors on the accent-stripe red itself,
     # and the fiber shading variance drops - the speckle/filament noise
@@ -697,8 +722,8 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
         block = np.asarray(base_rgb, dtype=np.float32)[None, None, :] * shade[:, :, None]
         return np.clip(block, 0.0, 255.0).astype(np.uint8)
 
-    lane_first = 16
-    lane_last = 215
+    lane_first = 32
+    lane_last = 430
     colour.paste(Image.fromarray(_felt_rows(felt_palette[0], lane_first, 0.0)), (0, 0))
     opacity_draw.rectangle([(0, 0), (size - 1, lane_first - 1)], fill=255)
     colour.paste(
@@ -717,11 +742,11 @@ def _build_brush_cards(output_root: Path) -> list[Path]:
         opacity_draw.rectangle([(0, y), (size - 1, y + lane_height - 1)], fill=255)
         # Soft felt hems: a slightly lifted top edge and a shadowed fold at
         # the bottom - warm reds, not the EVA cards' cyan/navy trim.
-        colour_draw.line([(0, y), (size - 1, y)], fill=(246, 134, 122), width=2)
+        colour_draw.line([(0, y), (size - 1, y)], fill=(246, 134, 122), width=3)
         colour_draw.line(
             [(0, y + lane_height - 1), (size - 1, y + lane_height - 1)],
             fill=(112, 26, 26),
-            width=2,
+            width=3,
         )
     # No extra fray pass: strand raggedness now lives in the random strand
     # lengths, and the hub edge (x = 0) stays fully opaque by construction.

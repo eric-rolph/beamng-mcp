@@ -1117,8 +1117,8 @@
       "material": "ericrolph_cannon_car_wash_brush_cards",
       "alpha_mode": "alpha test/clip",
       "vertical_cards_per_brush": 26,
-      "overhead_cards": 26,
-      "card_layout": "jittered outer ring + offset inner ring",
+      "overhead_cards": 66,
+      "card_layout": "jittered outer ring + two offset inner rings (overhead)",
       "motion": "off-axis orbit + 3.4 deg axis tilt, mirrored pairs counter-rotate",
       "sorting_policy": "no alpha blending"
     },
@@ -1423,8 +1423,8 @@
   },
   "mesh_statistics": {
     "objects": 56,
-    "vertices": 15629,
-    "polygons": 11260
+    "vertices": 15749,
+    "polygons": 11290
   },
   "collision_meshes": [
     "Colmesh-1",
@@ -1433,7 +1433,7 @@
     "Colmesh-4"
   ],
   "export_statistics": {
-    "triangle_count": 29052,
+    "triangle_count": 29112,
     "geometry_count": 53,
     "primitive_group_count": 53,
     "material_symbol_count": 20
