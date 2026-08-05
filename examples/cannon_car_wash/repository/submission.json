@@ -34,9 +34,9 @@
   },
   "release_artifact": {
     "filename": "cannon_car_wash_ericrolph.zip",
-    "sha256": "4fed0d9f1e28a57b8e65bee3dbd2a58f0be50f5581d16b3f63f87931cb6f9b4e",
-    "size_bytes": 58451795,
-    "member_count": 81
+    "sha256": "b899a1dd3e21a0c96892f0e29efb05aa98d5710d5d6f7f4c3de830d67a978e50",
+    "size_bytes": 61462132,
+    "member_count": 88
   },
   "release_validation": {
     "beamng_drive": "0.38.6.0.19963",

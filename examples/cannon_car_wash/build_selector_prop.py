@@ -28,6 +28,8 @@ MINI_CAR_DAE_PATH = VEHICLE_ROOT / "mini_car.dae"
 SOURCE_CANNON_PATH = MOD_ROOT / "art" / "shapes" / MOD_ID / "cannon.dae"
 CANNON_DAE_PATH = VEHICLE_ROOT / "cannon.dae"
 SOURCE_RAMP_FLAP_PATH = MOD_ROOT / "art" / "shapes" / MOD_ID / "ramp_flap.dae"
+SOURCE_CARRIAGE_PATH = MOD_ROOT / "art" / "shapes" / MOD_ID / "carriage.dae"
+CARRIAGE_DAE_PATH = VEHICLE_ROOT / "carriage.dae"
 RAMP_FLAP_DAE_PATH = VEHICLE_ROOT / "ramp_flap.dae"
 SOURCE_MATERIALS_PATH = (
     MOD_ROOT / "levels" / "gridmap_v2" / "scenarios" / MOD_ID / "main.materials.json"
@@ -219,13 +221,23 @@ def build_jbeam(handoff: dict[str, Any]) -> tuple[dict[str, Any], float]:
     if len(panel_buttons) != 5:
         raise ValueError("selector handoff must carry exactly five panel buttons")
     panel_node_ids: list[str] = []
+
+    # v1.39 probe ground truth (getTrigger:getCenter): jbeam nodes live in
+    # UNFLIPPED authored coordinates while the visual mesh carries the
+    # 180-degree model alignment - the click boxes landed on the opposite
+    # building corner from the rendered buttons. Apply the handoff's own
+    # source->vehicle transform (negate x, y) to the anchor nodes so the
+    # boxes sit on the buttons the player actually sees.
+    def _vehicle_space(position):
+        return [round(-position[0], 6), round(-position[1], 6), round(position[2], 6)]
+
     for button in panel_buttons:
         node_id = f"{MOD_ID}_panel_{button['suffix']}"
         panel_node_ids.append(node_id)
         node_rows.append(
             [
                 node_id,
-                *[round(value, 6) for value in button["source_position"]],
+                *_vehicle_space(button["source_position"]),
                 {
                     "collision": False,
                     "fixed": True,
@@ -238,28 +250,36 @@ def build_jbeam(handoff: dict[str, Any]) -> tuple[dict[str, Any], float]:
                 },
             ]
         )
-    frame_node_id = f"{MOD_ID}_panel_frame"
-    frame_position = [
-        round(panel_buttons[0]["source_position"][0] - 0.35, 6),
-        round(panel_buttons[0]["source_position"][1], 6),
-        round(panel_buttons[0]["source_position"][2], 6),
-    ]
-    node_rows.append(
-        [
-            frame_node_id,
-            *frame_position,
-            {
-                "collision": False,
-                "fixed": True,
-                "frictionCoef": 0.9,
-                "group": GROUP,
-                "nodeMaterial": "|NM_METAL",
-                "nodeWeight": PANEL_NODE_MASS_KG,
-                "selfCollision": False,
-                "staticCollision": False,
-            },
-        ]
+    # v1.39: the engine's trigger frame needs a healthy baseline - with the
+    # neighbouring cap (7 cm) as idX the box basis degenerated and the
+    # hover raycast never hit (probe-proven). Two dedicated frame nodes sit
+    # 1.2 m along the wall and 1.2 m up from the top cap; every button uses
+    # them as idX/idY, so all five click boxes share one well-conditioned
+    # basis while still sitting exactly ON their own cap node.
+    top_cap = _vehicle_space(panel_buttons[0]["source_position"])
+    frame_specs = (
+        (f"{MOD_ID}_panel_frame_x", [top_cap[0], top_cap[1] - 1.2, top_cap[2]]),
+        (f"{MOD_ID}_panel_frame_y", [top_cap[0], top_cap[1], top_cap[2] + 1.2]),
     )
+    frame_node_ids: list[str] = []
+    for frame_node_id, frame_position in frame_specs:
+        frame_node_ids.append(frame_node_id)
+        node_rows.append(
+            [
+                frame_node_id,
+                *[round(value, 6) for value in frame_position],
+                {
+                    "collision": False,
+                    "fixed": True,
+                    "frictionCoef": 0.9,
+                    "group": GROUP,
+                    "nodeMaterial": "|NM_METAL",
+                    "nodeWeight": PANEL_NODE_MASS_KG,
+                    "selfCollision": False,
+                    "staticCollision": False,
+                },
+            ]
+        )
     zero = {"x": 0, "y": 0, "z": 0}
     trigger_rows: list[list[Any]] = [
         [
@@ -278,19 +298,14 @@ def build_jbeam(handoff: dict[str, Any]) -> tuple[dict[str, Any], float]:
     link_rows: list[list[Any]] = [["triggerId:triggers2", "triggerInput", "inputAction"]]
     enabled_rows: list[list[Any]] = [["id"]]
     for index, button in enumerate(panel_buttons):
-        neighbour = (
-            panel_node_ids[index + 1]
-            if index + 1 < len(panel_node_ids)
-            else panel_node_ids[index - 1]
-        )
         trigger_id = f"panel_{button['suffix']}"
         action_name = f"{MOD_ID}_{button['suffix']}"
         trigger_rows.append(
             [
                 trigger_id,
                 panel_node_ids[index],
-                neighbour,
-                frame_node_id,
+                frame_node_ids[0],
+                frame_node_ids[1],
                 "box",
                 {"x": 0.07, "y": 0.07, "z": 0.07},
                 dict(zero),
@@ -306,7 +321,7 @@ def build_jbeam(handoff: dict[str, Any]) -> tuple[dict[str, Any], float]:
         len(base_ids) * BASE_NODE_MASS_KG
         + (len(nodes) - len(base_ids)) * STRUCTURE_NODE_MASS_KG
         + len(cloth["nodes"]) * CLOTH_NODE_MASS_KG
-        + (len(panel_buttons) + 1) * PANEL_NODE_MASS_KG
+        + (len(panel_buttons) + 2) * PANEL_NODE_MASS_KG
     )
     part = {
         "information": {"authors": AUTHOR, "name": DISPLAY_NAME},
@@ -428,6 +443,9 @@ def copy_mini_car() -> None:
     if not SOURCE_RAMP_FLAP_PATH.is_file():
         raise FileNotFoundError(f"ramp flap shape missing: {SOURCE_RAMP_FLAP_PATH}")
     shutil.copyfile(SOURCE_RAMP_FLAP_PATH, RAMP_FLAP_DAE_PATH)
+    if not SOURCE_CARRIAGE_PATH.is_file():
+        raise FileNotFoundError(f"carriage shape missing: {SOURCE_CARRIAGE_PATH}")
+    shutil.copyfile(SOURCE_CARRIAGE_PATH, CARRIAGE_DAE_PATH)
 
 
 def main() -> None:

@@ -15,6 +15,7 @@ local VISUAL_SHAPE = (
 local Attract = {
   shape = "/vehicles/ericrolph_cannon_car_wash/mini_car.dae",
   cannonShape = "/vehicles/ericrolph_cannon_car_wash/cannon.dae",
+  carriageShape = "/vehicles/ericrolph_cannon_car_wash/carriage.dae",
   intervalSeconds = 120,
   firstDelaySeconds = 25,
   speedMps = 16.0,
@@ -24,7 +25,10 @@ local Attract = {
   bounceRestitution = 0.35,
   bounceKeep = 0.4,
   maxBounces = 2,
-  mountLocal = vec3(1.62, -9.60, 5.74),
+  -- v1.39: the 18th-century gun stands centred on the roof lip above
+  -- the sign; the mount is the shared trunnion origin of barrel and
+  -- carriage (plinth cap 5.75 + truck reach 0.30).
+  mountLocal = vec3(0.0, -9.51, 6.05),
   aimLocal = vec3(0.0, -0.573576, 0.819152),
   barrelLength = 0.86,
   tumbleRate = 9.0,
@@ -43,6 +47,7 @@ local Attract = {
     "ericrolph_cannon_car_wash_mini_car_paint",
     "ericrolph_cannon_car_wash_mini_wheel",
     "ericrolph_cannon_car_wash_ramp_flap",
+    "ericrolph_cannon_car_wash_carriage_oak",
     -- v1.36: the mini car's windshield and hub caps reference these two;
     -- outside gridmap only THIS file defines them (the scenario set never
     -- loads), so the toy rendered fallback-orange glass and hubs.
@@ -111,6 +116,22 @@ function Attract.updateCannonAim(state)
   local mount = Attract.world(state, Attract.mountLocal)
   attract.mountWorld = mount
   local rotation = vec3(0, 0, 1):getRotationTo(aim)
+  -- Carriage yaws to the horizontal aim component only - the barrel
+  -- elevates on its trunnions above it, like the real gun.
+  local flatAim = vec3(aim.x, aim.y, 0)
+  local carriageRotation = nil
+  if flatAim:length() > 1e-4 then
+    flatAim:normalize()
+    carriageRotation = vec3(0, -1, 0):getRotationTo(flatAim)
+  end
+  if attract.carriage and carriageRotation then
+    pcall(function()
+      attract.carriage:setPosRot(
+        mount.x, mount.y, mount.z,
+        carriageRotation.x, carriageRotation.y, carriageRotation.z, carriageRotation.w
+      )
+    end)
+  end
   pcall(function()
     attract.cannon:setPosRot(
       mount.x, mount.y, mount.z, rotation.x, rotation.y, rotation.z, rotation.w
@@ -732,6 +753,30 @@ function Attract.createCannon(name)
     if type(object.preApply) == "function" then object:preApply() end
     setCanSaveFalse(object)
     object:setField("shapeName", 0, Attract.cannonShape)
+    object:setField("collisionType", 0, "None")
+    object:setField("decalType", 0, "None")
+    if type(object.postApply) == "function" then object:postApply() end
+  end)
+  if not ok then
+    pcall(function() object:delete() end)
+    return nil
+  end
+  local registered = registerInMission(object, name)
+  if not registered then
+    pcall(function() object:delete() end)
+    return nil
+  end
+  return object
+end
+
+function Attract.createCarriage(name)
+  local object = createObject(VISUAL_CLASS)
+  if not object then return nil end
+  local ok = pcall(function()
+    object.loadMode = 1
+    if type(object.preApply) == "function" then object:preApply() end
+    setCanSaveFalse(object)
+    object:setField("shapeName", 0, Attract.carriageShape)
     object:setField("collisionType", 0, "None")
     object:setField("decalType", 0, "None")
     if type(object.postApply) == "function" then object:postApply() end
@@ -2513,6 +2558,7 @@ local function cleanupInstallation(state, reason)
     deleteSceneObject(state.attract.muzzleEmitter)
     deleteSceneObject(state.attract.sparkEmitter)
     deleteSceneObject(state.attract.cannon)
+    deleteSceneObject(state.attract.carriage)
     state.attract = nil
   end
   if state.panel then
@@ -2725,6 +2771,7 @@ local function registerProp(propId)
       muzzleEmitter = muzzleEmitter,
       sparkEmitter = sparkEmitter,
       cannon = Attract.createCannon(prefix .. "_attract_cannon"),
+      carriage = Attract.createCarriage(prefix .. "_attract_carriage"),
       timer = Attract.firstDelaySeconds,
       flying = false,
       resting = false,
@@ -2891,6 +2938,22 @@ local function onPreRender(dtReal, dtSim, dtRaw)
     -- empty through the whole grace window. Momentary Contains-flap exits
     -- cancel via the re-enter path, so the ambient clip never restarts
     -- while a vehicle is actually inside.
+    -- v1.39 self-heal (player: brushes sometimes stop with a car inside):
+    -- while the bay is occupied and systems are meant to be on, re-assert
+    -- the ambient field if anything external reset it. Field writes only
+    -- happen on real mismatch, so the clip is never needlessly restarted.
+    state.ambientHealElapsed = (state.ambientHealElapsed or 0) + elapsed
+    if state.ambientHealElapsed >= 2.0 then
+      state.ambientHealElapsed = 0
+      if state.washSystemsActive and state.visual and washSubjectCount(state) > 0 then
+        local currentAmbient = nil
+        pcall(function() currentAmbient = state.visual:getField("playAmbient", 0) end)
+        if currentAmbient ~= "1" then
+          pcall(function() setVisualAmbient(state.visual, true) end)
+          emitEvent(state, "I", "ambient_reasserted", {previous = tostring(currentAmbient)})
+        end
+      end
+    end
     if state.washSystemsOffGraceSeconds and state.washSystemsActive then
       if washSubjectCount(state) > 0 then
         state.washSystemsOffGraceSeconds = nil

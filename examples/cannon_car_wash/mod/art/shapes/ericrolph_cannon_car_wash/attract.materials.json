@@ -20,6 +20,26 @@
     "translucentBlendOp": "None",
     "version": 1.5
   },
+  "ericrolph_cannon_car_wash_carriage_oak": {
+    "Stages": [
+      {
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_carriage_oak.color.png",
+        "normalMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_carriage_oak.normal.png",
+        "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash/textures/ericrolph_cannon_car_wash_carriage_oak_roughness.data.png"
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": true,
+    "class": "Material",
+    "mapTo": "ericrolph_cannon_car_wash_carriage_oak",
+    "materialTag0": "ericrolph_cannon_car_wash",
+    "name": "ericrolph_cannon_car_wash_carriage_oak",
+    "persistentId": "330c9762-0ffd-5cd7-b498-57869fc8c910",
+    "translucentBlendOp": "None",
+    "version": 1.5
+  },
   "ericrolph_cannon_car_wash_glass": {
     "Stages": [
       {

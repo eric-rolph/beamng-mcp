@@ -18548,6 +18548,7 @@
       "ericrolph_cannon_car_wash_selector_glass",
       "ericrolph_cannon_car_wash_selector_hazard_yellow",
       "ericrolph_cannon_car_wash_selector_interior_brick",
+      "ericrolph_cannon_car_wash_selector_kiosk_face",
       "ericrolph_cannon_car_wash_selector_led",
       "ericrolph_cannon_car_wash_selector_rubber",
       "ericrolph_cannon_car_wash_selector_safety_orange",
@@ -18557,7 +18558,7 @@
       "ericrolph_cannon_car_wash_selector_wet_concrete"
     ],
     "path": "vehicles/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
-    "sha256": "9a06ae2e9e977b8a638540894c20ac459696b40934159ce91fb6b4eaf3e6129e",
-    "size": 4039461
+    "sha256": "97c14a2a86a73338bbf03761c3d75cc9e22b67cd7f0f411f80e395413ccfb7ed",
+    "size": 4390538
   }
 }
