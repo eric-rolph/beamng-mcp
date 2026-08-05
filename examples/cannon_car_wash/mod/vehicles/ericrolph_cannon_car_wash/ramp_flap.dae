@@ -5,13 +5,13 @@
       <author>Blender User</author>
       <authoring_tool>Blender 4.5.4 LTS commit date:2025-10-27, commit time:12:46, hash:b3efe983cc58</authoring_tool>
     </contributor>
-    <created>2026-08-04T22:56:42</created>
-    <modified>2026-08-04T22:56:42</modified>
+    <created>2026-08-04T23:35:39</created>
+    <modified>2026-08-04T23:35:39</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
   <library_effects>
-    <effect id="ericrolph_cannon_car_wash_rubber-effect">
+    <effect id="ericrolph_cannon_car_wash_attract_iron-effect">
       <profile_COMMON>
         <technique sid="common">
           <lambert>
@@ -19,7 +19,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <diffuse>
-              <color sid="diffuse">0.012 0.014 0.018 1</color>
+              <color sid="diffuse">0.016 0.017 0.02 1</color>
             </diffuse>
             <index_of_refraction>
               <float sid="ior">1.5</float>
@@ -48,8 +48,8 @@
   </library_effects>
   <library_images/>
   <library_materials>
-    <material id="ericrolph_cannon_car_wash_rubber-material" name="ericrolph_cannon_car_wash_rubber">
-      <instance_effect url="#ericrolph_cannon_car_wash_rubber-effect"/>
+    <material id="ericrolph_cannon_car_wash_attract_iron-material" name="ericrolph_cannon_car_wash_attract_iron">
+      <instance_effect url="#ericrolph_cannon_car_wash_attract_iron-effect"/>
     </material>
     <material id="ericrolph_cannon_car_wash_ramp_flap-material" name="ericrolph_cannon_car_wash_ramp_flap">
       <instance_effect url="#ericrolph_cannon_car_wash_ramp_flap-effect"/>
@@ -90,7 +90,7 @@
         <vertices id="ericrolph_cannon_car_wash_rampflap_Knuckle_-1_25_mesh-mesh-vertices">
           <input semantic="POSITION" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-1_25_mesh-mesh-positions"/>
         </vertices>
-        <triangles material="ericrolph_cannon_car_wash_rubber-material" count="36">
+        <triangles material="ericrolph_cannon_car_wash_attract_iron-material" count="36">
           <input semantic="VERTEX" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-1_25_mesh-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-1_25_mesh-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-1_25_mesh-mesh-map-0" offset="2" set="0"/>
@@ -132,7 +132,7 @@
         <vertices id="ericrolph_cannon_car_wash_rampflap_Knuckle_-2_5_mesh-mesh-vertices">
           <input semantic="POSITION" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-2_5_mesh-mesh-positions"/>
         </vertices>
-        <triangles material="ericrolph_cannon_car_wash_rubber-material" count="36">
+        <triangles material="ericrolph_cannon_car_wash_attract_iron-material" count="36">
           <input semantic="VERTEX" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-2_5_mesh-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-2_5_mesh-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_-2_5_mesh-mesh-map-0" offset="2" set="0"/>
@@ -174,7 +174,7 @@
         <vertices id="ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-vertices">
           <input semantic="POSITION" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-positions"/>
         </vertices>
-        <triangles material="ericrolph_cannon_car_wash_rubber-material" count="36">
+        <triangles material="ericrolph_cannon_car_wash_attract_iron-material" count="36">
           <input semantic="VERTEX" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh-map-0" offset="2" set="0"/>
@@ -216,7 +216,7 @@
         <vertices id="ericrolph_cannon_car_wash_rampflap_Knuckle_1_25_mesh-mesh-vertices">
           <input semantic="POSITION" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_1_25_mesh-mesh-positions"/>
         </vertices>
-        <triangles material="ericrolph_cannon_car_wash_rubber-material" count="36">
+        <triangles material="ericrolph_cannon_car_wash_attract_iron-material" count="36">
           <input semantic="VERTEX" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_1_25_mesh-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_1_25_mesh-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_1_25_mesh-mesh-map-0" offset="2" set="0"/>
@@ -258,7 +258,7 @@
         <vertices id="ericrolph_cannon_car_wash_rampflap_Knuckle_2_5_mesh-mesh-vertices">
           <input semantic="POSITION" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_2_5_mesh-mesh-positions"/>
         </vertices>
-        <triangles material="ericrolph_cannon_car_wash_rubber-material" count="36">
+        <triangles material="ericrolph_cannon_car_wash_attract_iron-material" count="36">
           <input semantic="VERTEX" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_2_5_mesh-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_2_5_mesh-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#ericrolph_cannon_car_wash_rampflap_Knuckle_2_5_mesh-mesh-map-0" offset="2" set="0"/>
@@ -316,7 +316,7 @@
         <instance_geometry url="#ericrolph_cannon_car_wash_rampflap_Knuckle_-1_25_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Knuckle_-1.25">
           <bind_material>
             <technique_common>
-              <instance_material symbol="ericrolph_cannon_car_wash_rubber-material" target="#ericrolph_cannon_car_wash_rubber-material">
+              <instance_material symbol="ericrolph_cannon_car_wash_attract_iron-material" target="#ericrolph_cannon_car_wash_attract_iron-material">
                 <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>
@@ -328,7 +328,7 @@
         <instance_geometry url="#ericrolph_cannon_car_wash_rampflap_Knuckle_-2_5_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Knuckle_-2.5">
           <bind_material>
             <technique_common>
-              <instance_material symbol="ericrolph_cannon_car_wash_rubber-material" target="#ericrolph_cannon_car_wash_rubber-material">
+              <instance_material symbol="ericrolph_cannon_car_wash_attract_iron-material" target="#ericrolph_cannon_car_wash_attract_iron-material">
                 <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>
@@ -340,7 +340,7 @@
         <instance_geometry url="#ericrolph_cannon_car_wash_rampflap_Knuckle_0_0_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Knuckle_0.0">
           <bind_material>
             <technique_common>
-              <instance_material symbol="ericrolph_cannon_car_wash_rubber-material" target="#ericrolph_cannon_car_wash_rubber-material">
+              <instance_material symbol="ericrolph_cannon_car_wash_attract_iron-material" target="#ericrolph_cannon_car_wash_attract_iron-material">
                 <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>
@@ -352,7 +352,7 @@
         <instance_geometry url="#ericrolph_cannon_car_wash_rampflap_Knuckle_1_25_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Knuckle_1.25">
           <bind_material>
             <technique_common>
-              <instance_material symbol="ericrolph_cannon_car_wash_rubber-material" target="#ericrolph_cannon_car_wash_rubber-material">
+              <instance_material symbol="ericrolph_cannon_car_wash_attract_iron-material" target="#ericrolph_cannon_car_wash_attract_iron-material">
                 <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>
@@ -364,7 +364,7 @@
         <instance_geometry url="#ericrolph_cannon_car_wash_rampflap_Knuckle_2_5_mesh-mesh" name="ericrolph_cannon_car_wash_rampflap_Knuckle_2.5">
           <bind_material>
             <technique_common>
-              <instance_material symbol="ericrolph_cannon_car_wash_rubber-material" target="#ericrolph_cannon_car_wash_rubber-material">
+              <instance_material symbol="ericrolph_cannon_car_wash_attract_iron-material" target="#ericrolph_cannon_car_wash_attract_iron-material">
                 <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>

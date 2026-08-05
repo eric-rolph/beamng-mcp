@@ -3597,7 +3597,9 @@ def build_ramp_flap() -> None:
         (0.5, 0.52, 0.55, 1.0),
         roughness=0.8,
     )
-    dark = material(scenario_material_name("rubber"), (0.012, 0.014, 0.018, 1.0), roughness=0.9)
+    dark = material(
+        scenario_material_name("attract_iron"), (0.016, 0.017, 0.02, 1.0), roughness=0.55
+    )
     prefix = f"{MOD_ID}_rampflap_"
     object_name = f"{prefix}Wedge"
     # v1.40 (player): the plate doubles to 2.6 m so raised angles form a
@@ -3698,7 +3700,7 @@ def build_cannon() -> None:
         roughness=0.45,
     )
     bore_dark = material(
-        scenario_material_name("rubber"), (0.012, 0.014, 0.018, 1.0), roughness=0.9
+        scenario_material_name("attract_iron"), (0.016, 0.017, 0.02, 1.0), roughness=0.55
     )
     prefix = f"{MOD_ID}_cannonshape_"
     parts = []
@@ -3809,7 +3811,9 @@ def build_carriage() -> None:
         (0.36, 0.24, 0.13, 1.0),
         roughness=0.75,
     )
-    iron = material(scenario_material_name("rubber"), (0.012, 0.014, 0.018, 1.0), roughness=0.9)
+    iron = material(
+        scenario_material_name("attract_iron"), (0.016, 0.017, 0.02, 1.0), roughness=0.55
+    )
     prefix = f"{MOD_ID}_carriage_"
     parts = []
     for side in (-1.0, 1.0):
