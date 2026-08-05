@@ -2427,8 +2427,11 @@ def build_details() -> None:
     # v1.39: the 18th-century gun stands centred on the roof lip above the
     # sign - a proper plinth with a stainless coping edge carries the
     # carriage trucks; the old off-centre finial base is gone.
-    add_box("CannonPlinth", (0.0, -9.51, 5.66), (0.95, 0.72, 0.12), deep_blue, bevel=0.01)
-    add_box("CannonPlinthCap", (0.0, -9.51, 5.735), (1.00, 0.77, 0.03), steel, bevel=0.0)
+    # v1.40 (player): the gun sits ON the top edge of the roof - the
+    # plinth grows into a pedestal rising from the roofline to just above
+    # the parapet crown.
+    add_box("CannonPlinth", (0.0, -9.51, 5.85), (0.95, 0.72, 0.50), deep_blue, bevel=0.01)
+    add_box("CannonPlinthCap", (0.0, -9.51, 6.125), (1.00, 0.77, 0.03), steel, bevel=0.0)
     for side in (-1.0, 1.0):
         side_name = "L" if side < 0 else "R"
         add_cylinder(
@@ -3597,11 +3600,14 @@ def build_ramp_flap() -> None:
     dark = material(scenario_material_name("rubber"), (0.012, 0.014, 0.018, 1.0), roughness=0.9)
     prefix = f"{MOD_ID}_rampflap_"
     object_name = f"{prefix}Wedge"
+    # v1.40 (player): the plate doubles to 2.6 m so raised angles form a
+    # real jump kicker for cannon-launched cars (15 deg lifts the tip to
+    # ~0.54 m); at rest it lies as a long approach mat past the apron.
     vertices = [
         (-3.08, 0.0, 0.0),
         (3.08, 0.0, 0.0),
-        (3.08, 1.3, -0.132),
-        (-3.08, 1.3, -0.132),
+        (3.08, 2.6, -0.132),
+        (-3.08, 2.6, -0.132),
         (-3.08, 0.0, -0.132),
         (3.08, 0.0, -0.132),
     ]
@@ -3625,12 +3631,12 @@ def build_ramp_flap() -> None:
     rubber_window = ((0.30, 0.45), (0.42, 0.45), (0.42, 0.55), (0.30, 0.55))
     for polygon in wedge.data.polygons:
         polygon_vertices = [wedge.data.vertices[i].co for i in polygon.vertices]
-        is_top = all(abs(v.z - (-0.132) * (v.y / 1.3)) < 0.01 for v in polygon_vertices)
+        is_top = all(abs(v.z - (-0.132) * (v.y / 2.6)) < 0.01 for v in polygon_vertices)
         for loop_offset, loop_index in enumerate(polygon.loop_indices):
             vertex = polygon_vertices[loop_offset]
             if is_top and len(polygon_vertices) == 4:
                 u = (vertex.x + 3.08) / 6.16 * 3.0
-                v = vertex.y / 1.3
+                v = vertex.y / 2.6
                 uv_layer.data[loop_index].uv = (u, v)
             else:
                 uv_layer.data[loop_index].uv = rubber_window[loop_offset % 4]

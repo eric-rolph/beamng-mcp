@@ -229,7 +229,15 @@ def build_jbeam(handoff: dict[str, Any]) -> tuple[dict[str, Any], float]:
     # source->vehicle transform (negate x, y) to the anchor nodes so the
     # boxes sit on the buttons the player actually sees.
     def _vehicle_space(position):
-        return [round(-position[0], 6), round(-position[1], 6), round(position[2], 6)]
+        # v1.40 calibration: engine trigger centers sat a constant
+        # (+0.035, -0.028, +0.042) m off the caps (probe-measured via
+        # getTrigger:getCenter). Bake the inverse into the anchors so the
+        # hover boxes land exactly on the rendered buttons.
+        return [
+            round(-position[0] - 0.035, 6),
+            round(-position[1] + 0.028, 6),
+            round(position[2] - 0.042, 6),
+        ]
 
     for button in panel_buttons:
         node_id = f"{MOD_ID}_panel_{button['suffix']}"
