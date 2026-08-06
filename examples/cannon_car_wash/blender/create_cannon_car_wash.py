@@ -162,8 +162,8 @@ PANEL_BUTTON_SUFFIXES = (
     "btn_cannon",
 )
 PANEL_BUTTON_TITLES = (
-    "Exit Ramp: Raise 1°",
-    "Exit Ramp: Lower 1°",
+    "Exit Ramp: Raise",
+    "Exit Ramp: Lower",
     "Launch Power: Increase",
     "Launch Power: Decrease",
     "Cannon: Arm / Safe",

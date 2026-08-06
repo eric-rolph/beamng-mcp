@@ -16689,7 +16689,7 @@
         1.415
       ],
       "suffix": "btn_ramp_up",
-      "title": "Exit Ramp: Raise 1\u00b0"
+      "title": "Exit Ramp: Raise"
     },
     {
       "source_position": [
@@ -16698,7 +16698,7 @@
         1.345
       ],
       "suffix": "btn_ramp_down",
-      "title": "Exit Ramp: Lower 1\u00b0"
+      "title": "Exit Ramp: Lower"
     },
     {
       "source_position": [
@@ -18558,7 +18558,7 @@
       "ericrolph_cannon_car_wash_selector_wet_concrete"
     ],
     "path": "vehicles/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
-    "sha256": "7825066f911fda6e31adedabf217de85803084a77378508bc70e4a151b0d9e61",
-    "size": 4399990
+    "sha256": "d45ab7bd6a3028a6ca9b4e501874e1f3ac4452530015246e21ad90171fa3d8ec",
+    "size": 4400874
   }
 }
