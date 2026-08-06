@@ -1313,12 +1313,29 @@ local function washSubjectCount(state)
   -- caller of this count feeds the wash-systems lifecycle, so widening
   -- it keeps the ambient clip rolling for parked and counting-down cars.
   local count = 0
-  for _ in pairs(state.washSubjects) do count = count + 1 end
+  local counted = {}
+  for subjectId in pairs(state.washSubjects) do
+    count = count + 1
+    counted[subjectId] = true
+  end
   local launch = state.positionalOccupancy and state.positionalOccupancy.launch
   if launch then
     for subjectId in pairs(launch) do
-      if not state.washSubjects[subjectId] then count = count + 1 end
+      if not counted[subjectId] then
+        count = count + 1
+        counted[subjectId] = true
+      end
     end
+  end
+  -- v1.46 (player log: wash_systems_stop reason last_vehicle_exit fired
+  -- MID-PASS): the wash box and launch box do not tile the building, and
+  -- the wash trigger's Contains test drops a moving car the moment its
+  -- bbox pokes past the zone - so drive-throughs stopped the brushes
+  -- while the car was still between them. The lifecycle now also counts
+  -- any vehicle whose CENTER is inside the full tunnel envelope
+  -- (maintained by the positional sweep, portal to portal).
+  for subjectId in pairs(state.tunnelOccupancy or {}) do
+    if not counted[subjectId] then count = count + 1 end
   end
   return count
 end
@@ -1482,7 +1499,7 @@ local function removeWashSubject(state, vehicleId, reason)
     -- suspension wobble, and toggling playAmbient RESTARTS the clip from
     -- frame one - a visible jerk. Hold the systems on through a grace
     -- window; onPreRender turns them off only if the bay stays empty.
-    state.washSystemsOffGraceSeconds = 3.0
+    state.washSystemsOffGraceSeconds = 5.0
     state.washSystemsOffReason = reason
   end
 end
@@ -2449,7 +2466,7 @@ local function positionalZoneSweep(state)
   if not state.origin or not state.modelRotation then return end
   local inverseRotation = state.modelRotation:inversed()
   state.sweepChecks = (state.sweepChecks or 0) + 1
-  local seen = {wash = {}, launch = {}}
+  local seen = {wash = {}, launch = {}, tunnel = {}}
   local vehicles = {}
   if type(getAllVehicles) == "function" then
     vehicles = getAllVehicles() or {}
@@ -2476,6 +2493,14 @@ local function positionalZoneSweep(state)
           if inside then seen[zone.kind][vehicleId] = true end
           markZoneOccupancy(state, zone.kind, vehicleId, inside)
         end
+        -- v1.46 full-tunnel envelope: lifecycle-only occupancy (no wash
+        -- service semantics) so the brushes run portal to portal.
+        if math.abs(localPosition.x) <= 3.35
+          and math.abs(localPosition.y) <= 9.7
+          and localPosition.z >= -1.0
+          and localPosition.z <= 4.8 then
+          seen.tunnel[vehicleId] = true
+        end
       end
     end
   end
@@ -2487,6 +2512,13 @@ local function positionalZoneSweep(state)
         markZoneOccupancy(state, zone.kind, vehicleId, false)
       end
     end
+  end
+  state.tunnelOccupancy = seen.tunnel
+  -- Entering the portal starts the systems immediately; the deferred-off
+  -- grace path (fed by washSubjectCount, which includes this envelope)
+  -- shuts them down only after the building is genuinely empty.
+  if next(seen.tunnel) and not state.washSystemsActive then
+    setWashSystemsEnabled(state, true, "tunnel_enter")
   end
 end
 
