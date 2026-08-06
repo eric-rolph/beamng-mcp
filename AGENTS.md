@@ -415,6 +415,131 @@ its pre-pose-preservation repair. Keep backups in a profile-root sibling directo
 `beamng-mcp-backups/`), and note that `install` now fails closed when another archive in the mods
 tree ships the same vehicle or GE-extension namespace.
 
+## Prop authoring field guide (hard-won engine behavior)
+
+Everything below was proven live on BeamNG 0.39 during the Cannon Car Wash v1.20-v1.48 arc.
+Treat these as engine contracts until a probe proves otherwise.
+
+### TSStatics and collision
+
+- A TSStatic spawned at runtime (`createObject` + `registerObject`) gets **no static collision at
+  all** until `be:reloadCollision()` is called — `collisionType` alone does nothing, and
+  `castRayStatic` never sees runtime TSStatics even after the reload (verify with a physics
+  drop-test or `obj:getWorldBox()`, never with rays). Call `be:reloadCollision()` after creation
+  AND after every `setPosRot` pose change you want the collision to follow.
+- Use collisionType `"Visible Mesh Final"`, not `"Visible Mesh"` — the latter logs a performance
+  warning that live gates treating log warnings as errors will fail on.
+- Scenario-placed (prefab) TSStatics get collision at level load; only runtime spawns need the
+  reload. Colmesh conventions: only nodes named exactly `Colmesh-N` are collision-only/invisible;
+  any other name renders (material-less geometry renders fallback orange).
+
+### Ambient animation clips
+
+- The Collada exporter bakes animation **through `scene.frame_end` only**. When a clip is
+  stretched, THREE places must move together: the keyframe positions, the clip `<extra>` end pin,
+  and `scene.frame_end`. If frame_end lags, the engine plays the baked prefix and freezes on the
+  last pose for the rest of the declared clip (surge-stall). Audit by parsing the DAE's animation
+  `<float_array>` input times — the span must equal the declared clip length.
+- Ambient clips play ROTATION channels only (translation channels are silently ignored), one
+  channel per node, no nested animated empties. Two-keyframe channels need LINEAR interpolation
+  set explicitly plus a CYCLES modifier.
+- Toggling `playAmbient` RESTARTS the clip from frame zero. Never re-assert it on a cadence; read
+  it back first — and the readback returns `"1"` OR `"true"` depending on engine path, so compare
+  truthiness, not an exact string.
+- `setPosRot` on the animated TSStatic also restarts the clip. Guard transform refreshes with a
+  pose-delta check — but keep every SIDE EFFECT the guarded routine performed (mesh-alpha hides,
+  etc.); an idempotence guard that skips side effects reintroduces them as bugs.
+
+### Selector-prop double rendering
+
+A jbeam selector prop renders TWICE: the flexbody (vehicle mesh, follows physics) and any separate
+animated TSStatic visual. The runtime must hide the flexbody copy (`setMeshAlpha 0`) and RE-ASSERT
+that hide every refresh tick — resets and launches silently re-show it, producing offset ghost
+geometry.
+
+### Textures and atlases
+
+- BeamNG samples atlas V from the image BOTTOM. Authored DAE v=0 reads the bottom image row.
+  Never trust texcoord numbers for orientation — stage a marker texture (colored thirds) and
+  probe it live once per atlas.
+- Deep mips average the WHOLE texture: thin faces sampling a small UV window inherit surrounding
+  colors at grazing angles (mip bleed). Give edge faces an untextured factor material, or pad the
+  window generously.
+- Alpha-tested cutouts: draw at 2x and LANCZOS-downsample so the alpha threshold cuts through a
+  smooth gradient (hard bitmap silhouettes otherwise). Derive normals from the pre-fray artwork.
+- Materials must REFERENCE a texture for the engine to cook it; logical names use `.png` with the
+  real `/art/shapes/<id>/textures/` root. A file literally named `main.materials.json` under
+  `art/` is special-cased by the startup scan — explicit later loads of that filename silently
+  no-op; use any other name for material sets the runtime must load itself.
+- Level-independent lifecycles (vehicle selector on any map) auto-load NOTHING from art/: ship a
+  dedicated materials json next to the shapes and have the runtime `loadJson`+create materials,
+  then verify via `scenetree.findObject(materialName)` after registration.
+- Backface lighting: luminance-derived micro-normals invert on doubleSided backfaces and shade
+  the two sides differently — flatten the normal where both faces must match.
+
+### Lua runtime patterns (GE extensions)
+
+- LuaJIT limit: ~60 upvalues per function. Never scatter top-level `local` constants; group each
+  feature into ONE module table (`local Feature = {...}` + `function Feature.x()`).
+- Lexical binding: a table method defined ABOVE a `local function helper` silently calls it as a
+  nil global (pcall swallows it). Define methods AFTER every helper they call — table-field
+  dispatch (`Feature.method(...)`) resolves at call time and is immune.
+- Quats compose LEFT-TO-RIGHT: `a * b` applies a THEN b. `model * tilt` tilts about the WORLD
+  axis (yaw-broken); `tilt * model` tilts about the model-local axis (yaw-correct). An identity-
+  yaw test CANNOT distinguish these — always verify rotation composition on a yawed spawn, via
+  `obj:getWorldBox()` spans.
+- The vehicle-object rotation (`getRotation`) is stale for driven vehicles (updates on
+  spawn/teleport/reset only); derive live headings from the node cloud (`quatFromDir`, which
+  differs from the object convention by exactly 180 deg about up).
+- `vehicle:setOriginalTransform(x,y,z,rx,ry,rz,rw)` is the official reset-home setter; every
+  `setPositionRotation` re-homes the vehicle as a side effect.
+- Trigger tooltips print unicode escapes literally — ASCII only in input-action titles.
+
+### Interactive dashboard-style buttons on a prop
+
+The selector prop IS a vehicle, so vehicle triggers work: `triggers2` rows in the jbeam (anchored
+to three cage nodes forming a local frame; add dedicated anchor nodes at the panel with small
+mass), `triggerEventLinks2` mapping `action0` to input actions, an `input_actions.json` with
+ASCII titles, and a vehicle-side controller whose `onGameplayEvent` forwards presses to the GE
+runtime via `obj:queueGameEngineLua`. Trigger boxes land offset from their anchor nodes by a
+constant few cm — measure the live centers once (vlua reads its trigger table; ship the measured
+correction into the node positions). Walking-mode hover highlights confirm the wiring.
+
+### Zones and occupancy
+
+- `Contains` + bounding-box trigger tests drop a MOVING vehicle the moment its bbox pokes past
+  the zone: entries read late, exits read early. For lifecycle decisions (keep machinery running
+  while anyone is inside) maintain a CENTER-in-envelope positional sweep over the full structure,
+  separate from service-semantics zones, plus a few seconds of off-grace.
+- Positional sweeps must also drop occupants that vanish without exit events (deleted vehicles).
+
+### Packaging and caches
+
+- ZIP_EPOCH must postdate any plausible cache mtime on the target machine (stamp next-day noon).
+  The game prefers whichever of cache/zip is newer; a stale epoch silently serves old caches.
+- Rebuild the distribution after EVERY tree change including version stamps (2-byte drift fails
+  determinism checks). Verify shipped content by CONTENT HASH of zip members, never by dims or
+  counts alone.
+- Derived files are never edit targets: the selector `main.materials.json` derives from the
+  scenario materials; the selector thumbnails (`default.jpg`, `standard.jpg`) derive from the
+  scenario thumbnail jpg. Edit the source, rebuild, verify the derived copy changed.
+- Stray real directories under the user profile's `mods/` (backup folders etc.) shadow textures
+  via the engine's find-by-name fallback: keep backups OUTSIDE `mods/`. Diagnose resolution with
+  `FS:getFileRealPath` / `FS:findFiles`.
+
+### Diagnosis instruments (in preference order)
+
+1. The player's own `beamng.log` (`<profile>/beamng.log`): the runtime's emitted events land
+   there — read it before theorizing about behavior on the player's machine.
+2. Player screen recordings: extract frames (`ffmpeg -vf fps=2`) and compute consecutive-frame
+   mean-abs diffs — periodicity in the numbers identifies clip-length effects instantly.
+3. Marker textures (colored regions, one cook) for any UV/orientation question.
+4. `obj:getWorldBox()` spans for any rotation/pose question (rays can't see runtime TSStatics).
+5. Physics drop-tests for collision questions.
+6. Screenshot probes: the fixed-exposure renderView blows out in daylight; ToD ~0.75 (sunrise)
+   and ~0.845 (dusk) are the usable windows. The prop's runtime visual renders authored (x, y)
+   at world (-x, -y) — flip probe camera coordinates.
+
 ## Verification and Git hygiene
 
 Run focused tests first, then the repository checks before claiming completion:
