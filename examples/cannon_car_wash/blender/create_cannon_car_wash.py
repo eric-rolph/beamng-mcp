@@ -1154,10 +1154,13 @@ def reset_scene() -> None:
     scene.render.filepath = "//cannon_car_wash_preview.png"
     scene.render.use_stamp = False
     scene.frame_start = 1
-    # The spinner actions key a full revolution at frame 61. Collada samples
-    # through frame_end and writes its last sample into visual_scene, so ending
-    # on the equivalent rest pose keeps animated and flattened exports aligned.
-    scene.frame_end = 61
+    # Collada samples animation through frame_end. v1.47 (user VIDEO frame
+    # analysis, 8 s surge-stall period): this was still 61 - the 2.54 s
+    # clip era - while the spin keys moved to frame 193 in v1.29, so the
+    # exporter baked only the first 2.54 s of motion and the engine held
+    # the last pose for the remaining 5.5 s of every declared 8.04 s
+    # cycle. THE stop-start. frame_end must equal AMBIENT_END_FRAME.
+    scene.frame_end = AMBIENT_END_FRAME
     scene["beamng_axis"] = "Z-up, +Y drive direction"
     scene["beamng_asset"] = MOD_ID
     print("CANNON_CAR_WASH_STAGE reset complete")
