@@ -1179,6 +1179,39 @@ local function synchronizeTransforms(state)
   return true
 end
 
+function Panel.reloadStaticCollision(state)
+  -- v1.45 (player screenshot: cars drive straight through the raised
+  -- plate): a runtime-created TSStatic gets NO static collision from
+  -- registration or setPosRot alone - drop-test proven (car rested at
+  -- ground z 0.19 under every create/pose ordering). be:reloadCollision()
+  -- after posing rebuilds the static world and the same drop rests ON
+  -- the plate (z 0.73). Called at registration and per ramp press - both
+  -- rare, so the rebuild hitch is acceptable.
+  pcall(function() be:reloadCollision() end)
+  emitEvent(state, "I", "flap_collision_reloaded", {
+    ramp_angle_deg = state.panel and state.panel.rampAngleDeg or nil,
+  })
+end
+
+function Panel.sweepOrphans()
+  -- Orphans from crashed/unclean sessions carry OLD prop ids, so the
+  -- per-name dedupe in the creators cannot see them. Sweep every runtime
+  -- TSStatic whose prop id no longer has a live installation.
+  local names = scenetree.findClassObjects("TSStatic") or {}
+  for _, objectName in ipairs(names) do
+    if type(objectName) == "string" then
+      local propId = string.match(
+        objectName,
+        "^ericrolph_cannon_car_wash_runtime_(%d+)_[%w_]+$"
+      )
+      if propId and not installations[tonumber(propId)] then
+        local orphan = scenetree.findObject(objectName)
+        if orphan then pcall(function() orphan:delete() end) end
+      end
+    end
+  end
+end
+
 function Panel.createFlap(name)
   -- v1.43 (player screenshots: flat orange orphan planks multiplying at
   -- the exit): recovery re-registrations replaced state.panel without
@@ -1250,6 +1283,7 @@ function Panel.press(state, buttonSuffix)
     panel.rampAngleDeg = math.max(0, math.min(Panel.maxAngleDeg, (panel.rampAngleDeg or 0) + delta))
     if state.origin and state.modelRotation then
       Panel.syncTransforms(state, {origin = state.origin, modelRotation = state.modelRotation})
+      Panel.reloadStaticCollision(state)
     end
     message = string.format("EXIT RAMP %d deg", panel.rampAngleDeg)
   elseif buttonSuffix == "btn_power_up" or buttonSuffix == "btn_power_down" then
@@ -2829,9 +2863,10 @@ local function registerProp(propId)
     Attract.updateCannonAim(state)
   end
 
-  -- v1.35 control panel kit: hinged exit-ramp flap + five walk-in button
-  -- zones along the exit-corner wall. Non-fatal on failure - the wash
-  -- works without its accessories.
+  -- v1.35 control panel kit: hinged exit-ramp flap. Non-fatal on failure -
+  -- the wash works without its accessories. Sweep cross-session orphans
+  -- (old prop ids the per-name dedupe cannot match) before creating.
+  Panel.sweepOrphans()
   state.panel = {
     rampAngleDeg = 0,
     powerIndex = Panel.defaultPowerIndex,
@@ -2856,6 +2891,8 @@ local function registerProp(propId)
     cleanupInstallation(state, "registration_failed")
     return false
   end
+  -- The flap just took its rest pose; bake its static collision once.
+  if state.panel and state.panel.flap then Panel.reloadStaticCollision(state) end
   triggerOwners[state.washTrigger:getId()] = {propId = propId, kind = "wash"}
   triggerOwners[state.repairTrigger:getId()] = {propId = propId, kind = "repair"}
   triggerOwners[state.launchTrigger:getId()] = {propId = propId, kind = "launch"}
@@ -2997,7 +3034,17 @@ local function onPreRender(dtReal, dtSim, dtRaw)
       if state.washSystemsActive and state.visual and washSubjectCount(state) > 0 then
         local currentAmbient = nil
         pcall(function() currentAmbient = state.visual:getField("playAmbient", 0) end)
-        if currentAmbient ~= "1" then
+        -- v1.45 (player: brushes start-stop on a 2 s cadence): the field
+        -- readback is engine-version/locale dependent - "1", "true", or
+        -- boolean true are all PLAYING. The old exact-"1" compare treated
+        -- "true" as stopped and rewrote the field every heal tick, and a
+        -- playAmbient write RESTARTS the clip (the v1.20 lesson). Only a
+        -- definite off-state may trigger the rewrite.
+        local playing = currentAmbient == "1"
+          or currentAmbient == "true"
+          or currentAmbient == true
+          or currentAmbient == 1
+        if not playing then
           pcall(function() setVisualAmbient(state.visual, true) end)
           emitEvent(state, "I", "ambient_reasserted", {previous = tostring(currentAmbient)})
         end
