@@ -373,20 +373,33 @@ def add_cone(
     return obj
 
 
+# v1.40 doubled the exit ramp flap plate to 2.6 m for the jump kicker, but
+# the supporting apron collision kept its 1.3 m profile: the thin plate rode
+# up to 6.6 cm ABOVE its backing wedge and overhung flat ground past y 10.3
+# with a closing air gap - a tire-pinch void that deflated tires on every
+# driven exit at 8+ m/s (probe-measured; first pops at world y -10.6..-11.9
+# with zero body damage). The exit wedge now spans the full plate length so
+# the plate is backed within its own ~13 mm thickness everywhere.
+ENTRANCE_RAMP_LENGTH = 1.3
+EXIT_RAMP_LENGTH = 2.6
+
+
 def add_ramp_wedge(
     name: str,
     sign: float,
     value: bpy.types.Material | None,
+    *,
+    ramp_length: float = ENTRANCE_RAMP_LENGTH,
 ) -> bpy.types.Object:
     """Portal apron wedge: slab-top height at the floor edge tapering to grade.
 
     The structural slab stands 0.132 m proud of the placement datum, which
-    played as a hard curb hit at both portals (player report). A 1.3 m apron
+    played as a hard curb hit at both portals (player report). The apron
     keeps the datum and selector cage untouched while cars roll in flush.
     """
 
     high_y = 9.0 * sign
-    toe_y = 10.3 * sign
+    toe_y = (9.0 + ramp_length) * sign
     top_z = 0.132
     object_name = namespaced_object_name(name)
     vertices = [
@@ -1390,7 +1403,7 @@ def build_shell() -> None:
     add_box("Colmesh-4", (0.0, 0.0, 4.78), (6.8, 18.0, 0.36), None, bevel=0.0)
     collision_wedges = [
         add_ramp_wedge("ColmeshRamp_Entrance", -1.0, None),
-        add_ramp_wedge("ColmeshRamp_Exit", 1.0, None),
+        add_ramp_wedge("ColmeshRamp_Exit", 1.0, None, ramp_length=EXIT_RAMP_LENGTH),
     ]
     floor_colmesh = bpy.data.objects["Colmesh-1"]
     floor_colmesh_data_name = floor_colmesh.data.name
@@ -3097,10 +3110,12 @@ def _selector_structure() -> dict[str, Any]:
     # and the drive-through portals stay open.
     apron_tracks = ("apron_left", "apron_center", "apron_right")
     apron_x = (left_wall["max"][0], 0.0, right_wall["min"][0])
-    ramp_length = 1.3
+    # The exit apron spans the full 2.6 m ramp flap plate so the plate is
+    # collision-backed everywhere (see EXIT_RAMP_LENGTH: the old 1.3 m wedge
+    # left a tire-pinch void under the plate's outer half).
     apron_specs = (
-        ("f", -1, 0, y_min - ramp_length),
-        ("r", len(stations), len(stations) - 1, y_max + ramp_length),
+        ("f", -1, 0, y_min - ENTRANCE_RAMP_LENGTH),
+        ("r", len(stations), len(stations) - 1, y_max + EXIT_RAMP_LENGTH),
     )
     floor_edge_tracks = ("floor_inner_left", "floor_center", "floor_inner_right")
     for end_name, apron_station, portal_station, apron_y in apron_specs:

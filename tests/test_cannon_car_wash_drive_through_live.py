@@ -224,6 +224,24 @@ def test_cannon_car_wash_pass_escape_and_launch(tmp_path: Path) -> None:
             "detail": "the wash started a run on a rolling car",
             "phases": grabbed_phases,
         }
+        # The v1.40 2.6 m ramp flap overhung its 1.3 m apron collision and
+        # pinch-deflated tires on every 8+ m/s exit; the wedge now backs the
+        # full plate. Guard the whole class: a rolling exit keeps its tires.
+        tire_state = json.loads(
+            subject.queue_lua_command(
+                "local deflated = 0; "
+                "if wheels and wheels.wheels then "
+                "for _, wheel in pairs(wheels.wheels) do "
+                "if type(wheel) == 'table' and wheel.isTireDeflated == true then "
+                "deflated = deflated + 1 end; end; end; "
+                "return jsonEncode({deflated = deflated})",
+                True,
+            )
+        )
+        assert tire_state["deflated"] == 0, {
+            "detail": "the exit ramp deflated tires on a rolling drive-through",
+            "state": tire_state,
+        }
         snapshot = wash_state()
         assert snapshot.get("repair_pending_count", 0) == 0, snapshot
 

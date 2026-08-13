@@ -90,7 +90,7 @@ LAUNCH_TRANSIT_SPEED_MPS = 4.0
 LAUNCH_ZONE_CENTER_WORLD_Y = -5.4
 CAPTURE_RESOLUTION = (640, 360)
 EXPECTED_EMITTER_COUNTS = {
-    "BNGP_sprinkler": 6,
+    "BNGP_sprinkler": 12,
     "BNGP_waterfallsteam": 6,
     "BNGP_34": 2,
     "BNGP_2": 2,
@@ -99,6 +99,9 @@ EFFECT_PAIRS = (
     ("mister_PreSoak_L_1", "mister_PreSoak_R_1", "BNGP_sprinkler"),
     ("mister_PreSoak_L_2", "mister_PreSoak_R_2", "BNGP_sprinkler"),
     ("mister_PreSoak_L_3", "mister_PreSoak_R_3", "BNGP_sprinkler"),
+    ("mister_MidWash_L_1", "mister_MidWash_R_1", "BNGP_sprinkler"),
+    ("mister_MidWash_L_2", "mister_MidWash_R_2", "BNGP_sprinkler"),
+    ("mister_MidWash_L_3", "mister_MidWash_R_3", "BNGP_sprinkler"),
     ("dryer_Mist_L_1", "dryer_Mist_R_1", "BNGP_waterfallsteam"),
     ("dryer_Mist_L_2", "dryer_Mist_R_2", "BNGP_waterfallsteam"),
     ("dryer_Mist_L_3", "dryer_Mist_R_3", "BNGP_waterfallsteam"),
@@ -180,7 +183,7 @@ def _wait_for_occupancy(
         state = _runtime_state(bng)
         if int(state.get("wash_subject_count", -1)) == count and state.get("wash_active") is active:
             return state
-    pytest.fail({"expected_count": count, "expected_active": active, "state": state})
+    pytest.fail(json.dumps({"expected_count": count, "expected_active": active, "state": state}))
 
 
 def _launch_containment_state(bng: BeamNGpy) -> dict[str, Any]:
@@ -858,8 +861,8 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             assert runtime_state["registered"] is True, runtime_state
             assert runtime_state["arbitrary_vehicle_support"] is True
             assert runtime_state["visual_exists"] is True
-            assert runtime_state["effect_present_count"] == 16
-            assert runtime_state["effect_expected_count"] == 16
+            assert runtime_state["effect_present_count"] == 22
+            assert runtime_state["effect_expected_count"] == 22
             assert runtime_state["effect_active_count"] == 0
             assert runtime_state["light_present_count"] == 13
             assert runtime_state["light_expected_count"] == 13
@@ -947,8 +950,8 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
 
             effect_orientation = _runtime_effect_orientation_state(bng)
             assert effect_orientation["ok"] is True, effect_orientation
-            assert effect_orientation["present_count"] == 16
-            assert len(effect_orientation["samples"]) == 8
+            assert effect_orientation["present_count"] == 22
+            assert len(effect_orientation["samples"]) == 11
             assert {sample["expected_emitter"] for sample in effect_orientation["samples"]} == set(
                 EXPECTED_EMITTER_COUNTS
             )
@@ -1047,7 +1050,7 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                 )
                 _set_subject_frozen(occupant, True)
             occupancy_two = _wait_for_occupancy(bng, count=2, active=True)
-            assert occupancy_two["effect_active_count"] == 16
+            assert occupancy_two["effect_active_count"] == 22
             assert occupancy_two["emitter_active_counts"] == EXPECTED_EMITTER_COUNTS
             assert str(occupancy_two["visual_play_ambient"]).casefold() in {"1", "true"}
 
@@ -1061,7 +1064,7 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                 is True
             )
             occupancy_one = _wait_for_occupancy(bng, count=1, active=True)
-            assert occupancy_one["effect_active_count"] == 16
+            assert occupancy_one["effect_active_count"] == 22
             assert occupancy_one["emitter_active_counts"] == EXPECTED_EMITTER_COUNTS
             assert str(occupancy_one["visual_play_ambient"]).casefold() in {"1", "true"}
 
@@ -1074,7 +1077,11 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                 )
                 is True
             )
-            occupancy_zero = _wait_for_occupancy(bng, count=0, active=False)
+            # v1.46 extended the wash-systems off-grace window to 5 s, and the
+            # grace ticks once per RENDERED frame (deterministic stepping
+            # renders one frame per step batch), so 300 attempts accumulate
+            # exactly 5.0 s - sit safely past the boundary instead.
+            occupancy_zero = _wait_for_occupancy(bng, count=0, active=False, attempts=600)
             assert occupancy_zero["effect_active_count"] == 0
             assert str(occupancy_zero["visual_play_ambient"]).casefold() in {"0", "false"}
             bng.vehicles.despawn(occupant_a)
@@ -1172,7 +1179,7 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
                 "runtime_state": active_snapshot,
                 "trajectory": trajectory,
             }
-            assert active_snapshot["effect_active_count"] == 16
+            assert active_snapshot["effect_active_count"] == 22
             assert active_snapshot["emitter_active_counts"] == EXPECTED_EMITTER_COUNTS
             assert str(active_snapshot["visual_play_ambient"]).casefold() in {"1", "true"}
 
@@ -1214,7 +1221,7 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             )
             capture_runtime_state = _runtime_state(bng)
             assert capture_runtime_state["wash_active"] is True
-            assert capture_runtime_state["effect_active_count"] == 16
+            assert capture_runtime_state["effect_active_count"] == 22
             assert capture_runtime_state["emitter_active_counts"] == EXPECTED_EMITTER_COUNTS
             assert str(capture_runtime_state["visual_play_ambient"]).casefold() in {
                 "1",
@@ -1320,7 +1327,7 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
             assert repair_complete_snapshot["repair_pending_count"] == 0
             assert repair_complete_snapshot["repaired_subject_count"] == 1
             assert repair_complete_snapshot["wash_active"] is True
-            assert repair_complete_snapshot["effect_active_count"] == 16
+            assert repair_complete_snapshot["effect_active_count"] == 22
             assert repair_complete_snapshot["emitter_active_counts"] == EXPECTED_EMITTER_COUNTS
             assert repaired_integrity is not None
             assert repaired_integrity["damage"] == pytest.approx(0.0, abs=0.01)

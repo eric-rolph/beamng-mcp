@@ -3,7 +3,7 @@
   "title": "Cannon Car Wash",
   "internal_name": "ericrolph_cannon_car_wash",
   "stable_zip_filename": "cannon_car_wash_ericrolph.zip",
-  "version": "1.48.3",
+  "version": "1.49.0",
   "type": "Other",
   "author": "Eric Rolph",
   "tag_line": "Water, layered air drying, full repair, then a 360 km/h launch",
@@ -13,7 +13,7 @@
     "Scenarios",
     "Props"
   ],
-  "update_summary": "Huge interactive update: a working exterior CONTROL PANEL with real clickable buttons (walk up and hover, like vehicle door handles) driving a tilting exit-ramp JUMP (0-15 degrees, real collision), launch power 60-140%, and a cannon arm/safe switch. The sign cannon is now a proper 18th-century carronade on the roof edge firing a tiny textured car volley aimed at the live sun. Visual overhaul: two-tone red/blue high-resolution brush strands, bright needle-punched felt mitter curtains under a box-truss gantry, a mid-wash spray arch, and a new sunrise selector thumbnail. Deep fixes: brushes now spin continuously the whole visit (full animation bake + portal-to-portal occupancy), no more double-rendered geometry, and interactive tooltips read cleanly.",
+  "update_summary": "Exit ramp tire-pop fix: since v1.40 doubled the exit ramp flap to 2.6 m for the jump kicker, the thin plate overhung its 1.3 m support wedge with a closing air gap underneath - driving out at 8+ m/s (instead of taking the cannon) pinch-deflated tires against the void. The exit apron collision now spans the full plate, so driven exits keep all four tires at any speed. The rolling drive-through gate now asserts zero deflated tires so this class stays fixed.",
   "gallery_images": [
     "images/01_exterior.png",
     "images/02_wash_active.png"
@@ -34,8 +34,8 @@
   },
   "release_artifact": {
     "filename": "cannon_car_wash_ericrolph.zip",
-    "sha256": "2c49bde404a5fa83295d4df8f643a0745e09b36cb89245d222332d10c921fc43",
-    "size_bytes": 74262113,
+    "sha256": "a4c878f8be87eda552a9fea18e0713c2b79f8bc4b0ef18d8829a99aa9bc330f0",
+    "size_bytes": 74262684,
     "member_count": 88
   },
   "release_validation": {

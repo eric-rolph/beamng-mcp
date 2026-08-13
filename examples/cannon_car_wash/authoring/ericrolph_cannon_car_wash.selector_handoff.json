@@ -16497,14 +16497,14 @@
       "id": "ericrolph_cannon_car_wash_apron_r_t00",
       "position": [
         3.099999,
-        -10.3,
+        -11.6,
         0.0
       ],
       "source_object": "ericrolph_cannon_car_wash_selector_cage",
       "source_vertex_index": 82,
       "source_world_position": [
         -3.1,
-        10.3,
+        11.6,
         0.0
       ],
       "station": 7,
@@ -16514,14 +16514,14 @@
       "id": "ericrolph_cannon_car_wash_apron_r_t01",
       "position": [
         -1e-06,
-        -10.3,
+        -11.6,
         0.0
       ],
       "source_object": "ericrolph_cannon_car_wash_selector_cage",
       "source_vertex_index": 83,
       "source_world_position": [
         0.0,
-        10.3,
+        11.6,
         0.0
       ],
       "station": 7,
@@ -16531,14 +16531,14 @@
       "id": "ericrolph_cannon_car_wash_apron_r_t02",
       "position": [
         -3.100001,
-        -10.3,
+        -11.6,
         0.0
       ],
       "source_object": "ericrolph_cannon_car_wash_selector_cage",
       "source_vertex_index": 84,
       "source_world_position": [
         3.1,
-        10.3,
+        11.6,
         0.0
       ],
       "station": 7,
@@ -18558,7 +18558,7 @@
       "ericrolph_cannon_car_wash_selector_wet_concrete"
     ],
     "path": "vehicles/ericrolph_cannon_car_wash/ericrolph_cannon_car_wash.dae",
-    "sha256": "d45ab7bd6a3028a6ca9b4e501874e1f3ac4452530015246e21ad90171fa3d8ec",
-    "size": 4400874
+    "sha256": "bf31a813819ca307d6201fa84b638e066a18831ebce1ebb8b30cdb7a16c69d5e",
+    "size": 4400991
   }
 }
