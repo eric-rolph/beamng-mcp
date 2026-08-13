@@ -3,17 +3,17 @@
   "title": "Cannon Car Wash - Low VRAM",
   "internal_name": "ericrolph_cannon_car_wash_lowvram",
   "stable_zip_filename": "cannon_car_wash_lowvram_ericrolph.zip",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "Other",
   "author": "Eric Rolph",
   "tag_line": "The full Cannon Car Wash experience, tuned for 2 GB graphics cards",
-  "description": "The complete Cannon Car Wash - animated brushes, the midpoint vehicle restore, the layered dryer, the interactive control panel, and the fully contained 3-2-1-GO launch at 360 km/h - rebuilt for older graphics cards with 2 GB of VRAM such as the GTX 1050. All particle effects are removed (the biggest frame-rate cost on low-end GPUs), texture memory is cut to roughly a quarter, the dynamic light count drops from 13 to 5 brighter fixtures, and the brush fans carry fewer overdraw-heavy strand cards. Physics, collision, animations, and every gameplay feature are identical to the flagship mod. Install this edition OR the flagship - both can be installed side by side, but you only need one.",
+  "description": "The complete Cannon Car Wash - animated brushes, the midpoint vehicle restore, the layered dryer, the interactive control panel, and the fully contained 3-2-1-GO launch at 360 km/h - rebuilt for older graphics cards with 2 GB of VRAM such as the GTX 1050. All wash spray, steam, and dust particle effects ship OFF by default (the biggest frame-rate cost on low-end GPUs) and can be turned back on at a small secondary panel below the main control station - walk up and click its orange button, just like the other panel controls. Texture memory is cut to roughly a quarter, the dynamic light count drops from 13 to 5 brighter fixtures, and the brush fans carry fewer overdraw-heavy strand cards. Physics, collision, animations, and every gameplay feature are identical to the flagship mod. Install this edition OR the flagship - both can be installed side by side, but you only need one.",
   "categories": [
     "Gameplay",
     "Scenarios",
     "Props"
   ],
-  "update_summary": "Initial release of the Low VRAM edition, derived from Cannon Car Wash v1.48.3: no particle emitters, mip-stripped textures (max 1024 atlases / 512 tileables), 5 boosted lights instead of 13, and reduced brush-card overdraw. Identical physics and features.",
+  "update_summary": "v1.1.0: the wash spray/steam/dust effects are back as an OPT-IN - a new mini panel below the main control station carries a single orange hover button that toggles them (they stay OFF by default, so the 2 GB-card frame rate is unchanged unless you ask for the show). Toggling mid-wash applies instantly. Derived from Cannon Car Wash v1.48.3: mip-stripped textures (max 1024 atlases / 512 tileables), 5 boosted lights instead of 13, reduced brush-card overdraw, identical physics and features.",
   "gallery_images": [
     "../repository/images/01_exterior.png",
     "../repository/images/02_wash_active.png"
