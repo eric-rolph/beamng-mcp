@@ -10570,7 +10570,7 @@
       [
         "ericrolph_cannon_car_wash_apron_r_t00",
         3.099999,
-        -10.3,
+        -11.6,
         0.0,
         {
           "collision": false,
@@ -10586,7 +10586,7 @@
       [
         "ericrolph_cannon_car_wash_apron_r_t01",
         -1e-06,
-        -10.3,
+        -11.6,
         0.0,
         {
           "collision": false,
@@ -10602,7 +10602,7 @@
       [
         "ericrolph_cannon_car_wash_apron_r_t02",
         -3.100001,
-        -10.3,
+        -11.6,
         0.0,
         {
           "collision": false,

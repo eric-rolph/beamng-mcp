@@ -254,6 +254,47 @@ def test_low_vram_service_launch_without_effects(tmp_path: Path) -> None:
         }
         assert snapshot.get("control_panel", {}).get("effects_enabled") is False, snapshot
 
+        # ---- Drive out WITHOUT the launch (the reported tire-pop path):
+        # a 9 m/s exit over the ramp flap must keep all four tires. ----
+        push_subject(9.0)
+        deadline = time.time() + 30
+        while time.time() < deadline:
+            step(0.5)
+            state = subject_state()
+            if state["ok"] and state["y"] < -16.0:
+                break
+        assert state["ok"] and state["y"] < -16.0, {
+            "detail": "subject never cleared the exit",
+            "state": state,
+        }
+        tire_state = json.loads(
+            subject.queue_lua_command(
+                "local deflated = 0; "
+                "if wheels and wheels.wheels then "
+                "for _, wheel in pairs(wheels.wheels) do "
+                "if type(wheel) == 'table' and wheel.isTireDeflated == true then "
+                "deflated = deflated + 1 end; end; end; "
+                "return jsonEncode({deflated = deflated})",
+                True,
+            )
+        )
+        assert tire_state["deflated"] == 0, {
+            "detail": "the exit ramp deflated tires on a driven exit",
+            "state": tire_state,
+        }
+
+        # ---- Back into the bay for the countdown and cannon. ----
+        lua(
+            "local subject = scenetree.findObject('drive_subject'); "
+            "subject:setPositionRotation(0.6, 0.0, 0.35, 0, 0, 0, 1); "
+            "return jsonEncode({ok = true})"
+        )
+        step(1.0)
+        lua(
+            "local subject = scenetree.findObject('drive_subject'); "
+            "subject:queueLuaCommand('input.event(\"parkingbrake\", 0, FILTER_DIRECT)'); "
+            "return jsonEncode({ok = true})"
+        )
         creep_to_rear_zone()
         assert wait_for_phase("countdown", SERVICE_TIMEOUT_SECONDS), {
             "detail": "countdown never started for a parked car",

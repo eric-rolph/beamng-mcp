@@ -3,7 +3,7 @@
   "title": "Cannon Car Wash - Low VRAM",
   "internal_name": "ericrolph_cannon_car_wash_lowvram",
   "stable_zip_filename": "cannon_car_wash_lowvram_ericrolph.zip",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "type": "Other",
   "author": "Eric Rolph",
   "tag_line": "The full Cannon Car Wash experience, tuned for 2 GB graphics cards",
@@ -13,7 +13,7 @@
     "Scenarios",
     "Props"
   ],
-  "update_summary": "v1.1.0: the wash spray/steam/dust effects are back as an OPT-IN - a new mini panel below the main control station carries a single orange hover button that toggles them (they stay OFF by default, so the 2 GB-card frame rate is unchanged unless you ask for the show). Toggling mid-wash applies instantly. Derived from Cannon Car Wash v1.48.3: mip-stripped textures (max 1024 atlases / 512 tileables), 5 boosted lights instead of 13, reduced brush-card overdraw, identical physics and features.",
+  "update_summary": "v1.1.1: exit ramp tire-pop fix (shared with flagship v1.49.0). The 2.6 m exit ramp flap overhung its 1.3 m support collision with a closing air gap underneath, pinch-deflating tires on driven exits at 8+ m/s - the wedge now backs the full plate, so leaving without the cannon keeps all four tires at any speed. Also carries the v1.1.0 opt-in spray toggle: effects stay OFF by default, one orange button on the mini panel turns them on instantly.",
   "gallery_images": [
     "../repository/images/01_exterior.png",
     "../repository/images/02_wash_active.png"
@@ -25,7 +25,7 @@
   },
   "derived_from": {
     "flagship_internal_name": "ericrolph_cannon_car_wash",
-    "flagship_version": "1.48.3",
+    "flagship_version": "1.49.0",
     "transform": "build_low_vram_variant.py"
   }
 }
