@@ -3,9 +3,11 @@
 One sentinel session proves the derived mod is a real, working car wash:
 the selector prop registers under its own renamed GE extension (the escaped
 ``ericrolph__cannon__car__wash__lowvram_runtime`` identifier answers
-getSystemState, which is also the panel buttons' call path), a parked car
-takes the full service and the cannon launch, and the scene contains ZERO
-particle emitters and exactly the five planned lights while doing so.
+getSystemState, which is also the panel buttons' call path), the 22 wash
+emitters exist but stay INACTIVE by default while a car takes the service,
+the mini panel's spray-effects toggle turns all 22 on and off again
+mid-wash, the scene carries exactly the five planned lights, and the parked
+car still gets the full countdown and cannon launch.
 """
 
 from __future__ import annotations
@@ -176,15 +178,22 @@ def test_low_vram_service_launch_without_effects(tmp_path: Path) -> None:
                 break
         assert registered, {"detail": "low VRAM wash never registered", "state": wash_state()}
 
-        # ---- Variant contract: no emitters, exactly the 5-light plan. ----
+        # ---- Variant contract: 22 emitters present (opt-in, so they exist
+        # but must be inactive), exactly the 5-light plan. ----
         census = scene_census()
-        assert census["emitters"] == 0, {
-            "detail": "the low VRAM wash spawned particle emitters",
+        assert census["emitters"] == 22, {
+            "detail": "the low VRAM wash should define all 22 wash emitters",
             "census": census,
         }
         assert census["points"] == 3 and census["spots"] == 2, {
             "detail": "light roster differs from the 3-point + 2-spot plan",
             "census": census,
+        }
+        snapshot = wash_state()
+        assert snapshot.get("effect_present_count") == 22, snapshot
+        assert snapshot.get("effect_active_count") == 0, {
+            "detail": "wash emitters active before any car or toggle",
+            "state": snapshot,
         }
 
         subject = Vehicle("drive_subject", "etk800")
@@ -203,15 +212,57 @@ def test_low_vram_service_launch_without_effects(tmp_path: Path) -> None:
             "subject:setPositionRotation(0.6, 0.0, 0.35, 0, 0, 0, 1); "
             "return jsonEncode({ok = true})"
         )
+
+        # ---- Spray-effects toggle: default off while the wash runs, all 22
+        # on after one press, all off again after the next. ----
+        def press_effects_toggle() -> None:
+            lua(
+                f"local ext = extensions['{EXTENSION_NAME}']; "
+                "local prop = scenetree.findObject('wash_prop'); "
+                "ext.pressPanelButtonByVehicle(prop:getID(), 'btn_effects'); "
+                "return jsonEncode({ok = true})"
+            )
+
+        washing = False
+        deadline = time.time() + SERVICE_TIMEOUT_SECONDS
+        while time.time() < deadline:
+            step(0.5)
+            snapshot = wash_state()
+            if snapshot.get("repair_pending_count", 0) == 0 and snapshot.get("wash_active"):
+                washing = True
+                break
+        assert washing, {"detail": "wash never serviced the parked car", "state": wash_state()}
+        snapshot = wash_state()
+        assert snapshot.get("effect_active_count") == 0, {
+            "detail": "spray effects ran without the toggle (default must be OFF)",
+            "state": snapshot,
+        }
+        press_effects_toggle()
+        step(1.0)
+        snapshot = wash_state()
+        assert snapshot.get("effect_active_count") == 22, {
+            "detail": "toggle ON did not activate the wash emitters",
+            "state": snapshot,
+        }
+        assert snapshot.get("control_panel", {}).get("effects_enabled") is True, snapshot
+        press_effects_toggle()
+        step(1.0)
+        snapshot = wash_state()
+        assert snapshot.get("effect_active_count") == 0, {
+            "detail": "toggle OFF did not deactivate the wash emitters",
+            "state": snapshot,
+        }
+        assert snapshot.get("control_panel", {}).get("effects_enabled") is False, snapshot
+
         creep_to_rear_zone()
         assert wait_for_phase("countdown", SERVICE_TIMEOUT_SECONDS), {
             "detail": "countdown never started for a parked car",
             "state": wash_state(),
         }
-        mid_census = scene_census()
-        assert mid_census["emitters"] == 0, {
-            "detail": "emitters appeared mid-service",
-            "census": mid_census,
+        mid_snapshot = wash_state()
+        assert mid_snapshot.get("effect_active_count") == 0, {
+            "detail": "spray effects re-armed themselves during the countdown",
+            "state": mid_snapshot,
         }
 
         launched = False

@@ -4,19 +4,20 @@ The Low VRAM edition is a deterministically DERIVED second mod (own vehicle,
 GE-extension, and scenario namespace, so it installs beside the flagship)
 aimed at 2 GB graphics cards such as the GTX 1050:
 
-- every particle emitter is removed (22 wash emitters + the 2 attract-volley
-  emitters; the runtime treats wash-emitter creation failure as fatal, so the
-  spec tables are emptied rather than the factory disabled),
+- the 22 wash spray/steam/dust emitters ship OFF by default and only run
+  while the mini spray-effects panel's toggle turned them on (the scenario
+  version and the attract volley's 2 emitters stay fully removed),
 - the 13 dynamic lights become 5 (three boosted tunnel fills + both exit
   spills; the sign keeps its calibrated emissive glow instead of its spots),
 - every DDS ships with its top mip levels stripped (brush/sign atlases cap at
   1024, tileables at 512 - exact half/quarter images, no re-cook needed),
-- the brush card fans may come from a CANNON_CAR_WASH_LOW_VRAM=1 Blender
-  rebuild (reduced alpha-tested overdraw; collision cage, cloth, and JBeam
-  are byte-identical to the flagship apart from the namespace rename).
+- the brush card fans, the mini spray-effects panel, and its sixth hover
+  button come from a CANNON_CAR_WASH_LOW_VRAM=1 pipeline rebuild (reduced
+  alpha-tested overdraw; collision cage and cloth match the flagship, the
+  JBeam adds only the mini panel's button node and trigger rows).
 
 The transform never edits the flagship tree. Inputs are the reviewed
-``mod/`` release files (plus the optional card-trimmed wash DAEs) and the
+``mod/`` release files (plus the CANNON_CAR_WASH_LOW_VRAM=1 scratch-build members) and the
 output is the committed ``mod_low_vram/`` tree and its Repository archive.
 """
 
@@ -53,16 +54,22 @@ VARIANT_REPOSITORY_ROOT = EXAMPLE_ROOT / "repository_low_vram"
 SHARED_REPOSITORY_ROOT = flagship.REPOSITORY_ROOT
 DEFAULT_OUTPUT_DIR = EXAMPLE_ROOT / "dist"
 # Postdate-any-plausible-cache policy: next-day noon relative to the release.
-ZIP_EPOCH = (2026, 8, 14, 12, 0, 0)
-DAE_TIMESTAMP = "2026-08-14T12:00:00"
+ZIP_EPOCH = (2026, 8, 15, 12, 0, 0)
+DAE_TIMESTAMP = "2026-08-15T12:00:00"
 TEXT_SUFFIXES = {".json", ".lua", ".jbeam", ".dae", ".pc"}
 
-# Flagship members whose payloads may be overridden by the card-trimmed
-# Blender rebuild. Only these three DAEs carry brush card fans.
-CARD_DAE_MEMBERS = (
+# Flagship members whose payloads must be overridden by the
+# CANNON_CAR_WASH_LOW_VRAM=1 pipeline rebuild: the three DAEs carrying the
+# trimmed brush card fans and the mini spray-effects panel, plus the
+# selector outputs that grow the mini panel's sixth hover button (jbeam
+# node/trigger rows, its interaction action, and the +2 kg mass stamp).
+SCRATCH_BUILD_MEMBERS = (
     f"art/shapes/{SOURCE_MOD_ID}/{SOURCE_MOD_ID}.dae",
     f"vehicles/{SOURCE_MOD_ID}/{SOURCE_MOD_ID}.dae",
     f"vehicles/{SOURCE_MOD_ID}/{SOURCE_MOD_ID}_runtime_visual.dae",
+    f"vehicles/{SOURCE_MOD_ID}/{SOURCE_MOD_ID}.jbeam",
+    f"vehicles/{SOURCE_MOD_ID}/{SOURCE_MOD_ID}_default.interaction.json",
+    f"vehicles/{SOURCE_MOD_ID}/info_standard.json",
 )
 
 WASH_EFFECT_COUNT = 22
@@ -224,16 +231,89 @@ ATTRACT_EMITTER_REPLACEMENT = (
 )
 
 
+# The wash-systems choke point activates every emitter with the ambient
+# clip; the variant gates it behind the mini panel's default-off toggle.
+WASH_ACTIVATION_ANCHOR = (
+    "    setVisualAmbient(visual, enabled)\n"
+    "    for _, effect in ipairs(state.effects) do effect:setActive(enabled) end\n"
+)
+WASH_ACTIVATION_GATED = (
+    "    setVisualAmbient(visual, enabled)\n"
+    "    -- Low VRAM edition: spray/steam/dust stay dark unless the mini\n"
+    "    -- panel toggle turned them on (they ship OFF by default).\n"
+    "    local effectsOn = enabled and state.panel ~= nil and state.panel.effectsEnabled == true\n"
+    "    for _, effect in ipairs(state.effects) do effect:setActive(effectsOn) end\n"
+)
+DISPATCH_ANCHOR = (
+    '  elseif buttonSuffix == "btn_cannon" then\n'
+    "    panel.cannonEnabled = not panel.cannonEnabled\n"
+    '    message = panel.cannonEnabled and "CANNON ARMED" or "CANNON SAFE"\n'
+    "  else\n"
+)
+DISPATCH_WITH_EFFECTS = (
+    '  elseif buttonSuffix == "btn_cannon" then\n'
+    "    panel.cannonEnabled = not panel.cannonEnabled\n"
+    '    message = panel.cannonEnabled and "CANNON ARMED" or "CANNON SAFE"\n'
+    '  elseif buttonSuffix == "btn_effects" then\n'
+    "    -- Low VRAM edition: the mini panel's spray-effects toggle. Applies\n"
+    "    -- immediately so an active wash gains or loses its spray on the spot.\n"
+    "    panel.effectsEnabled = not panel.effectsEnabled\n"
+    "    local effectsOn = panel.effectsEnabled and state.washSystemsActive == true\n"
+    "    for _, effect in ipairs(state.effects or {}) do\n"
+    "      pcall(function() effect:setActive(effectsOn) end)\n"
+    "    end\n"
+    '    message = panel.effectsEnabled and "WASH SPRAY FX ON" or "WASH SPRAY FX OFF"\n'
+    "  else\n"
+)
+PRESSED_EVENT_ANCHOR = "    cannon_enabled = panel.cannonEnabled,\n  })\n"
+PRESSED_EVENT_WITH_EFFECTS = (
+    "    cannon_enabled = panel.cannonEnabled,\n"
+    "    effects_enabled = panel.effectsEnabled == true,\n  })\n"
+)
+PANEL_EXPORT_ANCHOR = (
+    "      cannon_enabled = state.panel.cannonEnabled,\n      has_flap = state.panel.flap ~= nil,\n"
+)
+PANEL_EXPORT_WITH_EFFECTS = (
+    "      cannon_enabled = state.panel.cannonEnabled,\n"
+    "      effects_enabled = state.panel.effectsEnabled == true,\n"
+    "      has_flap = state.panel.flap ~= nil,\n"
+)
+
+
+def _apply_anchored(text: str, anchor: str, replacement: str, *, label: str) -> str:
+    _require(text.count(anchor) == 1, f"runtime.lua: {label} anchor not found exactly once")
+    return text.replace(anchor, replacement)
+
+
 def _strip_runtime_effects(text: str) -> str:
-    text = _empty_lua_effect_specs(text, member="runtime.lua", table_name="EFFECT_OFFSETS")
+    # The 22 wash emitters STAY defined - the mini panel can turn them on -
+    # but the attract volley's muzzle/spark pair is still fully removed.
+    offsets = re.search(r"local EFFECT_OFFSETS = \{\n(.*?)\n\}\n", text, re.DOTALL)
+    _require(offsets is not None, "runtime.lua: EFFECT_OFFSETS table not found")
+    assert offsets is not None
+    entry_count = offsets.group(1).count('emitter = "')
+    _require(
+        entry_count == WASH_EFFECT_COUNT,
+        f"runtime.lua: expected {WASH_EFFECT_COUNT} effect entries, found {entry_count}",
+    )
     _require(
         text.count(ATTRACT_EMITTER_BLOCK) == 1,
         "runtime.lua: attract emitter block anchor not found exactly once",
     )
     text = text.replace(ATTRACT_EMITTER_BLOCK, ATTRACT_EMITTER_REPLACEMENT)
     _require(
-        'emitter = "BNGP' not in text,
-        "runtime.lua: a stock emitter reference survived the strip",
+        '"BNGP_22"' not in text and '"BNGP_82"' not in text,
+        "runtime.lua: an attract emitter reference survived the strip",
+    )
+    text = _apply_anchored(
+        text, WASH_ACTIVATION_ANCHOR, WASH_ACTIVATION_GATED, label="wash activation"
+    )
+    text = _apply_anchored(text, DISPATCH_ANCHOR, DISPATCH_WITH_EFFECTS, label="panel dispatch")
+    text = _apply_anchored(
+        text, PRESSED_EVENT_ANCHOR, PRESSED_EVENT_WITH_EFFECTS, label="pressed event"
+    )
+    text = _apply_anchored(
+        text, PANEL_EXPORT_ANCHOR, PANEL_EXPORT_WITH_EFFECTS, label="panel state export"
     )
     return text
 
@@ -401,20 +481,20 @@ def strip_dds_mips(payload: bytes, *, member: str, dimension_cap: int) -> bytes:
     return bytes(header) + payload[data_offset + sum(sizes[:dropped]) :]
 
 
-def load_source_payloads(card_trimmed_mod: Path | None) -> dict[str, bytes]:
+def load_source_payloads(scratch_mod: Path | None) -> dict[str, bytes]:
     sources = flagship.validate_mod_tree(flagship.MOD_ROOT)
     payloads = {name: flagship._stable_read(path) for name, path in sources.items()}
-    if card_trimmed_mod is not None:
-        for member in CARD_DAE_MEMBERS:
-            candidate = card_trimmed_mod / member
+    if scratch_mod is not None:
+        for member in SCRATCH_BUILD_MEMBERS:
+            candidate = scratch_mod / member
             _require(
                 candidate.is_file(),
-                f"card-trimmed tree is missing {member}",
+                f"scratch build tree is missing {member}",
             )
             trimmed = candidate.read_bytes()
             _require(
                 trimmed != payloads[member],
-                f"card-trimmed {member} is identical to the flagship export",
+                f"scratch-build {member} is identical to the flagship export",
             )
             payloads[member] = trimmed
     return payloads
@@ -439,7 +519,11 @@ def transform_payloads(payloads: dict[str, bytes]) -> dict[str, bytes]:
         member = rename_identifier(name)
         suffix = PurePosixPath(member).suffix
         if suffix in TEXT_SUFFIXES:
-            text = rename_identifier(payload.decode("utf-8"))
+            # Normalize to LF: the flagship's Windows-built working copies
+            # carry CRLF while git stores LF (.gitattributes eol=lf), so a
+            # fresh checkout of this tree would otherwise disagree with a
+            # locally derived one byte-for-byte.
+            text = rename_identifier(payload.decode("utf-8").replace("\r\n", "\n"))
             text = _regenerate_persistent_ids(text)
             if suffix == ".dae":
                 text = _pin_dae_timestamps(text)
@@ -627,11 +711,11 @@ def pack_variant(
 
 def build_variant(
     *,
-    card_trimmed_mod: Path | None,
+    scratch_mod: Path | None,
     output_dir: Path = DEFAULT_OUTPUT_DIR,
     overwrite: bool = False,
 ) -> dict[str, str | int]:
-    payloads = load_source_payloads(card_trimmed_mod)
+    payloads = load_source_payloads(scratch_mod)
     transformed = transform_payloads(payloads)
     if transform_payloads(payloads) != transformed:
         raise VariantError("variant transform is not deterministic")
@@ -642,11 +726,11 @@ def build_variant(
 def _argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--card-trimmed-mod",
+        "--scratch-mod",
         type=Path,
         default=None,
-        help="mod tree of a CANNON_CAR_WASH_LOW_VRAM=1 pipeline build; its three"
-        " card-bearing wash DAEs replace the flagship exports",
+        help="mod tree of a CANNON_CAR_WASH_LOW_VRAM=1 pipeline build; its wash"
+        " DAEs, selector jbeam/interaction, and mass stamp replace the flagship exports",
     )
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--overwrite", action="store_true")
@@ -665,7 +749,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             result = pack_variant(arguments.output_dir, overwrite=arguments.overwrite)
         else:
             result = build_variant(
-                card_trimmed_mod=arguments.card_trimmed_mod,
+                scratch_mod=arguments.scratch_mod,
                 output_dir=arguments.output_dir,
                 overwrite=arguments.overwrite,
             )

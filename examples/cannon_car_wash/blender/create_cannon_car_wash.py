@@ -42,6 +42,16 @@ SCENARIO_VISUAL_NAME = f"{MOD_ID}_scenario_visual"
 # every other mesh are untouched, so the selector JBeam stays identical. The
 # default (knob off) must keep reproducing the flagship export byte-for-byte.
 LOW_VRAM = os.environ.get("CANNON_CAR_WASH_LOW_VRAM", "") == "1"
+# Low VRAM edition only: a secondary mini panel below the main control
+# station hosts the wash spray-effects toggle (spray/steam/dust ship OFF by
+# default there). The cap position feeds both the mini-panel geometry and
+# the selector handoff's sixth panel-button anchor, so the rendered cap and
+# the hover click box cannot drift apart.
+LOW_VRAM_FX_BUTTON = {
+    "suffix": "btn_effects",
+    "title": "Toggle wash spray effects",
+    "source_position": [3.564, 6.0, 0.80],
+}
 
 
 def card_count(full: int, low_vram: int) -> int:
@@ -2822,6 +2832,35 @@ def build_details() -> None:
             rotation=(0.0, math.pi / 2.0, 0.0),
             bevel=0.004,
         )
+    if LOW_VRAM:
+        # Low VRAM edition: mini spray-effects panel directly below the main
+        # station (inside its own clear bay, above the conduit foot), with a
+        # single orange toggle cap whose center IS the handoff anchor.
+        fx_x, fx_y, fx_z = LOW_VRAM_FX_BUTTON["source_position"]
+        add_box(
+            "CtrlFxEnclosure", (3.50, fx_y, fx_z - 0.02), (0.10, 0.30, 0.30), steel, bevel=0.010
+        )
+        add_box("CtrlFxShroud", (3.52, fx_y, fx_z + 0.15), (0.16, 0.34, 0.028), steel, bevel=0.0)
+        add_cylinder(
+            "CtrlFxButtonBezel",
+            (fx_x - 0.008, fx_y, fx_z),
+            0.034,
+            0.010,
+            steel,
+            vertices=14,
+            rotation=(0.0, math.pi / 2.0, 0.0),
+            bevel=0.0,
+        )
+        add_cylinder(
+            "CtrlFxButtonCap",
+            (fx_x, fx_y, fx_z),
+            0.026,
+            0.018,
+            orange,
+            vertices=14,
+            rotation=(0.0, math.pi / 2.0, 0.0),
+            bevel=0.004,
+        )
     print("CANNON_CAR_WASH_STAGE details complete")
 
 
@@ -3372,7 +3411,18 @@ def _selector_structure() -> dict[str, Any]:
             for suffix, title, z in zip(
                 PANEL_BUTTON_SUFFIXES, PANEL_BUTTON_TITLES, PANEL_BUTTON_HEIGHTS, strict=True
             )
-        ],
+        ]
+        + (
+            [
+                {
+                    "suffix": LOW_VRAM_FX_BUTTON["suffix"],
+                    "title": LOW_VRAM_FX_BUTTON["title"],
+                    "source_position": list(LOW_VRAM_FX_BUTTON["source_position"]),
+                }
+            ]
+            if LOW_VRAM
+            else []
+        ),
     }
 
 

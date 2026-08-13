@@ -1,10 +1,12 @@
 """Static gates for the Cannon Car Wash - Low VRAM edition.
 
-The Low VRAM tree is DERIVED: every member except the three card-trimmed wash
-DAEs (which come from a ``CANNON_CAR_WASH_LOW_VRAM=1`` Blender rebuild) must
-re-derive byte-for-byte from the committed flagship tree through
-``build_low_vram_variant.transform_payloads``. These gates therefore prove the
-committed variant tree, the transform code, and the shipped archive agree.
+The Low VRAM tree is DERIVED: every member except the six scratch-build
+members (wash DAEs, selector jbeam/interaction, and the mass stamp from a
+``CANNON_CAR_WASH_LOW_VRAM=1`` pipeline rebuild) must re-derive
+byte-for-byte from the committed flagship tree through
+``build_low_vram_variant.transform_payloads``. These gates therefore prove
+the committed variant tree, the transform code, and the shipped archive
+agree.
 """
 
 from __future__ import annotations
@@ -43,14 +45,15 @@ def test_variant_tree_matches_allowlist(variant_files: dict[str, bytes]) -> None
     assert len(variant_files) == 82
 
 
-def test_variant_rederives_from_flagship_except_card_daes(
+def test_variant_rederives_from_flagship_except_scratch_members(
     variant_files: dict[str, bytes], flagship_payloads: dict[str, bytes]
 ) -> None:
-    """The transform is the variant's generator: 79 of 82 members must re-derive
-    exactly; only the three card-trimmed wash DAEs carry Blender-run output."""
+    """The transform is the variant's generator: 76 of 82 members must re-derive
+    exactly; only the six scratch-build members carry pipeline-run output."""
 
     rederived = variant.transform_payloads(flagship_payloads)
-    exempt = {variant.rename_identifier(name) for name in variant.CARD_DAE_MEMBERS}
+    exempt = {variant.rename_identifier(name) for name in variant.SCRATCH_BUILD_MEMBERS}
+    assert len(exempt) == 6
     mismatched = [
         name
         for name in variant.VARIANT_RUNTIME_FILES
@@ -60,22 +63,48 @@ def test_variant_rederives_from_flagship_except_card_daes(
     for name in sorted(exempt):
         assert name in variant_files
         assert variant_files[name] != rederived[name], (
-            f"{name} matches the untrimmed flagship export; the card-trimmed"
-            " Blender rebuild did not land"
+            f"{name} matches the flagship export; the CANNON_CAR_WASH_LOW_VRAM=1"
+            " pipeline rebuild did not land"
         )
 
 
-def test_no_particle_emitters_anywhere(variant_files: dict[str, bytes]) -> None:
+def test_wash_effects_are_opt_in_and_default_off(variant_files: dict[str, bytes]) -> None:
+    # Scenario (static) version stays completely effect-free.
     prefab = variant_files[(SCENARIO_ROOT / f"{VARIANT_ID}.prefab.json").as_posix()].decode()
     assert "ParticleEmitterNode" not in prefab
-    runtime = variant_files[f"lua/ge/extensions/{VARIANT_ID}/runtime.lua"].decode()
-    assert "local EFFECT_OFFSETS = {}" in runtime
-    assert 'emitter = "BNGP' not in runtime
-    assert "local muzzleEmitter = nil" in runtime
-    assert "local sparkEmitter = nil" in runtime
     scenario_lua = variant_files[(SCENARIO_ROOT / f"{VARIANT_ID}.lua").as_posix()].decode()
     assert "local EFFECT_SPECS = {}" in scenario_lua
     assert 'emitter = "BNGP' not in scenario_lua
+
+    # Selector prop: the 22 wash emitters remain DEFINED but only activate
+    # behind the mini panel's toggle; the attract pair stays removed.
+    runtime = variant_files[f"lua/ge/extensions/{VARIANT_ID}/runtime.lua"].decode()
+    offsets = re.search(r"local EFFECT_OFFSETS = \{\n(.*?)\n\}\n", runtime, re.DOTALL)
+    assert offsets is not None
+    assert offsets.group(1).count('emitter = "') == variant.WASH_EFFECT_COUNT
+    assert variant.WASH_ACTIVATION_GATED in runtime
+    assert variant.DISPATCH_WITH_EFFECTS in runtime
+    assert '"WASH SPRAY FX ON"' in runtime
+    assert "effects_enabled = state.panel.effectsEnabled == true" in runtime
+    assert "local muzzleEmitter = nil" in runtime
+    assert "local sparkEmitter = nil" in runtime
+    assert '"BNGP_22"' not in runtime
+    assert '"BNGP_82"' not in runtime
+
+    # The sixth hover button is wired end to end: interaction action calls
+    # the variant's escaped extension identifier with the toggle suffix.
+    interaction = json.loads(
+        variant_files[f"vehicles/{VARIANT_ID}/{VARIANT_ID}_default.interaction.json"]
+    )
+    actions = interaction["actions"]
+    assert len(actions) == 6
+    effects_action = actions[f"{VARIANT_ID}_btn_effects"]
+    assert (
+        f"extensions.{variant.VARIANT_ESCAPED_ID}_runtime.pressPanelButtonByVehicle"
+        in (effects_action["onDown"])
+    )
+    assert "'btn_effects'" in effects_action["onDown"]
+    assert effects_action["title"] == "Toggle wash spray effects"
 
 
 def test_light_roster_is_five_boosted_fixtures(variant_files: dict[str, bytes]) -> None:
@@ -162,14 +191,38 @@ def test_persistent_ids_are_canonical_unique_and_disjoint(
     )
 
 
-def test_jbeam_is_flagship_physics_modulo_rename(
+def test_jbeam_is_flagship_physics_plus_only_the_effects_button(
     variant_files: dict[str, bytes], flagship_payloads: dict[str, bytes]
 ) -> None:
-    flagship_jbeam = flagship_payloads[
-        f"vehicles/{variant.SOURCE_MOD_ID}/{variant.SOURCE_MOD_ID}.jbeam"
-    ].decode("utf-8")
-    variant_jbeam = variant_files[f"vehicles/{VARIANT_ID}/{VARIANT_ID}.jbeam"].decode("utf-8")
-    assert variant_jbeam == variant.rename_identifier(flagship_jbeam)
+    """Physics must be untouched: after removing the mini panel's button rows
+    (one node, one trigger box, one event link, one enabled action), the
+    variant JBeam must equal the flagship's modulo the namespace rename."""
+
+    flagship_jbeam = json.loads(
+        variant.rename_identifier(
+            flagship_payloads[
+                f"vehicles/{variant.SOURCE_MOD_ID}/{variant.SOURCE_MOD_ID}.jbeam"
+            ].decode("utf-8")
+        )
+    )
+    variant_jbeam = json.loads(variant_files[f"vehicles/{VARIANT_ID}/{VARIANT_ID}.jbeam"])
+    flagship_part = flagship_jbeam[VARIANT_ID]
+    variant_part = variant_jbeam[VARIANT_ID]
+    scrubbed = 0
+    for section, rows in variant_part.items():
+        if isinstance(rows, list):
+            kept = [row for row in rows if "btn_effects" not in json.dumps(row)]
+            scrubbed += len(rows) - len(kept)
+            variant_part[section] = kept
+    assert scrubbed == 4, f"expected exactly 4 btn_effects rows, scrubbed {scrubbed}"
+    assert variant_part == flagship_part
+
+    # The +2 kg button node lands in the mass stamp.
+    flagship_info = json.loads(
+        flagship_payloads[f"vehicles/{variant.SOURCE_MOD_ID}/info_standard.json"]
+    )
+    variant_info = json.loads(variant_files[f"vehicles/{VARIANT_ID}/info_standard.json"])
+    assert variant_info["Weight"] == flagship_info["Weight"] + 2.0
 
 
 def test_archive_packs_deterministically(tmp_path) -> None:

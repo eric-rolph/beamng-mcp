@@ -240,8 +240,31 @@ local POSITIONAL_ZONES = {
     ),
   },
 }
--- Low VRAM edition: the wash runs without particle effects.
-local EFFECT_OFFSETS = {}
+local EFFECT_OFFSETS = {
+  {suffix = "mister_PreSoak_L_1", emitter = "BNGP_sprinkler", position = vec3(-2.62, -5.6, 1.25), inward = vec3(1, 0, 0)},
+  {suffix = "mister_PreSoak_L_2", emitter = "BNGP_sprinkler", position = vec3(-2.62, -5.6, 2.1), inward = vec3(1, 0, 0)},
+  {suffix = "mister_PreSoak_L_3", emitter = "BNGP_sprinkler", position = vec3(-2.62, -5.6, 3.0), inward = vec3(1, 0, 0)},
+  {suffix = "mister_PreSoak_R_1", emitter = "BNGP_sprinkler", position = vec3(2.62, -5.6, 1.25), inward = vec3(-1, 0, 0)},
+  {suffix = "mister_PreSoak_R_2", emitter = "BNGP_sprinkler", position = vec3(2.62, -5.6, 2.1), inward = vec3(-1, 0, 0)},
+  {suffix = "mister_PreSoak_R_3", emitter = "BNGP_sprinkler", position = vec3(2.62, -5.6, 3.0), inward = vec3(-1, 0, 0)},
+  -- v1.37: mid-wash spray bank between the two roller-tower pairs.
+  {suffix = "mister_MidWash_L_1", emitter = "BNGP_sprinkler", position = vec3(-2.62, -0.9, 1.25), inward = vec3(1, 0, 0)},
+  {suffix = "mister_MidWash_L_2", emitter = "BNGP_sprinkler", position = vec3(-2.62, -0.9, 2.1), inward = vec3(1, 0, 0)},
+  {suffix = "mister_MidWash_L_3", emitter = "BNGP_sprinkler", position = vec3(-2.62, -0.9, 3.0), inward = vec3(1, 0, 0)},
+  {suffix = "mister_MidWash_R_1", emitter = "BNGP_sprinkler", position = vec3(2.62, -0.9, 1.25), inward = vec3(-1, 0, 0)},
+  {suffix = "mister_MidWash_R_2", emitter = "BNGP_sprinkler", position = vec3(2.62, -0.9, 2.1), inward = vec3(-1, 0, 0)},
+  {suffix = "mister_MidWash_R_3", emitter = "BNGP_sprinkler", position = vec3(2.62, -0.9, 3.0), inward = vec3(-1, 0, 0)},
+  {suffix = "dryer_Mist_L_1", emitter = "BNGP_waterfallsteam", position = vec3(-2.62, 5.65, 1.25), inward = vec3(1, 0, 0)},
+  {suffix = "dryer_Mist_L_2", emitter = "BNGP_waterfallsteam", position = vec3(-2.62, 5.65, 2.1), inward = vec3(1, 0, 0)},
+  {suffix = "dryer_Mist_L_3", emitter = "BNGP_waterfallsteam", position = vec3(-2.62, 5.65, 3.0), inward = vec3(1, 0, 0)},
+  {suffix = "dryer_Mist_R_1", emitter = "BNGP_waterfallsteam", position = vec3(2.62, 5.65, 1.25), inward = vec3(-1, 0, 0)},
+  {suffix = "dryer_Mist_R_2", emitter = "BNGP_waterfallsteam", position = vec3(2.62, 5.65, 2.1), inward = vec3(-1, 0, 0)},
+  {suffix = "dryer_Mist_R_3", emitter = "BNGP_waterfallsteam", position = vec3(2.62, 5.65, 3.0), inward = vec3(-1, 0, 0)},
+  {suffix = "dryer_Steam_L", emitter = "BNGP_34", position = vec3(-2.62, 5.65, 2.1), inward = vec3(1, 0, 0)},
+  {suffix = "dryer_Steam_R", emitter = "BNGP_34", position = vec3(2.62, 5.65, 2.1), inward = vec3(-1, 0, 0)},
+  {suffix = "dryer_Dust_L", emitter = "BNGP_2", position = vec3(-2.62, 5.65, 1.25), inward = vec3(1, 0, 0)},
+  {suffix = "dryer_Dust_R", emitter = "BNGP_2", position = vec3(2.62, 5.65, 1.25), inward = vec3(-1, 0, 0)},
+}
 
 local function holdVehicleCommand(propId, runNumber)
   return string.format([[
@@ -1271,6 +1294,15 @@ function Panel.press(state, buttonSuffix)
   elseif buttonSuffix == "btn_cannon" then
     panel.cannonEnabled = not panel.cannonEnabled
     message = panel.cannonEnabled and "CANNON ARMED" or "CANNON SAFE"
+  elseif buttonSuffix == "btn_effects" then
+    -- Low VRAM edition: the mini panel's spray-effects toggle. Applies
+    -- immediately so an active wash gains or loses its spray on the spot.
+    panel.effectsEnabled = not panel.effectsEnabled
+    local effectsOn = panel.effectsEnabled and state.washSystemsActive == true
+    for _, effect in ipairs(state.effects or {}) do
+      pcall(function() effect:setActive(effectsOn) end)
+    end
+    message = panel.effectsEnabled and "WASH SPRAY FX ON" or "WASH SPRAY FX OFF"
   else
     return
   end
@@ -1280,6 +1312,7 @@ function Panel.press(state, buttonSuffix)
     ramp_angle_deg = panel.rampAngleDeg,
     launch_power_factor = panel.powerFactor,
     cannon_enabled = panel.cannonEnabled,
+    effects_enabled = panel.effectsEnabled == true,
   })
 end
 
@@ -1353,7 +1386,10 @@ local function setWashSystemsEnabled(state, enabled, reason)
 
   local updated, updateError = pcall(function()
     setVisualAmbient(visual, enabled)
-    for _, effect in ipairs(state.effects) do effect:setActive(enabled) end
+    -- Low VRAM edition: spray/steam/dust stay dark unless the mini
+    -- panel toggle turned them on (they ship OFF by default).
+    local effectsOn = enabled and state.panel ~= nil and state.panel.effectsEnabled == true
+    for _, effect in ipairs(state.effects) do effect:setActive(effectsOn) end
   end)
   if not updated then
     forceWashSystemsOff(state)
@@ -3306,6 +3342,7 @@ local function installationState(state)
       ramp_angle_deg = state.panel.rampAngleDeg,
       launch_power_factor = state.panel.powerFactor,
       cannon_enabled = state.panel.cannonEnabled,
+      effects_enabled = state.panel.effectsEnabled == true,
       has_flap = state.panel.flap ~= nil,
     } or nil,
     wash_trigger = {

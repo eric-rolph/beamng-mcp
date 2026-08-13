@@ -18,6 +18,9 @@
       ],
       [
         "ericrolph_cannon_car_wash_lowvram_btn_cannon"
+      ],
+      [
+        "ericrolph_cannon_car_wash_lowvram_btn_effects"
       ]
     ],
     "beams": [
@@ -15176,6 +15179,22 @@
         }
       ],
       [
+        "ericrolph_cannon_car_wash_lowvram_panel_btn_effects",
+        -3.599,
+        -5.972,
+        0.758,
+        {
+          "collision": false,
+          "fixed": true,
+          "frictionCoef": 0.9,
+          "group": "ericrolph_cannon_car_wash_lowvram_physics",
+          "nodeMaterial": "|NM_METAL",
+          "nodeWeight": 2.0,
+          "selfCollision": false,
+          "staticCollision": false
+        }
+      ],
+      [
         "ericrolph_cannon_car_wash_lowvram_panel_frame_x",
         -3.614,
         -7.357,
@@ -18236,6 +18255,11 @@
         "panel_btn_cannon",
         "action0",
         "ericrolph_cannon_car_wash_lowvram_btn_cannon"
+      ],
+      [
+        "panel_btn_effects",
+        "action0",
+        "ericrolph_cannon_car_wash_lowvram_btn_effects"
       ]
     ],
     "triggers2": [
@@ -18382,6 +18406,38 @@
       [
         "panel_btn_cannon",
         "ericrolph_cannon_car_wash_lowvram_panel_btn_cannon",
+        "ericrolph_cannon_car_wash_lowvram_panel_frame_x",
+        "ericrolph_cannon_car_wash_lowvram_panel_frame_y",
+        "box",
+        {
+          "x": 0.07,
+          "y": 0.07,
+          "z": 0.07
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      ],
+      [
+        "panel_btn_effects",
+        "ericrolph_cannon_car_wash_lowvram_panel_btn_effects",
         "ericrolph_cannon_car_wash_lowvram_panel_frame_x",
         "ericrolph_cannon_car_wash_lowvram_panel_frame_y",
         "box",

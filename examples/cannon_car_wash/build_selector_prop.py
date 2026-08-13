@@ -218,7 +218,11 @@ def build_jbeam(handoff: dict[str, Any]) -> tuple[dict[str, Any], float]:
     # box sits exactly ON its own node (zero translation), so the engine's
     # node-frame math cannot drift the button off the printed door art.
     panel_buttons = handoff.get("panel_buttons", [])
-    if len(panel_buttons) != 5:
+    # The Low VRAM edition's handoff appends a sixth anchor for its mini
+    # spray-effects panel; every other build must carry exactly the five.
+    if len(panel_buttons) == 6 and panel_buttons[5].get("suffix") == "btn_effects":
+        pass
+    elif len(panel_buttons) != 5:
         raise ValueError("selector handoff must carry exactly five panel buttons")
     panel_node_ids: list[str] = []
 

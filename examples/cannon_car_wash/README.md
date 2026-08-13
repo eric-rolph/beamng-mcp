@@ -111,28 +111,36 @@ validate dimensions and DDS channel classes, copy the 22 release DDS files, and 
 `mod_low_vram/` and `dist/cannon_car_wash_lowvram_ericrolph.zip` are a second, independently
 installable mod (`ericrolph_cannon_car_wash_lowvram`, tagid `CANNONWSHLV`) aimed at 2 GB
 graphics cards such as the GTX 1050. It is DERIVED from the flagship tree by
-`build_low_vram_variant.py`: all 24 particle emitters removed, DDS mip-stripped (atlases cap at
-1024, tileables at 512 — texture payload drops from ~56 MB to ~16 MB), 13 dynamic lights reduced
-to 5 boosted fixtures, and the three card-bearing wash DAEs swapped for a
-`CANNON_CAR_WASH_LOW_VRAM=1` Blender export with ~40% fewer alpha-tested brush cards. Physics is
-untouched: the variant JBeam must equal the flagship JBeam modulo the namespace rename (gated).
+`build_low_vram_variant.py`: the 22 wash spray/steam/dust emitters ship OFF by default and are
+toggled by a mini secondary panel below the main control station (one orange triggers2 hover
+button, `btn_effects`, applied instantly mid-wash; the scenario version and the attract volley's
+2 emitters stay fully removed), DDS mip-stripped (atlases cap at 1024, tileables at 512 —
+texture payload drops from ~56 MB to ~16 MB), 13 dynamic lights reduced to 5 boosted fixtures,
+and six scratch-build members swapped in from a `CANNON_CAR_WASH_LOW_VRAM=1` pipeline export:
+the three wash DAEs (~40% fewer alpha-tested brush cards + the mini panel), the selector JBeam
+and interaction.json (the sixth button), and the info_standard.json mass stamp. Physics is
+untouched: after removing the button's four rows, the variant JBeam must equal the flagship
+JBeam modulo the namespace rename (gated). All variant text members are LF-normalized so a fresh
+checkout and a locally derived tree agree byte-for-byte.
 
 ~~~powershell
-# Card-trimmed geometry: copy the example dir to a scratch root, then inside the copy:
+# Low VRAM geometry + selector: copy the example dir to a scratch root, then inside the copy:
 $env:CANNON_CAR_WASH_LOW_VRAM = '1'
 & $blender454 --factory-startup --background --python <scratch>\blender\create_cannon_car_wash.py
 .\.venv\Scripts\python.exe <scratch>\build_selector_prop.py
 .\.venv\Scripts\python.exe <scratch>\sync_scenario_outputs.py
 Remove-Item Env:CANNON_CAR_WASH_LOW_VRAM
-# Derive the variant tree + archive from the flagship mod/ and the scratch DAEs:
+# Derive the variant tree + archive from the flagship mod/ and the scratch members:
 .\.venv\Scripts\python.exe .\examples\cannon_car_wash\build_low_vram_variant.py `
-  --card-trimmed-mod <scratch>\mod --overwrite
+  --scratch-mod <scratch>\mod --overwrite
 ~~~
 
-Every variant member except those three DAEs must re-derive byte-for-byte from the committed
-flagship tree (`tests/test_cannon_car_wash_low_vram.py` enforces this, plus emitter/light/texture
-budgets, namespace-leak checks including the escaped `ericrolph__cannon__car__wash` GE extension
-form, persistentId disjointness, and deterministic repacking). Metadata lives in
+Every variant member except those six must re-derive byte-for-byte from the committed flagship
+tree (`tests/test_cannon_car_wash_low_vram.py` enforces this, plus the default-off toggle
+wiring, light/texture budgets, namespace-leak checks including the escaped
+`ericrolph__cannon__car__wash` GE extension form, persistentId disjointness, and deterministic
+repacking). The live gate `tests/test_cannon_car_wash_low_vram_live.py` presses the toggle
+mid-wash and watches all 22 emitters light and go dark. Metadata lives in
 `repository_low_vram/submission.json`; icon and gallery images are shared with the flagship.
 
 ## Static and distribution gates

@@ -5,6 +5,11 @@
       "order": 5.0,
       "title": "Cannon: Arm / Safe"
     },
+    "ericrolph_cannon_car_wash_lowvram_btn_effects": {
+      "onDown": "obj:queueGameEngineLua(string.format(\"extensions.ericrolph__cannon__car__wash__lowvram_runtime.pressPanelButtonByVehicle(%d, 'btn_effects')\", objectId))",
+      "order": 6.0,
+      "title": "Toggle wash spray effects"
+    },
     "ericrolph_cannon_car_wash_lowvram_btn_power_down": {
       "onDown": "obj:queueGameEngineLua(string.format(\"extensions.ericrolph__cannon__car__wash__lowvram_runtime.pressPanelButtonByVehicle(%d, 'btn_power_down')\", objectId))",
       "order": 4.0,
