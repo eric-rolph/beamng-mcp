@@ -1,0 +1,525 @@
+{
+  "ericrolph_cannon_car_wash_lowvram_brush_aqua": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.0,
+          0.82,
+          0.83,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.72
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "doubleSided": true,
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_brush_aqua",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_brush_aqua",
+    "persistentId": "e61135ac-022c-53a3-a29c-30fef2c45faf",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_brush_blue": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.005,
+          0.2,
+          0.74,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.72
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "doubleSided": true,
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_brush_blue",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_brush_blue",
+    "persistentId": "6667f5a8-74fe-530a-ba6a-65efc55a4fac",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_brush_cards": {
+    "Stages": [
+      {
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_brush_cards.color.png",
+        "emissiveFactor": [
+          0.86,
+          0.2,
+          0.16
+        ],
+        "emissiveMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_brush_cards_emissive.data.png",
+        "metallicFactor": 0.0,
+        "normalMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_brush_cards.normal.png",
+        "opacityMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_brush_cards_opacity.data.png",
+        "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_brush_cards_roughness.data.png"
+      },
+      {},
+      {},
+      {}
+    ],
+    "alphaRef": 96,
+    "alphaTest": true,
+    "castShadows": true,
+    "class": "Material",
+    "doubleSided": true,
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_brush_cards",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_brush_cards",
+    "persistentId": "8e8af7fd-ee58-52f2-ac68-c85bb92c7b3c",
+    "translucentBlendOp": "None",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_concrete": {
+    "Stages": [
+      {
+        "ambientOcclusionMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_grime.data.png",
+        "ambientOcclusionMapUseUV": 1,
+        "baseColorFactor": [
+          0.18,
+          0.2,
+          0.23,
+          1.0
+        ],
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_concrete.color.png",
+        "detailNormalMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_detail.normal.png",
+        "detailNormalMapStrength": 0.65,
+        "detailScale": 10.0,
+        "metallicFactor": 0.0,
+        "normalMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_concrete.normal.png",
+        "roughnessFactor": 0.82,
+        "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_concrete_roughness.data.png"
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "groundType": "CONCRETE",
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_concrete",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_concrete",
+    "persistentId": "b12e3943-129a-5a22-bf2b-4f2ff591981d",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_control_panel": {
+    "Stages": [
+      {
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_control_panel.color.png",
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": true,
+    "class": "Material",
+    "doubleSided": true,
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_control_panel",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_control_panel",
+    "persistentId": "3ee9c663-783f-58ca-bea9-553a6b4ad3d1",
+    "translucentBlendOp": "None",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_corrugated_blue": {
+    "Stages": [
+      {
+        "ambientOcclusionMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_corrugated_blue_ao.data.png",
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_corrugated_blue.color.png",
+        "metallicFactor": 0.0,
+        "normalMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_corrugated_blue.normal.png",
+        "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_corrugated_blue_roughness.data.png"
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "dynamicCubemap": true,
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_corrugated_blue",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_corrugated_blue",
+    "persistentId": "2ee5e586-5737-5f0b-901d-950a4fd35b93",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_cyan_trim": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.0,
+          0.52,
+          0.83,
+          1.0
+        ],
+        "metallicFactor": 0.25,
+        "roughnessFactor": 0.5
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_cyan_trim",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_cyan_trim",
+    "persistentId": "4bc12ef6-d900-5992-a0f3-2793877a41c7",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_deep_blue": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.015,
+          0.09,
+          0.22,
+          1.0
+        ],
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_deep_blue.color.png",
+        "metallicFactor": 0.15,
+        "normalMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_deep_blue.normal.png",
+        "roughnessFactor": 0.5,
+        "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_deep_blue_roughness.data.png"
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_deep_blue",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_deep_blue",
+    "persistentId": "638feacb-63aa-56e5-8f82-78c44e7336ff",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_exterior_cmu": {
+    "Stages": [
+      {
+        "ambientOcclusionMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_grime.data.png",
+        "ambientOcclusionMapUseUV": 1,
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_cmu.color.png",
+        "detailNormalMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_detail.normal.png",
+        "detailNormalMapStrength": 0.6,
+        "detailScale": 8.0,
+        "metallicFactor": 0.0,
+        "normalMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_cmu.normal.png",
+        "normalMapStrength": 1.15,
+        "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_cmu_roughness.data.png"
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "groundType": "CONCRETE",
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_exterior_cmu",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_exterior_cmu",
+    "persistentId": "8a3846e3-557e-5cdb-8aa0-787870739f92",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_glass": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.03,
+          0.32,
+          0.48,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "opacityFactor": 0.38,
+        "roughnessFactor": 0.08
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": false,
+    "class": "Material",
+    "doubleSided": true,
+    "dynamicCubemap": true,
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_glass",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_glass",
+    "persistentId": "6a55713b-e804-54a4-973d-3f1f638e1bb9",
+    "translucent": true,
+    "translucentBlendOp": "PreMulAlpha",
+    "translucentRecvShadows": true,
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_hazard_yellow": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          1.0,
+          0.68,
+          0.015,
+          1.0
+        ],
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_hazard_yellow.color.png",
+        "metallicFactor": 0.0,
+        "normalMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_hazard_yellow.normal.png",
+        "roughnessFactor": 0.45,
+        "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_hazard_yellow_roughness.data.png"
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_hazard_yellow",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_hazard_yellow",
+    "persistentId": "6ff24455-af51-5cf4-807a-475580186003",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_interior_brick": {
+    "Stages": [
+      {
+        "ambientOcclusionMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_grime.data.png",
+        "ambientOcclusionMapUseUV": 1,
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_interior_brick.color.png",
+        "detailNormalMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_detail.normal.png",
+        "detailNormalMapStrength": 0.55,
+        "detailScale": 8.0,
+        "metallicFactor": 0.0,
+        "normalMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_interior_brick.normal.png",
+        "normalMapStrength": 1.15,
+        "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_interior_brick_roughness.data.png"
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "groundType": "CONCRETE",
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_interior_brick",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_interior_brick",
+    "persistentId": "a01ca176-bd26-588e-8342-76f95d5ffefb",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_kiosk_face": {
+    "Stages": [
+      {
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_kiosk_face.color.png",
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": true,
+    "class": "Material",
+    "doubleSided": true,
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_kiosk_face",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_kiosk_face",
+    "persistentId": "8de42d6c-6fa9-5d81-aaa9-900923be71ae",
+    "translucentBlendOp": "None",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_led": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.75,
+          0.93,
+          1.0,
+          1.0
+        ],
+        "emissive": true,
+        "emissiveFactor": [
+          3.5,
+          6.3,
+          7.0
+        ],
+        "emissiveIntensityNits": 400,
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.5
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": false,
+    "class": "Material",
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_led",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_led",
+    "persistentId": "40dba8c6-4c85-589e-b3bf-790f501de80a",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_rubber": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.012,
+          0.014,
+          0.018,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.9
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "groundType": "RUBBER",
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_rubber",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_rubber",
+    "persistentId": "93d6d2e8-64db-5e2a-8b05-91734f4508b0",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_safety_orange": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          1.0,
+          0.16,
+          0.015,
+          1.0
+        ],
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_safety_orange.color.png",
+        "metallicFactor": 0.0,
+        "normalMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_safety_orange.normal.png",
+        "roughnessFactor": 0.38,
+        "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_safety_orange_roughness.data.png"
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_safety_orange",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_safety_orange",
+    "persistentId": "2d5bd5ea-50e2-585c-a2a6-be9e07d430d5",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_screen": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.005,
+          0.12,
+          0.2,
+          1.0
+        ],
+        "emissive": true,
+        "emissiveFactor": [
+          0.0,
+          2.2,
+          4.0
+        ],
+        "emissiveIntensityNits": 250,
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.5
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": false,
+    "class": "Material",
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_screen",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_screen",
+    "persistentId": "edf8efea-1f03-5d57-a499-d247d24dbfea",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_sign_face": {
+    "Stages": [
+      {
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_sign.color.png",
+        "emissive": true,
+        "emissiveFactor": [
+          2.6,
+          3.2,
+          4.0
+        ],
+        "emissiveIntensityNits": 300,
+        "emissiveMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_sign_emissive.data.png",
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.32
+      },
+      {},
+      {},
+      {}
+    ],
+    "castShadows": false,
+    "class": "Material",
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_sign_face",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_sign_face",
+    "persistentId": "0f5f2401-aa2c-5b9a-8b10-f99fdb5cd640",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_stainless": {
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.42,
+          0.46,
+          0.5,
+          1.0
+        ],
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_stainless.color.png",
+        "metallicFactor": 0.9,
+        "normalMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_stainless.normal.png",
+        "roughnessFactor": 0.2,
+        "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_stainless_roughness.data.png"
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "dynamicCubemap": true,
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_stainless",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_stainless",
+    "persistentId": "41eb7bf7-34bc-55ec-9934-2e959c3a6547",
+    "version": 1.5
+  },
+  "ericrolph_cannon_car_wash_lowvram_wet_concrete": {
+    "Stages": [
+      {
+        "ambientOcclusionMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_grime.data.png",
+        "ambientOcclusionMapUseUV": 1,
+        "baseColorMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_wet_concrete.color.png",
+        "detailNormalMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_detail.normal.png",
+        "detailNormalMapStrength": 0.5,
+        "detailScale": 12.0,
+        "metallicFactor": 0.0,
+        "normalMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_wet_concrete.normal.png",
+        "roughnessMap": "/art/shapes/ericrolph_cannon_car_wash_lowvram/textures/ericrolph_cannon_car_wash_lowvram_wet_concrete_roughness.data.png"
+      },
+      {},
+      {},
+      {}
+    ],
+    "class": "Material",
+    "dynamicCubemap": true,
+    "groundType": "CONCRETE",
+    "mapTo": "ericrolph_cannon_car_wash_lowvram_wet_concrete",
+    "materialTag0": "ericrolph_cannon_car_wash_lowvram",
+    "name": "ericrolph_cannon_car_wash_lowvram_wet_concrete",
+    "persistentId": "3a54728d-478b-58d8-b122-e78a9050db83",
+    "version": 1.5
+  }
+}

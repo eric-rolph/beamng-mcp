@@ -36,6 +36,16 @@ VEHICLE_HANDOFF_PATH = AUTHORING_ROOT / f"{MOD_ID}.selector_handoff.json"
 VEHICLE_VISUAL_NAME = f"{MOD_ID}_selector_visual"
 VEHICLE_CAGE_NAME = f"{MOD_ID}_selector_cage"
 SCENARIO_VISUAL_NAME = f"{MOD_ID}_scenario_visual"
+# Low VRAM edition knob: CANNON_CAR_WASH_LOW_VRAM=1 reduces only the
+# alpha-tested brush CARD counts (visual overdraw, the dominant in-tunnel GPU
+# cost on low-end cards). The collision cage, cloth topology, animations, and
+# every other mesh are untouched, so the selector JBeam stays identical. The
+# default (knob off) must keep reproducing the flagship export byte-for-byte.
+LOW_VRAM = os.environ.get("CANNON_CAR_WASH_LOW_VRAM", "") == "1"
+
+
+def card_count(full: int, low_vram: int) -> int:
+    return low_vram if LOW_VRAM else full
 
 
 def add_ambient_animation_clip(path: Path) -> None:
@@ -635,9 +645,9 @@ def add_vertical_brush(
             else:
                 face_uvs.append(((0.0, 0.0), (1.0, 0.0), (1.0, 0.75), (0.0, 0.75)))
 
-    append_ring(22, 0.18, 0.92, half_height, 0.0, 0.07)
+    append_ring(card_count(22, 14), 0.18, 0.92, half_height, 0.0, 0.07)
     # Offset inner ring fills the see-through gap between core and card tips.
-    append_ring(14, 0.17, 0.55, half_height * 0.9, math.tau / 20.0, 0.04)
+    append_ring(card_count(14, 8), 0.17, 0.55, half_height * 0.9, math.tau / 20.0, 0.04)
     card_cluster = add_card_mesh(
         f"{name}_CardFan",
         location,
@@ -708,7 +718,7 @@ def add_wheel_scrubber(
     vertices: list[tuple[float, float, float]] = []
     faces: list[tuple[int, int, int, int]] = []
     face_uvs: list[tuple[tuple[float, float], ...]] = []
-    for index in range(18):
+    for index in range(card_count(18, 12)):
         angle = index * math.tau / 14.0
         cosine, sine = math.cos(angle), math.sin(angle)
         reach = 0.40 + 0.025 * math.sin(index * 2.7)
@@ -788,9 +798,9 @@ def add_horizontal_brush(
 
     # v1.44 (player closeup: sparse flat fan): three offset rings pack the
     # roller so closeups read as a full cylinder of strands, not blades.
-    append_ring(32, 0.17, 0.68, half_length, 0.0, 0.05)
-    append_ring(20, 0.165, 0.55, half_length * 0.97, math.tau / 64.0, 0.04)
-    append_ring(14, 0.16, 0.40, half_length * 0.94, math.tau / 28.0, 0.03)
+    append_ring(card_count(32, 20), 0.17, 0.68, half_length, 0.0, 0.05)
+    append_ring(card_count(20, 12), 0.165, 0.55, half_length * 0.97, math.tau / 64.0, 0.04)
+    append_ring(card_count(14, 8), 0.16, 0.40, half_length * 0.94, math.tau / 28.0, 0.03)
     card_cluster = add_card_mesh(
         "Brush_Overhead_CardFan",
         location,

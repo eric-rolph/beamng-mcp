@@ -106,6 +106,35 @@ their source-side manifest. `cook_release_textures.py stage` places only that kn
 isolated BeamNG cook; after the visual load, run `collect --profile-current <sentinel-current>` to
 validate dimensions and DDS channel classes, copy the 22 release DDS files, and remove staged PNGs.
 
+## Low VRAM edition
+
+`mod_low_vram/` and `dist/cannon_car_wash_lowvram_ericrolph.zip` are a second, independently
+installable mod (`ericrolph_cannon_car_wash_lowvram`, tagid `CANNONWSHLV`) aimed at 2 GB
+graphics cards such as the GTX 1050. It is DERIVED from the flagship tree by
+`build_low_vram_variant.py`: all 24 particle emitters removed, DDS mip-stripped (atlases cap at
+1024, tileables at 512 — texture payload drops from ~56 MB to ~16 MB), 13 dynamic lights reduced
+to 5 boosted fixtures, and the three card-bearing wash DAEs swapped for a
+`CANNON_CAR_WASH_LOW_VRAM=1` Blender export with ~40% fewer alpha-tested brush cards. Physics is
+untouched: the variant JBeam must equal the flagship JBeam modulo the namespace rename (gated).
+
+~~~powershell
+# Card-trimmed geometry: copy the example dir to a scratch root, then inside the copy:
+$env:CANNON_CAR_WASH_LOW_VRAM = '1'
+& $blender454 --factory-startup --background --python <scratch>\blender\create_cannon_car_wash.py
+.\.venv\Scripts\python.exe <scratch>\build_selector_prop.py
+.\.venv\Scripts\python.exe <scratch>\sync_scenario_outputs.py
+Remove-Item Env:CANNON_CAR_WASH_LOW_VRAM
+# Derive the variant tree + archive from the flagship mod/ and the scratch DAEs:
+.\.venv\Scripts\python.exe .\examples\cannon_car_wash\build_low_vram_variant.py `
+  --card-trimmed-mod <scratch>\mod --overwrite
+~~~
+
+Every variant member except those three DAEs must re-derive byte-for-byte from the committed
+flagship tree (`tests/test_cannon_car_wash_low_vram.py` enforces this, plus emitter/light/texture
+budgets, namespace-leak checks including the escaped `ericrolph__cannon__car__wash` GE extension
+form, persistentId disjointness, and deterministic repacking). Metadata lives in
+`repository_low_vram/submission.json`; icon and gallery images are shared with the flagship.
+
 ## Static and distribution gates
 
 ~~~powershell

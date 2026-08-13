@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Cannon Car Wash - Low VRAM",
+    "description": "Drive through animated rollers, inward water, a midpoint vehicle restore, and a layered air dryer, then enter the bay fully to arm the Cannon Car Wash launch. Low VRAM edition: no particle effects, reduced texture and light budgets for 2 GB graphics cards.",
+    "difficulty": 0,
+    "authors": "Eric Rolph",
+    "lapConfig": [],
+    "forceNoCountDown": true,
+    "extensions": [
+      {
+        "name": "ericrolph_cannon_car_wash_lowvram"
+      }
+    ],
+    "vehicles": {
+      "ericrolph_cannon_car_wash_lowvram_truck": {
+        "playerUsable": true,
+        "startFocus": true
+      }
+    },
+    "prefabs": []
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "title": "Cannon Car Wash - Low VRAM",
+  "internal_name": "ericrolph_cannon_car_wash_lowvram",
+  "stable_zip_filename": "cannon_car_wash_lowvram_ericrolph.zip",
+  "version": "1.0.0",
+  "type": "Other",
+  "author": "Eric Rolph",
+  "tag_line": "The full Cannon Car Wash experience, tuned for 2 GB graphics cards",
+  "description": "The complete Cannon Car Wash - animated brushes, the midpoint vehicle restore, the layered dryer, the interactive control panel, and the fully contained 3-2-1-GO launch at 360 km/h - rebuilt for older graphics cards with 2 GB of VRAM such as the GTX 1050. All particle effects are removed (the biggest frame-rate cost on low-end GPUs), texture memory is cut to roughly a quarter, the dynamic light count drops from 13 to 5 brighter fixtures, and the brush fans carry fewer overdraw-heavy strand cards. Physics, collision, animations, and every gameplay feature are identical to the flagship mod. Install this edition OR the flagship - both can be installed side by side, but you only need one.",
+  "categories": [
+    "Gameplay",
+    "Scenarios",
+    "Props"
+  ],
+  "update_summary": "Initial release of the Low VRAM edition, derived from Cannon Car Wash v1.48.3: no particle emitters, mip-stripped textures (max 1024 atlases / 512 tileables), 5 boosted lights instead of 13, and reduced brush-card overdraw. Identical physics and features.",
+  "gallery_images": [
+    "../repository/images/01_exterior.png",
+    "../repository/images/02_wash_active.png"
+  ],
+  "resource_icon": {
+    "path": "../repository/icon.jpg",
+    "width": 96,
+    "height": 96
+  },
+  "derived_from": {
+    "flagship_internal_name": "ericrolph_cannon_car_wash",
+    "flagship_version": "1.48.3",
+    "transform": "build_low_vram_variant.py"
+  }
+}
