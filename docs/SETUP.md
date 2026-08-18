@@ -3,8 +3,8 @@
 ## 1. Choose a feature tier
 
 For the supported sensor/scenario/autonomy surface, use BeamNG.tech 0.38 with BeamNGpy 1.35.1.
-Retail BeamNG.drive 0.38.6 can use the included GELua bridge, but BeamNGpy behavior there is
-experimental. In the tested retail build, BeamNGpy `Camera` is explicitly license-gated, so
+Retail BeamNG.drive can use the included GELua bridge — exercised on the engine-reported
+build `0.38.6.0.19963` recorded by `examples/cannon_car_wash/telemetry/cannon_car_wash_phase4_results.json` — but BeamNGpy behavior there is experimental. In the tested retail build, BeamNGpy `Camera` is explicitly license-gated, so
 production `vision-lane` and `hybrid` modes require BeamNG.tech; the repository's retail RenderView
 GPU fixture is test-only.
 

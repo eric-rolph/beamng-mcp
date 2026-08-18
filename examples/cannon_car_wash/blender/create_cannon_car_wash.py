@@ -161,7 +161,7 @@ REPAIR_TRIGGER_DIMENSIONS = (5.4, 2.2, 4.2)
 SUPPORTED_CITYBUS_ENVELOPE = {
     "model": "citybus",
     "configuration": "city",
-    "source": "BeamNG.drive 0.38.6 vehicles/citybus/info_city.json BoundingBox",
+    "source": "BeamNG.drive 0.38.6.0.19963 vehicles/citybus/info_city.json BoundingBox",
     "width": 3.11,
     "length": 12.63,
     "height": 2.994,
@@ -923,9 +923,15 @@ def wash_effect_specs() -> list[dict[str, Any]]:
 
     ``ParticleEmitterNode.emitter`` consumes ``ParticleEmitterData`` objects
     (the ``BNGP_*`` names below), not the underlying ``ParticleData`` object.
-    BeamNG 0.38.6 does not contain the three user-facing semantic labels, so
-    the manifest records both the requested role and its verified stock
-    runtime mapping.
+    The three user-facing semantic labels are not in the shipped data, so the
+    manifest records both the requested role and its verified stock runtime
+    mapping. This is a CENSUS and so it carries the build it ran on: the
+    "0.38.6" that used to sit in this line was the test PROFILE DIRECTORY
+    name, never an engine string. RE-VERIFIED 2026-08-15 against the engine
+    that reports itself as v0.39.4.0 build 20972 - still zero hits across all
+    173 install zips, alongside 91 ``ParticleEmitterData`` and 95
+    ``ParticleData`` objects that DO exist. See the version-provenance law in
+    the Round-16/17 ledger in AGENTS.md.
     """
 
     specs: list[dict[str, Any]] = []

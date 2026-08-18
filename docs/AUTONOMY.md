@@ -23,8 +23,10 @@ not fight. It currently instantiates the same camera/state supervisor as `vision
 mode name reserves a compatibility point for route-planner fusion, which is still on the roadmap.
 
 Both camera-driven modes use BeamNGpy's production `Camera` path and therefore require BeamNG.tech
-on the tested 0.38 generation. Retail BeamNG.drive 0.38.6 rejects that sensor with an explicit Tech
-license error. The repository's opt-in retail GPU smoke uses a test-only Lua RenderView fixture to
+on the tested 0.38 generation. Retail BeamNG.drive rejected that sensor with an explicit Tech
+license error on the 0.38 generation. No run record in this repository retains the build that
+rejection was seen on, and `0.38.6` alone was the test profile-DIRECTORY name, never an
+engine string. The repository's opt-in retail GPU smoke uses a test-only Lua RenderView fixture to
 exercise rendering plus local inference; it is removed afterward and is not a supported retail
 fallback for `vision-lane` or `hybrid` control.
 

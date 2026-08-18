@@ -35,7 +35,9 @@ never placed inside the 10–30 Hz steering/braking loop.
 
 BeamNGpy's official support contract is for BeamNG.tech. Retail Drive support is useful, but this
 repository labels it honestly as experimental. The pinned compatibility baseline is BeamNGpy
-1.35.1 with BeamNG 0.38.
+1.35.1 with BeamNG 0.38. That pin is the VALIDATED baseline, not the engine currently installed
+on the development machine, which reports `0.39.4.0 build 20972`; the release matrix has not been
+re-run against it. See the version-provenance table in `AGENTS.md`.
 
 ## What is included
 
@@ -217,8 +219,9 @@ The SegFormer backend does not download weights unless `allow_model_downloads = 
 prevents surprise network traffic. See [Autonomy and Vision](https://github.com/eric-rolph/beamng-mcp/blob/main/docs/AUTONOMY.md).
 The opt-in GPU regression captures a real rendered BeamNG frame through a test-only retail
 RenderView fixture and runs OpenCV, with an optional pre-cached SegFormer-B0 CUDA leg. It is not a
-production retail camera fallback: BeamNG.drive 0.38.6 rejects BeamNGpy `Camera` without a Tech
-license. The small model is a repeatable runtime smoke baseline, not a state-of-the-art driving
+production retail camera fallback: BeamNG.drive rejected BeamNGpy `Camera` without a Tech
+license on the 0.38 generation; no run record retains the build that
+rejection was seen on. The small model is a repeatable runtime smoke baseline, not a state-of-the-art driving
 claim; see [Development](docs/DEVELOPMENT.md) for the pinned, downloads-off test procedure.
 
 ## Mod and map workflows

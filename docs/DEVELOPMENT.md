@@ -141,8 +141,9 @@ causes a network fetch. This small SegFormer-B0 model is a repeatable CUDA integ
 not a claim of state-of-the-art driving perception. Keep model weights, caches, and any datasets
 outside git.
 
-This harness is not a production retail vision fallback. The tested BeamNG.drive 0.38.6 build
-rejects BeamNGpy `Camera` with a BeamNG.tech-license error, so production `vision-lane` and `hybrid`
+This harness is not a production retail vision fallback. The tested BeamNG.drive build — on
+the 0.38 generation; no run record retains which build — rejects BeamNGpy `Camera` with a
+BeamNG.tech-license error, so production `vision-lane` and `hybrid`
 modes still require BeamNG.tech's supported camera path. The Lua fixture exists only inside the
 sentinel-marked test profile and is removed after the test.
 

@@ -202,8 +202,10 @@ stateDiagram-v2
 
 The bridge owns each opaque handle, derives a reserved engine name, records the exact object
 reference/ID/name/class and bridge generation, and sets `canSave=false`. Disabled means no engine
-object exists; this is required because BeamNG 0.38.6 has no supported universal trigger
-enable/disable API. Enabled geometry is immutable. Peer disconnect or authentication expiry,
+object exists; this is required because the build this bridge was validated against — engine-reported
+`0.38.6.0.19963`, not the `BeamNG-0.38.6` profile-DIRECTORY name — has no supported universal
+trigger enable/disable API. An absence is only ever true of the build it was checked on; re-check
+it before relying on it against a newer install. Enabled geometry is immutable. Peer disconnect or authentication expiry,
 mission transitions, and extension unload normally delete both live objects and drafts.
 
 Cleanup is fail-closed under exceptional engine identity tampering or deletion failure. The bridge

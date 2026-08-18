@@ -225,7 +225,7 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
     assert citybus == {
         "model": "citybus",
         "configuration": "city",
-        "source": "BeamNG.drive 0.38.6 vehicles/citybus/info_city.json BoundingBox",
+        "source": "BeamNG.drive 0.38.6.0.19963 vehicles/citybus/info_city.json BoundingBox",
         **CITYBUS_ENVELOPE,
     }
     assert manifest["trigger"]["dimensions"][0] > citybus["width"]

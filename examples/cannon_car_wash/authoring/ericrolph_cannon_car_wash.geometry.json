@@ -24,7 +24,7 @@
   "supported_large_vehicle_envelope": {
     "model": "citybus",
     "configuration": "city",
-    "source": "BeamNG.drive 0.38.6 vehicles/citybus/info_city.json BoundingBox",
+    "source": "BeamNG.drive 0.38.6.0.19963 vehicles/citybus/info_city.json BoundingBox",
     "width": 3.11,
     "length": 12.63,
     "height": 2.994
