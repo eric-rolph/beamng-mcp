@@ -1,0 +1,45 @@
+A playground seesaw built at 10x scale, with a 10 US-ton cast-iron counterweight where the other kid should be.
+
+Drive up the ramp, stop on the red X, and hold still. After a three-second countdown the overhead latch releases a physical 9,070 kg weight cage. BeamNG gravity drops it 6.0 m onto a rubber-faced impact zone. The asymmetric plank gives the car end roughly a 1.5:1 lever-speed advantage, and physical hydraulic catchers arrest the plank near a 57-degree departure tangent. Gravity, impact, the hinged plank, your tires, and your suspension determine what happens next. There is no scripted vehicle velocity and no teleport.
+
+That means the result is deliberately not identical for every vehicle. Mass, wheelbase, suspension, tire grip, where you park, and whether you keep the brakes on all affect the trajectory. Finding good combinations is the toy.
+
+[SIZE=5][B]How to use it[/B][/SIZE]
+
+Spawn Charlie's Catapult Seesaw from the vehicle selector, then switch to a second vehicle and drive onto it. Stop near the center of the red X and stay below 0.6 m/s for the full countdown. Use flat, open ground with clear sky and room to land; Gridmap and the airfields work well.
+
+After firing, drive clear of the plank. The prop waits until the parking zone is empty before resetting and physically re-latching, so it will not rebuild the mechanism underneath a vehicle.
+
+[SIZE=5][B]What is actually physical[/B][/SIZE]
+
+[LIST]
+[*]The 22 x 4.4 m plank is a dynamic, two-layer box truss with collidable top and bottom surfaces, 100 contact nodes, and torsional cross-bracing.
+[*]The car arm is 13.5 m and the weight arm is 8.5 m. That real, asymmetric geometry supplies the speed advantage; Lua does not compensate for it.
+[*]Five collinear center pin nodes form a reinforced hinge axis tied into a fixed, cross-braced base.
+[*]The counterweight is a 75-node, 9,070 kg cage with a five-node, full-width rubber striker. A breakable mechanical latch suspends it while 15 zero-preload transport latches hold the softbody plank at its exact parked pose; all of those physical beams release together after the countdown.
+[*]Five bounded hydraulic links compress through a visible 25 cm rubber mat and feed the strike directly into five 80 kg structural rib nodes. Five final-stroke hydraulic catchers stop the moving lever, and five one-way overhead snubbers dissipate counterweight rebound. Wide rubber pads remain as overtravel fail-safes.
+[*]A fixed vertical rail guides the counterweight without prescribing its fall speed. Gravity remains the only source of drop energy.
+[*]The visible plank and weight are node-bound flexbodies, so the art follows the physical mechanism instead of playing a separate animation. They use the cache-busted [I]ericrolph_catapult_seesaw_physics_v3.dae[/I] shape path.
+[/LIST]
+
+Lua handles the parking countdown, latch release, UI, cosmetic cable/winch, telemetry, and safe reset. It never applies velocity or position to the car.
+
+[SIZE=5][B]Measured physical results[/B][/SIZE]
+
+The 9,070 kg weight reaches about 10.8 m/s after a 6.0 m free fall and carries roughly 534 kJ before impact. Deterministic live tests of the packaged mod on Small Grid measured:
+
+[LIST]
+[*]1,530 kg Barstow I6: 10.18 m/s at 51.5 degrees, 8.00 m (26.3 ft) above its parked height, and 19.15 m (62.8 ft) to first ground contact.
+[*]1,870 kg Bastion V6: 8.37 m/s at 54.0 degrees, 7.91 m (26.0 ft) above its parked height, and 15.24 m (50.0 ft) to first ground contact.
+[*]The block struck at 10.71-10.79 m/s and its first rebound stayed below 0.96 m. Steady parked-plank motion stayed below 0.014 degrees.
+[/LIST]
+
+These are measured reference runs, not universal promises. Softbody deformation, suspension, wheelbase, tire grip, parking position, brakes, early separation, and tumbling all matter. The earlier 16-22 m/s and 25 m apex estimates were not physically defensible for this energy source and lever geometry, so this release does not advertise them.
+
+[SIZE=5][B]Build[/B][/SIZE]
+
+Worn-red riveted lattice derrick with an ACME CATAPULT CO. sign, knee gussets, grooved crown and deflection blocks, and a hand-crank winch whose cable and drum follow the measured counterweight movement.
+
+The counterweight is a cast-iron frustum with raised 10 TON lettering, a foundry plate, a rubber impact face, and interlinked shackle and hook. The plank uses four separate cathedral-grain boards with crosscut end grain, wrapped steel tip bands, red stringers, a replaceable impact mat, and painted-on bullseye and kicker stripes. The entry ramp is asphalt with white chevrons and hazard edges on a bolted steel frame.
+
+Built with a shared framework I use for a set of oversized props. Feedback, vehicle experiments, and bug reports are welcome.

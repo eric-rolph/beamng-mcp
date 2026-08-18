@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<!-- Live LCD for the Spin Cycle washer (2026-08-13). Rendered by BeamNG's
+     CEF webview into the dynamic texture @ericrolph_spin_cycle_washer_lcd
+     (see spec.py VEHICLE_LUA_EXTRA). The clock is the player's real system
+     clock; everything else mirrors the actual GE cycle state pushed via
+     updateData({phase, progress, rpm, water}) and the vehicle-side motion
+     feed updateData({speed}). Self-contained: no external assets. -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body {
+    margin: 0; width: 816px; height: 500px; overflow: hidden;
+    background: #05080d;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: #dfe9f2; user-select: none; cursor: none;
+  }
+  #screen {
+    position: relative; width: 816px; height: 500px; box-sizing: border-box;
+    background:
+      radial-gradient(120% 90% at 50% -10%, #101a26 0%, #070b12 55%, #04060a 100%);
+    display: flex; flex-direction: column;
+  }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* ---- status bar ---- */
+  #statusbar {
+    height: 64px; flex: none; display: flex; align-items: center;
+    padding: 0 26px; border-bottom: 1px solid rgba(120, 180, 220, 0.14);
+  }
+  #brand { font-size: 24px; font-weight: 700; letter-spacing: 3px; color: #eaf3fa; }
+  #model { font-size: 15px; margin-left: 12px; color: #6d8296; letter-spacing: 1px; }
+  #statusicons { margin-left: auto; display: flex; align-items: center; gap: 18px; }
+  #statusicons svg { display: block; }
+  #clock { font-size: 30px; font-weight: 600; color: #eaf3fa; letter-spacing: 1px; }
+
+  /* ---- main ---- */
+  #main { flex: 1; display: flex; align-items: center; padding: 8px 26px 4px; gap: 26px; }
+
+  /* progress ring */
+  #ringwrap { position: relative; width: 290px; height: 290px; flex: none; }
+  #ringwrap svg { position: absolute; inset: 0; }
+  #ringtrack { stroke: rgba(110, 160, 200, 0.16); }
+  #ringbar {
+    stroke: #4fd2ff; stroke-linecap: round;
+    transition: stroke-dashoffset 0.35s linear, stroke 0.4s;
+    filter: drop-shadow(0 0 6px rgba(79, 210, 255, 0.55));
+  }
+  #ringcenter {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  #remain { font-size: 78px; font-weight: 200; line-height: 1; color: #f2f8fc; }
+  #remainlabel {
+    margin-top: 8px; font-size: 15px; letter-spacing: 4px; color: #7fd8ff;
+    text-transform: uppercase; font-weight: 600;
+  }
+  #remainsub { margin-top: 4px; font-size: 13px; color: #61758a; letter-spacing: 1px; }
+  .complete #ringbar { stroke: #47e08a; filter: drop-shadow(0 0 6px rgba(71, 224, 138, 0.55)); }
+  .complete #remainlabel { color: #6ff0a8; }
+  .abort #ringbar { stroke: #ffb347; filter: drop-shadow(0 0 6px rgba(255, 179, 71, 0.5)); }
+  .abort #remainlabel { color: #ffc475; }
+
+  /* right column */
+  #panel { flex: 1; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+  #program { display: flex; align-items: baseline; gap: 14px; }
+  #progname { font-size: 30px; font-weight: 600; letter-spacing: 1px; color: #eaf3fa; }
+  #progtag {
+    font-size: 13px; font-weight: 700; letter-spacing: 2px; color: #0a1420;
+    background: #4fd2ff; border-radius: 4px; padding: 3px 8px;
+  }
+  #chips { display: flex; gap: 12px; }
+  .chip {
+    border: 1px solid rgba(120, 180, 220, 0.28); border-radius: 20px;
+    padding: 7px 16px; font-size: 16px; color: #b8cad9; white-space: nowrap;
+    transition: background 0.3s, border-color 0.3s, color 0.3s;
+  }
+  .chip b { color: #eaf3fa; font-weight: 600; }
+  /* Filled capsules when a toggle is ON (player 2026-08-13): amber for
+     Suds, violet for Pre-Soak, dark contrasting text. OFF stays the
+     clear outline with white value text. */
+  #chipw-soil.fillon { background: #ffd166; border-color: #ffd166; color: #231a05; }
+  #chipw-soil.fillon b { color: #231a05; }
+  #chipw-delay.fillon { background: #b388ff; border-color: #b388ff; color: #1c1033; }
+  #chipw-delay.fillon b { color: #1c1033; }
+
+  /* RPM dial gauge (replaces the bar meter) */
+  .rpmrow { display: flex; align-items: center; gap: 14px; }
+  #rpmsvg { flex: none; }
+  #rpmsvg text { font-family: inherit; }
+
+  /* phase stepper */
+  #steps { display: flex; align-items: flex-start; margin-top: 4px; }
+  .step { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+  .step .dot {
+    width: 18px; height: 18px; border-radius: 50%; box-sizing: border-box;
+    border: 2px solid #3a4c5e; background: #0a1119; z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step .bar {
+    position: absolute; top: 8px; left: -50%; width: 100%; height: 2px;
+    background: #263748;
+  }
+  .step:first-child .bar { display: none; }
+  .step .lbl {
+    margin-top: 9px; font-size: 13px; letter-spacing: 2px; color: #5d7185;
+    font-weight: 600;
+  }
+  .step.done .dot { border-color: #4fd2ff; background: #4fd2ff; }
+  .step.done .dot::after { content: "✓"; font-size: 11px; color: #06121c; font-weight: 700; }
+  .step.done .bar { background: #4fd2ff; }
+  .step.done .lbl { color: #9fdcf7; }
+  .step.active .dot {
+    border-color: #4fd2ff; box-shadow: 0 0 10px rgba(79, 210, 255, 0.8);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  .step.active .bar { background: #4fd2ff; }
+  .step.active .lbl { color: #eaf3fa; }
+  @keyframes pulse { 50% { box-shadow: 0 0 3px rgba(79, 210, 255, 0.3); } }
+
+  /* live readouts */
+  #live { display: flex; gap: 14px; }
+  .gauge {
+    flex: 1; background: rgba(90, 140, 190, 0.07);
+    border: 1px solid rgba(120, 180, 220, 0.16); border-radius: 10px;
+    padding: 10px 16px 12px;
+  }
+  .gauge .glabel { font-size: 12px; letter-spacing: 2px; color: #5d7185; font-weight: 600; }
+  .gauge .gvalue { font-size: 34px; font-weight: 300; color: #f2f8fc; line-height: 1.15; }
+  .gauge .gunit { font-size: 14px; color: #7a8ea2; margin-left: 4px; }
+  .meter {
+    margin-top: 6px; height: 6px; border-radius: 3px; background: #182430; overflow: hidden;
+  }
+  .meter div {
+    height: 100%; width: 0%; border-radius: 3px; background: #4fd2ff;
+    transition: width 0.4s linear;
+  }
+
+  /* ---- bottom bar ---- */
+  #bottombar {
+    height: 60px; flex: none; display: flex; align-items: center;
+    padding: 0 26px; gap: 26px;
+    border-top: 1px solid rgba(120, 180, 220, 0.14);
+  }
+  #door { display: flex; align-items: center; gap: 10px; font-size: 16px; letter-spacing: 1px; }
+  #doortext { color: #b8cad9; font-weight: 600; }
+  #door.locked #doortext { color: #7fd8ff; }
+  #hint { margin-left: auto; font-size: 15px; letter-spacing: 2px; color: #4d6072; }
+  #hint.attention { color: #9fdcf7; animation: blinkslow 1.6s ease-in-out infinite; }
+  @keyframes blinkslow { 50% { opacity: 0.35; } }
+
+  /* ---- unbalanced overlay ---- */
+  #unbal {
+    position: absolute; inset: 0; display: none; z-index: 5;
+    background: rgba(30, 4, 8, 0.55);
+    align-items: center; justify-content: center; flex-direction: column;
+  }
+  #unbal.show { display: flex; }
+  #unbalbox {
+    background: rgba(60, 8, 14, 0.92); border: 2px solid #ff4d5a; border-radius: 14px;
+    padding: 26px 46px; text-align: center;
+    animation: alarmblink 0.8s step-end infinite;
+    box-shadow: 0 0 40px rgba(255, 77, 90, 0.45);
+  }
+  #unbalbox .big { font-size: 40px; font-weight: 700; letter-spacing: 3px; color: #ff8e97; }
+  #unbalbox .small { margin-top: 8px; font-size: 17px; letter-spacing: 2px; color: #ffc9cd; }
+  @keyframes alarmblink { 50% { border-color: #7a1620; box-shadow: none; } }
+</style>
+</head>
+<body>
+<div id="screen">
+  <div id="statusbar">
+    <span id="brand">MAXSPIN</span><span id="model">WM-9000</span>
+    <div id="statusicons">
+      <svg width="24" height="18" viewBox="0 0 24 18">
+        <path d="M12 15.5 L14.6 12.4 A4.4 4.4 0 0 0 9.4 12.4 Z" fill="#9fdcf7"/>
+        <path d="M6.4 9.2 A8.6 8.6 0 0 1 17.6 9.2" stroke="#9fdcf7" stroke-width="2" fill="none"/>
+        <path d="M3 5.6 A13.4 13.4 0 0 1 21 5.6" stroke="#41586d" stroke-width="2" fill="none"/>
+      </svg>
+      <span id="clock" class="num">--:--</span>
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="ringwrap">
+      <svg viewBox="0 0 290 290">
+        <circle id="ringtrack" cx="145" cy="145" r="130" fill="none" stroke-width="10"/>
+        <circle id="ringbar" cx="145" cy="145" r="130" fill="none" stroke-width="10"
+                transform="rotate(-90 145 145)"/>
+      </svg>
+      <div id="ringcenter">
+        <div id="remain" class="num">1:24</div>
+        <div id="remainlabel">Ready</div>
+        <div id="remainsub">estimated</div>
+      </div>
+    </div>
+
+    <div id="panel">
+      <div id="program">
+        <span id="progname">COTTON</span>
+        <span id="progtag">MAX SPIN</span>
+      </div>
+      <div id="chips">
+        <span class="chip" id="chipw-temp"><b id="chip-temp">40°</b>&thinsp;C</span>
+        <span class="chip" id="chipw-spin"><b id="chip-spin">1400</b> rpm set</span>
+        <span class="chip" id="chipw-soil">Suds <b id="chip-soil">ON</b></span>
+        <span class="chip" id="chipw-delay">Pre-Soak <b id="chip-delay">OFF</b></span>
+      </div>
+      <div id="steps">
+        <div class="step" id="st-fill"><span class="bar"></span><span class="dot"></span><span class="lbl">FILL</span></div>
+        <div class="step" id="st-wash"><span class="bar"></span><span class="dot"></span><span class="lbl">WASH</span></div>
+        <div class="step" id="st-spin"><span class="bar"></span><span class="dot"></span><span class="lbl">SPIN</span></div>
+        <div class="step" id="st-drain"><span class="bar"></span><span class="dot"></span><span class="lbl">DRAIN</span></div>
+      </div>
+      <div id="live">
+        <div class="gauge">
+          <div class="glabel">DRUM SPEED</div>
+          <div class="rpmrow">
+            <svg id="rpmsvg" width="96" height="74" viewBox="0 0 120 92"></svg>
+            <div><span class="gvalue num" id="rpmval">0</span><span class="gunit">rpm</span></div>
+          </div>
+        </div>
+        <div class="gauge">
+          <div class="glabel">WATER LEVEL</div>
+          <div><span class="gvalue num" id="waterval">0</span><span class="gunit">%</span></div>
+          <div class="meter"><div id="waterbar"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="bottombar">
+    <div id="door">
+      <svg id="doorsvg" width="20" height="24" viewBox="0 0 20 24">
+        <rect x="2" y="10" width="16" height="12" rx="2.5" fill="#7fd8ff"/>
+        <path id="shackle" d="M5.5 10 V7 A4.5 4.5 0 0 1 14.5 7 V10"
+              stroke="#7fd8ff" stroke-width="2.6" fill="none"/>
+      </svg>
+      <span id="doortext">DOOR OPEN</span>
+    </div>
+    <span id="hint">DRIVE IN TO START</span>
+  </div>
+
+  <div id="unbal">
+    <div id="unbalbox">
+      <div class="big">⚠ UNBALANCED LOAD</div>
+      <div class="small">REDISTRIBUTE LAUNDRY &mdash; CHECK MACHINE FOOTING</div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+var PROGRAM_MINUTES = 84;                    // the dial's COTTON 1:24
+var DELAY_MINUTES = 134;                     // DELAY stretches the program
+var CIRC = 2 * Math.PI * 130;                // ring circumference
+
+var S = { phase: "idle", progress: 0, rpm: 0, water: 0, speed: 0,
+          temp: 40, rpmSet: 1400, soil: true, delay: false,
+          program: "COTTON" };
+var unbalShown = false;
+var unbalCalm = 0;
+
+var $ = function (id) { return document.getElementById(id); };
+var ring = $("ringbar");
+ring.setAttribute("stroke-dasharray", CIRC);
+ring.setAttribute("stroke-dashoffset", CIRC);
+
+/* ---- TEMP colour spectrum (player 2026-08-13: "make the temperature go
+   up visually from cold color to hot color"). The four machine settings
+   map onto an ice-blue -> cyan -> amber -> red ramp; the chip is tinted
+   and outlined in its own temperature colour so a glance reads hot/cold
+   without reading the number. */
+var TEMP_COLORS = {
+  20: { line: "#5ec8ff", glow: "rgba(94, 200, 255, 0.16)" },
+  40: { line: "#63e6c3", glow: "rgba(99, 230, 195, 0.16)" },
+  60: { line: "#ffb04d", glow: "rgba(255, 176, 77, 0.18)" },
+  95: { line: "#ff5f52", glow: "rgba(255, 95, 82, 0.20)" }
+};
+function tempColor(t) {
+  return TEMP_COLORS[t] || TEMP_COLORS[40];
+}
+
+/* ---- RPM dial gauge: a 240-degree car-tachometer sweep scaled for a
+   washer (0..1600 rpm), with a redline arc over 1400 and a needle. Built
+   once in SVG, then only the needle + value move. */
+var RPM_MAX = 1600;
+var RPM_REDLINE = 1400;
+var GA_CX = 60, GA_CY = 62, GA_R = 44;
+var GA_START = 150, GA_SWEEP = 240;          // degrees, clockwise from left
+
+function gaugePoint(deg, radius) {
+  var rad = (deg * Math.PI) / 180;
+  return [GA_CX + radius * Math.cos(rad), GA_CY + radius * Math.sin(rad)];
+}
+function gaugeArc(fromDeg, toDeg, radius) {
+  var a = gaugePoint(fromDeg, radius), b = gaugePoint(toDeg, radius);
+  var large = (toDeg - fromDeg) > 180 ? 1 : 0;
+  return "M" + a[0].toFixed(2) + " " + a[1].toFixed(2) +
+         " A" + radius + " " + radius + " 0 " + large + " 1 " +
+         b[0].toFixed(2) + " " + b[1].toFixed(2);
+}
+function rpmToDeg(rpm) {
+  var f = Math.max(0, Math.min(1, rpm / RPM_MAX));
+  return GA_START + GA_SWEEP * f;
+}
+(function buildGauge() {
+  var NS = "http://www.w3.org/2000/svg";
+  var svg = $("rpmsvg");
+  function add(tag, attrs) {
+    var el = document.createElementNS(NS, tag);
+    for (var k in attrs) { el.setAttribute(k, attrs[k]); }
+    svg.appendChild(el);
+    return el;
+  }
+  add("path", { d: gaugeArc(GA_START, GA_START + GA_SWEEP, GA_R),
+                fill: "none", stroke: "#22323f", "stroke-width": 7,
+                "stroke-linecap": "round" });
+  add("path", { id: "rpmredline",
+                d: gaugeArc(rpmToDeg(RPM_REDLINE), GA_START + GA_SWEEP, GA_R),
+                fill: "none", stroke: "#ff5f52", "stroke-width": 7,
+                "stroke-linecap": "round", opacity: 0.55 });
+  add("path", { id: "rpmsweep", d: "", fill: "none", stroke: "#4fd2ff",
+                "stroke-width": 7, "stroke-linecap": "round" });
+  /* tick marks every 400 rpm */
+  for (var t = 0; t <= RPM_MAX; t += 400) {
+    var deg = rpmToDeg(t);
+    var outer = gaugePoint(deg, GA_R - 8), inner = gaugePoint(deg, GA_R - 14);
+    add("line", { x1: outer[0].toFixed(2), y1: outer[1].toFixed(2),
+                  x2: inner[0].toFixed(2), y2: inner[1].toFixed(2),
+                  stroke: "#41586d", "stroke-width": 2 });
+  }
+  add("line", { id: "rpmneedle", x1: GA_CX, y1: GA_CY, x2: GA_CX, y2: GA_CY,
+                stroke: "#f2f8fc", "stroke-width": 2.6,
+                "stroke-linecap": "round" });
+  add("circle", { cx: GA_CX, cy: GA_CY, r: 4.5, fill: "#0a1119",
+                  stroke: "#7fd8ff", "stroke-width": 2 });
+}());
+
+function renderGauge(rpm) {
+  var shown = Math.max(0, Math.min(RPM_MAX, rpm));
+  var deg = rpmToDeg(shown);
+  var sweep = $("rpmsweep");
+  if (shown < 8) {
+    sweep.setAttribute("d", "");
+  } else {
+    sweep.setAttribute("d", gaugeArc(GA_START, deg, GA_R));
+    sweep.setAttribute("stroke", shown >= RPM_REDLINE ? "#ff5f52" : "#4fd2ff");
+  }
+  var tip = gaugePoint(deg, GA_R - 10);
+  var needle = $("rpmneedle");
+  needle.setAttribute("x2", tip[0].toFixed(2));
+  needle.setAttribute("y2", tip[1].toFixed(2));
+  needle.setAttribute("stroke", shown >= RPM_REDLINE ? "#ff8e97" : "#f2f8fc");
+}
+
+/* Real system clock - this webview is Chromium on the player's machine,
+   so Date() IS their local time, in their own 12/24h locale format. */
+function tickClock() {
+  var text;
+  try {
+    text = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  } catch (e) {
+    var d = new Date();
+    text = d.getHours() + ":" + ("0" + d.getMinutes()).slice(-2);
+  }
+  $("clock").textContent = text;
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+function fmtRemain(minutes) {
+  minutes = Math.max(0, Math.round(minutes));
+  return Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
+}
+
+/* phase -> UI descriptor */
+var PHASES = {
+  idle:      { label: "Ready",       hint: "DRIVE IN OR PRESS START", locked: false, step: -1 },
+  loading:   { label: "Door",        hint: "DOOR CLOSING",      locked: true,  step: -1 },
+  presoak:   { label: "Pre-Soak",    hint: "LEVITATION ACTIVE", locked: true,  step: -1 },
+  filling:   { label: "Filling",     hint: "CYCLE RUNNING",     locked: true,  step: 0 },
+  washing:   { label: "Washing",     hint: "CYCLE RUNNING",     locked: true,  step: 1 },
+  spincycle: { label: "Max Spin",    hint: "CYCLE RUNNING",     locked: true,  step: 2 },
+  ejecting:  { label: "Draining",    hint: "STAND CLEAR",       locked: false, step: 3 },
+  cooldown:  { label: "Complete",    hint: "UNLOAD LAUNDRY",    locked: false, step: 4 },
+  aborting:  { label: "Interrupted", hint: "LOAD REMOVED",      locked: false, step: -1 }
+};
+var STEP_IDS = ["st-fill", "st-wash", "st-spin", "st-drain"];
+
+function render() {
+  var ui = PHASES[S.phase] || PHASES.idle;
+  var running = ui.step >= 0 && S.phase !== "cooldown";
+
+  document.getElementById("screen").className =
+    S.phase === "cooldown" ? "complete" : (S.phase === "aborting" ? "abort" : "");
+
+  /* ring + remaining */
+  ring.setAttribute("stroke-dashoffset", CIRC * (1 - S.progress));
+  var programLength = S.delay ? DELAY_MINUTES : PROGRAM_MINUTES;
+  $("remain").textContent =
+    S.phase === "cooldown" ? "0:00" : fmtRemain(programLength * (1 - S.progress));
+  $("remainlabel").textContent = ui.label;
+  $("remainsub").textContent =
+    S.phase === "idle" ? "estimated" : (running ? "remaining" : " ");
+
+  /* stepper */
+  for (var i = 0; i < STEP_IDS.length; i++) {
+    var el = $(STEP_IDS[i]);
+    el.className = "step" + (ui.step > i || S.phase === "cooldown" ? " done"
+      : (ui.step === i ? " active" : ""));
+  }
+
+  /* program name from the physical dial */
+  $("progname").textContent = S.program;
+  $("progtag").textContent = S.program === "MAX SPIN" ? "MAX SPIN" : "SELECTED";
+
+  /* settings chips (mirror the fascia buttons) */
+  $("chip-temp").textContent = S.temp + "°";
+  $("chip-spin").textContent = S.rpmSet;
+  $("chip-soil").textContent = S.soil ? "ON" : "OFF";
+  $("chip-delay").textContent = S.delay ? "ON" : "OFF";
+
+  /* TEMP chip tints along the cold->hot spectrum */
+  var tc = tempColor(S.temp);
+  var tempChip = $("chipw-temp");
+  tempChip.style.borderColor = tc.line;
+  tempChip.style.background = tc.glow;
+  $("chip-temp").style.color = tc.line;
+
+  /* Suds / Pre-Soak: filled capsule when ON, clear outline when OFF */
+  $("chipw-soil").className = "chip" + (S.soil ? " fillon" : "");
+  $("chipw-delay").className = "chip" + (S.delay ? " fillon" : "");
+
+  /* live gauges */
+  $("rpmval").textContent = Math.round(S.rpm);
+  renderGauge(S.rpm);
+  var waterPct = Math.round(S.water * 100);
+  $("waterval").textContent = waterPct;
+  $("waterbar").style.width = waterPct + "%";
+
+  /* door + hint */
+  $("door").className = ui.locked ? "locked" : "";
+  $("doortext").textContent = ui.locked ? "DOOR LOCKED" : "DOOR OPEN";
+  $("shackle").setAttribute("d", ui.locked
+    ? "M5.5 10 V7 A4.5 4.5 0 0 1 14.5 7 V10"
+    : "M5.5 10 V7 A4.5 4.5 0 0 1 14.5 7 V8.2");
+  var hint = $("hint");
+  hint.textContent = ui.hint;
+  hint.className = (S.phase === "idle" || S.phase === "cooldown") ? "attention" : "";
+
+  /* unbalanced-load alarm from the washer's own motion */
+  if (S.speed > 2.0) { unbalShown = true; unbalCalm = 0; }
+  $("unbal").className = unbalShown ? "show" : "";
+}
+
+/* Called from vehicle Lua via htmlTexture.call: cycle payloads
+   {phase, progress, rpm, water} at 2.5 Hz and motion payloads {speed}
+   at 4 Hz share this entry point. */
+function updateData(data) {
+  if (!data) { return; }
+  if (data.phase !== undefined) { S.phase = data.phase; }
+  if (data.progress !== undefined) { S.progress = data.progress; }
+  if (data.rpm !== undefined) { S.rpm = data.rpm; }
+  if (data.water !== undefined) { S.water = data.water; }
+  if (data.temp !== undefined) { S.temp = data.temp; }
+  if (data.rpmSet !== undefined) { S.rpmSet = data.rpmSet; }
+  if (data.soil !== undefined) { S.soil = data.soil; }
+  if (data.delay !== undefined) { S.delay = data.delay; }
+  if (data.program !== undefined) { S.program = data.program; }
+  if (data.speed !== undefined) {
+    S.speed = data.speed;
+    if (unbalShown && data.speed < 0.8) {
+      unbalCalm += 1;                        // 4 Hz feed: ~12 = 3 seconds
+      if (unbalCalm > 12) { unbalShown = false; unbalCalm = 0; }
+    }
+  }
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

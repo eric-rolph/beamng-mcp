@@ -1,0 +1,8 @@
+# Remaining short fields for the beamng.com resource form.
+# One "key: value" per line; make_submission.py copies this through verbatim.
+
+Category: Vehicles / Props
+Version: 1.0.0
+Tags: prop, giant, boot, launcher, stunt, mid-century, contraption
+External URL: (none)
+Prefix: (none)

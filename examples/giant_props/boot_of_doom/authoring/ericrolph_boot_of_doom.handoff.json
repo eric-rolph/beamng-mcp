@@ -1,0 +1,3090 @@
+{
+  "asset": {
+    "display_name": "Charlie's Boot of Doom",
+    "flexbodies_extra": [],
+    "id": "ericrolph_boot_of_doom",
+    "physics_cage": "ericrolph_boot_of_doom_cage",
+    "visual_mesh": "ericrolph_boot_of_doom_visual"
+  },
+  "base_nodes": [
+    "ericrolph_boot_of_doom_pad_00_00_00",
+    "ericrolph_boot_of_doom_pad_00_01_00",
+    "ericrolph_boot_of_doom_pad_00_02_00",
+    "ericrolph_boot_of_doom_pad_01_00_00",
+    "ericrolph_boot_of_doom_pad_01_01_00",
+    "ericrolph_boot_of_doom_pad_01_02_00",
+    "ericrolph_boot_of_doom_pad_02_00_00",
+    "ericrolph_boot_of_doom_pad_02_01_00",
+    "ericrolph_boot_of_doom_pad_02_02_00",
+    "ericrolph_boot_of_doom_hinge_00_00_00",
+    "ericrolph_boot_of_doom_hinge_00_01_00",
+    "ericrolph_boot_of_doom_hinge_01_00_00",
+    "ericrolph_boot_of_doom_hinge_01_01_00",
+    "ericrolph_boot_of_doom_pad_skirt_nw",
+    "ericrolph_boot_of_doom_pad_skirt_ne",
+    "ericrolph_boot_of_doom_pad_skirt_se",
+    "ericrolph_boot_of_doom_pad_skirt_sw",
+    "ericrolph_boot_of_doom_console_0_0_0",
+    "ericrolph_boot_of_doom_console_0_1_0",
+    "ericrolph_boot_of_doom_console_1_0_0",
+    "ericrolph_boot_of_doom_console_1_1_0"
+  ],
+  "beam_specs": {
+    "rigid": {
+      "beamDamp": 1500.0,
+      "beamDeform": "FLT_MAX",
+      "beamSpring": 15000000.0,
+      "beamStrength": "FLT_MAX"
+    }
+  },
+  "beams": [
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_0",
+        "ericrolph_boot_of_doom_console_0_0_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_0",
+        "ericrolph_boot_of_doom_console_0_1_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_0",
+        "ericrolph_boot_of_doom_console_1_0_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_0",
+        "ericrolph_boot_of_doom_console_1_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_1",
+        "ericrolph_boot_of_doom_console_0_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_1",
+        "ericrolph_boot_of_doom_console_1_0_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_1",
+        "ericrolph_boot_of_doom_panel_frame_y"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_1",
+        "ericrolph_boot_of_doom_panelbtn_btn_angle_down"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_1",
+        "ericrolph_boot_of_doom_panelbtn_btn_angle_up"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_1",
+        "ericrolph_boot_of_doom_panelbtn_btn_power_down"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_1",
+        "ericrolph_boot_of_doom_panelbtn_btn_power_up"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_0",
+        "ericrolph_boot_of_doom_console_0_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_0",
+        "ericrolph_boot_of_doom_console_1_1_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_1",
+        "ericrolph_boot_of_doom_console_1_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_1",
+        "ericrolph_boot_of_doom_panel_frame_x"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_1",
+        "ericrolph_boot_of_doom_panelfx_btn_angle_down"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_1",
+        "ericrolph_boot_of_doom_panelfx_btn_angle_up"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_1",
+        "ericrolph_boot_of_doom_panelfx_btn_power_down"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_1",
+        "ericrolph_boot_of_doom_panelfx_btn_power_up"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_1",
+        "ericrolph_boot_of_doom_panelfy_btn_angle_down"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_1",
+        "ericrolph_boot_of_doom_panelfy_btn_angle_up"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_1",
+        "ericrolph_boot_of_doom_panelfy_btn_power_down"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_1",
+        "ericrolph_boot_of_doom_panelfy_btn_power_up"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_1_0_0",
+        "ericrolph_boot_of_doom_console_1_0_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_1_0_0",
+        "ericrolph_boot_of_doom_console_1_1_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_1_0_0",
+        "ericrolph_boot_of_doom_hinge_00_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_1_0_1",
+        "ericrolph_boot_of_doom_console_1_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_1_1_0",
+        "ericrolph_boot_of_doom_console_1_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_console_1_1_0",
+        "ericrolph_boot_of_doom_hinge_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_00",
+        "ericrolph_boot_of_doom_hinge_00_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_00",
+        "ericrolph_boot_of_doom_hinge_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_00",
+        "ericrolph_boot_of_doom_hinge_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_00",
+        "ericrolph_boot_of_doom_hinge_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_00",
+        "ericrolph_boot_of_doom_hinge_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_00",
+        "ericrolph_boot_of_doom_hinge_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_00",
+        "ericrolph_boot_of_doom_hinge_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_01",
+        "ericrolph_boot_of_doom_hinge_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_01",
+        "ericrolph_boot_of_doom_hinge_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_01",
+        "ericrolph_boot_of_doom_hinge_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_01",
+        "ericrolph_boot_of_doom_hinge_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_01",
+        "ericrolph_boot_of_doom_hinge_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_01_00",
+        "ericrolph_boot_of_doom_hinge_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_01_00",
+        "ericrolph_boot_of_doom_hinge_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_01_00",
+        "ericrolph_boot_of_doom_hinge_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_01_00",
+        "ericrolph_boot_of_doom_hinge_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_01_00",
+        "ericrolph_boot_of_doom_pad_00_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_01_01",
+        "ericrolph_boot_of_doom_hinge_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_01_01",
+        "ericrolph_boot_of_doom_hinge_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_01_01",
+        "ericrolph_boot_of_doom_hinge_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_01_01",
+        "ericrolph_boot_of_doom_pad_00_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_01_00_00",
+        "ericrolph_boot_of_doom_hinge_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_01_00_00",
+        "ericrolph_boot_of_doom_hinge_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_01_00_00",
+        "ericrolph_boot_of_doom_hinge_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_01_00_01",
+        "ericrolph_boot_of_doom_hinge_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_01_00_01",
+        "ericrolph_boot_of_doom_hinge_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_01_01_00",
+        "ericrolph_boot_of_doom_hinge_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_01_01_00",
+        "ericrolph_boot_of_doom_pad_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_01_01_01",
+        "ericrolph_boot_of_doom_pad_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_00",
+        "ericrolph_boot_of_doom_pad_00_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_00",
+        "ericrolph_boot_of_doom_pad_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_00",
+        "ericrolph_boot_of_doom_pad_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_00",
+        "ericrolph_boot_of_doom_pad_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_00",
+        "ericrolph_boot_of_doom_pad_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_00",
+        "ericrolph_boot_of_doom_pad_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_00",
+        "ericrolph_boot_of_doom_pad_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_00",
+        "ericrolph_boot_of_doom_pad_skirt_sw"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_01",
+        "ericrolph_boot_of_doom_pad_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_01",
+        "ericrolph_boot_of_doom_pad_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_01",
+        "ericrolph_boot_of_doom_pad_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_01",
+        "ericrolph_boot_of_doom_pad_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_01",
+        "ericrolph_boot_of_doom_pad_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_01",
+        "ericrolph_boot_of_doom_pad_skirt_sw"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_01_00",
+        "ericrolph_boot_of_doom_pad_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_01_00",
+        "ericrolph_boot_of_doom_pad_00_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_01_00",
+        "ericrolph_boot_of_doom_pad_00_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_01_00",
+        "ericrolph_boot_of_doom_pad_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_01_00",
+        "ericrolph_boot_of_doom_pad_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_01_00",
+        "ericrolph_boot_of_doom_pad_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_01_00",
+        "ericrolph_boot_of_doom_pad_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_01_00",
+        "ericrolph_boot_of_doom_pad_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_01_01",
+        "ericrolph_boot_of_doom_pad_00_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_01_01",
+        "ericrolph_boot_of_doom_pad_00_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_01_01",
+        "ericrolph_boot_of_doom_pad_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_01_01",
+        "ericrolph_boot_of_doom_pad_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_01_01",
+        "ericrolph_boot_of_doom_pad_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_01_01",
+        "ericrolph_boot_of_doom_pad_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_02_00",
+        "ericrolph_boot_of_doom_pad_00_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_02_00",
+        "ericrolph_boot_of_doom_pad_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_02_00",
+        "ericrolph_boot_of_doom_pad_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_02_00",
+        "ericrolph_boot_of_doom_pad_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_02_00",
+        "ericrolph_boot_of_doom_pad_skirt_nw"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_02_01",
+        "ericrolph_boot_of_doom_pad_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_02_01",
+        "ericrolph_boot_of_doom_pad_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_02_01",
+        "ericrolph_boot_of_doom_pad_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_02_01",
+        "ericrolph_boot_of_doom_pad_skirt_nw"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_00_00",
+        "ericrolph_boot_of_doom_pad_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_00_00",
+        "ericrolph_boot_of_doom_pad_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_00_00",
+        "ericrolph_boot_of_doom_pad_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_00_00",
+        "ericrolph_boot_of_doom_pad_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_00_00",
+        "ericrolph_boot_of_doom_pad_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_00_00",
+        "ericrolph_boot_of_doom_pad_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_00_00",
+        "ericrolph_boot_of_doom_pad_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_00_01",
+        "ericrolph_boot_of_doom_pad_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_00_01",
+        "ericrolph_boot_of_doom_pad_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_00_01",
+        "ericrolph_boot_of_doom_pad_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_00_01",
+        "ericrolph_boot_of_doom_pad_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_00_01",
+        "ericrolph_boot_of_doom_pad_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_01_00",
+        "ericrolph_boot_of_doom_pad_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_01_00",
+        "ericrolph_boot_of_doom_pad_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_01_00",
+        "ericrolph_boot_of_doom_pad_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_01_00",
+        "ericrolph_boot_of_doom_pad_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_01_00",
+        "ericrolph_boot_of_doom_pad_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_01_00",
+        "ericrolph_boot_of_doom_pad_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_01_00",
+        "ericrolph_boot_of_doom_pad_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_01_00",
+        "ericrolph_boot_of_doom_pad_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_01_01",
+        "ericrolph_boot_of_doom_pad_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_01_01",
+        "ericrolph_boot_of_doom_pad_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_01_01",
+        "ericrolph_boot_of_doom_pad_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_01_01",
+        "ericrolph_boot_of_doom_pad_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_01_01",
+        "ericrolph_boot_of_doom_pad_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_01_01",
+        "ericrolph_boot_of_doom_pad_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_02_00",
+        "ericrolph_boot_of_doom_pad_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_02_00",
+        "ericrolph_boot_of_doom_pad_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_02_00",
+        "ericrolph_boot_of_doom_pad_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_02_00",
+        "ericrolph_boot_of_doom_pad_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_02_01",
+        "ericrolph_boot_of_doom_pad_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_02_01",
+        "ericrolph_boot_of_doom_pad_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_02_01",
+        "ericrolph_boot_of_doom_pad_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_00_00",
+        "ericrolph_boot_of_doom_pad_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_00_00",
+        "ericrolph_boot_of_doom_pad_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_00_00",
+        "ericrolph_boot_of_doom_pad_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_00_00",
+        "ericrolph_boot_of_doom_pad_skirt_se"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_00_01",
+        "ericrolph_boot_of_doom_pad_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_00_01",
+        "ericrolph_boot_of_doom_pad_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_00_01",
+        "ericrolph_boot_of_doom_pad_skirt_se"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_01_00",
+        "ericrolph_boot_of_doom_pad_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_01_00",
+        "ericrolph_boot_of_doom_pad_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_01_00",
+        "ericrolph_boot_of_doom_pad_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_01_01",
+        "ericrolph_boot_of_doom_pad_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_01_01",
+        "ericrolph_boot_of_doom_pad_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_02_00",
+        "ericrolph_boot_of_doom_pad_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_02_00",
+        "ericrolph_boot_of_doom_pad_skirt_ne"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_02_01",
+        "ericrolph_boot_of_doom_pad_skirt_ne"
+      ],
+      "spec": "rigid"
+    }
+  ],
+  "behavior": {
+    "camera_distance": 34.0,
+    "effects": {
+      "punt_dust": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_2",
+        "position": [
+          0.0,
+          1.2,
+          0.6
+        ]
+      }
+    },
+    "triggers": {
+      "kick_pad": {
+        "center": [
+          0.0,
+          1.2,
+          1.8
+        ],
+        "dimensions": [
+          4.6,
+          5.2,
+          4.0
+        ],
+        "mode": "Overlaps"
+      },
+      "strike_zone": {
+        "center": [
+          0.0,
+          3.2,
+          2.1
+        ],
+        "dimensions": [
+          5.4,
+          9.4,
+          4.4
+        ],
+        "mode": "Overlaps"
+      }
+    },
+    "tunables": {
+      "alert_seconds": 0.3,
+      "angle_step_deg": 10.0,
+      "camera_distance": 34.0,
+      "cooldown_seconds": 1.0,
+      "default_angle_index": 5,
+      "default_power_level": 1,
+      "follow_seconds": 0.9,
+      "hold_seconds": 0.15,
+      "power_levels": 10,
+      "power_multiplier_max": 4.0,
+      "punt_angle_deg": 62.0,
+      "punt_lateral_per_meter": 0.05,
+      "punt_launch_fraction": 0.32,
+      "punt_lunge": 1.3,
+      "punt_seconds": 0.24,
+      "punt_speed_max_mps": 42.0,
+      "punt_speed_min_mps": 27.0,
+      "return_seconds": 1.6,
+      "windup_angle_deg": 8.0,
+      "windup_seconds": 0.7,
+      "windup_shuffle": 0.8
+    }
+  },
+  "coordinate_system": {
+    "source": "right-handed, meters, Z-up, +Y drive direction",
+    "source_world_to_beamng_vehicle": [
+      [
+        -1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        -1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "target": "BeamNG vehicle space, meters, Z-up, -Y forward"
+  },
+  "nodes": [
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_00_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.1,
+        1.1,
+        0.0
+      ],
+      "source_world_position": [
+        -2.1,
+        -1.1,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_00_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.1,
+        1.1,
+        0.14
+      ],
+      "source_world_position": [
+        -2.1,
+        -1.1,
+        0.14
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_00_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.1,
+        -1.2,
+        0.0
+      ],
+      "source_world_position": [
+        -2.1,
+        1.2,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_00_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.1,
+        -1.2,
+        0.14
+      ],
+      "source_world_position": [
+        -2.1,
+        1.2,
+        0.14
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_00_02_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.1,
+        -3.5,
+        0.0
+      ],
+      "source_world_position": [
+        -2.1,
+        3.5,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_00_02_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.1,
+        -3.5,
+        0.14
+      ],
+      "source_world_position": [
+        -2.1,
+        3.5,
+        0.14
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_01_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        1.1,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        -1.1,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_01_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        1.1,
+        0.14
+      ],
+      "source_world_position": [
+        0.0,
+        -1.1,
+        0.14
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_01_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -1.2,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        1.2,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_01_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -1.2,
+        0.14
+      ],
+      "source_world_position": [
+        0.0,
+        1.2,
+        0.14
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_01_02_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -3.5,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        3.5,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_01_02_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -3.5,
+        0.14
+      ],
+      "source_world_position": [
+        0.0,
+        3.5,
+        0.14
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_02_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.1,
+        1.1,
+        0.0
+      ],
+      "source_world_position": [
+        2.1,
+        -1.1,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_02_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.1,
+        1.1,
+        0.14
+      ],
+      "source_world_position": [
+        2.1,
+        -1.1,
+        0.14
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_02_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.1,
+        -1.2,
+        0.0
+      ],
+      "source_world_position": [
+        2.1,
+        1.2,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_02_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.1,
+        -1.2,
+        0.14
+      ],
+      "source_world_position": [
+        2.1,
+        1.2,
+        0.14
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_02_02_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.1,
+        -3.5,
+        0.0
+      ],
+      "source_world_position": [
+        2.1,
+        3.5,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_02_02_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.1,
+        -3.5,
+        0.14
+      ],
+      "source_world_position": [
+        2.1,
+        3.5,
+        0.14
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_hinge_00_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.500001,
+        9.4,
+        0.0
+      ],
+      "source_world_position": [
+        -1.5,
+        -9.4,
+        0.0
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_hinge_00_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.500001,
+        9.4,
+        1.1
+      ],
+      "source_world_position": [
+        -1.5,
+        -9.4,
+        1.1
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_hinge_00_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.500001,
+        7.2,
+        0.0
+      ],
+      "source_world_position": [
+        -1.5,
+        -7.2,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_hinge_00_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.500001,
+        7.2,
+        1.1
+      ],
+      "source_world_position": [
+        -1.5,
+        -7.2,
+        1.1
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_hinge_01_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.499999,
+        9.4,
+        0.0
+      ],
+      "source_world_position": [
+        1.5,
+        -9.4,
+        0.0
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_hinge_01_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.499999,
+        9.4,
+        1.1
+      ],
+      "source_world_position": [
+        1.5,
+        -9.4,
+        1.1
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_hinge_01_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.499999,
+        7.2,
+        0.0
+      ],
+      "source_world_position": [
+        1.5,
+        -7.2,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_hinge_01_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.499999,
+        7.2,
+        1.1
+      ],
+      "source_world_position": [
+        1.5,
+        -7.2,
+        1.1
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_skirt_nw",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.6,
+        -4.0,
+        0.0
+      ],
+      "source_world_position": [
+        -2.6,
+        4.0,
+        0.0
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_skirt_ne",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.6,
+        -4.0,
+        0.0
+      ],
+      "source_world_position": [
+        2.6,
+        4.0,
+        0.0
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_skirt_se",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.6,
+        1.6,
+        0.0
+      ],
+      "source_world_position": [
+        2.6,
+        -1.6,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_pad_skirt_sw",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.6,
+        1.6,
+        0.0
+      ],
+      "source_world_position": [
+        -2.6,
+        -1.6,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_console_0_0_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.950001,
+        11.66,
+        0.0
+      ],
+      "source_world_position": [
+        -0.95,
+        -11.66,
+        0.0
+      ],
+      "weight": 60.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_console_0_0_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.950001,
+        11.66,
+        1.72
+      ],
+      "source_world_position": [
+        -0.95,
+        -11.66,
+        1.72
+      ],
+      "weight": 60.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_console_0_1_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.949999,
+        11.66,
+        0.0
+      ],
+      "source_world_position": [
+        0.95,
+        -11.66,
+        0.0
+      ],
+      "weight": 60.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_console_0_1_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.949999,
+        11.66,
+        1.72
+      ],
+      "source_world_position": [
+        0.95,
+        -11.66,
+        1.72
+      ],
+      "weight": 60.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_console_1_0_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.950001,
+        11.08,
+        0.0
+      ],
+      "source_world_position": [
+        -0.95,
+        -11.08,
+        0.0
+      ],
+      "weight": 60.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_console_1_0_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.950001,
+        11.08,
+        1.72
+      ],
+      "source_world_position": [
+        -0.95,
+        -11.08,
+        1.72
+      ],
+      "weight": 60.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_console_1_1_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.949999,
+        11.08,
+        0.0
+      ],
+      "source_world_position": [
+        0.95,
+        -11.08,
+        0.0
+      ],
+      "weight": 60.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_console_1_1_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.949999,
+        11.08,
+        1.72
+      ],
+      "source_world_position": [
+        0.95,
+        -11.08,
+        1.72
+      ],
+      "weight": 60.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_panelbtn_btn_power_down",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.550001,
+        11.777,
+        1.307
+      ],
+      "source_world_position": [
+        -0.55,
+        -11.777,
+        1.307
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_panelfx_btn_power_down",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.150001,
+        11.777,
+        1.307
+      ],
+      "source_world_position": [
+        -0.15,
+        -11.777,
+        1.307
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_panelfy_btn_power_down",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.550001,
+        11.777,
+        1.707
+      ],
+      "source_world_position": [
+        -0.55,
+        -11.777,
+        1.707
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_panelbtn_btn_power_up",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.549999,
+        11.777,
+        1.307
+      ],
+      "source_world_position": [
+        0.55,
+        -11.777,
+        1.307
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_panelfx_btn_power_up",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.949999,
+        11.777,
+        1.307
+      ],
+      "source_world_position": [
+        0.95,
+        -11.777,
+        1.307
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_panelfy_btn_power_up",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.549999,
+        11.777,
+        1.707
+      ],
+      "source_world_position": [
+        0.55,
+        -11.777,
+        1.707
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_panelbtn_btn_angle_down",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.620001,
+        11.777,
+        0.94
+      ],
+      "source_world_position": [
+        -0.62,
+        -11.777,
+        0.94
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_panelfx_btn_angle_down",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.220001,
+        11.777,
+        0.94
+      ],
+      "source_world_position": [
+        -0.22,
+        -11.777,
+        0.94
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_panelfy_btn_angle_down",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.620001,
+        11.777,
+        1.34
+      ],
+      "source_world_position": [
+        -0.62,
+        -11.777,
+        1.34
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_panelbtn_btn_angle_up",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.619999,
+        11.777,
+        0.94
+      ],
+      "source_world_position": [
+        0.62,
+        -11.777,
+        0.94
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_panelfx_btn_angle_up",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.019999,
+        11.777,
+        0.94
+      ],
+      "source_world_position": [
+        1.02,
+        -11.777,
+        0.94
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_panelfy_btn_angle_up",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.619999,
+        11.777,
+        1.34
+      ],
+      "source_world_position": [
+        0.62,
+        -11.777,
+        1.34
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_panel_frame_x",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.899999,
+        11.777,
+        1.5
+      ],
+      "source_world_position": [
+        0.9,
+        -11.777,
+        1.5
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_boot_of_doom_panel_frame_y",
+      "node_material": "|NM_METAL",
+      "position": [
+        1e-06,
+        11.777,
+        2.0
+      ],
+      "source_world_position": [
+        0.0,
+        -11.777,
+        2.0
+      ],
+      "weight": 20.0
+    }
+  ],
+  "palette": {
+    "ericrolph_boot_of_doom_boot_hero": {
+      "color": [
+        0.45,
+        0.26,
+        0.15,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.6,
+      "texture": {
+        "family": "external",
+        "maps": {
+          "baseColorMap": "assets/boot_hero.color.png",
+          "normalMap": "assets/boot_hero.normal.png",
+          "roughnessMap": "assets/boot_hero_roughness.data.png"
+        }
+      }
+    },
+    "ericrolph_boot_of_doom_btn_bakelite": {
+      "color": [
+        0.08,
+        0.07,
+        0.07,
+        1.0
+      ],
+      "metallic": 0.15,
+      "roughness": 0.4,
+      "texture": {
+        "family": "bakelite"
+      }
+    },
+    "ericrolph_boot_of_doom_console_cream": {
+      "color": [
+        0.91,
+        0.88,
+        0.8,
+        1.0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.34,
+      "texture": {
+        "family": "painted_metal",
+        "params": {
+          "base": [
+            0.91,
+            0.88,
+            0.8
+          ],
+          "peel": 0.25,
+          "rough": 0.34
+        },
+        "size": 1024
+      }
+    },
+    "ericrolph_boot_of_doom_console_walnut": {
+      "color": [
+        0.33,
+        0.2,
+        0.11,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.45,
+      "texture": {
+        "family": "wood",
+        "params": {
+          "early": [
+            0.4,
+            0.245,
+            0.145
+          ],
+          "late": [
+            0.165,
+            0.092,
+            0.052
+          ],
+          "pore": 0.2,
+          "rings": 17.0,
+          "sheen": 0.0
+        },
+        "size": 1024
+      }
+    },
+    "ericrolph_boot_of_doom_needle_red": {
+      "color": [
+        0.86,
+        0.1,
+        0.08,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.3
+    },
+    "ericrolph_boot_of_doom_pad_deck": {
+      "color": [
+        0.16,
+        0.16,
+        0.17,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.9,
+      "texture": {
+        "family": "kick_pad",
+        "params": {
+          "frame_outer": [
+            2.1,
+            2.3
+          ],
+          "frame_width": 0.2,
+          "half_u": 2.6,
+          "half_v": 2.8,
+          "paint": [
+            0.88,
+            0.88,
+            0.86
+          ],
+          "stroke_length": 3.4,
+          "stroke_width": 0.55,
+          "target": [
+            0.82,
+            0.12,
+            0.08
+          ]
+        },
+        "size": 1024
+      }
+    },
+    "ericrolph_boot_of_doom_panel_legend": {
+      "color": [
+        0.055,
+        0.06,
+        0.068,
+        1.0
+      ],
+      "metallic": 0.3,
+      "roughness": 0.5,
+      "texture": {
+        "family": "panel_legend",
+        "params": {
+          "aspect": 1.744186046511628,
+          "labels": [
+            [
+              0.5,
+              0.814,
+              "POWER",
+              0.8
+            ],
+            [
+              0.1333,
+              0.5349,
+              "-",
+              0.9
+            ],
+            [
+              0.8667,
+              0.5349,
+              "+",
+              0.9
+            ],
+            [
+              0.275,
+              0.5814,
+              "1X",
+              0.6
+            ],
+            [
+              0.725,
+              0.5814,
+              "4X",
+              0.6
+            ],
+            [
+              0.5,
+              0.07,
+              "LAUNCH ANGLE",
+              0.8
+            ],
+            [
+              0.0867,
+              0.1221,
+              "-",
+              0.9
+            ],
+            [
+              0.9133,
+              0.1221,
+              "+",
+              0.9
+            ],
+            [
+              0.26,
+              0.1628,
+              "0",
+              0.6
+            ],
+            [
+              0.5,
+              0.5233,
+              "90",
+              0.6
+            ]
+          ],
+          "title": "KICK CONTROL"
+        },
+        "size": 1024
+      }
+    },
+    "ericrolph_boot_of_doom_plate_data": {
+      "color": [
+        0.055,
+        0.06,
+        0.068,
+        1.0
+      ],
+      "metallic": 0.6,
+      "roughness": 0.38,
+      "texture": {
+        "family": "panel_legend",
+        "params": {
+          "aspect": 1.5384615384615385,
+          "labels": [
+            [
+              0.5,
+              0.855,
+              "C H A R L I E   C O .",
+              1.25
+            ],
+            [
+              0.5,
+              0.665,
+              "KINETIC FOOTWEAR DIV.",
+              0.8
+            ],
+            [
+              0.5,
+              0.53,
+              "MODEL BD-1   SER. 0022",
+              0.75
+            ],
+            [
+              0.5,
+              0.395,
+              "2300 V  3 PH  60 CY",
+              0.75
+            ],
+            [
+              0.5,
+              0.26,
+              "470 A   2200 H.P.",
+              0.75
+            ],
+            [
+              0.5,
+              0.11,
+              "PAT. PEND.   MADE IN U.S.A.",
+              0.58
+            ]
+          ],
+          "rules": [
+            [
+              0.775,
+              0.3,
+              0.014
+            ]
+          ],
+          "title": ""
+        },
+        "size": 512
+      }
+    },
+    "ericrolph_boot_of_doom_seg_amber": {
+      "color": [
+        0.98,
+        0.62,
+        0.1,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.35
+    },
+    "ericrolph_boot_of_doom_seg_red": {
+      "color": [
+        0.85,
+        0.14,
+        0.08,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.35
+    },
+    "ericrolph_boot_of_doom_steel": {
+      "color": [
+        0.53,
+        0.54,
+        0.56,
+        1.0
+      ],
+      "metallic": 0.8,
+      "roughness": 0.4,
+      "texture": {
+        "family": "steel_worn",
+        "params": {
+          "base": [
+            0.53,
+            0.54,
+            0.56
+          ],
+          "rough": 0.44
+        },
+        "size": 1024
+      }
+    }
+  },
+  "panel": {
+    "button_size": 0.12,
+    "buttons": [
+      {
+        "frame_x_node": "ericrolph_boot_of_doom_panelfx_btn_power_down",
+        "frame_y_node": "ericrolph_boot_of_doom_panelfy_btn_power_down",
+        "id": "btn_power_down",
+        "node": "ericrolph_boot_of_doom_panelbtn_btn_power_down",
+        "size": 0.12,
+        "title": "Kick Power: Decrease"
+      },
+      {
+        "frame_x_node": "ericrolph_boot_of_doom_panelfx_btn_power_up",
+        "frame_y_node": "ericrolph_boot_of_doom_panelfy_btn_power_up",
+        "id": "btn_power_up",
+        "node": "ericrolph_boot_of_doom_panelbtn_btn_power_up",
+        "size": 0.12,
+        "title": "Kick Power: Increase"
+      },
+      {
+        "frame_x_node": "ericrolph_boot_of_doom_panelfx_btn_angle_down",
+        "frame_y_node": "ericrolph_boot_of_doom_panelfy_btn_angle_down",
+        "id": "btn_angle_down",
+        "node": "ericrolph_boot_of_doom_panelbtn_btn_angle_down",
+        "size": 0.12,
+        "title": "Launch Angle: Lower"
+      },
+      {
+        "frame_x_node": "ericrolph_boot_of_doom_panelfx_btn_angle_up",
+        "frame_y_node": "ericrolph_boot_of_doom_panelfy_btn_angle_up",
+        "id": "btn_angle_up",
+        "node": "ericrolph_boot_of_doom_panelbtn_btn_angle_up",
+        "size": 0.12,
+        "title": "Launch Angle: Raise"
+      }
+    ],
+    "frame_x_node": "ericrolph_boot_of_doom_panel_frame_x",
+    "frame_y_node": "ericrolph_boot_of_doom_panel_frame_y"
+  },
+  "parts": [
+    {
+      "materials": [
+        "ericrolph_boot_of_doom_needle_red"
+      ],
+      "name": "angle_needle",
+      "path": "vehicles/ericrolph_boot_of_doom/ericrolph_boot_of_doom_angle_needle.dae",
+      "pivot_world": [
+        0.0,
+        -11.694,
+        0.88
+      ],
+      "sha256": "8636eaa3e58a2d50f68efbac5ca4caeca36fc9a659af25c351989182712317d3",
+      "size": 6464
+    },
+    {
+      "materials": [
+        "ericrolph_boot_of_doom_boot_hero",
+        "ericrolph_boot_of_doom_steel"
+      ],
+      "name": "boot",
+      "path": "vehicles/ericrolph_boot_of_doom/ericrolph_boot_of_doom_boot.dae",
+      "pivot_world": [
+        0.0,
+        -8.3,
+        0.9
+      ],
+      "sha256": "e5bba6c5aac4a768de6e3c2c8de111c608dfa52fd58036fe20a9873d8a5aa587",
+      "size": 18208067
+    },
+    {
+      "materials": [
+        "ericrolph_boot_of_doom_seg_amber"
+      ],
+      "name": "pow_seg1",
+      "path": "vehicles/ericrolph_boot_of_doom/ericrolph_boot_of_doom_pow_seg1.dae",
+      "pivot_world": [
+        -0.3375,
+        -11.698,
+        1.307
+      ],
+      "sha256": "662408f243a7393b21fc31aa329cdb4a29d2e273278b9f8ccff58d16e3f002cc",
+      "size": 17945
+    },
+    {
+      "materials": [
+        "ericrolph_boot_of_doom_seg_red"
+      ],
+      "name": "pow_seg10",
+      "path": "vehicles/ericrolph_boot_of_doom/ericrolph_boot_of_doom_pow_seg10.dae",
+      "pivot_world": [
+        0.3375,
+        -11.698,
+        1.307
+      ],
+      "sha256": "f845f2da09153846706b8b742321f301e1bda9699a51c1633d1d1cbc51349d76",
+      "size": 18025
+    },
+    {
+      "materials": [
+        "ericrolph_boot_of_doom_seg_amber"
+      ],
+      "name": "pow_seg2",
+      "path": "vehicles/ericrolph_boot_of_doom/ericrolph_boot_of_doom_pow_seg2.dae",
+      "pivot_world": [
+        -0.2625,
+        -11.698,
+        1.307
+      ],
+      "sha256": "0dee761be0ad0b972bee7e7ff2e52b7e356bc39f213b13ae3208e91e7f06d3ef",
+      "size": 17981
+    },
+    {
+      "materials": [
+        "ericrolph_boot_of_doom_seg_amber"
+      ],
+      "name": "pow_seg3",
+      "path": "vehicles/ericrolph_boot_of_doom/ericrolph_boot_of_doom_pow_seg3.dae",
+      "pivot_world": [
+        -0.1875,
+        -11.698,
+        1.307
+      ],
+      "sha256": "e11c9c425b468b52abf3bb13001e10cf400cb3ae871ffc6cc940b07f672299e2",
+      "size": 18018
+    },
+    {
+      "materials": [
+        "ericrolph_boot_of_doom_seg_amber"
+      ],
+      "name": "pow_seg4",
+      "path": "vehicles/ericrolph_boot_of_doom/ericrolph_boot_of_doom_pow_seg4.dae",
+      "pivot_world": [
+        -0.1125,
+        -11.698,
+        1.307
+      ],
+      "sha256": "d929e82072486fa8dd66d5e86de0733d850a13b621eaadaa56c1d4ad5ae4c610",
+      "size": 17981
+    },
+    {
+      "materials": [
+        "ericrolph_boot_of_doom_seg_amber"
+      ],
+      "name": "pow_seg5",
+      "path": "vehicles/ericrolph_boot_of_doom/ericrolph_boot_of_doom_pow_seg5.dae",
+      "pivot_world": [
+        -0.0375,
+        -11.698,
+        1.307
+      ],
+      "sha256": "385a630f0428716a794484162b153c9b23310d1df6438c7d520924772b89a4a0",
+      "size": 17982
+    },
+    {
+      "materials": [
+        "ericrolph_boot_of_doom_seg_amber"
+      ],
+      "name": "pow_seg6",
+      "path": "vehicles/ericrolph_boot_of_doom/ericrolph_boot_of_doom_pow_seg6.dae",
+      "pivot_world": [
+        0.0375,
+        -11.698,
+        1.307
+      ],
+      "sha256": "177428cb7b95c9bfbbb2943076b3ff72d6d11aec538a82b4534afa5a872e7ee2",
+      "size": 17981
+    },
+    {
+      "materials": [
+        "ericrolph_boot_of_doom_seg_amber"
+      ],
+      "name": "pow_seg7",
+      "path": "vehicles/ericrolph_boot_of_doom/ericrolph_boot_of_doom_pow_seg7.dae",
+      "pivot_world": [
+        0.1125,
+        -11.698,
+        1.307
+      ],
+      "sha256": "ff1a3e9d0b6e6b48190b6687b5e724de585219543f8a501eccec31ceee742bb6",
+      "size": 17982
+    },
+    {
+      "materials": [
+        "ericrolph_boot_of_doom_seg_red"
+      ],
+      "name": "pow_seg8",
+      "path": "vehicles/ericrolph_boot_of_doom/ericrolph_boot_of_doom_pow_seg8.dae",
+      "pivot_world": [
+        0.1875,
+        -11.698,
+        1.307
+      ],
+      "sha256": "c0be1babefa6c053011162b066bd4105c4ebe72543211837ce60737f4feac126",
+      "size": 18004
+    },
+    {
+      "materials": [
+        "ericrolph_boot_of_doom_seg_red"
+      ],
+      "name": "pow_seg9",
+      "path": "vehicles/ericrolph_boot_of_doom/ericrolph_boot_of_doom_pow_seg9.dae",
+      "pivot_world": [
+        0.2625,
+        -11.698,
+        1.307
+      ],
+      "sha256": "9eb1ad18bc9a3f3ce0ed5894ab604d842f6b1261be080defd35c76facca9589a",
+      "size": 17939
+    }
+  ],
+  "refnodes": {
+    "back": "ericrolph_boot_of_doom_pad_01_00_00",
+    "left": "ericrolph_boot_of_doom_pad_00_01_00",
+    "ref": "ericrolph_boot_of_doom_pad_01_01_00",
+    "up": "ericrolph_boot_of_doom_pad_01_01_01"
+  },
+  "schema": "ericrolph-giant-props-handoff-v1",
+  "spawn_envelope_nodes": [
+    "ericrolph_boot_of_doom_pad_skirt_nw",
+    "ericrolph_boot_of_doom_pad_skirt_ne",
+    "ericrolph_boot_of_doom_pad_00_02_01",
+    "ericrolph_boot_of_doom_pad_02_02_01",
+    "ericrolph_boot_of_doom_hinge_00_00_00",
+    "ericrolph_boot_of_doom_hinge_01_00_00",
+    "ericrolph_boot_of_doom_hinge_00_00_01",
+    "ericrolph_boot_of_doom_hinge_01_00_01"
+  ],
+  "triangles": [
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_01",
+        "ericrolph_boot_of_doom_pad_01_00_01",
+        "ericrolph_boot_of_doom_pad_01_01_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_01",
+        "ericrolph_boot_of_doom_pad_01_01_01",
+        "ericrolph_boot_of_doom_pad_00_01_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_01_01",
+        "ericrolph_boot_of_doom_pad_01_01_01",
+        "ericrolph_boot_of_doom_pad_01_02_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_01_01",
+        "ericrolph_boot_of_doom_pad_01_02_01",
+        "ericrolph_boot_of_doom_pad_00_02_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_00_01",
+        "ericrolph_boot_of_doom_pad_02_00_01",
+        "ericrolph_boot_of_doom_pad_02_01_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_00_01",
+        "ericrolph_boot_of_doom_pad_02_01_01",
+        "ericrolph_boot_of_doom_pad_01_01_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_01_01",
+        "ericrolph_boot_of_doom_pad_02_01_01",
+        "ericrolph_boot_of_doom_pad_02_02_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_01_01_01",
+        "ericrolph_boot_of_doom_pad_02_02_01",
+        "ericrolph_boot_of_doom_pad_01_02_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_01",
+        "ericrolph_boot_of_doom_hinge_01_00_01",
+        "ericrolph_boot_of_doom_hinge_01_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_01",
+        "ericrolph_boot_of_doom_hinge_01_01_01",
+        "ericrolph_boot_of_doom_hinge_00_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_01_01",
+        "ericrolph_boot_of_doom_hinge_01_01_01",
+        "ericrolph_boot_of_doom_hinge_01_01_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_01_01",
+        "ericrolph_boot_of_doom_hinge_01_01_00",
+        "ericrolph_boot_of_doom_hinge_00_01_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_00",
+        "ericrolph_boot_of_doom_hinge_01_00_00",
+        "ericrolph_boot_of_doom_hinge_01_00_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_00",
+        "ericrolph_boot_of_doom_hinge_01_00_01",
+        "ericrolph_boot_of_doom_hinge_00_00_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_01_00_00",
+        "ericrolph_boot_of_doom_hinge_01_01_00",
+        "ericrolph_boot_of_doom_hinge_01_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_01_00_00",
+        "ericrolph_boot_of_doom_hinge_01_01_01",
+        "ericrolph_boot_of_doom_hinge_01_00_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_01",
+        "ericrolph_boot_of_doom_hinge_00_01_01",
+        "ericrolph_boot_of_doom_hinge_00_01_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_hinge_00_00_01",
+        "ericrolph_boot_of_doom_hinge_00_01_00",
+        "ericrolph_boot_of_doom_hinge_00_00_00"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_02_01",
+        "ericrolph_boot_of_doom_pad_skirt_ne",
+        "ericrolph_boot_of_doom_pad_skirt_nw"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_02_01",
+        "ericrolph_boot_of_doom_pad_02_02_01",
+        "ericrolph_boot_of_doom_pad_skirt_nw"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_skirt_ne",
+        "ericrolph_boot_of_doom_pad_02_02_01",
+        "ericrolph_boot_of_doom_pad_00_02_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_skirt_ne",
+        "ericrolph_boot_of_doom_pad_00_02_01",
+        "ericrolph_boot_of_doom_pad_skirt_nw"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_00_01",
+        "ericrolph_boot_of_doom_pad_skirt_se",
+        "ericrolph_boot_of_doom_pad_skirt_ne"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_02_01",
+        "ericrolph_boot_of_doom_pad_02_00_01",
+        "ericrolph_boot_of_doom_pad_skirt_ne"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_skirt_se",
+        "ericrolph_boot_of_doom_pad_02_00_01",
+        "ericrolph_boot_of_doom_pad_02_02_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_skirt_se",
+        "ericrolph_boot_of_doom_pad_02_02_01",
+        "ericrolph_boot_of_doom_pad_skirt_ne"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_01",
+        "ericrolph_boot_of_doom_pad_skirt_sw",
+        "ericrolph_boot_of_doom_pad_skirt_se"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_02_00_01",
+        "ericrolph_boot_of_doom_pad_00_00_01",
+        "ericrolph_boot_of_doom_pad_skirt_se"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_skirt_sw",
+        "ericrolph_boot_of_doom_pad_00_00_01",
+        "ericrolph_boot_of_doom_pad_02_00_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_skirt_sw",
+        "ericrolph_boot_of_doom_pad_02_00_01",
+        "ericrolph_boot_of_doom_pad_skirt_se"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_02_01",
+        "ericrolph_boot_of_doom_pad_skirt_nw",
+        "ericrolph_boot_of_doom_pad_skirt_sw"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_00_00_01",
+        "ericrolph_boot_of_doom_pad_00_02_01",
+        "ericrolph_boot_of_doom_pad_skirt_sw"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_skirt_nw",
+        "ericrolph_boot_of_doom_pad_00_02_01",
+        "ericrolph_boot_of_doom_pad_00_00_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_boot_of_doom_pad_skirt_nw",
+        "ericrolph_boot_of_doom_pad_00_00_01",
+        "ericrolph_boot_of_doom_pad_skirt_sw"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_0",
+        "ericrolph_boot_of_doom_console_0_1_0",
+        "ericrolph_boot_of_doom_console_0_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_0",
+        "ericrolph_boot_of_doom_console_0_1_1",
+        "ericrolph_boot_of_doom_console_0_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_1",
+        "ericrolph_boot_of_doom_console_0_1_1",
+        "ericrolph_boot_of_doom_console_0_1_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_1",
+        "ericrolph_boot_of_doom_console_0_1_0",
+        "ericrolph_boot_of_doom_console_0_0_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_1_0_0",
+        "ericrolph_boot_of_doom_console_1_1_0",
+        "ericrolph_boot_of_doom_console_1_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_1_0_0",
+        "ericrolph_boot_of_doom_console_1_1_1",
+        "ericrolph_boot_of_doom_console_1_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_1_0_1",
+        "ericrolph_boot_of_doom_console_1_1_1",
+        "ericrolph_boot_of_doom_console_1_1_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_1_0_1",
+        "ericrolph_boot_of_doom_console_1_1_0",
+        "ericrolph_boot_of_doom_console_1_0_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_0",
+        "ericrolph_boot_of_doom_console_1_0_0",
+        "ericrolph_boot_of_doom_console_1_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_0",
+        "ericrolph_boot_of_doom_console_1_0_1",
+        "ericrolph_boot_of_doom_console_0_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_1",
+        "ericrolph_boot_of_doom_console_1_0_1",
+        "ericrolph_boot_of_doom_console_1_0_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_0_1",
+        "ericrolph_boot_of_doom_console_1_0_0",
+        "ericrolph_boot_of_doom_console_0_0_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_0",
+        "ericrolph_boot_of_doom_console_1_1_0",
+        "ericrolph_boot_of_doom_console_1_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_0",
+        "ericrolph_boot_of_doom_console_1_1_1",
+        "ericrolph_boot_of_doom_console_0_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_1",
+        "ericrolph_boot_of_doom_console_1_1_1",
+        "ericrolph_boot_of_doom_console_1_1_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_1",
+        "ericrolph_boot_of_doom_console_1_1_0",
+        "ericrolph_boot_of_doom_console_0_1_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_1_1_1",
+        "ericrolph_boot_of_doom_console_1_0_1",
+        "ericrolph_boot_of_doom_console_0_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_0_1_1",
+        "ericrolph_boot_of_doom_console_1_1_1",
+        "ericrolph_boot_of_doom_console_0_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_1_0_1",
+        "ericrolph_boot_of_doom_console_1_1_1",
+        "ericrolph_boot_of_doom_console_0_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_boot_of_doom_console_1_0_1",
+        "ericrolph_boot_of_doom_console_0_1_1",
+        "ericrolph_boot_of_doom_console_0_0_1"
+      ]
+    }
+  ],
+  "visual": {
+    "bounds": {
+      "max": [
+        2.6,
+        11.771,
+        1.745
+      ],
+      "min": [
+        -2.6,
+        -4.0,
+        -0.015
+      ]
+    },
+    "materials": [
+      "ericrolph_boot_of_doom_btn_bakelite",
+      "ericrolph_boot_of_doom_console_cream",
+      "ericrolph_boot_of_doom_console_walnut",
+      "ericrolph_boot_of_doom_pad_deck",
+      "ericrolph_boot_of_doom_panel_legend",
+      "ericrolph_boot_of_doom_plate_data",
+      "ericrolph_boot_of_doom_steel"
+    ],
+    "path": "vehicles/ericrolph_boot_of_doom/ericrolph_boot_of_doom.dae",
+    "sha256": "fa544ef30b7be7c9e8cf61cb3da350abb1095aa82d982a6185d07761f54a4cd9",
+    "size": 820494
+  }
+}

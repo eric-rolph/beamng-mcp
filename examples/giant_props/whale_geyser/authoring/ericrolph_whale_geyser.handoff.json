@@ -1,0 +1,5539 @@
+{
+  "asset": {
+    "display_name": "Whale Blowhole Geyser",
+    "flexbodies_extra": [],
+    "id": "ericrolph_whale_geyser",
+    "physics_cage": "ericrolph_whale_geyser_cage",
+    "visual_mesh": "ericrolph_whale_geyser_visual"
+  },
+  "base_nodes": [
+    "ericrolph_whale_geyser_flank_0_0",
+    "ericrolph_whale_geyser_flank_1_0",
+    "ericrolph_whale_geyser_flank_0_1",
+    "ericrolph_whale_geyser_flank_1_1",
+    "ericrolph_whale_geyser_flank_0_2",
+    "ericrolph_whale_geyser_flank_1_2",
+    "ericrolph_whale_geyser_flank_0_3",
+    "ericrolph_whale_geyser_flank_1_3",
+    "ericrolph_whale_geyser_flank_0_4",
+    "ericrolph_whale_geyser_flank_1_4",
+    "ericrolph_whale_geyser_flank_0_5",
+    "ericrolph_whale_geyser_flank_1_5",
+    "ericrolph_whale_geyser_flank_0_6",
+    "ericrolph_whale_geyser_flank_1_6",
+    "ericrolph_whale_geyser_flank_0_7",
+    "ericrolph_whale_geyser_flank_1_7",
+    "ericrolph_whale_geyser_flank_0_8",
+    "ericrolph_whale_geyser_flank_1_8",
+    "ericrolph_whale_geyser_flank_0_9",
+    "ericrolph_whale_geyser_flank_1_9",
+    "ericrolph_whale_geyser_flank_0_10",
+    "ericrolph_whale_geyser_flank_1_10",
+    "ericrolph_whale_geyser_flank_0_11",
+    "ericrolph_whale_geyser_flank_1_11",
+    "ericrolph_whale_geyser_ramp_0_0",
+    "ericrolph_whale_geyser_ramp_1_0",
+    "ericrolph_whale_geyser_ramp_2_0",
+    "ericrolph_whale_geyser_ground_reference",
+    "ericrolph_whale_geyser_ground_back"
+  ],
+  "beam_specs": {
+    "rigid": {
+      "beamDamp": 1500.0,
+      "beamDeform": "FLT_MAX",
+      "beamSpring": 15000000.0,
+      "beamStrength": "FLT_MAX"
+    }
+  },
+  "beams": [
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_0",
+        "ericrolph_whale_geyser_deck_0_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_0",
+        "ericrolph_whale_geyser_deck_1_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_0",
+        "ericrolph_whale_geyser_flank_0_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_0",
+        "ericrolph_whale_geyser_ramp_0_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_1",
+        "ericrolph_whale_geyser_deck_0_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_1",
+        "ericrolph_whale_geyser_deck_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_1",
+        "ericrolph_whale_geyser_flank_0_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_10",
+        "ericrolph_whale_geyser_deck_0_11"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_10",
+        "ericrolph_whale_geyser_deck_0_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_10",
+        "ericrolph_whale_geyser_deck_1_10"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_10",
+        "ericrolph_whale_geyser_flank_0_10"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_11",
+        "ericrolph_whale_geyser_deck_1_11"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_11",
+        "ericrolph_whale_geyser_flank_0_11"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_11",
+        "ericrolph_whale_geyser_head_lip_l"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_2",
+        "ericrolph_whale_geyser_deck_0_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_2",
+        "ericrolph_whale_geyser_deck_1_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_2",
+        "ericrolph_whale_geyser_flank_0_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_3",
+        "ericrolph_whale_geyser_deck_0_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_3",
+        "ericrolph_whale_geyser_deck_1_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_3",
+        "ericrolph_whale_geyser_flank_0_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_4",
+        "ericrolph_whale_geyser_deck_0_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_4",
+        "ericrolph_whale_geyser_deck_1_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_4",
+        "ericrolph_whale_geyser_flank_0_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_5",
+        "ericrolph_whale_geyser_deck_0_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_5",
+        "ericrolph_whale_geyser_deck_1_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_5",
+        "ericrolph_whale_geyser_flank_0_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_6",
+        "ericrolph_whale_geyser_deck_0_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_6",
+        "ericrolph_whale_geyser_deck_1_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_6",
+        "ericrolph_whale_geyser_flank_0_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_7",
+        "ericrolph_whale_geyser_deck_0_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_7",
+        "ericrolph_whale_geyser_deck_1_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_7",
+        "ericrolph_whale_geyser_flank_0_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_8",
+        "ericrolph_whale_geyser_deck_0_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_8",
+        "ericrolph_whale_geyser_deck_1_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_8",
+        "ericrolph_whale_geyser_flank_0_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_9",
+        "ericrolph_whale_geyser_deck_1_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_9",
+        "ericrolph_whale_geyser_flank_0_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_0",
+        "ericrolph_whale_geyser_deck_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_0",
+        "ericrolph_whale_geyser_deck_2_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_1",
+        "ericrolph_whale_geyser_deck_1_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_1",
+        "ericrolph_whale_geyser_deck_2_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_10",
+        "ericrolph_whale_geyser_deck_1_11"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_10",
+        "ericrolph_whale_geyser_deck_1_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_10",
+        "ericrolph_whale_geyser_deck_2_10"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_11",
+        "ericrolph_whale_geyser_deck_2_11"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_2",
+        "ericrolph_whale_geyser_deck_1_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_2",
+        "ericrolph_whale_geyser_deck_2_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_3",
+        "ericrolph_whale_geyser_deck_1_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_3",
+        "ericrolph_whale_geyser_deck_2_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_4",
+        "ericrolph_whale_geyser_deck_1_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_4",
+        "ericrolph_whale_geyser_deck_2_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_5",
+        "ericrolph_whale_geyser_deck_1_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_5",
+        "ericrolph_whale_geyser_deck_2_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_6",
+        "ericrolph_whale_geyser_deck_1_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_6",
+        "ericrolph_whale_geyser_deck_2_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_7",
+        "ericrolph_whale_geyser_deck_1_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_7",
+        "ericrolph_whale_geyser_deck_2_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_8",
+        "ericrolph_whale_geyser_deck_1_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_8",
+        "ericrolph_whale_geyser_deck_2_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_9",
+        "ericrolph_whale_geyser_deck_2_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_0",
+        "ericrolph_whale_geyser_deck_2_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_0",
+        "ericrolph_whale_geyser_deck_3_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_0",
+        "ericrolph_whale_geyser_flank_0_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_0",
+        "ericrolph_whale_geyser_ramp_1_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_1",
+        "ericrolph_whale_geyser_deck_2_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_1",
+        "ericrolph_whale_geyser_deck_3_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_1",
+        "ericrolph_whale_geyser_flank_0_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_10",
+        "ericrolph_whale_geyser_deck_2_11"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_10",
+        "ericrolph_whale_geyser_deck_2_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_10",
+        "ericrolph_whale_geyser_deck_3_10"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_10",
+        "ericrolph_whale_geyser_flank_0_10"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_11",
+        "ericrolph_whale_geyser_deck_3_11"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_11",
+        "ericrolph_whale_geyser_flank_0_11"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_2",
+        "ericrolph_whale_geyser_deck_2_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_2",
+        "ericrolph_whale_geyser_deck_3_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_2",
+        "ericrolph_whale_geyser_flank_0_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_3",
+        "ericrolph_whale_geyser_deck_2_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_3",
+        "ericrolph_whale_geyser_deck_3_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_3",
+        "ericrolph_whale_geyser_flank_0_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_4",
+        "ericrolph_whale_geyser_deck_2_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_4",
+        "ericrolph_whale_geyser_deck_3_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_4",
+        "ericrolph_whale_geyser_flank_0_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_5",
+        "ericrolph_whale_geyser_deck_2_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_5",
+        "ericrolph_whale_geyser_deck_3_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_5",
+        "ericrolph_whale_geyser_flank_0_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_6",
+        "ericrolph_whale_geyser_deck_2_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_6",
+        "ericrolph_whale_geyser_deck_3_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_6",
+        "ericrolph_whale_geyser_flank_0_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_7",
+        "ericrolph_whale_geyser_deck_2_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_7",
+        "ericrolph_whale_geyser_deck_3_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_7",
+        "ericrolph_whale_geyser_flank_0_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_8",
+        "ericrolph_whale_geyser_deck_2_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_8",
+        "ericrolph_whale_geyser_deck_3_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_8",
+        "ericrolph_whale_geyser_flank_0_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_9",
+        "ericrolph_whale_geyser_deck_3_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_9",
+        "ericrolph_whale_geyser_flank_0_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_0",
+        "ericrolph_whale_geyser_deck_3_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_0",
+        "ericrolph_whale_geyser_deck_4_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_1",
+        "ericrolph_whale_geyser_deck_3_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_1",
+        "ericrolph_whale_geyser_deck_4_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_10",
+        "ericrolph_whale_geyser_deck_3_11"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_10",
+        "ericrolph_whale_geyser_deck_3_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_10",
+        "ericrolph_whale_geyser_deck_4_10"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_11",
+        "ericrolph_whale_geyser_deck_4_11"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_2",
+        "ericrolph_whale_geyser_deck_3_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_2",
+        "ericrolph_whale_geyser_deck_4_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_3",
+        "ericrolph_whale_geyser_deck_3_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_3",
+        "ericrolph_whale_geyser_deck_4_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_4",
+        "ericrolph_whale_geyser_deck_3_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_4",
+        "ericrolph_whale_geyser_deck_4_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_5",
+        "ericrolph_whale_geyser_deck_3_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_5",
+        "ericrolph_whale_geyser_deck_4_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_6",
+        "ericrolph_whale_geyser_deck_3_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_6",
+        "ericrolph_whale_geyser_deck_4_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_7",
+        "ericrolph_whale_geyser_deck_3_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_7",
+        "ericrolph_whale_geyser_deck_4_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_8",
+        "ericrolph_whale_geyser_deck_3_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_8",
+        "ericrolph_whale_geyser_deck_4_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_9",
+        "ericrolph_whale_geyser_deck_4_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_0",
+        "ericrolph_whale_geyser_deck_4_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_0",
+        "ericrolph_whale_geyser_flank_1_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_0",
+        "ericrolph_whale_geyser_ramp_2_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_1",
+        "ericrolph_whale_geyser_deck_4_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_1",
+        "ericrolph_whale_geyser_flank_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_10",
+        "ericrolph_whale_geyser_deck_4_11"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_10",
+        "ericrolph_whale_geyser_deck_4_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_10",
+        "ericrolph_whale_geyser_flank_1_10"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_11",
+        "ericrolph_whale_geyser_flank_1_11"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_11",
+        "ericrolph_whale_geyser_head_lip_r"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_2",
+        "ericrolph_whale_geyser_deck_4_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_2",
+        "ericrolph_whale_geyser_flank_1_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_3",
+        "ericrolph_whale_geyser_deck_4_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_3",
+        "ericrolph_whale_geyser_flank_1_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_4",
+        "ericrolph_whale_geyser_deck_4_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_4",
+        "ericrolph_whale_geyser_flank_1_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_5",
+        "ericrolph_whale_geyser_deck_4_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_5",
+        "ericrolph_whale_geyser_flank_1_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_6",
+        "ericrolph_whale_geyser_deck_4_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_6",
+        "ericrolph_whale_geyser_flank_1_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_7",
+        "ericrolph_whale_geyser_deck_4_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_7",
+        "ericrolph_whale_geyser_flank_1_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_8",
+        "ericrolph_whale_geyser_deck_4_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_8",
+        "ericrolph_whale_geyser_flank_1_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_deck_4_9",
+        "ericrolph_whale_geyser_flank_1_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_0",
+        "ericrolph_whale_geyser_flank_0_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_0",
+        "ericrolph_whale_geyser_flank_1_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_1",
+        "ericrolph_whale_geyser_flank_0_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_1",
+        "ericrolph_whale_geyser_flank_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_10",
+        "ericrolph_whale_geyser_flank_0_11"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_10",
+        "ericrolph_whale_geyser_flank_0_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_10",
+        "ericrolph_whale_geyser_flank_1_10"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_11",
+        "ericrolph_whale_geyser_flank_1_11"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_11",
+        "ericrolph_whale_geyser_head_lip_l"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_2",
+        "ericrolph_whale_geyser_flank_0_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_2",
+        "ericrolph_whale_geyser_flank_1_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_2",
+        "ericrolph_whale_geyser_ground_back"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_2",
+        "ericrolph_whale_geyser_ground_reference"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_3",
+        "ericrolph_whale_geyser_flank_0_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_3",
+        "ericrolph_whale_geyser_flank_1_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_3",
+        "ericrolph_whale_geyser_ground_back"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_3",
+        "ericrolph_whale_geyser_ground_reference"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_4",
+        "ericrolph_whale_geyser_flank_0_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_4",
+        "ericrolph_whale_geyser_flank_1_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_5",
+        "ericrolph_whale_geyser_flank_0_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_5",
+        "ericrolph_whale_geyser_flank_1_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_6",
+        "ericrolph_whale_geyser_flank_0_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_6",
+        "ericrolph_whale_geyser_flank_1_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_7",
+        "ericrolph_whale_geyser_flank_0_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_7",
+        "ericrolph_whale_geyser_flank_1_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_8",
+        "ericrolph_whale_geyser_flank_0_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_8",
+        "ericrolph_whale_geyser_flank_1_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_9",
+        "ericrolph_whale_geyser_flank_1_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_0",
+        "ericrolph_whale_geyser_flank_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_1",
+        "ericrolph_whale_geyser_flank_1_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_10",
+        "ericrolph_whale_geyser_flank_1_11"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_10",
+        "ericrolph_whale_geyser_flank_1_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_11",
+        "ericrolph_whale_geyser_head_lip_r"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_2",
+        "ericrolph_whale_geyser_flank_1_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_2",
+        "ericrolph_whale_geyser_ground_back"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_2",
+        "ericrolph_whale_geyser_ground_reference"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_3",
+        "ericrolph_whale_geyser_flank_1_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_3",
+        "ericrolph_whale_geyser_ground_back"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_3",
+        "ericrolph_whale_geyser_ground_reference"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_4",
+        "ericrolph_whale_geyser_flank_1_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_5",
+        "ericrolph_whale_geyser_flank_1_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_6",
+        "ericrolph_whale_geyser_flank_1_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_7",
+        "ericrolph_whale_geyser_flank_1_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_8",
+        "ericrolph_whale_geyser_flank_1_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ground_back",
+        "ericrolph_whale_geyser_ground_reference"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_head_lip_l",
+        "ericrolph_whale_geyser_head_lip_r"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_0",
+        "ericrolph_whale_geyser_ramp_0_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_0",
+        "ericrolph_whale_geyser_ramp_1_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_1",
+        "ericrolph_whale_geyser_ramp_0_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_1",
+        "ericrolph_whale_geyser_ramp_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_2",
+        "ericrolph_whale_geyser_ramp_0_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_2",
+        "ericrolph_whale_geyser_ramp_1_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_3",
+        "ericrolph_whale_geyser_ramp_0_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_3",
+        "ericrolph_whale_geyser_ramp_1_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_4",
+        "ericrolph_whale_geyser_ramp_0_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_4",
+        "ericrolph_whale_geyser_ramp_1_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_5",
+        "ericrolph_whale_geyser_ramp_0_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_5",
+        "ericrolph_whale_geyser_ramp_1_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_6",
+        "ericrolph_whale_geyser_ramp_0_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_6",
+        "ericrolph_whale_geyser_ramp_1_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_7",
+        "ericrolph_whale_geyser_ramp_0_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_7",
+        "ericrolph_whale_geyser_ramp_1_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_8",
+        "ericrolph_whale_geyser_ramp_0_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_8",
+        "ericrolph_whale_geyser_ramp_1_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_9",
+        "ericrolph_whale_geyser_ramp_1_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_0",
+        "ericrolph_whale_geyser_ramp_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_0",
+        "ericrolph_whale_geyser_ramp_2_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_1",
+        "ericrolph_whale_geyser_ramp_1_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_1",
+        "ericrolph_whale_geyser_ramp_2_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_2",
+        "ericrolph_whale_geyser_ramp_1_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_2",
+        "ericrolph_whale_geyser_ramp_2_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_3",
+        "ericrolph_whale_geyser_ramp_1_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_3",
+        "ericrolph_whale_geyser_ramp_2_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_4",
+        "ericrolph_whale_geyser_ramp_1_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_4",
+        "ericrolph_whale_geyser_ramp_2_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_5",
+        "ericrolph_whale_geyser_ramp_1_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_5",
+        "ericrolph_whale_geyser_ramp_2_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_6",
+        "ericrolph_whale_geyser_ramp_1_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_6",
+        "ericrolph_whale_geyser_ramp_2_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_7",
+        "ericrolph_whale_geyser_ramp_1_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_7",
+        "ericrolph_whale_geyser_ramp_2_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_8",
+        "ericrolph_whale_geyser_ramp_1_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_8",
+        "ericrolph_whale_geyser_ramp_2_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_9",
+        "ericrolph_whale_geyser_ramp_2_9"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_2_0",
+        "ericrolph_whale_geyser_ramp_2_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_2_1",
+        "ericrolph_whale_geyser_ramp_2_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_2_2",
+        "ericrolph_whale_geyser_ramp_2_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_2_3",
+        "ericrolph_whale_geyser_ramp_2_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_2_4",
+        "ericrolph_whale_geyser_ramp_2_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_2_5",
+        "ericrolph_whale_geyser_ramp_2_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_2_6",
+        "ericrolph_whale_geyser_ramp_2_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_2_7",
+        "ericrolph_whale_geyser_ramp_2_8"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_2_8",
+        "ericrolph_whale_geyser_ramp_2_9"
+      ],
+      "spec": "rigid"
+    }
+  ],
+  "behavior": {
+    "camera_distance": 36.0,
+    "effects": {
+      "geyser_low": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_sprinkler",
+        "position": [
+          0.0,
+          6.5,
+          4.5
+        ]
+      },
+      "geyser_mid1": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_waterfallsteam",
+        "position": [
+          0.0,
+          6.5,
+          7.4
+        ]
+      },
+      "geyser_mid2": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_waterfallsteam",
+        "position": [
+          0.0,
+          6.5,
+          13.0
+        ]
+      },
+      "geyser_mid3": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_waterfallsteam",
+        "position": [
+          0.0,
+          6.5,
+          17.5
+        ]
+      },
+      "geyser_top": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_waterfallsteam",
+        "position": [
+          0.0,
+          6.5,
+          22.0
+        ]
+      },
+      "idle_puff": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_34",
+        "position": [
+          0.0,
+          6.5,
+          4.6
+        ]
+      }
+    },
+    "triggers": {
+      "back_zone": {
+        "center": [
+          0.0,
+          -3.0,
+          3.9
+        ],
+        "dimensions": [
+          7.0,
+          12.0,
+          4.4
+        ],
+        "mode": "Overlaps"
+      },
+      "blowhole_zone": {
+        "center": [
+          0.0,
+          6.5,
+          5.88
+        ],
+        "dimensions": [
+          6.6,
+          6.8,
+          4.9
+        ],
+        "mode": "Contains"
+      }
+    },
+    "tunables": {
+      "blast_forward_mps": 3.0,
+      "blast_up_mps": 55.0,
+      "camera_distance": 36.0,
+      "cooldown_seconds": 4.0,
+      "hint_period_seconds": 7.0,
+      "idle_puff_period": 8.0,
+      "idle_puff_seconds": 0.5,
+      "inhale_seconds": 1.5,
+      "pad_center": [
+        0.0,
+        6.5,
+        4.33
+      ],
+      "vent_seconds": 3.0
+    }
+  },
+  "coordinate_system": {
+    "source": "right-handed, meters, Z-up, +Y drive direction",
+    "source_world_to_beamng_vehicle": [
+      [
+        -1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        -1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "target": "BeamNG vehicle space, meters, Z-up, -Y forward"
+  },
+  "nodes": [
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_0_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.848,
+        4.0,
+        3.81
+      ],
+      "source_world_position": [
+        -1.848,
+        -4.0,
+        3.81
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_1_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.924,
+        4.0,
+        4.02
+      ],
+      "source_world_position": [
+        -0.924,
+        -4.0,
+        4.02
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_2_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        4.0,
+        4.05
+      ],
+      "source_world_position": [
+        0.0,
+        -4.0,
+        4.05
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_3_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.924,
+        4.0,
+        3.96
+      ],
+      "source_world_position": [
+        0.924,
+        -4.0,
+        3.96
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_4_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.848,
+        4.0,
+        3.54
+      ],
+      "source_world_position": [
+        1.848,
+        -4.0,
+        3.54
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_0_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.2,
+        4.0,
+        0.0
+      ],
+      "source_world_position": [
+        -3.2,
+        -4.0,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_1_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.2,
+        4.0,
+        0.0
+      ],
+      "source_world_position": [
+        3.2,
+        -4.0,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_0_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.848,
+        2.5,
+        3.91
+      ],
+      "source_world_position": [
+        -1.848,
+        -2.5,
+        3.91
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_1_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.924,
+        2.5,
+        4.07
+      ],
+      "source_world_position": [
+        -0.924,
+        -2.5,
+        4.07
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_2_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        2.5,
+        4.1
+      ],
+      "source_world_position": [
+        0.0,
+        -2.5,
+        4.1
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_3_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.924,
+        2.5,
+        4.01
+      ],
+      "source_world_position": [
+        0.924,
+        -2.5,
+        4.01
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_4_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.848,
+        2.5,
+        3.61
+      ],
+      "source_world_position": [
+        1.848,
+        -2.5,
+        3.61
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_0_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.2,
+        2.5,
+        0.0
+      ],
+      "source_world_position": [
+        -3.2,
+        -2.5,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_1_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.2,
+        2.5,
+        0.0
+      ],
+      "source_world_position": [
+        3.2,
+        -2.5,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_0_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.848,
+        1.0,
+        3.97
+      ],
+      "source_world_position": [
+        -1.848,
+        -1.0,
+        3.97
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_1_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.924,
+        1.0,
+        4.12
+      ],
+      "source_world_position": [
+        -0.924,
+        -1.0,
+        4.12
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_2_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        1.0,
+        4.14
+      ],
+      "source_world_position": [
+        0.0,
+        -1.0,
+        4.14
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_3_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.924,
+        1.0,
+        4.05
+      ],
+      "source_world_position": [
+        0.924,
+        -1.0,
+        4.05
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_4_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.848,
+        1.0,
+        3.69
+      ],
+      "source_world_position": [
+        1.848,
+        -1.0,
+        3.69
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_0_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.6,
+        1.0,
+        0.0
+      ],
+      "source_world_position": [
+        -2.6,
+        -1.0,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_1_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.6,
+        1.0,
+        0.0
+      ],
+      "source_world_position": [
+        2.6,
+        -1.0,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_0_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.848,
+        -0.5,
+        4.0
+      ],
+      "source_world_position": [
+        -1.848,
+        0.5,
+        4.0
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_1_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.924,
+        -0.5,
+        4.15
+      ],
+      "source_world_position": [
+        -0.924,
+        0.5,
+        4.15
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_2_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -0.5,
+        4.17
+      ],
+      "source_world_position": [
+        0.0,
+        0.5,
+        4.17
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_3_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.924,
+        -0.5,
+        4.08
+      ],
+      "source_world_position": [
+        0.924,
+        0.5,
+        4.08
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_4_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.848,
+        -0.5,
+        3.7
+      ],
+      "source_world_position": [
+        1.848,
+        0.5,
+        3.7
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_0_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.6,
+        -0.5,
+        0.0
+      ],
+      "source_world_position": [
+        -2.6,
+        0.5,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_1_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.6,
+        -0.5,
+        0.0
+      ],
+      "source_world_position": [
+        2.6,
+        0.5,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_0_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.848,
+        -2.0,
+        4.05
+      ],
+      "source_world_position": [
+        -1.848,
+        2.0,
+        4.05
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_1_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.924,
+        -2.0,
+        4.18
+      ],
+      "source_world_position": [
+        -0.924,
+        2.0,
+        4.18
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_2_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -2.0,
+        4.2
+      ],
+      "source_world_position": [
+        0.0,
+        2.0,
+        4.2
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_3_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.924,
+        -2.0,
+        4.11
+      ],
+      "source_world_position": [
+        0.924,
+        2.0,
+        4.11
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_4_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.848,
+        -2.0,
+        3.7
+      ],
+      "source_world_position": [
+        1.848,
+        2.0,
+        3.7
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_0_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.6,
+        -2.0,
+        0.0
+      ],
+      "source_world_position": [
+        -2.6,
+        2.0,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_1_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.6,
+        -2.0,
+        0.0
+      ],
+      "source_world_position": [
+        2.6,
+        2.0,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_0_5",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.848,
+        -3.5,
+        4.09
+      ],
+      "source_world_position": [
+        -1.848,
+        3.5,
+        4.09
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_1_5",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.924,
+        -3.5,
+        4.21
+      ],
+      "source_world_position": [
+        -0.924,
+        3.5,
+        4.21
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_2_5",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -3.5,
+        4.22
+      ],
+      "source_world_position": [
+        0.0,
+        3.5,
+        4.22
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_3_5",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.924,
+        -3.5,
+        4.12
+      ],
+      "source_world_position": [
+        0.924,
+        3.5,
+        4.12
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_4_5",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.848,
+        -3.5,
+        3.69
+      ],
+      "source_world_position": [
+        1.848,
+        3.5,
+        3.69
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_0_5",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.6,
+        -3.5,
+        0.0
+      ],
+      "source_world_position": [
+        -2.6,
+        3.5,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_1_5",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.6,
+        -3.5,
+        0.0
+      ],
+      "source_world_position": [
+        2.6,
+        3.5,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_0_6",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.679999,
+        -5.0,
+        4.26
+      ],
+      "source_world_position": [
+        -1.68,
+        5.0,
+        4.26
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_1_6",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.84,
+        -5.0,
+        4.26
+      ],
+      "source_world_position": [
+        -0.84,
+        5.0,
+        4.26
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_2_6",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -5.0,
+        4.26
+      ],
+      "source_world_position": [
+        0.0,
+        5.0,
+        4.26
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_3_6",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.84,
+        -5.0,
+        4.26
+      ],
+      "source_world_position": [
+        0.84,
+        5.0,
+        4.26
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_4_6",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.68,
+        -5.0,
+        4.26
+      ],
+      "source_world_position": [
+        1.68,
+        5.0,
+        4.26
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_0_6",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.9,
+        -5.0,
+        0.0
+      ],
+      "source_world_position": [
+        -2.9,
+        5.0,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_1_6",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.900001,
+        -5.0,
+        0.0
+      ],
+      "source_world_position": [
+        2.9,
+        5.0,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_0_7",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.679999,
+        -6.5,
+        4.26
+      ],
+      "source_world_position": [
+        -1.68,
+        6.5,
+        4.26
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_1_7",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.839999,
+        -6.5,
+        4.26
+      ],
+      "source_world_position": [
+        -0.84,
+        6.5,
+        4.26
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_2_7",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -6.5,
+        4.26
+      ],
+      "source_world_position": [
+        0.0,
+        6.5,
+        4.26
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_3_7",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.840001,
+        -6.5,
+        4.26
+      ],
+      "source_world_position": [
+        0.84,
+        6.5,
+        4.26
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_4_7",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.680001,
+        -6.5,
+        4.26
+      ],
+      "source_world_position": [
+        1.68,
+        6.5,
+        4.26
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_0_7",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.7,
+        -6.5,
+        0.0
+      ],
+      "source_world_position": [
+        -2.7,
+        6.5,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_1_7",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.700001,
+        -6.5,
+        0.0
+      ],
+      "source_world_position": [
+        2.7,
+        6.5,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_0_8",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.679999,
+        -8.0,
+        4.26
+      ],
+      "source_world_position": [
+        -1.68,
+        8.0,
+        4.26
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_1_8",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.839999,
+        -8.0,
+        4.26
+      ],
+      "source_world_position": [
+        -0.84,
+        8.0,
+        4.26
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_2_8",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -8.0,
+        4.26
+      ],
+      "source_world_position": [
+        0.0,
+        8.0,
+        4.26
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_3_8",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.840001,
+        -8.0,
+        4.26
+      ],
+      "source_world_position": [
+        0.84,
+        8.0,
+        4.26
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_4_8",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.680001,
+        -8.0,
+        4.26
+      ],
+      "source_world_position": [
+        1.68,
+        8.0,
+        4.26
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_0_8",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.799999,
+        -8.0,
+        0.0
+      ],
+      "source_world_position": [
+        -2.8,
+        8.0,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_1_8",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.800001,
+        -8.0,
+        0.0
+      ],
+      "source_world_position": [
+        2.8,
+        8.0,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_0_9",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.343999,
+        -9.5,
+        4.19
+      ],
+      "source_world_position": [
+        -1.344,
+        9.5,
+        4.19
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_1_9",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.671999,
+        -9.5,
+        4.22
+      ],
+      "source_world_position": [
+        -0.672,
+        9.5,
+        4.22
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_2_9",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -9.5,
+        4.22
+      ],
+      "source_world_position": [
+        0.0,
+        9.5,
+        4.22
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_3_9",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.672001,
+        -9.5,
+        4.11
+      ],
+      "source_world_position": [
+        0.672,
+        9.5,
+        4.11
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_4_9",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.344001,
+        -9.5,
+        3.76
+      ],
+      "source_world_position": [
+        1.344,
+        9.5,
+        3.76
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_0_9",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.599999,
+        -9.5,
+        0.0
+      ],
+      "source_world_position": [
+        -2.6,
+        9.5,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_1_9",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.600001,
+        -9.5,
+        0.0
+      ],
+      "source_world_position": [
+        2.6,
+        9.5,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_0_10",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.175999,
+        -11.0,
+        4.09
+      ],
+      "source_world_position": [
+        -1.176,
+        11.0,
+        4.09
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_1_10",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.587999,
+        -11.0,
+        4.1
+      ],
+      "source_world_position": [
+        -0.588,
+        11.0,
+        4.1
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_2_10",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -11.0,
+        4.08
+      ],
+      "source_world_position": [
+        0.0,
+        11.0,
+        4.08
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_3_10",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.588001,
+        -11.0,
+        3.98
+      ],
+      "source_world_position": [
+        0.588,
+        11.0,
+        3.98
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_4_10",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.176001,
+        -11.0,
+        3.73
+      ],
+      "source_world_position": [
+        1.176,
+        11.0,
+        3.73
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_0_10",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.399999,
+        -11.0,
+        0.0
+      ],
+      "source_world_position": [
+        -2.4,
+        11.0,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_1_10",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.400001,
+        -11.0,
+        0.0
+      ],
+      "source_world_position": [
+        2.4,
+        11.0,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_0_11",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.007999,
+        -12.5,
+        3.99
+      ],
+      "source_world_position": [
+        -1.008,
+        12.5,
+        3.99
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_1_11",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.503999,
+        -12.5,
+        4.0
+      ],
+      "source_world_position": [
+        -0.504,
+        12.5,
+        4.0
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_2_11",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -12.5,
+        3.95
+      ],
+      "source_world_position": [
+        0.0,
+        12.5,
+        3.95
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_3_11",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.504001,
+        -12.5,
+        3.87
+      ],
+      "source_world_position": [
+        0.504,
+        12.5,
+        3.87
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_deck_4_11",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.008001,
+        -12.5,
+        3.67
+      ],
+      "source_world_position": [
+        1.008,
+        12.5,
+        3.67
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_0_11",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.199999,
+        -12.5,
+        0.0
+      ],
+      "source_world_position": [
+        -2.2,
+        12.5,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_flank_1_11",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.200001,
+        -12.5,
+        0.0
+      ],
+      "source_world_position": [
+        2.2,
+        12.5,
+        0.0
+      ],
+      "weight": 180.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_0_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.300002,
+        27.0,
+        0.0
+      ],
+      "source_world_position": [
+        -2.3,
+        -27.0,
+        0.0
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_1_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        2e-06,
+        27.0,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        -27.0,
+        0.0
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_2_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.299998,
+        27.0,
+        0.0
+      ],
+      "source_world_position": [
+        2.3,
+        -27.0,
+        0.0
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_0_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.300002,
+        24.700001,
+        0.405
+      ],
+      "source_world_position": [
+        -2.3,
+        -24.700001,
+        0.405
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_1_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        2e-06,
+        24.700001,
+        0.405
+      ],
+      "source_world_position": [
+        0.0,
+        -24.700001,
+        0.405
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_2_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.299998,
+        24.700001,
+        0.405
+      ],
+      "source_world_position": [
+        2.3,
+        -24.700001,
+        0.405
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_0_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.300002,
+        22.4,
+        0.81
+      ],
+      "source_world_position": [
+        -2.3,
+        -22.4,
+        0.81
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_1_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        2e-06,
+        22.4,
+        0.81
+      ],
+      "source_world_position": [
+        0.0,
+        -22.4,
+        0.81
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_2_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.299998,
+        22.4,
+        0.81
+      ],
+      "source_world_position": [
+        2.3,
+        -22.4,
+        0.81
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_0_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.300002,
+        20.1,
+        1.215
+      ],
+      "source_world_position": [
+        -2.3,
+        -20.1,
+        1.215
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_1_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        2e-06,
+        20.1,
+        1.215
+      ],
+      "source_world_position": [
+        0.0,
+        -20.1,
+        1.215
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_2_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.299998,
+        20.1,
+        1.215
+      ],
+      "source_world_position": [
+        2.3,
+        -20.1,
+        1.215
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_0_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.300002,
+        17.799999,
+        1.62
+      ],
+      "source_world_position": [
+        -2.3,
+        -17.799999,
+        1.62
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_1_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        2e-06,
+        17.799999,
+        1.62
+      ],
+      "source_world_position": [
+        0.0,
+        -17.799999,
+        1.62
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_2_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.299998,
+        17.799999,
+        1.62
+      ],
+      "source_world_position": [
+        2.3,
+        -17.799999,
+        1.62
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_0_5",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.300001,
+        15.5,
+        2.025
+      ],
+      "source_world_position": [
+        -2.3,
+        -15.5,
+        2.025
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_1_5",
+      "node_material": "|NM_METAL",
+      "position": [
+        1e-06,
+        15.5,
+        2.025
+      ],
+      "source_world_position": [
+        0.0,
+        -15.5,
+        2.025
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_2_5",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.299999,
+        15.5,
+        2.025
+      ],
+      "source_world_position": [
+        2.3,
+        -15.5,
+        2.025
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_0_6",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.300001,
+        13.2,
+        2.43
+      ],
+      "source_world_position": [
+        -2.3,
+        -13.2,
+        2.43
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_1_6",
+      "node_material": "|NM_METAL",
+      "position": [
+        1e-06,
+        13.2,
+        2.43
+      ],
+      "source_world_position": [
+        0.0,
+        -13.2,
+        2.43
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_2_6",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.299999,
+        13.2,
+        2.43
+      ],
+      "source_world_position": [
+        2.3,
+        -13.2,
+        2.43
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_0_7",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.300001,
+        10.9,
+        2.835
+      ],
+      "source_world_position": [
+        -2.3,
+        -10.9,
+        2.835
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_1_7",
+      "node_material": "|NM_METAL",
+      "position": [
+        1e-06,
+        10.9,
+        2.835
+      ],
+      "source_world_position": [
+        0.0,
+        -10.9,
+        2.835
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_2_7",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.299999,
+        10.9,
+        2.835
+      ],
+      "source_world_position": [
+        2.3,
+        -10.9,
+        2.835
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_0_8",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.300001,
+        8.6,
+        3.24
+      ],
+      "source_world_position": [
+        -2.3,
+        -8.6,
+        3.24
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_1_8",
+      "node_material": "|NM_METAL",
+      "position": [
+        1e-06,
+        8.6,
+        3.24
+      ],
+      "source_world_position": [
+        0.0,
+        -8.6,
+        3.24
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_2_8",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.299999,
+        8.6,
+        3.24
+      ],
+      "source_world_position": [
+        2.3,
+        -8.6,
+        3.24
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_0_9",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.3,
+        6.3,
+        3.645
+      ],
+      "source_world_position": [
+        -2.3,
+        -6.3,
+        3.645
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_1_9",
+      "node_material": "|NM_METAL",
+      "position": [
+        1e-06,
+        6.3,
+        3.645
+      ],
+      "source_world_position": [
+        0.0,
+        -6.3,
+        3.645
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ramp_2_9",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.299999,
+        6.3,
+        3.645
+      ],
+      "source_world_position": [
+        2.3,
+        -6.3,
+        3.645
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_head_lip_l",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.799999,
+        -15.0,
+        2.2
+      ],
+      "source_world_position": [
+        -1.8,
+        15.0,
+        2.2
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_head_lip_r",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.800001,
+        -15.0,
+        2.2
+      ],
+      "source_world_position": [
+        1.8,
+        15.0,
+        2.2
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ground_reference",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "weight": 500.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_whale_geyser_ground_back",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        5.0,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        -5.0,
+        0.0
+      ],
+      "weight": 500.0
+    }
+  ],
+  "palette": {
+    "ericrolph_whale_geyser_blowhole_dark": {
+      "color": [
+        0.15,
+        0.25,
+        0.38,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.6,
+      "texture": {
+        "family": "whale_skin",
+        "params": {
+          "base": [
+            0.16,
+            0.26,
+            0.4
+          ]
+        }
+      }
+    },
+    "ericrolph_whale_geyser_hazard": {
+      "color": [
+        0.95,
+        0.75,
+        0.08,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.55,
+      "texture": {
+        "family": "hazard_chevron"
+      }
+    },
+    "ericrolph_whale_geyser_paint_white": {
+      "color": [
+        0.92,
+        0.92,
+        0.9,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.6
+    },
+    "ericrolph_whale_geyser_pupil_black": {
+      "color": [
+        0.05,
+        0.05,
+        0.06,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.3
+    },
+    "ericrolph_whale_geyser_ramp_steel": {
+      "color": [
+        0.55,
+        0.58,
+        0.6,
+        1.0
+      ],
+      "metallic": 0.3,
+      "roughness": 0.5,
+      "texture": {
+        "family": "painted_metal",
+        "params": {
+          "base": [
+            0.55,
+            0.58,
+            0.6
+          ],
+          "rough": 0.5
+        }
+      }
+    },
+    "ericrolph_whale_geyser_whale_hero": {
+      "color": [
+        0.35,
+        0.42,
+        0.5,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.55,
+      "texture": {
+        "family": "external",
+        "maps": {
+          "baseColorMap": "assets/whale_hero.color.png",
+          "normalMap": "assets/whale_hero.normal.png",
+          "roughnessMap": "assets/whale_hero_roughness.data.png"
+        }
+      }
+    }
+  },
+  "parts": [],
+  "refnodes": {
+    "back": "ericrolph_whale_geyser_ground_back",
+    "left": "ericrolph_whale_geyser_flank_0_2",
+    "ref": "ericrolph_whale_geyser_ground_reference",
+    "up": "ericrolph_whale_geyser_deck_2_2"
+  },
+  "schema": "ericrolph-giant-props-handoff-v1",
+  "spawn_envelope_nodes": [
+    "ericrolph_whale_geyser_ramp_0_0",
+    "ericrolph_whale_geyser_ramp_2_0",
+    "ericrolph_whale_geyser_deck_0_8",
+    "ericrolph_whale_geyser_deck_4_8",
+    "ericrolph_whale_geyser_head_lip_l",
+    "ericrolph_whale_geyser_head_lip_r",
+    "ericrolph_whale_geyser_deck_0_0",
+    "ericrolph_whale_geyser_deck_4_0"
+  ],
+  "triangles": [
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_0",
+        "ericrolph_whale_geyser_deck_1_0",
+        "ericrolph_whale_geyser_deck_1_1"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_0",
+        "ericrolph_whale_geyser_deck_1_1",
+        "ericrolph_whale_geyser_deck_0_1"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_0",
+        "ericrolph_whale_geyser_deck_2_0",
+        "ericrolph_whale_geyser_deck_2_1"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_0",
+        "ericrolph_whale_geyser_deck_2_1",
+        "ericrolph_whale_geyser_deck_1_1"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_0",
+        "ericrolph_whale_geyser_deck_3_0",
+        "ericrolph_whale_geyser_deck_3_1"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_0",
+        "ericrolph_whale_geyser_deck_3_1",
+        "ericrolph_whale_geyser_deck_2_1"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_0",
+        "ericrolph_whale_geyser_deck_4_0",
+        "ericrolph_whale_geyser_deck_4_1"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_0",
+        "ericrolph_whale_geyser_deck_4_1",
+        "ericrolph_whale_geyser_deck_3_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_0",
+        "ericrolph_whale_geyser_deck_0_0",
+        "ericrolph_whale_geyser_deck_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_0",
+        "ericrolph_whale_geyser_deck_0_1",
+        "ericrolph_whale_geyser_flank_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_0",
+        "ericrolph_whale_geyser_flank_1_1",
+        "ericrolph_whale_geyser_deck_4_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_0",
+        "ericrolph_whale_geyser_deck_4_1",
+        "ericrolph_whale_geyser_deck_4_0"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_1",
+        "ericrolph_whale_geyser_deck_1_1",
+        "ericrolph_whale_geyser_deck_1_2"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_1",
+        "ericrolph_whale_geyser_deck_1_2",
+        "ericrolph_whale_geyser_deck_0_2"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_1",
+        "ericrolph_whale_geyser_deck_2_1",
+        "ericrolph_whale_geyser_deck_2_2"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_1",
+        "ericrolph_whale_geyser_deck_2_2",
+        "ericrolph_whale_geyser_deck_1_2"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_1",
+        "ericrolph_whale_geyser_deck_3_1",
+        "ericrolph_whale_geyser_deck_3_2"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_1",
+        "ericrolph_whale_geyser_deck_3_2",
+        "ericrolph_whale_geyser_deck_2_2"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_1",
+        "ericrolph_whale_geyser_deck_4_1",
+        "ericrolph_whale_geyser_deck_4_2"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_1",
+        "ericrolph_whale_geyser_deck_4_2",
+        "ericrolph_whale_geyser_deck_3_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_1",
+        "ericrolph_whale_geyser_deck_0_1",
+        "ericrolph_whale_geyser_deck_0_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_1",
+        "ericrolph_whale_geyser_deck_0_2",
+        "ericrolph_whale_geyser_flank_0_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_1",
+        "ericrolph_whale_geyser_flank_1_2",
+        "ericrolph_whale_geyser_deck_4_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_1",
+        "ericrolph_whale_geyser_deck_4_2",
+        "ericrolph_whale_geyser_deck_4_1"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_2",
+        "ericrolph_whale_geyser_deck_1_2",
+        "ericrolph_whale_geyser_deck_1_3"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_2",
+        "ericrolph_whale_geyser_deck_1_3",
+        "ericrolph_whale_geyser_deck_0_3"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_2",
+        "ericrolph_whale_geyser_deck_2_2",
+        "ericrolph_whale_geyser_deck_2_3"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_2",
+        "ericrolph_whale_geyser_deck_2_3",
+        "ericrolph_whale_geyser_deck_1_3"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_2",
+        "ericrolph_whale_geyser_deck_3_2",
+        "ericrolph_whale_geyser_deck_3_3"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_2",
+        "ericrolph_whale_geyser_deck_3_3",
+        "ericrolph_whale_geyser_deck_2_3"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_2",
+        "ericrolph_whale_geyser_deck_4_2",
+        "ericrolph_whale_geyser_deck_4_3"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_2",
+        "ericrolph_whale_geyser_deck_4_3",
+        "ericrolph_whale_geyser_deck_3_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_2",
+        "ericrolph_whale_geyser_deck_0_2",
+        "ericrolph_whale_geyser_deck_0_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_2",
+        "ericrolph_whale_geyser_deck_0_3",
+        "ericrolph_whale_geyser_flank_0_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_2",
+        "ericrolph_whale_geyser_flank_1_3",
+        "ericrolph_whale_geyser_deck_4_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_2",
+        "ericrolph_whale_geyser_deck_4_3",
+        "ericrolph_whale_geyser_deck_4_2"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_3",
+        "ericrolph_whale_geyser_deck_1_3",
+        "ericrolph_whale_geyser_deck_1_4"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_3",
+        "ericrolph_whale_geyser_deck_1_4",
+        "ericrolph_whale_geyser_deck_0_4"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_3",
+        "ericrolph_whale_geyser_deck_2_3",
+        "ericrolph_whale_geyser_deck_2_4"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_3",
+        "ericrolph_whale_geyser_deck_2_4",
+        "ericrolph_whale_geyser_deck_1_4"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_3",
+        "ericrolph_whale_geyser_deck_3_3",
+        "ericrolph_whale_geyser_deck_3_4"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_3",
+        "ericrolph_whale_geyser_deck_3_4",
+        "ericrolph_whale_geyser_deck_2_4"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_3",
+        "ericrolph_whale_geyser_deck_4_3",
+        "ericrolph_whale_geyser_deck_4_4"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_3",
+        "ericrolph_whale_geyser_deck_4_4",
+        "ericrolph_whale_geyser_deck_3_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_3",
+        "ericrolph_whale_geyser_deck_0_3",
+        "ericrolph_whale_geyser_deck_0_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_3",
+        "ericrolph_whale_geyser_deck_0_4",
+        "ericrolph_whale_geyser_flank_0_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_3",
+        "ericrolph_whale_geyser_flank_1_4",
+        "ericrolph_whale_geyser_deck_4_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_3",
+        "ericrolph_whale_geyser_deck_4_4",
+        "ericrolph_whale_geyser_deck_4_3"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_4",
+        "ericrolph_whale_geyser_deck_1_4",
+        "ericrolph_whale_geyser_deck_1_5"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_4",
+        "ericrolph_whale_geyser_deck_1_5",
+        "ericrolph_whale_geyser_deck_0_5"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_4",
+        "ericrolph_whale_geyser_deck_2_4",
+        "ericrolph_whale_geyser_deck_2_5"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_4",
+        "ericrolph_whale_geyser_deck_2_5",
+        "ericrolph_whale_geyser_deck_1_5"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_4",
+        "ericrolph_whale_geyser_deck_3_4",
+        "ericrolph_whale_geyser_deck_3_5"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_4",
+        "ericrolph_whale_geyser_deck_3_5",
+        "ericrolph_whale_geyser_deck_2_5"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_4",
+        "ericrolph_whale_geyser_deck_4_4",
+        "ericrolph_whale_geyser_deck_4_5"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_4",
+        "ericrolph_whale_geyser_deck_4_5",
+        "ericrolph_whale_geyser_deck_3_5"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_4",
+        "ericrolph_whale_geyser_deck_0_4",
+        "ericrolph_whale_geyser_deck_0_5"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_4",
+        "ericrolph_whale_geyser_deck_0_5",
+        "ericrolph_whale_geyser_flank_0_5"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_4",
+        "ericrolph_whale_geyser_flank_1_5",
+        "ericrolph_whale_geyser_deck_4_5"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_4",
+        "ericrolph_whale_geyser_deck_4_5",
+        "ericrolph_whale_geyser_deck_4_4"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_5",
+        "ericrolph_whale_geyser_deck_1_5",
+        "ericrolph_whale_geyser_deck_1_6"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_5",
+        "ericrolph_whale_geyser_deck_1_6",
+        "ericrolph_whale_geyser_deck_0_6"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_5",
+        "ericrolph_whale_geyser_deck_2_5",
+        "ericrolph_whale_geyser_deck_2_6"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_5",
+        "ericrolph_whale_geyser_deck_2_6",
+        "ericrolph_whale_geyser_deck_1_6"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_5",
+        "ericrolph_whale_geyser_deck_3_5",
+        "ericrolph_whale_geyser_deck_3_6"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_5",
+        "ericrolph_whale_geyser_deck_3_6",
+        "ericrolph_whale_geyser_deck_2_6"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_5",
+        "ericrolph_whale_geyser_deck_4_5",
+        "ericrolph_whale_geyser_deck_4_6"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_5",
+        "ericrolph_whale_geyser_deck_4_6",
+        "ericrolph_whale_geyser_deck_3_6"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_5",
+        "ericrolph_whale_geyser_deck_0_5",
+        "ericrolph_whale_geyser_deck_0_6"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_5",
+        "ericrolph_whale_geyser_deck_0_6",
+        "ericrolph_whale_geyser_flank_0_6"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_5",
+        "ericrolph_whale_geyser_flank_1_6",
+        "ericrolph_whale_geyser_deck_4_6"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_5",
+        "ericrolph_whale_geyser_deck_4_6",
+        "ericrolph_whale_geyser_deck_4_5"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_6",
+        "ericrolph_whale_geyser_deck_1_6",
+        "ericrolph_whale_geyser_deck_1_7"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_6",
+        "ericrolph_whale_geyser_deck_1_7",
+        "ericrolph_whale_geyser_deck_0_7"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_6",
+        "ericrolph_whale_geyser_deck_2_6",
+        "ericrolph_whale_geyser_deck_2_7"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_6",
+        "ericrolph_whale_geyser_deck_2_7",
+        "ericrolph_whale_geyser_deck_1_7"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_6",
+        "ericrolph_whale_geyser_deck_3_6",
+        "ericrolph_whale_geyser_deck_3_7"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_6",
+        "ericrolph_whale_geyser_deck_3_7",
+        "ericrolph_whale_geyser_deck_2_7"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_6",
+        "ericrolph_whale_geyser_deck_4_6",
+        "ericrolph_whale_geyser_deck_4_7"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_6",
+        "ericrolph_whale_geyser_deck_4_7",
+        "ericrolph_whale_geyser_deck_3_7"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_6",
+        "ericrolph_whale_geyser_deck_0_6",
+        "ericrolph_whale_geyser_deck_0_7"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_6",
+        "ericrolph_whale_geyser_deck_0_7",
+        "ericrolph_whale_geyser_flank_0_7"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_6",
+        "ericrolph_whale_geyser_flank_1_7",
+        "ericrolph_whale_geyser_deck_4_7"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_6",
+        "ericrolph_whale_geyser_deck_4_7",
+        "ericrolph_whale_geyser_deck_4_6"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_7",
+        "ericrolph_whale_geyser_deck_1_7",
+        "ericrolph_whale_geyser_deck_1_8"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_7",
+        "ericrolph_whale_geyser_deck_1_8",
+        "ericrolph_whale_geyser_deck_0_8"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_7",
+        "ericrolph_whale_geyser_deck_2_7",
+        "ericrolph_whale_geyser_deck_2_8"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_7",
+        "ericrolph_whale_geyser_deck_2_8",
+        "ericrolph_whale_geyser_deck_1_8"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_7",
+        "ericrolph_whale_geyser_deck_3_7",
+        "ericrolph_whale_geyser_deck_3_8"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_7",
+        "ericrolph_whale_geyser_deck_3_8",
+        "ericrolph_whale_geyser_deck_2_8"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_7",
+        "ericrolph_whale_geyser_deck_4_7",
+        "ericrolph_whale_geyser_deck_4_8"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_7",
+        "ericrolph_whale_geyser_deck_4_8",
+        "ericrolph_whale_geyser_deck_3_8"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_7",
+        "ericrolph_whale_geyser_deck_0_7",
+        "ericrolph_whale_geyser_deck_0_8"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_7",
+        "ericrolph_whale_geyser_deck_0_8",
+        "ericrolph_whale_geyser_flank_0_8"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_7",
+        "ericrolph_whale_geyser_flank_1_8",
+        "ericrolph_whale_geyser_deck_4_8"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_7",
+        "ericrolph_whale_geyser_deck_4_8",
+        "ericrolph_whale_geyser_deck_4_7"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_8",
+        "ericrolph_whale_geyser_deck_1_8",
+        "ericrolph_whale_geyser_deck_1_9"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_8",
+        "ericrolph_whale_geyser_deck_1_9",
+        "ericrolph_whale_geyser_deck_0_9"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_8",
+        "ericrolph_whale_geyser_deck_2_8",
+        "ericrolph_whale_geyser_deck_2_9"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_8",
+        "ericrolph_whale_geyser_deck_2_9",
+        "ericrolph_whale_geyser_deck_1_9"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_8",
+        "ericrolph_whale_geyser_deck_3_8",
+        "ericrolph_whale_geyser_deck_3_9"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_8",
+        "ericrolph_whale_geyser_deck_3_9",
+        "ericrolph_whale_geyser_deck_2_9"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_8",
+        "ericrolph_whale_geyser_deck_4_8",
+        "ericrolph_whale_geyser_deck_4_9"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_8",
+        "ericrolph_whale_geyser_deck_4_9",
+        "ericrolph_whale_geyser_deck_3_9"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_8",
+        "ericrolph_whale_geyser_deck_0_8",
+        "ericrolph_whale_geyser_deck_0_9"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_8",
+        "ericrolph_whale_geyser_deck_0_9",
+        "ericrolph_whale_geyser_flank_0_9"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_8",
+        "ericrolph_whale_geyser_flank_1_9",
+        "ericrolph_whale_geyser_deck_4_9"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_8",
+        "ericrolph_whale_geyser_deck_4_9",
+        "ericrolph_whale_geyser_deck_4_8"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_9",
+        "ericrolph_whale_geyser_deck_1_9",
+        "ericrolph_whale_geyser_deck_1_10"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_9",
+        "ericrolph_whale_geyser_deck_1_10",
+        "ericrolph_whale_geyser_deck_0_10"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_9",
+        "ericrolph_whale_geyser_deck_2_9",
+        "ericrolph_whale_geyser_deck_2_10"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_9",
+        "ericrolph_whale_geyser_deck_2_10",
+        "ericrolph_whale_geyser_deck_1_10"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_9",
+        "ericrolph_whale_geyser_deck_3_9",
+        "ericrolph_whale_geyser_deck_3_10"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_9",
+        "ericrolph_whale_geyser_deck_3_10",
+        "ericrolph_whale_geyser_deck_2_10"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_9",
+        "ericrolph_whale_geyser_deck_4_9",
+        "ericrolph_whale_geyser_deck_4_10"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_9",
+        "ericrolph_whale_geyser_deck_4_10",
+        "ericrolph_whale_geyser_deck_3_10"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_9",
+        "ericrolph_whale_geyser_deck_0_9",
+        "ericrolph_whale_geyser_deck_0_10"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_9",
+        "ericrolph_whale_geyser_deck_0_10",
+        "ericrolph_whale_geyser_flank_0_10"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_9",
+        "ericrolph_whale_geyser_flank_1_10",
+        "ericrolph_whale_geyser_deck_4_10"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_9",
+        "ericrolph_whale_geyser_deck_4_10",
+        "ericrolph_whale_geyser_deck_4_9"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_10",
+        "ericrolph_whale_geyser_deck_1_10",
+        "ericrolph_whale_geyser_deck_1_11"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_10",
+        "ericrolph_whale_geyser_deck_1_11",
+        "ericrolph_whale_geyser_deck_0_11"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_10",
+        "ericrolph_whale_geyser_deck_2_10",
+        "ericrolph_whale_geyser_deck_2_11"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_1_10",
+        "ericrolph_whale_geyser_deck_2_11",
+        "ericrolph_whale_geyser_deck_1_11"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_10",
+        "ericrolph_whale_geyser_deck_3_10",
+        "ericrolph_whale_geyser_deck_3_11"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_10",
+        "ericrolph_whale_geyser_deck_3_11",
+        "ericrolph_whale_geyser_deck_2_11"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_10",
+        "ericrolph_whale_geyser_deck_4_10",
+        "ericrolph_whale_geyser_deck_4_11"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_3_10",
+        "ericrolph_whale_geyser_deck_4_11",
+        "ericrolph_whale_geyser_deck_3_11"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_10",
+        "ericrolph_whale_geyser_deck_0_10",
+        "ericrolph_whale_geyser_deck_0_11"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_0_10",
+        "ericrolph_whale_geyser_deck_0_11",
+        "ericrolph_whale_geyser_flank_0_11"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_10",
+        "ericrolph_whale_geyser_flank_1_11",
+        "ericrolph_whale_geyser_deck_4_11"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_flank_1_10",
+        "ericrolph_whale_geyser_deck_4_11",
+        "ericrolph_whale_geyser_deck_4_10"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_0",
+        "ericrolph_whale_geyser_ramp_1_0",
+        "ericrolph_whale_geyser_ramp_1_1"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_0",
+        "ericrolph_whale_geyser_ramp_1_1",
+        "ericrolph_whale_geyser_ramp_0_1"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_0",
+        "ericrolph_whale_geyser_ramp_2_0",
+        "ericrolph_whale_geyser_ramp_2_1"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_0",
+        "ericrolph_whale_geyser_ramp_2_1",
+        "ericrolph_whale_geyser_ramp_1_1"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_1",
+        "ericrolph_whale_geyser_ramp_1_1",
+        "ericrolph_whale_geyser_ramp_1_2"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_1",
+        "ericrolph_whale_geyser_ramp_1_2",
+        "ericrolph_whale_geyser_ramp_0_2"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_1",
+        "ericrolph_whale_geyser_ramp_2_1",
+        "ericrolph_whale_geyser_ramp_2_2"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_1",
+        "ericrolph_whale_geyser_ramp_2_2",
+        "ericrolph_whale_geyser_ramp_1_2"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_2",
+        "ericrolph_whale_geyser_ramp_1_2",
+        "ericrolph_whale_geyser_ramp_1_3"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_2",
+        "ericrolph_whale_geyser_ramp_1_3",
+        "ericrolph_whale_geyser_ramp_0_3"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_2",
+        "ericrolph_whale_geyser_ramp_2_2",
+        "ericrolph_whale_geyser_ramp_2_3"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_2",
+        "ericrolph_whale_geyser_ramp_2_3",
+        "ericrolph_whale_geyser_ramp_1_3"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_3",
+        "ericrolph_whale_geyser_ramp_1_3",
+        "ericrolph_whale_geyser_ramp_1_4"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_3",
+        "ericrolph_whale_geyser_ramp_1_4",
+        "ericrolph_whale_geyser_ramp_0_4"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_3",
+        "ericrolph_whale_geyser_ramp_2_3",
+        "ericrolph_whale_geyser_ramp_2_4"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_3",
+        "ericrolph_whale_geyser_ramp_2_4",
+        "ericrolph_whale_geyser_ramp_1_4"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_4",
+        "ericrolph_whale_geyser_ramp_1_4",
+        "ericrolph_whale_geyser_ramp_1_5"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_4",
+        "ericrolph_whale_geyser_ramp_1_5",
+        "ericrolph_whale_geyser_ramp_0_5"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_4",
+        "ericrolph_whale_geyser_ramp_2_4",
+        "ericrolph_whale_geyser_ramp_2_5"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_4",
+        "ericrolph_whale_geyser_ramp_2_5",
+        "ericrolph_whale_geyser_ramp_1_5"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_5",
+        "ericrolph_whale_geyser_ramp_1_5",
+        "ericrolph_whale_geyser_ramp_1_6"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_5",
+        "ericrolph_whale_geyser_ramp_1_6",
+        "ericrolph_whale_geyser_ramp_0_6"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_5",
+        "ericrolph_whale_geyser_ramp_2_5",
+        "ericrolph_whale_geyser_ramp_2_6"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_5",
+        "ericrolph_whale_geyser_ramp_2_6",
+        "ericrolph_whale_geyser_ramp_1_6"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_6",
+        "ericrolph_whale_geyser_ramp_1_6",
+        "ericrolph_whale_geyser_ramp_1_7"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_6",
+        "ericrolph_whale_geyser_ramp_1_7",
+        "ericrolph_whale_geyser_ramp_0_7"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_6",
+        "ericrolph_whale_geyser_ramp_2_6",
+        "ericrolph_whale_geyser_ramp_2_7"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_6",
+        "ericrolph_whale_geyser_ramp_2_7",
+        "ericrolph_whale_geyser_ramp_1_7"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_7",
+        "ericrolph_whale_geyser_ramp_1_7",
+        "ericrolph_whale_geyser_ramp_1_8"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_7",
+        "ericrolph_whale_geyser_ramp_1_8",
+        "ericrolph_whale_geyser_ramp_0_8"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_7",
+        "ericrolph_whale_geyser_ramp_2_7",
+        "ericrolph_whale_geyser_ramp_2_8"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_7",
+        "ericrolph_whale_geyser_ramp_2_8",
+        "ericrolph_whale_geyser_ramp_1_8"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_8",
+        "ericrolph_whale_geyser_ramp_1_8",
+        "ericrolph_whale_geyser_ramp_1_9"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_8",
+        "ericrolph_whale_geyser_ramp_1_9",
+        "ericrolph_whale_geyser_ramp_0_9"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_8",
+        "ericrolph_whale_geyser_ramp_2_8",
+        "ericrolph_whale_geyser_ramp_2_9"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_8",
+        "ericrolph_whale_geyser_ramp_2_9",
+        "ericrolph_whale_geyser_ramp_1_9"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_9",
+        "ericrolph_whale_geyser_ramp_1_9",
+        "ericrolph_whale_geyser_deck_2_0"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_0_9",
+        "ericrolph_whale_geyser_deck_2_0",
+        "ericrolph_whale_geyser_deck_0_0"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_9",
+        "ericrolph_whale_geyser_ramp_2_9",
+        "ericrolph_whale_geyser_deck_4_0"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_whale_geyser_ramp_1_9",
+        "ericrolph_whale_geyser_deck_4_0",
+        "ericrolph_whale_geyser_deck_2_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_0_11",
+        "ericrolph_whale_geyser_deck_2_11",
+        "ericrolph_whale_geyser_head_lip_l"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_11",
+        "ericrolph_whale_geyser_head_lip_r",
+        "ericrolph_whale_geyser_head_lip_l"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_whale_geyser_deck_2_11",
+        "ericrolph_whale_geyser_deck_4_11",
+        "ericrolph_whale_geyser_head_lip_r"
+      ]
+    }
+  ],
+  "visual": {
+    "bounds": {
+      "max": [
+        3.285408,
+        27.311062,
+        5.644702
+      ],
+      "min": [
+        -3.28541,
+        -16.5,
+        -0.145005
+      ]
+    },
+    "materials": [
+      "ericrolph_whale_geyser_blowhole_dark",
+      "ericrolph_whale_geyser_hazard",
+      "ericrolph_whale_geyser_paint_white",
+      "ericrolph_whale_geyser_pupil_black",
+      "ericrolph_whale_geyser_ramp_steel",
+      "ericrolph_whale_geyser_whale_hero"
+    ],
+    "path": "vehicles/ericrolph_whale_geyser/ericrolph_whale_geyser.dae",
+    "sha256": "daacd2dd627bade983a389a5f9ec5044cfb88fbadc2c756d475f40c8047544ff",
+    "size": 3525503
+  }
+}

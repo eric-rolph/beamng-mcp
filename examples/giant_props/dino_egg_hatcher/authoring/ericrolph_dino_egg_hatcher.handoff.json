@@ -1,0 +1,2807 @@
+{
+  "asset": {
+    "display_name": "Dino Egg Hatcher",
+    "flexbodies_extra": [],
+    "id": "ericrolph_dino_egg_hatcher",
+    "physics_cage": "ericrolph_dino_egg_hatcher_cage",
+    "visual_mesh": "ericrolph_dino_egg_hatcher_visual"
+  },
+  "base_nodes": [
+    "ericrolph_dino_egg_hatcher_floor_00_00_00",
+    "ericrolph_dino_egg_hatcher_floor_00_01_00",
+    "ericrolph_dino_egg_hatcher_floor_00_02_00",
+    "ericrolph_dino_egg_hatcher_floor_01_00_00",
+    "ericrolph_dino_egg_hatcher_floor_01_01_00",
+    "ericrolph_dino_egg_hatcher_floor_01_02_00",
+    "ericrolph_dino_egg_hatcher_floor_02_00_00",
+    "ericrolph_dino_egg_hatcher_floor_02_01_00",
+    "ericrolph_dino_egg_hatcher_floor_02_02_00",
+    "ericrolph_dino_egg_hatcher_ramp_ground_l",
+    "ericrolph_dino_egg_hatcher_ramp_ground_r"
+  ],
+  "beam_specs": {
+    "rigid": {
+      "beamDamp": 1500.0,
+      "beamDeform": "FLT_MAX",
+      "beamSpring": 15000000.0,
+      "beamStrength": "FLT_MAX"
+    }
+  },
+  "beams": [
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_00",
+        "ericrolph_dino_egg_hatcher_floor_00_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_00",
+        "ericrolph_dino_egg_hatcher_floor_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_00",
+        "ericrolph_dino_egg_hatcher_floor_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_00",
+        "ericrolph_dino_egg_hatcher_floor_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_00",
+        "ericrolph_dino_egg_hatcher_floor_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_00",
+        "ericrolph_dino_egg_hatcher_floor_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_00",
+        "ericrolph_dino_egg_hatcher_floor_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_00",
+        "ericrolph_dino_egg_hatcher_shell_06_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_00",
+        "ericrolph_dino_egg_hatcher_shell_07_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_01",
+        "ericrolph_dino_egg_hatcher_floor_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_01",
+        "ericrolph_dino_egg_hatcher_floor_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_01",
+        "ericrolph_dino_egg_hatcher_floor_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_01",
+        "ericrolph_dino_egg_hatcher_floor_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_01",
+        "ericrolph_dino_egg_hatcher_floor_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_01",
+        "ericrolph_dino_egg_hatcher_ramp_top_l"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_01",
+        "ericrolph_dino_egg_hatcher_shell_06_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_01",
+        "ericrolph_dino_egg_hatcher_shell_07_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_00",
+        "ericrolph_dino_egg_hatcher_floor_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_00",
+        "ericrolph_dino_egg_hatcher_floor_00_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_00",
+        "ericrolph_dino_egg_hatcher_floor_00_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_00",
+        "ericrolph_dino_egg_hatcher_floor_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_00",
+        "ericrolph_dino_egg_hatcher_floor_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_00",
+        "ericrolph_dino_egg_hatcher_floor_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_00",
+        "ericrolph_dino_egg_hatcher_floor_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_00",
+        "ericrolph_dino_egg_hatcher_floor_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_00",
+        "ericrolph_dino_egg_hatcher_shell_05_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_01",
+        "ericrolph_dino_egg_hatcher_floor_00_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_01",
+        "ericrolph_dino_egg_hatcher_floor_00_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_01",
+        "ericrolph_dino_egg_hatcher_floor_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_01",
+        "ericrolph_dino_egg_hatcher_floor_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_01",
+        "ericrolph_dino_egg_hatcher_floor_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_01",
+        "ericrolph_dino_egg_hatcher_floor_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_01",
+        "ericrolph_dino_egg_hatcher_shell_05_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_02_00",
+        "ericrolph_dino_egg_hatcher_floor_00_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_02_00",
+        "ericrolph_dino_egg_hatcher_floor_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_02_00",
+        "ericrolph_dino_egg_hatcher_floor_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_02_00",
+        "ericrolph_dino_egg_hatcher_floor_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_02_00",
+        "ericrolph_dino_egg_hatcher_shell_04_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_02_01",
+        "ericrolph_dino_egg_hatcher_floor_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_02_01",
+        "ericrolph_dino_egg_hatcher_floor_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_02_01",
+        "ericrolph_dino_egg_hatcher_floor_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_02_01",
+        "ericrolph_dino_egg_hatcher_shell_04_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_00",
+        "ericrolph_dino_egg_hatcher_floor_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_00",
+        "ericrolph_dino_egg_hatcher_floor_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_00",
+        "ericrolph_dino_egg_hatcher_floor_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_00",
+        "ericrolph_dino_egg_hatcher_floor_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_00",
+        "ericrolph_dino_egg_hatcher_floor_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_00",
+        "ericrolph_dino_egg_hatcher_floor_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_00",
+        "ericrolph_dino_egg_hatcher_floor_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_00",
+        "ericrolph_dino_egg_hatcher_shell_08_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_00",
+        "ericrolph_dino_egg_hatcher_shell_09_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_01",
+        "ericrolph_dino_egg_hatcher_floor_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_01",
+        "ericrolph_dino_egg_hatcher_floor_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_01",
+        "ericrolph_dino_egg_hatcher_floor_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_01",
+        "ericrolph_dino_egg_hatcher_floor_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_01",
+        "ericrolph_dino_egg_hatcher_floor_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_01",
+        "ericrolph_dino_egg_hatcher_ramp_top_l"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_01",
+        "ericrolph_dino_egg_hatcher_ramp_top_r"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_01",
+        "ericrolph_dino_egg_hatcher_shell_08_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_01",
+        "ericrolph_dino_egg_hatcher_shell_09_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_01_00",
+        "ericrolph_dino_egg_hatcher_floor_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_01_00",
+        "ericrolph_dino_egg_hatcher_floor_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_01_00",
+        "ericrolph_dino_egg_hatcher_floor_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_01_00",
+        "ericrolph_dino_egg_hatcher_floor_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_01_00",
+        "ericrolph_dino_egg_hatcher_floor_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_01_00",
+        "ericrolph_dino_egg_hatcher_floor_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_01_00",
+        "ericrolph_dino_egg_hatcher_floor_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_01_00",
+        "ericrolph_dino_egg_hatcher_floor_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_01_01",
+        "ericrolph_dino_egg_hatcher_floor_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_01_01",
+        "ericrolph_dino_egg_hatcher_floor_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_01_01",
+        "ericrolph_dino_egg_hatcher_floor_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_01_01",
+        "ericrolph_dino_egg_hatcher_floor_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_01_01",
+        "ericrolph_dino_egg_hatcher_floor_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_01_01",
+        "ericrolph_dino_egg_hatcher_floor_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_02_00",
+        "ericrolph_dino_egg_hatcher_floor_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_02_00",
+        "ericrolph_dino_egg_hatcher_floor_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_02_00",
+        "ericrolph_dino_egg_hatcher_floor_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_02_00",
+        "ericrolph_dino_egg_hatcher_floor_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_02_00",
+        "ericrolph_dino_egg_hatcher_shell_02_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_02_00",
+        "ericrolph_dino_egg_hatcher_shell_03_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_02_01",
+        "ericrolph_dino_egg_hatcher_floor_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_02_01",
+        "ericrolph_dino_egg_hatcher_floor_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_02_01",
+        "ericrolph_dino_egg_hatcher_floor_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_02_01",
+        "ericrolph_dino_egg_hatcher_shell_02_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_02_01",
+        "ericrolph_dino_egg_hatcher_shell_03_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_00_00",
+        "ericrolph_dino_egg_hatcher_floor_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_00_00",
+        "ericrolph_dino_egg_hatcher_floor_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_00_00",
+        "ericrolph_dino_egg_hatcher_floor_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_00_00",
+        "ericrolph_dino_egg_hatcher_shell_10_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_00_00",
+        "ericrolph_dino_egg_hatcher_shell_11_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_00_01",
+        "ericrolph_dino_egg_hatcher_floor_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_00_01",
+        "ericrolph_dino_egg_hatcher_floor_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_00_01",
+        "ericrolph_dino_egg_hatcher_ramp_top_r"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_00_01",
+        "ericrolph_dino_egg_hatcher_shell_10_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_00_01",
+        "ericrolph_dino_egg_hatcher_shell_11_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_01_00",
+        "ericrolph_dino_egg_hatcher_floor_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_01_00",
+        "ericrolph_dino_egg_hatcher_floor_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_01_00",
+        "ericrolph_dino_egg_hatcher_floor_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_01_00",
+        "ericrolph_dino_egg_hatcher_shell_00_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_01_01",
+        "ericrolph_dino_egg_hatcher_floor_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_01_01",
+        "ericrolph_dino_egg_hatcher_floor_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_01_01",
+        "ericrolph_dino_egg_hatcher_shell_00_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_02_00",
+        "ericrolph_dino_egg_hatcher_floor_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_02_00",
+        "ericrolph_dino_egg_hatcher_shell_01_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_02_02_01",
+        "ericrolph_dino_egg_hatcher_shell_01_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_ramp_ground_l",
+        "ericrolph_dino_egg_hatcher_ramp_ground_r"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_ramp_ground_l",
+        "ericrolph_dino_egg_hatcher_ramp_top_l"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_ramp_ground_r",
+        "ericrolph_dino_egg_hatcher_ramp_top_r"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_ramp_top_l",
+        "ericrolph_dino_egg_hatcher_ramp_top_r"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_00_0",
+        "ericrolph_dino_egg_hatcher_shell_00_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_00_0",
+        "ericrolph_dino_egg_hatcher_shell_01_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_00_0",
+        "ericrolph_dino_egg_hatcher_shell_11_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_00_1",
+        "ericrolph_dino_egg_hatcher_shell_01_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_00_1",
+        "ericrolph_dino_egg_hatcher_shell_11_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_01_0",
+        "ericrolph_dino_egg_hatcher_shell_01_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_01_0",
+        "ericrolph_dino_egg_hatcher_shell_02_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_01_1",
+        "ericrolph_dino_egg_hatcher_shell_02_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_02_0",
+        "ericrolph_dino_egg_hatcher_shell_02_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_02_0",
+        "ericrolph_dino_egg_hatcher_shell_03_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_02_1",
+        "ericrolph_dino_egg_hatcher_shell_03_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_03_0",
+        "ericrolph_dino_egg_hatcher_shell_03_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_03_0",
+        "ericrolph_dino_egg_hatcher_shell_04_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_03_1",
+        "ericrolph_dino_egg_hatcher_shell_04_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_04_0",
+        "ericrolph_dino_egg_hatcher_shell_04_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_04_0",
+        "ericrolph_dino_egg_hatcher_shell_05_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_04_1",
+        "ericrolph_dino_egg_hatcher_shell_05_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_05_0",
+        "ericrolph_dino_egg_hatcher_shell_05_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_05_0",
+        "ericrolph_dino_egg_hatcher_shell_06_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_05_1",
+        "ericrolph_dino_egg_hatcher_shell_06_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_06_0",
+        "ericrolph_dino_egg_hatcher_shell_06_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_06_0",
+        "ericrolph_dino_egg_hatcher_shell_07_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_06_1",
+        "ericrolph_dino_egg_hatcher_shell_07_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_07_0",
+        "ericrolph_dino_egg_hatcher_shell_07_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_07_0",
+        "ericrolph_dino_egg_hatcher_shell_08_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_07_1",
+        "ericrolph_dino_egg_hatcher_shell_08_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_08_0",
+        "ericrolph_dino_egg_hatcher_shell_08_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_08_0",
+        "ericrolph_dino_egg_hatcher_shell_09_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_08_1",
+        "ericrolph_dino_egg_hatcher_shell_09_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_09_0",
+        "ericrolph_dino_egg_hatcher_shell_09_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_09_0",
+        "ericrolph_dino_egg_hatcher_shell_10_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_09_1",
+        "ericrolph_dino_egg_hatcher_shell_10_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_10_0",
+        "ericrolph_dino_egg_hatcher_shell_10_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_10_0",
+        "ericrolph_dino_egg_hatcher_shell_11_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_10_1",
+        "ericrolph_dino_egg_hatcher_shell_11_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_11_0",
+        "ericrolph_dino_egg_hatcher_shell_11_1"
+      ],
+      "spec": "rigid"
+    }
+  ],
+  "behavior": {
+    "camera_distance": 30.0,
+    "effects": {
+      "hatch_dust_l": {
+        "direction": [
+          -0.8,
+          0.0,
+          0.6
+        ],
+        "emitter": "BNGP_2",
+        "position": [
+          -2.4,
+          0.0,
+          3.2
+        ]
+      },
+      "hatch_dust_r": {
+        "direction": [
+          0.8,
+          0.0,
+          0.6
+        ],
+        "emitter": "BNGP_2",
+        "position": [
+          2.4,
+          0.0,
+          3.2
+        ]
+      },
+      "hatch_dust_top": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_2",
+        "position": [
+          0.0,
+          0.0,
+          5.4
+        ]
+      }
+    },
+    "triggers": {
+      "egg_zone": {
+        "center": [
+          0.0,
+          0.3,
+          2.0
+        ],
+        "dimensions": [
+          5.0,
+          5.4,
+          4.0
+        ],
+        "mode": "Contains"
+      },
+      "nest_zone": {
+        "center": [
+          0.0,
+          -5.0,
+          1.6
+        ],
+        "dimensions": [
+          9.0,
+          9.0,
+          3.2
+        ],
+        "mode": "Overlaps"
+      }
+    },
+    "tunables": {
+      "camera_distance": 30.0,
+      "fly_seconds": 1.1,
+      "launch_forward_mps": 6.0,
+      "launch_up_mps": 30.0,
+      "open_seconds": 9.0,
+      "reassemble_seconds": 1.2,
+      "shard_dirs": [
+        [
+          0.898794,
+          0.438371
+        ],
+        [
+          0.087156,
+          0.996195
+        ],
+        [
+          -0.782608,
+          0.622515
+        ],
+        [
+          -0.95882,
+          -0.284015
+        ],
+        [
+          -0.317305,
+          -0.948324
+        ],
+        [
+          0.477159,
+          -0.878817
+        ],
+        [
+          0.945519,
+          -0.325568
+        ],
+        [
+          0.165388,
+          0.524544
+        ],
+        [
+          -0.541644,
+          -0.095506
+        ],
+        [
+          0.371575,
+          -0.405503
+        ],
+        [
+          0.578509,
+          0.68944
+        ],
+        [
+          -0.307818,
+          0.845723
+        ],
+        [
+          -0.886327,
+          0.156283
+        ],
+        [
+          -0.636396,
+          -0.636396
+        ],
+        [
+          -0.0,
+          -0.9
+        ],
+        [
+          0.636396,
+          -0.636396
+        ],
+        [
+          0.9,
+          -0.0
+        ]
+      ],
+      "shard_fly_distance": 8.0,
+      "shard_names": [
+        "shard_1",
+        "shard_2",
+        "shard_3",
+        "shard_4",
+        "shard_5",
+        "shard_6",
+        "shard_7",
+        "shard_8",
+        "shard_9",
+        "shard_10",
+        "shard_11",
+        "shard_12",
+        "shard_13",
+        "shard_14",
+        "shard_15",
+        "shard_16",
+        "shard_17"
+      ],
+      "shard_rise": 4.5,
+      "sink_seconds": 1.4,
+      "wobble_seconds": 2.5
+    }
+  },
+  "coordinate_system": {
+    "source": "right-handed, meters, Z-up, +Y drive direction",
+    "source_world_to_beamng_vehicle": [
+      [
+        -1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        -1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "target": "BeamNG vehicle space, meters, Z-up, -Y forward"
+  },
+  "nodes": [
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_00_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.6,
+        2.6,
+        0.0
+      ],
+      "source_world_position": [
+        -2.6,
+        -2.6,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_00_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.6,
+        2.6,
+        0.4
+      ],
+      "source_world_position": [
+        -2.6,
+        -2.6,
+        0.4
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_00_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.6,
+        -0.0,
+        0.0
+      ],
+      "source_world_position": [
+        -2.6,
+        0.0,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_00_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.6,
+        -0.0,
+        0.4
+      ],
+      "source_world_position": [
+        -2.6,
+        0.0,
+        0.4
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_00_02_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.6,
+        -2.6,
+        0.0
+      ],
+      "source_world_position": [
+        -2.6,
+        2.6,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_00_02_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.6,
+        -2.6,
+        0.4
+      ],
+      "source_world_position": [
+        -2.6,
+        2.6,
+        0.4
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_01_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        2.6,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        -2.6,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_01_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        2.6,
+        0.4
+      ],
+      "source_world_position": [
+        0.0,
+        -2.6,
+        0.4
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_01_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_01_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        0.0,
+        0.4
+      ],
+      "source_world_position": [
+        0.0,
+        0.0,
+        0.4
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_01_02_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -2.6,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        2.6,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_01_02_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -2.6,
+        0.4
+      ],
+      "source_world_position": [
+        0.0,
+        2.6,
+        0.4
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_02_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.6,
+        2.6,
+        0.0
+      ],
+      "source_world_position": [
+        2.6,
+        -2.6,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_02_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.6,
+        2.6,
+        0.4
+      ],
+      "source_world_position": [
+        2.6,
+        -2.6,
+        0.4
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_02_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.6,
+        0.0,
+        0.0
+      ],
+      "source_world_position": [
+        2.6,
+        0.0,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_02_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.6,
+        0.0,
+        0.4
+      ],
+      "source_world_position": [
+        2.6,
+        0.0,
+        0.4
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_02_02_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.6,
+        -2.6,
+        0.0
+      ],
+      "source_world_position": [
+        2.6,
+        2.6,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_floor_02_02_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.6,
+        -2.6,
+        0.4
+      ],
+      "source_world_position": [
+        2.6,
+        2.6,
+        0.4
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_00_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.95,
+        0.0,
+        0.4
+      ],
+      "source_world_position": [
+        2.95,
+        0.0,
+        0.4
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_00_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.95,
+        0.0,
+        2.3
+      ],
+      "source_world_position": [
+        2.95,
+        0.0,
+        2.3
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_01_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.554775,
+        -1.475,
+        0.4
+      ],
+      "source_world_position": [
+        2.554775,
+        1.475,
+        0.4
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_01_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.554775,
+        -1.475,
+        2.3
+      ],
+      "source_world_position": [
+        2.554775,
+        1.475,
+        2.3
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_02_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.475,
+        -2.554775,
+        0.4
+      ],
+      "source_world_position": [
+        1.475,
+        2.554775,
+        0.4
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_02_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.475,
+        -2.554775,
+        2.3
+      ],
+      "source_world_position": [
+        1.475,
+        2.554775,
+        2.3
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_03_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -2.95,
+        0.4
+      ],
+      "source_world_position": [
+        0.0,
+        2.95,
+        0.4
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_03_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -2.95,
+        2.3
+      ],
+      "source_world_position": [
+        0.0,
+        2.95,
+        2.3
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_04_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.475,
+        -2.554775,
+        0.4
+      ],
+      "source_world_position": [
+        -1.475,
+        2.554775,
+        0.4
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_04_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.475,
+        -2.554775,
+        2.3
+      ],
+      "source_world_position": [
+        -1.475,
+        2.554775,
+        2.3
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_05_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.554775,
+        -1.475,
+        0.4
+      ],
+      "source_world_position": [
+        -2.554775,
+        1.475,
+        0.4
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_05_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.554775,
+        -1.475,
+        2.3
+      ],
+      "source_world_position": [
+        -2.554775,
+        1.475,
+        2.3
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_06_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.95,
+        -0.0,
+        0.4
+      ],
+      "source_world_position": [
+        -2.95,
+        0.0,
+        0.4
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_06_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.95,
+        -0.0,
+        2.3
+      ],
+      "source_world_position": [
+        -2.95,
+        0.0,
+        2.3
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_07_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.554775,
+        1.475,
+        0.4
+      ],
+      "source_world_position": [
+        -2.554775,
+        -1.475,
+        0.4
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_07_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.554775,
+        1.475,
+        2.3
+      ],
+      "source_world_position": [
+        -2.554775,
+        -1.475,
+        2.3
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_08_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.475,
+        2.554775,
+        0.4
+      ],
+      "source_world_position": [
+        -1.475,
+        -2.554775,
+        0.4
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_08_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.475,
+        2.554775,
+        2.3
+      ],
+      "source_world_position": [
+        -1.475,
+        -2.554775,
+        2.3
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_09_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        2.95,
+        0.4
+      ],
+      "source_world_position": [
+        -0.0,
+        -2.95,
+        0.4
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_09_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        2.95,
+        2.3
+      ],
+      "source_world_position": [
+        -0.0,
+        -2.95,
+        2.3
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_10_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.475,
+        2.554775,
+        0.4
+      ],
+      "source_world_position": [
+        1.475,
+        -2.554775,
+        0.4
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_10_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.475,
+        2.554775,
+        2.3
+      ],
+      "source_world_position": [
+        1.475,
+        -2.554775,
+        2.3
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_11_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.554775,
+        1.475,
+        0.4
+      ],
+      "source_world_position": [
+        2.554775,
+        -1.475,
+        0.4
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_shell_11_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.554775,
+        1.475,
+        2.3
+      ],
+      "source_world_position": [
+        2.554775,
+        -1.475,
+        2.3
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_ramp_ground_l",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.500001,
+        6.9,
+        0.0
+      ],
+      "source_world_position": [
+        -1.5,
+        -6.9,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_ramp_ground_r",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.499999,
+        6.9,
+        0.0
+      ],
+      "source_world_position": [
+        1.5,
+        -6.9,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_ramp_top_l",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.9,
+        2.7,
+        0.38
+      ],
+      "source_world_position": [
+        -1.9,
+        -2.7,
+        0.38
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_dino_egg_hatcher_ramp_top_r",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.9,
+        2.7,
+        0.38
+      ],
+      "source_world_position": [
+        1.9,
+        -2.7,
+        0.38
+      ],
+      "weight": 125.0
+    }
+  ],
+  "palette": {
+    "ericrolph_dino_egg_hatcher_crack_white": {
+      "color": [
+        0.98,
+        0.97,
+        0.93,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.4
+    },
+    "ericrolph_dino_egg_hatcher_eggshell": {
+      "color": [
+        0.93,
+        0.9,
+        0.8,
+        1.0
+      ],
+      "double_sided": true,
+      "metallic": 0.0,
+      "roughness": 0.5,
+      "texture": {
+        "family": "eggshell"
+      }
+    },
+    "ericrolph_dino_egg_hatcher_nest_dark": {
+      "color": [
+        0.45,
+        0.33,
+        0.12,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.85,
+      "texture": {
+        "family": "straw",
+        "params": {
+          "base": [
+            0.5,
+            0.37,
+            0.14
+          ]
+        }
+      }
+    },
+    "ericrolph_dino_egg_hatcher_nest_straw": {
+      "color": [
+        0.78,
+        0.62,
+        0.22,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.75,
+      "texture": {
+        "family": "straw"
+      }
+    },
+    "ericrolph_dino_egg_hatcher_spot_green": {
+      "color": [
+        0.25,
+        0.55,
+        0.25,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.55
+    },
+    "ericrolph_dino_egg_hatcher_spot_teal": {
+      "color": [
+        0.15,
+        0.5,
+        0.5,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.55
+    }
+  },
+  "parts": [
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell"
+      ],
+      "name": "shard_1",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_1.dae",
+      "pivot_world": [
+        1.707709,
+        0.832905,
+        5.85
+      ],
+      "sha256": "a684d81ff13501d893a1058809c420d3b5e368ece1f0d369864165d7d1f6395c",
+      "size": 16131
+    },
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell"
+      ],
+      "name": "shard_10",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_10.dae",
+      "pivot_world": [
+        0.472913,
+        -0.516094,
+        6.8
+      ],
+      "sha256": "82035d31f14b67eade9196061c7446033c1ab5b09548d8634803637b1afcab75",
+      "size": 37477
+    },
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell",
+        "ericrolph_dino_egg_hatcher_spot_green",
+        "ericrolph_dino_egg_hatcher_spot_teal"
+      ],
+      "name": "shard_11",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_11.dae",
+      "pivot_world": [
+        1.864084,
+        2.221529,
+        3.6
+      ],
+      "sha256": "cbc17cb95e8268a4f5267325ff380dcd05f5917ad05222b2d667bbf7f82dcd64",
+      "size": 70752
+    },
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell"
+      ],
+      "name": "shard_12",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_12.dae",
+      "pivot_world": [
+        -0.991858,
+        2.725109,
+        3.6
+      ],
+      "sha256": "ce746fc99ecdfebd8f43a86edbf93a9fdb9c759e1f59439d645790555a72c5e1",
+      "size": 20946
+    },
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell",
+        "ericrolph_dino_egg_hatcher_spot_green"
+      ],
+      "name": "shard_13",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_13.dae",
+      "pivot_world": [
+        -2.855942,
+        0.50358,
+        3.6
+      ],
+      "sha256": "49b8e828e29a30e1a6b66206646981656cf69b93797ffc438790d7507fdd6557",
+      "size": 44559
+    },
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell"
+      ],
+      "name": "shard_14",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_14.dae",
+      "pivot_world": [
+        -2.05061,
+        -2.05061,
+        3.6
+      ],
+      "sha256": "f69aea11d627ff06aa070b3615610daf9e42ba73379955695bf0bafaa1c1242d",
+      "size": 21451
+    },
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell"
+      ],
+      "name": "shard_15",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_15.dae",
+      "pivot_world": [
+        -0.0,
+        -2.9,
+        3.6
+      ],
+      "sha256": "9e6f162d1ac03002832cae4fe81f97c700d8ca2166352c835dbb559ed8484b3f",
+      "size": 14593
+    },
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell"
+      ],
+      "name": "shard_16",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_16.dae",
+      "pivot_world": [
+        2.05061,
+        -2.05061,
+        3.6
+      ],
+      "sha256": "5117c4ab96bbefcaa8981559e9d5812e5902d12696167cf682c079a19c807228",
+      "size": 21745
+    },
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell"
+      ],
+      "name": "shard_17",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_17.dae",
+      "pivot_world": [
+        2.9,
+        -0.0,
+        3.6
+      ],
+      "sha256": "e0a24b690ec566df5a75699e4658c03eca5979f3a527f80acad5eb382ba082fc",
+      "size": 16585
+    },
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell",
+        "ericrolph_dino_egg_hatcher_spot_teal"
+      ],
+      "name": "shard_2",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_2.dae",
+      "pivot_world": [
+        0.165596,
+        1.89277,
+        5.85
+      ],
+      "sha256": "d171ed6ffd700cced42b0476e4eda0b767a7a81fc46d03a584a7ecc72a0d1ac6",
+      "size": 41286
+    },
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell"
+      ],
+      "name": "shard_3",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_3.dae",
+      "pivot_world": [
+        -1.486956,
+        1.182778,
+        5.85
+      ],
+      "sha256": "232396178008cad8334e5e96da7a63c190fc7185386bc02923c2e5f89cf12b22",
+      "size": 15092
+    },
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell",
+        "ericrolph_dino_egg_hatcher_spot_teal"
+      ],
+      "name": "shard_4",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_4.dae",
+      "pivot_world": [
+        -1.821758,
+        -0.539629,
+        5.85
+      ],
+      "sha256": "97d746d26d8fbd5781593fcf71a3e3be6bcb391da9190fb4ef4f01a4f8b8477b",
+      "size": 41543
+    },
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell"
+      ],
+      "name": "shard_5",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_5.dae",
+      "pivot_world": [
+        -0.602879,
+        -1.801815,
+        5.85
+      ],
+      "sha256": "2a635f70d877141f85a1e40e61b2349fabf33425319ccc3bbbc0b1e973f31981",
+      "size": 15879
+    },
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell"
+      ],
+      "name": "shard_6",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_6.dae",
+      "pivot_world": [
+        0.906602,
+        -1.669752,
+        5.85
+      ],
+      "sha256": "f5a055112ebd6daf375637d53935932fec213a8b1082a775468c2ab0e147a511",
+      "size": 15990
+    },
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell",
+        "ericrolph_dino_egg_hatcher_spot_green"
+      ],
+      "name": "shard_7",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_7.dae",
+      "pivot_world": [
+        1.796485,
+        -0.61858,
+        5.85
+      ],
+      "sha256": "f08ac08acabf538f277f077ed31c067bfd07a61807ab3dbd03569c17cd4238e5",
+      "size": 37048
+    },
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell"
+      ],
+      "name": "shard_8",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_8.dae",
+      "pivot_world": [
+        0.210494,
+        0.667602,
+        6.8
+      ],
+      "sha256": "88e6060fa024140c181ffeb7a5e1fdb9acc0d188a8525df04c271757257867cb",
+      "size": 30115
+    },
+    {
+      "materials": [
+        "ericrolph_dino_egg_hatcher_eggshell"
+      ],
+      "name": "shard_9",
+      "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher_shard_9.dae",
+      "pivot_world": [
+        -0.689365,
+        -0.121554,
+        6.8
+      ],
+      "sha256": "39c17c30015aad9ea6889ebc9bfdd411769e7fa33c935c24ef19393a100e5f83",
+      "size": 31476
+    }
+  ],
+  "refnodes": {
+    "back": "ericrolph_dino_egg_hatcher_floor_01_00_00",
+    "left": "ericrolph_dino_egg_hatcher_floor_00_01_00",
+    "ref": "ericrolph_dino_egg_hatcher_floor_01_01_00",
+    "up": "ericrolph_dino_egg_hatcher_floor_01_01_01"
+  },
+  "schema": "ericrolph-giant-props-handoff-v1",
+  "spawn_envelope_nodes": [
+    "ericrolph_dino_egg_hatcher_shell_01_0",
+    "ericrolph_dino_egg_hatcher_shell_01_1",
+    "ericrolph_dino_egg_hatcher_shell_04_0",
+    "ericrolph_dino_egg_hatcher_shell_04_1",
+    "ericrolph_dino_egg_hatcher_shell_07_0",
+    "ericrolph_dino_egg_hatcher_shell_07_1",
+    "ericrolph_dino_egg_hatcher_shell_10_0",
+    "ericrolph_dino_egg_hatcher_shell_10_1"
+  ],
+  "triangles": [
+    {
+      "ground_model": "dirt",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_01",
+        "ericrolph_dino_egg_hatcher_floor_01_00_01",
+        "ericrolph_dino_egg_hatcher_floor_01_01_01"
+      ]
+    },
+    {
+      "ground_model": "dirt",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_00_01",
+        "ericrolph_dino_egg_hatcher_floor_01_01_01",
+        "ericrolph_dino_egg_hatcher_floor_00_01_01"
+      ]
+    },
+    {
+      "ground_model": "dirt",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_01",
+        "ericrolph_dino_egg_hatcher_floor_01_01_01",
+        "ericrolph_dino_egg_hatcher_floor_01_02_01"
+      ]
+    },
+    {
+      "ground_model": "dirt",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_00_01_01",
+        "ericrolph_dino_egg_hatcher_floor_01_02_01",
+        "ericrolph_dino_egg_hatcher_floor_00_02_01"
+      ]
+    },
+    {
+      "ground_model": "dirt",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_01",
+        "ericrolph_dino_egg_hatcher_floor_02_00_01",
+        "ericrolph_dino_egg_hatcher_floor_02_01_01"
+      ]
+    },
+    {
+      "ground_model": "dirt",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_00_01",
+        "ericrolph_dino_egg_hatcher_floor_02_01_01",
+        "ericrolph_dino_egg_hatcher_floor_01_01_01"
+      ]
+    },
+    {
+      "ground_model": "dirt",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_01_01",
+        "ericrolph_dino_egg_hatcher_floor_02_01_01",
+        "ericrolph_dino_egg_hatcher_floor_02_02_01"
+      ]
+    },
+    {
+      "ground_model": "dirt",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_floor_01_01_01",
+        "ericrolph_dino_egg_hatcher_floor_02_02_01",
+        "ericrolph_dino_egg_hatcher_floor_01_02_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_00_0",
+        "ericrolph_dino_egg_hatcher_shell_01_0",
+        "ericrolph_dino_egg_hatcher_shell_01_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_00_0",
+        "ericrolph_dino_egg_hatcher_shell_01_1",
+        "ericrolph_dino_egg_hatcher_shell_00_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_00_1",
+        "ericrolph_dino_egg_hatcher_shell_01_1",
+        "ericrolph_dino_egg_hatcher_shell_01_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_00_1",
+        "ericrolph_dino_egg_hatcher_shell_01_0",
+        "ericrolph_dino_egg_hatcher_shell_00_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_01_0",
+        "ericrolph_dino_egg_hatcher_shell_02_0",
+        "ericrolph_dino_egg_hatcher_shell_02_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_01_0",
+        "ericrolph_dino_egg_hatcher_shell_02_1",
+        "ericrolph_dino_egg_hatcher_shell_01_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_01_1",
+        "ericrolph_dino_egg_hatcher_shell_02_1",
+        "ericrolph_dino_egg_hatcher_shell_02_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_01_1",
+        "ericrolph_dino_egg_hatcher_shell_02_0",
+        "ericrolph_dino_egg_hatcher_shell_01_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_02_0",
+        "ericrolph_dino_egg_hatcher_shell_03_0",
+        "ericrolph_dino_egg_hatcher_shell_03_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_02_0",
+        "ericrolph_dino_egg_hatcher_shell_03_1",
+        "ericrolph_dino_egg_hatcher_shell_02_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_02_1",
+        "ericrolph_dino_egg_hatcher_shell_03_1",
+        "ericrolph_dino_egg_hatcher_shell_03_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_02_1",
+        "ericrolph_dino_egg_hatcher_shell_03_0",
+        "ericrolph_dino_egg_hatcher_shell_02_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_03_0",
+        "ericrolph_dino_egg_hatcher_shell_04_0",
+        "ericrolph_dino_egg_hatcher_shell_04_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_03_0",
+        "ericrolph_dino_egg_hatcher_shell_04_1",
+        "ericrolph_dino_egg_hatcher_shell_03_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_03_1",
+        "ericrolph_dino_egg_hatcher_shell_04_1",
+        "ericrolph_dino_egg_hatcher_shell_04_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_03_1",
+        "ericrolph_dino_egg_hatcher_shell_04_0",
+        "ericrolph_dino_egg_hatcher_shell_03_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_04_0",
+        "ericrolph_dino_egg_hatcher_shell_05_0",
+        "ericrolph_dino_egg_hatcher_shell_05_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_04_0",
+        "ericrolph_dino_egg_hatcher_shell_05_1",
+        "ericrolph_dino_egg_hatcher_shell_04_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_04_1",
+        "ericrolph_dino_egg_hatcher_shell_05_1",
+        "ericrolph_dino_egg_hatcher_shell_05_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_04_1",
+        "ericrolph_dino_egg_hatcher_shell_05_0",
+        "ericrolph_dino_egg_hatcher_shell_04_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_05_0",
+        "ericrolph_dino_egg_hatcher_shell_06_0",
+        "ericrolph_dino_egg_hatcher_shell_06_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_05_0",
+        "ericrolph_dino_egg_hatcher_shell_06_1",
+        "ericrolph_dino_egg_hatcher_shell_05_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_05_1",
+        "ericrolph_dino_egg_hatcher_shell_06_1",
+        "ericrolph_dino_egg_hatcher_shell_06_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_05_1",
+        "ericrolph_dino_egg_hatcher_shell_06_0",
+        "ericrolph_dino_egg_hatcher_shell_05_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_06_0",
+        "ericrolph_dino_egg_hatcher_shell_07_0",
+        "ericrolph_dino_egg_hatcher_shell_07_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_06_0",
+        "ericrolph_dino_egg_hatcher_shell_07_1",
+        "ericrolph_dino_egg_hatcher_shell_06_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_06_1",
+        "ericrolph_dino_egg_hatcher_shell_07_1",
+        "ericrolph_dino_egg_hatcher_shell_07_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_06_1",
+        "ericrolph_dino_egg_hatcher_shell_07_0",
+        "ericrolph_dino_egg_hatcher_shell_06_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_11_0",
+        "ericrolph_dino_egg_hatcher_shell_00_0",
+        "ericrolph_dino_egg_hatcher_shell_00_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_11_0",
+        "ericrolph_dino_egg_hatcher_shell_00_1",
+        "ericrolph_dino_egg_hatcher_shell_11_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_11_1",
+        "ericrolph_dino_egg_hatcher_shell_00_1",
+        "ericrolph_dino_egg_hatcher_shell_00_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_shell_11_1",
+        "ericrolph_dino_egg_hatcher_shell_00_0",
+        "ericrolph_dino_egg_hatcher_shell_11_0"
+      ]
+    },
+    {
+      "ground_model": "dirt",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_ramp_ground_l",
+        "ericrolph_dino_egg_hatcher_ramp_ground_r",
+        "ericrolph_dino_egg_hatcher_ramp_top_r"
+      ]
+    },
+    {
+      "ground_model": "dirt",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_ramp_ground_l",
+        "ericrolph_dino_egg_hatcher_ramp_top_r",
+        "ericrolph_dino_egg_hatcher_ramp_top_l"
+      ]
+    },
+    {
+      "ground_model": "dirt",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_ramp_top_l",
+        "ericrolph_dino_egg_hatcher_ramp_top_r",
+        "ericrolph_dino_egg_hatcher_floor_02_00_01"
+      ]
+    },
+    {
+      "ground_model": "dirt",
+      "nodes": [
+        "ericrolph_dino_egg_hatcher_ramp_top_l",
+        "ericrolph_dino_egg_hatcher_floor_02_00_01",
+        "ericrolph_dino_egg_hatcher_floor_00_00_01"
+      ]
+    }
+  ],
+  "visual": {
+    "bounds": {
+      "max": [
+        5.012916,
+        10.151371,
+        2.3
+      ],
+      "min": [
+        -5.012916,
+        -5.105648,
+        -0.492
+      ]
+    },
+    "materials": [
+      "ericrolph_dino_egg_hatcher_crack_white",
+      "ericrolph_dino_egg_hatcher_eggshell",
+      "ericrolph_dino_egg_hatcher_nest_dark",
+      "ericrolph_dino_egg_hatcher_nest_straw"
+    ],
+    "path": "vehicles/ericrolph_dino_egg_hatcher/ericrolph_dino_egg_hatcher.dae",
+    "sha256": "551620c0c3525367e2cf7a74dee088ce69b9c5e15a39bb44b1ef15b9d7898bcb",
+    "size": 250237
+  }
+}

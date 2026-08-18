@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<!-- Live name displays for the Sumo Gyro-Platform scoreboard (2026-08-14).
+     Rendered by BeamNG's CEF webview into the dynamic texture
+     @ericrolph_sumo_gyro_platform_name (see spec.py VEHICLE_LUA_EXTRA), and
+     mapped onto FOUR quads: the east and west windows on each of the board's
+     two faces. The page is therefore TWO-UP - left half is the east cell,
+     right half the west - and each quad samples only its own half of u.
+
+     Baked textures cannot change at runtime and this engine has no other
+     way to draw a chosen string onto a surface: the previous cut used the
+     debug overlay, which renders at a fixed SCREEN size and so could only
+     ever hover in front of the board instead of sitting in it (player,
+     2026-08-14). A webview is a real texture, so it scales with the sign.
+
+     Self-contained: no external assets, no network, OS fonts only. -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  /* The webview does not auto-fit: the page hard-codes the texture's pixel
+     size, and the plate's aspect is matched to it in spec.py. */
+  html, body {
+    margin: 0; padding: 0;
+    width: 1510px; height: 256px;
+    overflow: hidden;
+    background: #04060a;
+    user-select: none; cursor: none;
+  }
+  #board { position: relative; width: 1510px; height: 256px; display: flex; }
+  .cell {
+    position: relative;
+    width: 755px; height: 256px;
+    box-sizing: border-box;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at 50% 45%, #0b1017 0%, #04060a 78%);
+  }
+  /* The lamp itself. One line of condensed capitals on a black field, with
+     a bloom - that combination is what reads as an emissive panel rather
+     than as painted lettering. */
+  /* The lamp is an INLINE-BLOCK centred by a flex wrapper, not a stretched
+     absolute block: a full-width block reports its container's width, so
+     the fit-to-width measurement below would shrink every name whether it
+     needed it or not. */
+  .namewrap {
+    position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .name {
+    display: inline-block;
+    white-space: nowrap;
+    font-family: "DIN Condensed", "Arial Narrow", "Segoe UI", Impact, sans-serif;
+    font-weight: 700;
+    font-size: 150px;
+    letter-spacing: 8px;
+    line-height: 1;
+  }
+  #east .name { color: #ff8a52; text-shadow: 0 0 18px rgba(255,110,50,0.75), 0 0 46px rgba(255,80,30,0.40); }
+  #west .name { color: #cfe4ff; text-shadow: 0 0 18px rgba(150,200,255,0.72), 0 0 46px rgba(110,170,255,0.38); }
+  .idle { opacity: 0.20; letter-spacing: 20px; }
+  /* Dot-matrix mask over the whole cell: the pixel grid a stadium board
+     has. Sized so a 150 px capital spans ~18 rows, which is about what a
+     real matrix panel gives a letter of that height. */
+  .grid {
+    position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+    background-image:
+      repeating-linear-gradient(to right, rgba(0,0,0,0.55) 0 2px, rgba(0,0,0,0) 2px 8px),
+      repeating-linear-gradient(to bottom, rgba(0,0,0,0.55) 0 2px, rgba(0,0,0,0) 2px 8px);
+    pointer-events: none;
+  }
+  /* Glass: a faint sheen down the top third so the panel reads as covered,
+     not as raw emitter. */
+  .glass {
+    position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+    background: linear-gradient(to bottom, rgba(190,220,255,0.055) 0%,
+                                rgba(190,220,255,0.012) 34%,
+                                rgba(0,0,0,0) 62%);
+    pointer-events: none;
+  }
+  .rule {
+    position: absolute; left: 0; right: 0; height: 2px;
+    background: rgba(120,150,190,0.16);
+  }
+  .rule.top { top: 0; }
+  .rule.bottom { bottom: 0; }
+  .divider {
+    position: absolute; left: 754px; top: 0;
+    width: 2px; height: 256px;
+    background: #04060a;
+  }
+</style>
+</head>
+<body>
+<div id="board">
+  <div class="cell" id="east">
+    <div class="namewrap"><span class="name" id="east-name">- - - -</span></div>
+    <div class="grid"></div><div class="glass"></div>
+    <div class="rule top"></div><div class="rule bottom"></div>
+  </div>
+  <div class="cell" id="west">
+    <div class="namewrap"><span class="name" id="west-name">- - - -</span></div>
+    <div class="grid"></div><div class="glass"></div>
+    <div class="rule top"></div><div class="rule bottom"></div>
+  </div>
+  <div class="divider"></div>
+</div>
+<script>
+/* Defaults that render correctly BEFORE any Lua data arrives: a webview
+   paints as soon as it is created, and an empty first frame would flash a
+   black panel on every spawn. */
+var S = { east: "", west: "" };
+
+var CELL_W = 755;
+var PAD = 44;          /* keep letters off the bezel */
+var BASE_PX = 150;     /* font-size the layout is authored at */
+/* Floor low enough that even a pathological 22-character name still FITS
+   rather than being clipped at the bezel. Stock jbeam names are short
+   (PIGEON, COVET, SUNBURST2), so this only ever bites on oddities. */
+var MIN_PX = 38;
+
+function $(id) { return document.getElementById(id); }
+
+/* Long vehicle names have to fit a fixed window, so the type is measured
+   and scaled DOWN to fit rather than clipped or ellipsised - a name that
+   reads "AUTOBELL..." is worse than a smaller one that reads whole. */
+function paint(side) {
+  var el = $(side + "-name");
+  var text = S[side];
+  var idle = !text;
+  el.textContent = idle ? "- - - -" : text;
+  el.className = idle ? "name idle" : "name";
+  el.style.fontSize = BASE_PX + "px";
+  el.style.letterSpacing = (idle ? 20 : 8) + "px";
+  var room = CELL_W - PAD * 2;
+  var width = el.offsetWidth;
+  if (width > room) {
+    var px = Math.max(MIN_PX, Math.floor(BASE_PX * room / width));
+    el.style.fontSize = px + "px";
+    /* Tighten the tracking with the size, or a long name loses more room to
+       the gaps than to the glyphs. */
+    el.style.letterSpacing = Math.max(2, Math.floor(8 * px / BASE_PX)) + "px";
+  }
+}
+
+/* Called from vehicle Lua via htmlTexture.call. PARTIAL MERGE on purpose:
+   fields arrive independently, and unconditional assignment would blank one
+   corner every time the other one changed. */
+function updateData(data) {
+  if (!data) { return; }
+  if (data.east !== undefined) { S.east = String(data.east || ""); }
+  if (data.west !== undefined) { S.west = String(data.west || ""); }
+  paint("east");
+  paint("west");
+}
+
+paint("east");
+paint("west");
+</script>
+</body>
+</html>

@@ -1,0 +1,4723 @@
+{
+  "asset": {
+    "display_name": "200MPH Spider Web Catcher",
+    "flexbodies_extra": [
+      {
+        "groups": [
+          "web"
+        ],
+        "mesh": "ericrolph_spider_web_catcher_web_mesh"
+      }
+    ],
+    "id": "ericrolph_spider_web_catcher",
+    "physics_cage": "ericrolph_spider_web_catcher_cage",
+    "visual_mesh": "ericrolph_spider_web_catcher_visual"
+  },
+  "base_nodes": [
+    "ericrolph_spider_web_catcher_pad_00_00_00",
+    "ericrolph_spider_web_catcher_pad_00_01_00",
+    "ericrolph_spider_web_catcher_pad_00_02_00",
+    "ericrolph_spider_web_catcher_pad_01_00_00",
+    "ericrolph_spider_web_catcher_pad_01_01_00",
+    "ericrolph_spider_web_catcher_pad_01_02_00",
+    "ericrolph_spider_web_catcher_pad_02_00_00",
+    "ericrolph_spider_web_catcher_pad_02_01_00",
+    "ericrolph_spider_web_catcher_pad_02_02_00",
+    "ericrolph_spider_web_catcher_tower_0_0_0_0",
+    "ericrolph_spider_web_catcher_tower_0_0_1_0",
+    "ericrolph_spider_web_catcher_tower_0_1_0_0",
+    "ericrolph_spider_web_catcher_tower_0_1_1_0",
+    "ericrolph_spider_web_catcher_tower_1_0_0_0",
+    "ericrolph_spider_web_catcher_tower_1_0_1_0",
+    "ericrolph_spider_web_catcher_tower_1_1_0_0",
+    "ericrolph_spider_web_catcher_tower_1_1_1_0",
+    "ericrolph_spider_web_catcher_web_anchor_5",
+    "ericrolph_spider_web_catcher_web_anchor_6",
+    "ericrolph_spider_web_catcher_web_anchor_7"
+  ],
+  "beam_specs": {
+    "rigid": {
+      "beamDamp": 1500.0,
+      "beamDeform": "FLT_MAX",
+      "beamSpring": 15000000.0,
+      "beamStrength": "FLT_MAX"
+    },
+    "web_anchor": {
+      "beamDamp": 1900.0,
+      "beamDeform": "FLT_MAX",
+      "beamSpring": 13000.0,
+      "beamStrength": "FLT_MAX"
+    },
+    "web_ring": {
+      "beamDamp": 700.0,
+      "beamDeform": "FLT_MAX",
+      "beamSpring": 5000.0,
+      "beamStrength": "FLT_MAX"
+    },
+    "web_spoke": {
+      "beamDamp": 1400.0,
+      "beamDeform": "FLT_MAX",
+      "beamSpring": 9000.0,
+      "beamStrength": "FLT_MAX"
+    }
+  },
+  "beams": [
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_00_00",
+        "ericrolph_spider_web_catcher_pad_00_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_00_00",
+        "ericrolph_spider_web_catcher_pad_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_00_00",
+        "ericrolph_spider_web_catcher_pad_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_00_00",
+        "ericrolph_spider_web_catcher_pad_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_00_00",
+        "ericrolph_spider_web_catcher_pad_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_00_00",
+        "ericrolph_spider_web_catcher_pad_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_00_00",
+        "ericrolph_spider_web_catcher_pad_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_00_00",
+        "ericrolph_spider_web_catcher_tower_0_1_1_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_00_01",
+        "ericrolph_spider_web_catcher_pad_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_00_01",
+        "ericrolph_spider_web_catcher_pad_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_00_01",
+        "ericrolph_spider_web_catcher_pad_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_00_01",
+        "ericrolph_spider_web_catcher_pad_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_00_01",
+        "ericrolph_spider_web_catcher_pad_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_00_01",
+        "ericrolph_spider_web_catcher_web_anchor_5"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_01_00",
+        "ericrolph_spider_web_catcher_pad_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_01_00",
+        "ericrolph_spider_web_catcher_pad_00_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_01_00",
+        "ericrolph_spider_web_catcher_pad_00_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_01_00",
+        "ericrolph_spider_web_catcher_pad_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_01_00",
+        "ericrolph_spider_web_catcher_pad_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_01_00",
+        "ericrolph_spider_web_catcher_pad_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_01_00",
+        "ericrolph_spider_web_catcher_pad_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_01_00",
+        "ericrolph_spider_web_catcher_pad_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_01_01",
+        "ericrolph_spider_web_catcher_pad_00_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_01_01",
+        "ericrolph_spider_web_catcher_pad_00_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_01_01",
+        "ericrolph_spider_web_catcher_pad_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_01_01",
+        "ericrolph_spider_web_catcher_pad_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_01_01",
+        "ericrolph_spider_web_catcher_pad_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_01_01",
+        "ericrolph_spider_web_catcher_pad_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_02_00",
+        "ericrolph_spider_web_catcher_pad_00_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_02_00",
+        "ericrolph_spider_web_catcher_pad_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_02_00",
+        "ericrolph_spider_web_catcher_pad_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_02_00",
+        "ericrolph_spider_web_catcher_pad_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_02_01",
+        "ericrolph_spider_web_catcher_pad_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_02_01",
+        "ericrolph_spider_web_catcher_pad_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_02_01",
+        "ericrolph_spider_web_catcher_pad_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_00_00",
+        "ericrolph_spider_web_catcher_pad_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_00_00",
+        "ericrolph_spider_web_catcher_pad_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_00_00",
+        "ericrolph_spider_web_catcher_pad_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_00_00",
+        "ericrolph_spider_web_catcher_pad_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_00_00",
+        "ericrolph_spider_web_catcher_pad_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_00_00",
+        "ericrolph_spider_web_catcher_pad_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_00_00",
+        "ericrolph_spider_web_catcher_pad_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_00_01",
+        "ericrolph_spider_web_catcher_pad_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_00_01",
+        "ericrolph_spider_web_catcher_pad_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_00_01",
+        "ericrolph_spider_web_catcher_pad_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_00_01",
+        "ericrolph_spider_web_catcher_pad_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_00_01",
+        "ericrolph_spider_web_catcher_pad_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_00_01",
+        "ericrolph_spider_web_catcher_web_anchor_6"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_01_00",
+        "ericrolph_spider_web_catcher_pad_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_01_00",
+        "ericrolph_spider_web_catcher_pad_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_01_00",
+        "ericrolph_spider_web_catcher_pad_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_01_00",
+        "ericrolph_spider_web_catcher_pad_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_01_00",
+        "ericrolph_spider_web_catcher_pad_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_01_00",
+        "ericrolph_spider_web_catcher_pad_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_01_00",
+        "ericrolph_spider_web_catcher_pad_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_01_00",
+        "ericrolph_spider_web_catcher_pad_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_01_01",
+        "ericrolph_spider_web_catcher_pad_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_01_01",
+        "ericrolph_spider_web_catcher_pad_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_01_01",
+        "ericrolph_spider_web_catcher_pad_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_01_01",
+        "ericrolph_spider_web_catcher_pad_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_01_01",
+        "ericrolph_spider_web_catcher_pad_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_01_01",
+        "ericrolph_spider_web_catcher_pad_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_02_00",
+        "ericrolph_spider_web_catcher_pad_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_02_00",
+        "ericrolph_spider_web_catcher_pad_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_02_00",
+        "ericrolph_spider_web_catcher_pad_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_02_00",
+        "ericrolph_spider_web_catcher_pad_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_02_01",
+        "ericrolph_spider_web_catcher_pad_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_02_01",
+        "ericrolph_spider_web_catcher_pad_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_02_01",
+        "ericrolph_spider_web_catcher_pad_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_02_00_00",
+        "ericrolph_spider_web_catcher_pad_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_02_00_00",
+        "ericrolph_spider_web_catcher_pad_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_02_00_00",
+        "ericrolph_spider_web_catcher_pad_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_02_00_00",
+        "ericrolph_spider_web_catcher_tower_1_0_1_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_02_00_01",
+        "ericrolph_spider_web_catcher_pad_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_02_00_01",
+        "ericrolph_spider_web_catcher_pad_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_02_00_01",
+        "ericrolph_spider_web_catcher_web_anchor_7"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_02_01_00",
+        "ericrolph_spider_web_catcher_pad_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_02_01_00",
+        "ericrolph_spider_web_catcher_pad_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_02_01_00",
+        "ericrolph_spider_web_catcher_pad_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_02_01_01",
+        "ericrolph_spider_web_catcher_pad_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_02_01_01",
+        "ericrolph_spider_web_catcher_pad_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_02_02_00",
+        "ericrolph_spider_web_catcher_pad_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_0_0_0",
+        "ericrolph_spider_web_catcher_tower_0_0_0_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_0_0_0",
+        "ericrolph_spider_web_catcher_tower_0_0_1_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_0_0_0",
+        "ericrolph_spider_web_catcher_tower_0_1_0_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_0_0_1",
+        "ericrolph_spider_web_catcher_tower_0_0_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_0_0_1",
+        "ericrolph_spider_web_catcher_tower_0_1_0_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_0_0_1",
+        "ericrolph_spider_web_catcher_web_anchor_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_0_0_1",
+        "ericrolph_spider_web_catcher_web_anchor_3"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_0_1_0",
+        "ericrolph_spider_web_catcher_tower_0_0_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_0_1_0",
+        "ericrolph_spider_web_catcher_tower_0_1_1_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_0_1_1",
+        "ericrolph_spider_web_catcher_tower_0_1_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_1_0_0",
+        "ericrolph_spider_web_catcher_tower_0_1_0_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_1_0_0",
+        "ericrolph_spider_web_catcher_tower_0_1_1_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_1_0_1",
+        "ericrolph_spider_web_catcher_tower_0_1_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_1_0_1",
+        "ericrolph_spider_web_catcher_web_anchor_4"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_1_1_0",
+        "ericrolph_spider_web_catcher_tower_0_1_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_0_0_0",
+        "ericrolph_spider_web_catcher_tower_1_0_0_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_0_0_0",
+        "ericrolph_spider_web_catcher_tower_1_0_1_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_0_0_0",
+        "ericrolph_spider_web_catcher_tower_1_1_0_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_0_0_1",
+        "ericrolph_spider_web_catcher_tower_1_0_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_0_0_1",
+        "ericrolph_spider_web_catcher_tower_1_1_0_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_0_0_1",
+        "ericrolph_spider_web_catcher_web_anchor_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_0_1_0",
+        "ericrolph_spider_web_catcher_tower_1_0_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_0_1_0",
+        "ericrolph_spider_web_catcher_tower_1_1_1_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_0_1_1",
+        "ericrolph_spider_web_catcher_tower_1_1_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_1_0_0",
+        "ericrolph_spider_web_catcher_tower_1_1_0_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_1_0_0",
+        "ericrolph_spider_web_catcher_tower_1_1_1_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_1_0_1",
+        "ericrolph_spider_web_catcher_tower_1_1_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_1_0_1",
+        "ericrolph_spider_web_catcher_web_anchor_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_1_1_0",
+        "ericrolph_spider_web_catcher_tower_1_1_1_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_0",
+        "ericrolph_spider_web_catcher_web_0_1"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_0",
+        "ericrolph_spider_web_catcher_web_1_0"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_0",
+        "ericrolph_spider_web_catcher_web_7_0"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_0",
+        "ericrolph_spider_web_catcher_web_c"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_1",
+        "ericrolph_spider_web_catcher_web_0_2"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_1",
+        "ericrolph_spider_web_catcher_web_1_1"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_1",
+        "ericrolph_spider_web_catcher_web_7_1"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_2",
+        "ericrolph_spider_web_catcher_web_0_3"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_2",
+        "ericrolph_spider_web_catcher_web_1_2"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_2",
+        "ericrolph_spider_web_catcher_web_7_2"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_3",
+        "ericrolph_spider_web_catcher_web_0_4"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "extra": {
+        "beamStrength": 95000.0,
+        "breakGroup": "ericrolph_spider_web_catcher_snap_3_0"
+      },
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_3",
+        "ericrolph_spider_web_catcher_web_1_3"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "extra": {
+        "beamStrength": 95000.0,
+        "breakGroup": "ericrolph_spider_web_catcher_snap_3_7"
+      },
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_3",
+        "ericrolph_spider_web_catcher_web_7_3"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "extra": {
+        "beamStrength": 95000.0,
+        "breakGroup": "ericrolph_spider_web_catcher_snap_4_0"
+      },
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_4",
+        "ericrolph_spider_web_catcher_web_1_4"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "extra": {
+        "beamStrength": 95000.0,
+        "breakGroup": "ericrolph_spider_web_catcher_snap_4_7"
+      },
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_4",
+        "ericrolph_spider_web_catcher_web_7_4"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_4",
+        "ericrolph_spider_web_catcher_web_anchor_0"
+      ],
+      "spec": "web_anchor"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_0",
+        "ericrolph_spider_web_catcher_web_1_1"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_0",
+        "ericrolph_spider_web_catcher_web_2_0"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_0",
+        "ericrolph_spider_web_catcher_web_c"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_1",
+        "ericrolph_spider_web_catcher_web_1_2"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_1",
+        "ericrolph_spider_web_catcher_web_2_1"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_2",
+        "ericrolph_spider_web_catcher_web_1_3"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_2",
+        "ericrolph_spider_web_catcher_web_2_2"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_3",
+        "ericrolph_spider_web_catcher_web_1_4"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "extra": {
+        "beamStrength": 95000.0,
+        "breakGroup": "ericrolph_spider_web_catcher_snap_3_1"
+      },
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_3",
+        "ericrolph_spider_web_catcher_web_2_3"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "extra": {
+        "beamStrength": 95000.0,
+        "breakGroup": "ericrolph_spider_web_catcher_snap_4_1"
+      },
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_4",
+        "ericrolph_spider_web_catcher_web_2_4"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_4",
+        "ericrolph_spider_web_catcher_web_anchor_1"
+      ],
+      "spec": "web_anchor"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_0",
+        "ericrolph_spider_web_catcher_web_2_1"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_0",
+        "ericrolph_spider_web_catcher_web_3_0"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_0",
+        "ericrolph_spider_web_catcher_web_c"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_1",
+        "ericrolph_spider_web_catcher_web_2_2"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_1",
+        "ericrolph_spider_web_catcher_web_3_1"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_2",
+        "ericrolph_spider_web_catcher_web_2_3"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_2",
+        "ericrolph_spider_web_catcher_web_3_2"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_3",
+        "ericrolph_spider_web_catcher_web_2_4"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "extra": {
+        "beamStrength": 95000.0,
+        "breakGroup": "ericrolph_spider_web_catcher_snap_3_2"
+      },
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_3",
+        "ericrolph_spider_web_catcher_web_3_3"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "extra": {
+        "beamStrength": 95000.0,
+        "breakGroup": "ericrolph_spider_web_catcher_snap_4_2"
+      },
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_4",
+        "ericrolph_spider_web_catcher_web_3_4"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_4",
+        "ericrolph_spider_web_catcher_web_anchor_2"
+      ],
+      "spec": "web_anchor"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_0",
+        "ericrolph_spider_web_catcher_web_3_1"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_0",
+        "ericrolph_spider_web_catcher_web_4_0"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_0",
+        "ericrolph_spider_web_catcher_web_c"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_1",
+        "ericrolph_spider_web_catcher_web_3_2"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_1",
+        "ericrolph_spider_web_catcher_web_4_1"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_2",
+        "ericrolph_spider_web_catcher_web_3_3"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_2",
+        "ericrolph_spider_web_catcher_web_4_2"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_3",
+        "ericrolph_spider_web_catcher_web_3_4"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "extra": {
+        "beamStrength": 95000.0,
+        "breakGroup": "ericrolph_spider_web_catcher_snap_3_3"
+      },
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_3",
+        "ericrolph_spider_web_catcher_web_4_3"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "extra": {
+        "beamStrength": 95000.0,
+        "breakGroup": "ericrolph_spider_web_catcher_snap_4_3"
+      },
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_4",
+        "ericrolph_spider_web_catcher_web_4_4"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_4",
+        "ericrolph_spider_web_catcher_web_anchor_3"
+      ],
+      "spec": "web_anchor"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_0",
+        "ericrolph_spider_web_catcher_web_4_1"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_0",
+        "ericrolph_spider_web_catcher_web_5_0"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_0",
+        "ericrolph_spider_web_catcher_web_c"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_1",
+        "ericrolph_spider_web_catcher_web_4_2"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_1",
+        "ericrolph_spider_web_catcher_web_5_1"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_2",
+        "ericrolph_spider_web_catcher_web_4_3"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_2",
+        "ericrolph_spider_web_catcher_web_5_2"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_3",
+        "ericrolph_spider_web_catcher_web_4_4"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "extra": {
+        "beamStrength": 95000.0,
+        "breakGroup": "ericrolph_spider_web_catcher_snap_3_4"
+      },
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_3",
+        "ericrolph_spider_web_catcher_web_5_3"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "extra": {
+        "beamStrength": 95000.0,
+        "breakGroup": "ericrolph_spider_web_catcher_snap_4_4"
+      },
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_4",
+        "ericrolph_spider_web_catcher_web_5_4"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_4",
+        "ericrolph_spider_web_catcher_web_anchor_4"
+      ],
+      "spec": "web_anchor"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_0",
+        "ericrolph_spider_web_catcher_web_5_1"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_0",
+        "ericrolph_spider_web_catcher_web_6_0"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_0",
+        "ericrolph_spider_web_catcher_web_c"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_1",
+        "ericrolph_spider_web_catcher_web_5_2"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_1",
+        "ericrolph_spider_web_catcher_web_6_1"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_2",
+        "ericrolph_spider_web_catcher_web_5_3"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_2",
+        "ericrolph_spider_web_catcher_web_6_2"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_3",
+        "ericrolph_spider_web_catcher_web_5_4"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "extra": {
+        "beamStrength": 95000.0,
+        "breakGroup": "ericrolph_spider_web_catcher_snap_3_5"
+      },
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_3",
+        "ericrolph_spider_web_catcher_web_6_3"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "extra": {
+        "beamStrength": 95000.0,
+        "breakGroup": "ericrolph_spider_web_catcher_snap_4_5"
+      },
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_4",
+        "ericrolph_spider_web_catcher_web_6_4"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_4",
+        "ericrolph_spider_web_catcher_web_anchor_5"
+      ],
+      "spec": "web_anchor"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_0",
+        "ericrolph_spider_web_catcher_web_6_1"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_0",
+        "ericrolph_spider_web_catcher_web_7_0"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_0",
+        "ericrolph_spider_web_catcher_web_c"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_1",
+        "ericrolph_spider_web_catcher_web_6_2"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_1",
+        "ericrolph_spider_web_catcher_web_7_1"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_2",
+        "ericrolph_spider_web_catcher_web_6_3"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_2",
+        "ericrolph_spider_web_catcher_web_7_2"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_3",
+        "ericrolph_spider_web_catcher_web_6_4"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "extra": {
+        "beamStrength": 95000.0,
+        "breakGroup": "ericrolph_spider_web_catcher_snap_3_6"
+      },
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_3",
+        "ericrolph_spider_web_catcher_web_7_3"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "extra": {
+        "beamStrength": 95000.0,
+        "breakGroup": "ericrolph_spider_web_catcher_snap_4_6"
+      },
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_4",
+        "ericrolph_spider_web_catcher_web_7_4"
+      ],
+      "spec": "web_ring"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_4",
+        "ericrolph_spider_web_catcher_web_anchor_6"
+      ],
+      "spec": "web_anchor"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_0",
+        "ericrolph_spider_web_catcher_web_7_1"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_0",
+        "ericrolph_spider_web_catcher_web_c"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_1",
+        "ericrolph_spider_web_catcher_web_7_2"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_2",
+        "ericrolph_spider_web_catcher_web_7_3"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_3",
+        "ericrolph_spider_web_catcher_web_7_4"
+      ],
+      "spec": "web_spoke"
+    },
+    {
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_4",
+        "ericrolph_spider_web_catcher_web_anchor_7"
+      ],
+      "spec": "web_anchor"
+    }
+  ],
+  "behavior": {
+    "camera_distance": 42.0,
+    "effects": {
+      "impact_dust": {
+        "direction": [
+          0.0,
+          1.0,
+          0.6
+        ],
+        "emitter": "BNGP_2",
+        "position": [
+          0.0,
+          1.0,
+          4.0
+        ]
+      }
+    },
+    "triggers": {
+      "approach_zone": {
+        "center": [
+          0.0,
+          -30.0,
+          5.0
+        ],
+        "dimensions": [
+          30.0,
+          44.0,
+          12.0
+        ],
+        "mode": "Overlaps"
+      },
+      "web_zone": {
+        "center": [
+          0.0,
+          7.0,
+          8.5
+        ],
+        "dimensions": [
+          26.0,
+          30.0,
+          19.0
+        ],
+        "mode": "Overlaps"
+      }
+    },
+    "tunables": {
+      "camera_distance": 42.0,
+      "caught_speed_mps": 10.0,
+      "incoming_speed_mps": 25.0,
+      "rearm_delay_seconds": 4.0,
+      "spider_descend_seconds": 2.6,
+      "spider_drop_depth": 6.2,
+      "spider_inspect_seconds": 5.0,
+      "spider_retreat_seconds": 2.0,
+      "stretch_axis_note": "authored +Y",
+      "web_plane_margin": 0.5
+    }
+  },
+  "coordinate_system": {
+    "source": "right-handed, meters, Z-up, +Y drive direction",
+    "source_world_to_beamng_vehicle": [
+      [
+        -1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        -1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "target": "BeamNG vehicle space, meters, Z-up, -Y forward"
+  },
+  "nodes": [
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_00_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        9.0,
+        -1.200001,
+        0.0
+      ],
+      "source_world_position": [
+        -9.0,
+        1.2,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_00_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        9.0,
+        -1.200001,
+        0.2
+      ],
+      "source_world_position": [
+        -9.0,
+        1.2,
+        0.2
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_00_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        8.999999,
+        -8.600001,
+        0.0
+      ],
+      "source_world_position": [
+        -9.0,
+        8.6,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_00_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        8.999999,
+        -8.600001,
+        0.2
+      ],
+      "source_world_position": [
+        -9.0,
+        8.6,
+        0.2
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_00_02_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        8.999999,
+        -16.0,
+        0.0
+      ],
+      "source_world_position": [
+        -9.0,
+        16.0,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_00_02_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        8.999999,
+        -16.0,
+        0.2
+      ],
+      "source_world_position": [
+        -9.0,
+        16.0,
+        0.2
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_01_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -1.2,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        1.2,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_01_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -1.2,
+        0.2
+      ],
+      "source_world_position": [
+        0.0,
+        1.2,
+        0.2
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_01_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -8.6,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        8.6,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_01_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -8.6,
+        0.2
+      ],
+      "source_world_position": [
+        0.0,
+        8.6,
+        0.2
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_01_02_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -16.0,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        16.0,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_01_02_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -16.0,
+        0.2
+      ],
+      "source_world_position": [
+        0.0,
+        16.0,
+        0.2
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_02_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -9.0,
+        -1.199999,
+        0.0
+      ],
+      "source_world_position": [
+        9.0,
+        1.2,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_02_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -9.0,
+        -1.199999,
+        0.2
+      ],
+      "source_world_position": [
+        9.0,
+        1.2,
+        0.2
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_02_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -9.000001,
+        -8.599999,
+        0.0
+      ],
+      "source_world_position": [
+        9.0,
+        8.6,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_02_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -9.000001,
+        -8.599999,
+        0.2
+      ],
+      "source_world_position": [
+        9.0,
+        8.6,
+        0.2
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_02_02_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -9.000001,
+        -15.999999,
+        0.0
+      ],
+      "source_world_position": [
+        9.0,
+        16.0,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_pad_02_02_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -9.000001,
+        -15.999999,
+        0.2
+      ],
+      "source_world_position": [
+        9.0,
+        16.0,
+        0.2
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_tower_0_0_0_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        11.4,
+        0.899999,
+        0.0
+      ],
+      "source_world_position": [
+        -11.4,
+        -0.9,
+        0.0
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_tower_0_0_0_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        11.4,
+        0.899999,
+        16.5
+      ],
+      "source_world_position": [
+        -11.4,
+        -0.9,
+        16.5
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_tower_0_0_1_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        11.4,
+        -0.900001,
+        0.0
+      ],
+      "source_world_position": [
+        -11.4,
+        0.9,
+        0.0
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_tower_0_0_1_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        11.4,
+        -0.900001,
+        16.5
+      ],
+      "source_world_position": [
+        -11.4,
+        0.9,
+        16.5
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_tower_0_1_0_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        9.6,
+        0.899999,
+        0.0
+      ],
+      "source_world_position": [
+        -9.6,
+        -0.9,
+        0.0
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_tower_0_1_0_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        9.6,
+        0.899999,
+        16.5
+      ],
+      "source_world_position": [
+        -9.6,
+        -0.9,
+        16.5
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_tower_0_1_1_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        9.6,
+        -0.900001,
+        0.0
+      ],
+      "source_world_position": [
+        -9.6,
+        0.9,
+        0.0
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_tower_0_1_1_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        9.6,
+        -0.900001,
+        16.5
+      ],
+      "source_world_position": [
+        -9.6,
+        0.9,
+        16.5
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_tower_1_0_0_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -9.6,
+        0.900001,
+        0.0
+      ],
+      "source_world_position": [
+        9.6,
+        -0.9,
+        0.0
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_tower_1_0_0_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -9.6,
+        0.900001,
+        16.5
+      ],
+      "source_world_position": [
+        9.6,
+        -0.9,
+        16.5
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_tower_1_0_1_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -9.6,
+        -0.899999,
+        0.0
+      ],
+      "source_world_position": [
+        9.6,
+        0.9,
+        0.0
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_tower_1_0_1_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -9.6,
+        -0.899999,
+        16.5
+      ],
+      "source_world_position": [
+        9.6,
+        0.9,
+        16.5
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_tower_1_1_0_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -11.4,
+        0.900001,
+        0.0
+      ],
+      "source_world_position": [
+        11.4,
+        -0.9,
+        0.0
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_tower_1_1_0_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -11.4,
+        0.900001,
+        16.5
+      ],
+      "source_world_position": [
+        11.4,
+        -0.9,
+        16.5
+      ],
+      "spawn_envelope": true,
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_tower_1_1_1_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -11.4,
+        -0.899999,
+        0.0
+      ],
+      "source_world_position": [
+        11.4,
+        0.9,
+        0.0
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spider_web_catcher_tower_1_1_1_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -11.4,
+        -0.899999,
+        16.5
+      ],
+      "source_world_position": [
+        11.4,
+        0.9,
+        16.5
+      ],
+      "weight": 150.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_c",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        0.0,
+        8.5
+      ],
+      "source_world_position": [
+        0.0,
+        0.0,
+        8.5
+      ],
+      "weight": 30.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_0_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.5,
+        0.0,
+        8.5
+      ],
+      "source_world_position": [
+        1.5,
+        0.0,
+        8.5
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_0_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.0,
+        0.0,
+        8.5
+      ],
+      "source_world_position": [
+        3.0,
+        0.0,
+        8.5
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_0_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -4.5,
+        0.0,
+        8.5
+      ],
+      "source_world_position": [
+        4.5,
+        0.0,
+        8.5
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_0_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        -6.0,
+        1e-06,
+        8.5
+      ],
+      "source_world_position": [
+        6.0,
+        0.0,
+        8.5
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_0_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        -7.5,
+        1e-06,
+        8.5
+      ],
+      "source_world_position": [
+        7.5,
+        0.0,
+        8.5
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_1_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.06066,
+        0.0,
+        9.56066
+      ],
+      "source_world_position": [
+        1.06066,
+        0.0,
+        9.56066
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_1_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.12132,
+        0.0,
+        10.621321
+      ],
+      "source_world_position": [
+        2.12132,
+        0.0,
+        10.621321
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_1_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.181981,
+        0.0,
+        11.68198
+      ],
+      "source_world_position": [
+        3.181981,
+        0.0,
+        11.68198
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_1_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        -4.24264,
+        0.0,
+        12.74264
+      ],
+      "source_world_position": [
+        4.24264,
+        0.0,
+        12.74264
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_1_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        -5.303301,
+        0.0,
+        13.803301
+      ],
+      "source_world_position": [
+        5.303301,
+        0.0,
+        13.803301
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_2_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        0.0,
+        10.0
+      ],
+      "source_world_position": [
+        0.0,
+        0.0,
+        10.0
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_2_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        0.0,
+        11.5
+      ],
+      "source_world_position": [
+        0.0,
+        0.0,
+        11.5
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_2_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        0.0,
+        13.0
+      ],
+      "source_world_position": [
+        0.0,
+        0.0,
+        13.0
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_2_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        0.0,
+        14.5
+      ],
+      "source_world_position": [
+        0.0,
+        0.0,
+        14.5
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_2_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        0.0,
+        16.0
+      ],
+      "source_world_position": [
+        0.0,
+        0.0,
+        16.0
+      ],
+      "spawn_envelope": true,
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_3_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.06066,
+        -0.0,
+        9.56066
+      ],
+      "source_world_position": [
+        -1.06066,
+        0.0,
+        9.56066
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_3_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.12132,
+        -0.0,
+        10.621321
+      ],
+      "source_world_position": [
+        -2.12132,
+        0.0,
+        10.621321
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_3_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.181981,
+        -0.0,
+        11.68198
+      ],
+      "source_world_position": [
+        -3.181981,
+        0.0,
+        11.68198
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_3_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        4.24264,
+        -0.0,
+        12.74264
+      ],
+      "source_world_position": [
+        -4.24264,
+        0.0,
+        12.74264
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_3_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        5.303301,
+        -0.0,
+        13.803301
+      ],
+      "source_world_position": [
+        -5.303301,
+        0.0,
+        13.803301
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_4_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.5,
+        -0.0,
+        8.5
+      ],
+      "source_world_position": [
+        -1.5,
+        0.0,
+        8.5
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_4_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.0,
+        -0.0,
+        8.5
+      ],
+      "source_world_position": [
+        -3.0,
+        0.0,
+        8.5
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_4_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        4.5,
+        -0.0,
+        8.5
+      ],
+      "source_world_position": [
+        -4.5,
+        0.0,
+        8.5
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_4_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        6.0,
+        -1e-06,
+        8.5
+      ],
+      "source_world_position": [
+        -6.0,
+        0.0,
+        8.5
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_4_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        7.5,
+        -1e-06,
+        8.5
+      ],
+      "source_world_position": [
+        -7.5,
+        0.0,
+        8.5
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_5_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.06066,
+        -0.0,
+        7.43934
+      ],
+      "source_world_position": [
+        -1.06066,
+        0.0,
+        7.43934
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_5_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.12132,
+        -0.0,
+        6.37868
+      ],
+      "source_world_position": [
+        -2.12132,
+        0.0,
+        6.37868
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_5_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.181981,
+        -0.0,
+        5.318019
+      ],
+      "source_world_position": [
+        -3.181981,
+        0.0,
+        5.318019
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_5_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        4.24264,
+        -0.0,
+        4.25736
+      ],
+      "source_world_position": [
+        -4.24264,
+        0.0,
+        4.25736
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_5_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        5.303301,
+        -0.0,
+        3.196699
+      ],
+      "source_world_position": [
+        -5.303301,
+        0.0,
+        3.196699
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_6_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        -0.0,
+        7.0
+      ],
+      "source_world_position": [
+        -0.0,
+        0.0,
+        7.0
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_6_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        -0.0,
+        5.5
+      ],
+      "source_world_position": [
+        -0.0,
+        0.0,
+        5.5
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_6_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        -0.0,
+        4.0
+      ],
+      "source_world_position": [
+        -0.0,
+        0.0,
+        4.0
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_6_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        -0.0,
+        2.5
+      ],
+      "source_world_position": [
+        -0.0,
+        0.0,
+        2.5
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_6_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        -0.0,
+        1.0
+      ],
+      "source_world_position": [
+        -0.0,
+        0.0,
+        1.0
+      ],
+      "spawn_envelope": true,
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_7_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.06066,
+        0.0,
+        7.43934
+      ],
+      "source_world_position": [
+        1.06066,
+        0.0,
+        7.43934
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_7_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.12132,
+        0.0,
+        6.37868
+      ],
+      "source_world_position": [
+        2.12132,
+        0.0,
+        6.37868
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_7_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.181981,
+        0.0,
+        5.318019
+      ],
+      "source_world_position": [
+        3.181981,
+        0.0,
+        5.318019
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_7_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        -4.24264,
+        0.0,
+        4.25736
+      ],
+      "source_world_position": [
+        4.24264,
+        0.0,
+        4.25736
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": true,
+      "fixed": false,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_7_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        -5.303301,
+        0.0,
+        3.196699
+      ],
+      "source_world_position": [
+        5.303301,
+        0.0,
+        3.196699
+      ],
+      "weight": 32.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_anchor_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -10.5,
+        1e-06,
+        8.5
+      ],
+      "source_world_position": [
+        10.5,
+        0.0,
+        8.5
+      ],
+      "weight": 120.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_anchor_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -10.5,
+        1e-06,
+        15.5
+      ],
+      "source_world_position": [
+        10.5,
+        0.0,
+        15.5
+      ],
+      "weight": 120.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_anchor_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        0.0,
+        16.200001
+      ],
+      "source_world_position": [
+        0.0,
+        0.0,
+        16.200001
+      ],
+      "weight": 120.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_anchor_3",
+      "node_material": "|NM_METAL",
+      "position": [
+        10.5,
+        -1e-06,
+        15.5
+      ],
+      "source_world_position": [
+        -10.5,
+        0.0,
+        15.5
+      ],
+      "weight": 120.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_anchor_4",
+      "node_material": "|NM_METAL",
+      "position": [
+        10.5,
+        -1e-06,
+        8.5
+      ],
+      "source_world_position": [
+        -10.5,
+        0.0,
+        8.5
+      ],
+      "weight": 120.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_anchor_5",
+      "node_material": "|NM_METAL",
+      "position": [
+        8.5,
+        -1e-06,
+        0.0
+      ],
+      "source_world_position": [
+        -8.5,
+        0.0,
+        0.0
+      ],
+      "weight": 120.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_anchor_6",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "weight": 120.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "group": "web",
+      "id": "ericrolph_spider_web_catcher_web_anchor_7",
+      "node_material": "|NM_METAL",
+      "position": [
+        -8.5,
+        1e-06,
+        0.0
+      ],
+      "source_world_position": [
+        8.5,
+        0.0,
+        0.0
+      ],
+      "weight": 120.0
+    }
+  ],
+  "palette": {
+    "ericrolph_spider_web_catcher_board_white": {
+      "color": [
+        0.9,
+        0.89,
+        0.85,
+        1.0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.45,
+      "texture": {
+        "family": "painted_metal",
+        "params": {
+          "base": [
+            0.9,
+            0.89,
+            0.85
+          ],
+          "rough": 0.45
+        }
+      }
+    },
+    "ericrolph_spider_web_catcher_concrete": {
+      "color": [
+        0.62,
+        0.6,
+        0.57,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.85,
+      "texture": {
+        "family": "concrete"
+      }
+    },
+    "ericrolph_spider_web_catcher_eye_glow": {
+      "color": [
+        0.9,
+        0.85,
+        0.3,
+        1.0
+      ],
+      "emissive": [
+        0.9,
+        0.8,
+        0.25
+      ],
+      "metallic": 0.0,
+      "roughness": 0.3,
+      "stage": {
+        "emissiveIntensityNits": 800
+      }
+    },
+    "ericrolph_spider_web_catcher_hazard": {
+      "color": [
+        0.95,
+        0.75,
+        0.08,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.55,
+      "texture": {
+        "family": "hazard_chevron"
+      }
+    },
+    "ericrolph_spider_web_catcher_paint_white": {
+      "color": [
+        0.92,
+        0.92,
+        0.9,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.6
+    },
+    "ericrolph_spider_web_catcher_spider_black": {
+      "color": [
+        0.08,
+        0.07,
+        0.08,
+        1.0
+      ],
+      "metallic": 0.15,
+      "roughness": 0.45,
+      "texture": {
+        "family": "bakelite"
+      }
+    },
+    "ericrolph_spider_web_catcher_spider_red": {
+      "color": [
+        0.8,
+        0.12,
+        0.1,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.4
+    },
+    "ericrolph_spider_web_catcher_tower_steel": {
+      "color": [
+        0.5,
+        0.53,
+        0.57,
+        1.0
+      ],
+      "metallic": 0.8,
+      "roughness": 0.4,
+      "texture": {
+        "family": "steel_worn"
+      }
+    },
+    "ericrolph_spider_web_catcher_web_silk": {
+      "color": [
+        0.92,
+        0.94,
+        0.97,
+        1.0
+      ],
+      "double_sided": true,
+      "metallic": 0.0,
+      "roughness": 0.25
+    }
+  },
+  "parts": [
+    {
+      "materials": [
+        "ericrolph_spider_web_catcher_eye_glow",
+        "ericrolph_spider_web_catcher_spider_black",
+        "ericrolph_spider_web_catcher_spider_red",
+        "ericrolph_spider_web_catcher_web_silk"
+      ],
+      "name": "spider",
+      "path": "vehicles/ericrolph_spider_web_catcher/ericrolph_spider_web_catcher_spider.dae",
+      "pivot_world": [
+        0.0,
+        0.0,
+        16.0
+      ],
+      "sha256": "4b5ed84a64c115c787b20c63c55822ce511ee44d311454b4d9482eeb56a066b9",
+      "size": 413756
+    }
+  ],
+  "refnodes": {
+    "back": "ericrolph_spider_web_catcher_pad_01_00_00",
+    "left": "ericrolph_spider_web_catcher_pad_00_01_00",
+    "ref": "ericrolph_spider_web_catcher_pad_01_01_00",
+    "up": "ericrolph_spider_web_catcher_pad_01_01_01"
+  },
+  "schema": "ericrolph-giant-props-handoff-v1",
+  "spawn_envelope_nodes": [
+    "ericrolph_spider_web_catcher_tower_0_0_0_0",
+    "ericrolph_spider_web_catcher_tower_1_1_0_0",
+    "ericrolph_spider_web_catcher_tower_0_0_0_1",
+    "ericrolph_spider_web_catcher_tower_1_1_0_1",
+    "ericrolph_spider_web_catcher_pad_00_02_01",
+    "ericrolph_spider_web_catcher_pad_02_02_01",
+    "ericrolph_spider_web_catcher_web_2_4",
+    "ericrolph_spider_web_catcher_web_6_4"
+  ],
+  "triangles": [
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_00_01",
+        "ericrolph_spider_web_catcher_pad_01_00_01",
+        "ericrolph_spider_web_catcher_pad_01_01_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_00_01",
+        "ericrolph_spider_web_catcher_pad_01_01_01",
+        "ericrolph_spider_web_catcher_pad_00_01_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_01_01",
+        "ericrolph_spider_web_catcher_pad_01_01_01",
+        "ericrolph_spider_web_catcher_pad_01_02_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_00_01_01",
+        "ericrolph_spider_web_catcher_pad_01_02_01",
+        "ericrolph_spider_web_catcher_pad_00_02_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_00_01",
+        "ericrolph_spider_web_catcher_pad_02_00_01",
+        "ericrolph_spider_web_catcher_pad_02_01_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_00_01",
+        "ericrolph_spider_web_catcher_pad_02_01_01",
+        "ericrolph_spider_web_catcher_pad_01_01_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_01_01",
+        "ericrolph_spider_web_catcher_pad_02_01_01",
+        "ericrolph_spider_web_catcher_pad_02_02_01"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_spider_web_catcher_pad_01_01_01",
+        "ericrolph_spider_web_catcher_pad_02_02_01",
+        "ericrolph_spider_web_catcher_pad_01_02_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_0_0_0",
+        "ericrolph_spider_web_catcher_tower_0_1_0_0",
+        "ericrolph_spider_web_catcher_tower_0_1_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_0_0_0",
+        "ericrolph_spider_web_catcher_tower_0_1_0_1",
+        "ericrolph_spider_web_catcher_tower_0_0_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_1_1_0",
+        "ericrolph_spider_web_catcher_tower_0_0_1_0",
+        "ericrolph_spider_web_catcher_tower_0_0_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_1_1_0",
+        "ericrolph_spider_web_catcher_tower_0_0_1_1",
+        "ericrolph_spider_web_catcher_tower_0_1_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_0_1_0",
+        "ericrolph_spider_web_catcher_tower_0_0_0_0",
+        "ericrolph_spider_web_catcher_tower_0_0_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_0_1_0",
+        "ericrolph_spider_web_catcher_tower_0_0_0_1",
+        "ericrolph_spider_web_catcher_tower_0_0_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_1_0_0",
+        "ericrolph_spider_web_catcher_tower_0_1_1_0",
+        "ericrolph_spider_web_catcher_tower_0_1_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_0_1_0_0",
+        "ericrolph_spider_web_catcher_tower_0_1_1_1",
+        "ericrolph_spider_web_catcher_tower_0_1_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_0_0_0",
+        "ericrolph_spider_web_catcher_tower_1_1_0_0",
+        "ericrolph_spider_web_catcher_tower_1_1_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_0_0_0",
+        "ericrolph_spider_web_catcher_tower_1_1_0_1",
+        "ericrolph_spider_web_catcher_tower_1_0_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_1_1_0",
+        "ericrolph_spider_web_catcher_tower_1_0_1_0",
+        "ericrolph_spider_web_catcher_tower_1_0_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_1_1_0",
+        "ericrolph_spider_web_catcher_tower_1_0_1_1",
+        "ericrolph_spider_web_catcher_tower_1_1_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_0_1_0",
+        "ericrolph_spider_web_catcher_tower_1_0_0_0",
+        "ericrolph_spider_web_catcher_tower_1_0_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_0_1_0",
+        "ericrolph_spider_web_catcher_tower_1_0_0_1",
+        "ericrolph_spider_web_catcher_tower_1_0_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_1_0_0",
+        "ericrolph_spider_web_catcher_tower_1_1_1_0",
+        "ericrolph_spider_web_catcher_tower_1_1_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_tower_1_1_0_0",
+        "ericrolph_spider_web_catcher_tower_1_1_1_1",
+        "ericrolph_spider_web_catcher_tower_1_1_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_c",
+        "ericrolph_spider_web_catcher_web_0_0",
+        "ericrolph_spider_web_catcher_web_1_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_0",
+        "ericrolph_spider_web_catcher_web_0_0",
+        "ericrolph_spider_web_catcher_web_c"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_0",
+        "ericrolph_spider_web_catcher_web_1_0",
+        "ericrolph_spider_web_catcher_web_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_0",
+        "ericrolph_spider_web_catcher_web_1_1",
+        "ericrolph_spider_web_catcher_web_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_1",
+        "ericrolph_spider_web_catcher_web_1_1",
+        "ericrolph_spider_web_catcher_web_1_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_1",
+        "ericrolph_spider_web_catcher_web_1_0",
+        "ericrolph_spider_web_catcher_web_0_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_1",
+        "ericrolph_spider_web_catcher_web_1_1",
+        "ericrolph_spider_web_catcher_web_1_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_1",
+        "ericrolph_spider_web_catcher_web_1_2",
+        "ericrolph_spider_web_catcher_web_0_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_2",
+        "ericrolph_spider_web_catcher_web_1_2",
+        "ericrolph_spider_web_catcher_web_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_2",
+        "ericrolph_spider_web_catcher_web_1_1",
+        "ericrolph_spider_web_catcher_web_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_2",
+        "ericrolph_spider_web_catcher_web_1_2",
+        "ericrolph_spider_web_catcher_web_1_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_2",
+        "ericrolph_spider_web_catcher_web_1_3",
+        "ericrolph_spider_web_catcher_web_0_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_3",
+        "ericrolph_spider_web_catcher_web_1_3",
+        "ericrolph_spider_web_catcher_web_1_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_3",
+        "ericrolph_spider_web_catcher_web_1_2",
+        "ericrolph_spider_web_catcher_web_0_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_3",
+        "ericrolph_spider_web_catcher_web_1_3",
+        "ericrolph_spider_web_catcher_web_1_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_3",
+        "ericrolph_spider_web_catcher_web_1_4",
+        "ericrolph_spider_web_catcher_web_0_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_4",
+        "ericrolph_spider_web_catcher_web_1_4",
+        "ericrolph_spider_web_catcher_web_1_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_4",
+        "ericrolph_spider_web_catcher_web_1_3",
+        "ericrolph_spider_web_catcher_web_0_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_c",
+        "ericrolph_spider_web_catcher_web_1_0",
+        "ericrolph_spider_web_catcher_web_2_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_0",
+        "ericrolph_spider_web_catcher_web_1_0",
+        "ericrolph_spider_web_catcher_web_c"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_0",
+        "ericrolph_spider_web_catcher_web_2_0",
+        "ericrolph_spider_web_catcher_web_2_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_0",
+        "ericrolph_spider_web_catcher_web_2_1",
+        "ericrolph_spider_web_catcher_web_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_1",
+        "ericrolph_spider_web_catcher_web_2_1",
+        "ericrolph_spider_web_catcher_web_2_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_1",
+        "ericrolph_spider_web_catcher_web_2_0",
+        "ericrolph_spider_web_catcher_web_1_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_1",
+        "ericrolph_spider_web_catcher_web_2_1",
+        "ericrolph_spider_web_catcher_web_2_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_1",
+        "ericrolph_spider_web_catcher_web_2_2",
+        "ericrolph_spider_web_catcher_web_1_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_2",
+        "ericrolph_spider_web_catcher_web_2_2",
+        "ericrolph_spider_web_catcher_web_2_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_2",
+        "ericrolph_spider_web_catcher_web_2_1",
+        "ericrolph_spider_web_catcher_web_1_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_2",
+        "ericrolph_spider_web_catcher_web_2_2",
+        "ericrolph_spider_web_catcher_web_2_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_2",
+        "ericrolph_spider_web_catcher_web_2_3",
+        "ericrolph_spider_web_catcher_web_1_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_3",
+        "ericrolph_spider_web_catcher_web_2_3",
+        "ericrolph_spider_web_catcher_web_2_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_3",
+        "ericrolph_spider_web_catcher_web_2_2",
+        "ericrolph_spider_web_catcher_web_1_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_3",
+        "ericrolph_spider_web_catcher_web_2_3",
+        "ericrolph_spider_web_catcher_web_2_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_3",
+        "ericrolph_spider_web_catcher_web_2_4",
+        "ericrolph_spider_web_catcher_web_1_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_4",
+        "ericrolph_spider_web_catcher_web_2_4",
+        "ericrolph_spider_web_catcher_web_2_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_1_4",
+        "ericrolph_spider_web_catcher_web_2_3",
+        "ericrolph_spider_web_catcher_web_1_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_c",
+        "ericrolph_spider_web_catcher_web_2_0",
+        "ericrolph_spider_web_catcher_web_3_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_0",
+        "ericrolph_spider_web_catcher_web_2_0",
+        "ericrolph_spider_web_catcher_web_c"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_0",
+        "ericrolph_spider_web_catcher_web_3_0",
+        "ericrolph_spider_web_catcher_web_3_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_0",
+        "ericrolph_spider_web_catcher_web_3_1",
+        "ericrolph_spider_web_catcher_web_2_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_1",
+        "ericrolph_spider_web_catcher_web_3_1",
+        "ericrolph_spider_web_catcher_web_3_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_1",
+        "ericrolph_spider_web_catcher_web_3_0",
+        "ericrolph_spider_web_catcher_web_2_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_1",
+        "ericrolph_spider_web_catcher_web_3_1",
+        "ericrolph_spider_web_catcher_web_3_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_1",
+        "ericrolph_spider_web_catcher_web_3_2",
+        "ericrolph_spider_web_catcher_web_2_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_2",
+        "ericrolph_spider_web_catcher_web_3_2",
+        "ericrolph_spider_web_catcher_web_3_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_2",
+        "ericrolph_spider_web_catcher_web_3_1",
+        "ericrolph_spider_web_catcher_web_2_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_2",
+        "ericrolph_spider_web_catcher_web_3_2",
+        "ericrolph_spider_web_catcher_web_3_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_2",
+        "ericrolph_spider_web_catcher_web_3_3",
+        "ericrolph_spider_web_catcher_web_2_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_3",
+        "ericrolph_spider_web_catcher_web_3_3",
+        "ericrolph_spider_web_catcher_web_3_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_3",
+        "ericrolph_spider_web_catcher_web_3_2",
+        "ericrolph_spider_web_catcher_web_2_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_3",
+        "ericrolph_spider_web_catcher_web_3_3",
+        "ericrolph_spider_web_catcher_web_3_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_3",
+        "ericrolph_spider_web_catcher_web_3_4",
+        "ericrolph_spider_web_catcher_web_2_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_4",
+        "ericrolph_spider_web_catcher_web_3_4",
+        "ericrolph_spider_web_catcher_web_3_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_2_4",
+        "ericrolph_spider_web_catcher_web_3_3",
+        "ericrolph_spider_web_catcher_web_2_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_c",
+        "ericrolph_spider_web_catcher_web_3_0",
+        "ericrolph_spider_web_catcher_web_4_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_0",
+        "ericrolph_spider_web_catcher_web_3_0",
+        "ericrolph_spider_web_catcher_web_c"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_0",
+        "ericrolph_spider_web_catcher_web_4_0",
+        "ericrolph_spider_web_catcher_web_4_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_0",
+        "ericrolph_spider_web_catcher_web_4_1",
+        "ericrolph_spider_web_catcher_web_3_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_1",
+        "ericrolph_spider_web_catcher_web_4_1",
+        "ericrolph_spider_web_catcher_web_4_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_1",
+        "ericrolph_spider_web_catcher_web_4_0",
+        "ericrolph_spider_web_catcher_web_3_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_1",
+        "ericrolph_spider_web_catcher_web_4_1",
+        "ericrolph_spider_web_catcher_web_4_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_1",
+        "ericrolph_spider_web_catcher_web_4_2",
+        "ericrolph_spider_web_catcher_web_3_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_2",
+        "ericrolph_spider_web_catcher_web_4_2",
+        "ericrolph_spider_web_catcher_web_4_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_2",
+        "ericrolph_spider_web_catcher_web_4_1",
+        "ericrolph_spider_web_catcher_web_3_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_2",
+        "ericrolph_spider_web_catcher_web_4_2",
+        "ericrolph_spider_web_catcher_web_4_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_2",
+        "ericrolph_spider_web_catcher_web_4_3",
+        "ericrolph_spider_web_catcher_web_3_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_3",
+        "ericrolph_spider_web_catcher_web_4_3",
+        "ericrolph_spider_web_catcher_web_4_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_3",
+        "ericrolph_spider_web_catcher_web_4_2",
+        "ericrolph_spider_web_catcher_web_3_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_3",
+        "ericrolph_spider_web_catcher_web_4_3",
+        "ericrolph_spider_web_catcher_web_4_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_3",
+        "ericrolph_spider_web_catcher_web_4_4",
+        "ericrolph_spider_web_catcher_web_3_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_4",
+        "ericrolph_spider_web_catcher_web_4_4",
+        "ericrolph_spider_web_catcher_web_4_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_3_4",
+        "ericrolph_spider_web_catcher_web_4_3",
+        "ericrolph_spider_web_catcher_web_3_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_c",
+        "ericrolph_spider_web_catcher_web_4_0",
+        "ericrolph_spider_web_catcher_web_5_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_0",
+        "ericrolph_spider_web_catcher_web_4_0",
+        "ericrolph_spider_web_catcher_web_c"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_0",
+        "ericrolph_spider_web_catcher_web_5_0",
+        "ericrolph_spider_web_catcher_web_5_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_0",
+        "ericrolph_spider_web_catcher_web_5_1",
+        "ericrolph_spider_web_catcher_web_4_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_1",
+        "ericrolph_spider_web_catcher_web_5_1",
+        "ericrolph_spider_web_catcher_web_5_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_1",
+        "ericrolph_spider_web_catcher_web_5_0",
+        "ericrolph_spider_web_catcher_web_4_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_1",
+        "ericrolph_spider_web_catcher_web_5_1",
+        "ericrolph_spider_web_catcher_web_5_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_1",
+        "ericrolph_spider_web_catcher_web_5_2",
+        "ericrolph_spider_web_catcher_web_4_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_2",
+        "ericrolph_spider_web_catcher_web_5_2",
+        "ericrolph_spider_web_catcher_web_5_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_2",
+        "ericrolph_spider_web_catcher_web_5_1",
+        "ericrolph_spider_web_catcher_web_4_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_2",
+        "ericrolph_spider_web_catcher_web_5_2",
+        "ericrolph_spider_web_catcher_web_5_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_2",
+        "ericrolph_spider_web_catcher_web_5_3",
+        "ericrolph_spider_web_catcher_web_4_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_3",
+        "ericrolph_spider_web_catcher_web_5_3",
+        "ericrolph_spider_web_catcher_web_5_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_3",
+        "ericrolph_spider_web_catcher_web_5_2",
+        "ericrolph_spider_web_catcher_web_4_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_3",
+        "ericrolph_spider_web_catcher_web_5_3",
+        "ericrolph_spider_web_catcher_web_5_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_3",
+        "ericrolph_spider_web_catcher_web_5_4",
+        "ericrolph_spider_web_catcher_web_4_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_4",
+        "ericrolph_spider_web_catcher_web_5_4",
+        "ericrolph_spider_web_catcher_web_5_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_4_4",
+        "ericrolph_spider_web_catcher_web_5_3",
+        "ericrolph_spider_web_catcher_web_4_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_c",
+        "ericrolph_spider_web_catcher_web_5_0",
+        "ericrolph_spider_web_catcher_web_6_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_0",
+        "ericrolph_spider_web_catcher_web_5_0",
+        "ericrolph_spider_web_catcher_web_c"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_0",
+        "ericrolph_spider_web_catcher_web_6_0",
+        "ericrolph_spider_web_catcher_web_6_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_0",
+        "ericrolph_spider_web_catcher_web_6_1",
+        "ericrolph_spider_web_catcher_web_5_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_1",
+        "ericrolph_spider_web_catcher_web_6_1",
+        "ericrolph_spider_web_catcher_web_6_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_1",
+        "ericrolph_spider_web_catcher_web_6_0",
+        "ericrolph_spider_web_catcher_web_5_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_1",
+        "ericrolph_spider_web_catcher_web_6_1",
+        "ericrolph_spider_web_catcher_web_6_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_1",
+        "ericrolph_spider_web_catcher_web_6_2",
+        "ericrolph_spider_web_catcher_web_5_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_2",
+        "ericrolph_spider_web_catcher_web_6_2",
+        "ericrolph_spider_web_catcher_web_6_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_2",
+        "ericrolph_spider_web_catcher_web_6_1",
+        "ericrolph_spider_web_catcher_web_5_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_2",
+        "ericrolph_spider_web_catcher_web_6_2",
+        "ericrolph_spider_web_catcher_web_6_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_2",
+        "ericrolph_spider_web_catcher_web_6_3",
+        "ericrolph_spider_web_catcher_web_5_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_3",
+        "ericrolph_spider_web_catcher_web_6_3",
+        "ericrolph_spider_web_catcher_web_6_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_3",
+        "ericrolph_spider_web_catcher_web_6_2",
+        "ericrolph_spider_web_catcher_web_5_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_3",
+        "ericrolph_spider_web_catcher_web_6_3",
+        "ericrolph_spider_web_catcher_web_6_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_3",
+        "ericrolph_spider_web_catcher_web_6_4",
+        "ericrolph_spider_web_catcher_web_5_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_4",
+        "ericrolph_spider_web_catcher_web_6_4",
+        "ericrolph_spider_web_catcher_web_6_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_5_4",
+        "ericrolph_spider_web_catcher_web_6_3",
+        "ericrolph_spider_web_catcher_web_5_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_c",
+        "ericrolph_spider_web_catcher_web_6_0",
+        "ericrolph_spider_web_catcher_web_7_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_0",
+        "ericrolph_spider_web_catcher_web_6_0",
+        "ericrolph_spider_web_catcher_web_c"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_0",
+        "ericrolph_spider_web_catcher_web_7_0",
+        "ericrolph_spider_web_catcher_web_7_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_0",
+        "ericrolph_spider_web_catcher_web_7_1",
+        "ericrolph_spider_web_catcher_web_6_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_1",
+        "ericrolph_spider_web_catcher_web_7_1",
+        "ericrolph_spider_web_catcher_web_7_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_1",
+        "ericrolph_spider_web_catcher_web_7_0",
+        "ericrolph_spider_web_catcher_web_6_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_1",
+        "ericrolph_spider_web_catcher_web_7_1",
+        "ericrolph_spider_web_catcher_web_7_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_1",
+        "ericrolph_spider_web_catcher_web_7_2",
+        "ericrolph_spider_web_catcher_web_6_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_2",
+        "ericrolph_spider_web_catcher_web_7_2",
+        "ericrolph_spider_web_catcher_web_7_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_2",
+        "ericrolph_spider_web_catcher_web_7_1",
+        "ericrolph_spider_web_catcher_web_6_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_2",
+        "ericrolph_spider_web_catcher_web_7_2",
+        "ericrolph_spider_web_catcher_web_7_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_2",
+        "ericrolph_spider_web_catcher_web_7_3",
+        "ericrolph_spider_web_catcher_web_6_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_3",
+        "ericrolph_spider_web_catcher_web_7_3",
+        "ericrolph_spider_web_catcher_web_7_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_3",
+        "ericrolph_spider_web_catcher_web_7_2",
+        "ericrolph_spider_web_catcher_web_6_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_3",
+        "ericrolph_spider_web_catcher_web_7_3",
+        "ericrolph_spider_web_catcher_web_7_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_3",
+        "ericrolph_spider_web_catcher_web_7_4",
+        "ericrolph_spider_web_catcher_web_6_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_4",
+        "ericrolph_spider_web_catcher_web_7_4",
+        "ericrolph_spider_web_catcher_web_7_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_6_4",
+        "ericrolph_spider_web_catcher_web_7_3",
+        "ericrolph_spider_web_catcher_web_6_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_c",
+        "ericrolph_spider_web_catcher_web_7_0",
+        "ericrolph_spider_web_catcher_web_0_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_0_0",
+        "ericrolph_spider_web_catcher_web_7_0",
+        "ericrolph_spider_web_catcher_web_c"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_0",
+        "ericrolph_spider_web_catcher_web_0_0",
+        "ericrolph_spider_web_catcher_web_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_0",
+        "ericrolph_spider_web_catcher_web_0_1",
+        "ericrolph_spider_web_catcher_web_7_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_1",
+        "ericrolph_spider_web_catcher_web_0_1",
+        "ericrolph_spider_web_catcher_web_0_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_1",
+        "ericrolph_spider_web_catcher_web_0_0",
+        "ericrolph_spider_web_catcher_web_7_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_1",
+        "ericrolph_spider_web_catcher_web_0_1",
+        "ericrolph_spider_web_catcher_web_0_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_1",
+        "ericrolph_spider_web_catcher_web_0_2",
+        "ericrolph_spider_web_catcher_web_7_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_2",
+        "ericrolph_spider_web_catcher_web_0_2",
+        "ericrolph_spider_web_catcher_web_0_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_2",
+        "ericrolph_spider_web_catcher_web_0_1",
+        "ericrolph_spider_web_catcher_web_7_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_2",
+        "ericrolph_spider_web_catcher_web_0_2",
+        "ericrolph_spider_web_catcher_web_0_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_2",
+        "ericrolph_spider_web_catcher_web_0_3",
+        "ericrolph_spider_web_catcher_web_7_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_3",
+        "ericrolph_spider_web_catcher_web_0_3",
+        "ericrolph_spider_web_catcher_web_0_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_3",
+        "ericrolph_spider_web_catcher_web_0_2",
+        "ericrolph_spider_web_catcher_web_7_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_3",
+        "ericrolph_spider_web_catcher_web_0_3",
+        "ericrolph_spider_web_catcher_web_0_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_3",
+        "ericrolph_spider_web_catcher_web_0_4",
+        "ericrolph_spider_web_catcher_web_7_4"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_4",
+        "ericrolph_spider_web_catcher_web_0_4",
+        "ericrolph_spider_web_catcher_web_0_3"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spider_web_catcher_web_7_4",
+        "ericrolph_spider_web_catcher_web_0_3",
+        "ericrolph_spider_web_catcher_web_7_3"
+      ]
+    }
+  ],
+  "visual": {
+    "materials": [
+      "ericrolph_spider_web_catcher_board_white",
+      "ericrolph_spider_web_catcher_concrete",
+      "ericrolph_spider_web_catcher_hazard",
+      "ericrolph_spider_web_catcher_paint_white",
+      "ericrolph_spider_web_catcher_tower_steel",
+      "ericrolph_spider_web_catcher_web_silk"
+    ],
+    "meshes": {
+      "ericrolph_spider_web_catcher_visual": {
+        "bounds": {
+          "max": [
+            12.0,
+            89.199997,
+            16.800001
+          ],
+          "min": [
+            -12.0,
+            -16.0,
+            0.0
+          ]
+        },
+        "materials": [
+          "ericrolph_spider_web_catcher_board_white",
+          "ericrolph_spider_web_catcher_concrete",
+          "ericrolph_spider_web_catcher_hazard",
+          "ericrolph_spider_web_catcher_paint_white",
+          "ericrolph_spider_web_catcher_tower_steel"
+        ]
+      },
+      "ericrolph_spider_web_catcher_web_mesh": {
+        "bounds": {
+          "max": [
+            10.507759,
+            0.120001,
+            16.200001
+          ],
+          "min": [
+            -10.507759,
+            -0.120002,
+            -0.017677
+          ]
+        },
+        "materials": [
+          "ericrolph_spider_web_catcher_web_silk"
+        ]
+      }
+    },
+    "path": "vehicles/ericrolph_spider_web_catcher/ericrolph_spider_web_catcher.dae",
+    "sha256": "8e20bb5061e5f8005b0956fc81cf262b627357cfdf8f4238d98885ed5dbef7fb",
+    "size": 357260
+  }
+}

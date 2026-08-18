@@ -1,0 +1,5225 @@
+{
+  "asset": {
+    "display_name": "Washing Machine Spin Cycle",
+    "flexbodies_extra": [],
+    "id": "ericrolph_spin_cycle_washer",
+    "physics_cage": "ericrolph_spin_cycle_washer_cage",
+    "visual_mesh": "ericrolph_spin_cycle_washer_visual"
+  },
+  "base_nodes": [
+    "ericrolph_spin_cycle_washer_body_00_00_00",
+    "ericrolph_spin_cycle_washer_body_00_01_00",
+    "ericrolph_spin_cycle_washer_body_00_02_00",
+    "ericrolph_spin_cycle_washer_body_01_00_00",
+    "ericrolph_spin_cycle_washer_body_01_01_00",
+    "ericrolph_spin_cycle_washer_body_01_02_00",
+    "ericrolph_spin_cycle_washer_body_02_00_00",
+    "ericrolph_spin_cycle_washer_body_02_01_00",
+    "ericrolph_spin_cycle_washer_body_02_02_00",
+    "ericrolph_spin_cycle_washer_ramp_ground_l",
+    "ericrolph_spin_cycle_washer_ramp_ground_r"
+  ],
+  "beam_specs": {
+    "rigid": {
+      "beamDamp": 1500.0,
+      "beamDeform": "FLT_MAX",
+      "beamSpring": 15000000.0,
+      "beamStrength": "FLT_MAX"
+    }
+  },
+  "beams": [
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_00",
+        "ericrolph_spin_cycle_washer_body_00_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_00",
+        "ericrolph_spin_cycle_washer_body_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_00",
+        "ericrolph_spin_cycle_washer_body_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_00",
+        "ericrolph_spin_cycle_washer_body_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_00",
+        "ericrolph_spin_cycle_washer_body_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_00",
+        "ericrolph_spin_cycle_washer_body_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_00",
+        "ericrolph_spin_cycle_washer_body_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_00",
+        "ericrolph_spin_cycle_washer_sill_l"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_01",
+        "ericrolph_spin_cycle_washer_body_00_00_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_01",
+        "ericrolph_spin_cycle_washer_body_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_01",
+        "ericrolph_spin_cycle_washer_body_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_01",
+        "ericrolph_spin_cycle_washer_body_00_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_01",
+        "ericrolph_spin_cycle_washer_body_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_01",
+        "ericrolph_spin_cycle_washer_body_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_01",
+        "ericrolph_spin_cycle_washer_body_01_00_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_01",
+        "ericrolph_spin_cycle_washer_body_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_01",
+        "ericrolph_spin_cycle_washer_body_01_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_02",
+        "ericrolph_spin_cycle_washer_body_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_02",
+        "ericrolph_spin_cycle_washer_body_00_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_02",
+        "ericrolph_spin_cycle_washer_body_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_02",
+        "ericrolph_spin_cycle_washer_body_01_00_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_02",
+        "ericrolph_spin_cycle_washer_body_01_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_00",
+        "ericrolph_spin_cycle_washer_body_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_00",
+        "ericrolph_spin_cycle_washer_body_00_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_00",
+        "ericrolph_spin_cycle_washer_body_00_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_00",
+        "ericrolph_spin_cycle_washer_body_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_00",
+        "ericrolph_spin_cycle_washer_body_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_00",
+        "ericrolph_spin_cycle_washer_body_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_00",
+        "ericrolph_spin_cycle_washer_body_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_00",
+        "ericrolph_spin_cycle_washer_body_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_01",
+        "ericrolph_spin_cycle_washer_body_00_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_01",
+        "ericrolph_spin_cycle_washer_body_00_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_01",
+        "ericrolph_spin_cycle_washer_body_00_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_01",
+        "ericrolph_spin_cycle_washer_body_00_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_01",
+        "ericrolph_spin_cycle_washer_body_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_01",
+        "ericrolph_spin_cycle_washer_body_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_01",
+        "ericrolph_spin_cycle_washer_body_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_01",
+        "ericrolph_spin_cycle_washer_body_01_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_01",
+        "ericrolph_spin_cycle_washer_body_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_01",
+        "ericrolph_spin_cycle_washer_body_01_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_02",
+        "ericrolph_spin_cycle_washer_body_00_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_02",
+        "ericrolph_spin_cycle_washer_body_00_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_02",
+        "ericrolph_spin_cycle_washer_body_01_00_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_02",
+        "ericrolph_spin_cycle_washer_body_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_02",
+        "ericrolph_spin_cycle_washer_body_01_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_02",
+        "ericrolph_spin_cycle_washer_body_01_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_02_00",
+        "ericrolph_spin_cycle_washer_body_00_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_02_00",
+        "ericrolph_spin_cycle_washer_body_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_02_00",
+        "ericrolph_spin_cycle_washer_body_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_02_00",
+        "ericrolph_spin_cycle_washer_body_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_02_01",
+        "ericrolph_spin_cycle_washer_body_00_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_02_01",
+        "ericrolph_spin_cycle_washer_body_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_02_01",
+        "ericrolph_spin_cycle_washer_body_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_02_01",
+        "ericrolph_spin_cycle_washer_body_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_02_01",
+        "ericrolph_spin_cycle_washer_body_01_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_02_02",
+        "ericrolph_spin_cycle_washer_body_01_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_02_02",
+        "ericrolph_spin_cycle_washer_body_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_02_02",
+        "ericrolph_spin_cycle_washer_body_01_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_00",
+        "ericrolph_spin_cycle_washer_body_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_00",
+        "ericrolph_spin_cycle_washer_body_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_00",
+        "ericrolph_spin_cycle_washer_body_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_00",
+        "ericrolph_spin_cycle_washer_body_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_00",
+        "ericrolph_spin_cycle_washer_body_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_00",
+        "ericrolph_spin_cycle_washer_body_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_00",
+        "ericrolph_spin_cycle_washer_body_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_01",
+        "ericrolph_spin_cycle_washer_body_01_00_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_01",
+        "ericrolph_spin_cycle_washer_body_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_01",
+        "ericrolph_spin_cycle_washer_body_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_01",
+        "ericrolph_spin_cycle_washer_body_01_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_01",
+        "ericrolph_spin_cycle_washer_body_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_01",
+        "ericrolph_spin_cycle_washer_body_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_01",
+        "ericrolph_spin_cycle_washer_body_02_00_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_01",
+        "ericrolph_spin_cycle_washer_body_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_01",
+        "ericrolph_spin_cycle_washer_body_02_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_01",
+        "ericrolph_spin_cycle_washer_drum_00_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_01",
+        "ericrolph_spin_cycle_washer_drum_03_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_01",
+        "ericrolph_spin_cycle_washer_drum_06_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_01",
+        "ericrolph_spin_cycle_washer_drum_09_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_body_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_body_01_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_body_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_body_02_00_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_body_02_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panel_frame_x"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panel_frame_y"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelbtn_btn_delay"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelbtn_btn_soil"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelbtn_btn_spin"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelbtn_btn_start"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelbtn_btn_temp"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelbtn_dial_ccw"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelbtn_dial_cw"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelfx_btn_delay"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelfx_btn_soil"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelfx_btn_spin"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelfx_btn_start"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelfx_btn_temp"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelfx_dial_ccw"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelfx_dial_cw"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelfy_btn_delay"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelfy_btn_soil"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelfy_btn_spin"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelfy_btn_start"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelfy_btn_temp"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelfy_dial_ccw"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_panelfy_dial_cw"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_00",
+        "ericrolph_spin_cycle_washer_body_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_00",
+        "ericrolph_spin_cycle_washer_body_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_00",
+        "ericrolph_spin_cycle_washer_body_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_00",
+        "ericrolph_spin_cycle_washer_body_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_00",
+        "ericrolph_spin_cycle_washer_body_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_00",
+        "ericrolph_spin_cycle_washer_body_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_00",
+        "ericrolph_spin_cycle_washer_body_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_00",
+        "ericrolph_spin_cycle_washer_body_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_01",
+        "ericrolph_spin_cycle_washer_body_01_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_01",
+        "ericrolph_spin_cycle_washer_body_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_01",
+        "ericrolph_spin_cycle_washer_body_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_01",
+        "ericrolph_spin_cycle_washer_body_01_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_01",
+        "ericrolph_spin_cycle_washer_body_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_01",
+        "ericrolph_spin_cycle_washer_body_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_01",
+        "ericrolph_spin_cycle_washer_body_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_01",
+        "ericrolph_spin_cycle_washer_body_02_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_01",
+        "ericrolph_spin_cycle_washer_body_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_01",
+        "ericrolph_spin_cycle_washer_body_02_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_02",
+        "ericrolph_spin_cycle_washer_body_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_02",
+        "ericrolph_spin_cycle_washer_body_01_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_02",
+        "ericrolph_spin_cycle_washer_body_02_00_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_02",
+        "ericrolph_spin_cycle_washer_body_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_02",
+        "ericrolph_spin_cycle_washer_body_02_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_02",
+        "ericrolph_spin_cycle_washer_body_02_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_00",
+        "ericrolph_spin_cycle_washer_body_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_00",
+        "ericrolph_spin_cycle_washer_body_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_00",
+        "ericrolph_spin_cycle_washer_body_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_00",
+        "ericrolph_spin_cycle_washer_body_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_01",
+        "ericrolph_spin_cycle_washer_body_01_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_01",
+        "ericrolph_spin_cycle_washer_body_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_01",
+        "ericrolph_spin_cycle_washer_body_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_01",
+        "ericrolph_spin_cycle_washer_body_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_01",
+        "ericrolph_spin_cycle_washer_body_02_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_01",
+        "ericrolph_spin_cycle_washer_drum_00_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_01",
+        "ericrolph_spin_cycle_washer_drum_03_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_01",
+        "ericrolph_spin_cycle_washer_drum_06_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_01",
+        "ericrolph_spin_cycle_washer_drum_09_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_02",
+        "ericrolph_spin_cycle_washer_body_02_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_02",
+        "ericrolph_spin_cycle_washer_body_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_02",
+        "ericrolph_spin_cycle_washer_body_02_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_00_00",
+        "ericrolph_spin_cycle_washer_body_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_00_00",
+        "ericrolph_spin_cycle_washer_body_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_00_00",
+        "ericrolph_spin_cycle_washer_body_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_00_00",
+        "ericrolph_spin_cycle_washer_sill_r"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_00_01",
+        "ericrolph_spin_cycle_washer_body_02_00_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_00_01",
+        "ericrolph_spin_cycle_washer_body_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_00_01",
+        "ericrolph_spin_cycle_washer_body_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_00_01",
+        "ericrolph_spin_cycle_washer_body_02_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_00_02",
+        "ericrolph_spin_cycle_washer_body_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_00_02",
+        "ericrolph_spin_cycle_washer_body_02_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_01_00",
+        "ericrolph_spin_cycle_washer_body_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_01_00",
+        "ericrolph_spin_cycle_washer_body_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_01_00",
+        "ericrolph_spin_cycle_washer_body_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_01_01",
+        "ericrolph_spin_cycle_washer_body_02_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_01_01",
+        "ericrolph_spin_cycle_washer_body_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_01_01",
+        "ericrolph_spin_cycle_washer_body_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_01_01",
+        "ericrolph_spin_cycle_washer_body_02_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_01_02",
+        "ericrolph_spin_cycle_washer_body_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_01_02",
+        "ericrolph_spin_cycle_washer_body_02_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_02_00",
+        "ericrolph_spin_cycle_washer_body_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_02_01",
+        "ericrolph_spin_cycle_washer_body_02_02_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_00_0",
+        "ericrolph_spin_cycle_washer_drum_00_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_00_0",
+        "ericrolph_spin_cycle_washer_drum_01_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_00_0",
+        "ericrolph_spin_cycle_washer_drum_11_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_00_1",
+        "ericrolph_spin_cycle_washer_drum_00_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_00_1",
+        "ericrolph_spin_cycle_washer_drum_01_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_00_1",
+        "ericrolph_spin_cycle_washer_drum_11_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_00_2",
+        "ericrolph_spin_cycle_washer_drum_01_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_00_2",
+        "ericrolph_spin_cycle_washer_drum_11_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_00_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_01_0",
+        "ericrolph_spin_cycle_washer_drum_01_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_01_0",
+        "ericrolph_spin_cycle_washer_drum_02_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_01_1",
+        "ericrolph_spin_cycle_washer_drum_01_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_01_1",
+        "ericrolph_spin_cycle_washer_drum_02_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_01_2",
+        "ericrolph_spin_cycle_washer_drum_02_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_01_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_02_0",
+        "ericrolph_spin_cycle_washer_drum_02_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_02_0",
+        "ericrolph_spin_cycle_washer_drum_03_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_02_1",
+        "ericrolph_spin_cycle_washer_drum_02_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_02_1",
+        "ericrolph_spin_cycle_washer_drum_03_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_02_2",
+        "ericrolph_spin_cycle_washer_drum_03_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_02_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_03_0",
+        "ericrolph_spin_cycle_washer_drum_03_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_03_0",
+        "ericrolph_spin_cycle_washer_drum_04_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_03_1",
+        "ericrolph_spin_cycle_washer_drum_03_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_03_1",
+        "ericrolph_spin_cycle_washer_drum_04_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_03_2",
+        "ericrolph_spin_cycle_washer_drum_04_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_03_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_04_0",
+        "ericrolph_spin_cycle_washer_drum_04_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_04_0",
+        "ericrolph_spin_cycle_washer_drum_05_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_04_1",
+        "ericrolph_spin_cycle_washer_drum_04_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_04_1",
+        "ericrolph_spin_cycle_washer_drum_05_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_04_2",
+        "ericrolph_spin_cycle_washer_drum_05_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_04_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_05_0",
+        "ericrolph_spin_cycle_washer_drum_05_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_05_0",
+        "ericrolph_spin_cycle_washer_drum_06_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_05_1",
+        "ericrolph_spin_cycle_washer_drum_05_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_05_1",
+        "ericrolph_spin_cycle_washer_drum_06_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_05_2",
+        "ericrolph_spin_cycle_washer_drum_06_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_05_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_06_0",
+        "ericrolph_spin_cycle_washer_drum_06_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_06_0",
+        "ericrolph_spin_cycle_washer_drum_07_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_06_1",
+        "ericrolph_spin_cycle_washer_drum_06_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_06_1",
+        "ericrolph_spin_cycle_washer_drum_07_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_06_2",
+        "ericrolph_spin_cycle_washer_drum_07_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_06_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_07_0",
+        "ericrolph_spin_cycle_washer_drum_07_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_07_0",
+        "ericrolph_spin_cycle_washer_drum_08_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_07_0",
+        "ericrolph_spin_cycle_washer_sill_l"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_07_1",
+        "ericrolph_spin_cycle_washer_drum_07_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_07_1",
+        "ericrolph_spin_cycle_washer_drum_08_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_07_2",
+        "ericrolph_spin_cycle_washer_drum_08_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_07_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_08_0",
+        "ericrolph_spin_cycle_washer_drum_08_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_08_0",
+        "ericrolph_spin_cycle_washer_drum_09_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_08_1",
+        "ericrolph_spin_cycle_washer_drum_08_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_08_1",
+        "ericrolph_spin_cycle_washer_drum_09_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_08_2",
+        "ericrolph_spin_cycle_washer_drum_09_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_08_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_09_0",
+        "ericrolph_spin_cycle_washer_drum_09_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_09_0",
+        "ericrolph_spin_cycle_washer_drum_10_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_09_1",
+        "ericrolph_spin_cycle_washer_drum_09_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_09_1",
+        "ericrolph_spin_cycle_washer_drum_10_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_09_2",
+        "ericrolph_spin_cycle_washer_drum_10_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_09_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_10_0",
+        "ericrolph_spin_cycle_washer_drum_10_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_10_0",
+        "ericrolph_spin_cycle_washer_drum_11_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_10_1",
+        "ericrolph_spin_cycle_washer_drum_10_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_10_1",
+        "ericrolph_spin_cycle_washer_drum_11_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_10_2",
+        "ericrolph_spin_cycle_washer_drum_11_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_10_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_11_0",
+        "ericrolph_spin_cycle_washer_drum_11_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_11_0",
+        "ericrolph_spin_cycle_washer_sill_r"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_11_1",
+        "ericrolph_spin_cycle_washer_drum_11_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_11_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_ramp_ground_l",
+        "ericrolph_spin_cycle_washer_ramp_ground_r"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_ramp_ground_l",
+        "ericrolph_spin_cycle_washer_sill_l"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_ramp_ground_r",
+        "ericrolph_spin_cycle_washer_sill_r"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_spin_cycle_washer_sill_l",
+        "ericrolph_spin_cycle_washer_sill_r"
+      ],
+      "spec": "rigid"
+    }
+  ],
+  "behavior": {
+    "camera_distance": 38.0,
+    "effects": {
+      "door_steam": {
+        "direction": [
+          0.0,
+          -0.8,
+          0.6
+        ],
+        "emitter": "BNGP_34",
+        "position": [
+          0.0,
+          -6.8,
+          4.8
+        ]
+      },
+      "fill_spray": {
+        "direction": [
+          0.0,
+          -0.4,
+          -0.9
+        ],
+        "emitter": "BNGP_sprinkler",
+        "position": [
+          0.0,
+          2.8,
+          7.6
+        ]
+      },
+      "suds_mist": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_waterfallsteam",
+        "position": [
+          0.0,
+          -1.0,
+          5.8
+        ]
+      }
+    },
+    "triggers": {
+      "approach_zone": {
+        "center": [
+          0.0,
+          -9.5,
+          2.0
+        ],
+        "dimensions": [
+          6.0,
+          5.5,
+          4.0
+        ],
+        "mode": "Overlaps"
+      },
+      "drum_zone": {
+        "center": [
+          0.0,
+          -1.0,
+          3.9
+        ],
+        "dimensions": [
+          7.0,
+          9.6,
+          8.2
+        ],
+        "mode": "Contains"
+      }
+    },
+    "tunables": {
+      "axial_centering": 2.0,
+      "buoy_bob_cap": 2.5,
+      "buoy_gain": 3.0,
+      "buoy_spring": 1.8,
+      "camera_distance": 38.0,
+      "cooldown_seconds": 3.0,
+      "door_close_seconds": 1.0,
+      "door_fling_seconds": 0.25,
+      "door_open_angle_deg": -110.0,
+      "drain_seconds": 1.0,
+      "drum_bottom_z": 0.39999999999999947,
+      "drum_center": [
+        0.0,
+        -1.0,
+        4.6
+      ],
+      "eject_delay_seconds": 0.3,
+      "eject_out_mps": 24.0,
+      "eject_up_mps": 9.0,
+      "fill_seconds": 3.0,
+      "frame_dv_cap": 2.0,
+      "gravity_comp": 9.81,
+      "max_water_depth": 5.2,
+      "slosh_omega": 0.6,
+      "spin_omega": 8.0,
+      "spin_seconds": 5.0,
+      "surface_wobble": 0.06,
+      "tilt_max": 0.85,
+      "tilt_per_omega": 0.1,
+      "wash_omega": 2.8,
+      "wash_seconds": 4.0,
+      "water_drag_rate": 2.5,
+      "water_pivot_y": -1.0,
+      "water_slab_height": 6.0,
+      "water_speed_cap": 18.0
+    }
+  },
+  "coordinate_system": {
+    "source": "right-handed, meters, Z-up, +Y drive direction",
+    "source_world_to_beamng_vehicle": [
+      [
+        -1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        -1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "target": "BeamNG vehicle space, meters, Z-up, -Y forward"
+  },
+  "nodes": [
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_00_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        6.5,
+        6.5,
+        0.0
+      ],
+      "source_world_position": [
+        -6.5,
+        -6.5,
+        0.0
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_00_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        6.5,
+        6.5,
+        6.5
+      ],
+      "source_world_position": [
+        -6.5,
+        -6.5,
+        6.5
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_00_00_02",
+      "node_material": "|NM_METAL",
+      "position": [
+        6.5,
+        6.5,
+        13.0
+      ],
+      "source_world_position": [
+        -6.5,
+        -6.5,
+        13.0
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_00_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        6.5,
+        -1e-06,
+        0.0
+      ],
+      "source_world_position": [
+        -6.5,
+        0.0,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_00_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        6.5,
+        -1e-06,
+        6.5
+      ],
+      "source_world_position": [
+        -6.5,
+        0.0,
+        6.5
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_00_01_02",
+      "node_material": "|NM_METAL",
+      "position": [
+        6.5,
+        -1e-06,
+        13.0
+      ],
+      "source_world_position": [
+        -6.5,
+        0.0,
+        13.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_00_02_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        6.5,
+        -6.5,
+        0.0
+      ],
+      "source_world_position": [
+        -6.5,
+        6.5,
+        0.0
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_00_02_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        6.5,
+        -6.5,
+        6.5
+      ],
+      "source_world_position": [
+        -6.5,
+        6.5,
+        6.5
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_00_02_02",
+      "node_material": "|NM_METAL",
+      "position": [
+        6.5,
+        -6.5,
+        13.0
+      ],
+      "source_world_position": [
+        -6.5,
+        6.5,
+        13.0
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_01_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        1e-06,
+        6.5,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        -6.5,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_01_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        1e-06,
+        6.5,
+        6.5
+      ],
+      "source_world_position": [
+        0.0,
+        -6.5,
+        6.5
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_01_00_02",
+      "node_material": "|NM_METAL",
+      "position": [
+        1e-06,
+        6.5,
+        13.0
+      ],
+      "source_world_position": [
+        0.0,
+        -6.5,
+        13.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_01_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_01_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        0.0,
+        6.5
+      ],
+      "source_world_position": [
+        0.0,
+        0.0,
+        6.5
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_01_01_02",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        0.0,
+        13.0
+      ],
+      "source_world_position": [
+        0.0,
+        0.0,
+        13.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_01_02_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -6.5,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        6.5,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_01_02_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -6.5,
+        6.5
+      ],
+      "source_world_position": [
+        0.0,
+        6.5,
+        6.5
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_01_02_02",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -6.5,
+        13.0
+      ],
+      "source_world_position": [
+        0.0,
+        6.5,
+        13.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_02_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -6.5,
+        6.5,
+        0.0
+      ],
+      "source_world_position": [
+        6.5,
+        -6.5,
+        0.0
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_02_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -6.5,
+        6.5,
+        6.5
+      ],
+      "source_world_position": [
+        6.5,
+        -6.5,
+        6.5
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_02_00_02",
+      "node_material": "|NM_METAL",
+      "position": [
+        -6.5,
+        6.5,
+        13.0
+      ],
+      "source_world_position": [
+        6.5,
+        -6.5,
+        13.0
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_02_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -6.5,
+        1e-06,
+        0.0
+      ],
+      "source_world_position": [
+        6.5,
+        0.0,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_02_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -6.5,
+        1e-06,
+        6.5
+      ],
+      "source_world_position": [
+        6.5,
+        0.0,
+        6.5
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_02_01_02",
+      "node_material": "|NM_METAL",
+      "position": [
+        -6.5,
+        1e-06,
+        13.0
+      ],
+      "source_world_position": [
+        6.5,
+        0.0,
+        13.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_02_02_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -6.5,
+        -6.5,
+        0.0
+      ],
+      "source_world_position": [
+        6.5,
+        6.5,
+        0.0
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_02_02_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -6.5,
+        -6.5,
+        6.5
+      ],
+      "source_world_position": [
+        6.5,
+        6.5,
+        6.5
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_body_02_02_02",
+      "node_material": "|NM_METAL",
+      "position": [
+        -6.5,
+        -6.5,
+        13.0
+      ],
+      "source_world_position": [
+        6.5,
+        6.5,
+        13.0
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_00_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -4.199999,
+        6.0,
+        4.6
+      ],
+      "source_world_position": [
+        4.2,
+        -6.0,
+        4.6
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_00_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -4.2,
+        1.0,
+        4.6
+      ],
+      "source_world_position": [
+        4.2,
+        -1.0,
+        4.6
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_00_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -4.2,
+        -4.0,
+        4.6
+      ],
+      "source_world_position": [
+        4.2,
+        4.0,
+        4.6
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_01_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.637306,
+        6.0,
+        6.7
+      ],
+      "source_world_position": [
+        3.637307,
+        -6.0,
+        6.7
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_01_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.637307,
+        1.0,
+        6.7
+      ],
+      "source_world_position": [
+        3.637307,
+        -1.0,
+        6.7
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_01_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.637307,
+        -4.0,
+        6.7
+      ],
+      "source_world_position": [
+        3.637307,
+        4.0,
+        6.7
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_02_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.099999,
+        6.0,
+        8.237307
+      ],
+      "source_world_position": [
+        2.1,
+        -6.0,
+        8.237307
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_02_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.1,
+        1.0,
+        8.237307
+      ],
+      "source_world_position": [
+        2.1,
+        -1.0,
+        8.237307
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_02_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.1,
+        -4.0,
+        8.237307
+      ],
+      "source_world_position": [
+        2.1,
+        4.0,
+        8.237307
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_03_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        1e-06,
+        6.0,
+        8.8
+      ],
+      "source_world_position": [
+        0.0,
+        -6.0,
+        8.8
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_03_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        1.0,
+        8.8
+      ],
+      "source_world_position": [
+        0.0,
+        -1.0,
+        8.8
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_03_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -4.0,
+        8.8
+      ],
+      "source_world_position": [
+        0.0,
+        4.0,
+        8.8
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_04_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.1,
+        6.0,
+        8.237307
+      ],
+      "source_world_position": [
+        -2.1,
+        -6.0,
+        8.237307
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_04_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.1,
+        1.0,
+        8.237307
+      ],
+      "source_world_position": [
+        -2.1,
+        -1.0,
+        8.237307
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_04_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.1,
+        -4.0,
+        8.237307
+      ],
+      "source_world_position": [
+        -2.1,
+        4.0,
+        8.237307
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_05_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.637307,
+        6.0,
+        6.7
+      ],
+      "source_world_position": [
+        -3.637307,
+        -6.0,
+        6.7
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_05_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.637307,
+        1.0,
+        6.7
+      ],
+      "source_world_position": [
+        -3.637307,
+        -1.0,
+        6.7
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_05_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.637306,
+        -4.0,
+        6.7
+      ],
+      "source_world_position": [
+        -3.637307,
+        4.0,
+        6.7
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_06_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        4.2,
+        6.0,
+        4.6
+      ],
+      "source_world_position": [
+        -4.2,
+        -6.0,
+        4.6
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_06_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        4.2,
+        1.0,
+        4.6
+      ],
+      "source_world_position": [
+        -4.2,
+        -1.0,
+        4.6
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_06_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        4.199999,
+        -4.0,
+        4.6
+      ],
+      "source_world_position": [
+        -4.2,
+        4.0,
+        4.6
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_07_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.637307,
+        6.0,
+        2.5
+      ],
+      "source_world_position": [
+        -3.637307,
+        -6.0,
+        2.5
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_07_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.637307,
+        1.0,
+        2.5
+      ],
+      "source_world_position": [
+        -3.637307,
+        -1.0,
+        2.5
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_07_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.637306,
+        -4.0,
+        2.5
+      ],
+      "source_world_position": [
+        -3.637307,
+        4.0,
+        2.5
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_08_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.1,
+        6.0,
+        0.962693
+      ],
+      "source_world_position": [
+        -2.1,
+        -6.0,
+        0.962693
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_08_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.1,
+        1.0,
+        0.962693
+      ],
+      "source_world_position": [
+        -2.1,
+        -1.0,
+        0.962693
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_08_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.1,
+        -4.0,
+        0.962693
+      ],
+      "source_world_position": [
+        -2.1,
+        4.0,
+        0.962693
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_09_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        1e-06,
+        6.0,
+        0.4
+      ],
+      "source_world_position": [
+        -0.0,
+        -6.0,
+        0.4
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_09_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.0,
+        1.0,
+        0.4
+      ],
+      "source_world_position": [
+        -0.0,
+        -1.0,
+        0.4
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_09_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -4.0,
+        0.4
+      ],
+      "source_world_position": [
+        -0.0,
+        4.0,
+        0.4
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_10_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.099999,
+        6.0,
+        0.962693
+      ],
+      "source_world_position": [
+        2.1,
+        -6.0,
+        0.962693
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_10_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.1,
+        1.0,
+        0.962693
+      ],
+      "source_world_position": [
+        2.1,
+        -1.0,
+        0.962693
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_10_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.1,
+        -4.0,
+        0.962693
+      ],
+      "source_world_position": [
+        2.1,
+        4.0,
+        0.962693
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_11_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.637306,
+        6.0,
+        2.5
+      ],
+      "source_world_position": [
+        3.637307,
+        -6.0,
+        2.5
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_11_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.637307,
+        1.0,
+        2.5
+      ],
+      "source_world_position": [
+        3.637307,
+        -1.0,
+        2.5
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_11_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.637307,
+        -4.0,
+        2.5
+      ],
+      "source_world_position": [
+        3.637307,
+        4.0,
+        2.5
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_drum_back_center",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -4.0,
+        4.6
+      ],
+      "source_world_position": [
+        0.0,
+        4.0,
+        4.6
+      ],
+      "weight": 140.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_ramp_ground_l",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.200001,
+        12.5,
+        0.0
+      ],
+      "source_world_position": [
+        -2.2,
+        -12.5,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_ramp_ground_r",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.199999,
+        12.5,
+        0.0
+      ],
+      "source_world_position": [
+        2.2,
+        -12.5,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_sill_l",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.200001,
+        6.5,
+        0.65
+      ],
+      "source_world_position": [
+        -2.2,
+        -6.5,
+        0.65
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_sill_r",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.2,
+        6.5,
+        0.65
+      ],
+      "source_world_position": [
+        2.2,
+        -6.5,
+        0.65
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelbtn_btn_start",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.549999,
+        6.94,
+        11.85
+      ],
+      "source_world_position": [
+        0.55,
+        -6.94,
+        11.85
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelfx_btn_start",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.949999,
+        6.94,
+        11.85
+      ],
+      "source_world_position": [
+        0.95,
+        -6.94,
+        11.85
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelfy_btn_start",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.549999,
+        6.94,
+        12.25
+      ],
+      "source_world_position": [
+        0.55,
+        -6.94,
+        12.25
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelbtn_btn_temp",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.549999,
+        6.94,
+        11.85
+      ],
+      "source_world_position": [
+        1.55,
+        -6.94,
+        11.85
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelfx_btn_temp",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.949999,
+        6.94,
+        11.85
+      ],
+      "source_world_position": [
+        1.95,
+        -6.94,
+        11.85
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelfy_btn_temp",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1.549999,
+        6.94,
+        12.25
+      ],
+      "source_world_position": [
+        1.55,
+        -6.94,
+        12.25
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelbtn_btn_spin",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.399999,
+        6.94,
+        11.85
+      ],
+      "source_world_position": [
+        2.4,
+        -6.94,
+        11.85
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelfx_btn_spin",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.799999,
+        6.940001,
+        11.85
+      ],
+      "source_world_position": [
+        2.8,
+        -6.94,
+        11.85
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelfy_btn_spin",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.399999,
+        6.94,
+        12.25
+      ],
+      "source_world_position": [
+        2.4,
+        -6.94,
+        12.25
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelbtn_btn_soil",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.249999,
+        6.940001,
+        11.85
+      ],
+      "source_world_position": [
+        3.25,
+        -6.94,
+        11.85
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelfx_btn_soil",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.649999,
+        6.940001,
+        11.85
+      ],
+      "source_world_position": [
+        3.65,
+        -6.94,
+        11.85
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelfy_btn_soil",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.249999,
+        6.940001,
+        12.25
+      ],
+      "source_world_position": [
+        3.25,
+        -6.94,
+        12.25
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelbtn_btn_delay",
+      "node_material": "|NM_METAL",
+      "position": [
+        -4.099999,
+        6.940001,
+        11.85
+      ],
+      "source_world_position": [
+        4.1,
+        -6.94,
+        11.85
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelfx_btn_delay",
+      "node_material": "|NM_METAL",
+      "position": [
+        -4.5,
+        6.940001,
+        11.85
+      ],
+      "source_world_position": [
+        4.5,
+        -6.94,
+        11.85
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelfy_btn_delay",
+      "node_material": "|NM_METAL",
+      "position": [
+        -4.099999,
+        6.940001,
+        12.25
+      ],
+      "source_world_position": [
+        4.1,
+        -6.94,
+        12.25
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelbtn_dial_ccw",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.730001,
+        7.59,
+        11.8
+      ],
+      "source_world_position": [
+        -1.73,
+        -7.59,
+        11.8
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelfx_dial_ccw",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.330001,
+        7.59,
+        11.8
+      ],
+      "source_world_position": [
+        -1.33,
+        -7.59,
+        11.8
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelfy_dial_ccw",
+      "node_material": "|NM_METAL",
+      "position": [
+        1.730001,
+        7.59,
+        12.2
+      ],
+      "source_world_position": [
+        -1.73,
+        -7.59,
+        12.2
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelbtn_dial_cw",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.970001,
+        7.59,
+        11.8
+      ],
+      "source_world_position": [
+        -0.97,
+        -7.59,
+        11.8
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelfx_dial_cw",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.570001,
+        7.59,
+        11.8
+      ],
+      "source_world_position": [
+        -0.57,
+        -7.59,
+        11.8
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panelfy_dial_cw",
+      "node_material": "|NM_METAL",
+      "position": [
+        0.970001,
+        7.59,
+        12.2
+      ],
+      "source_world_position": [
+        -0.97,
+        -7.59,
+        12.2
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panel_frame_x",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.949999,
+        6.85,
+        11.85
+      ],
+      "source_world_position": [
+        0.95,
+        -6.85,
+        11.85
+      ],
+      "weight": 20.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_spin_cycle_washer_panel_frame_y",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.549999,
+        6.85,
+        12.25
+      ],
+      "source_world_position": [
+        0.55,
+        -6.85,
+        12.25
+      ],
+      "weight": 20.0
+    }
+  ],
+  "palette": {
+    "ericrolph_spin_cycle_washer_brass_fitting": {
+      "color": [
+        0.72,
+        0.55,
+        0.22,
+        1.0
+      ],
+      "metallic": 1.0,
+      "roughness": 0.35
+    },
+    "ericrolph_spin_cycle_washer_button_satin": {
+      "color": [
+        0.8,
+        0.81,
+        0.83,
+        1.0
+      ],
+      "metallic": 0.85,
+      "roughness": 0.3,
+      "texture": {
+        "family": "brushed_metal",
+        "params": {
+          "base": [
+            0.8,
+            0.81,
+            0.83
+          ],
+          "rough": 0.3
+        }
+      }
+    },
+    "ericrolph_spin_cycle_washer_chrome_trim": {
+      "color": [
+        0.9,
+        0.91,
+        0.93,
+        1.0
+      ],
+      "metallic": 1.0,
+      "roughness": 0.12,
+      "texture": {
+        "family": "scribed_chrome"
+      }
+    },
+    "ericrolph_spin_cycle_washer_console_graphite": {
+      "color": [
+        0.28,
+        0.29,
+        0.32,
+        1.0
+      ],
+      "metallic": 0.6,
+      "roughness": 0.4,
+      "texture": {
+        "family": "brushed_metal",
+        "params": {
+          "base": [
+            0.28,
+            0.29,
+            0.32
+          ],
+          "rough": 0.4
+        }
+      }
+    },
+    "ericrolph_spin_cycle_washer_controls_legend": {
+      "color": [
+        0.13,
+        0.14,
+        0.16,
+        1.0
+      ],
+      "metallic": 0.4,
+      "roughness": 0.4,
+      "texture": {
+        "family": "panel_legend",
+        "params": {
+          "aspect": 2.0045,
+          "frame": false,
+          "labels": [
+            [
+              0.127,
+              0.3,
+              "START",
+              0.62
+            ],
+            [
+              0.3537,
+              0.3,
+              "TEMP",
+              0.62
+            ],
+            [
+              0.5465,
+              0.3,
+              "SPIN",
+              0.62
+            ],
+            [
+              0.7392,
+              0.3,
+              "SOIL",
+              0.62
+            ],
+            [
+              0.932,
+              0.3,
+              "DELAY",
+              0.62
+            ]
+          ]
+        },
+        "size": 1024
+      }
+    },
+    "ericrolph_spin_cycle_washer_cord_black": {
+      "color": [
+        0.08,
+        0.08,
+        0.09,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.6
+    },
+    "ericrolph_spin_cycle_washer_dial_blue": {
+      "color": [
+        0.15,
+        0.35,
+        0.7,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.4
+    },
+    "ericrolph_spin_cycle_washer_dial_legend": {
+      "color": [
+        0.13,
+        0.14,
+        0.16,
+        1.0
+      ],
+      "metallic": 0.4,
+      "roughness": 0.4,
+      "texture": {
+        "family": "panel_legend",
+        "params": {
+          "aspect": 1.1818,
+          "frame": false,
+          "labels": [
+            [
+              0.5,
+              0.9,
+              "MAX SPIN",
+              0.62
+            ],
+            [
+              0.5,
+              0.8273,
+              "\u2022",
+              0.5
+            ],
+            [
+              0.6989,
+              0.8236,
+              "COTTON",
+              0.62
+            ],
+            [
+              0.6628,
+              0.7648,
+              "\u2022",
+              0.5
+            ],
+            [
+              0.8219,
+              0.6236,
+              "ECO",
+              0.62
+            ],
+            [
+              0.7634,
+              0.6011,
+              "\u2022",
+              0.5
+            ],
+            [
+              0.8219,
+              0.3764,
+              "SYNTH",
+              0.62
+            ],
+            [
+              0.7634,
+              0.3989,
+              "\u2022",
+              0.5
+            ],
+            [
+              0.6989,
+              0.1764,
+              "WOOL",
+              0.62
+            ],
+            [
+              0.6628,
+              0.2352,
+              "\u2022",
+              0.5
+            ],
+            [
+              0.5,
+              0.1,
+              "SOFT",
+              0.62
+            ],
+            [
+              0.5,
+              0.1727,
+              "\u2022",
+              0.5
+            ],
+            [
+              0.3011,
+              0.1764,
+              "RINSE",
+              0.62
+            ],
+            [
+              0.3372,
+              0.2352,
+              "\u2022",
+              0.5
+            ],
+            [
+              0.1781,
+              0.3764,
+              "DRAIN",
+              0.62
+            ],
+            [
+              0.2366,
+              0.3989,
+              "\u2022",
+              0.5
+            ],
+            [
+              0.1781,
+              0.6236,
+              "QUICK",
+              0.62
+            ],
+            [
+              0.2366,
+              0.6011,
+              "\u2022",
+              0.5
+            ],
+            [
+              0.3011,
+              0.8236,
+              "STEAM",
+              0.62
+            ],
+            [
+              0.3372,
+              0.7648,
+              "\u2022",
+              0.5
+            ]
+          ]
+        },
+        "size": 1024
+      }
+    },
+    "ericrolph_spin_cycle_washer_display_lcd": {
+      "color": [
+        0.012,
+        0.014,
+        0.02,
+        1.0
+      ],
+      "material": {
+        "dynamicCubemap": true
+      },
+      "metallic": 0.52,
+      "roughness": 0.11,
+      "stage": {
+        "emissive": true,
+        "emissiveFactor": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "emissiveIntensityNits": 800,
+        "emissiveMap": "@ericrolph_spin_cycle_washer_lcd"
+      }
+    },
+    "ericrolph_spin_cycle_washer_drum_bright": {
+      "color": [
+        0.66,
+        0.68,
+        0.72,
+        1.0
+      ],
+      "metallic": 0.85,
+      "roughness": 0.3,
+      "texture": {
+        "family": "drum_perforated",
+        "params": {
+          "base": [
+            0.62,
+            0.64,
+            0.68
+          ],
+          "hole": 0.006,
+          "rows": 30
+        },
+        "size": 2048
+      }
+    },
+    "ericrolph_spin_cycle_washer_drum_lamp": {
+      "color": [
+        0.7,
+        0.6,
+        0.42,
+        1.0
+      ],
+      "emissive": [
+        1.0,
+        0.88,
+        0.62
+      ],
+      "metallic": 0.0,
+      "roughness": 0.4,
+      "stage": {
+        "emissiveIntensityNits": 800
+      }
+    },
+    "ericrolph_spin_cycle_washer_drum_spider": {
+      "color": [
+        0.66,
+        0.68,
+        0.72,
+        1.0
+      ],
+      "metallic": 0.9,
+      "roughness": 0.28,
+      "texture": {
+        "family": "brushed_metal",
+        "params": {
+          "base": [
+            0.66,
+            0.68,
+            0.72
+          ],
+          "rough": 0.28
+        }
+      }
+    },
+    "ericrolph_spin_cycle_washer_drum_steel": {
+      "color": [
+        0.68,
+        0.7,
+        0.74,
+        1.0
+      ],
+      "double_sided": true,
+      "metallic": 0.9,
+      "roughness": 0.3,
+      "texture": {
+        "family": "drum_perforated"
+      }
+    },
+    "ericrolph_spin_cycle_washer_enamel_gray": {
+      "color": [
+        0.45,
+        0.47,
+        0.5,
+        1.0
+      ],
+      "metallic": 0.2,
+      "roughness": 0.4,
+      "texture": {
+        "family": "painted_metal",
+        "params": {
+          "base": [
+            0.45,
+            0.47,
+            0.5
+          ],
+          "rough": 0.4
+        }
+      }
+    },
+    "ericrolph_spin_cycle_washer_enamel_white": {
+      "color": [
+        0.92,
+        0.93,
+        0.94,
+        1.0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.25,
+      "texture": {
+        "family": "painted_metal",
+        "params": {
+          "base": [
+            0.92,
+            0.93,
+            0.94
+          ],
+          "peel": 0.6,
+          "rough": 0.24
+        }
+      }
+    },
+    "ericrolph_spin_cycle_washer_energy_label": {
+      "color": [
+        0.94,
+        0.95,
+        0.96,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.5,
+      "texture": {
+        "family": "energy_label",
+        "params": {
+          "aspect": 0.74,
+          "capacity": "19,600 cu ft (554 m3)",
+          "cost": 480000,
+          "hi": 740000,
+          "kwh": 3100000,
+          "lo": 210000
+        },
+        "size": 1024
+      }
+    },
+    "ericrolph_spin_cycle_washer_foot_rubber": {
+      "color": [
+        0.09,
+        0.09,
+        0.1,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.8
+    },
+    "ericrolph_spin_cycle_washer_gasket_rubber": {
+      "color": [
+        0.62,
+        0.63,
+        0.65,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.8
+    },
+    "ericrolph_spin_cycle_washer_glass_blue": {
+      "color": [
+        0.78,
+        0.86,
+        0.93,
+        0.15
+      ],
+      "double_sided": true,
+      "metallic": 0.0,
+      "roughness": 0.05
+    },
+    "ericrolph_spin_cycle_washer_hose_rubber": {
+      "color": [
+        0.38,
+        0.4,
+        0.43,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.85
+    },
+    "ericrolph_spin_cycle_washer_knob_shell": {
+      "color": [
+        0.13,
+        0.135,
+        0.15,
+        1.0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.35,
+      "texture": {
+        "family": "bakelite",
+        "params": {
+          "base": [
+            0.13,
+            0.135,
+            0.15
+          ]
+        }
+      }
+    },
+    "ericrolph_spin_cycle_washer_mark_cold": {
+      "color": [
+        0.1,
+        0.3,
+        0.75,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.45
+    },
+    "ericrolph_spin_cycle_washer_mark_hot": {
+      "color": [
+        0.75,
+        0.12,
+        0.1,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.45
+    },
+    "ericrolph_spin_cycle_washer_paddle_plastic": {
+      "color": [
+        0.84,
+        0.85,
+        0.87,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.5
+    },
+    "ericrolph_spin_cycle_washer_ramp_asphalt": {
+      "color": [
+        0.16,
+        0.16,
+        0.17,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.9,
+      "texture": {
+        "family": "asphalt"
+      }
+    },
+    "ericrolph_spin_cycle_washer_serial_plate": {
+      "color": [
+        0.9,
+        0.91,
+        0.92,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.5,
+      "texture": {
+        "family": "panel_legend",
+        "params": {
+          "aspect": 1.5,
+          "base": [
+            0.9,
+            0.91,
+            0.92
+          ],
+          "frame": true,
+          "ink": [
+            0.15,
+            0.16,
+            0.18
+          ],
+          "labels": [
+            [
+              0.5,
+              0.72,
+              "MAXSPIN WM-9000",
+              0.9
+            ],
+            [
+              0.5,
+              0.42,
+              "240V ~ 60Hz 12A",
+              0.75
+            ],
+            [
+              0.5,
+              0.14,
+              "SN 2026-08-4711",
+              0.6
+            ]
+          ]
+        },
+        "size": 512
+      }
+    },
+    "ericrolph_spin_cycle_washer_start_glass": {
+      "color": [
+        0.14,
+        0.36,
+        0.78,
+        1.0
+      ],
+      "material": {
+        "dynamicCubemap": true
+      },
+      "metallic": 0.0,
+      "roughness": 0.08
+    },
+    "ericrolph_spin_cycle_washer_suds_foam": {
+      "color": [
+        0.94,
+        0.96,
+        0.98,
+        1.0
+      ],
+      "double_sided": true,
+      "metallic": 0.0,
+      "roughness": 0.72,
+      "stage": {
+        "animFlags": 1,
+        "scrollDir": [
+          0.02,
+          -0.09
+        ],
+        "scrollSpeed": 0.9
+      },
+      "texture": {
+        "family": "suds_foam",
+        "normal_strength": 3.0,
+        "params": {
+          "coverage": 0.52
+        },
+        "size": 1024
+      }
+    },
+    "ericrolph_spin_cycle_washer_wash_water": {
+      "color": [
+        0.25,
+        0.5,
+        0.72,
+        0.74
+      ],
+      "double_sided": true,
+      "material": {
+        "castShadows": false,
+        "dynamicCubemap": true,
+        "translucent": true
+      },
+      "metallic": 0.0,
+      "roughness": 0.05,
+      "stage": {
+        "animFlags": 5,
+        "scrollDir": [
+          0.03,
+          -0.17
+        ],
+        "scrollSpeed": 1.88,
+        "useAnisotropic": true,
+        "waveAmp": 0.03,
+        "waveFreq": 0.55,
+        "waveType": "Sin"
+      },
+      "stage1": {
+        "animFlags": 1,
+        "baseColorFactor": [
+          1.0,
+          1.0,
+          1.0,
+          0.6
+        ],
+        "inherit_maps": true,
+        "metallicFactor": 0.0,
+        "scrollDir": [
+          0.03,
+          -0.34
+        ],
+        "scrollSpeed": 1.29,
+        "useAnisotropic": true
+      },
+      "texture": {
+        "family": "water_surface",
+        "normal_strength": 7.0,
+        "params": {
+          "base": [
+            0.16,
+            0.43,
+            0.58
+          ]
+        },
+        "size": 1024
+      }
+    }
+  },
+  "panel": {
+    "buttons": [
+      {
+        "frame_x_node": "ericrolph_spin_cycle_washer_panelfx_btn_start",
+        "frame_y_node": "ericrolph_spin_cycle_washer_panelfy_btn_start",
+        "id": "btn_start",
+        "node": "ericrolph_spin_cycle_washer_panelbtn_btn_start",
+        "size": 0.8,
+        "title": "START - run a cycle (laundry optional)"
+      },
+      {
+        "frame_x_node": "ericrolph_spin_cycle_washer_panelfx_btn_temp",
+        "frame_y_node": "ericrolph_spin_cycle_washer_panelfy_btn_temp",
+        "id": "btn_temp",
+        "node": "ericrolph_spin_cycle_washer_panelbtn_btn_temp",
+        "size": 0.7,
+        "title": "TEMP - water feel: 20 40 60 95 C"
+      },
+      {
+        "frame_x_node": "ericrolph_spin_cycle_washer_panelfx_btn_spin",
+        "frame_y_node": "ericrolph_spin_cycle_washer_panelfy_btn_spin",
+        "id": "btn_spin",
+        "node": "ericrolph_spin_cycle_washer_panelbtn_btn_spin",
+        "size": 0.7,
+        "title": "SPIN - drum speed: 400 to 1600 rpm"
+      },
+      {
+        "frame_x_node": "ericrolph_spin_cycle_washer_panelfx_btn_soil",
+        "frame_y_node": "ericrolph_spin_cycle_washer_panelfy_btn_soil",
+        "id": "btn_soil",
+        "node": "ericrolph_spin_cycle_washer_panelbtn_btn_soil",
+        "size": 0.7,
+        "title": "SOIL - heavy suds on or off"
+      },
+      {
+        "frame_x_node": "ericrolph_spin_cycle_washer_panelfx_btn_delay",
+        "frame_y_node": "ericrolph_spin_cycle_washer_panelfy_btn_delay",
+        "id": "btn_delay",
+        "node": "ericrolph_spin_cycle_washer_panelbtn_btn_delay",
+        "size": 0.7,
+        "title": "DELAY - extended cycle: levitating pre-soak plus longer phases"
+      },
+      {
+        "frame_x_node": "ericrolph_spin_cycle_washer_panelfx_dial_ccw",
+        "frame_y_node": "ericrolph_spin_cycle_washer_panelfy_dial_ccw",
+        "id": "dial_ccw",
+        "node": "ericrolph_spin_cycle_washer_panelbtn_dial_ccw",
+        "size": 0.62,
+        "title": "PROGRAM DIAL - turn counter-clockwise"
+      },
+      {
+        "frame_x_node": "ericrolph_spin_cycle_washer_panelfx_dial_cw",
+        "frame_y_node": "ericrolph_spin_cycle_washer_panelfy_dial_cw",
+        "id": "dial_cw",
+        "node": "ericrolph_spin_cycle_washer_panelbtn_dial_cw",
+        "size": 0.62,
+        "title": "PROGRAM DIAL - turn clockwise"
+      }
+    ],
+    "frame_x_node": "ericrolph_spin_cycle_washer_panel_frame_x",
+    "frame_y_node": "ericrolph_spin_cycle_washer_panel_frame_y"
+  },
+  "parts": [
+    {
+      "materials": [
+        "ericrolph_spin_cycle_washer_button_satin",
+        "ericrolph_spin_cycle_washer_enamel_white",
+        "ericrolph_spin_cycle_washer_knob_shell"
+      ],
+      "name": "dial",
+      "path": "vehicles/ericrolph_spin_cycle_washer/ericrolph_spin_cycle_washer_dial.dae",
+      "pivot_world": [
+        -1.35,
+        -7.22,
+        11.8
+      ],
+      "sha256": "45db9814d6d4c2dde3fe1e8f53d1ce19cc3b1c876750ed81fe7fb6fd4ba67024",
+      "size": 275523
+    },
+    {
+      "materials": [
+        "ericrolph_spin_cycle_washer_chrome_trim",
+        "ericrolph_spin_cycle_washer_enamel_gray",
+        "ericrolph_spin_cycle_washer_foot_rubber",
+        "ericrolph_spin_cycle_washer_glass_blue"
+      ],
+      "name": "door",
+      "path": "vehicles/ericrolph_spin_cycle_washer/ericrolph_spin_cycle_washer_door.dae",
+      "pivot_world": [
+        3.7,
+        -6.7,
+        4.6
+      ],
+      "sha256": "3b1f146627f39d3ab4d09b33dc51ddfafd662aad84a8777652704708047a1e08",
+      "size": 707356
+    },
+    {
+      "materials": [
+        "ericrolph_spin_cycle_washer_drum_steel",
+        "ericrolph_spin_cycle_washer_paddle_plastic"
+      ],
+      "name": "drum_liner",
+      "path": "vehicles/ericrolph_spin_cycle_washer/ericrolph_spin_cycle_washer_drum_liner.dae",
+      "pivot_world": [
+        0.0,
+        -1.0,
+        4.6
+      ],
+      "sha256": "2c9dcebd09fea8c2da59d1e58a3afca2b9f663d558044e5ff55b600337027a63",
+      "size": 360816
+    },
+    {
+      "materials": [
+        "ericrolph_spin_cycle_washer_suds_foam"
+      ],
+      "name": "suds_foam",
+      "path": "vehicles/ericrolph_spin_cycle_washer/ericrolph_spin_cycle_washer_suds_foam.dae",
+      "pivot_world": [
+        0.0,
+        -1.0,
+        0.4
+      ],
+      "sha256": "60ccff6c5d4c92153b6121a2b00c992600afcba44bba8e42ad9f41fbc34c929b",
+      "size": 66300
+    },
+    {
+      "materials": [
+        "ericrolph_spin_cycle_washer_wash_water"
+      ],
+      "name": "water_body",
+      "path": "vehicles/ericrolph_spin_cycle_washer/ericrolph_spin_cycle_washer_water_body.dae",
+      "pivot_world": [
+        0.0,
+        -1.0,
+        0.4
+      ],
+      "sha256": "9861d84bbb8ebb168b17bb9c6042c5e518cb232699f10af01e31f4cf3be02341",
+      "size": 170490
+    }
+  ],
+  "refnodes": {
+    "back": "ericrolph_spin_cycle_washer_body_01_00_00",
+    "left": "ericrolph_spin_cycle_washer_body_00_01_00",
+    "ref": "ericrolph_spin_cycle_washer_body_01_01_00",
+    "up": "ericrolph_spin_cycle_washer_body_01_01_01"
+  },
+  "schema": "ericrolph-giant-props-handoff-v1",
+  "spawn_envelope_nodes": [
+    "ericrolph_spin_cycle_washer_body_00_00_00",
+    "ericrolph_spin_cycle_washer_body_02_00_00",
+    "ericrolph_spin_cycle_washer_body_00_02_00",
+    "ericrolph_spin_cycle_washer_body_02_02_00",
+    "ericrolph_spin_cycle_washer_body_00_00_02",
+    "ericrolph_spin_cycle_washer_body_02_00_02",
+    "ericrolph_spin_cycle_washer_body_00_02_02",
+    "ericrolph_spin_cycle_washer_body_02_02_02"
+  ],
+  "triangles": [
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_02",
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_body_01_01_02"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_02",
+        "ericrolph_spin_cycle_washer_body_01_01_02",
+        "ericrolph_spin_cycle_washer_body_00_01_02"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_02",
+        "ericrolph_spin_cycle_washer_body_01_01_02",
+        "ericrolph_spin_cycle_washer_body_01_02_02"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_02",
+        "ericrolph_spin_cycle_washer_body_01_02_02",
+        "ericrolph_spin_cycle_washer_body_00_02_02"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_body_02_00_02",
+        "ericrolph_spin_cycle_washer_body_02_01_02"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_body_02_01_02",
+        "ericrolph_spin_cycle_washer_body_01_01_02"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_02",
+        "ericrolph_spin_cycle_washer_body_02_01_02",
+        "ericrolph_spin_cycle_washer_body_02_02_02"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_01_02",
+        "ericrolph_spin_cycle_washer_body_02_02_02",
+        "ericrolph_spin_cycle_washer_body_01_02_02"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_02_01",
+        "ericrolph_spin_cycle_washer_body_01_02_01",
+        "ericrolph_spin_cycle_washer_body_01_02_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_02_01",
+        "ericrolph_spin_cycle_washer_body_01_02_00",
+        "ericrolph_spin_cycle_washer_body_00_02_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_02_02",
+        "ericrolph_spin_cycle_washer_body_01_02_02",
+        "ericrolph_spin_cycle_washer_body_01_02_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_02_02",
+        "ericrolph_spin_cycle_washer_body_01_02_01",
+        "ericrolph_spin_cycle_washer_body_00_02_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_01",
+        "ericrolph_spin_cycle_washer_body_02_02_01",
+        "ericrolph_spin_cycle_washer_body_02_02_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_01",
+        "ericrolph_spin_cycle_washer_body_02_02_00",
+        "ericrolph_spin_cycle_washer_body_01_02_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_02",
+        "ericrolph_spin_cycle_washer_body_02_02_02",
+        "ericrolph_spin_cycle_washer_body_02_02_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_02_02",
+        "ericrolph_spin_cycle_washer_body_02_02_01",
+        "ericrolph_spin_cycle_washer_body_01_02_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_00_00",
+        "ericrolph_spin_cycle_washer_body_02_01_00",
+        "ericrolph_spin_cycle_washer_body_02_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_00_00",
+        "ericrolph_spin_cycle_washer_body_02_01_01",
+        "ericrolph_spin_cycle_washer_body_02_00_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_00_01",
+        "ericrolph_spin_cycle_washer_body_02_01_01",
+        "ericrolph_spin_cycle_washer_body_02_01_02"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_00_01",
+        "ericrolph_spin_cycle_washer_body_02_01_02",
+        "ericrolph_spin_cycle_washer_body_02_00_02"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_01_00",
+        "ericrolph_spin_cycle_washer_body_02_02_00",
+        "ericrolph_spin_cycle_washer_body_02_02_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_01_00",
+        "ericrolph_spin_cycle_washer_body_02_02_01",
+        "ericrolph_spin_cycle_washer_body_02_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_01_01",
+        "ericrolph_spin_cycle_washer_body_02_02_01",
+        "ericrolph_spin_cycle_washer_body_02_02_02"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_02_01_01",
+        "ericrolph_spin_cycle_washer_body_02_02_02",
+        "ericrolph_spin_cycle_washer_body_02_01_02"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_01",
+        "ericrolph_spin_cycle_washer_body_00_01_01",
+        "ericrolph_spin_cycle_washer_body_00_01_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_01",
+        "ericrolph_spin_cycle_washer_body_00_01_00",
+        "ericrolph_spin_cycle_washer_body_00_00_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_02",
+        "ericrolph_spin_cycle_washer_body_00_01_02",
+        "ericrolph_spin_cycle_washer_body_00_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_02",
+        "ericrolph_spin_cycle_washer_body_00_01_01",
+        "ericrolph_spin_cycle_washer_body_00_00_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_01",
+        "ericrolph_spin_cycle_washer_body_00_02_01",
+        "ericrolph_spin_cycle_washer_body_00_02_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_01",
+        "ericrolph_spin_cycle_washer_body_00_02_00",
+        "ericrolph_spin_cycle_washer_body_00_01_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_02",
+        "ericrolph_spin_cycle_washer_body_00_02_02",
+        "ericrolph_spin_cycle_washer_body_00_02_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_01_02",
+        "ericrolph_spin_cycle_washer_body_00_02_01",
+        "ericrolph_spin_cycle_washer_body_00_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_01",
+        "ericrolph_spin_cycle_washer_body_01_00_01",
+        "ericrolph_spin_cycle_washer_body_01_00_02"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_00_00_01",
+        "ericrolph_spin_cycle_washer_body_01_00_02",
+        "ericrolph_spin_cycle_washer_body_00_00_02"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_01",
+        "ericrolph_spin_cycle_washer_body_02_00_01",
+        "ericrolph_spin_cycle_washer_body_02_00_02"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_body_01_00_01",
+        "ericrolph_spin_cycle_washer_body_02_00_02",
+        "ericrolph_spin_cycle_washer_body_01_00_02"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_00_0",
+        "ericrolph_spin_cycle_washer_drum_01_0",
+        "ericrolph_spin_cycle_washer_drum_01_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_00_0",
+        "ericrolph_spin_cycle_washer_drum_01_1",
+        "ericrolph_spin_cycle_washer_drum_00_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_00_1",
+        "ericrolph_spin_cycle_washer_drum_01_1",
+        "ericrolph_spin_cycle_washer_drum_01_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_00_1",
+        "ericrolph_spin_cycle_washer_drum_01_2",
+        "ericrolph_spin_cycle_washer_drum_00_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_00_2",
+        "ericrolph_spin_cycle_washer_drum_01_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_01_0",
+        "ericrolph_spin_cycle_washer_drum_02_0",
+        "ericrolph_spin_cycle_washer_drum_02_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_01_0",
+        "ericrolph_spin_cycle_washer_drum_02_1",
+        "ericrolph_spin_cycle_washer_drum_01_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_01_1",
+        "ericrolph_spin_cycle_washer_drum_02_1",
+        "ericrolph_spin_cycle_washer_drum_02_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_01_1",
+        "ericrolph_spin_cycle_washer_drum_02_2",
+        "ericrolph_spin_cycle_washer_drum_01_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_01_2",
+        "ericrolph_spin_cycle_washer_drum_02_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_02_0",
+        "ericrolph_spin_cycle_washer_drum_03_0",
+        "ericrolph_spin_cycle_washer_drum_03_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_02_0",
+        "ericrolph_spin_cycle_washer_drum_03_1",
+        "ericrolph_spin_cycle_washer_drum_02_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_02_1",
+        "ericrolph_spin_cycle_washer_drum_03_1",
+        "ericrolph_spin_cycle_washer_drum_03_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_02_1",
+        "ericrolph_spin_cycle_washer_drum_03_2",
+        "ericrolph_spin_cycle_washer_drum_02_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_02_2",
+        "ericrolph_spin_cycle_washer_drum_03_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_03_0",
+        "ericrolph_spin_cycle_washer_drum_04_0",
+        "ericrolph_spin_cycle_washer_drum_04_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_03_0",
+        "ericrolph_spin_cycle_washer_drum_04_1",
+        "ericrolph_spin_cycle_washer_drum_03_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_03_1",
+        "ericrolph_spin_cycle_washer_drum_04_1",
+        "ericrolph_spin_cycle_washer_drum_04_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_03_1",
+        "ericrolph_spin_cycle_washer_drum_04_2",
+        "ericrolph_spin_cycle_washer_drum_03_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_03_2",
+        "ericrolph_spin_cycle_washer_drum_04_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_04_0",
+        "ericrolph_spin_cycle_washer_drum_05_0",
+        "ericrolph_spin_cycle_washer_drum_05_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_04_0",
+        "ericrolph_spin_cycle_washer_drum_05_1",
+        "ericrolph_spin_cycle_washer_drum_04_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_04_1",
+        "ericrolph_spin_cycle_washer_drum_05_1",
+        "ericrolph_spin_cycle_washer_drum_05_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_04_1",
+        "ericrolph_spin_cycle_washer_drum_05_2",
+        "ericrolph_spin_cycle_washer_drum_04_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_04_2",
+        "ericrolph_spin_cycle_washer_drum_05_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_05_0",
+        "ericrolph_spin_cycle_washer_drum_06_0",
+        "ericrolph_spin_cycle_washer_drum_06_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_05_0",
+        "ericrolph_spin_cycle_washer_drum_06_1",
+        "ericrolph_spin_cycle_washer_drum_05_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_05_1",
+        "ericrolph_spin_cycle_washer_drum_06_1",
+        "ericrolph_spin_cycle_washer_drum_06_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_05_1",
+        "ericrolph_spin_cycle_washer_drum_06_2",
+        "ericrolph_spin_cycle_washer_drum_05_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_05_2",
+        "ericrolph_spin_cycle_washer_drum_06_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_06_0",
+        "ericrolph_spin_cycle_washer_drum_07_0",
+        "ericrolph_spin_cycle_washer_drum_07_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_06_0",
+        "ericrolph_spin_cycle_washer_drum_07_1",
+        "ericrolph_spin_cycle_washer_drum_06_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_06_1",
+        "ericrolph_spin_cycle_washer_drum_07_1",
+        "ericrolph_spin_cycle_washer_drum_07_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_06_1",
+        "ericrolph_spin_cycle_washer_drum_07_2",
+        "ericrolph_spin_cycle_washer_drum_06_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_06_2",
+        "ericrolph_spin_cycle_washer_drum_07_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_07_0",
+        "ericrolph_spin_cycle_washer_drum_08_0",
+        "ericrolph_spin_cycle_washer_drum_08_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_07_0",
+        "ericrolph_spin_cycle_washer_drum_08_1",
+        "ericrolph_spin_cycle_washer_drum_07_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_07_1",
+        "ericrolph_spin_cycle_washer_drum_08_1",
+        "ericrolph_spin_cycle_washer_drum_08_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_07_1",
+        "ericrolph_spin_cycle_washer_drum_08_2",
+        "ericrolph_spin_cycle_washer_drum_07_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_07_2",
+        "ericrolph_spin_cycle_washer_drum_08_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_08_0",
+        "ericrolph_spin_cycle_washer_drum_09_0",
+        "ericrolph_spin_cycle_washer_drum_09_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_08_0",
+        "ericrolph_spin_cycle_washer_drum_09_1",
+        "ericrolph_spin_cycle_washer_drum_08_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_08_1",
+        "ericrolph_spin_cycle_washer_drum_09_1",
+        "ericrolph_spin_cycle_washer_drum_09_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_08_1",
+        "ericrolph_spin_cycle_washer_drum_09_2",
+        "ericrolph_spin_cycle_washer_drum_08_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_08_2",
+        "ericrolph_spin_cycle_washer_drum_09_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_09_0",
+        "ericrolph_spin_cycle_washer_drum_10_0",
+        "ericrolph_spin_cycle_washer_drum_10_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_09_0",
+        "ericrolph_spin_cycle_washer_drum_10_1",
+        "ericrolph_spin_cycle_washer_drum_09_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_09_1",
+        "ericrolph_spin_cycle_washer_drum_10_1",
+        "ericrolph_spin_cycle_washer_drum_10_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_09_1",
+        "ericrolph_spin_cycle_washer_drum_10_2",
+        "ericrolph_spin_cycle_washer_drum_09_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_09_2",
+        "ericrolph_spin_cycle_washer_drum_10_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_10_0",
+        "ericrolph_spin_cycle_washer_drum_11_0",
+        "ericrolph_spin_cycle_washer_drum_11_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_10_0",
+        "ericrolph_spin_cycle_washer_drum_11_1",
+        "ericrolph_spin_cycle_washer_drum_10_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_10_1",
+        "ericrolph_spin_cycle_washer_drum_11_1",
+        "ericrolph_spin_cycle_washer_drum_11_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_10_1",
+        "ericrolph_spin_cycle_washer_drum_11_2",
+        "ericrolph_spin_cycle_washer_drum_10_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_10_2",
+        "ericrolph_spin_cycle_washer_drum_11_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_11_0",
+        "ericrolph_spin_cycle_washer_drum_00_0",
+        "ericrolph_spin_cycle_washer_drum_00_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_11_0",
+        "ericrolph_spin_cycle_washer_drum_00_1",
+        "ericrolph_spin_cycle_washer_drum_11_1"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_11_1",
+        "ericrolph_spin_cycle_washer_drum_00_1",
+        "ericrolph_spin_cycle_washer_drum_00_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_11_1",
+        "ericrolph_spin_cycle_washer_drum_00_2",
+        "ericrolph_spin_cycle_washer_drum_11_2"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_drum_11_2",
+        "ericrolph_spin_cycle_washer_drum_00_2",
+        "ericrolph_spin_cycle_washer_drum_back_center"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_ramp_ground_l",
+        "ericrolph_spin_cycle_washer_ramp_ground_r",
+        "ericrolph_spin_cycle_washer_sill_r"
+      ]
+    },
+    {
+      "ground_model": "asphalt",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_ramp_ground_l",
+        "ericrolph_spin_cycle_washer_sill_r",
+        "ericrolph_spin_cycle_washer_sill_l"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_sill_l",
+        "ericrolph_spin_cycle_washer_sill_r",
+        "ericrolph_spin_cycle_washer_drum_09_0"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_spin_cycle_washer_sill_l",
+        "ericrolph_spin_cycle_washer_drum_09_0",
+        "ericrolph_spin_cycle_washer_drum_08_0"
+      ]
+    }
+  ],
+  "visual": {
+    "bounds": {
+      "max": [
+        6.650001,
+        12.499999,
+        13.975
+      ],
+      "min": [
+        -6.650001,
+        -7.15,
+        -0.21872
+      ]
+    },
+    "materials": [
+      "ericrolph_spin_cycle_washer_brass_fitting",
+      "ericrolph_spin_cycle_washer_button_satin",
+      "ericrolph_spin_cycle_washer_chrome_trim",
+      "ericrolph_spin_cycle_washer_console_graphite",
+      "ericrolph_spin_cycle_washer_controls_legend",
+      "ericrolph_spin_cycle_washer_cord_black",
+      "ericrolph_spin_cycle_washer_dial_blue",
+      "ericrolph_spin_cycle_washer_dial_legend",
+      "ericrolph_spin_cycle_washer_display_lcd",
+      "ericrolph_spin_cycle_washer_drum_bright",
+      "ericrolph_spin_cycle_washer_drum_lamp",
+      "ericrolph_spin_cycle_washer_drum_spider",
+      "ericrolph_spin_cycle_washer_enamel_gray",
+      "ericrolph_spin_cycle_washer_enamel_white",
+      "ericrolph_spin_cycle_washer_energy_label",
+      "ericrolph_spin_cycle_washer_foot_rubber",
+      "ericrolph_spin_cycle_washer_gasket_rubber",
+      "ericrolph_spin_cycle_washer_hose_rubber",
+      "ericrolph_spin_cycle_washer_mark_cold",
+      "ericrolph_spin_cycle_washer_mark_hot",
+      "ericrolph_spin_cycle_washer_ramp_asphalt",
+      "ericrolph_spin_cycle_washer_serial_plate",
+      "ericrolph_spin_cycle_washer_start_glass"
+    ],
+    "path": "vehicles/ericrolph_spin_cycle_washer/ericrolph_spin_cycle_washer.dae",
+    "sha256": "627382331648462ae7b6744571b700ac72d9c233a851b9570b33ffdb8dc758d8",
+    "size": 4054771
+  }
+}

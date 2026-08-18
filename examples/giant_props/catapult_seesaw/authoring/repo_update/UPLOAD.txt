@@ -1,0 +1,142 @@
+POSTING THIS UPDATE ON BEAMNG.COM
+=================================
+
+This is an UPDATE to the existing Charlie's Catapult Seesaw resource.
+
+    Resource options  ->  Post resource update
+
+
+1. TITLE
+   Paste update_title.txt:
+
+       Real 10-ton physics: guided drop, dynamic lever, no scripted launch
+
+
+2. MESSAGE
+   Paste update_description.bbcode as BBCode, not Markdown.
+
+
+3. VERSION
+   This is a complete mechanism replacement, so use a major version bump.
+   Recommended version:
+
+       2.0.0
+
+   If the live resource already uses 2.x or newer, choose the next major
+   version instead; beamng.com requires a version that is not already used.
+
+
+4. FILE
+   Attach this file from the same repo_update folder:
+
+       catapult_seesaw_ericrolph.zip
+
+   Certified final build:
+
+       build serial: 78
+       size:         20,276,823 bytes
+       ZIP members:  53
+       SHA-256:      af5fc85ac5db71444d42b3c1667d7830c669d09c38253b68e9017e9242b0ea63
+
+   Do not reuse serial 27 metadata: that archive contains the obsolete
+   40-ton prototype and v2 physical shape.
+
+   Tick the option to replace the existing file so subscribers receive it.
+
+
+5. EDIT THE RESOURCE DESCRIPTION
+   The old description promises a fixed 42 m/s vertical + 8 m/s forward
+   launch and half-Earth gravity. Those statements are no longer true.
+
+   Open the resource's Edit Resource page and paste, from this same folder:
+
+       subtitle.txt          -> the tagline under the title
+       description.bbcode    -> the main description field
+
+   BBCODE, NOT MARKDOWN, for the description field too. listing_copy.md is
+   the human-readable working doc; its '###' headings paste into XenForo as
+   literal '###'. description.bbcode is the same text already converted.
+
+   The icon can stay, but the new generated thumbnail is also available at:
+
+       authoring/ericrolph_catapult_seesaw_thumbnail.jpg
+
+
+WHAT ACTUALLY CHANGED
+---------------------
+
+The previous release had a permanently fixed rest-angle collision surface,
+collisionless animated plank/weight meshes, and Lua that replaced the subject
+vehicle's cluster velocity. This build removes that path completely.
+
+The release now contains:
+
+  * a dynamic 22 x 4.4 m plank box truss with 100 contact nodes;
+  * 13.5 m and 8.5 m lever arms for roughly 1.5:1 car-side speed advantage;
+  * a reinforced five-node collinear hinge tied into a fixed base;
+  * a physical 9,070 kg (10 US tons / 20,000 lb), 75-node counterweight cage
+    with a five-node, full-width striker;
+  * two breakable weight-latch beams plus 15 zero-preload transport latches,
+    all released together before the mechanism moves;
+  * a fixed vertical guide rail that aligns, but does not drive, the weight;
+  * a 6.0 m gravity-driven free fall into five bounded hydraulic links acting
+    through a visible 25 cm rubber mat and five 80 kg structural rib nodes;
+  * collidable plank/weight surfaces and weight-base self-collision;
+  * node-bound flexbody visuals for the moving plank and weight;
+  * a cache-busted ericrolph_catapult_seesaw_physics_v3.dae source path;
+  * five final-stroke hydraulic catchers, five one-way rebound snubbers, and
+    rubber fail-safe pads; and
+  * runtime code limited to release, observation, UI/effects, and safe reset.
+
+The obsolete collisionless plank.dae and weight.dae runtime parts, the old
+visual-only ericrolph_catapult_seesaw.dae path, and obsolete physics_v2 shape
+are not in the archive. The catapult runtime contains no launchSubject,
+addSubjectVelocity, teleportSubject, applyClusterVelocityScaleAdd, or subject
+setPositionRotation call.
+
+
+VALIDATION REQUIRED BEFORE UPLOAD
+---------------------------------
+
+Do not paste the serial-27 Pigeon figures here; they describe the obsolete
+40-ton/v2 mechanism. The certified serial-78 v3 archive produced these
+deterministic Small Grid results:
+
+  * 1,530 kg Barstow I6: 10.18 m/s at 51.5 degrees, +8.00 m apex,
+    19.15 m to first ground contact;
+  * 1,870 kg Bastion V6: 8.37 m/s at 54.0 degrees, +7.91 m apex,
+    15.24 m to first ground contact;
+  * block impact 10.71-10.79 m/s, first rebound below 0.96 m, and steady
+    parked-plank motion below 0.014 degrees; and
+  * no runtime error, NaN, physics-instability, or scripted-launch event.
+
+The required live contract must observe weight_released,
+counterweight_impact, physical plank rotation, and seesaw_flung in order. It
+must observe no subject_launched event, report no mod errors, and find no
+non-finite/NaN/physics-instability entry after the run's log marker.
+
+The input-energy sanity check is a 9,070 kg weight falling 6.0 m: about
+10.8 m/s and 534 kJ at impact. Do not advertise the earlier 16-22 m/s or
+25 m apex estimates. Those require a strongly elastic collision and conflict
+with the deliberately damped, sub-1 m rebound mechanism. Advertise the
+measured vehicle-specific results above and label them as reference runs.
+
+
+NOTE ABOUT FIRST LOAD
+---------------------
+
+This archive ships the source PNG textures. BeamNG cooks them into its cache
+on first load, so an IMPORTING TEXTURE placeholder may appear briefly the
+first time the updated prop is spawned. This is expected and clears once the
+one-time texture cook finishes.
+
+
+LOCAL SIDELOAD TESTING
+----------------------
+
+Do not drop this ZIP into a running game while the subscribed release remains
+mounted. Fully exit BeamNG first, disable or move the old
+mods/repo/catapult_seesaw_ericrolph.zip outside mods, then place this ZIP in
+mods and restart. The v3 Collada filename prevents reuse of both the old main
+shape cache and the earlier v2 physical cache; a full cache clear is not
+required.

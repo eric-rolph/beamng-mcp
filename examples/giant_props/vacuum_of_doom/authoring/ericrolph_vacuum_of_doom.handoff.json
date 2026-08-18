@@ -1,0 +1,2317 @@
+{
+  "asset": {
+    "display_name": "The Vacuum Cleaner of Doom",
+    "id": "ericrolph_vacuum_of_doom",
+    "physics_cage": "ericrolph_vacuum_of_doom_cage",
+    "visual_mesh": "ericrolph_vacuum_of_doom_visual"
+  },
+  "base_nodes": [
+    "ericrolph_vacuum_of_doom_deck_00_00_00",
+    "ericrolph_vacuum_of_doom_deck_00_01_00",
+    "ericrolph_vacuum_of_doom_deck_00_02_00",
+    "ericrolph_vacuum_of_doom_deck_01_00_00",
+    "ericrolph_vacuum_of_doom_deck_01_01_00",
+    "ericrolph_vacuum_of_doom_deck_01_02_00",
+    "ericrolph_vacuum_of_doom_deck_02_00_00",
+    "ericrolph_vacuum_of_doom_deck_02_01_00",
+    "ericrolph_vacuum_of_doom_deck_02_02_00",
+    "ericrolph_vacuum_of_doom_bell_00_00_00",
+    "ericrolph_vacuum_of_doom_bell_00_01_00",
+    "ericrolph_vacuum_of_doom_bell_01_00_00",
+    "ericrolph_vacuum_of_doom_bell_01_01_00"
+  ],
+  "beam_specs": {
+    "rigid": {
+      "beamDamp": 1500.0,
+      "beamDeform": "FLT_MAX",
+      "beamSpring": 15000000.0,
+      "beamStrength": "FLT_MAX"
+    }
+  },
+  "beams": [
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_00",
+        "ericrolph_vacuum_of_doom_bell_00_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_00",
+        "ericrolph_vacuum_of_doom_bell_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_00",
+        "ericrolph_vacuum_of_doom_bell_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_00",
+        "ericrolph_vacuum_of_doom_bell_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_00",
+        "ericrolph_vacuum_of_doom_bell_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_00",
+        "ericrolph_vacuum_of_doom_bell_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_00",
+        "ericrolph_vacuum_of_doom_bell_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_00",
+        "ericrolph_vacuum_of_doom_lane_anchor_l"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_01",
+        "ericrolph_vacuum_of_doom_bell_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_01",
+        "ericrolph_vacuum_of_doom_bell_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_01",
+        "ericrolph_vacuum_of_doom_bell_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_01",
+        "ericrolph_vacuum_of_doom_bell_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_01",
+        "ericrolph_vacuum_of_doom_bell_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_01_00",
+        "ericrolph_vacuum_of_doom_bell_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_01_00",
+        "ericrolph_vacuum_of_doom_bell_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_01_00",
+        "ericrolph_vacuum_of_doom_bell_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_01_00",
+        "ericrolph_vacuum_of_doom_bell_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_01_00",
+        "ericrolph_vacuum_of_doom_deck_00_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_01_01",
+        "ericrolph_vacuum_of_doom_bell_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_01_01",
+        "ericrolph_vacuum_of_doom_bell_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_01_01",
+        "ericrolph_vacuum_of_doom_bell_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_01_01",
+        "ericrolph_vacuum_of_doom_deck_00_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_01_00_00",
+        "ericrolph_vacuum_of_doom_bell_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_01_00_00",
+        "ericrolph_vacuum_of_doom_bell_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_01_00_00",
+        "ericrolph_vacuum_of_doom_bell_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_01_00_00",
+        "ericrolph_vacuum_of_doom_lane_anchor_r"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_01_00_01",
+        "ericrolph_vacuum_of_doom_bell_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_01_00_01",
+        "ericrolph_vacuum_of_doom_bell_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_01_01_00",
+        "ericrolph_vacuum_of_doom_bell_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_01_01_00",
+        "ericrolph_vacuum_of_doom_deck_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_01_01_01",
+        "ericrolph_vacuum_of_doom_deck_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_00",
+        "ericrolph_vacuum_of_doom_deck_00_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_00",
+        "ericrolph_vacuum_of_doom_deck_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_00",
+        "ericrolph_vacuum_of_doom_deck_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_00",
+        "ericrolph_vacuum_of_doom_deck_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_00",
+        "ericrolph_vacuum_of_doom_deck_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_00",
+        "ericrolph_vacuum_of_doom_deck_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_00",
+        "ericrolph_vacuum_of_doom_deck_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_01",
+        "ericrolph_vacuum_of_doom_deck_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_01",
+        "ericrolph_vacuum_of_doom_deck_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_01",
+        "ericrolph_vacuum_of_doom_deck_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_01",
+        "ericrolph_vacuum_of_doom_deck_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_01",
+        "ericrolph_vacuum_of_doom_deck_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_01",
+        "ericrolph_vacuum_of_doom_drum_00_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_00",
+        "ericrolph_vacuum_of_doom_deck_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_00",
+        "ericrolph_vacuum_of_doom_deck_00_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_00",
+        "ericrolph_vacuum_of_doom_deck_00_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_00",
+        "ericrolph_vacuum_of_doom_deck_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_00",
+        "ericrolph_vacuum_of_doom_deck_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_00",
+        "ericrolph_vacuum_of_doom_deck_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_00",
+        "ericrolph_vacuum_of_doom_deck_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_00",
+        "ericrolph_vacuum_of_doom_deck_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_01",
+        "ericrolph_vacuum_of_doom_deck_00_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_01",
+        "ericrolph_vacuum_of_doom_deck_00_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_01",
+        "ericrolph_vacuum_of_doom_deck_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_01",
+        "ericrolph_vacuum_of_doom_deck_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_01",
+        "ericrolph_vacuum_of_doom_deck_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_01",
+        "ericrolph_vacuum_of_doom_deck_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_02_00",
+        "ericrolph_vacuum_of_doom_deck_00_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_02_00",
+        "ericrolph_vacuum_of_doom_deck_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_02_00",
+        "ericrolph_vacuum_of_doom_deck_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_02_00",
+        "ericrolph_vacuum_of_doom_deck_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_02_01",
+        "ericrolph_vacuum_of_doom_deck_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_02_01",
+        "ericrolph_vacuum_of_doom_deck_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_02_01",
+        "ericrolph_vacuum_of_doom_deck_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_02_01",
+        "ericrolph_vacuum_of_doom_drum_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_00_00",
+        "ericrolph_vacuum_of_doom_deck_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_00_00",
+        "ericrolph_vacuum_of_doom_deck_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_00_00",
+        "ericrolph_vacuum_of_doom_deck_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_00_00",
+        "ericrolph_vacuum_of_doom_deck_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_00_00",
+        "ericrolph_vacuum_of_doom_deck_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_00_00",
+        "ericrolph_vacuum_of_doom_deck_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_00_00",
+        "ericrolph_vacuum_of_doom_deck_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_00_01",
+        "ericrolph_vacuum_of_doom_deck_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_00_01",
+        "ericrolph_vacuum_of_doom_deck_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_00_01",
+        "ericrolph_vacuum_of_doom_deck_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_00_01",
+        "ericrolph_vacuum_of_doom_deck_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_00_01",
+        "ericrolph_vacuum_of_doom_deck_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_01_00",
+        "ericrolph_vacuum_of_doom_deck_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_01_00",
+        "ericrolph_vacuum_of_doom_deck_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_01_00",
+        "ericrolph_vacuum_of_doom_deck_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_01_00",
+        "ericrolph_vacuum_of_doom_deck_02_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_01_00",
+        "ericrolph_vacuum_of_doom_deck_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_01_00",
+        "ericrolph_vacuum_of_doom_deck_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_01_00",
+        "ericrolph_vacuum_of_doom_deck_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_01_00",
+        "ericrolph_vacuum_of_doom_deck_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_01_01",
+        "ericrolph_vacuum_of_doom_deck_01_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_01_01",
+        "ericrolph_vacuum_of_doom_deck_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_01_01",
+        "ericrolph_vacuum_of_doom_deck_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_01_01",
+        "ericrolph_vacuum_of_doom_deck_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_01_01",
+        "ericrolph_vacuum_of_doom_deck_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_01_01",
+        "ericrolph_vacuum_of_doom_deck_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_02_00",
+        "ericrolph_vacuum_of_doom_deck_01_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_02_00",
+        "ericrolph_vacuum_of_doom_deck_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_02_00",
+        "ericrolph_vacuum_of_doom_deck_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_02_00",
+        "ericrolph_vacuum_of_doom_deck_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_02_01",
+        "ericrolph_vacuum_of_doom_deck_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_02_01",
+        "ericrolph_vacuum_of_doom_deck_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_02_01",
+        "ericrolph_vacuum_of_doom_deck_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_00_00",
+        "ericrolph_vacuum_of_doom_deck_02_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_00_00",
+        "ericrolph_vacuum_of_doom_deck_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_00_00",
+        "ericrolph_vacuum_of_doom_deck_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_00_01",
+        "ericrolph_vacuum_of_doom_deck_02_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_00_01",
+        "ericrolph_vacuum_of_doom_deck_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_00_01",
+        "ericrolph_vacuum_of_doom_drum_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_01_00",
+        "ericrolph_vacuum_of_doom_deck_02_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_01_00",
+        "ericrolph_vacuum_of_doom_deck_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_01_00",
+        "ericrolph_vacuum_of_doom_deck_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_01_01",
+        "ericrolph_vacuum_of_doom_deck_02_02_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_01_01",
+        "ericrolph_vacuum_of_doom_deck_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_02_00",
+        "ericrolph_vacuum_of_doom_deck_02_02_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_02_01",
+        "ericrolph_vacuum_of_doom_drum_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_00",
+        "ericrolph_vacuum_of_doom_drum_00_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_00",
+        "ericrolph_vacuum_of_doom_drum_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_00",
+        "ericrolph_vacuum_of_doom_drum_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_00",
+        "ericrolph_vacuum_of_doom_drum_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_00",
+        "ericrolph_vacuum_of_doom_drum_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_00",
+        "ericrolph_vacuum_of_doom_drum_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_00",
+        "ericrolph_vacuum_of_doom_drum_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_01",
+        "ericrolph_vacuum_of_doom_drum_00_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_01",
+        "ericrolph_vacuum_of_doom_drum_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_01",
+        "ericrolph_vacuum_of_doom_drum_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_01",
+        "ericrolph_vacuum_of_doom_drum_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_01",
+        "ericrolph_vacuum_of_doom_drum_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_01_00",
+        "ericrolph_vacuum_of_doom_drum_00_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_01_00",
+        "ericrolph_vacuum_of_doom_drum_01_00_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_01_00",
+        "ericrolph_vacuum_of_doom_drum_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_01_00",
+        "ericrolph_vacuum_of_doom_drum_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_01_01",
+        "ericrolph_vacuum_of_doom_drum_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_01_01",
+        "ericrolph_vacuum_of_doom_drum_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_01_01",
+        "ericrolph_vacuum_of_doom_drum_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_01_01",
+        "ericrolph_vacuum_of_doom_exhaust_anchor"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_01_00_00",
+        "ericrolph_vacuum_of_doom_drum_01_00_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_01_00_00",
+        "ericrolph_vacuum_of_doom_drum_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_01_00_00",
+        "ericrolph_vacuum_of_doom_drum_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_01_00_01",
+        "ericrolph_vacuum_of_doom_drum_01_01_00"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_01_00_01",
+        "ericrolph_vacuum_of_doom_drum_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_01_01_00",
+        "ericrolph_vacuum_of_doom_drum_01_01_01"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_01_01_01",
+        "ericrolph_vacuum_of_doom_exhaust_anchor"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_vacuum_of_doom_lane_anchor_l",
+        "ericrolph_vacuum_of_doom_lane_anchor_r"
+      ],
+      "spec": "rigid"
+    }
+  ],
+  "behavior": {
+    "camera_distance": 36.0,
+    "effects": {
+      "exhaust_steam": {
+        "direction": [
+          0.0,
+          0.906,
+          0.423
+        ],
+        "emitter": "BNGP_34",
+        "position": [
+          0.0,
+          11.0,
+          5.1
+        ]
+      },
+      "nozzle_dust": {
+        "direction": [
+          0.0,
+          -0.7,
+          0.7
+        ],
+        "emitter": "BNGP_2",
+        "position": [
+          0.0,
+          -4.6,
+          1.0
+        ]
+      }
+    },
+    "triggers": {
+      "gulp_zone": {
+        "center": [
+          0.0,
+          -3.3,
+          1.2
+        ],
+        "dimensions": [
+          4.6,
+          1.6,
+          2.8
+        ],
+        "mode": "Overlaps"
+      },
+      "pull_zone": {
+        "center": [
+          0.0,
+          -14.0,
+          2.2
+        ],
+        "dimensions": [
+          10.0,
+          21.0,
+          4.4
+        ],
+        "mode": "Overlaps"
+      }
+    },
+    "tunables": {
+      "camera_distance": 36.0,
+      "cap_full_spin": 18.0,
+      "cap_idle_spin": 0.0,
+      "cap_spool_spin": 4.0,
+      "digest_seconds": 0.8,
+      "eject_speed_mps": 45.0,
+      "exhaust_dir": [
+        0.0,
+        0.906,
+        0.423
+      ],
+      "flap_open_seconds": 0.9,
+      "max_pull_speed": 14.0,
+      "nozzle_point": [
+        0.0,
+        -3.5,
+        1.1
+      ],
+      "pull_accel_full": 12.0,
+      "pull_accel_start": 4.0,
+      "pull_ramp_seconds": 3.0,
+      "spool_seconds": 1.2,
+      "teleport_point": [
+        0.0,
+        12.2,
+        5.8
+      ],
+      "winddown_seconds": 1.5
+    }
+  },
+  "coordinate_system": {
+    "source": "right-handed, meters, Z-up, +Y drive direction",
+    "source_world_to_beamng_vehicle": [
+      [
+        -1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        -1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "target": "BeamNG vehicle space, meters, Z-up, -Y forward"
+  },
+  "nodes": [
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_00_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        4.0,
+        -1.8,
+        0.0
+      ],
+      "source_world_position": [
+        -4.0,
+        1.8,
+        0.0
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_00_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        4.0,
+        -1.8,
+        0.8
+      ],
+      "source_world_position": [
+        -4.0,
+        1.8,
+        0.8
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_00_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        4.0,
+        -6.0,
+        0.0
+      ],
+      "source_world_position": [
+        -4.0,
+        6.0,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_00_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        4.0,
+        -6.0,
+        0.8
+      ],
+      "source_world_position": [
+        -4.0,
+        6.0,
+        0.8
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_00_02_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.999999,
+        -10.2,
+        0.0
+      ],
+      "source_world_position": [
+        -4.0,
+        10.2,
+        0.0
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_00_02_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.999999,
+        -10.2,
+        0.8
+      ],
+      "source_world_position": [
+        -4.0,
+        10.2,
+        0.8
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_01_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -1.8,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        1.8,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_01_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -0.0,
+        -1.8,
+        0.8
+      ],
+      "source_world_position": [
+        0.0,
+        1.8,
+        0.8
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_01_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -6.0,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        6.0,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_01_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -6.0,
+        0.8
+      ],
+      "source_world_position": [
+        0.0,
+        6.0,
+        0.8
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_01_02_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -10.2,
+        0.0
+      ],
+      "source_world_position": [
+        0.0,
+        10.2,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_01_02_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -10.2,
+        0.8
+      ],
+      "source_world_position": [
+        0.0,
+        10.2,
+        0.8
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_02_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -4.0,
+        -1.8,
+        0.0
+      ],
+      "source_world_position": [
+        4.0,
+        1.8,
+        0.0
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_02_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -4.0,
+        -1.8,
+        0.8
+      ],
+      "source_world_position": [
+        4.0,
+        1.8,
+        0.8
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_02_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -4.0,
+        -6.0,
+        0.0
+      ],
+      "source_world_position": [
+        4.0,
+        6.0,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_02_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -4.0,
+        -6.0,
+        0.8
+      ],
+      "source_world_position": [
+        4.0,
+        6.0,
+        0.8
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_02_02_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -4.000001,
+        -10.2,
+        0.0
+      ],
+      "source_world_position": [
+        4.0,
+        10.2,
+        0.0
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_deck_02_02_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -4.000001,
+        -10.2,
+        0.8
+      ],
+      "source_world_position": [
+        4.0,
+        10.2,
+        0.8
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_drum_00_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.2,
+        -2.8,
+        0.8
+      ],
+      "source_world_position": [
+        -3.2,
+        2.8,
+        0.8
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_drum_00_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.2,
+        -2.8,
+        7.6
+      ],
+      "source_world_position": [
+        -3.2,
+        2.8,
+        7.6
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_drum_00_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.199999,
+        -9.2,
+        0.8
+      ],
+      "source_world_position": [
+        -3.2,
+        9.2,
+        0.8
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_drum_00_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        3.199999,
+        -9.2,
+        7.6
+      ],
+      "source_world_position": [
+        -3.2,
+        9.2,
+        7.6
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_drum_01_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.2,
+        -2.8,
+        0.8
+      ],
+      "source_world_position": [
+        3.2,
+        2.8,
+        0.8
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_drum_01_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.2,
+        -2.8,
+        7.6
+      ],
+      "source_world_position": [
+        3.2,
+        2.8,
+        7.6
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_drum_01_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.200001,
+        -9.2,
+        0.8
+      ],
+      "source_world_position": [
+        3.2,
+        9.2,
+        0.8
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_drum_01_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -3.200001,
+        -9.2,
+        7.6
+      ],
+      "source_world_position": [
+        3.2,
+        9.2,
+        7.6
+      ],
+      "spawn_envelope": true,
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_bell_00_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.3,
+        4.3,
+        0.0
+      ],
+      "source_world_position": [
+        -2.3,
+        -4.3,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_bell_00_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.3,
+        4.3,
+        2.3
+      ],
+      "source_world_position": [
+        -2.3,
+        -4.3,
+        2.3
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_bell_00_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.3,
+        2.5,
+        0.0
+      ],
+      "source_world_position": [
+        -2.3,
+        -2.5,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_bell_00_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.3,
+        2.5,
+        2.3
+      ],
+      "source_world_position": [
+        -2.3,
+        -2.5,
+        2.3
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_bell_01_00_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.299999,
+        4.3,
+        0.0
+      ],
+      "source_world_position": [
+        2.3,
+        -4.3,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_bell_01_00_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.299999,
+        4.3,
+        2.3
+      ],
+      "source_world_position": [
+        2.3,
+        -4.3,
+        2.3
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_bell_01_01_00",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.3,
+        2.5,
+        0.0
+      ],
+      "source_world_position": [
+        2.3,
+        -2.5,
+        0.0
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_bell_01_01_01",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.3,
+        2.5,
+        2.3
+      ],
+      "source_world_position": [
+        2.3,
+        -2.5,
+        2.3
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_lane_anchor_l",
+      "node_material": "|NM_METAL",
+      "position": [
+        2.400002,
+        16.5,
+        0.05
+      ],
+      "source_world_position": [
+        -2.4,
+        -16.5,
+        0.05
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_lane_anchor_r",
+      "node_material": "|NM_METAL",
+      "position": [
+        -2.399999,
+        16.5,
+        0.05
+      ],
+      "source_world_position": [
+        2.4,
+        -16.5,
+        0.05
+      ],
+      "weight": 125.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_vacuum_of_doom_exhaust_anchor",
+      "node_material": "|NM_METAL",
+      "position": [
+        -1e-06,
+        -11.2,
+        5.9
+      ],
+      "source_world_position": [
+        0.0,
+        11.2,
+        5.9
+      ],
+      "weight": 125.0
+    }
+  ],
+  "palette": {
+    "ericrolph_vacuum_of_doom_charcoal": {
+      "color": [
+        0.13,
+        0.13,
+        0.15,
+        1.0
+      ],
+      "metallic": 0.2,
+      "roughness": 0.55,
+      "texture": {
+        "family": "painted_metal",
+        "params": {
+          "base": [
+            0.14,
+            0.14,
+            0.16
+          ],
+          "rough": 0.5
+        }
+      }
+    },
+    "ericrolph_vacuum_of_doom_cream": {
+      "color": [
+        0.92,
+        0.88,
+        0.78,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.55,
+      "texture": {
+        "family": "painted_metal",
+        "params": {
+          "base": [
+            0.92,
+            0.88,
+            0.78
+          ]
+        }
+      }
+    },
+    "ericrolph_vacuum_of_doom_hose_gray": {
+      "color": [
+        0.42,
+        0.44,
+        0.47,
+        1.0
+      ],
+      "metallic": 0.05,
+      "roughness": 0.6,
+      "texture": {
+        "family": "plastic_ribs",
+        "params": {
+          "base": [
+            0.42,
+            0.44,
+            0.47
+          ],
+          "ribs": 10.0,
+          "rough": 0.5
+        }
+      }
+    },
+    "ericrolph_vacuum_of_doom_steel": {
+      "color": [
+        0.6,
+        0.62,
+        0.65,
+        1.0
+      ],
+      "metallic": 0.85,
+      "roughness": 0.3,
+      "texture": {
+        "family": "steel_worn"
+      }
+    },
+    "ericrolph_vacuum_of_doom_vac_orange": {
+      "color": [
+        0.92,
+        0.45,
+        0.08,
+        1.0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.35,
+      "texture": {
+        "family": "plastic_ribs",
+        "params": {
+          "base": [
+            0.9,
+            0.44,
+            0.1
+          ],
+          "ribs": 6.0
+        }
+      }
+    }
+  },
+  "parts": [
+    {
+      "materials": [
+        "ericrolph_vacuum_of_doom_charcoal"
+      ],
+      "name": "exhaust_flap",
+      "path": "vehicles/ericrolph_vacuum_of_doom/ericrolph_vacuum_of_doom_exhaust_flap.dae",
+      "pivot_world": [
+        0.0,
+        10.9,
+        5.85
+      ],
+      "sha256": "eac8b86d6b8059d6dc54a7267c692393b048dea9d0cebe00efc9e9341ae73446",
+      "size": 13581
+    },
+    {
+      "materials": [
+        "ericrolph_vacuum_of_doom_charcoal",
+        "ericrolph_vacuum_of_doom_steel"
+      ],
+      "name": "turbine_cap",
+      "path": "vehicles/ericrolph_vacuum_of_doom/ericrolph_vacuum_of_doom_turbine_cap.dae",
+      "pivot_world": [
+        0.0,
+        6.0,
+        7.85
+      ],
+      "sha256": "45f1ea9d1ef8b0b15869dd934709ecf1aab86f1d1af111e230968c7fbb21fef7",
+      "size": 70985
+    }
+  ],
+  "refnodes": {
+    "back": "ericrolph_vacuum_of_doom_deck_01_00_00",
+    "left": "ericrolph_vacuum_of_doom_deck_00_01_00",
+    "ref": "ericrolph_vacuum_of_doom_deck_01_01_00",
+    "up": "ericrolph_vacuum_of_doom_deck_01_01_01"
+  },
+  "schema": "ericrolph-giant-props-handoff-v1",
+  "spawn_envelope_nodes": [
+    "ericrolph_vacuum_of_doom_deck_00_00_00",
+    "ericrolph_vacuum_of_doom_deck_02_00_00",
+    "ericrolph_vacuum_of_doom_deck_00_02_00",
+    "ericrolph_vacuum_of_doom_deck_02_02_00",
+    "ericrolph_vacuum_of_doom_drum_00_00_01",
+    "ericrolph_vacuum_of_doom_drum_01_00_01",
+    "ericrolph_vacuum_of_doom_drum_00_01_01",
+    "ericrolph_vacuum_of_doom_drum_01_01_01"
+  ],
+  "triangles": [
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_01",
+        "ericrolph_vacuum_of_doom_deck_01_00_01",
+        "ericrolph_vacuum_of_doom_deck_01_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_01",
+        "ericrolph_vacuum_of_doom_deck_01_01_01",
+        "ericrolph_vacuum_of_doom_deck_00_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_01",
+        "ericrolph_vacuum_of_doom_deck_01_01_01",
+        "ericrolph_vacuum_of_doom_deck_01_02_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_01",
+        "ericrolph_vacuum_of_doom_deck_01_02_01",
+        "ericrolph_vacuum_of_doom_deck_00_02_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_00_01",
+        "ericrolph_vacuum_of_doom_deck_02_00_01",
+        "ericrolph_vacuum_of_doom_deck_02_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_00_01",
+        "ericrolph_vacuum_of_doom_deck_02_01_01",
+        "ericrolph_vacuum_of_doom_deck_01_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_01_01",
+        "ericrolph_vacuum_of_doom_deck_02_01_01",
+        "ericrolph_vacuum_of_doom_deck_02_02_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_01_01",
+        "ericrolph_vacuum_of_doom_deck_02_02_01",
+        "ericrolph_vacuum_of_doom_deck_01_02_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_02_01",
+        "ericrolph_vacuum_of_doom_deck_01_02_01",
+        "ericrolph_vacuum_of_doom_deck_01_02_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_02_01",
+        "ericrolph_vacuum_of_doom_deck_01_02_00",
+        "ericrolph_vacuum_of_doom_deck_00_02_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_02_01",
+        "ericrolph_vacuum_of_doom_deck_02_02_01",
+        "ericrolph_vacuum_of_doom_deck_02_02_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_02_01",
+        "ericrolph_vacuum_of_doom_deck_02_02_00",
+        "ericrolph_vacuum_of_doom_deck_01_02_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_00",
+        "ericrolph_vacuum_of_doom_deck_01_00_00",
+        "ericrolph_vacuum_of_doom_deck_01_00_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_00",
+        "ericrolph_vacuum_of_doom_deck_01_00_01",
+        "ericrolph_vacuum_of_doom_deck_00_00_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_00_00",
+        "ericrolph_vacuum_of_doom_deck_02_00_00",
+        "ericrolph_vacuum_of_doom_deck_02_00_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_01_00_00",
+        "ericrolph_vacuum_of_doom_deck_02_00_01",
+        "ericrolph_vacuum_of_doom_deck_01_00_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_00_00",
+        "ericrolph_vacuum_of_doom_deck_02_01_00",
+        "ericrolph_vacuum_of_doom_deck_02_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_00_00",
+        "ericrolph_vacuum_of_doom_deck_02_01_01",
+        "ericrolph_vacuum_of_doom_deck_02_00_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_01_00",
+        "ericrolph_vacuum_of_doom_deck_02_02_00",
+        "ericrolph_vacuum_of_doom_deck_02_02_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_02_01_00",
+        "ericrolph_vacuum_of_doom_deck_02_02_01",
+        "ericrolph_vacuum_of_doom_deck_02_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_01",
+        "ericrolph_vacuum_of_doom_deck_00_01_01",
+        "ericrolph_vacuum_of_doom_deck_00_01_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_00_01",
+        "ericrolph_vacuum_of_doom_deck_00_01_00",
+        "ericrolph_vacuum_of_doom_deck_00_00_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_01",
+        "ericrolph_vacuum_of_doom_deck_00_02_01",
+        "ericrolph_vacuum_of_doom_deck_00_02_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_deck_00_01_01",
+        "ericrolph_vacuum_of_doom_deck_00_02_00",
+        "ericrolph_vacuum_of_doom_deck_00_01_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_01",
+        "ericrolph_vacuum_of_doom_drum_01_00_01",
+        "ericrolph_vacuum_of_doom_drum_01_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_01",
+        "ericrolph_vacuum_of_doom_drum_01_01_01",
+        "ericrolph_vacuum_of_doom_drum_00_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_01_01",
+        "ericrolph_vacuum_of_doom_drum_01_01_01",
+        "ericrolph_vacuum_of_doom_drum_01_01_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_01_01",
+        "ericrolph_vacuum_of_doom_drum_01_01_00",
+        "ericrolph_vacuum_of_doom_drum_00_01_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_00",
+        "ericrolph_vacuum_of_doom_drum_01_00_00",
+        "ericrolph_vacuum_of_doom_drum_01_00_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_00",
+        "ericrolph_vacuum_of_doom_drum_01_00_01",
+        "ericrolph_vacuum_of_doom_drum_00_00_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_01_00_00",
+        "ericrolph_vacuum_of_doom_drum_01_01_00",
+        "ericrolph_vacuum_of_doom_drum_01_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_01_00_00",
+        "ericrolph_vacuum_of_doom_drum_01_01_01",
+        "ericrolph_vacuum_of_doom_drum_01_00_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_01",
+        "ericrolph_vacuum_of_doom_drum_00_01_01",
+        "ericrolph_vacuum_of_doom_drum_00_01_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_drum_00_00_01",
+        "ericrolph_vacuum_of_doom_drum_00_01_00",
+        "ericrolph_vacuum_of_doom_drum_00_00_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_01",
+        "ericrolph_vacuum_of_doom_bell_01_00_01",
+        "ericrolph_vacuum_of_doom_bell_01_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_01",
+        "ericrolph_vacuum_of_doom_bell_01_01_01",
+        "ericrolph_vacuum_of_doom_bell_00_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_01_00_00",
+        "ericrolph_vacuum_of_doom_bell_01_01_00",
+        "ericrolph_vacuum_of_doom_bell_01_01_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_01_00_00",
+        "ericrolph_vacuum_of_doom_bell_01_01_01",
+        "ericrolph_vacuum_of_doom_bell_01_00_01"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_01",
+        "ericrolph_vacuum_of_doom_bell_00_01_01",
+        "ericrolph_vacuum_of_doom_bell_00_01_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_00_01",
+        "ericrolph_vacuum_of_doom_bell_00_01_00",
+        "ericrolph_vacuum_of_doom_bell_00_00_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_01_01",
+        "ericrolph_vacuum_of_doom_bell_01_01_01",
+        "ericrolph_vacuum_of_doom_bell_01_01_00"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_vacuum_of_doom_bell_00_01_01",
+        "ericrolph_vacuum_of_doom_bell_01_01_00",
+        "ericrolph_vacuum_of_doom_bell_00_01_00"
+      ]
+    }
+  ],
+  "visual": {
+    "bounds": {
+      "max": [
+        4.0,
+        16.89308,
+        7.6
+      ],
+      "min": [
+        -4.000001,
+        -11.491924,
+        -1.28547
+      ]
+    },
+    "materials": [
+      "ericrolph_vacuum_of_doom_charcoal",
+      "ericrolph_vacuum_of_doom_cream",
+      "ericrolph_vacuum_of_doom_hose_gray",
+      "ericrolph_vacuum_of_doom_steel",
+      "ericrolph_vacuum_of_doom_vac_orange"
+    ],
+    "path": "vehicles/ericrolph_vacuum_of_doom/ericrolph_vacuum_of_doom.dae",
+    "sha256": "e570e595b732fdc458bf29f9607a6401c8e3fc76bc7e7957e0ac6c1f5d26b7cd",
+    "size": 411973
+  }
+}

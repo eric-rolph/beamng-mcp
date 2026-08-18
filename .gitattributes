@@ -5,3 +5,15 @@
 *.jpg binary
 *.zip binary
 *.onnx binary
+
+# examples/giant_props/ is stored byte-for-byte. Do NOT normalise it.
+#
+# The tree is mixed on purpose and the mix is load-bearing: 13 files are
+# genuinely CRLF, several tools hash them, and a CRLF shebang makes a .sh
+# fail under bash (found and fixed once already in
+# sumo_gyro_platform/authoring/mix_call_audio.sh). This directory has no
+# history before this commit, so every integrity claim in it rests on sha256
+# comparison; a checkout that silently flipped line endings would change
+# every one of those hashes while changing no content, making real drift
+# indistinguishable from noise.
+examples/giant_props/** -text

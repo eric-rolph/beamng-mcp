@@ -1,0 +1,41 @@
+[B]The reviewers were right:[/B] the previous release animated the board and then replaced the car's velocity with a mostly vertical scripted value. The visible motion and the launch were disconnected from the collision structure.
+
+This update replaces that mechanism instead of tuning the old launch. It also rebuilds the bouncy first physical prototype: the old 40,000 kg eight-corner cage acted like a set of spring-loaded point hammers and transferred impact poorly.
+
+[B]What changed[/B]
+
+[LIST]
+[*]The 22 x 4.4 m plank is now a dynamic two-layer JBeam box truss with 100 contact nodes, collidable surfaces, and torsional cross-bracing.
+[*]The fulcrum is intentionally asymmetric: a 13.5 m car arm and 8.5 m weight arm provide roughly a 1.5:1 real lever-speed advantage.
+[*]Five collinear pin nodes form a reinforced shared hinge axis and tie the trussed deck into a fixed, cross-braced base.
+[*]The overhead tower now holds a physical 9,070 kg (10 US tons / 20,000 lb) counterweight distributed across a 75-node cage with a five-node, full-width striker. A breakable mechanical latch suspends it, and a fixed vertical rail keeps the fall aligned without setting its speed.
+[*]Fifteen zero-preload transport latches hold the softbody lever at its exact parked pose. They and the two weight-latch beams release together before the mechanism moves, eliminating the old spawn oscillation without applying stored launch energy.
+[*]Releasing the latch lets normal BeamNG gravity drop the weight 6.0 m. Five bounded hydraulic links compress through a visible 25 cm rubber mat and feed the strike directly into five 80 kg structural plank-rib nodes.
+[*]Five final-stroke hydraulic catchers arrest the moving plank. Five one-way overhead snubbers dissipate the block's upward rebound without resisting its free fall. Wide rubber-faced pads remain as overtravel fail-safes.
+[*]Contact through the plank, tires, and suspension supplies the car's impulse.
+[*]The visible plank and weight are node-bound flexbodies. They follow the actual JBeam bodies instead of separate TSStatic animations.
+[*]The combined physical shape uses the new cache-busted ericrolph_catapult_seesaw_physics_v3.dae path, preventing either older compiled shape cache from hiding the flexbodies after an update.
+[*]Reset waits until the parking zone is clear, then resets and physically re-latches the prop.
+[/LIST]
+
+[B]What the script does not do[/B]
+
+It does not set, add, or replace the subject vehicle's velocity, and it does not teleport the vehicle. Lua is limited to the countdown, physical latch release, UI/effects, cosmetic cable and winch motion, telemetry, and safe prop reset. The lever geometry—not a hidden impulse—supplies the speed advantage.
+
+Because the launch is now physical, different cars produce different results. Mass, wheelbase, suspension, tire grip, parking position, and brakes all matter. That variability is intentional.
+
+[B]Measured physical results[/B]
+
+The 9,070 kg weight should reach about 10.8 m/s after a 6.0 m fall and carries roughly 534 kJ before impact. Deterministic live tests of the packaged mod on Small Grid measured:
+
+[LIST]
+[*]1,530 kg Barstow I6: 10.18 m/s at 51.5 degrees, 8.00 m (26.3 ft) above its parked height, and 19.15 m (62.8 ft) to first ground contact
+[*]1,870 kg Bastion V6: 8.37 m/s at 54.0 degrees, 7.91 m (26.0 ft) above its parked height, and 15.24 m (50.0 ft) to first ground contact
+[*]10.71–10.79 m/s measured block-impact speed, below 0.96 m first rebound, and below 0.014 degrees steady parked-plank motion
+[/LIST]
+
+These are reference runs, not guaranteed results. Vehicle mass, wheelbase, suspension, tire grip, parking position, brakes, deformation, early separation, and tumbling all matter. The earlier 16–22 m/s and 25 m apex estimates require a much more elastic impact than this intentionally damped mechanism and are not advertised as release targets.
+
+The live regression test requires the release, physical impact, real plank rotation, and contact-driven fling events; rejects any scripted subject-launch event; and scans the BeamNG log for runtime errors and physics instability.
+
+Thanks to the reviewers who called out the disconnected physics. This is the mechanism the prop should have shipped with.
