@@ -1,0 +1,31 @@
+[B]If you spawned the boot anywhere but flat ground, parts of it were in the wrong place.[/B] The clearest symptom was on the KICK CONTROL console: the ten-segment power ladder and the launch-angle needle floated off the panel and hung in the air beside the cabinet. Thanks to the video that showed it — that is what got this found.
+
+The instruments were only the most visible part of it. The same fault moved everything the machine places at runtime.
+
+[B]What was wrong[/B]
+
+The boot, its gauges, the trigger zones that notice your car, and the launch dust are separate objects positioned relative to the machine every frame. That position was worked out from the orientation the game reports for the prop — which it only refreshes when the prop spawns, teleports or resets. Settle the machine onto a slope and that reported orientation stays flat while the structure tilts, so everything got placed as if the machine were still level. The further a part sits from the middle of the pad, the further out it landed.
+
+Flat ground hid it completely, which is why it shipped.
+
+[B]How far out it was[/B]
+
+Measured on a 53-degree settle:
+
+[LIST]
+[*]power ladder and angle needle — about 11.6 m off the panel
+[*]the boot itself — about 8.5 m out of place
+[*]the strike zone — 2.6 m off, against a 5.4 x 9.4 m box
+[*]the kick pad trigger — 1.6 m off, enough to shift it clear of the painted X
+[*]the launch dust — about 0.5 m off
+[/LIST]
+
+Gentle ground scaled the same way: a slope dropping half a metre over twelve put the console gauges about a metre out.
+
+[B]What changed[/B]
+
+The machine's orientation is now measured from its own structure every frame instead of being taken from the stale spawn value. Everything placed at runtime rides that, so the gauges stay bolted to the panel, the boot stays on its hinge, and the trigger zones stay over the pad at any angle the ground puts the machine at.
+
+[B]What to expect[/B]
+
+On flat ground nothing changes — this build behaves exactly like the last one. On a hillside the machine now works the way it always did on the level. Nothing else in the mod changed: no new parts, no retuned kick, same power and angle ranges, same 60-120 yard punt.

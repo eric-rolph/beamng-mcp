@@ -15,6 +15,7 @@ from tests.live_support import (
     cleanup_exact_live_artifacts,
     cleanup_owned_beamng_session,
     isolated_profile_lock,
+    purge_cached_prop_meshes,
     require_confined_profile_target,
     reserve_loopback_ports,
     temporary_lua_bridge_config,
@@ -535,3 +536,94 @@ def test_isolated_profile_lock_can_retry_after_lock_file_open_fails(
 
     with isolated_profile_lock(user):
         pass
+
+
+def _sentinel_profile(tmp_path: Path) -> Path:
+    user = tmp_path / "current"
+    user.mkdir()
+    (user / ".beamng-mcp-test-user").touch()
+    return user
+
+
+def test_mesh_purge_clears_both_cache_roots_including_nested_textures(
+    tmp_path: Path,
+) -> None:
+    user = _sentinel_profile(tmp_path)
+    vehicles = user / "temp" / "vehicles" / "ericrolph_spin_launch"
+    (vehicles / "textures").mkdir(parents=True)
+    (vehicles / "ericrolph_spin_launch.cdae").write_bytes(b"stale")
+    (vehicles / "textures" / "shell.dds").write_bytes(b"stale")
+    shapes = user / "temp" / "art" / "shapes" / "ericrolph_spin_launch"
+    shapes.mkdir(parents=True)
+    (shapes / "ericrolph_spin_launch.cdae").write_bytes(b"stale")
+    unrelated = user / "temp" / "vehicles" / "ericrolph_pachinko_tower"
+    unrelated.mkdir()
+    (unrelated / "keep.cdae").write_bytes(b"keep")
+
+    removed = purge_cached_prop_meshes(user, "ericrolph_spin_launch")
+
+    assert not vehicles.exists()
+    assert not shapes.exists()
+    assert (unrelated / "keep.cdae").read_bytes() == b"keep"
+    # three files plus the two textures/ and mod directories and the shapes dir
+    assert len(removed) == 6
+
+
+def test_mesh_purge_is_a_no_op_when_nothing_was_ever_compiled(tmp_path: Path) -> None:
+    user = _sentinel_profile(tmp_path)
+    assert purge_cached_prop_meshes(user, "ericrolph_spin_launch") == ()
+
+
+@pytest.mark.parametrize(
+    "mod_id",
+    ["..", "../mods", "..\\mods", "a/b", "C:/Windows", "", "with space", ".hidden"],
+)
+def test_mesh_purge_refuses_anything_that_is_not_a_bare_mod_id(
+    tmp_path: Path, mod_id: str
+) -> None:
+    user = _sentinel_profile(tmp_path)
+    keep = user / "mods"
+    keep.mkdir()
+    (keep / "important.zip").write_bytes(b"keep")
+    with pytest.raises(RuntimeError, match="non-literal mod id"):
+        purge_cached_prop_meshes(user, mod_id)
+    assert (keep / "important.zip").read_bytes() == b"keep"
+
+
+def test_mesh_purge_refuses_a_cache_holding_a_file_it_does_not_understand(
+    tmp_path: Path,
+) -> None:
+    """It is not a recursive delete. An unknown file stops the purge dead."""
+
+    user = _sentinel_profile(tmp_path)
+    cache = user / "temp" / "vehicles" / "ericrolph_spin_launch"
+    cache.mkdir(parents=True)
+    (cache / "notes.txt").write_text("not ours", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="refusing to purge"):
+        purge_cached_prop_meshes(user, "ericrolph_spin_launch")
+    assert (cache / "notes.txt").is_file()
+
+
+def test_mesh_purge_refuses_a_profile_without_its_sentinel(tmp_path: Path) -> None:
+    user = tmp_path / "current"
+    (user / "temp" / "vehicles" / "ericrolph_spin_launch").mkdir(parents=True)
+    with pytest.raises(RuntimeError, match="sentinel"):
+        purge_cached_prop_meshes(user, "ericrolph_spin_launch")
+
+
+def test_mesh_purge_refuses_a_cache_directory_that_is_a_link(tmp_path: Path) -> None:
+    user = _sentinel_profile(tmp_path)
+    outside = tmp_path / "elsewhere"
+    outside.mkdir()
+    (outside / "precious.cdae").write_bytes(b"keep")
+    cache_parent = user / "temp" / "vehicles"
+    cache_parent.mkdir(parents=True)
+    try:
+        (cache_parent / "ericrolph_spin_launch").symlink_to(
+            outside, target_is_directory=True
+        )
+    except OSError as exc:
+        pytest.skip(f"directory links are unavailable on this host: {exc}")
+    with pytest.raises(RuntimeError, match="link or reparse"):
+        purge_cached_prop_meshes(user, "ericrolph_spin_launch")
+    assert (outside / "precious.cdae").read_bytes() == b"keep"

@@ -12,6 +12,7 @@ from __future__ import annotations
 import ast
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -85,9 +86,13 @@ def reject_constants(value: str) -> None:
 def test_pack_has_all_mods() -> None:
     # 13 -> 17 (2026-08-10): pachinko_tower, belt_sander_trap,
     # sumo_gyro_platform and junk_chute_grinder. 17 -> 18 (2026-08-13):
-    # football_goal_post. 18 -> 19 (2026-08-14): hot_potato. A tripwire for a
-    # mod silently dropping out of discovery, so it is deliberately a literal.
-    assert len(MOD_KEYS) == 19, MOD_KEYS
+    # football_goal_post. 18 -> 19 (2026-08-14): hot_potato. 19 -> 20
+    # (2026-08-24): spin_launch. 20 -> 21 (2026-08-24): colossus_tire.
+    # 21 -> 22 (2026-08-25): high_five. 22 -> 23 (2026-08-25): giant_fan.
+    # A tripwire for a mod silently dropping out of discovery, so it is
+    # deliberately a literal - bump it by ONE for the mod you added, never to
+    # whatever discovery happens to return.
+    assert len(MOD_KEYS) == 23, MOD_KEYS
 
 
 @pytest.mark.parametrize("mod_key", MOD_KEYS)
@@ -187,8 +192,25 @@ def test_required_tunables_all_ship(mod_key: str) -> None:
         pytest.skip("mod declares no REQUIRED tunables")
 
     def _block(marker: str) -> str:
+        """The whole brace-balanced table, not up to the first close.
+
+        colossus_tire is the first mod whose tunable table holds NESTED
+        tables - a node-name list and a station triple - and stopping at the
+        first `}` cut the block off after six of its twenty-three keys, so
+        the gate reported fourteen tunables missing that were shipped three
+        lines further down.
+        """
+
         start = text.index(marker)
-        return text[start:text.index("}", start)]
+        depth = 0
+        for offset in range(start + len(marker) - 1, len(text)):
+            if text[offset] == "{":
+                depth += 1
+            elif text[offset] == "}":
+                depth -= 1
+                if depth == 0:
+                    return text[start:offset]
+        raise AssertionError(f"unterminated table after {marker!r}")
 
     required = set(re.findall(r'"(\w+)"', _block("local REQUIRED = {")))
     shipped = set(re.findall(r"(\w+) =", _block("local B = {")))
@@ -282,6 +304,29 @@ def test_jbeam_matches_handoff(mod_key: str) -> None:
     back_position = positions[refnodes[1]]
     assert back_position[1] > ref_position[1], "back refnode must sit at +Y"
 
+    # AND THE TRIAD MUST BE RIGHT-HANDED, the same way for every prop. BeamNG
+    # builds the spawn basis from this table, so a mirrored triad spawns the
+    # prop flipped about its fore-aft axis with everything the player
+    # approaches - ramps, doors, docks - on the wrong side. Twenty-two of the
+    # twenty-three props agreed; colossus_tire alone came out mirrored, and
+    # nothing downstream reported it because a runtime that maps authored
+    # baselines onto live ones uses the same roles on both sides.
+    left_position = positions[refnodes[2]]
+    up_position = positions[refnodes[3]]
+    to_back = [back_position[i] - ref_position[i] for i in range(3)]
+    to_left = [left_position[i] - ref_position[i] for i in range(3)]
+    to_up = [up_position[i] - ref_position[i] for i in range(3)]
+    cross = [
+        to_left[1] * to_back[2] - to_left[2] * to_back[1],
+        to_left[2] * to_back[0] - to_left[0] * to_back[2],
+        to_left[0] * to_back[1] - to_left[1] * to_back[0],
+    ]
+    handedness = sum(cross[i] * to_up[i] for i in range(3))
+    assert handedness > 0.0, (
+        f"{mod_key}: refNode triad is mirrored (cross(left-ref, back-ref) . (up-ref) "
+        f"= {handedness:.2f}); every other prop in the pack is right-handed"
+    )
+
     base_ids = handoff["base_nodes"]
     assert len(base_ids) >= 3
     min_z = min(z for (_x, _y, z) in positions.values())
@@ -297,6 +342,157 @@ def test_jbeam_matches_handoff(mod_key: str) -> None:
     flex_mesh, groups = part["flexbodies"][1]
     assert flex_mesh == handoff["asset"]["visual_mesh"]
     assert groups == [f"{spec.MOD_ID}_physics"]
+
+
+# The ref node IS the spawn datum. BeamNG places a vehicle by its BASE
+# ORIGIN - the LOWEST node in the cage - and then reports ``origin`` from
+# the REF node, so authoring the two at different heights lifts the entire
+# prop by the difference. spin_launch shipped with its ref at the ramp foot
+# (authored z 0) and its plinth deliberately "buried" at z -3.0; a prop
+# cannot bury anything, so the plinth landed on the terrain and the approach
+# ramp started 3 m in the air. Measured live 2026-08-24: origin.z == 3.0 for
+# a prop spawned at surface z = 0, and a player could not drive onto the
+# machine at all. Both refnode docstrings in proplib/blender_kit.py state
+# this rule; nothing enforced it until now.
+#
+# 0.05 m is not arbitrary slop: it is the same window ``auto_base_nodes``
+# uses to decide which nodes are ground ballast, so this asserts precisely
+# "the ref node would qualify as a base node".
+SPAWN_DATUM_TOLERANCE = 0.05
+
+# Tombstones, deliberately NOT a widened tolerance. A tolerance big enough
+# to admit a known 0.75 m failure cannot catch a 0.75 m regression, which is
+# the whole class of bug this gate exists for. strict=True keeps the defect
+# named in the code and turns the eventual fix into a FAILURE that forces
+# the tombstone out.
+SPAWN_DATUM_XFAIL = {
+    "sumo_gyro_platform": (
+        "datum_ref sits at z 0 (the arena floor) while the drain moat floor "
+        "is MOAT_FLOOR_Z = -0.75, so the prop spawns 0.75 m in the air. The "
+        "moat depth is itself derived - it clears the rim girder's lowest "
+        "swept point at -0.554 m by 0.196 - so the fix is the same "
+        "whole-machine re-datum spin_launch needed (+0.75 on every authored "
+        "z), which means its own Blender run, its own hashes, its own zip "
+        "lock and its own live gate. That belongs in its own change."
+    ),
+}
+
+
+def _spawn_datum_params():
+    return [
+        pytest.param(
+            key,
+            marks=pytest.mark.xfail(strict=True,
+                                    reason=SPAWN_DATUM_XFAIL[key]),
+        )
+        if key in SPAWN_DATUM_XFAIL
+        else key
+        for key in MOD_KEYS
+    ]
+
+
+@pytest.mark.parametrize("mod_key", _spawn_datum_params())
+def test_reference_node_is_the_lowest_node(mod_key: str) -> None:
+    """The ref node is the spawn datum, so it must be the lowest node.
+
+    Read out of the SHIPPED jbeam rather than the handoff, because the jbeam
+    is what BeamNG places the prop from; the handoff's own refnodes table is
+    cross-checked against it here so the authoring evidence and the artifact
+    cannot disagree about which node is the datum.
+    """
+
+    spec = load_spec(mod_key)
+    handoff = load_handoff(mod_key)
+    jbeam_path = (
+        PACK_ROOT / mod_key / "mod" / "vehicles" / spec.MOD_ID
+        / f"{spec.MOD_ID}.jbeam"
+    )
+    jbeam = json.loads(jbeam_path.read_text(encoding="utf-8"),
+                       parse_constant=reject_constants)
+    part = jbeam[spec.MOD_ID]
+
+    positions = {row[0]: (row[1], row[2], row[3]) for row in part["nodes"][1:]}
+    ref = part["refNodes"][1][0]
+    assert ref == handoff["refnodes"]["ref"], (
+        f"{mod_key}: shipped jbeam refNodes[0] is {ref!r} but the handoff "
+        f"names {handoff['refnodes']['ref']!r}"
+    )
+
+    ref_z = positions[ref][2]
+    min_z = min(z for (_x, _y, z) in positions.values())
+    lift = ref_z - min_z
+    lowest = sorted(
+        identifier for identifier, (_x, _y, z) in positions.items()
+        if z <= min_z + 1e-6
+    )
+    assert lift <= SPAWN_DATUM_TOLERANCE, (
+        f"{mod_key}: ref node {ref!r} is authored {lift:.3f} m above the "
+        f"lowest node (ref z {ref_z:.3f}, min z {min_z:.3f}). BeamNG places "
+        f"by base origin, so this prop spawns {lift:.3f} m in the air and "
+        f"nothing on it lands where it was authored. Lowest nodes: "
+        f"{lowest[:4]}"
+    )
+
+
+@pytest.mark.parametrize("mod_key", MOD_KEYS)
+def test_panel_button_chain_is_wired_end_to_end(mod_key: str) -> None:
+    """A console button is FOUR agreements, and nothing checked any of them.
+
+    A press travels spec.PANEL_BUTTONS -> jbeam `triggers2` (the click box, on
+    three named cage nodes) -> `triggerEventLinks2` (box id to input action) ->
+    `actionsEnabled` -> the interaction json's `onDown`, which finally calls
+    `pressPanelButtonByVehicle` on the doubled-underscore extension name. Break
+    any single link and the cap is dead in the game.
+
+    No gate could see that. The live gates call `pressPanelButtonByVehicle`
+    directly - a mouse ray is not scriptable - so they prove what the button
+    calls and never that anything calls the button. Six props ship a console.
+    """
+
+    spec = load_spec(mod_key)
+    buttons = getattr(spec, "PANEL_BUTTONS", ())
+    vehicle_root = PACK_ROOT / mod_key / "mod" / "vehicles" / spec.MOD_ID
+    interaction_path = vehicle_root / f"{spec.MOD_ID}_default.interaction.json"
+    if not buttons:
+        assert not interaction_path.is_file(), "interaction map with no PANEL_BUTTONS"
+        pytest.skip("no console panel")
+    assert interaction_path.is_file(), "PANEL_BUTTONS with no interaction map"
+
+    part = json.loads(
+        (vehicle_root / f"{spec.MOD_ID}.jbeam").read_text(encoding="utf-8"),
+        parse_constant=reject_constants,
+    )[spec.MOD_ID]
+    node_ids = {row[0] for row in part["nodes"][1:]}
+    boxes = {row[0]: row for row in part["triggers2"][1:]}
+    links = {row[0]: row[2] for row in part["triggerEventLinks2"][1:]}
+    enabled = {row[0] for row in part["actionsEnabled"][1:]}
+    actions = json.loads(interaction_path.read_text(encoding="utf-8"))["actions"]
+    # BeamNG doubles literal underscores before replacing the path separator.
+    extension = f"{spec.MOD_ID}/runtime".replace("_", "__").replace("/", "_")
+
+    expected_actions = set()
+    for button in buttons:
+        key = button["id"]
+        box_id = f"panel_{key}"
+        action_id = f"{spec.MOD_ID}_{key}"
+        expected_actions.add(action_id)
+        assert box_id in boxes, (mod_key, box_id, sorted(boxes))
+        box = boxes[box_id]
+        assert box[4] == "box", (mod_key, box_id, box[4])
+        # idRef / idX / idY: a click box hangs off three real cage nodes.
+        for column in (1, 2, 3):
+            assert box[column] in node_ids, (mod_key, box_id, box[column])
+        assert links.get(box_id) == action_id, (mod_key, box_id, links.get(box_id))
+        assert box_id in enabled, (mod_key, box_id)
+        action = actions.get(action_id)
+        assert action is not None, (mod_key, action_id, sorted(actions))
+        on_down = str(action["onDown"])
+        assert f"extensions.{extension}.pressPanelButtonByVehicle" in on_down, (
+            mod_key, action_id, on_down)
+        assert f"'{key}'" in on_down, (mod_key, action_id, on_down)
+        assert action["title"] == button["title"], (mod_key, action_id)
+    assert set(actions) == expected_actions, (
+        mod_key, sorted(set(actions) ^ expected_actions))
 
 
 @pytest.mark.parametrize("mod_key", MOD_KEYS)
@@ -337,6 +533,86 @@ def test_materials_cover_all_referenced(mod_key: str) -> None:
             if cooked.is_file():
                 # Engine placeholder size = an unfinished cook was shipped.
                 assert cooked.stat().st_size != 1398281, (name, map_key, "poisoned DDS")
+
+
+@pytest.mark.parametrize("mod_key", MOD_KEYS)
+def test_translucent_palette_entries_emit_an_opacity_factor(mod_key: str) -> None:
+    """THE OPACITY LAW, on every palette in the pack.
+
+    ``baseColorFactor[3]`` is not read as opacity by BeamNG's v1.5 PBR
+    material. The emitter declared ``translucent`` and left the number
+    there, so ELEVEN materials across SIX props shipped fully opaque -
+    including both panes of glass_atrium, a mod whose entire concept is
+    glass. Proven live 2026-08-25 on spin_launch's velocity dial: as
+    shipped it was a blank pale-blue disc; adding ``opacityFactor 0.12`` to
+    stage 0 - and nothing else - made it a legible instrument.
+
+    This gate reads the PALETTES and runs the emitter's own helper, not the
+    shipped materials.json, and that is deliberate: an emitter fix reaches a
+    prop only when that prop is next rebuilt, so a shipped-file gate would
+    be answering "has this prop been rebuilt yet" instead of "is the law
+    kept". The law is the emitter's, so it is tested where it lives - the
+    same shape as test_builder_refuses_a_four_component_emissive_factor.
+    """
+
+    prop_builder, _ = load_proplib()
+    spec = load_spec(mod_key)
+    checked = 0
+    for name, entry in spec.PALETTE.items():
+        color = entry["color"]
+        if float(color[3]) >= 1.0:
+            continue
+        checked += 1
+        # The two branches build_materials picks between: a textured entry
+        # tints its maps, an untextured one uses the colour outright. Both
+        # carry the alpha, and both go through the same helper.
+        if "texture" in entry:
+            factor = list(entry.get("tint", [1.0, 1.0, 1.0, color[3]]))
+        else:
+            factor = list(color)
+        stage0 = {"baseColorFactor": factor}
+        prop_builder.move_alpha_to_opacity(stage0)
+        # The raw passthrough is merged after the derived fields, so an entry
+        # that states its own opacity still wins - and still satisfies this.
+        stage0.update(entry.get("stage") or {})
+        opacity = stage0.get("opacityFactor")
+        assert opacity is not None, (
+            f"{mod_key}: {name} is translucent (alpha {color[3]}) and emits no"
+            " opacityFactor; baseColorFactor alpha is INERT for opacity and the"
+            " material will render fully opaque in game"
+        )
+        assert 0.0 < float(opacity) <= 1.0, (mod_key, name, opacity)
+        assert stage0["baseColorFactor"][3] == 1.0, (
+            f"{mod_key}: {name} still carries its transparency in"
+            f" baseColorFactor[3] ({stage0['baseColorFactor'][3]}), where"
+            " nothing reads it"
+        )
+    if checked:
+        print(f"{mod_key}: {checked} translucent material(s) checked")
+
+
+def test_builder_moves_the_alpha_where_the_engine_reads_it() -> None:
+    """The gate above is retroactive; this one pins the helper's behaviour."""
+
+    prop_builder, _ = load_proplib()
+    stage0 = {"baseColorFactor": [0.62, 0.70, 0.74, 0.12]}
+    prop_builder.move_alpha_to_opacity(stage0)
+    assert stage0 == {"baseColorFactor": [0.62, 0.70, 0.74, 1.0],
+                      "opacityFactor": 0.12}
+    # IDEMPOTENT. Once the alpha is 1.0 there is nothing left to move, so a
+    # second pass must not overwrite an opacity that is already correct.
+    prop_builder.move_alpha_to_opacity(stage0)
+    assert stage0["opacityFactor"] == 0.12
+    # An opaque material is left completely alone - no stray opacityFactor 1.0
+    # on the 200-odd materials in this pack that are not glass.
+    opaque = {"baseColorFactor": [0.5, 0.5, 0.5, 1.0]}
+    prop_builder.move_alpha_to_opacity(opaque)
+    assert opaque == {"baseColorFactor": [0.5, 0.5, 0.5, 1.0]}
+    # A stage that has no colour factor yet (never happens in build_materials,
+    # but the helper must not invent one) is untouched.
+    empty: dict = {}
+    prop_builder.move_alpha_to_opacity(empty)
+    assert empty == {}
 
 
 @pytest.mark.parametrize("mod_key", MOD_KEYS)
@@ -945,3 +1221,138 @@ def test_generator_is_import_safe(mod_key: str) -> None:
     ]
     assert guarded, f'{generator.name} has no `if __name__ == "__main__":` calling main()'
 
+# ---------------------------------------------------------------------------
+# Gates added 2026-08-25 after the colossus_tire critic round. Every one of
+# these exists because something shipped past the other 26 checks.
+# ---------------------------------------------------------------------------
+def _triangle_normal(points):
+    (ax, ay, az), (bx, by, bz), (cx, cy, cz) = points
+    ux, uy, uz = bx - ax, by - ay, bz - az
+    vx, vy, vz = cx - ax, cy - ay, cz - az
+    return (uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx)
+
+
+@pytest.mark.parametrize("mod_key", MOD_KEYS)
+def test_fixed_surfaces_are_not_one_way_floors(mod_key: str) -> None:
+    """A fixed horizontal surface must have at least as much UP area as DOWN.
+
+    jbeam collision triangles are one-sided. A deck whose corner order happens
+    to wind the other way is an invisible floor that only collides from
+    underneath, and a car drives straight through it - which is exactly what
+    colossus_tire's 13 m loading ramp did, past every other gate here,
+    because nothing downstream of the generator looks at winding.
+
+    Down-facing fixed geometry is perfectly legitimate: undersides, soffits,
+    and the lower half of every ``add_quad_both`` pair. What is never
+    legitimate is down-facing horizontal area with no up-facing area to match
+    it. Measured over the whole pack the ratio runs from 1.00 (pachinko_tower,
+    sumo_gyro_platform - both entirely double-sided) to 12.1, so 0.9 leaves
+    real headroom while a one-way floor scores 0.
+    """
+
+    handoff = load_handoff(mod_key)
+    positions = {node["id"]: node["source_world_position"] for node in handoff["nodes"]}
+    fixed = {node["id"]: node["fixed"] for node in handoff["nodes"]}
+
+    up_area = down_area = 0.0
+    for triangle in handoff["triangles"]:
+        identifiers = triangle["nodes"]
+        if not all(fixed.get(i) for i in identifiers):
+            continue
+        normal = _triangle_normal([positions[i] for i in identifiers])
+        length = math.sqrt(sum(component * component for component in normal))
+        if length < 1e-9:
+            continue
+        vertical = normal[2] / length
+        if vertical > 0.7:
+            up_area += 0.5 * length
+        elif vertical < -0.7:
+            down_area += 0.5 * length
+
+    if down_area <= 0.5:
+        return
+    assert up_area >= 0.9 * down_area, (
+        f"{mod_key}: {down_area:.1f} m2 of DOWN-facing fixed horizontal collision "
+        f"against only {up_area:.1f} m2 facing up - a car falls through it"
+    )
+
+
+@pytest.mark.parametrize("mod_key", MOD_KEYS)
+def test_selector_thumbnails_are_the_authored_render(mod_key: str) -> None:
+    """default.jpg and standard.jpg must BE the authored thumbnail.
+
+    prop_builder copies authoring/<mod_id>_thumbnail.jpg to both, so they are
+    derived files - but nothing checked that the copy in mod/ is still a copy
+    of the current render. A Blender re-run that rewrites the thumbnail after
+    the last build.py leaves the shipped pair stale and the ZIP lock pinned to
+    an image no longer in the tree, silently.
+    """
+
+    spec = load_spec(mod_key)
+    authored = PACK_ROOT / mod_key / "authoring" / f"{spec.MOD_ID}_thumbnail.jpg"
+    if not authored.is_file():
+        pytest.skip("no authored thumbnail")
+    vehicle = PACK_ROOT / mod_key / "mod" / "vehicles" / spec.MOD_ID
+    source = hashlib.sha256(authored.read_bytes()).hexdigest()
+    for name in ("default.jpg", "standard.jpg"):
+        shipped = vehicle / name
+        if not shipped.is_file():
+            continue
+        assert hashlib.sha256(shipped.read_bytes()).hexdigest() == source, (
+            f"{mod_key}: {name} is not the current authored thumbnail; "
+            "re-run build.py <mod> prop then dist"
+        )
+
+
+@pytest.mark.parametrize("mod_key", MOD_KEYS)
+def test_behaviour_node_names_resolve_in_the_jbeam(mod_key: str) -> None:
+    """Every node id the runtime is handed must exist in the shipped cage.
+
+    A mod whose runtime measures live geometry hangs its whole measurement
+    layer off string literals. Rename a cage column and the lookup returns nil
+    forever: the update path returns early, no message ever fires, and NOTHING
+    fails - the jbeam still matches the handoff, connectivity still passes,
+    the ZIP still matches its lock. Same for a breakGroup the runtime asks the
+    vehicle VM to break.
+    """
+
+    spec = load_spec(mod_key)
+    handoff = load_handoff(mod_key)
+    node_ids = {node["id"] for node in handoff["nodes"]}
+
+    def walk(value):
+        if isinstance(value, str):
+            if value.startswith(f"{spec.MOD_ID}_"):
+                yield value
+        elif isinstance(value, dict):
+            for item in value.values():
+                yield from walk(item)
+        elif isinstance(value, (list, tuple)):
+            for item in value:
+                yield from walk(item)
+
+    missing = sorted({name for name in walk(handoff.get("behavior")) if name not in node_ids})
+    assert not missing, f"{mod_key}: behaviour references node ids the cage lacks: {missing}"
+
+    groups = {
+        beam.get("extra", {}).get("breakGroup")
+        for beam in handoff["beams"]
+        if beam.get("extra", {}).get("breakGroup")
+    }
+    runtime = (
+        PACK_ROOT / mod_key / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID
+        / "runtime.lua"
+    )
+    if runtime.is_file():
+        text = runtime.read_text(encoding="utf-8")
+        # The runtime usually builds the group name by concatenating a
+        # tunable, so the literal is in the B table rather than at the call
+        # site. Read it from there; skip any capture that is itself Lua
+        # concatenation.
+        for key, name in re.findall(r'(\w*break_group\w*) = "([^"]*)"', text):
+            if ".." in name or not name:
+                continue
+            assert name in groups, (
+                f"{mod_key}: {key} names breakGroup {name!r}, which no beam "
+                f"carries (cage has {sorted(groups)})"
+            )

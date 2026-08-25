@@ -1,7 +1,7 @@
 # Giant Props pack
 
-Ten oversized cartoon contraptions for BeamNG.drive, built on the Cannon Car
-Wash evidence chain: a deterministic Blender generator owns every coordinate,
+Twenty-three oversized cartoon contraptions for BeamNG.drive, built on the Cannon
+Car Wash evidence chain: a deterministic Blender generator owns every coordinate,
 an exact-coordinate handoff JSON is the single physics source of truth, and
 every runtime file is generated — never hand-edited.
 
@@ -17,10 +17,15 @@ every runtime file is generated — never hand-edited.
 | `whale_geyser` | Whale Blowhole Geyser | The tail is the ramp. Park on the blowhole; after the inhale, ride a water column ~24 m up, hover, drop. |
 | `boot_of_doom` | The Boot of Doom | The sneaker notices you, draws back, and punts you field-goal style over decorative goal posts. |
 | `pendulum_gauntlet` | Wrecking Ball Pendulum Gauntlet | Four real physics pendulums (heavy free-node balls on cables, authored displaced ±40°) over a squishy inflated-mat bridge. |
+| `spin_launch` | Spin Launch Kinetic Accelerator | Drive into a 43 m vacuum chamber standing on edge. The airlock seals, the chamber pumps down, the load deck sinks away, and a composite tether whips you round until the tangent points where the console says. POWER 28-182 m/s and ELEVATION 34-72 deg, on a launch tube that pivots around the rim to stay tangent to the release point. |
+| `high_five` | Charlie's High Five | An 8.6 m foam-latex hand on a 12.6 m slewing arm. It LEADS you: it reads your closing speed and starts the swing so the palm arrives when you do, at any speed. POWER 1-10 and WRIST TILT 0-42 deg; the launch always leaves along the palm normal. Hold the mast-side line and it goes past your door. |
+| `colossus_tire` | COLOSSUS 10350/80R457 | A 28.17 m earthmover radial standing on its tread, and the only prop in the pack that moves entirely on its own physics. Board through the bolted access port in its right sidewall, the tie-downs are cut, and from then on it rolls because YOU push its inner liner and its tread pushes the ground. The runtime never touches it — it fits the axle to three live crown nodes and reports what the physics did, and it is one of two mods in the pack (with `catapult_seesaw`) that set `ALLOW_SUBJECT_MUTATION = False` so it structurally cannot. |
+| `giant_fan` | The Giant Fan | A GALEFORCE GF-3600 table fan at 108x with the guard CUT OFF. Each blade is a city bus long and passes 0.35 m over a drivable deck. The rotor is a real jbeam `rotators` body - the stock large_spinner mechanism - so a blade wrecks a car with moving collision geometry at the solver's 2000 Hz, and bogs when it does. The dial keeps the reference detent order 0-3-2-1, so THE FIRST CLICK FROM OFF IS FULL POWER; the chrome plunger on the housing crown starts the 90 deg sweep; BLADE HEIGHT picks which vehicles get hit. |
 
 Design rule shared by every contraption: **exaggerate the anticipation**.
 The toaster ticks, the swatter hovers, the egg wobbles, the whale inhales,
-the boot draws back — the pause before the chaos is the joke.
+the boot draws back, the airlock seals in your face — the pause
+before the chaos is the joke.
 
 ## Layout
 
@@ -78,19 +83,74 @@ density stays true in meters — the Cannon Car Wash "tiny blocks" lesson.
 Ships as PNG (BeamNG cooks on first load); pre-cooked DDS remains a
 Repository-upload step, per the car wash release policy.
 
+The 2026-08-24 tire pass added seven more, because the kit's existing
+`rubber_tread` is a *sneaker outsole* and none of the five surfaces a real
+tire presents look like each other: `tire_tread` (mould grain, vent spew
+whiskers, stone nicks, a polish mask that lightens and smooths together),
+`tire_sidewall` (circumferential mould ripple, parting line, ozone checking,
+and antiozonant bloom deposited in the RECESSES rather than sprayed on),
+`tire_sidewall_print` (raised moulded print — it drives height, not colour,
+because that is what makes real sidewall type legible), `tire_liner`
+(halobutyl with the curing bladder's vent lattice embossed into it),
+`tire_laminate` (the carcass in section for the port's cut edge: liner, tie
+gum, casing plies, cushion, four steel belts, nylon cap ply, undertread,
+tread cap, with steel cord cross-sections at their own per-band pitch),
+`tire_bead` (woven chafer over apex stock, rim-polished) and
+`diamond_plate`.
+
 ## Validation
 
 ```powershell
-# Static gates for all ten mods (handoff hashes, JBeam/cage consistency,
+# Static gates for every mod (handoff hashes, JBeam/cage consistency,
 # materials coverage, runtime boilerplate, ZIP locks).
 .\.venv\Scripts\python.exe -m pytest -q .\tests\test_giant_props_pack.py
 
-# Live smoke gate (opt-in; sentinel-isolated profile): boots BeamNG with the
-# packaged Giant Toaster, proves register -> zone -> tick -> POP -> launch.
+# Headless state-machine gates: the REAL generated runtime.lua run under
+# lupa against stubbed engine globals. Cheap, and they see mechanics the
+# static gates cannot - hot_potato's multi-car passing, spin_launch's
+# release window and its aiming identity.
+#
+# THESE SKIP SILENTLY WITHOUT lupa, which is why they are run from the repo
+# venv above and not from a bare `python`. A review that reported "all gates
+# pass" from an interpreter without lupa was reporting on a suite in which
+# every one of these had quietly been skipped.
+.\.venv\Scripts\python.exe -m pytest -q .\tests\test_hot_potato_logic.py `
+    .\tests\test_spin_launch_sequence.py .\tests\test_colossus_tire_sequence.py
+
+# Per-mod structural gates the shared pack suite cannot express.
+# colossus_tire's carries a unilateral-contact static solver: it settles the
+# real cage under gravity TO A RESIDUAL - not to a step count, which stopped
+# with the ground carrying a third of the weight and made every number taken
+# off the settle a measurement of a falling tire - and then fails if the
+# contact patch comes out too narrow to stand on, or if the boarding
+# centreline has a hole or a step in it once everything has sagged.
+#
+# It also parses the SHIPPED Collada, which for a long time nothing did: zero
+# degenerate faces, zero duplicated faces, zero edges traversed the same way
+# by both their faces, zero triangles with world area and no UV area, every
+# material at its authored grain size, and every moulded glyph a closed solid
+# of positive volume.
+.\.venv\Scripts\python.exe -m pytest -q .\tests\test_colossus_tire_geometry.py
+
+# Live gates (opt-in; sentinel-isolated profile). The toaster one boots BeamNG
+# with the packaged Giant Toaster and proves the shared runtime core every mod
+# generates: register -> zone -> tick -> POP -> launch.
+#
+# The Colossus one proves the four things static gates structurally cannot
+# reach for a free-rolling body: that 1,072 free nodes carrying 10.5 t stand
+# upright and stay round after real physics has had them; that the dock and
+# the inner liner are solid FROM ABOVE (a one-sided collision triangle wound
+# the wrong way is invisible to everything else); that the doorway is clear;
+# and that pushing the SUBJECT rolls the tire. Its first run found a bug
+# nothing headless could - the runaway detector measured 3D drift, and a 28 m
+# carcass settles 0.36 m onto its own contact patch, so it fired "the
+# tie-downs have parted" before anyone boarded and suppressed the whole
+# boarding beat for the rest of the session.
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_giant_props_live.py
+.\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_colossus_tire_live.py
 ```
 
-The live gate exercises the shared runtime core that all ten mods generate
+The live gate exercises the shared runtime core every mod generates
 from `lua_kit.py`. Per-mod live play-testing (soft-body tuning for the
 castle/bridge, pendulum amplitude, ride controller feel) is still expected
 before any public upload; see AGENTS.md for the sentinel-profile rules.
@@ -111,3 +171,22 @@ before any public upload; see AGENTS.md for the sentinel-profile rules.
   `applyClusterVelocityScaleAdd(refNode, 0, ...)`; force fields (vacuum,
   geyser, tumble) integrate small per-frame velocity adds with
   position-delta speed caps.
+- `spin_launch` is the one prop that has to hold a payload on a VERTICAL
+  circle, which no force field can do - gravity wins at the top. Its tether
+  field REPLACES the ref-node cluster velocity every frame with the tangent
+  plus a correction toward the tether point, so the constraint lives in
+  velocity space and the car cannot fall off. The soft body still takes the
+  full escalating G-load, because only the ref-node cluster is driven and
+  every other node has to follow it through its own beams.
+- `colossus_tire` goes the other way and drives NOTHING. It is 214,104
+  visual triangles over 1,072 free nodes
+  in a tire-shaped cage — bead bundles, casing plies, a steel belt package
+  with long chords to stations ±2 and ±3, sidewall rubber, a tread slab that
+  flattens into a contact patch, and a soft damped truss across the cavity
+  standing in for the air a real tire is pressurised with. The car rolls it
+  by pushing on the inner liner; the ground rolls it back. Its runtime fits a
+  circle to three live crown nodes 120° apart to recover the axle, the
+  rotation and the ground speed, which is exact and keeps working 300 m from
+  the dock where a trigger box cannot follow. Damping is picked per material —
+  the rubber families run 15-20% of critical because rubber's loss tangent
+  really is that high, the steel families 4-6%.

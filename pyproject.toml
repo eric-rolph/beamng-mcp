@@ -41,11 +41,21 @@ vision = [
   "transformers>=4.53,<5",
 ]
 dev = [
+  # The giant_props headless gates run each mod's REAL generated runtime.lua
+  # under lupa, and the Spin Launch audio gate hashes DECODED PCM through
+  # soundfile. Both were undeclared, and both are guarded by
+  # `pytest.importorskip` - so on a clean `pip install -e .[dev]` they did not
+  # fail, they SKIPPED: 135 of Spin Launch's 162 tests evaporated silently,
+  # and eleven test modules across the pack lost their lupa rig. A dependency
+  # that only the author happens to have installed is a gate that only runs on
+  # the author's machine.
+  "lupa>=2.8,<3",
   "mypy>=1.15,<2",
   "pytest>=8.3,<9",
   "pytest-asyncio>=0.25,<1",
   "pytest-cov>=6,<7",
   "ruff>=0.11,<1",
+  "soundfile>=0.14,<1",
 ]
 
 [project.urls]

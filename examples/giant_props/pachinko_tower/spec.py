@@ -8,7 +8,7 @@ gate (a hinged flap across the crown chute) swings open and the car is
 EJECTED off the still-level deck: a horizontal velocity field walks it
 inboard and a bounded KICKER impulse throws it airborne over the convex
 hinge lip onto the crown chute's 40 deg ice, and from there into
-a staggered field of 25 kite-section steel pegs on a FRICTIONLESS
+a staggered field of 28 kite-section steel pegs on a FRICTIONLESS
 groundmodel (mu = 0 exactly, read back out of the live engine). (The deck's 68 deg tip is
 now an EMPTY-deck flourish that plays only after the car is gone - tipping an
 occupied deck field-failed three times and is forbidden by THE CONFORMAL BAKE
@@ -2044,7 +2044,7 @@ PALETTE = {
                     [0.66, 0.395, "VVP-50 VERTICAL", 0.92],
                     [0.28, 0.250, "SERIAL", 0.80],
                     [0.66, 0.250, "No. 0060", 0.92],
-                    [0.5, 0.095, "25 PIN  5 POCKET   PAT. PEND.", 0.62],
+                    [0.5, 0.095, "28 PIN  5 POCKET   PAT. PEND.", 0.62],
                 ],
                 "rules": [[0.520, 0.44, 0.016]],
             },

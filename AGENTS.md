@@ -432,6 +432,275 @@ its pre-pose-preservation repair. Keep backups in a profile-root sibling directo
 `beamng-mcp-backups/`), and note that `install` now fails closed when another archive in the mods
 tree ships the same vehicle or GE-extension namespace.
 
+Detect that shadowing by what an archive CONTAINS, never by its filename. The sentinel profile held
+a `pachinko_tower_ericrolph.zip` shipping the `ericrolph_pachinko_tower` namespace — the mod id
+reversed — so every substring check on the mod id missed it while BeamNG mounted it happily. Scan
+`mods/**/*.zip` for members under `vehicles/<mod_id>/` or `lua/ge/extensions/<mod_id>/` instead
+(`tests/test_giant_props_slope_live.py::_namespace_conflicts`), and fail closed.
+
+### Sloped-terrain gating
+
+A sloped SPOT does not give you a tilted PROP, so measure the attitude, never assume it. Spawning
+Boot of Doom at the same steep utah point four ways measured base-plane tilts of 0.93 / 2.35 /
+53.19 / 0.00003 degrees — the engine simply does not conform a YAWED spawn to a steep slope, and
+that level "slope+yaw" spawn is what produced a physically impossible number in an early revision
+of the comment table in `lua_kit.py`. `tests/test_giant_props_slope_live.py` therefore asserts the
+tilt SPREAD across the sampled attitudes rather than requiring each sloped spawn to be tilted.
+
+Sample only quiescent states. Comparing part-to-node distances across attitudes is meaningless if
+the behaviour is mid-animation, and a matching `behavior_phase` does not prove a matching pose —
+behaviours animate within a phase on elapsed time. Requiring two consecutive probes to agree to
+2 mm dropped the gate's own worst-case drift from 1.7 mm to 24 um, i.e. most of what looked like
+frame error was sampling noise. Props whose parts track free-swinging nodes (pendulum_gauntlet)
+are not rigid by construction and cannot be gated this way at all.
+
+### A Lua `local` TABLE binds at its definition point, exactly like a `local function`
+
+`tests/test_giant_props_pack.py::test_local_helpers_defined_before_use` scans for a
+`local function` called above its own definition, because that name resolves as a nil GLOBAL and
+blows up the first time the path runs. A `local` TABLE has identical semantics and the gate does
+not look for it. High Five declared `local TRACKING_PHASES = {...}` beside `behavior.onEnter`,
+below the `poseConsole` that reads it: the chunk compiled clean, a lupa syntax gate passed, and it
+produced **1200 silenced `behavior_update_failed` errors in a 20 s run** — every one swallowed by
+`lua_kit`'s `pcall`, with the only symptom being that the arm stopped advancing past one phase.
+Declare shared tables at the top of the behaviour chunk with the other constants, and treat a
+headless state-machine gate (`test_high_five_sequence.py`, `test_spin_launch_sequence.py`) as the
+thing that actually catches this class — it asserts on the error log, which is the only place a
+`pcall`-swallowed fault surfaces.
+
+### Opting a palette into `srgb` must convert the family's DEFAULTS too
+
+`texture_kit.build_set(srgb=True)` re-encodes the colour map, and the palette entry's own colours
+must be re-authored to the linear values the engine was already seeing or the whole look shifts by
+up to 9x. That much is in `_srgb_encode`'s docstring. What is not: an entry only overrides SOME of
+its family's colour parameters, and every one it leaves alone — `slap_pad`'s 0.16 asphalt,
+`panel_legend`'s base and ink, `cast_iron`'s grey — is still a raw linear number that the encode
+then makes roughly three times LIGHTER. The road patch came back from the first sRGB build as pale
+concrete. State every colour-shaped default explicitly in the palette, converted; introspecting
+`inspect.signature(FAMILIES[family])` finds them all.
+
+### A clearance claim must sweep the SWEPT GEOMETRY, not a representative edge
+
+High Five's `WRIST_Z` carried the comment "palm bottom clears the road", and it did — the number
+was derived from `PALM_WIDTH/2` below the hand axis, and the gate that guarded it asserted on the
+same quantity. Both were true and both were beside the point: the DIGITS splay below the palm's
+ulnar edge, and the little finger swept **0.42 m under the tarmac** at the flat tilt setting and
+0.09 m under at the shipped default, for the whole stroke and while parked. A gate that re-states
+the constant's own derivation cannot fail. Sample the actual parts at their actual poses across
+the actual control range — and assert the OTHER side of it too, because clearance bought by
+lifting the machine is clearance spent on sailing over the thing it is supposed to hit.
+
+### Smooth shading is an ANAESTHETIC: it hides folds, and the cure is not an angle test
+
+High Five's hand was built with a bare `shade_smooth()`, which interpolates the normal across
+every edge regardless of angle. Under it, **four separate constructs were folding the surface back
+on itself** and not one was visible in a render:
+
+- **Every digit, at both interphalangeal joints.** `DigitSurface` emitted the last spine sample of
+  one phalanx and the first of the next at the SAME arc length, so the frame lerp's `span` was zero
+  and it returned the upstream direction unchanged — the section frame rotated by the whole flexion
+  angle between two adjacent stations. The volar strip stepped **65-123 mm BACKWARD** against a
+  station pitch of 21-33 mm. Ten joints, five parts, facets 179.9° apart.
+- **`ball_limit` returning `-inf`** where no metacarpal head covered the point, switching the palm's
+  web bulge off for a single station and back on: a one-row crater 0.26 m deep.
+- **The clamp that used it**, which made the SURFACE track a level set of `ball_limit`. A level set
+  does not follow the grid, so walking a column weaves in and out of the binding region — a ragged
+  staircase, facets 177° apart. Softening it made it worse; reducing the amplitude under it did
+  nothing (226 quads → 170 across a 3× sweep). **The constraint was never sample-time**: the
+  amplitude simply asked for more than the envelope had room for, and halving it satisfied the
+  envelope by construction with no clamp at all. A limit is for ASSERTING against, not for dragging
+  a surface along.
+- **Palmar creases narrowed to 0.115 m wide against 0.221 m deep** to make them "cast a shadow
+  line". They inverted. And the premise was wrong anyway: smooth shading never erased grooves, only
+  arrises — at 0.309 m the crease spans nine faces and reads on its own.
+
+**The obvious repair is a trap.** Switching to `shade_auto_smooth(38°)` like the rest of the pack
+made things worse, because an angle test has to DISCOVER which edges are sharp and on an organic
+cap its input is undefined: a single-pole dome over a 3.2:1 section runs its two parameter
+directions within 1.6° of collinear in one patch, and those quads' face normals are the sign of a
+difference of two nearly equal products — noise. The angle test duly split them into a blocky
+staircase. A reviewer reported a 179.6° "fold" there that is a **4.1° dihedral** once measured on a
+well-formed quad.
+
+So: mark known discontinuities EXPLICITLY (the mould seam is a known column — `edge.smooth = False`
+along it) and smooth everything else. Reserve angle tests for well-conditioned meshes like machined
+plate.
+
+And gate it on the OUTCOME, in both grid directions, over **every part**: the fold gate written
+specifically to catch this covered only the palm, so the worst defect in the mod was structurally
+invisible to it and a reviewer found it in a render. Separate degenerate quads from real folds and
+bound each, rather than widening one threshold until it catches nothing.
+
+### `_bump`'s `width` argument is a SIGMA, so the feature is six times wider than the number
+
+Same mod, same round. `FLASH_WIDTH_DEG = 8.0` was not an 8° bead: `_bump` is a Gaussian clamped at
+3σ, so it spanned **±24°** — 50 of the palm's 192 columns, a 1.75 m arc carrying a 0.067 m rise. A
+4% gradient. A hill. Two successive comments on that constant quoted column counts the code does not
+produce, because they were reasoned about rather than measured, and the parting line stayed invisible
+through four review rounds while its own comment called it "the loudest single signal that the thing
+is a CASTING".
+
+Degrees were the wrong unit as well: the palm's columns are 0.072 m of arc and a digit's are 0.030 m,
+so one angle cannot mean one feature on both. Size a feature that must survive a discrete grid in
+COLUMNS of that grid, and assert its realised width in **metres of prop**.
+
+And when a reviewer prescribes both a target and the knob value that reaches it, **measure the
+knob**: "0.85 gives −0.25 m" was justified by geometry that 0.75 actually delivers.
+
+### A ratio that describes an OUTPUT must not be asserted on the INPUT that produces it
+
+High Five's nail colour is authored relative to the skin, and the reference measures the plate at
+**1.09x** the foam. A reviewer found the authored base sitting at 0.90x with the comment above it
+claiming 1.21x, and the obvious repair was to re-author the base to 1.09x. That repair is wrong, and
+a gate written against the palette constants passed on it.
+
+`nail_keratin` **lifts** its base — plate sheen, lunula, striation. A base at 0.90x lands the shipped
+map at 1.18x and the rendered plate at 1.07x, which is exactly the reference. Moving the base to
+1.09x took the map to 1.41x: 20% too bright, arrived at by making an input equal a figure that
+describes an output. The constant was never the thing that was wrong; the comment was.
+
+So gate the artefact. `test_the_nail_holds_its_ratio_to_the_foam` reads the two shipped PNGs and
+bounds their measured luminance ratio. Only quantities that are genuinely authored — the nail's hue,
+the bed tracking the foam's own base — are checked where they are authored.
+
+The same shape one aisle over, where the ordering really was inverted: the cast iron rendered 5.9x
+darker than the matte enamel bolted to it. A note had spotted it and prescribed `srgb: True` — but
+**srgb scales both entries, and the fix for a ratio is never a change that scales both sides.** It
+shipped inverted for two more rounds. Gate the relation on the quantity that reaches the renderer:
+`metallic: 0.7` meant 70% of that albedo was never diffuse, so no change to the base alone could
+have been legible.
+
+And when two reviewers disagree, reconcile them before acting. One had measured the RENDERED ratio
+at 1.07 and called it exact; the next measured the AUTHORED ratio at 0.90 and called it broken. Both
+were right, about different quantities, and taking the second at face value undid the first.
+
+### A feature nobody can photograph is indistinguishable from a feature that is not there
+
+High Five's mould parting line was inert for three review rounds, then real but unfindable for two
+more. The second half was not a modelling problem: the seam measured a 42-99 degree crest against a
+3 degree median, and every reviewer looking for it came back empty. **The evidence set could not
+show it.** A two-part mould splits on the SILHOUETTE, so the line runs along the hand's width axis —
+and every camera in the review set looked down the volar/dorsal axis, where a bead is exactly
+edge-on and contributes a couple of pixels of outline.
+
+It then took **three attempts** to add a camera that worked, and the two failures are the lesson.
+
+**First: the feature has to be LIT, not merely facing you.** `V_REST` is `(0, 0, 1)` — the thumb
+axis points at the sky, so of the seam's two meridians the radial crest faces up and the ulnar
+crest faces the ground. The first pair of cameras went to the ulnar edge: **955 of 955 crest
+samples lit on the radial side, 0 of 955 on the ulnar**, and 712 of 726 ulnar samples are
+self-shadowed by the hand rather than merely Lambert-dark. A correct structural diagnosis, aimed at
+the dark half of it.
+
+**Second — and this is the more general one — a swept optimum is worthless if the objective cannot
+discriminate.** The replacement bearing was *solved*, not guessed: sweep every azimuth and
+elevation, count crest samples that are front-facing and lit, take the maximum. It scored 91%. So
+does almost every other bearing, because the metric omitted self-shadowing, framing and
+self-occlusion — and, fatally, ORIENTATION. The crest runs along the hand's long axis; the "solved"
+camera looked 31 degrees off that axis, straight down the length of the line, with the hand's own
+mass stacked in front of it. **82 unoccluded samples against a broadside camera's 571, and a
+cross-crest gradient below its own no-bead control.** Optimising a proxy that cannot tell good from
+bad returns an arbitrary answer with a confident number attached, which is worse than a guess
+because it looks like evidence.
+
+So: score what you actually need — visible AND lit AND unoccluded AND in frame AND oblique to the
+feature — and sanity-check the spread of the objective across the search space. A metric that
+returns 91% everywhere is not measuring the thing you care about. And keep one lighting model
+across the set: a shot lit differently from its siblings is not comparable evidence, which is the
+whole point of having a set.
+
+### The part your test suite skips is where the defect goes
+
+`test_digit_tips_converge_on_a_point` asserts that High Five's five digits close on a point, and
+documents at length what happens otherwise ("the pole was not a point, it was a segment... a flat
+triangular beak"). Nothing asserted it for the **palm**, which has the same kind of cap.
+
+So when the mould seam was found fading toward the palm's pole — the bead was folded into the
+section's half-extents and then scaled by the dome, so it thinned exactly where the form rolls away
+and the line is all you can see of the edge — the obvious repair was to hold it at full height. That
+fixed the dihedral, and opened the palm's pole to a **0.126 m segment** with seam facets at 155-165
+degrees, because a bead that keeps its height while the ring collapses is a bead the ring cannot
+close around. **All 74 gates passed.** A reviewer found it.
+
+Two habits fall out:
+
+- **Fixing one end of a constraint is the moment to check the other.** "Constant height" and "closes
+  on a point" are in direct tension at a pole; the answer was a taper confined to the last 8% of the
+  cap, not a choice between them. And note the newly-written gate for the first property — bead
+  variation under 2% across the cap — would have *forbidden* the fix for the second if its window
+  had not been scoped to the cap body.
+- **Look for the asymmetry.** When a suite covers five of six similar parts, the sixth is not
+  merely untested, it is where the next defect will be, because every reviewer's eye and every
+  author's assumption has been trained on the covered five.
+
+Same shape, twice more in one session: a fold gate that constructed only a `PalmSurface` (so ten
+self-intersecting digit joints were structurally invisible to it), and a seam gate that measured its
+maximum at ONE station and therefore never reached the cap at all.
+
+### Giant Props releases: `dist` is a RE-ZIP, not a rebuild
+
+`build.py <key> dist` only archives whatever `<mod>/mod/` holds at that instant — it never
+regenerates textures or materials. That makes re-cutting a release a live hazard, because
+`build.py <key> prop` rewrites cooked `.dds` back to raw `.png` for any mod without a certified
+harvest manifest. Running `prop` across the pack and then `dist` silently downgraded seven mods'
+textures (whale_geyser 7.2 MB -> 4.8 MB) and would have shipped uncommitted `texture_kit.py` work
+in three more. Only 10 of 20 mod trees differed from their shipped zip by runtime.lua alone.
+
+So when landing a shared-runtime fix: snapshot each shipped zip, restore every member that differs
+for a reason OTHER than the file you meant to change back into `mod/`, re-cut, then prove
+member-by-member that exactly one member moved. `serial.json` bumps only on a real content change,
+so a no-op rebuild is idempotent and reproduces the hash — but ONLY below the timestamp clamp
+(`packaging._serial_timestamp`, serial <= days since 2026-08-01). Above it the member timestamp
+rides the wall clock and every rebuild yields a new sha256. Re-staging `dist/repo_update` or
+`dist/repo_submission` is part of the re-cut; a test pins the catapult one.
+
+**`high_five` is the first mod to cross that clamp** — it reached serial 25 on 2026-08-25, i.e. 25
+serials against 24 days since 2026-08-01, so its `member_timestamp` now reads the build clock
+(`2026-08-25T05:09:30`) instead of a synthetic day. Two practical consequences: a no-op rebuild of
+this mod no longer reproduces its sha256, so its lock cannot be verified by re-cutting; and anyone
+diffing two builds across a day boundary will see `member_timestamp` move for no content reason.
+That is the scheme working as named, not a defect — but it is the point at which hash-stability
+stops being a property you can lean on, and the mod that gets there first will not be the last.
+
+
+### Giant Props: the Collada exporter is not deterministic, and the fix is quantisation
+
+Blender's Collada exporter stamps wall-clock `<created>`/`<modified>` and `Blender User` as the
+author, AND jitters the last ULP of normals and UVs between runs of an otherwise identical
+generator (positions and topology are exact). `.gitignore` has recorded the second half of that
+since 2026-08; it is why `examples/giant_props/*/mod/` is not tracked. The practical effect is that
+a mod's `visual.sha256`, its handoff, its build serial and its ZIP lock all move on a rebuild that
+changed nothing, which quietly makes the whole evidence chain unfalsifiable.
+
+`colossus_tire`'s generator fixes it locally in `normalise_collada()`: pin the two timestamps and
+the author, then re-emit every `<float_array>` at **five decimal places**. Five is measured, not
+chosen — at six, 97 values still straddled a rounding boundary and flipped between two runs; at
+five, two consecutive full generator runs produce a byte-identical DAE, and five decimals is 0.01
+mm on a 28 m prop, 0.0006 degrees on a normal and 26 um of texture on a UV. Any mod that wants a
+verifiable lock needs this; doing it in `blender_kit` would invalidate twenty-two other mods'
+hashes in one commit, so it is per-mod until someone lands that deliberately.
+
+### Giant Props: `normal_strength` belongs INSIDE the palette's `texture` dict
+
+`prop_builder.ensure_textures` reads it as `entry["texture"]["normal_strength"]`. A
+`normal_strength` sitting beside `color`/`roughness` at the entry level is read by nothing at all
+and every map is baked at the default 2.0. `colossus_tire` shipped thirteen of them in the wrong
+place for three rounds; the symptom was one material (the carcass laminate at the port's cut edge)
+measuring 95% of its texels under one degree of slope while every other map in the same mod
+reached 25-52 degrees. Measure the shipped `.normal.png` slope distribution when a surface looks
+plastic - that is the fastest way to see it.
+
+### Giant Props: colossus_tire's mass is a documented departure
+
+TIRE_MASS is 10,500 kg where an honest 28.168 m carcass would be ~1,923,000 kg (rubber goes as
+volume, and the scale factor is 7.0455). It is not taste: it is solved backwards from a
+playability requirement - a stock car pushing the inner liner at mu 0.75 has to spin the tire up to
+30 km/h in 12-28 s - through the CONTACT-POINT rolling inertia I_cm + M*R^2, not the axle inertia.
+Any change to the size code, the mass or the friction has to re-run that solve, and the beam
+families rescale with it: every `beamSpring` by the mass ratio and every `beamDamp` by its square
+root, which is what keeps the damping ratios where the materials argument put them.
+
+
 ## Prop authoring field guide (hard-won engine behavior)
 
 Everything below was proven live on BeamNG 0.39 during the Cannon Car Wash v1.20-v1.48 arc.
@@ -508,6 +777,25 @@ geometry.
 - The vehicle-object rotation (`getRotation`) is stale for driven vehicles (updates on
   spawn/teleport/reset only); derive live headings from the node cloud (`quatFromDir`, which
   differs from the object convention by exactly 180 deg about up).
+- That staleness is NOT limited to driven vehicles. An all-`fixed:true` prop that settles onto
+  sloped terrain keeps reporting its spawn attitude forever, while the flexbody renders at the
+  real nodes. `getPosition` does track; `getRotation` does not. Anything dead-reckoned from the
+  object transform therefore drifts by the ROTATION ERROR TIMES THE LEVER ARM, so props with
+  geometry far from the ref node fail hardest. Measured on utah 2026-08-24 against a Boot of
+  Doom console node 13 m out: flat 0.209 m, a gentle 0.48 m-per-12 m slope 1.03 m, a 7 m-per-12 m
+  slope 11.6 m — the gentle case being the shipped-mod bug report (indicator lights floating a
+  metre under their own panel). Rebuild the frame from the four refNodes' live positions instead:
+  two long baselines give an orthonormal basis, and the error drops to 0-2 mm at every attitude.
+  **Never gate this on `smallgrid`** — flat ground is the one condition where the object transform
+  and the node cloud agree, so it hides the bug completely.
+- A quaternion you build yourself needs CONJUGATING before the engine will accept it. Shepperd's
+  matrix-to-quat yields the textbook quat (rotation `q*v*inverse(q)`), but the engine's `q * vec3`
+  applies the opposite handedness — the same reversal behind the left-to-right composition rule
+  above. Feeding the textbook quat in transposes the rotation: exactly identity on a level spawn,
+  silently wrong the moment the prop tilts. The two errors also compose, so fixing one and not the
+  other still misses (Boot of Doom: 11.6 m raw, 2.2 m with the wrong conjugate, 18.9 m with the
+  wrong composition order, 0.000 m with both right). Solve conventions by measuring every
+  candidate against a known node position, not by reasoning about them.
 - `vehicle:setOriginalTransform(x,y,z,rx,ry,rz,rw)` is the official reset-home setter; every
   `setPositionRotation` re-homes the vehicle as a side effect.
 - Trigger tooltips print unicode escapes literally — ASCII only in input-action titles.

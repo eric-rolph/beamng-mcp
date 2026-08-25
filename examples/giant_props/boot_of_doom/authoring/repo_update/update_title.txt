@@ -1,0 +1,1 @@
+Slope fix: the boot, its trigger zones and the console gauges now stay put

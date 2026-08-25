@@ -285,13 +285,66 @@ def bakelite(size, rng, base=(0.07, 0.06, 0.06)):
     return color.clip(0, 1), swirl * 0.02, roughness, None
 
 
-def painted_metal(size, rng, base=(0.9, 0.9, 0.9), rough=0.32, peel=0.5):
+def painted_metal(size, rng, base=(0.9, 0.9, 0.9), rough=0.32, peel=0.5,
+                  grain=0.0, chalk=0.0, orange_peel=0.0, runoff=0.0):
+    """Sprayed paint over sheet steel.
+
+    The three extra terms are OPT-IN AT ZERO, and the defaults reproduce
+    the original family byte for byte, because half the pack already ships
+    textures baked from it and a change here would invalidate every one of
+    their harvest manifests and zip locks.
+
+    They exist because the original is a two-metre cabinet finish and it
+    does not survive being asked for a ten-metre machine. Measured on a
+    1024 map at the stock settings: FOUR unique RGB triplets across the
+    whole tile, a normal map 90.8% within one code step of flat, and every
+    varying term riding a 3-texel cell that is gone by mip 2. Rendered on a
+    black mast it is not paint, it is a flat fill — and BC1 collapses each
+    face to one block.
+
+    * ``grain`` drives ALBEDO from the 4-cell blotch, which is the one
+      frequency here that survives mipping.
+    * ``chalk`` adds oxidised patches that lift toward grey, the way an old
+      spray job actually fails.
+    * ``orange_peel`` puts real relief in the height field at a cell coarse
+      enough to read at distance.
+    """
+
     fine = _value_noise(size, size // 3, rng)
     blotch = _fbm(size, rng, base_cells=4, octaves=3)
     height = fine * 0.03 * peel
-    color = _colorize(base, blotch, 0.03)
+    color = _colorize(base, blotch, 0.03 + 0.09 * grain)
     roughness = np.full((size, size), rough) + (fine - 0.5) * 0.08
-    return color, height, roughness, None
+    if grain > 0.0:
+        # Multiplicative on top of the colorised base: _colorize compresses
+        # toward the base hue, so on a near-black paint an additive spread
+        # alone still reads as one value (the steel_worn lesson).
+        color = color * (1.0 - 0.35 * grain + 0.70 * grain * blotch[..., None])
+        roughness = roughness + (blotch - 0.5) * (0.22 * grain)
+    if chalk > 0.0:
+        patch = np.clip((_fbm(size, rng, base_cells=3, octaves=4) - 0.52) * 3.4, 0.0, 1.0)
+        patch = patch * patch
+        # A CHALKED BLACK, not a grey. +0.10 on a near-black base is a 3.4x
+        # lift to a faintly blue mid-grey, which is where the mouldy-tarp
+        # read came from.
+        target = np.asarray(base, dtype=np.float64) * 0.55 + 0.035
+        color = color * (1.0 - chalk * patch[..., None]) + (
+            target * (chalk * patch[..., None])
+        )
+        roughness = roughness + patch * (0.24 * chalk)
+    if runoff > 0.0:
+        # Vertical rain streaking. This is what actually says "this has
+        # stood outside for years" — weathering has a DIRECTION, and
+        # isotropic blotching is contamination, not weather. _streaks runs
+        # along v, which on every metric_uv in this pack is the vertical.
+        streak = _streaks(size, rng, max(8, size // 5), length_frac=0.22)
+        color = color * (1.0 - runoff * 0.10 * (1.0 - streak))[..., None]
+        roughness = roughness + (1.0 - streak) * (0.12 * runoff)
+    if orange_peel > 0.0:
+        peel_field = _fbm(size, rng, base_cells=max(6, size // 96), octaves=3)
+        height = height + (peel_field - 0.5) * (0.10 * orange_peel)
+        roughness = roughness + (peel_field - 0.5) * (0.10 * orange_peel)
+    return color.clip(0, 1), height, roughness.clip(0, 1), None
 
 
 def plastic_ribs(size, rng, base=(0.9, 0.44, 0.1), ribs=9.0, rough=0.42):
@@ -380,7 +433,7 @@ def _blur(field: np.ndarray, radius: float) -> np.ndarray:
 
 def stamped_mark(size, rng, text="CGS", base=(0.94, 0.70, 0.05),
                  mark_span=0.76, mark_height=0.44, tracking=0.09,
-                 mark_drop=0.0, fit_circle=False, fill=0.90,
+                 mark_drop=0.0, fit_circle=False, fill=0.90, type_aspect=1.0,
                  bead_band=(0.905, 0.980), groove_band=(0.868, 0.900),
                  pocket_r=0.885, ring=True, depth=0.55, rough=0.34, wear=0.30,
                  light=(-0.62, -0.78)):
@@ -415,6 +468,16 @@ def stamped_mark(size, rng, text="CGS", base=(0.94, 0.70, 0.05),
     type that sits in the middle of a cap and type that owns it — a
     span/height pair tuned by eye always leaves the four corners of the
     circle empty, because the constraint is radial, not rectangular.
+
+    ``type_aspect`` is the width/height ratio of the SURFACE this square
+    map is stretched onto. The map is always square, so a badge authored
+    as a 2.10 x 1.35 ellipse stretches every glyph 1.556x wide unless the
+    type is pre-compressed by the same factor. Pass the surface's own
+    aspect and the rendered letters come out with their designed
+    proportions; leave it at 1.0 for a square or circular face. The rings
+    and the die pocket are deliberately NOT compensated - they are
+    concentric with the face, so on an elliptical badge they should read
+    as an ellipse, which is exactly what the plain stretch gives.
     """
 
     from PIL import ImageDraw, ImageFont
@@ -438,7 +501,11 @@ def stamped_mark(size, rng, text="CGS", base=(0.94, 0.70, 0.05),
             # Inscribe the word's box in the disc: with half-extents a, b at
             # the word's aspect k = a/b, a^2 + b^2 = r^2 gives
             # b = r / sqrt(1 + k^2). Everything else follows from the probe.
-            aspect = max(run, 1.0) / max(caps, 1.0)
+            # Solve the inscription against the aspect the type will
+            # actually be DRAWN at, i.e. after the type_aspect squeeze,
+            # otherwise a compressed word is fitted to the box of an
+            # uncompressed one and ends up smaller than the disc allows.
+            aspect = (max(run, 1.0) / type_aspect) / max(caps, 1.0)
             half_h = (fill * hi / 2.0) / math.sqrt(1.0 + aspect * aspect)
             scale = 2.0 * half_h / max(caps, 1.0)
         else:
@@ -459,6 +526,14 @@ def stamped_mark(size, rng, text="CGS", base=(0.94, 0.70, 0.05),
         for ch, box, width in zip(text, boxes, widths):
             draw.text((pen - box[0], top - box[1]), ch, fill=255, font=font)
             pen += width + gap
+        if abs(type_aspect - 1.0) > 1e-9:
+            # Squeeze the LETTERS ONLY, about the centre of the face, so the
+            # stretch the non-square surface applies puts them back. Drawn
+            # centred, so a centred paste is the same operation.
+            narrow = max(1, int(round(hi / type_aspect)))
+            squeezed = strip.resize((narrow, hi), Image.LANCZOS)
+            strip = Image.new("L", (hi, hi), 0)
+            strip.paste(squeezed, ((hi - narrow) // 2, 0))
     mark = np.asarray(strip.resize((size, size), Image.LANCZOS),
                       dtype=float) / 255.0
 
@@ -2040,6 +2115,12 @@ def lamp_bands(size, rng, colors=((0.98, 0.42, 0.06), (0.88, 0.11, 0.09),
 
 
 def asphalt(size, rng, base=(0.16, 0.16, 0.17)):
+    # DO NOT EDIT THIS LINE IN PLACE. It was changed once to fix a fleck size
+    # in `slap_pad` — which does not call this function, it duplicates it —
+    # and the edit silently re-cut `asphalt` in TEN other mods: 30 of 32
+    # differing maps pack-wide, 80-96% of texels moved, every one of their
+    # certified cooked-DDS harvests invalidated. Shared families take
+    # OPT-IN parameters; see painted_metal.
     aggregate = _value_noise(size, size // 2, rng)
     blotch = _fbm(size, rng, base_cells=3, octaves=4)
     color = _colorize(base, 0.35 + aggregate * 0.4 + blotch * 0.25, 0.16)
@@ -2139,7 +2220,8 @@ def end_grain(size, rng, early=(0.50, 0.32, 0.165),
     return color.clip(0, 1), height, roughness.clip(0.05, 1), None
 
 
-def cast_iron(size, rng, base=(0.16, 0.155, 0.16)):
+def cast_iron(size, rng, base=(0.16, 0.155, 0.16), oxide=(0.32, 0.19, 0.12),
+              contrast=1.0):
     """Sand-cast iron for the big drop weight (2026-08-13 play-test:
     "much more realistic textures for the steel weight" - the borrowed
     concrete-fine map smeared on the frustum's unmapped UVs).
@@ -2161,9 +2243,32 @@ def cast_iron(size, rng, base=(0.16, 0.155, 0.16)):
     rust = np.clip(rust, 0.0, 0.5)
     tone = (0.42 + (mottle - 0.5) * 0.28 + (grain - 0.5) * 0.16
             + (grain2 - 0.5) * 0.10)
-    color = _colorize(base, tone, 0.10)
+    # `contrast` scales the tone spread and DEFAULTS TO A NO-OP, so every
+    # existing consumer regenerates byte-identical.
+    #
+    # _colorize is purely multiplicative, so the LINEAR relative contrast
+    # here is the same whatever the base. What is not the same is how many
+    # 8-bit code values it survives as: sRGB encoding is steep in the
+    # shadows and flat higher up, so the identical linear grain that spans
+    # a usable spread on a near-black casting collapses to under one code
+    # value of standard deviation on a light one. high_five lightened its
+    # iron 5.7x to get the castings above the enamel and the sand-cast
+    # grain quietly went with it. This is the knob that buys it back, and
+    # it is a parameter rather than an edit because cast_iron is SHARED —
+    # see the guard on `oxide` directly below.
+    color = _colorize(base, tone, 0.10 * contrast)
     color *= 0.94 + runoff[..., None] * 0.12
-    oxide = np.array([0.32, 0.19, 0.12])
+    # A PARAMETER, defaulting to the original display value so every
+    # existing consumer regenerates byte-identical.
+    #
+    # It was briefly hard-coded to its linear form, because under srgb=True
+    # the display value encodes to a pale milky tan instead of rust. That
+    # was right about this mod and wrong about the kit: cast_iron is SHARED,
+    # the literal is unconditional, and it moved catapult_seesaw
+    # (max|d| = 31) and sumo_gyro_platform (max|d| = 17) off their shipped
+    # bytes. Exactly the same mistake as the one asphalt's guard comment
+    # names, made twice in two rounds. A shared family takes a parameter.
+    oxide = np.asarray(oxide, dtype=float)
     color = color * (1 - rust[..., None]) + oxide[None, None, :] * rust[..., None]
     height = ((grain - 0.5) * 0.09 + (grain2 - 0.5) * 0.05
               + (mottle - 0.5) * 0.04 - rust * 0.03)
@@ -2458,7 +2563,7 @@ def _streaks(size, rng, cells, length_frac=0.06):
     return (smear - lo) / max(hi - lo, 1e-9)
 
 
-def steel_worn(size, rng, base=(0.5, 0.53, 0.57), rough=0.42):
+def steel_worn(size, rng, base=(0.5, 0.53, 0.57), rough=0.42, relief=1.0):
     """Mill-finished structural steel: directional grain, rolling banding,
     scattered scuffs, faint weathering.
 
@@ -2491,7 +2596,9 @@ def steel_worn(size, rng, base=(0.5, 0.53, 0.57), rough=0.42):
     # at any distance. This is what makes the beam look rolled.
     color *= (0.86 + grain[..., None] * 0.28) * (0.96 + micro[..., None] * 0.08)
     color += scuff[..., None] * 0.22
-    height = (grain - 0.5) * 0.05 + (micro - 0.5) * 0.02 - scuff * 0.03
+    # `relief` scales the whole field. Authored at 0.05 amplitude this map
+    # quantised to a single byte and shipped literally constant.
+    height = ((grain - 0.5) * 0.05 + (micro - 0.5) * 0.02 - scuff * 0.03) * relief
     roughness = (rough
                  + (patina - 0.5) * 0.16
                  + (grain - 0.5) * 0.10
@@ -2499,7 +2606,7 @@ def steel_worn(size, rng, base=(0.5, 0.53, 0.57), rough=0.42):
     return color.clip(0, 1), height, roughness.clip(0, 1), None
 
 
-def machined_steel(size, rng, base=(0.44, 0.46, 0.49), rough=0.38):
+def machined_steel(size, rng, base=(0.44, 0.46, 0.49), rough=0.38, relief=1.0):
     """Machined/turned hardware steel: tight short grain, oily mottle,
     values compressed toward one grey.
 
@@ -2535,7 +2642,10 @@ def machined_steel(size, rng, base=(0.44, 0.46, 0.49), rough=0.38):
               * (0.93 + grain_med[..., None] * 0.14)
               * (0.97 + grain_fine[..., None] * 0.06))
     color += scuff[..., None] * 0.14
-    height = (grain_fine - 0.5) * 0.025 + (grain_med - 0.5) * 0.01 - scuff * 0.015
+    # `relief` scales the whole field; see steel_worn.
+    height = (
+        (grain_fine - 0.5) * 0.025 + (grain_med - 0.5) * 0.01 - scuff * 0.015
+    ) * relief
     roughness = (rough
                  + (mottle - 0.5) * 0.14
                  + (grain_fine - 0.5) * 0.08
@@ -2560,14 +2670,54 @@ def forged_ball(size, rng, base=(0.14, 0.13, 0.14)):
     return color.clip(0, 1), height, roughness.clip(0, 1), None
 
 
-def hazard_chevron(size, rng, c1=(0.95, 0.75, 0.08), c2=(0.12, 0.12, 0.13)):
+def hazard_chevron(size, rng, c1=(0.95, 0.75, 0.08), c2=(0.12, 0.12, 0.13),
+                   glow=False, glow_floor=0.10, relief=0.0):
+    """Painted hazard chevrons.
+
+    ``glow`` returns an emissive channel that follows the STRIPES. Without one
+    a material with an emissiveFactor emits uniformly - AGENTS.md's own
+    photometric ledger measures a missing map at 0.991 of the white-map cell -
+    so an emissive chevron glows just as brightly through its dark stripes as
+    its light ones and erases the pattern it exists to draw. The glow map is
+    decoded as sRGB like any `.color`, so the dark stripes keep a real floor
+    rather than going to zero.
+
+    The height field is no longer decorative either: paint laid over steel
+    stands proud of it, and at 0.02 amplitude the normal map came out
+    literally constant (128, 128, 255) - a blank map on one of the few
+    surfaces the player stands right next to.
+    """
+
     diag = (_stripes(size, 4.0, axis=1) + _stripes(size, 4.0, axis=0)) % 1.0
     stripe = (diag < 0.5).astype(float)
+    edge = np.clip(1.0 - np.abs(diag - 0.5) / 0.06, 0.0, 1.0)
     grime = _fbm(size, rng, base_cells=3, octaves=3)
+    fine = _fbm(size, rng, base_cells=max(48, size // 12), octaves=3)
     color = np.array(c1) * stripe[..., None] + np.array(c2) * (1 - stripe[..., None])
     color *= 0.75 + grime[..., None] * 0.35
-    roughness = 0.45 + grime * 0.2
-    return color.clip(0, 1), grime * 0.02, roughness, None
+    # Paint film + its rolled edge, plus the steel tooth under it. OPT-IN:
+    # `relief` defaults to 0 so every mod that already ships this family keeps
+    # its exact bytes - a shared kit cannot quietly re-cut twenty other mods'
+    # normal maps and invalidate their cooked-DDS harvests.
+    if relief <= 0.0:
+        height = grime * 0.02
+        roughness = 0.45 + grime * 0.2
+    else:
+        height = (stripe * 0.22 + edge * 0.10 + (fine - 0.5) * 0.16) * relief
+        roughness = 0.45 + grime * 0.2 + (1.0 - stripe) * 0.10
+    if not glow:
+        return color.clip(0, 1), height, roughness, None
+    # NEUTRAL GREYSCALE. The emissive map is a MASK saying which parts of the
+    # chevron are lit; the hue belongs to the material's emissiveFactor, once.
+    # Tinting the map by c1 as well multiplied the hue by itself, so an amber
+    # marking emitted a saturated orange nothing on the prop matched. Nothing
+    # else in the pack asks this family for a glow map, so there is no old
+    # behaviour to preserve here - see the note above about relief.
+    emissive = np.zeros((size, size, 3))
+    intensity = glow_floor + stripe * (1.0 - glow_floor)
+    for channel in range(3):
+        emissive[..., channel] = intensity
+    return color.clip(0, 1), height, roughness, None, emissive.clip(0, 1)
 
 
 def eggshell(size, rng, base=(0.91, 0.87, 0.76), speck=(0.42, 0.33, 0.22)):
@@ -2799,7 +2949,8 @@ def toast_crumb(size, rng, base=(0.82, 0.58, 0.22)):
     return color.clip(0, 1), height, roughness.clip(0, 1), None
 
 
-def copper(size, rng, base=(0.545, 0.30, 0.195), rough=0.5):
+def copper(size, rng, base=(0.545, 0.30, 0.195), rough=0.5,
+           oxide=(0.28, 0.16, 0.11), verd=(0.38, 0.46, 0.42)):
     """Worn-penny architectural copper (player round 15: the louver fins
     should read as copper metal, "dull worn penny" chosen over shiny).
 
@@ -2836,8 +2987,16 @@ def copper(size, rng, base=(0.545, 0.30, 0.195), rough=0.5):
     color = np.empty((size, size, 3))
     for channel, b in enumerate(base):
         color[..., channel] = b * value
-    oxide = (0.28, 0.16, 0.11)
-    verd = (0.38, 0.46, 0.42)
+    # PARAMETERS, defaulting to the original display values so every
+    # existing consumer regenerates byte-identical. They were unconditional
+    # body literals — the same trap cast_iron's `oxide` carried, and the
+    # same one asphalt's guard comment names. Nothing in the pack sets
+    # srgb=True on a copper entry yet, so it was latent rather than broken;
+    # it is armed for whoever does it first, because a display value
+    # re-encoded to sRGB comes out a pale milky tan instead of oxide.
+    # A shared family takes a parameter. Third time in this file.
+    oxide = tuple(oxide)
+    verd = tuple(verd)
     for channel in range(3):
         color[..., channel] = color[..., channel] * (1 - dark) + oxide[channel] * dark
         color[..., channel] = color[..., channel] * (1 - patina) + verd[channel] * patina
@@ -3250,8 +3409,1308 @@ def potato_skin(
     return color.clip(0, 1), height, roughness.clip(0, 1), None
 
 
+def foam_latex(
+    size,
+    rng,
+    base=(0.760, 0.635, 0.470),
+    deep=(0.545, 0.405, 0.285),
+    mottle=0.42,
+    pores=0.55,
+    seam=0.32,
+    dust=0.30,
+    rough=0.78,
+    crazing=0.62,
+    # Fold scale in METRES of prop, with the tile pitch it is measured
+    # against. Both are here rather than derived from `size` because a
+    # texel-referenced cell count silently rescales every time the tile
+    # moves: when SKIN_METERS_PER_TILE went 2.60 -> 0.65 to square the
+    # hand's texels, the folds went 200 mm -> 39 mm and the crazing turned
+    # from a wrinkle network into an all-over stucco pebble.
+    fold_m=0.10,
+    tile_m=0.66,
+):
+    """Cast foam-latex prop skin - the Jackass 3D giant hand, not a hand.
+
+    The reference is the PROP, not anatomy. A foam-latex appliance is
+    whipped, poured into a two-part mould, gelled, baked and pulled, then
+    painted with thinned rubber cement. What you see standing next to one
+    is four things and no others: a warm sandy tan blotched at the
+    half-metre scale where the pigment never fully dispersed in the pour, a
+    dense open-cell pore stipple wherever the skin coat went on thin, one
+    pale flash line down the mould split, and shop dust in every low spot.
+    It is dead matte end to end.
+
+    It is emphatically NOT skin - no pink, no subsurface glow, no dermal
+    ridges, no follicle rows - and reaching for "skin" is the failure mode
+    here. A glossy pink 8.6 m hand reads as a mannequin; the joke only
+    lands if the thing reads as a prop that somebody built.
+
+    Why these four layers and no more: the pores carry every viewing
+    distance inside about 3 m, the mottle carries everything past that, the
+    seam is the single feature that says CAST rather than "tiled texture",
+    and the dust is what stops the other three from looking factory-new. A
+    fifth layer would only fight one of them.
+
+    PORE SIZE ARITHMETIC, which is the whole family, and it is worth
+    checking rather than believing: this paragraph has been wrong twice,
+    both times because the tile pitch moved underneath it.
+
+    high_five maps this tile at the REALISED pitch — `reference / u_tiles`
+    per part, which is what the mesh actually gets, NOT the nominal
+    SKIN_METERS_PER_TILE it is derived from. That runs 0.637 m on the ring
+    finger to 0.679 m on the middle, mean 0.66 m. So at size=2048 one texel
+    is 660/2048 = 0.32 mm of prop. The pore field is thresholded
+    band-limited noise at a 3.2 px cell pitch with a second pass at 4.6 px,
+    plus stamped blowholes 3.7-7.3 px across: call it 3-8 px, i.e.
+    1.0-2.4 mm on the prop. That is deliberately LARGER than a scaled-down real cell. The
+    honest factor from a 0.19 m hand to an 8.6 m one is 45x, which would put
+    a 0.4 mm cell at 0.7 texels and turn the signature of the material into
+    aliasing. So the cells are held at the size they appear when you put
+    your eye against the real prop. Nobody measures it; everybody sees
+    whether a surface has cells or has grain.
+    """
+
+    base_rgb = np.asarray(base, dtype=float)
+    deep_rgb = np.asarray(deep, dtype=float)
+
+    # 1. PIGMENT DRIFT, two scales. The slow one is the pour itself - latex
+    # thickens as a batch sits, so the last of it lays down darker - and the
+    # faster one is the brushed colour coat, which never goes on even.
+    broad = _fbm(size, rng, base_cells=2, octaves=4, persistence=0.62)
+    blotch = _fbm(size, rng, base_cells=5, octaves=4, persistence=0.55)
+    pigment = np.clip(0.5 + (broad - 0.5) * 1.30 + (blotch - 0.5) * 0.78, 0.0, 1.0)
+
+    # 2. PORES. Thresholded band-limited noise, NOT a per-texel grain: a
+    # uniform grain reads as sandpaper at every distance, whereas open-cell
+    # foam is discrete cells with skin between them. Two cell pitches so the
+    # sizes vary, and a low-frequency DENSITY field on top - a real cast is
+    # cell-rich where the skin coat pulled thin and nearly smooth elsewhere,
+    # and without that the tile is busy edge to edge and reads as a swatch.
+    density = _fbm(size, rng, base_cells=4, octaves=3, persistence=0.58)
+    density = np.clip(0.45 + density * 0.95, 0.0, 1.0)
+
+    fine = _value_noise(size, max(8, round(size / 3.2)), rng)
+    coarse = _value_noise(size, max(6, round(size / 4.6)), rng)
+    fine_cut = float(np.quantile(fine, 1.0 - 0.36 * pores))
+    coarse_cut = float(np.quantile(coarse, 1.0 - 0.15 * pores))
+    pore = np.maximum(
+        np.clip((fine - fine_cut) / 0.10, 0.0, 1.0) ** 0.80,
+        np.clip((coarse - coarse_cut) / 0.13, 0.0, 1.0) ** 0.80 * 0.95,
+    )
+    pore = np.clip(pore * density, 0.0, 1.0)
+
+    # Blowholes: the handful of larger, oriented, elongated cells that a
+    # thresholded isotropic field can never produce. They are what stops the
+    # stipple from reading as a screen pattern at close range.
+    blow = np.zeros((size, size))
+    blow_count = int(size * size * pores / 2400.0)
+    if blow_count > 0:
+        by = rng.integers(0, size, blow_count)
+        bx = rng.integers(0, size, blow_count)
+        br = rng.uniform(size / 1100.0, size / 560.0, blow_count)
+        ba = rng.uniform(0.0, math.pi, blow_count)
+        bs = rng.uniform(1.0, 2.1, blow_count)
+        for y, x, radius, angle, stretch in zip(by, bx, br, ba, bs, strict=True):
+            if density[y, x] < 0.82:      # crowd them where the fine pores are
+                continue
+            _stamp(blow, int(y), int(x), float(radius), 1.0,
+                   aspect=float(stretch), angle=float(angle), falloff=0.85)
+
+    # 2b. CRAZING. The single most recognisable thing about the reference
+    # prop is not its pores, it is the field of long soft wrinkle folds over
+    # the whole casting — a skin coat that shrank onto foam and crinkled.
+    # The pore stipple is a millimetre feature and disappears past a few
+    # metres; the crazing is a 5-15 cm feature and is what carries the read
+    # at every distance a driver actually sees this from.
+    #
+    # It is a LEVEL SET, not more noise: the ridge follows where an fbm
+    # crosses its own midpoint, which gives long connected branching folds
+    # instead of isotropic blobs. Same construction potato_skin's netting
+    # and molded_nylon's crease already use here.
+    # CELL COUNT IN METRES, not texels. `size / 120.0` is map-referenced,
+    # so when SKIN_METERS_PER_TILE went 2.60 -> 0.65 to square the texels
+    # the fold scale silently came with it: 200 mm cells became 39 mm, and
+    # with the widened level set on top the coverage went 6% to 56% — an
+    # all-over stucco pebble rather than the 5-15 cm folds this family
+    # exists to draw. Pinned to the prop, the term is now size-independent,
+    # which is what "pinned to the extent" should have meant the first time
+    # that phrase was used in this file.
+    web = _fbm(size, rng, base_cells=max(4, round(tile_m / fold_m)), octaves=4,
+               persistence=0.55)
+    # WIDE level sets. At /0.030 the ridge runs measured a median THREE
+    # texels — 4-7 mm on the prop — against a docstring promising a 5-15 cm
+    # feature, so it read as crackle glaze or lichen rather than as the
+    # reference's broad soft wrinkles. The cell SPACING was always right;
+    # the ridge width was 20-30x too narrow.
+    craze = np.clip(1.0 - np.abs(web - 0.5) / 0.200, 0.0, 1.0) ** 1.0
+    # A second, finer network so the folds branch rather than reading as one
+    # regular mesh.
+    web2 = _fbm(size, rng, base_cells=max(6, round(tile_m / (fold_m * 0.5))), octaves=3,
+                persistence=0.50)
+    craze = np.clip(
+        craze + np.clip(1.0 - np.abs(web2 - 0.5) / 0.100, 0.0, 1.0) ** 1.2 * 0.55,
+        0.0,
+        1.0,
+    ) * crazing
+
+    # 3. THE MOULD SEAM. One flash line at a fixed u so the tile still
+    # repeats. It has to be FAINT and BROKEN, and that is not timidity: one
+    # seam per tile is one seam every 0.66 m on the prop (and high_five sets
+    # seam = 0.0 outright, because its parting line is geometry), and a strong one
+    # would read as pinstripes. So it wanders (a periodic column of noise
+    # displaces it along v), it is dressed back to nothing over stretches,
+    # and at the default seam=0.32 it reads as "there is a seam over there"
+    # rather than as a ruled line. Flash rubber squeezed into the mould
+    # split cures paler and slightly proud, so it is both lighter and up.
+    u_row = ((np.arange(size, dtype=float) + 0.5) / size)[None, :]
+    wander = _fbm(size, rng, base_cells=3, octaves=3)[:, :1]
+    dressed = _fbm(size, rng, base_cells=2, octaves=3)[:, :1]
+    du = ((u_row - 0.29 - (wander - 0.5) * 0.011) + 0.5) % 1.0 - 0.5
+    core = np.clip(1.0 - np.abs(du) / 0.0019, 0.0, 1.0)
+    core = core * core * (3.0 - 2.0 * core)
+    flank = np.clip(1.0 - np.abs(du) / 0.013, 0.0, 1.0) ** 2.0
+    live = np.clip((dressed - 0.26) * 2.4, 0.0, 1.0)
+    ridge = core * live * seam
+    halo = flank * live * seam
+
+    # 4. DUST AND HANDLING. Dust settles in the RECESSES — the pores, the
+    # blowholes and the crazing — and nowhere else. Keying it to the low
+    # ground of the PIGMENT field instead, which is what this did, put pale
+    # near-neutral wash over roughly half the tile in patches unrelated to
+    # any surface feature, and it read as mildew.
+    relief = np.clip(pore * 0.70 + blow * 0.85 + craze * 0.95, 0.0, 1.0)
+    powder = _fbm(size, rng, base_cells=7, octaves=4, persistence=0.55)
+    dust_mask = np.clip(relief * (0.30 + powder * 1.10), 0.0, 1.0) * dust
+
+    smudge = np.zeros((size, size))
+    for _ in range(6):
+        _stamp(
+            smudge,
+            int(rng.integers(0, size)),
+            int(rng.integers(0, size)),
+            float(size * rng.uniform(0.055, 0.130)),
+            1.0,
+            aspect=float(rng.uniform(1.5, 3.2)),
+            angle=float(rng.uniform(0.0, math.pi)),
+            falloff=2.4,
+        )
+    smudge = np.clip(smudge * (0.35 + blotch * 0.85), 0.0, 1.0) * dust
+
+    micro = _value_noise(size, max(8, size // 2), rng)
+    burnish = np.clip((broad - 0.66) * 3.0, 0.0, 1.0)
+
+    # ONE lerp toward `deep` carries both halves of the brief: `deep` is the
+    # colour that settles into recesses, and mottle and cavity are both
+    # recesses - one at the half-metre scale, one at the millimetre scale.
+    # Splitting them into two separate tints is what makes procedural
+    # organics look like two textures multiplied together.
+    cavity = np.clip(pore * 0.92 + blow * 0.80 + craze * 0.55, 0.0, 1.0)
+    tint = np.clip(
+        0.14
+        + (pigment - 0.5) * 1.25 * mottle
+        + cavity * 0.50
+        + (0.5 - micro) * 0.09,
+        0.0,
+        1.0,
+    )
+    color = (base_rgb[None, None, :]
+             + (deep_rgb - base_rgb)[None, None, :] * tint[..., None])
+    # And a straight multiplicative darkening on top of the lerp. `deep` is a
+    # fairly light brown, so in the already-pale regions the lerp alone leaves
+    # the pores nearly invisible - which is where the first pass lost them.
+    color *= (1.0 - 0.14 * cavity)[..., None]
+    # AND the crazing gets its own multiply, because a derivative operator
+    # cannot see it. _height_to_normal measures slope: a fold 120 texels
+    # wide at depth 0.052 is 0.00087/texel while a pore 1.5 texels wide at
+    # 0.110 is 0.073/texel — 84x steeper. Measured, the whole crazing layer
+    # moved the normal map by 1.6 code values, i.e. deleting the feature
+    # entirely would not have shown in a blink test. Amplitude in COLOUR is
+    # read directly, and on the reference prop the wrinkles read as VALUE
+    # rather than as shading anyway.
+    color *= (1.0 - 0.35 * craze)[..., None]
+
+    # MULTIPLICATIVE on the base, not base*k + c. Any additive constant is
+    # calibrated for one base brightness, and this family's base has since
+    # moved from a pale cream to a dark linear ochre — at which point
+    # base*0.62 + 0.145 is no longer dust, it is a wash of something two
+    # stops lighter and half as saturated.
+    dust_rgb = np.clip(base_rgb * 1.22 + 0.015, 0.0, 1.0)
+    dm = dust_mask[..., None]
+    color = color * (1.0 - dm) + dust_rgb[None, None, :] * dm
+    color *= (1.0 - 0.17 * smudge)[..., None]
+
+    # Same correction as dust_rgb: base*0.70 + 0.30 on the current base is
+    # 2x lighter and desaturated from 0.855 to 0.30, so the mould seam went
+    # from invisible to a bright near-grey stripe.
+    flash_rgb = np.clip(base_rgb * 1.55 + 0.02, 0.0, 1.0)
+    sm = np.clip(ridge * 0.55 + halo * 0.12, 0.0, 1.0)[..., None]
+    color = color * (1.0 - sm) + flash_rgb[None, None, :] * sm
+    color *= (0.965 + micro * 0.07)[..., None]
+
+    height = (
+        (broad - 0.5) * 0.038
+        + (blotch - 0.5) * 0.018
+        + (micro - 0.5) * 0.010
+        # Deepened. Measured on the shipped 2048 map the whole normal field
+        # carried a std of 2.6 code values and fell below quantisation by
+        # mip 3, so the pores existed in colour and nowhere else and read as
+        # printed grain at every distance.
+        - pore * 0.110
+        - blow * 0.085
+        - craze * 0.052
+        + ridge * 0.075
+        + halo * 0.007
+        + dust_mask * 0.004
+    )
+
+    # A FLAT roughness is what makes CG props look like injection-moulded
+    # plastic, and this is the surface the player will stand under. Dust is
+    # the roughest thing here, burnished high spots and handling smudges the
+    # smoothest, and the seam's flash rubber smoother still because it never
+    # took the mould's texture.
+    roughness = (
+        rough
+        + dust_mask * 0.15
+        + pore * 0.05
+        + craze * 0.16
+        + (blotch - 0.5) * 0.07
+        + (micro - 0.5) * 0.04
+        - smudge * 0.17
+        - burnish * 0.09
+        - ridge * 0.34
+    )
+    return color.clip(0, 1), height, roughness.clip(0.06, 1.0), None
+
+
+def nail_keratin(
+    size,
+    rng,
+    base=(0.845, 0.735, 0.665),
+    lunula=(0.925, 0.870, 0.830),
+    striate=0.35,
+    rough=0.24,
+    bed=(0.66, 0.50, 0.30),
+):
+    """Painted fingernail on a cast prop hand: the only gloss on the prop.
+
+    The reference is a prop nail, which is a nail-plate SHAPE sprayed with
+    tinted lacquer, so it borrows a real nail's structure - longitudinal
+    striae, a lunula, a paler free edge, a warm blush where the bed shows
+    through the plate - and then wears all of it under a thin clear coat
+    instead of growing it. That is why it is nearly the only surface in the
+    pack with a low roughness: on an 8.6 m foam hand the single specular
+    highlight on the nails is what tells you the rest of it is matte on
+    purpose rather than matte because nobody lit it.
+
+    NOT isotropic, and barely a tile. The nail-plate UVs run v = proximal
+    (cuticle) -> distal (free edge) with u across the plate, so this is a
+    one-shot gradient family. It still WRAPS, because everything in this kit
+    does and because the seam check is the only cheap way to notice a family
+    that quietly stopped tiling:
+
+    - u wraps because every u-dependent term is either an INTEGER-frequency
+      sine (the striae) or a function of min(u, 1-u) (the lateral nail
+      groove). Both are exactly periodic, not approximately.
+    - v wraps because the profile's two ends are made to MEET rather than
+      left to chance: the free-edge pale band is faded out before v = 1, the
+      lunula is faded in after v = 0, and the last few percent at both ends
+      carry the same soft shade term. That last part is not a fudge to pass
+      a test - it is the cuticle shadow at one end and the shadow under the
+      free edge at the other, and those really are the two darkest rows of a
+      real nail.
+
+    Height is deliberately about a quarter of foam_latex's. A nail is
+    smooth, and a normal map that fights the gloss is exactly what makes CG
+    nails read as moulded plastic shells.
+    """
+
+    base_rgb = np.asarray(base, dtype=float)
+    lun_rgb = np.asarray(lunula, dtype=float)
+
+    rows = (np.arange(size, dtype=float) + 0.5) / size
+    u = ((np.arange(size, dtype=float) + 0.5) / size)[None, :]
+    v = (1.0 - rows)[:, None]                   # v samples from the image bottom
+    seam_v = np.minimum(v, 1.0 - v)             # wrapped distance to the v seam
+    # The lateral nail groove, where the plate disappears under the fold.
+    # Being a function of min(u, 1-u) it is its own mirror, so the u seam is
+    # exact by construction rather than by luck.
+    # 0.09, not 0.035. At 0.035 the plate ended on a hard line 2% of the
+    # way in from each edge, so five near-white rectangles sat on the
+    # fingertips like sticking plasters. A nail's lateral edge does not end,
+    # it goes under a fold — so the band is wide enough to see and the
+    # colour is lerped toward the FOAM inside it.
+    fold = np.clip(1.0 - np.minimum(u, 1.0 - u) / 0.090, 0.0, 1.0) ** 2.0
+
+    # STRIAE. Irregular spacing is the point, so this is neither one sine nor
+    # a _stripes field: it is a short sum of sines at randomly chosen INTEGER
+    # cycle counts, which is quasi-periodic to the eye and exactly periodic
+    # to the tile. Low frequencies get more amplitude because the coarse
+    # ridges are the ones you actually see on a nail; the fine ones only
+    # break up the specular. A slow lateral wander keeps them off the ruler.
+    wander = (_fbm(size, rng, base_cells=3, octaves=3) - 0.5) * 0.013
+    phase_u = u + wander
+    striae = np.zeros((size, size))
+    weight = 0.0
+    for k in np.sort(rng.choice(np.arange(22, 152), size=11, replace=False)):
+        amp = 1.0 / (1.0 + float(k) / 42.0)
+        striae += amp * np.sin(2.0 * np.pi * (float(k) * phase_u + rng.random()))
+        weight += amp
+    striae /= max(weight, 1e-9)
+
+    # Transverse growth ripple (also integer harmonics, also exactly
+    # periodic) and the plate's transverse arch, which is the one bit of
+    # FORM this map carries - the geometry under it is a flat-ish nail plate.
+    ripple = np.zeros((size, 1))
+    for cycles, amp in ((3, 0.55), (5, 0.30), (9, 0.16)):
+        ripple = ripple + amp * np.sin(2.0 * np.pi * (cycles * v + rng.random()))
+    ripple /= 1.01
+    arch = 0.5 - 0.5 * np.cos(2.0 * np.pi * u)
+
+    # LUNULA. A disc centred BELOW the plate, so its visible edge is a
+    # convex arc pointing distally - which is the half-moon's whole shape.
+    # Clipped by a proximal fade so the arc floats free of the v seam
+    # instead of being cut in half by it.
+    lr = np.sqrt((u - 0.5) ** 2 + (v + 0.12) ** 2)
+    lun = np.clip((0.30 - lr) / 0.085, 0.0, 1.0)
+    lun = lun * lun * (3.0 - 2.0 * lun)
+    fade = np.clip(v / 0.055, 0.0, 1.0)
+    lun = lun * fade * fade * (3.0 - 2.0 * fade)
+
+    # Free edge: the opaque pale band where the plate has left the bed. Ends
+    # before v = 1 (see the wrap note above).
+    # A CAST PROP NAIL HAS NO GROWN-OUT FREE EDGE. The band was 22% of the
+    # plate at weight 0.80, which painted the near-white lunula colour over
+    # the whole distal fifth and is most of why the nails read as white
+    # caps. It is kept only as a thin brightening at the very tip.
+    rise = np.clip((v - 0.88) / 0.10, 0.0, 1.0)
+    tip = rise * rise * (3.0 - 2.0 * rise) * _aa_slab(v, -1.0, 0.955, 0.055)
+    shade = np.clip(1.0 - seam_v / 0.055, 0.0, 1.0)
+    shade = shade * shade * (3.0 - 2.0 * shade)
+
+    # The bed showing through: warmest in the middle of the plate, gone by
+    # both ends. Written as a cosine rather than a gaussian purely so it is
+    # zero at the seam on both sides without a clip.
+    blush = (0.5 + 0.5 * np.cos(2.0 * np.pi * (v - 0.47))) ** 1.7 * (0.35 + 0.65 * arch)
+
+    grain = _value_noise(size, max(8, size // 2), rng)
+    smear = _fbm(size, rng, base_cells=4, octaves=3)
+    haze = _fbm(size, rng, base_cells=9, octaves=3)
+
+    warm_rgb = np.clip(base_rgb * np.array([1.050, 0.995, 0.960]), 0.0, 1.0)
+    color = (base_rgb[None, None, :]
+             + (warm_rgb - base_rgb)[None, None, :] * (blush * 0.62)[..., None])
+    pale = np.clip(lun * 0.90 + tip * 0.35, 0.0, 1.0)
+    color = color * (1.0 - pale[..., None]) + lun_rgb[None, None, :] * pale[..., None]
+    color *= (1.0
+              + striae * 0.078 * striate
+              + ripple * 0.016
+              + (grain - 0.5) * 0.034)[..., None]
+    # Dissolve into the bed rather than ending on a line.
+    bed_rgb = np.asarray(bed, dtype=float)
+    fm = (fold * 0.85)[..., None]
+    color = color * (1.0 - fm) + bed_rgb[None, None, :] * fm
+    color *= (1.0 - 0.11 * fold)[..., None]
+    color *= (1.0 - 0.085 * shade)[..., None]
+
+    height = (
+        striae * 0.075 * striate
+        + ripple * 0.008
+        + arch * 0.014
+        + lun * 0.004
+        - fold * 0.016
+        - shade * 0.008
+        + (grain - 0.5) * 0.004
+    )
+
+    # Low, but never uniform. A constant low roughness gives a mirror
+    # highlight that slides across the nail as the prop swings and reads as
+    # chrome; the smear and the fingerprint haze break it into something
+    # that stays put. The groove and the shadowed ends go matte because dust
+    # collects there and the lacquer never levelled into them.
+    roughness = (
+        rough
+        + (smear - 0.5) * 0.10
+        + np.clip((haze - 0.64) * 2.6, 0.0, 1.0) * 0.15
+        + shade * 0.10
+        + fold * 0.09
+        + np.abs(striae) * 0.030 * striate
+        - pale * 0.030
+    )
+    return color.clip(0, 1), height, roughness.clip(0.05, 1.0), None
+
+
+def slap_pad(size, rng, base=(0.16, 0.16, 0.17), paint=(0.88, 0.88, 0.86),
+             warn=(0.94, 0.72, 0.06), aspect=1.0, hand_scale=0.60):
+    """One-shot road patch: hazard border and an open right hand, PAINTED.
+
+    Same law as ramp_deck and kick_pad, restated because it keeps getting
+    relearned the expensive way: marking GEOMETRY on a drivable surface
+    always betrays itself in-engine. Even a 4 mm plate casts a shadow and
+    catches edge light, and the player reads that instantly as "a thing
+    lying on the road" rather than as a marking. So the border, the keyline
+    and the hand are colour and roughness only, the height map carries
+    nothing but the asphalt's own aggregate, and the paint lands exactly
+    where a stencil crew's would.
+
+    ``aspect`` is width/length (u across the pad, v along it), handled the
+    way ramp_deck handles it: every drawn shape is measured in the isotropic
+    coordinate (u - 0.5, (v - 0.5)/aspect), so a non-square pad gets a round
+    hand rather than a stretched one.
+
+    TILING, which the kit demands of every family and which a one-shot pad
+    has to earn: the hazard border is a function of the MIRRORED coordinates
+    min(u, 1-u) and min(v, 1-v), so opposite sides are reflections and the
+    wrap is exact rather than approximate. That is not a trick to satisfy a
+    seam check - it is also why the stripes read as chevrons apexing at the
+    middle of each side, instead of as a diagonal ladder that mitres well at
+    one corner and badly at the other three.
+
+    THE HAND has to read as a hand at a glance, from a car, at speed. What
+    does that work is not outline fidelity; it is (a) the finger LENGTH
+    ORDER - middle, ring, index, little - (b) visible gaps between the
+    fingertips over bases that merge into the palm, and (c) a thumb that is
+    short, fat and thrown out to the side. Five equal spokes read as a
+    starfish and five equal capsules read as a comb; both are the failure
+    mode here. Drawn as capsules and superellipses evaluated per texel
+    rather than through PIL, so the anti-aliasing feather is a fixed number
+    of TEXELS at any size instead of whatever a LANCZOS downsample of a 2x
+    canvas happens to give. Right hand, palm toward the viewer, thumb on
+    the -u side.
+    """
+
+    aspect = float(max(aspect, 1e-3))
+    base_rgb = np.asarray(base, dtype=float)
+    paint_rgb = np.asarray(paint, dtype=float)
+    warn_rgb = np.asarray(warn, dtype=float)
+    seal_rgb = np.clip(base_rgb * 0.55, 0.0, 1.0)
+
+    # The road under the paint: the same four lines as ``asphalt`` (and as
+    # ramp_deck and kick_pad before this). Duplicated rather than called
+    # because ``aggregate`` is wanted BY NAME below - the paint has to break
+    # over the proud stones, and that is most of what separates worn road
+    # marking from a decal sticker.
+    aggregate = _value_noise(size, size // 2, rng)
+    blotch = _fbm(size, rng, base_cells=3, octaves=4)
+    road = _colorize(base, 0.35 + aggregate * 0.4 + blotch * 0.25, 0.16)
+    road_rough = 0.88 + (blotch - 0.5) * 0.08
+
+    rows = (np.arange(size, dtype=float) + 0.5) / size
+    u = ((np.arange(size, dtype=float) + 0.5) / size)[None, :]
+    v = (1.0 - rows)[:, None]
+    texel = 1.0 / size
+    border = 0.07                       # hazard band, fraction of the u span
+
+    def _ss(t):
+        t = np.clip(t, 0.0, 1.0)
+        return t * t * (3.0 - 2.0 * t)
+
+    # Isotropic pad coordinates, and the inward depth from the rim measured
+    # in the same units. min(edge_v)/aspect makes the band the same number of
+    # METRES on all four sides for any aspect.
+    px = np.broadcast_to(u - 0.5, (size, size))
+    py = np.broadcast_to((v - 0.5) / aspect, (size, size))
+    mirror_u = np.minimum(u, 1.0 - u)
+    mirror_v = np.minimum(v, 1.0 - v) / aspect
+    depth = np.minimum(mirror_u, mirror_v)
+
+    band = 1.0 - _ss((depth - border) / (1.6 * texel) + 0.5)
+    keyline = _aa_slab(depth, border + 0.014, border + 0.028, 2.2 * texel)
+
+    # Chevrons: 45 degrees in metres, mirrored, 50% duty, anti-aliased on the
+    # phase so they stay clean when the pad is seen edge-on down the road.
+    pitch = 22.0
+    phase = ((mirror_u + mirror_v) * pitch) % 1.0
+    diag = _ss((0.5 - np.abs(phase - 0.5) * 2.0) / (4.0 * pitch * texel) + 0.5)
+
+    # HAND LAYOUT in hand units: +y toward the fingertips, +x toward the
+    # little finger, origin near the palm centre. Normalised numerically
+    # below so the silhouette's bounding box is exactly `hand_scale` of the
+    # inner area, whatever anyone later does to these numbers.
+    fingers = (
+        # base_x, base_y, length, splay_deg, root_r, tip_r
+        (-0.155, 0.030, 0.365, -15.0, 0.058, 0.043),   # index
+        (-0.045, 0.070, 0.420, -4.0, 0.060, 0.045),    # middle, the longest
+        (0.065, 0.055, 0.385, 8.0, 0.056, 0.042),      # ring
+        (0.165, 0.000, 0.300, 21.0, 0.047, 0.036),     # little, the shortest
+    )
+    thumb = (-0.205, -0.150, 0.265, -52.0, 0.078, 0.055)
+    palm = (0.0, -0.140, 0.248, 0.268, 2.7)            # cx, cy, a, b, exponent
+    thenar = (-0.175, -0.185, 0.118, 0.150, 2.4)       # the ball of the thumb
+
+    limbs = []
+    xs, ys = [], []
+    for bx, by, length, deg, r0, r1 in (*fingers, thumb):
+        angle = math.radians(deg)
+        tx = bx + length * math.sin(angle)
+        ty = by + length * math.cos(angle)
+        limbs.append((bx, by, tx, ty, r0, r1))
+        xs += [bx - r0, bx + r0, tx - r1, tx + r1]
+        ys += [by - r0, by + r0, ty - r1, ty + r1]
+    for cx, cy, a, b, _n in (palm, thenar):
+        xs += [cx - a, cx + a]
+        ys += [cy - b, cy + b]
+    mid_x = 0.5 * (min(xs) + max(xs))
+    mid_y = 0.5 * (min(ys) + max(ys))
+    fit = 1.0 / max(max(xs) - min(xs), max(ys) - min(ys), 1e-6)
+
+    inner = max(min(0.5 - border, 0.5 / aspect - border), 0.02)
+    scale = max(2.0 * inner * hand_scale * fit, 1e-5)
+    lx = px / scale + mid_x
+    ly = py / scale + mid_y
+    feather = max(1.7 * texel / scale, 1e-6)
+
+    def _capsule(ax, ay, bx, by, r0, r1):
+        """Tapered capsule. Constant-radius capsules read as sausages; a
+        finger is 35% thinner at the tip than at the knuckle."""
+        pax, pay = lx - ax, ly - ay
+        bax, bay = bx - ax, by - ay
+        h = np.clip((pax * bax + pay * bay) / max(bax * bax + bay * bay, 1e-9),
+                    0.0, 1.0)
+        return np.hypot(pax - bax * h, pay - bay * h) - (r0 + (r1 - r0) * h)
+
+    def _superellipse(cx, cy, a, b, n):
+        s = (np.abs((lx - cx) / a) ** n + np.abs((ly - cy) / b) ** n) ** (1.0 / n)
+        return (s - 1.0) * min(a, b)
+
+    def _smin(a, b, k):
+        """Polynomial smooth union - the interdigital webbing. A hard min
+        leaves a razor notch between the fingers that no real hand has and
+        that aliases badly once the pad is a few metres away."""
+        h = np.clip(0.5 + 0.5 * (b - a) / k, 0.0, 1.0)
+        return b + (a - b) * h - k * h * (1.0 - h)
+
+    dist = _capsule(*limbs[0])
+    for limb in limbs[1:4]:
+        dist = _smin(dist, _capsule(*limb), 0.018)
+    dist = _smin(dist, _capsule(*limbs[4]), 0.030)
+    dist = _smin(dist, _superellipse(*palm), 0.055)
+    dist = _smin(dist, _superellipse(*thenar), 0.070)
+
+    hand = _ss(0.5 - dist / feather)
+    # `rim` is 1 well inside the silhouette and falls to 0 at its edge, over
+    # a band measured in TEXELS rather than in hand units - a band tied to
+    # the hand's size renders as a soft bevel and makes the marking read as
+    # an extruded 3D hand lying on the road, which is the exact failure this
+    # family exists to avoid. It is applied to COVERAGE rather than to alpha
+    # (below) so the thinning is broken up by the same aggregate and chip
+    # noise as the rest of the paint. A smooth alpha ramp is a bevel; a
+    # ragged one is a roller running out of paint.
+    rim = _ss(-dist / max(9.0 * feather, 1e-9))
+
+    # WEAR. Road paint is thin: it sits in the binder between the stones and
+    # gets ground off the tops of them, it scuffs in patches, and it is
+    # always thinnest at the stencil edge where the roller ran out. Coverage
+    # therefore never reaches 1, and the outer rim of the hazard band takes
+    # the worst of it because that is where the tyres cross.
+    grime = _fbm(size, rng, base_cells=9, octaves=4)
+    scuff = _value_noise(size, max(8, size // 14), rng)
+    polish = _fbm(size, rng, base_cells=2, octaves=3)
+    stone = np.clip((aggregate - 0.56) * 2.2, 0.0, 1.0)
+    # Real fresh stencil work loses about 5% of its coverage, at the
+    # edges. At threshold 0.70 knocked out at 0.95 this removed 19.6% of the
+    # painted hand in ~133 mm holes: measles, not wear.
+    chew = np.clip((scuff - 0.80) * 3.4, 0.0, 1.0)
+    coverage = np.clip(
+        # 0.30 and 0.15, not 0.95 and 0.45: at full knockout this removed
+        # 19.6% of the painted hand in ~133 mm holes, which is measles
+        # rather than wear. Fresh stencil work loses about 5%, at the edges.
+        0.70 + grime * 0.72 + (polish - 0.5) * 0.22 - chew * 0.30 - stone * 0.15,
+        0.0,
+        1.0,
+    )
+    border_cov = np.clip(coverage * (0.62 + 0.42 * _ss(depth / max(border, 1e-6))),
+                         0.0, 1.0)
+
+    a_seal = band * (1.0 - diag) * border_cov * 0.80
+    a_warn = band * diag * border_cov
+    a_key = keyline * coverage
+    a_hand = hand * np.clip(coverage - (1.0 - rim) * 0.50, 0.0, 1.0)
+
+    color = road
+    for rgb, alpha in ((seal_rgb, a_seal), (warn_rgb, a_warn),
+                       (paint_rgb, a_key), (paint_rgb, a_hand)):
+        m = np.clip(alpha, 0.0, 1.0)[..., None]
+        color = color * (1.0 - m) + rgb[None, None, :] * m
+
+    # Paint is smoother than the road it sits on, and worn-through texels get
+    # the road's roughness back for free because `painted` goes to zero
+    # there - no separate mask, no chance of the two drifting apart.
+    painted = np.clip(a_seal + a_warn + a_key + a_hand, 0.0, 1.0)
+    paint_rough = (0.44 + (blotch - 0.5) * 0.12 + stone * 0.14
+                   + (1.0 - coverage) * 0.10)
+    roughness = road_rough * (1.0 - painted) + paint_rough * painted
+    # No paint geometry (see the docstring). The one concession is that a
+    # thick film fills the voids between the stones slightly, which is a
+    # height the paint REMOVES rather than adds.
+    height = aggregate * 0.12 * (1.0 - 0.30 * painted)
+    return color.clip(0, 1), height, roughness.clip(0.05, 1.0), None
+
+
+def carbon_weave(size, rng, base=(0.052, 0.055, 0.063), tows=14.0, twill=2,
+                 sheen=0.55, rough=0.15, glint=(0.30, 0.34, 0.42)):
+    """2x2 twill carbon-fibre laminate under clearcoat.
+
+    Added 2026-08-24 for the Spin Launch tether, which is the one surface
+    on that machine the reference material insists on: SpinLaunch's own
+    cutaway calls the arm a "high tensile strength composite", and every
+    published photograph of it reads as woven prepreg, not as painted
+    steel. ``steel_worn`` and ``machined_steel`` are both WRONG here in a
+    way that shows at range - they carry metre-scale rolling banding and
+    bright drag scuffs, and a 16 m blade skinned in either reads as a
+    girder.
+
+    The weave is authored the way the real cloth is woven rather than as
+    a checkerboard: each pixel belongs to a warp tow (running along v) and
+    a weft tow (along u), one of which is on top. A 2x2 twill steps that
+    over/under decision by one tow per row, which is what produces the
+    familiar diagonal rib - a plain (``twill=1``) weave gives the
+    finer-grained square cloth instead, and both are one argument apart.
+
+    Anisotropy is the whole look: the filaments inside a tow run ALONG
+    that tow, so the striations are drawn per-direction and picked up by
+    whichever tow is visible. The crown of the visible tow is what catches
+    light, so the sheen term rides ``crown`` squared and the same field
+    darkens at the tow boundary - that shadow line is what separates the
+    weave from a noise texture at reading distance.
+    """
+
+    ramp = np.linspace(0.0, tows, size, endpoint=False)
+    iu = np.tile(np.floor(ramp)[None, :], (size, 1))
+    iv = np.tile(np.floor(ramp)[:, None], (1, size))
+    fu = np.tile((ramp % 1.0)[None, :], (size, 1))
+    fv = np.tile((ramp % 1.0)[:, None], (1, size))
+    period = 2 * twill
+    warp_up = (((iu - iv) % period) < twill).astype(float)
+
+    # Tow cross-sections are rounded, so the crown is a half-sine across
+    # the tow width and zero at its edges.
+    crown_u = np.sin(np.pi * fu)
+    crown_v = np.sin(np.pi * fv)
+    # Filament striations run ALONG the tow: a warp tow runs down the
+    # image, so its filaments vary across u.
+    fil_warp = np.abs(_stripes(size, tows * 9.0, axis=1) - 0.5) * 2.0
+    fil_weft = np.abs(_stripes(size, tows * 9.0, axis=0) - 0.5) * 2.0
+    jitter = _fbm(size, rng, base_cells=6, octaves=3)
+
+    crown = warp_up * crown_u + (1.0 - warp_up) * crown_v
+    fil = warp_up * fil_warp + (1.0 - warp_up) * fil_weft
+    spec = np.clip(crown, 0.0, 1.0) ** 2.2
+    tone = 0.34 + spec * sheen + (fil - 0.5) * 0.18 + (jitter - 0.5) * 0.10
+    color = _colorize(base, tone, 0.9)
+    for channel in range(3):
+        color[..., channel] += spec * glint[channel] * 0.30
+    # The boundary between two tows sits in shadow under the clearcoat.
+    shadow = np.clip(1.0 - crown, 0.0, 1.0) ** 2
+    color *= (1.0 - shadow * 0.45)[..., None]
+
+    height = crown * 0.09 - shadow * 0.04 + (fil - 0.5) * 0.012
+    roughness = rough + (1.0 - spec) * 0.11 + shadow * 0.12 + (jitter - 0.5) * 0.04
+    return color.clip(0, 1), height, roughness.clip(0, 1), None
+
+
+# ---------------------------------------------------------------------------
+# Tire families (2026-08-24, colossus_tire).
+#
+# `rubber_tread` already in this kit is a SNEAKER OUTSOLE - gum dots, worn
+# centres, a 0.9 base. Skinning a 28 m earthmover radial in it reads as a
+# trainer, and none of the five surfaces a real tire actually presents
+# (tread rubber, sidewall rubber, inner liner, carcass laminate, bead
+# chafer) look like each other. They are different compounds with different
+# manufacturing marks, so they are five families here.
+#
+# What each one is grounded in:
+#
+#   tread rubber   comes out of a segmented mould, so it carries the mould's
+#                  fine grain plus VENT SPEW - the whiskers of rubber forced
+#                  into the mould's air vents, snipped but never flush. In
+#                  service it takes stone nicks and polishes where it works.
+#   sidewall       comes out of a two-piece mould, so it carries a PARTING
+#                  LINE, circumferential mould ripple, and (on anything not
+#                  factory-fresh) ozone CHECKING - the fine crazing network
+#                  that opens on flexing rubber - plus antiozonant BLOOM, the
+#                  waxy haze that migrates to the surface and settles in the
+#                  recesses. Getting bloom into the recesses and not onto the
+#                  crowns is most of what separates rubber from grey plastic.
+#   inner liner    is halobutyl cured against a BLADDER, and the bladder's
+#                  vent grooves emboss a fine lattice into it. It is dusted
+#                  with release agent and it is the only tire surface with a
+#                  faint sheen.
+#   laminate       is only ever seen at a cut edge: liner, tie gum, casing
+#                  plies, cushion, four steel belts, cap ply, undertread,
+#                  tread cap - each a band, with the STEEL CORD cross sections
+#                  showing as bright dots at their real pitch.
+#   bead/chafer    is a woven fabric chafer over hard apex stock, polished
+#                  where the rim flange bears on it.
+# ---------------------------------------------------------------------------
+
+
+def _cord_row(size, v_centre, v_half, pitch, radius, phase=0.0):
+    """Circular steel-cord cross sections in one laminate band.
+
+    ``pitch`` and ``radius`` are in texture fractions. Cords repeat along u
+    and are clipped to the band, which is what makes a belt read as a row of
+    wires embedded in gum rather than as a stripe.
+
+    The pitch is SNAPPED to a whole number of repeats across the sheet. An
+    authored 0.052 gives 19.2 cords, so the cord straddling the wrap edge is
+    cut at the wrong phase and the sheet does not tile - measured as a 5x step
+    across the seam. Snapping moves each pitch by under 2%, which no eye can
+    see, and closes it exactly.
+    """
+
+    repeats = max(1, round(1.0 / max(pitch, 1e-6)))
+    pitch = 1.0 / repeats
+    u = np.tile(np.linspace(0.0, 1.0, size, endpoint=False)[None, :], (size, 1))
+    v = np.tile(np.linspace(0.0, 1.0, size, endpoint=False)[:, None], (1, size))
+    du = ((u / pitch + phase) % 1.0 - 0.5) * pitch
+    dv = v - v_centre
+    disc = np.sqrt(du * du + dv * dv) / max(radius, 1e-6)
+    inside = (np.abs(dv) <= v_half).astype(float)
+    return np.clip(1.0 - disc, 0.0, 1.0) * inside
+
+
+def _band(size, lo, hi, feather=0.006):
+    """Soft-edged horizontal band mask over v in [0, 1].
+
+    Built as a DIFFERENCE OF STEPS so abutting bands sum to exactly 1 at every
+    shared boundary. The obvious formulation - clip((v-lo)/f) * clip((hi-v)/f)
+    - drives both factors to zero on a shared edge, so the accumulated colour
+    there collapses to black: measured as a hairline at all seven interfaces
+    of the carcass laminate (row means 1.0-3.2 against neighbours near 27).
+    """
+
+    v = np.tile(np.linspace(0.0, 1.0, size, endpoint=False)[:, None], (1, size))
+
+    def step(edge):
+        return np.clip((v - edge) / feather + 0.5, 0.0, 1.0)
+
+    return step(lo) - step(hi)
+
+
+def _spew(size, rng, count, length=0.018, width=0.0045):
+    """Moulded vent spew: short rubber whiskers at random angles.
+
+    Real vent spew is the single cheapest tell that a rubber surface came out
+    of a mould rather than out of a texture generator, and it is nearly always
+    missing. Each whisker is a capsule with a rounded root.
+    """
+
+    field = np.zeros((size, size))
+    u = np.tile(np.linspace(0.0, 1.0, size, endpoint=False)[None, :], (size, 1))
+    v = np.tile(np.linspace(0.0, 1.0, size, endpoint=False)[:, None], (1, size))
+    for _ in range(int(count)):
+        cu = float(rng.uniform(0.0, 1.0))
+        cv = float(rng.uniform(0.0, 1.0))
+        angle = float(rng.uniform(0.0, math.pi))
+        half = length * float(rng.uniform(0.6, 1.4))
+        ca, sa = math.cos(angle), math.sin(angle)
+        # Wrap the offsets so a whisker crossing the seam stays tileable.
+        du = (u - cu + 0.5) % 1.0 - 0.5
+        dv = (v - cv + 0.5) % 1.0 - 0.5
+        along = du * ca + dv * sa
+        across = -du * sa + dv * ca
+        along = np.clip(np.abs(along) - half, 0.0, None)
+        distance = np.sqrt(along * along + across * across) / width
+        field = np.maximum(field, np.clip(1.0 - distance, 0.0, 1.0))
+    return field
+
+
+def _checking(size, rng, cells, strength, octaves=3):
+    """Ozone checking: the crazing network that opens in flexing rubber.
+
+    Built as the ridge set of a value-noise field (|n - 0.5| near zero), which
+    gives closed, branching, roughly polygonal cracks rather than the parallel
+    scratches a stripe field would give.
+    """
+
+    noise = _fbm(size, rng, base_cells=cells, octaves=octaves)
+    ridge = 1.0 - np.clip(np.abs(noise - 0.5) / 0.055, 0.0, 1.0)
+    fine = _fbm(size, rng, base_cells=cells * 2, octaves=2)
+    return ridge * (0.45 + fine * 0.55) * strength
+
+
+def tire_tread(size, rng, base=(0.043, 0.042, 0.041), wear=0.42, nicks=0.55,
+               rough=0.62, spew=26, grain=0.55):
+    """Moulded tread compound: mould grain, vent spew, stone nicks, polish.
+
+    The LUGS THEMSELVES ARE GEOMETRY on this prop - this family only has to
+    supply the compound's surface, which is why it is not a lug pattern. Four
+    things are doing the work:
+
+    * mould grain, a very fine isotropic noise, is the base tooth. Tread
+      rubber is not smooth and a smooth normal map is the giveaway.
+    * vent spew whiskers, sparse and raised.
+    * stone nicks: sharp, DARK, high-frequency gouges with raised lips, the
+      accumulated damage of rock service. They are cut into the height field
+      rather than painted, so grazing light finds them.
+    * a broad polish mask that both LIGHTENS and SMOOTHS. Worked rubber
+      polishes; unworked rubber in the groove shadows stays matte and dusty.
+      Coupling those two channels is what stops the surface reading flat.
+    """
+
+    # Frequency budget: at TILE_TREAD = 2.20 m on 1024 px the texel is
+    # 2.15 mm, so features down to ~5 mm are resolvable. Round 1 authored its
+    # finest tread octave at 34 mm and the normal map measured essentially
+    # flat. `fine` now starts at 102 cells (21 mm) and its top octave lands at
+    # 5.4 mm, which is the actual grain of a mould plate.
+    fine = _fbm(size, rng, base_cells=max(64, size // 10), octaves=3)
+    micro = _fbm(size, rng, base_cells=max(96, size // 6), octaves=2)
+    # MASK AND AMOUNT ARE SEPARATE. Round 1 multiplied the polish mask by
+    # `wear` before using it as a mask, so it capped at 0.42 and the roughness
+    # map spanned 0.667..0.827 - perceptually a constant sheet. The mask stays
+    # 0..1; `wear` scales the EFFECT.
+    pmask = np.clip((_fbm(size, rng, base_cells=3, octaves=3) - 0.35) / 0.5, 0.0, 1.0)
+    polish = pmask * wear
+    # Decametre band: at TILE_TREAD = 2.2 m a base_cells=1 octave is a 2.2 m
+    # feature, which survives every mip level a hero framing uses.
+    broad = _fbm(size, rng, base_cells=1, octaves=2)
+
+    nick_field = _fbm(size, rng, base_cells=max(10, size // 40), octaves=3)
+    cuts = np.clip((nick_field - (1.0 - 0.16 * nicks)) / 0.06, 0.0, 1.0)
+    lips = _blur(cuts, 1.6) * 0.5 - cuts * 0.5
+    whiskers = _spew(size, rng, spew)
+
+    height = (
+        (fine - 0.5) * 0.75 * grain
+        + (micro - 0.5) * 0.26
+        - cuts * 0.55
+        + lips * 0.22
+        + whiskers * 0.42
+    )
+
+    # Carbon-black rubber is not neutral: it skews very slightly blue in
+    # light, and polished rubber lifts toward grey rather than toward white.
+    tone = 0.46 + (fine - 0.5) * 0.30 + (micro - 0.5) * 0.16 + polish * 0.34
+    color = _colorize(base, tone, 0.85)
+    color[..., 2] *= 1.0 + polish * 0.10
+    color *= (1.0 - cuts * 0.42)[..., None]
+    color += whiskers[..., None] * 0.018
+
+    # 0.92 unworked, 0.44 on a burnished crown, ~0.98 in a fresh cut - torn
+    # rubber is the roughest thing on a tire.
+    roughness = (
+        0.92 - pmask * wear * 1.15 + cuts * 0.06 + (micro - 0.5) * 0.05
+        + (broad - 0.5) * 0.30
+    )
+    color *= (0.86 + broad * 0.28)[..., None]
+    return color.clip(0, 1), height, roughness.clip(0.05, 1), None
+
+
+def tire_sidewall(size, rng, base=(0.048, 0.047, 0.049), ripples=104.0,
+                  bloom=0.60, checking=0.30, spew=34, parting=0.5,
+                  rough=0.52):
+    """Moulded sidewall: circumferential ripple, parting line, bloom, checking.
+
+    ``ripples`` runs along V. The generator maps u = arc length (round the
+    tire) and v = meridian arc length (out from the bead), so a stripe that
+    varies along U has iso-lines of constant u, which are RADIAL spokes.
+    Round 1 used axis=1 and put 76 mm radial spokes on the sidewall where a
+    real one has concentric ripple; you can see them in the renders. Concentric
+    means varying along v, i.e. axis=0.
+
+    ``bloom`` is antiozonant wax and it is the whole trick: it is DEPOSITED IN
+    THE RECESSES (low height), so it is masked by the inverse of the height
+    field rather than sprayed uniformly. Wax also kills specular, so it lifts
+    roughness where it settles.
+    """
+
+    ripple = np.abs(_stripes(size, ripples, axis=0) - 0.5) * 2.0
+    ripple = ripple * ripple * (3.0 - 2.0 * ripple)
+    radial = _fbm(size, rng, base_cells=max(24, size // 16), octaves=4)
+    radial = np.tile(radial.mean(axis=1, keepdims=True), (1, size)) * 0.6 + radial * 0.4
+    fine = _fbm(size, rng, base_cells=max(96, size // 6), octaves=3)
+    # Ozone checking is 1-10 mm apart on real rubber. At 2.54 mm/texel that is
+    # resolvable; round 1 authored it at 260 mm, i.e. continent scale.
+    crazing = _checking(size, rng, max(48, size // 8), checking, octaves=2)
+    whiskers = _spew(size, rng, spew)
+    # Decametre band: dirt and water staining sweeping round the disc, plus a
+    # dry bead-to-shoulder gradient. This is the only thing on the sidewall
+    # that survives being mipped to a whole-tire framing.
+    broad = _fbm(size, rng, base_cells=1, octaves=2)
+    band = np.tile(np.linspace(0.0, 1.0, size, endpoint=False)[:, None], (1, size))
+
+    # Mould parting line: one raised, slightly flashed ridge across the sheet.
+    # The parting line runs round the tire, so it is a line of constant v.
+    v = np.tile(np.linspace(0.0, 1.0, size, endpoint=False)[:, None], (1, size))
+    seam_v = 0.5 + (radial[:, :1].mean() - 0.5) * 0.04
+    seam = np.exp(-(((v - seam_v) / 0.006) ** 2)) * parting
+
+    height = (
+        (ripple - 0.5) * 0.20
+        + (radial - 0.5) * 0.30
+        + (fine - 0.5) * 0.11
+        - crazing * 0.46
+        + whiskers * 0.38
+        + seam * 0.30
+    )
+
+    # A MASK, not a haze. Round 1's `clip(0.5 - height*1.4)` spanned 0.22 to
+    # 0.78 over a height field of amplitude +/-0.2 - every texel got some, so
+    # the "deposited in the recesses" idea in the docstring above was a flat
+    # 17% film. This selects valleys and crack interiors only.
+    recess = np.clip((0.02 - height) / 0.10, 0.0, 1.0) ** 1.5
+    wax = recess * bloom
+
+    tone = 0.46 + (ripple - 0.5) * 0.18 + (radial - 0.5) * 0.26 + (fine - 0.5) * 0.14
+    color = _colorize(base, tone, 0.9)
+    color *= (1.0 - crazing * 0.35)[..., None]
+    # Bloom is a warm grey haze, not white.
+    color = color * (1.0 - wax[..., None] * 0.9) + wax[..., None] * np.array(
+        [0.20, 0.18, 0.15]
+    ) * 0.9
+    color += (whiskers * 0.016 + seam * 0.010)[..., None]
+
+    # Wax kills specular outright, so the bloomed valleys are the matte part
+    # and the ripple crowns stay waxy-glossy. That contrast is the whole
+    # material read at distance.
+    roughness = (
+        rough + wax * 0.85 + crazing * 0.35 + (radial - 0.5) * 0.10
+        + (broad - 0.5) * 0.34 + band * 0.14
+    )
+    color *= (0.84 + broad * 0.30)[..., None]
+    return color.clip(0, 1), height, roughness.clip(0.05, 1), None
+
+
+def tire_sidewall_print(size, rng, lines=(), base=(0.052, 0.051, 0.053),
+                        aspect=6.0, relief=0.55, ink_lift=0.34, rough=0.5):
+    """The small-print band: service code, TIN, load and pressure legends.
+
+    Moulded sidewall print is RAISED rubber, the same compound as the sidewall
+    - it is not ink. So the text drives the HEIGHT field and only nudges
+    colour, because what makes it legible on a real tire is the shadow at the
+    letter's foot and the sheen on its crown, not contrast. ``ink_lift`` is
+    deliberately small for that reason: crank it and you get a printed decal.
+
+    The strip is drawn at its true ``aspect`` and stretched into the square
+    texture afterwards, the marquee lesson - drawing into the square squashes
+    the type.
+    """
+
+    from PIL import ImageDraw, ImageFont
+
+    lines = tuple(str(line) for line in lines if str(line).strip())
+    strip_w = size * 2
+    strip_h = max(48, int(strip_w / max(aspect, 0.5)))
+    strip = Image.new("L", (strip_w, strip_h), 0)
+    draw = ImageDraw.Draw(strip)
+    font_path = _font_file()
+
+    def _font(px):
+        if font_path:
+            return ImageFont.truetype(font_path, max(6, px))
+        return ImageFont.load_default()
+
+    if lines:
+        rows = len(lines)
+        px = int(strip_h / (rows + 0.8) * 0.72)
+        for index, text in enumerate(lines):
+            font = _font(px)
+            box = draw.textbbox((0, 0), text, font=font)
+            cx = strip_w / 2.0 - (box[2] - box[0]) / 2.0 - box[0]
+            cy = strip_h * (index + 0.62) / (rows + 0.25) - (box[3] - box[1]) / 2.0 - box[1]
+            draw.text((cx, cy), text, fill=255, font=font)
+
+    text_mask = np.asarray(
+        strip.resize((size, size), Image.LANCZOS), dtype=float
+    ) / 255.0
+    text_mask = np.clip(text_mask * 1.25, 0.0, 1.0)
+
+    ripple = np.abs(_stripes(size, 96.0, axis=0) - 0.5) * 2.0
+    fine = _fbm(size, rng, base_cells=max(96, size // 6), octaves=3)
+    crazing = _checking(size, rng, max(48, size // 8), 0.16, octaves=2)
+
+    height = (
+        text_mask * relief
+        + (ripple - 0.5) * 0.09
+        + (fine - 0.5) * 0.10
+        - crazing * 0.22
+    )
+    # Shoulder shadow at the foot of each raised character.
+    foot = np.clip(_blur(text_mask, 2.2) - text_mask, 0.0, 1.0)
+
+    tone = 0.46 + (fine - 0.5) * 0.20 + text_mask * ink_lift - foot * 0.22
+    color = _colorize(base, tone, 0.9)
+    # Raised print is the one part of a sidewall that stays glossy: it is
+    # proud, so it never collects the wax the field does.
+    roughness = (
+        0.86
+        - text_mask * 0.40
+        + crazing * 0.22
+        + foot * 0.10
+        + (fine - 0.5) * 0.10
+    )
+    return color.clip(0, 1), height, roughness.clip(0.05, 1), None
+
+
+def tire_liner(size, rng, base=(0.088, 0.092, 0.086), lattice=128.0, talc=0.42,
+               splices=2, rough=0.30, cord_pitch=54.0):
+    """Halobutyl inner liner, cured against a bladder.
+
+    The lattice is the point. A curing bladder is moulded with a shallow vent
+    grid so trapped air can escape, and that grid is embossed into every inner
+    liner ever made - a fine diamond lattice of grooves, unmistakable once you
+    have seen inside a tire. It is the reason the cavity of this prop cannot
+    just be dark tread rubber.
+
+    Butyl is also the one tire surface with a slight sheen and a green-grey
+    cast, and it carries release-agent dusting (``talc``) plus the raised
+    ridges where the liner plies were spliced.
+
+    PITCH MATTERS MORE THAN PATTERN HERE. A real bladder vent grid is 5-20 mm.
+    Round 1 ran the lattice at 26 cells on a 2.40 m tile - 92 mm diamonds -
+    and paired it with the strongest normal in the set, so the cavity of a
+    28 m tire read as a tiled bathroom and actively destroyed the sense of
+    scale on the largest interior surface. 128 cells is 18.7 mm, and 128
+    divides 1024 so the tile stays exact.
+
+    ``cord_pitch`` adds the other thing a liner shows and round 1 did not: the
+    radial casing cords telegraphing through as a faint corduroy running
+    ACROSS the tire. It is the detail that says "radial" from the inside.
+    """
+
+    u = np.tile(np.linspace(0.0, lattice, size, endpoint=False)[None, :], (size, 1))
+    v = np.tile(np.linspace(0.0, lattice, size, endpoint=False)[:, None], (1, size))
+    diag_a = np.abs(((u + v) % 1.0) - 0.5) * 2.0
+    diag_b = np.abs(((u - v) % 1.0) - 0.5) * 2.0
+    groove = np.clip(1.0 - np.minimum(diag_a, diag_b) / 0.10, 0.0, 1.0)
+
+    fine = _fbm(size, rng, base_cells=max(96, size // 6), octaves=3)
+    dust = np.clip(
+        (_fbm(size, rng, base_cells=max(128, size // 4), octaves=3) - 0.58) / 0.34,
+        0.0,
+        1.0,
+    ) * talc
+    # Casing cords telegraphing through the liner: low amplitude, one axis.
+    cords = (np.cos(2.0 * math.pi * np.tile(
+        np.linspace(0.0, cord_pitch, size, endpoint=False)[None, :], (size, 1)
+    )) * 0.5 + 0.5)
+
+    splice = np.zeros((size, size))
+    for index in range(int(splices)):
+        centre = (index + 0.5) / max(int(splices), 1)
+        offset = (v / max(lattice, 1e-6)) - centre
+        splice = np.maximum(splice, np.exp(-((offset / 0.010) ** 2)))
+
+    height = groove * -0.26 + (fine - 0.5) * 0.10 + splice * 0.30 + (cords - 0.5) * 0.045
+    tone = (
+        0.50 - groove * 0.18 + (fine - 0.5) * 0.20 + dust * 0.30
+        + splice * 0.08 + (cords - 0.5) * 0.05
+    )
+    color = _colorize(base, tone, 0.8)
+    # Release dust is a pale mineral grey, and it kills the butyl sheen.
+    color = color * (1.0 - dust[..., None] * 0.28) + np.array(
+        [0.52, 0.52, 0.50]
+    ) * dust[..., None] * 0.28
+
+    # Butyl is the one genuinely semi-gloss surface on a tire; the release
+    # dust on top of it is the matte part. That is the contrast.
+    broad = _fbm(size, rng, base_cells=1, octaves=2)
+    roughness = (
+        rough + dust * 0.55 + groove * 0.10 - splice * 0.04 + (broad - 0.5) * 0.26
+    )
+    color *= (0.88 + broad * 0.24)[..., None]
+    return color.clip(0, 1), height, roughness.clip(0.05, 1), None
+
+
+def tire_laminate(size, rng, section="tread", cap=(0.046, 0.045, 0.044),
+                  liner=(0.105, 0.118, 0.100), cord=(0.62, 0.63, 0.66),
+                  fabric=(0.55, 0.48, 0.36), rough=0.55):
+    """The carcass in section, as seen at the cut edge of the access port.
+
+    Bands run cavity side to outside. The STEEL CORDS are drawn as circular
+    cross sections at their own pitch per band, and that difference between
+    bands is the whole reason a cut edge reads as a tire rather than as a
+    laminated worktop.
+
+    ``section`` picks WHICH cut. It matters, and round 1 got it wrong in the
+    most visible place on the prop: the access port is cut entirely through
+    the SIDEWALL, but the band table was a CROWN section - 32% four-belt
+    package, a nylon cap ply, an undertread and a tread cap. Belts stopping at
+    the shoulder is the definition of a radial; that is what the R in the size
+    code means. A belt package showing in a sidewall cut is the loudest
+    construction error a tire person can be shown, and it was framed by its
+    own hero render two metres from where the player drives past it.
+
+    A sidewall section is: inner liner, tie gum, two radial casing plies,
+    cushion gum, sidewall compound. No belts, no cap ply, no tread cap.
+    """
+
+    v = np.tile(np.linspace(0.0, 1.0, size, endpoint=False)[:, None], (1, size))
+    fine = _fbm(size, rng, base_cells=max(12, size // 32), octaves=3)
+
+    if section == "sidewall":
+        layers = (
+            (0.000, 0.100, liner),                   # inner liner
+            (0.100, 0.160, (0.088, 0.082, 0.076)),   # tie gum / squeegee
+            (0.160, 0.380, (0.126, 0.120, 0.116)),   # casing ply 1
+            (0.380, 0.560, (0.122, 0.116, 0.112)),   # casing ply 2
+            (0.560, 0.640, (0.074, 0.071, 0.069)),   # cushion gum
+            (0.640, 1.001, (0.052, 0.051, 0.053)),   # sidewall compound
+        )
+    else:
+        layers = (
+            (0.000, 0.062, liner),                   # inner liner, butyl
+            (0.062, 0.104, (0.088, 0.082, 0.076)),   # tie gum / squeegee
+            (0.104, 0.340, (0.126, 0.120, 0.116)),   # casing ply calender stock
+            (0.340, 0.398, (0.074, 0.071, 0.069)),   # cushion gum
+            (0.398, 0.716, (0.146, 0.140, 0.136)),   # belt package skim
+            (0.716, 0.772, fabric),                  # nylon cap ply
+            (0.772, 0.858, (0.066, 0.064, 0.062)),   # undertread
+            (0.858, 1.001, cap),                     # tread cap
+        )
+    color = np.zeros((size, size, 3))
+    height = np.zeros((size, size))
+    for lo, hi, tint in layers:
+        mask = _band(size, lo, hi)
+        for channel in range(3):
+            color[..., channel] += mask * tint[channel]
+        # Each interface is a slight step: gum shrinks away from steel.
+        height += mask * (0.5 - abs((lo + hi) / 2.0 - 0.5)) * 0.02
+
+    cords = np.zeros((size, size))
+    if section == "sidewall":
+        # Two radial casing plies and nothing else. Coarse brass-plated cord.
+        for centre, phase in ((0.270, 0.0), (0.470, 0.5)):
+            cords = np.maximum(cords, _cord_row(size, centre, 0.055, 0.052, 0.019, phase))
+        cap_mask = np.zeros((size, size))
+    else:
+        for centre, phase in ((0.163, 0.0), (0.281, 0.5)):
+            cords = np.maximum(cords, _cord_row(size, centre, 0.052, 0.052, 0.019, phase))
+        # Four belts: finer cord, denser pitch, the outer pair on a different
+        # bias so their sections come out longer.
+        for centre, pitch, radius, phase in (
+            (0.440, 0.026, 0.0098, 0.0),
+            (0.518, 0.026, 0.0098, 0.5),
+            (0.596, 0.034, 0.0128, 0.25),
+            (0.672, 0.034, 0.0128, 0.75),
+        ):
+            cords = np.maximum(cords, _cord_row(size, centre, 0.030, pitch, radius, phase))
+        cap_mask = _band(size, 0.716, 0.772)
+
+    weave = np.abs(_stripes(size, 96.0, axis=1) - 0.5) * 2.0
+
+    steel = np.clip(cords, 0.0, 1.0)
+    for channel in range(3):
+        color[..., channel] = (
+            color[..., channel] * (1.0 - steel)
+            + cord[channel] * steel * (0.72 + fine * 0.5)
+        )
+        color[..., channel] += cap_mask * weave * fabric[channel] * 0.22
+
+    color *= (0.80 + fine * 0.4)[..., None]
+    height += steel * 0.38 - cap_mask * weave * 0.10 + (fine - 0.5) * 0.09
+    # Cut rubber is matte and torn; the exposed cord ends are bright metal.
+    roughness = 0.88 - steel * 0.55 + cap_mask * 0.06 + (fine - 0.5) * 0.10
+    return color.clip(0, 1), height, roughness.clip(0.05, 1), None
+
+
+# warp/weft must DIVIDE the texture size. At 44 over 1024 the cell
+# boundaries land mid-pixel, so the boundary that falls on the wrap edge
+# carries a half-pixel phase error the interior ones do not - measured as
+# an 8.7x step across the seam against neighbouring columns. 64 divides
+# every size this kit uses.
+def tire_bead(size, rng, base=(0.058, 0.056, 0.054), warp=64, weft=64,
+              polish=0.45, rough=0.48):
+    """Bead area: woven fabric chafer over hard apex stock, rim-polished.
+
+    The chafer is a real woven cloth calendered into rubber, so the weave
+    telegraphs through as a shallow over-under lattice rather than as a
+    printed pattern. ``polish`` is the burnished band where the rim flange
+    bears - smoother, lighter, and the only part of a tire that ever gets
+    shiny by contact.
+    """
+
+    ramp_u = np.tile(np.linspace(0.0, float(warp), size, endpoint=False)[None, :], (size, 1))
+    ramp_v = np.tile(np.linspace(0.0, float(weft), size, endpoint=False)[:, None], (1, size))
+    over = ((np.floor(ramp_u) + np.floor(ramp_v)) % 2 == 0).astype(float)
+    crown_u = np.sin(np.pi * (ramp_u % 1.0))
+    crown_v = np.sin(np.pi * (ramp_v % 1.0))
+    weave = over * crown_u + (1.0 - over) * crown_v
+
+    fine = _fbm(size, rng, base_cells=max(10, size // 40), octaves=3)
+    v = np.tile(np.linspace(0.0, 1.0, size, endpoint=False)[:, None], (1, size))
+    # PERIODIC. A monotonic ramp across the sheet does not tile, and the bead
+    # is a lathed ring: its texture wraps. A raised cosine of the wrapped
+    # distance keeps the burnished rim-contact band and closes the seam.
+    wrapped = np.minimum(np.abs(v - 0.30), 1.0 - np.abs(v - 0.30))
+    burnish = np.clip(1.0 - wrapped / 0.16, 0.0, 1.0) ** 1.6 * polish
+    scuff = _streaks(size, rng, 5, length_frac=0.11) * burnish
+
+    height = (weave - 0.5) * 0.40 + (fine - 0.5) * 0.11 - burnish * 0.14
+    tone = 0.46 + (weave - 0.5) * 0.24 + (fine - 0.5) * 0.18 + burnish * 0.42
+    color = _colorize(base, tone, 0.85)
+    color += (burnish * 0.05 + scuff * 0.04)[..., None]
+    roughness = (
+        np.full((size, size), rough)
+        - burnish * 0.24
+        + (1.0 - weave) * 0.10
+        + (fine - 0.5) * 0.06
+    )
+    return color.clip(0, 1), height, roughness.clip(0.05, 1), None
+
+
+def diamond_plate(size, rng, base=(0.42, 0.44, 0.47), cells=32.0, lug_angle=38.0,
+                  rough=0.42, wear=0.4):
+    """Raised-teardrop steel floor plate.
+
+    Two opposed lugs per cell at +-``lug_angle``, alternate rows offset half a
+    cell - the standard rolled pattern. Lug crowns take traffic, so they are
+    polished and lighter while the field between them stays milled and grubby.
+
+    ``cells`` is the scale-critical knob. Real rolled tread plate has 25-60 mm
+    teardrops; at TILE_STEEL = 1.60 m the round-1 default of 5 cells made them
+    320 mm, right under the camera on the walkway the player boards from and
+    directly beside correctly-scaled handrails. 32 cells is 50 mm, and 32
+    divides 1024 exactly so the tile stays clean.
+    """
+
+    u = np.tile(np.linspace(0.0, cells, size, endpoint=False)[None, :], (size, 1))
+    v = np.tile(np.linspace(0.0, cells, size, endpoint=False)[:, None], (1, size))
+    shifted = u + (np.floor(v) % 2.0) * 0.5
+    fu = (shifted % 1.0) - 0.5
+    fv = (v % 1.0) - 0.5
+
+    bump = np.zeros((size, size))
+    for sign, offset in ((1.0, -0.21), (-1.0, 0.21)):
+        angle = math.radians(lug_angle) * sign
+        ca, sa = math.cos(angle), math.sin(angle)
+        du = fu * ca + (fv - offset) * sa
+        dv = -fu * sa + (fv - offset) * ca
+        distance = np.sqrt((du / 0.30) ** 2 + (dv / 0.10) ** 2)
+        bump = np.maximum(bump, np.clip(1.0 - distance, 0.0, 1.0))
+    bump = bump ** 0.55
+
+    mill = _fbm(size, rng, base_cells=2, octaves=5)
+    mill = np.tile(mill.mean(axis=0, keepdims=True), (size, 1)) * 0.6 + mill * 0.4
+    grime = np.clip((_fbm(size, rng, base_cells=5, octaves=4) - 0.45) / 0.4, 0.0, 1.0) * wear
+
+    height = bump * 0.55 + (mill - 0.5) * 0.03
+    tone = 0.44 + bump * 0.34 + (mill - 0.5) * 0.22 - grime * 0.26
+    color = _colorize(base, tone, 0.85)
+    color *= (1.0 - grime[..., None] * 0.30)
+
+    roughness = (
+        np.full((size, size), rough)
+        - bump * 0.16
+        + grime * 0.30
+        + (mill - 0.5) * 0.08
+    )
+    return color.clip(0, 1), height, roughness.clip(0.05, 1), None
+
+
 FAMILIES = {
+    "foam_latex": foam_latex,
+    "nail_keratin": nail_keratin,
+    "slap_pad": slap_pad,
     "potato_skin": potato_skin,
+    "tire_tread": tire_tread,
+    "tire_sidewall": tire_sidewall,
+    "tire_sidewall_print": tire_sidewall_print,
+    "tire_liner": tire_liner,
+    "tire_laminate": tire_laminate,
+    "tire_bead": tire_bead,
+    "diamond_plate": diamond_plate,
+    "carbon_weave": carbon_weave,
     "brushed_metal": brushed_metal,
     "energy_label": energy_label,
     "scribed_chrome": scribed_chrome,
@@ -3334,6 +4793,35 @@ def external_set(out_dir, base_name: str, example_root, maps: dict) -> dict:
     return manifest
 
 
+def _srgb_encode(color: np.ndarray) -> np.ndarray:
+    """Linear -> sRGB, the standard piecewise transfer function.
+
+    THE TRANSFER-FUNCTION LAW (round 2, 2026-08-24, colossus_tire). Families
+    author LINEAR albedo - `_colorize` multiplies a linear base colour - and
+    `_to_image` wrote those floats straight to bytes with no encoding. But
+    AGENTS.md has already MEASURED, on engine 0.39.4.0, that a `.color` map is
+    decoded as sRGB. So an authored linear 0.043 was being written as byte 11,
+    which the engine then decodes as linear 0.0035: twelve times darker than
+    authored, and darker than any real material.
+
+    It is worse than a brightness error. Carbon-black rubber authored linear
+    occupies about 15 of 256 code values, so a BC1 cook collapses the whole
+    albedo to two or three flat colours and every bit of mould grain in the
+    colour channel is gone. Encoded, the same rubber spans ~60 code values.
+
+    This is OPT-IN (`srgb=True` per palette entry) rather than a blanket fix:
+    the kit is shared by twenty other shipped mods whose look was tuned
+    against the un-encoded output, and whose harvested DDS are hashed against
+    their current PNG bytes. Correcting them is their own round.
+    """
+
+    return np.where(
+        color <= 0.0031308,
+        color * 12.92,
+        1.055 * np.power(np.clip(color, 0.0, None), 1.0 / 2.4) - 0.055,
+    )
+
+
 def build_set(
     out_dir,
     base_name: str,
@@ -3342,8 +4830,13 @@ def build_set(
     size: int = 512,
     normal_strength: float = 2.0,
     params: dict | None = None,
+    srgb: bool = False,
 ) -> dict:
-    """Generate one texture set; returns the map manifest (relative names)."""
+    """Generate one texture set; returns the map manifest (relative names).
+
+    ``srgb`` encodes the COLOUR map only. Normal and ``_roughness.data`` maps
+    are data, not colour, and must stay linear.
+    """
 
     from pathlib import Path
 
@@ -3357,6 +4850,9 @@ def build_set(
         color, height, rough, opacity = result
         emissive = None
     manifest = {"family": family, "size": size}
+    if srgb:
+        manifest["srgb"] = True
+        color = _srgb_encode(np.clip(color, 0.0, 1.0))
     color_name = f"{base_name}.color.png"
     _save_stable(_to_image(color), out / color_name)
     manifest["baseColorMap"] = color_name
@@ -3392,6 +4888,8 @@ def build_set(
         # `.color` (not `.data`) because a glow map is authored in sRGB and is
         # allowed to be tinted.
         emissive_name = f"{base_name}_glow.color.png"
+        if srgb:
+            emissive = _srgb_encode(np.clip(emissive, 0.0, 1.0))
         _save_stable(_to_image(emissive), out / emissive_name)
         manifest["emissiveMap"] = emissive_name
     return manifest

@@ -33,10 +33,10 @@ This is an UPDATE to the existing Charlie's Catapult Seesaw resource.
 
    Certified final build:
 
-       build serial: 78
-       size:         20,276,823 bytes
+       build serial: 80
+       size:         20,287,625 bytes
        ZIP members:  53
-       SHA-256:      af5fc85ac5db71444d42b3c1667d7830c669d09c38253b68e9017e9242b0ea63
+       SHA-256:      77aa48b0e22f1de2babef186ad8ebe96c0a3a606fdfd2f597cea155fb579cce7
 
    Do not reuse serial 27 metadata: that archive contains the obsolete
    40-ton prototype and v2 physical shape.

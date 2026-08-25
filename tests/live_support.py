@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import json
 import os
+import re
 import secrets
 import socket
 import stat
@@ -20,6 +21,22 @@ from pydantic import SecretStr
 from beamng_mcp.installer import BRIDGE_CONFIG, MOD_DIRECTORY, MOD_MARKER
 
 _DEFAULT_SERVICE_PORTS = frozenset({8765, 25252})
+# BeamNG compiles every .dae it loads into a .cdae keyed on the MODEL PATH,
+# and never invalidates it when the ZIP behind that path changes. Both roots
+# are live in the sentinel profile: temp/vehicles/<mod_id>/ for a vehicle mod
+# (spin_launch: 29 .cdae plus a nested textures/ of .dds) and
+# temp/art/shapes/<mod_id>/ for a level prop (cannon_car_wash). JBeam and Lua
+# changes land immediately; MESH changes do not, so a green live run does not
+# prove the shipped ZIP's geometry until this cache is gone first.
+_MESH_CACHE_ROOTS = (Path("temp") / "vehicles", Path("temp") / "art" / "shapes")
+# An ALLOW-list, not a skip-list: anything here that is not one of these is a
+# broken assumption about what the cache holds, and the purge refuses rather
+# than deleting a file it does not understand.
+_MESH_CACHE_SUFFIXES = frozenset({".cdae", ".dds", ".dts"})
+_MESH_CACHE_MAX_DEPTH = 3
+# Anchored, no separators, no dots: a mod id must be a bare literal before it
+# is ever concatenated into a deletion path.
+_MOD_ID_PATTERN = re.compile(r"\A[A-Za-z0-9][A-Za-z0-9_]{0,63}\Z")
 _HELD_PROFILE_LOCKS: set[Path] = set()
 _PROFILE_LOCK_GUARD = threading.Lock()
 _LOG_CURSOR_ANCHOR_BYTES = 64
@@ -370,6 +387,80 @@ def cleanup_exact_live_artifacts(
             errors.append(exc)
     if errors:
         raise ExceptionGroup("live-test artifact cleanup failed", errors)
+
+
+def purge_cached_prop_meshes(user: Path, mod_id: str) -> tuple[Path, ...]:
+    """Drop one mod's compiled-mesh cache so the next boot recompiles from the ZIP.
+
+    BeamNG caches compiled meshes per MODEL PATH and does not invalidate them
+    when the archive behind that path changes. Measured live 2026-08-24: three
+    consecutive rebuilds silently did nothing - the game kept serving .cdae
+    files from the first session while the gate happily verified the NEW ZIP's
+    SHA-256 against its lock. It was provable only from "Loaded Static
+    Collision ... Verts: 373, Tris: 472" staying frozen while the deck mesh had
+    gained two boxes. Hash the archive all you like; without this the live gate
+    is testing whatever geometry the profile happened to compile first.
+
+    Deleting inside a player profile is dangerous, so this cannot escape:
+
+    - ``mod_id`` must be a bare literal before any path is built, so no
+      separator, no ``..`` and no drive letter can reach the join;
+    - every path, including every entry found by the walk, re-enters
+      :func:`require_confined_profile_target`, which re-proves the sentinel,
+      re-proves containment before AND after resolution, and rejects a link or
+      reparse point in any component;
+    - the walk is depth-capped, and a link discovered inside the cache raises
+      instead of being followed;
+    - and it is NOT a recursive delete. Only files whose suffix is a known
+      cache artifact are unlinked; anything else means the assumption about
+      what lives here is wrong, so it raises and removes nothing further.
+      Directories go only through ``rmdir``, bottom-up, exactly as
+      :func:`cleanup_exact_live_artifacts` does.
+
+    Returns every path removed, newest-first per root, so a caller can assert
+    the purge was real rather than a silent no-op.
+    """
+
+    if not _MOD_ID_PATTERN.fullmatch(mod_id):
+        raise RuntimeError(
+            f"refusing to purge a mesh cache for a non-literal mod id: {mod_id!r}"
+        )
+
+    removed: list[Path] = []
+    for cache_root in _MESH_CACHE_ROOTS:
+        target = require_confined_profile_target(user, cache_root / mod_id)
+        if not target.is_dir() or _is_link_or_reparse(target):
+            continue
+        directories: list[Path] = []
+        stack: list[tuple[Path, int]] = [(target, 0)]
+        while stack:
+            current, depth = stack.pop()
+            directories.append(current)
+            if depth >= _MESH_CACHE_MAX_DEPTH:
+                raise RuntimeError(
+                    f"compiled-mesh cache is deeper than expected: {current}"
+                )
+            with os.scandir(current) as entries:
+                for entry in entries:
+                    child = require_confined_profile_target(user, Path(entry.path))
+                    if _is_link_or_reparse(child):
+                        raise RuntimeError(
+                            f"compiled-mesh cache contains a link: {child}"
+                        )
+                    if entry.is_dir(follow_symlinks=False):
+                        stack.append((child, depth + 1))
+                        continue
+                    if child.suffix.casefold() not in _MESH_CACHE_SUFFIXES:
+                        raise RuntimeError(
+                            "unexpected file in the compiled-mesh cache, "
+                            f"refusing to purge: {child}"
+                        )
+                    child.unlink()
+                    removed.append(child)
+        for directory in reversed(directories):
+            directory.rmdir()
+            removed.append(directory)
+    return tuple(removed)
 
 
 def _require_isolated_profile(user: Path) -> Path:

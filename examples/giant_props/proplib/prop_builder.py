@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 import sys
 import uuid
@@ -261,6 +262,110 @@ def build_jbeam(
     return {mod_id: part}, total_mass
 
 
+# JBeam column headers whose VALUES are node ids. A trailing colon is
+# BeamNG's own marker for "this column names a node", which is what makes
+# this list mechanical rather than a guess; `[group]:` names a node GROUP.
+NODE_REF_KEYS = (
+    "node1:",
+    "node2:",
+    "nodeArm:",
+    "idRef:",
+    "idX:",
+    "idY:",
+    "id1:",
+    "id2:",
+    "id3:",
+    "id4:",
+)
+NODE_LIST_REF_KEYS = ("torqueReactionNodes:",)
+GROUP_REF_KEYS = ("[group]:",)
+
+
+def check_jbeam_section_refs(
+    section: str,
+    value: Any,
+    node_ids: set[str],
+    node_groups: set[str],
+) -> None:
+    """Reject an authored jbeam section that names a node the cage lacks.
+
+    Every node reference the cage compiler itself writes is checked against
+    the measured cage — beams, triangles, refnodes, panel anchors. Authored
+    sections (`rotators`, `powertrain`, `torsionHydros`, ...) are the one
+    physics input that arrives as opaque JSON, so they get the same gate
+    here: a rotator whose `node1:` no longer exists is silently DELETED by
+    the engine, and the mod ships a fan that does not turn with nothing in
+    the log.
+
+    Validation only — never rewriting. Spec authors write the full prefixed
+    id (`f"{MOD_ID}_hub_axis_front"`), exactly the string `add_node`
+    returns, because a builder that silently mangled names would happily
+    "fix" a string that was never a node reference at all.
+    """
+
+    def check_name(key: str, name: Any) -> None:
+        if not isinstance(name, str) or not name:
+            raise ValueError(f"jbeam_sections[{section}] {key} is not a node name: {name!r}")
+        if name not in node_ids:
+            raise ValueError(
+                f"jbeam_sections[{section}] {key} references an unknown cage node: {name}"
+            )
+
+    def walk(node: Any) -> None:
+        if isinstance(node, dict):
+            for key, item in node.items():
+                if key in NODE_REF_KEYS:
+                    check_name(key, item)
+                elif key in NODE_LIST_REF_KEYS:
+                    if not isinstance(item, list) or not item:
+                        raise ValueError(
+                            f"jbeam_sections[{section}] {key} must be a non-empty list"
+                        )
+                    for item_name in item:
+                        check_name(key, item_name)
+                elif key in GROUP_REF_KEYS:
+                    groups = item if isinstance(item, list) else [item]
+                    for group in groups:
+                        if group not in node_groups:
+                            raise ValueError(
+                                f"jbeam_sections[{section}] {key} references an empty"
+                                f" node group: {group}"
+                            )
+                else:
+                    walk(item)
+        elif isinstance(node, list):
+            # JBeam's table form: row 0 is the header, later rows are
+            # positional. Pair them up so a positional node id is checked
+            # against the header that names its column.
+            header = node[0] if node and isinstance(node[0], list) else None
+            if header and all(isinstance(cell, str) for cell in header):
+                for row in node[1:]:
+                    if not isinstance(row, list):
+                        walk(row)
+                        continue
+                    for column, cell in zip(header, row):
+                        if column in NODE_REF_KEYS:
+                            check_name(column, cell)
+                        elif column in GROUP_REF_KEYS:
+                            groups = cell if isinstance(cell, list) else [cell]
+                            for group in groups:
+                                if group not in node_groups:
+                                    raise ValueError(
+                                        f"jbeam_sections[{section}] {column} references"
+                                        f" an empty node group: {group}"
+                                    )
+                        else:
+                            walk(cell)
+                    for cell in row[len(header) :]:
+                        walk(cell)
+                if header is not None:
+                    return
+            for item in node:
+                walk(item)
+
+    walk(value)
+
+
 def build_interaction_json(mod_id: str, handoff: dict[str, Any]) -> dict[str, Any] | None:
     """Input-action map: onDown forwards each press to the GE runtime.
 
@@ -319,7 +424,36 @@ def ensure_textures(example_root: Path, spec: Any) -> dict[str, dict[str, Any]]:
             size=texture.get("size", 512),
             normal_strength=texture.get("normal_strength", 2.0),
             params=texture.get("params"),
+            # Opt-in per palette entry. Families author LINEAR albedo and the
+            # engine decodes a `.color` map as sRGB, so an un-encoded map
+            # ships ~12x too dark; see texture_kit._srgb_encode. Default off
+            # because twenty shipped mods were tuned against the old output.
+            srgb=bool(texture.get("srgb", False)),
         )
+
+    # PRUNE WHAT NO PALETTE ENTRY CLAIMS. build_set writes the maps a family
+    # produces and never removes the ones it stopped producing, so a family
+    # swap leaves the old maps sitting in the authoring directory - and
+    # blender_kit.material() probes for maps BY FILENAME, so a stale
+    # `<name>_opacity.data.png` from a previous family silently reappears in
+    # every verify render as holes punched through the surface. That is
+    # exactly what happened to the colossus lane chevrons, which were switched
+    # to hazard_chevron precisely to be rid of an opacity map.
+    claimed = {
+        texture_dir / relative
+        for manifest in manifests.values()
+        for key, relative in manifest.items()
+        if isinstance(relative, str) and relative.endswith(".png")
+    }
+    prefixes = tuple(f"{name}." for name in manifests) + tuple(
+        f"{name}_" for name in manifests
+    )
+    for path in sorted(texture_dir.glob("*.png")):
+        if path in claimed:
+            continue
+        if not path.name.startswith(prefixes):
+            continue
+        path.unlink()
     return manifests
 
 
@@ -523,6 +657,61 @@ def check_emissive_factor(mod_id: str, name: str, stages: list[dict[str, Any]]) 
             )
 
 
+def move_alpha_to_opacity(stage0: dict[str, Any]) -> None:
+    """THE OPACITY LAW. ``baseColorFactor[3]`` is NOT read as opacity.
+
+    Every translucent material in the pack shipped OPAQUE - eleven of them,
+    across six props, one of which (glass_atrium) is a mod whose entire
+    concept is glass. The emitter declared ``translucent: true`` and
+    ``alphaRef: 0`` and then left the number that says HOW transparent in
+    ``Stages[0].baseColorFactor[3]``, which BeamNG's v1.5 PBR material does
+    not read for opacity. It reads ``opacityFactor``, and nothing was
+    writing one.
+
+    Proven live 2026-08-25 on this pack's own velocity dial (alpha 0.12),
+    one arm at a time:
+
+        as shipped                        blank opaque pale-blue disc -
+                                          no face, no numerals, no needle
+        + translucentBlendOp PreMulAlpha  UNCHANGED (the runtime already
+                                          had LerpAlpha; the blend op was
+                                          never the problem)
+        + opacityFactor 0.12 on stage 0   fully legible instrument
+
+    THE ALPHA IS NORMALISED TO 1.0 ON THE WAY OUT, and the first arm above
+    is the whole argument for that: a pane carrying alpha 0.12 in
+    baseColorFactor rendered fully opaque, so that slot is INERT for
+    opacity and leaving a number in it is leaving a number that looks
+    load-bearing and is not. That is the trap that produced this bug.
+    Moving it also matches the pack's one glass that has ever shipped and
+    been seen to work - cannon_car_wash's ``selector_glass``, alpha 1.0 in
+    baseColorFactor with 0.38 in ``opacityFactor``.
+
+    DERIVED FROM THE PALETTE ALPHA rather than authored per palette. The
+    alternative - make every palette state ``stage: {"opacityFactor": ...}``
+    itself - writes the same number in two places on the same entry, where
+    they can drift, and leaves the inert one still sitting in the colour
+    looking meaningful. One number, in the place the author already writes
+    it, emitted into the slot the engine actually reads. A palette that
+    needs something else says so through the ``stage`` passthrough, which
+    is merged AFTER this and therefore still wins (gforce_centrifuge's
+    ``mirror_glass`` already does exactly that with opacityFactor 1.0).
+
+    Stage 1 is deliberately NOT touched. It is a raw passthrough: what the
+    author writes there is what the engine gets, and the washer's second
+    water layer states its own baseColorFactor alpha on purpose.
+    """
+
+    factor = stage0.get("baseColorFactor")
+    if not factor or len(factor) < 4:
+        return
+    alpha = float(factor[3])
+    if alpha >= 1.0:
+        return
+    stage0["opacityFactor"] = round(alpha, 6)
+    factor[3] = 1.0
+
+
 def build_materials(
     mod_id: str,
     handoff: dict[str, Any],
@@ -620,6 +809,9 @@ def build_materials(
         else:
             stage0["baseColorFactor"] = [round(float(c), 6) for c in color]
             stage0["roughnessFactor"] = round(float(entry.get("roughness", 0.45)), 6)
+        # BEFORE the `stage` passthrough below, so a palette that states its
+        # own opacityFactor still wins - the passthrough's documented job.
+        move_alpha_to_opacity(stage0)
         if entry.get("emissive"):
             stage0["emissiveFactor"] = [round(float(c), 6) for c in entry["emissive"]]
         definition: dict[str, Any] = {
@@ -678,8 +870,34 @@ def build_materials(
             definition["castShadows"] = True
             definition["translucentBlendOp"] = "None"
         elif float(color[3]) < 1.0:
+            # THE FOUR KEYS THAT MAKE A PANE A PANE. `translucent` + `alphaRef`
+            # alone were shipped for months and rendered every glass in the
+            # pack OPAQUE, because the alpha they were switching on lives in
+            # `opacityFactor` and move_alpha_to_opacity above is what puts it
+            # there. The other two come with it:
+            #
+            #   castShadows FALSE. A pane you can see through must not lay a
+            #   solid shadow. This is not styling - the observation ring is a
+            #   5.2 m annulus over the payload circle, and a shadow-casting
+            #   ring shadows the very interior it exists to show.
+            #   translucentRecvShadows TRUE, so shadows still land ON it.
+            #
+            # Both, plus PreMulAlpha, are what the pack's one glass that has
+            # ever shipped and been seen to work writes: cannon_car_wash's
+            # `selector_glass`, baseColorFactor alpha 1.0 + opacityFactor 0.38.
+            # The live A/B (2026-08-25, spin_launch dial) ran the arms
+            # cumulatively - shipped, +PreMulAlpha +castShadows 0, then
+            # +opacityFactor - and it was the THIRD arm that turned a blank
+            # pale-blue disc into a legible instrument. So PreMulAlpha and
+            # castShadows are carried because the proven-good state carried
+            # them, and opacityFactor is carried because it is the one that
+            # moved. Every key here is overridable by the `material`
+            # passthrough, which is applied after.
             definition["translucent"] = True
             definition["alphaRef"] = 0
+            definition["translucentBlendOp"] = "PreMulAlpha"
+            definition["translucentRecvShadows"] = True
+            definition["castShadows"] = False
         for key, value in (entry.get("material") or {}).items():
             definition[key] = value
         check_emissive_factor(mod_id, name, definition["Stages"])
@@ -814,8 +1032,48 @@ def build_prop(example_root: Path, spec: Any) -> dict[str, Any]:
     # amber SPOTLIGHT emergency lights, 2026-08-09): vehicle-side light
     # props driven by electrics, the exact mechanism stock lightbars use.
     extra_props = getattr(spec, "JBEAM_PROPS", None)
+    # Spec-provided WHOLE jbeam sections, for the mechanisms the cage
+    # compiler deliberately does not synthesise: `rotators`, `powertrain`,
+    # the named motor block, `controller`, `hydros`, `soundConfig`,
+    # `components`, `electrics` (giant_fan 2026-08-24 — a real powered
+    # rotor, stock large_spinner architecture, because a spinning
+    # collision surface cannot be faked; see AGENTS.md).
+    #
+    # This is an ESCAPE HATCH, not a second compiler. It may only ADD
+    # sections: clobbering a generated one would let authored JSON silently
+    # override measured geometry, which is the whole thing the handoff
+    # chain exists to prevent.
+    #
+    # These stay in spec.py rather than riding the handoff, unlike PALETTE.
+    # The palette lives in the handoff because Blender BAKES it into the
+    # exported meshes' material slots, so the two can disagree; a rotator
+    # table bakes into nothing. Routing it through the handoff would only
+    # buy a Blender round-trip for every physics tune. The staleness hole
+    # that would open — a spec naming a node the regenerated cage dropped —
+    # is closed by validating every reference against THIS handoff's cage
+    # below, which catches the drift from either direction.
+    extra_sections = dict(getattr(spec, "JBEAM_SECTIONS", None) or {})
     if extra_props:
-        jbeam[mod_id]["props"] = extra_props
+        # `props` rows carry `idRef:`/`idX:`/`idY:` node columns exactly like
+        # the authored sections do, so it goes through the SAME gate rather
+        # than being written straight in. A prop whose anchor node was renamed
+        # in Blender is the same silent failure as a rotator's: the mesh is
+        # simply never placed.
+        if "props" in extra_sections:
+            raise ValueError("JBEAM_PROPS and JBEAM_SECTIONS['props'] both define props")
+        extra_sections["props"] = extra_props
+    if extra_sections:
+        node_ids = {node["id"] for node in handoff["nodes"]}
+        node_groups = {
+            f"{mod_id}_{node['group']}" for node in handoff["nodes"] if node.get("group")
+        }
+        for key in sorted(extra_sections):
+            if key in jbeam[mod_id]:
+                raise ValueError(
+                    f"JBEAM_SECTIONS may not overwrite a generated section: {key}"
+                )
+            check_jbeam_section_refs(key, extra_sections[key], node_ids, node_groups)
+            jbeam[mod_id][key] = extra_sections[key]
     write_json(vehicle_root / f"{mod_id}.jbeam", jbeam)
     write_json(
         vehicle_root / "main.materials.json",
@@ -854,6 +1112,20 @@ def build_prop(example_root: Path, spec: Any) -> dict[str, Any]:
         encoding="utf-8",
         newline="\n",
     )
+    # Vehicle-side main/aux controllers, the mechanism stock uses for a
+    # powered rotator (large_spinner/lua/controller/spinner.lua). Written
+    # under the VEHICLE's own lua/controller/, so BeamNG resolves it by name
+    # from the jbeam `controller` table without touching a global namespace.
+    controllers = getattr(spec, "VEHICLE_CONTROLLERS", None) or {}
+    for name in sorted(controllers):
+        if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", name):
+            raise ValueError(f"controller name is not a bare lua identifier: {name}")
+        controller_path = vehicle_root / "lua" / "controller" / f"{name}.lua"
+        controller_path.parent.mkdir(parents=True, exist_ok=True)
+        controller_path.write_text(
+            controllers[name].strip("\n") + "\n", encoding="utf-8", newline="\n"
+        )
+
     interaction = build_interaction_json(mod_id, handoff)
     if interaction is not None:
         write_json(vehicle_root / f"{mod_id}_default.interaction.json", interaction)

@@ -70,6 +70,7 @@ def material(
     roughness: float = 0.45,
     emission: tuple[float, float, float, float] | None = None,
     emission_strength: float = 0.0,
+    glow_map: bool = False,
     texture: Path | str | None = None,
 ) -> bpy.types.Material:
     existing = bpy.data.materials.get(name)
@@ -138,21 +139,58 @@ def material(
                     rough_node.image = rough_image
                     rough_node.location = (-650, 40)
                     tree.links.new(rough_node.outputs["Color"], principled.inputs["Roughness"])
+                # OPT-IN, like every other probe here should have been. A
+                # family that emits a _glow map had no branch at all, so an
+                # emissive surface rendered as a featureless self-lit slab and
+                # the map was entirely unverifiable from a render.
+                glow_path = Path(f"{base}_glow.color.png")
+                if glow_map and glow_path.is_file():
+                    glow_input = principled.inputs.get("Emission Color")
+                    if glow_input is not None:
+                        glow_node = tree.nodes.new("ShaderNodeTexImage")
+                        glow_node.image = bpy.data.images.load(str(glow_path))
+                        glow_node.location = (-350, -640)
+                        tree.links.new(glow_node.outputs["Color"], glow_input)
     return result
 
 
-def materials_from_palette(spec: Any, texture_dir: Path) -> dict[str, bpy.types.Material]:
-    """Build every palette material, textured for preview when maps exist."""
+def materials_from_palette(
+    spec: Any,
+    texture_dir: Path,
+    *,
+    preview_emission: bool = False,
+) -> dict[str, bpy.types.Material]:
+    """Build every palette material, textured for preview when maps exist.
+
+    ``preview_emission`` wires an emissive palette entry into the Blender
+    preview shader. It is OPT-IN and defaults OFF, and that default is the
+    important part: Blender's Collada exporter writes the Principled BSDF's
+    emission into ``<emission>``, so turning this on unconditionally changes
+    the exported DAE bytes - and therefore the handoff sha256, the build
+    serial and the ZIP lock - of the SEVEN other specs in this pack that carry
+    an ``emissive`` key, for a preview-only reason the engine never reads.
+    Every texture_kit family added in 2026-08 took an opt-in parameter for
+    exactly this reason; this is the same discipline applied here.
+    """
 
     materials: dict[str, bpy.types.Material] = {}
     for name, entry in spec.PALETTE.items():
         texture_path = texture_dir / f"{name}.color.png"
+        emissive = entry.get("emissive") if preview_emission else None
         materials[name] = material(
             name,
             tuple(entry["color"]),
             metallic=entry.get("metallic", 0.0),
             roughness=entry.get("roughness", 0.45),
             texture=texture_path if "texture" in entry else None,
+            glow_map=preview_emission,
+            emission=(tuple(emissive) + (1.0,)) if emissive else None,
+            emission_strength=(
+                float((entry.get("stage") or {}).get("emissiveIntensityNits", 0.0))
+                / 400.0
+                if emissive
+                else 0.0
+            ),
         )
     return materials
 
@@ -315,6 +353,8 @@ def add_cone(
     *,
     vertices: int = 24,
     rotation: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    bevel: float = 0.0,
+    metric_uv: tuple[float, float] | None = None,
 ) -> bpy.types.Object:
     bpy.ops.mesh.primitive_cone_add(
         vertices=vertices,
@@ -326,7 +366,21 @@ def add_cone(
     )
     obj = bpy.context.object
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-    return _finish_primitive(obj, name, value, 0.0)
+    if metric_uv is not None:
+        # A truncated cone carries the primitive's 0..1 side UV, so ONE tile
+        # spans the whole circumference AND the whole slant. Left alone, a
+        # 5 m-radius housing lands near 30 px/m beside boxes at ~430 - the
+        # Cannon Car Wash "tiny blocks" density cliff, in reverse. U follows
+        # the MEAN circumference and V the slant length, so the tile stays
+        # roughly square along the taper.
+        mean_radius = 0.5 * (radius_bottom + radius_top)
+        slant = math.hypot(depth, radius_bottom - radius_top)
+        scale_uvs(
+            obj,
+            (2.0 * math.pi * mean_radius) / metric_uv[0],
+            slant / metric_uv[1],
+        )
+    return _finish_primitive(obj, name, value, bevel)
 
 
 def add_sphere(
@@ -338,6 +392,8 @@ def add_sphere(
     segments: int = 24,
     rings: int = 16,
     scale: tuple[float, float, float] = (1.0, 1.0, 1.0),
+    bevel: float = 0.0,
+    metric_uv: tuple[float, float] | None = None,
 ) -> bpy.types.Object:
     bpy.ops.mesh.primitive_uv_sphere_add(
         segments=segments,
@@ -348,7 +404,14 @@ def add_sphere(
     obj = bpy.context.object
     obj.scale = scale
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-    return _finish_primitive(obj, name, value, 0.0)
+    if metric_uv is not None:
+        # U spans the equator, V runs pole to pole (half the circumference).
+        # Measured on the AUTHORED radius times the dominant scale, because
+        # the transform_apply above has already baked `scale` into the mesh.
+        equator = 2.0 * math.pi * radius * max(scale[0], scale[1])
+        meridian = math.pi * radius * max(scale[0], scale[1], scale[2])
+        scale_uvs(obj, equator / metric_uv[0], meridian / metric_uv[1])
+    return _finish_primitive(obj, name, value, bevel)
 
 
 def add_torus(
@@ -361,6 +424,8 @@ def add_torus(
     rotation: tuple[float, float, float] = (0.0, 0.0, 0.0),
     major_segments: int = 24,
     minor_segments: int = 12,
+    bevel: float = 0.0,
+    metric_uv: tuple[float, float] | None = None,
 ) -> bpy.types.Object:
     bpy.ops.mesh.primitive_torus_add(
         location=location,
@@ -371,7 +436,14 @@ def add_torus(
         minor_segments=minor_segments,
     )
     obj = bpy.context.object
-    return _finish_primitive(obj, name, value, 0.0)
+    if metric_uv is not None:
+        # U runs the major circumference, V the minor (tube) circumference.
+        scale_uvs(
+            obj,
+            (2.0 * math.pi * major_radius) / metric_uv[0],
+            (2.0 * math.pi * minor_radius) / metric_uv[1],
+        )
+    return _finish_primitive(obj, name, value, bevel)
 
 
 def cut_openings(target: bpy.types.Object, cutters: list[bpy.types.Object]) -> None:
@@ -1241,7 +1313,24 @@ def render_thumbnail(
     look_at: tuple[float, float, float],
     resolution: tuple[int, int] = (500, 281),
     sun_direction: tuple[float, float, float] = (-0.4, 0.35, -1.0),
+    sun_energy: float = 3.0,
+    world_color: tuple[float, float, float] = (0.72, 0.82, 0.92),
+    world_strength: float = 1.0,
 ) -> None:
+    """Render one review/thumbnail frame.
+
+    ``world_strength`` defaults to 1.0 against a bright sky, which is what
+    every mod in the pack has always used — so the default is left alone.
+    It is a PARAMETER because that ambient is not free: fitting
+    ``render = k*albedo + A*neutral`` against a known swatch on the High
+    Five renders put A at 69 counts, which halved every chroma and more
+    than doubled the floor of every shadow (the darkest 15% of the hand
+    bottomed out at luma 135 against the reference photograph's 63). Two
+    separate material changes measured as a ONE-COUNT difference because of
+    it, and a reviewer spent two rounds attributing the loss to the texture
+    before the pedestal was found. A prop whose look is being judged from
+    these frames needs a rig whose shadows reach.
+    """
     scene = bpy.context.scene
     camera_data = bpy.data.cameras.new("thumbnail_camera")
     camera = bpy.data.objects.new("thumbnail_camera", camera_data)
@@ -1251,7 +1340,7 @@ def render_thumbnail(
     camera.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
     camera_data.lens = 32.0
     sun_data = bpy.data.lights.new("thumbnail_sun", "SUN")
-    sun_data.energy = 3.0
+    sun_data.energy = sun_energy
     sun = bpy.data.objects.new("thumbnail_sun", sun_data)
     scene.collection.objects.link(sun)
     sun.rotation_euler = Vector(sun_direction).to_track_quat("-Z", "Y").to_euler()
@@ -1259,8 +1348,8 @@ def render_thumbnail(
     world.use_nodes = True
     background = world.node_tree.nodes.get("Background")
     if background is not None:
-        background.inputs[0].default_value = (0.72, 0.82, 0.92, 1.0)
-        background.inputs[1].default_value = 1.0
+        background.inputs[0].default_value = (*world_color, 1.0)
+        background.inputs[1].default_value = world_strength
     scene.world = world
     previous_camera = scene.camera
     scene.camera = camera

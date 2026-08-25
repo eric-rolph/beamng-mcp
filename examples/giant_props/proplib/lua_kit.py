@@ -189,6 +189,10 @@ local REQUIRED_VISUAL_MATERIALS = {
 local PROP_REF_OFFSET = @REF_OFFSET@
 local MODEL_ALIGNMENT_ROTATION = quat(0, 0, 1, 0)
 
+-- The jbeam refNodes, with the authored vehicle-frame position of each. These
+-- are the live datum for every placement (see propFrame).
+local FRAME_NODES = @FRAME_NODES@
+
 local PART_SPECS = {
 @PART_SPECS@
 }
@@ -304,21 +308,231 @@ local function axisAngle(axis, angle)
   return quat(direction.x * sine, direction.y * sine, direction.z * sine, math.cos(half))
 end
 
-local function propFrame(vehicle)
-  local position = vehicle:getPosition()
-  local vehicleRotation = quat(vehicle:getRotation())
-  if not finiteVector3(position)
-    or not finiteNumber(vehicleRotation.x)
-    or not finiteNumber(vehicleRotation.y)
-    or not finiteNumber(vehicleRotation.z)
-    or not finiteNumber(vehicleRotation.w) then
-    return nil
+-- The game does NOT assign node cids in jbeam row order (fixed nodes are
+-- renumbered ahead of free ones — probed live 2026-07-23), so any authored
+-- row index is wrong at runtime: resolve cids by node NAME from vdata and
+-- cache per name. Returns nil (and retries next call) until vdata is ready.
+local function resolveNodeCid(state, nodeName)
+  state.nodeCids = state.nodeCids or {}
+  local cached = state.nodeCids[nodeName]
+  if cached then return cached end
+  local ok, data = pcall(function()
+    return core_vehicle_manager.getVehicleData(state.propId)
+  end)
+  local nodes = ok and data and data.vdata and data.vdata.nodes or nil
+  if not nodes then return nil end
+  for _, node in pairs(nodes) do
+    if node.name == nodeName then
+      state.nodeCids[nodeName] = node.cid
+      return node.cid
+    end
   end
-  local origin = position - vehicleRotation * PROP_REF_OFFSET
+  return nil
+end
+
+-- World position of one named cage node, or nil until vdata is ready.
+-- getNodePosition is relative to the vehicle datum, so the sum tracks the
+-- LIVE node even while the object transform itself is stale.
+local function nodeWorldPosition(state, vehicle, position, nodeName)
+  local cid = resolveNodeCid(state, nodeName)
+  if not cid then return nil end
+  local ok, relative = pcall(function() return vehicle:getNodePosition(cid) end)
+  if not ok or not relative or not finiteVector3(relative) then return nil end
+  return vec3(position.x + relative.x, position.y + relative.y, position.z + relative.z)
+end
+
+-- Orthonormal basis from two independent baselines, built the same way on both
+-- sides so the result is always a PROPER rotation (no handedness check needed).
+local function baselineBasis(primary, secondary)
+  local e1 = vec3(primary.x, primary.y, primary.z)
+  if e1:length() < 0.05 then return nil end
+  e1:normalize()
+  local e2 = vec3(secondary.x, secondary.y, secondary.z)
+  local along = e1 * e2:dot(e1)
+  e2 = e2 - along
+  -- Near-collinear baselines cannot pin a rotation about their shared axis.
+  if e2:length() < 0.05 then return nil end
+  e2:normalize()
+  return e1, e2, e1:cross(e2)
+end
+
+-- Quaternion that maps the authored axes onto the basis VECTORS given (the
+-- columns of the rotation matrix). Shepperd's method: branch on the largest
+-- diagonal term so the divisor never approaches zero.
+--
+-- The result is CONJUGATED before it is returned. Shepperd yields the textbook
+-- quaternion, whose rotation is q*v*inverse(q) — but the engine's `q * vec3`
+-- applies the OPPOSITE handedness, the same reversal behind the documented
+-- "quats compose LEFT-TO-RIGHT" rule. Feeding the textbook quat to the engine
+-- transposes the rotation, which is an identity no-op on a level spawn and
+-- silently wrong the moment the prop tilts: measured live 2026-08-24, the
+-- transposed frame still left Boot of Doom's instruments 2.2 m off a
+-- 7 m-per-12 m slope, having removed only the pitch error and not the roll.
+local function basisQuat(ex, ey, ez)
+  local x, y, z, w
+  local trace = ex.x + ey.y + ez.z
+  if trace > 0 then
+    local s = math.sqrt(trace + 1.0) * 2
+    x, y, z, w = (ey.z - ez.y) / s, (ez.x - ex.z) / s, (ex.y - ey.x) / s, 0.25 * s
+  elseif ex.x > ey.y and ex.x > ez.z then
+    local s = math.sqrt(1.0 + ex.x - ey.y - ez.z) * 2
+    x, y, z, w = 0.25 * s, (ey.x + ex.y) / s, (ez.x + ex.z) / s, (ey.z - ez.y) / s
+  elseif ey.y > ez.z then
+    local s = math.sqrt(1.0 + ey.y - ex.x - ez.z) * 2
+    x, y, z, w = (ey.x + ex.y) / s, 0.25 * s, (ez.y + ey.z) / s, (ez.x - ex.z) / s
+  else
+    local s = math.sqrt(1.0 + ez.z - ex.x - ey.y) * 2
+    x, y, z, w = (ez.x + ex.z) / s, (ez.y + ey.z) / s, 0.25 * s, (ex.y - ey.x) / s
+  end
+  return quat(-x, -y, -z, w)
+end
+
+-- PLACEMENT FRAME — derived from the LIVE node cloud, never from the object
+-- transform.
+--
+-- `vehicle:getRotation()` only refreshes on spawn/teleport/reset, so a prop
+-- that settles onto sloped ground keeps reporting its SPAWN attitude while the
+-- flexbody renders at the real nodes. Every runtime part, trigger and effect is
+-- dead-reckoned from this frame, and props carry geometry many metres out from
+-- the ref node, so a stale rotation is multiplied by that lever arm. Measured
+-- live on utah 2026-08-24 against a Boot of Doom console node 13 m out:
+--
+--     terrain drop over 12 m     object transform      node cloud
+--     0.03 m (flat)                    0.209 m            0.000 m
+--     0.48 m (gentle)                  1.025 m            0.000 m
+--     7.09 m (steep)                  11.611 m            0.000 m
+--
+-- The 1 m gentle-slope case is the shipped-mod bug report: Boot of Doom's
+-- indicator lights floating a metre under their own control panel. Every gate
+-- before this ran on flat smallgrid, the one condition where the object
+-- transform and the node cloud agree and the error is invisible.
+--
+-- The refNodes give both the origin and the basis. Which PAIR of baselines
+-- pins the basis is chosen per frame by conditioning, not hardcoded: what
+-- matters is the Gram-Schmidt residual (how much of the second baseline is
+-- genuinely perpendicular to the first), NOT how far apart the nodes are.
+-- pendulum_gauntlet's ref/back/left sit only 10.2 degrees apart, so its
+-- nominally 10.16 m left baseline pins the second axis with just 1.80 m of
+-- residual; its up node is a far better partner. Boot of Doom is the opposite
+-- case — its up baseline is 14 cm — so it keeps back/left. Picking the best
+-- available pair covers both without either cage having to be re-authored.
+local function propFrame(state, vehicle)
+  local located, position = pcall(function() return vehicle:getPosition() end)
+  if not located or not finiteVector3(position) then return nil end
+
+  local refWorld = nodeWorldPosition(state, vehicle, position, FRAME_NODES.ref.name)
+
+  local vehicleRotation
+  local origin
+  local frameSource = "object_transform"
+  if refWorld then
+    -- One lookup per node, not one per pair.
+    local world = {}
+    for _, role in ipairs({"back", "left", "up"}) do
+      world[role] = nodeWorldPosition(state, vehicle, position, FRAME_NODES[role].name)
+    end
+    -- Map the authored baselines onto the live ones: R = V * transpose(U).
+    local best, bestResidual = nil, 0
+    for _, roles in ipairs({{"back", "left"}, {"back", "up"}, {"left", "up"}}) do
+      local first, second = FRAME_NODES[roles[1]], FRAME_NODES[roles[2]]
+      local firstWorld, secondWorld = world[roles[1]], world[roles[2]]
+      if firstWorld and secondWorld then
+        local u1, u2, u3 = baselineBasis(
+          first.mesh - FRAME_NODES.ref.mesh, second.mesh - FRAME_NODES.ref.mesh)
+        if u1 then
+          -- Score on the AUTHORED geometry so the choice is stable frame to
+          -- frame; a live score would let noise flip the pair mid-flight.
+          --
+          -- BOTH axes have to be well pinned, so score the WEAKER of the two.
+          -- The residual alone only says how well the SECOND axis is fixed;
+          -- the first axis inherits angular noise as sigma / |first|, which a
+          -- residual-only score never sees. Scoring the residual alone would
+          -- hand bouncy_castle a 2.50 m primary with an 11.51 m residual over
+          -- a 10.00 m primary with a 3.94 m residual — the worse frame by the
+          -- axis that actually limits it. (Dot product with the unit residual
+          -- direction is a length, so it is already non-negative.)
+          local firstLength = (first.mesh - FRAME_NODES.ref.mesh):length()
+          local residual = (second.mesh - FRAME_NODES.ref.mesh):dot(u2)
+          if firstLength < residual then residual = firstLength end
+          if residual > bestResidual then
+            local v1, v2, v3 = baselineBasis(firstWorld - refWorld, secondWorld - refWorld)
+            if v1 then
+              bestResidual = residual
+              best = {u1 = u1, u2 = u2, u3 = u3, v1 = v1, v2 = v2, v3 = v3}
+            end
+          end
+        end
+      end
+    end
+    if best then
+      local ex = best.v1 * best.u1.x + best.v2 * best.u2.x + best.v3 * best.u3.x
+      local ey = best.v1 * best.u1.y + best.v2 * best.u2.y + best.v3 * best.u3.y
+      local ez = best.v1 * best.u1.z + best.v2 * best.u2.z + best.v3 * best.u3.z
+      local rotation = basisQuat(ex, ey, ez)
+      if finiteNumber(rotation.x) and finiteNumber(rotation.y)
+        and finiteNumber(rotation.z) and finiteNumber(rotation.w) then
+        vehicleRotation = rotation
+        origin = refWorld - rotation * PROP_REF_OFFSET
+        frameSource = "node_cloud"
+      end
+    end
+  end
+
+  if not vehicleRotation then
+    -- vdata is not ready yet (the first frames after spawn) or the cage is
+    -- degenerate. Fall back to the object transform: wrong on a slope, but it
+    -- keeps the prop placed until the node cloud answers, and the per-frame
+    -- resync in synchronizeInstallation corrects it as soon as it does.
+    local turned, objectRotation = pcall(function() return quat(vehicle:getRotation()) end)
+    if not turned or not objectRotation
+      or not finiteNumber(objectRotation.x)
+      or not finiteNumber(objectRotation.y)
+      or not finiteNumber(objectRotation.z)
+      or not finiteNumber(objectRotation.w) then
+      return nil
+    end
+    vehicleRotation = objectRotation
+    origin = position - vehicleRotation * PROP_REF_OFFSET
+  end
+
+  if not finiteVector3(origin) then return nil end
+  -- WITHOUT THIS THE FALLBACK IS INVISIBLE. On flat ground both paths agree to
+  -- 0.000 m, so a prop stuck on the object transform forever looks identical to
+  -- a healthy one in every smallgrid gate — and then flies apart on a slope.
+  -- Report the transition, once, rather than every frame.
+  if state.frameSource ~= frameSource then
+    local previous = state.frameSource
+    state.frameSource = frameSource
+    if previous ~= nil or frameSource ~= "node_cloud" then
+      emitEvent(
+        state,
+        -- Losing a frame source that was working is a regression; acquiring it
+        -- during the first frames after spawn is just startup.
+        (previous == "node_cloud") and "W" or "I",
+        "prop_frame_source",
+        {frame_source = frameSource, previous = previous}
+      )
+    end
+  end
   return {
     origin = origin,
     vehicleRotation = vehicleRotation,
-    modelRotation = vehicleRotation * MODEL_ALIGNMENT_ROTATION,
+    -- ORDER MATTERS, and an identity spawn cannot prove it. Quats compose
+    -- left-to-right here, so `FLIP * vehicleRotation` applies the authored ->
+    -- mesh flip in the MODEL's own frame and only then the vehicle attitude;
+    -- `vehicleRotation * FLIP` would flip about the WORLD axis instead. Both
+    -- read identically while the prop sits LEVEL, which is every spawn the
+    -- gates ever made, so the wrong order survived until the frame started
+    -- carrying a real rotation. The error scales with TILT, not with yaw.
+    -- Measured live 2026-08-24 against a panel node 13 m out:
+    --                              flat   flat+yaw40   slope
+    --     FLIP * vehicleRotation   0.000      0.002     0.000 m
+    --     vehicleRotation * FLIP   0.380      0.425    18.880 m
+    -- (A fourth spawn, slope+yaw40, is deliberately not quoted: it read like a
+    -- level spawn, i.e. that prop had not taken the terrain's attitude when it
+    -- was sampled. Which is precisely why the gate now ASSERTS measured tilt
+    -- instead of assuming a sloped spot produces a tilted prop.)
+    modelRotation = MODEL_ALIGNMENT_ROTATION * vehicleRotation,
   }
 end
 
@@ -472,28 +686,6 @@ local function toWorldDir(state, localDir)
   return direction
 end
 
--- The game does NOT assign node cids in jbeam row order (fixed nodes are
--- renumbered ahead of free ones — probed live 2026-07-23), so any authored
--- row index is wrong at runtime: resolve cids by node NAME from vdata and
--- cache per name. Returns nil (and retries next call) until vdata is ready.
-local function resolveNodeCid(state, nodeName)
-  state.nodeCids = state.nodeCids or {}
-  local cached = state.nodeCids[nodeName]
-  if cached then return cached end
-  local ok, data = pcall(function()
-    return core_vehicle_manager.getVehicleData(state.propId)
-  end)
-  local nodes = ok and data and data.vdata and data.vdata.nodes or nil
-  if not nodes then return nil end
-  for _, node in pairs(nodes) do
-    if node.name == nodeName then
-      state.nodeCids[nodeName] = node.cid
-      return node.cid
-    end
-  end
-  return nil
-end
-
 local function setPartPose(state, name, offset, rotation, scale)
   local pose = state.partPoses[name]
   if not pose then
@@ -548,7 +740,7 @@ local function synchronizeInstallation(state, force)
   if not vehicle or not isSelfProp(vehicle) then
     return false, "registered prop is unavailable"
   end
-  local frame = propFrame(vehicle)
+  local frame = propFrame(state, vehicle)
   if not frame then return false, "registered prop transform is invalid" end
   local moved = force
     or not state.origin
@@ -951,6 +1143,11 @@ local function getSystemState(propId)
     triggers = {},
     zone_counts = {},
     behavior_phase = state.behavior and state.behavior.phase or nil,
+    -- "node_cloud" once the live frame is up; "object_transform" while the
+    -- fallback is carrying it. Exposed so a placement test can prove WHICH
+    -- path produced the pose it just measured — on flat ground the two are
+    -- indistinguishable by position alone.
+    frame_source = state.frameSource,
   }
   for _ in pairs(state.parts) do result.part_count = result.part_count + 1 end
   for _ in pairs(state.effects) do result.effect_count = result.effect_count + 1 end
@@ -1040,15 +1237,31 @@ end
 return M
 """
 
+    node_positions = {node["id"]: node["position"] for node in handoff["nodes"]}
     ref_id = handoff["refnodes"]["ref"]
-    ref_position = next(node["position"] for node in handoff["nodes"] if node["id"] == ref_id)
+    ref_position = node_positions[ref_id]
     ref_offset = (
         f"vec3({lua_number(ref_position[0])}, "
         f"{lua_number(ref_position[1])}, {lua_number(ref_position[2])})"
     )
 
+    # propFrame rebuilds the placement basis from these nodes' LIVE positions
+    # every frame, because vehicle:getRotation() goes stale the moment a prop
+    # settles onto anything that is not flat.
+    frame_lines = []
+    for role in ("ref", "back", "left", "up"):
+        node_id = handoff["refnodes"][role]
+        position = node_positions[node_id]
+        frame_lines.append(
+            f"  {role} = {{name = {lua_value(node_id)}, mesh = vec3("
+            f"{lua_number(position[0])}, {lua_number(position[1])}, "
+            f"{lua_number(position[2])})}},"
+        )
+    frame_nodes = "{\n" + "\n".join(frame_lines) + "\n}"
+
     replacements = {
         "@REF_OFFSET@": ref_offset,
+        "@FRAME_NODES@": frame_nodes,
         "@MOD_ID@": mod_id,
         "@DISPLAY_NAME@": display_name,
         "@LOG_TAG@": mod_id.upper() + "_RUNTIME",
