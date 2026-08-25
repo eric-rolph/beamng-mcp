@@ -383,6 +383,32 @@ def test_high_five_leads_a_moving_car_and_slaps_it(tmp_path: Path) -> None:
                 "approach_speed": approach_speed,
                 "trace": trace[:20],
             }
+
+            # --- PHASE 2: the painted pad, which is a different trigger ---
+            #
+            # Found in play, and invisible to phase 1 by construction. The
+            # corridor runs authored y = -124 .. -16 and the pad is
+            # -4.3 .. +4.3, so a car put straight onto the pad has never
+            # been inside the only zone that used to arm anything. Phase 1
+            # drives the MECHANISM; this drives the AFFORDANCE -- the hand
+            # stencilled on the road that says "drive here".
+            #
+            # It also exercises re-arming: the machine has to finish its
+            # follow-through, return and cooldown from the first slap
+            # before this can possibly fire.
+            for _ in range(12):
+                bng.control.step(STEPS_PER_CALL, wait=True)
+            pad_world = _world_point(origin, 0.0, 0.0, 0.8)
+            subject.teleport(pos=pad_world, rot_quat=(0, 0, 0, 1), reset=True)
+            subject.control(parkingbrake=1.0, throttle=0.0, brake=0.0)
+            pad_baseline = _subject_probe(bng)
+            pad_peak_speed = 0.0
+            for _ in range(12):
+                bng.control.step(STEPS_PER_CALL, wait=True)
+                sample = _subject_probe(bng)
+                if sample.get("ok"):
+                    pad_peak_speed = max(pad_peak_speed, float(sample["speed"]))
+            pad_start_authored = _authored(origin, pad_baseline)
         finally:
             try:
                 cleanup_owned_beamng_session(
@@ -415,6 +441,8 @@ def test_high_five_leads_a_moving_car_and_slaps_it(tmp_path: Path) -> None:
             seconds_per_call = abs(y1 - y0) / mean_speed / (len(approach_samples) - 1)
 
     summary = {
+        "pad_start_authored": [round(c, 2) for c in pad_start_authored],
+        "pad_peak_speed_mps": round(pad_peak_speed, 2),
         "seconds_per_step_call": (
             round(seconds_per_call, 4) if seconds_per_call else None
         ),
@@ -487,6 +515,29 @@ def test_high_five_leads_a_moving_car_and_slaps_it(tmp_path: Path) -> None:
     }
     assert abs(peak_speed - logged_speed) < 3.0, {
         "detail": "the car never reached the speed the runtime says it left at",
+        **summary,
+    }
+
+    # THE PAD. A car placed on the painted hand, having never been in the
+    # corridor, has to be swung at -- and swung at AT ONCE, because it is
+    # already standing on the contact point.
+    assert "high_five_pad_swing" in events, {
+        "detail": "a car parked on the painted pad was never swung at; the "
+        "thing the player can see and the thing that arms the machine are "
+        "still different objects",
+        **summary,
+    }
+    assert events.count("high_five_slapped") >= 2, {
+        "detail": "the pad swing did not connect, or the machine never "
+        "re-armed after the corridor slap",
+        **summary,
+    }
+    assert pad_peak_speed > 8.0, {
+        "detail": "the runtime logged a pad slap the physics did not produce",
+        **summary,
+    }
+    assert abs(pad_start_authored[1]) < 6.0, {
+        "detail": "the pad phase did not start on the pad",
         **summary,
     }
 

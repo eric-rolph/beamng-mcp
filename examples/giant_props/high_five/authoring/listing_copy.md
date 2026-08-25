@@ -49,6 +49,16 @@ The consequence: it hits at 15 km/h and it hits at 500 km/h. Verified in a
 headless harness from 4 to 140 m/s, with sub-metre contact error below
 60 m/s. You do not outrun it. You have to outsmart it.
 
+### Or just drive onto the pad
+
+There is a hand stencilled on the road in front of the machine. Drive onto
+it — from any direction, at any speed, or roll to a stop on it — and the
+arm comes round immediately. No wind-up, no warning: you are standing on
+the contact point, so there is nothing to lead and nothing to wait for.
+
+Two ways in, then. Come down the road and the machine reads you and times
+itself to meet you. Wander onto the pad and it just swings.
+
 ### The sequence
 
 Cross into the corridor and it wakes — 0.45 s of alert, then 0.85 s of
@@ -125,6 +135,8 @@ chains, hazard chevrons and a builder's plate. 8,010 kg, 26 posable parts.
   palm normal, so the console reads as a real ballistic control.
 - The corridor is an ARMING trigger, not a leash: leaving it does not call
   off a swing already being timed for you.
+- The painted pad arms it too, independently of the corridor, and swings
+  from rest at once.
 - Nothing on the hand sweeps below the road at any tilt setting, parked or
   swinging — checked against every digit at every detent, not against a
   representative edge.
@@ -202,6 +214,12 @@ because a 0.85 s wind-up is 19 m at this speed. Measured in-engine:
 | speed the car actually reached | within 0.06 m/s of it |
 | launch elevation vs WRIST TILT setting | **14.0 deg vs 14.0 deg** |
 | runtime errors | none |
+
+The same session then teleports the car onto the painted pad — authored
+(0, 0), having never been inside the corridor — and requires a second
+slap from `high_five_pad_swing`, which also proves the machine re-arms
+after a full follow-through, return and cooldown. Measured: launched from
+a standstill at 38.6 m/s.
 
 That elevation row is the console's whole premise — the launch leaves along
 the palm normal, so TILT is a ballistic control and not a decoration — and

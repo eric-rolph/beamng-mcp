@@ -861,3 +861,71 @@ def test_a_dodger_cannot_steal_the_aim_from_a_car_in_the_kill_lane():
         f"the machine launched {launched}; a car in the escape lane took the "
         "aim from one it could actually reach"
     )
+
+
+def test_a_car_that_only_touches_the_pad_is_slapped(rig):
+    """THE PAINTED PAD HAS TO WORK, and this was found in play.
+
+    The approach corridor runs y = -124 .. -16. The painted pad is
+    y = -4.3 .. +4.3. So the one object in the scene that says "drive
+    here" -- a hand stencilled on the road -- sat 11.7 m outside the only
+    trigger that armed anything, and `onEnter` opened with
+    `if zone ~= "approach" then return end`. Drive onto the pad from the
+    side, or from anywhere nearer than 16 m, and the hand just watched.
+
+    Every other test in this file approaches down the corridor, which is
+    exactly why none of them saw it: they all exercise the MECHANISM and
+    none of them exercise the AFFORDANCE. The live gate missed it for the
+    same reason -- it placed the car 85 m up the corridor and drove it
+    straight down the centreline.
+    """
+
+    lua, state, module = rig
+    corridor = SPEC.TRIGGERS["approach"]
+    near_edge = corridor["center"][1] + corridor["dimensions"][1] / 2.0
+    assert near_edge < -CAR_HALF, (
+        "the corridor now reaches the pad, so parking on the pad would arm "
+        "through the corridor and this test would prove nothing"
+    )
+
+    # Straight onto the pad, stationary, having never been up the road.
+    state.addVehicle(SUBJECT_ID, "pickup", 0.0, 0.0, 0.5)
+    state.setMotion(SUBJECT_ID, 0.0)
+
+    swung = drive(
+        state, module, SUBJECT_ID, 3.0, until=lambda s: s.phase == "slapping"
+    )
+    assert swung is not None, (
+        "a car sitting on the painted pad never got swung at; the affordance "
+        "and the trigger are still different things"
+    )
+    assert swung < 0.25, (
+        f"the pad swing took {swung:.2f} s to start. A car is AT the contact "
+        "point already, so there is nothing to lead and no reason to wait"
+    )
+
+    drive(state, module, SUBJECT_ID, 2.0, until=lambda s: state.lastVelocity() is not None)
+    launched = state.lastVelocity()
+    assert launched is not None, "the pad swing connected with nothing"
+    assert launched.scale == 0, "the pad launch did not replace the velocity"
+
+
+def test_the_corridor_still_leads_after_the_pad_shortcut(rig):
+    """The pad path must not have turned the machine into a doorbell.
+
+    Arming from the strike zone is a swing from rest with no anticipation,
+    which is right for a car that is already there and would be wrong for
+    one arriving at speed. This pins that a corridor approach still runs
+    alert -> windup before it swings.
+    """
+
+    lua, state, module = rig
+    approach(lua, state, module, speed=25.0)
+    seen = []
+    drive(
+        state, module, SUBJECT_ID, 6.0,
+        until=lambda s: (seen.append(s.phase) or False) if s.phase not in seen else False,
+    )
+    assert "alert" in seen, seen
+    assert "windup" in seen, seen
+    assert seen.index("alert") < seen.index("windup"), seen

@@ -1929,6 +1929,35 @@ behavior.update = function(state, dtSim)
 
   if b.phase == "idle" then
     poseMachine(state, REST_DEG, tilt, 0, b.clock)
+    -- THE PAD IS A TRIGGER IN ITS OWN RIGHT, and this is a play-test fix.
+    --
+    -- Until now the ONLY way to arm the machine was the approach corridor,
+    -- which runs y = -124 .. -16. The painted pad is y = -4.3 .. +4.3. So
+    -- the one object in the scene that says "drive here" -- a hand stencilled
+    -- on the road -- sat 11.7 m outside the only trigger that did anything,
+    -- and `onEnter` opens with `if zone ~= "approach" then return end`. Drive
+    -- onto the pad from the side, or from anywhere nearer than 16 m, and the
+    -- hand simply watched.
+    --
+    -- The affordance and the mechanism have to be the same thing. A car in
+    -- the strike zone is already AT the contact point, so there is nothing to
+    -- lead and no reason to wait: swing from rest, now. The corridor still
+    -- does what it always did for anyone arriving down the road at speed --
+    -- that is the anticipation the machine is built on -- but arriving any
+    -- other way is no longer silence.
+    if zoneCount(state, "slap_zone") > 0 then
+      local onPad = firstOccupant(state, "slap_zone")
+      if onPad then
+        b.subjectId = onPad:getId()
+        b.aimedAt = b.subjectId
+        b.swingFrom = REST_DEG
+        b.phase = "slapping"
+        b.elapsed = 0
+        b.slapped = false
+        showMessage("You are standing ON it.", 1.2)
+        emitEvent(state, "I", "high_five_pad_swing", {subject_id = b.subjectId})
+      end
+    end
 
   elseif b.phase == "alert" then
     -- Parked, but the fingers have noticed. The ripple runs little -> index;
