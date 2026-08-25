@@ -89,6 +89,8 @@ S.collisionReloads = 0
 -- assertion below would pass VACUOUSLY - which is why the cue tests assert
 -- this list is non-empty before they assert anything about its contents.
 S.luaCommands = {}
+-- The same stream, addressed: {id, command} per send.
+S.vehCommands = {}
 
 local vecmt = {}
 vecmt.__index = vecmt
@@ -278,6 +280,10 @@ function vehmt:getSpawnWorldOOBB()
 end
 function vehmt:queueLuaCommand(command)
   S.luaCommands[#S.luaCommands + 1] = tostring(command)
+  -- WHO was sent it, as well as what. The cue readers only ever needed the
+  -- text, but a command whose whole purpose is to change one specific car's
+  -- structure cannot be checked without knowing which car received it.
+  S.vehCommands[#S.vehCommands + 1] = {id = self.id, command = tostring(command)}
 end
 function vehmt:applyClusterVelocityScaleAdd(_node, scale, x, y, z)
   S.velocities[#S.velocities + 1] = {id = self.id, scale = scale,
@@ -628,6 +634,40 @@ def board_payload(lua, state, module, spec, position=None):
     state.addVehicle(SUBJECT_ID, "pickup", x, y, z)
     enter_zone(lua, state, module, "chamber_zone", SUBJECT_ID)
     enter_zone(lua, state, module, "cradle_zone", SUBJECT_ID)
+
+
+def armour_traffic(state, vehicle_id=None):
+    """Every armour chunk the GE side sent, as ("on"|"off", vehicle_id).
+
+    The two chunks are told apart by what they DO, not by a marker comment:
+    the pin writes math.huge, the restore writes a saved value back. A chunk
+    that stopped doing either would fall out of this list rather than being
+    silently reclassified.
+    """
+
+    out = []
+    for index in range(len(state.vehCommands)):
+        record = state.vehCommands[index + 1]
+        text = str(record.command)
+        if "spinLaunchArmour" not in text:
+            continue
+        kind = "on" if "math.huge" in text else "off"
+        if vehicle_id is None or int(record.id) == vehicle_id:
+            out.append((kind, int(record.id)))
+    return out
+
+
+def armour_chunk(state, kind):
+    """The exact shipped text of one armour chunk."""
+
+    for index in range(len(state.vehCommands)):
+        record = state.vehCommands[index + 1]
+        text = str(record.command)
+        if "spinLaunchArmour" not in text:
+            continue
+        if (kind == "on") == ("math.huge" in text):
+            return text
+    raise AssertionError(f"no {kind!r} armour chunk was ever sent")
 
 
 def test_registers_and_starts_idle(rig):
@@ -2221,3 +2261,217 @@ def test_the_audio_emitter_node_is_resolved_by_name_and_pushed(rig):
     # ...once, not once a frame: this is a latch, and every push is a
     # queueLuaCommand that drops and rebuilds every source on the far side.
     assert len(pushed) == 1, pushed
+
+
+# ---------------------------------------------------------------------
+# Payload armour.
+# ---------------------------------------------------------------------
+#
+# The field drives the ref-node CLUSTER only, so the rest of the car is
+# hauled round a 15.9 m circle by its own beams and carries the whole of
+# v^2/r - 43 g on the nominal rung, 212 g on POWER 8. Before B.payload_armour
+# the machine delivered a wreck to the muzzle and then threw it.
+
+
+def test_the_armour_chunk_pins_every_beam_and_remembers_what_it_pinned(rig):
+    """Execute the SHIPPED chunk against a stub vehicle VM.
+
+    Asserting that a string was sent proves nothing about what the string
+    does. This runs the real text through lupa with a stub obj/v and checks
+    the two things that matter: every beam ends unbreakable, and the value
+    it had first is kept somewhere the restore can find it.
+    """
+
+    lua, state, module, spec = rig
+    register_prop(state, module, spec)
+    board_payload(lua, state, module, spec)
+    module.pressPanelButtonByVehicle(PROP_ID, "btn_launch")
+    run_until(module, lambda s: s.phase == "sealing", limit=400)
+    # The sync is a frame-loop diff, so the send lands on the tick AFTER the
+    # phase flips, not on the flip itself.
+    tick(module, steps=4)
+
+    vm = lupa.LuaRuntime(unpack_returned_tuples=True)
+    vm.execute("""
+      applied = {}
+      v = {data = {beams = {
+        {cid = 0, beamDeform = 12000, beamStrength = 34000},
+        {cid = 1, beamDeform = 500,   beamStrength = 900},
+        {cid = 2},
+      }}}
+      obj = {
+        setBeamDeform = function(_, cid, value)
+          applied[#applied + 1] = {"deform", cid, value}
+        end,
+        setBeamStrength = function(_, cid, value)
+          applied[#applied + 1] = {"strength", cid, value}
+        end,
+      }
+    """)
+    vm.execute(armour_chunk(state, "on"))
+
+    applied = vm.eval("applied")
+    writes = {(str(applied[i + 1][1]), int(applied[i + 1][2])): applied[i + 1][3]
+              for i in range(len(applied))}
+    # The two fully specified beams are pinned on both properties.
+    for cid in (0, 1):
+        assert writes[("deform", cid)] == float("inf"), cid
+        assert writes[("strength", cid)] == float("inf"), cid
+    # A beam whose jbeam carried neither property is left completely alone -
+    # inventing a limit for it would be a change, not a freeze.
+    assert ("deform", 2) not in writes
+    assert ("strength", 2) not in writes
+    # And the originals are held for the restore.
+    saved = vm.eval("spinLaunchArmour")
+    assert saved[0][1] == 12000 and saved[0][2] == 34000
+    assert saved[1][1] == 500 and saved[1][2] == 900
+
+
+def test_the_restore_hands_back_the_car_s_own_numbers_and_never_a_default(rig):
+    """FREEZE, NEVER REPAIR.
+
+    The point of the machine is the landing. A restore that wrote defaults -
+    or that skipped a beam - would hand back a car that crashes like some
+    other car, and a car driven in already dented has to launch dented.
+    """
+
+    lua, state, module, spec = rig
+    register_prop(state, module, spec)
+    board_payload(lua, state, module, spec)
+    module.pressPanelButtonByVehicle(PROP_ID, "btn_launch")
+    run_until(module, lambda s: s.phase == "sealing", limit=400)
+    # The sync is a frame-loop diff, so the send lands on the tick AFTER the
+    # phase flips, not on the flip itself. Abort to make the machine emit the
+    # restore chunk as well, so both halves under test are the shipped text.
+    tick(module, steps=4)
+    module.pressPanelButtonByVehicle(PROP_ID, "btn_abort")
+    tick(module, steps=4)
+
+    vm = lupa.LuaRuntime(unpack_returned_tuples=True)
+    vm.execute("""
+      applied = {}
+      v = {data = {beams = {
+        {cid = 7, beamDeform = 1234, beamStrength = 5678},
+        {cid = 9, beamDeform = 4321},
+      }}}
+      obj = {
+        setBeamDeform = function(_, cid, value)
+          applied[#applied + 1] = {"deform", cid, value}
+        end,
+        setBeamStrength = function(_, cid, value)
+          applied[#applied + 1] = {"strength", cid, value}
+        end,
+      }
+    """)
+    vm.execute(armour_chunk(state, "on"))
+    vm.execute("applied = {}")
+    vm.execute(armour_chunk(state, "off"))
+
+    applied = vm.eval("applied")
+    writes = {(str(applied[i + 1][1]), int(applied[i + 1][2])): applied[i + 1][3]
+              for i in range(len(applied))}
+    assert writes[("deform", 7)] == 1234
+    assert writes[("strength", 7)] == 5678
+    assert writes[("deform", 9)] == 4321
+    # Beam 9 never had a strength, so it must not acquire one on the way out.
+    assert ("strength", 9) not in writes
+    # And the VM is left clean, so a second ride re-reads the real values
+    # rather than restoring math.huge over them for ever.
+    assert vm.eval("spinLaunchArmour") is None
+
+
+def test_a_car_merely_parked_on_the_cradle_is_never_pinned(rig):
+    """arming is not a commitment.
+
+    The driver can still pull off the cradle during the countdown. Pinning
+    there would let anyone collect an indestructible car by driving in,
+    waiting two seconds and leaving.
+    """
+
+    lua, state, module, spec = rig
+    register_prop(state, module, spec)
+    board_payload(lua, state, module, spec)
+    run_until(module, lambda s: s.phase == "arming", limit=400)
+    tick(module, steps=20)
+
+    assert status(module).phase == "arming"
+    assert armour_traffic(state) == []
+
+
+def test_the_payload_is_pinned_for_the_ride_and_freed_for_the_landing(rig):
+    lua, state, module, spec = rig
+    register_prop(state, module, spec)
+    board_payload(lua, state, module, spec)
+    module.pressPanelButtonByVehicle(PROP_ID, "btn_launch")
+
+    run_until(module, lambda s: s.phase == "sealing", limit=400)
+    tick(module, steps=4)
+    assert armour_traffic(state, SUBJECT_ID) == [("on", SUBJECT_ID)], (
+        "the payload was not pinned when it committed")
+
+    # Through the whole loaded ride it stays pinned exactly once - the sync
+    # is a diff, not a resend, so a per-frame call must not spam the VM.
+    run_until(module, lambda s: s.phase == "spinup", limit=20000)
+    assert armour_traffic(state, SUBJECT_ID) == [("on", SUBJECT_ID)]
+
+    # WHEN the restore lands, not merely that it eventually does: a car freed
+    # late is a car that lands rigid, and at 180 m/s a short flight is the
+    # whole flight.
+    #
+    # It lands one tick into "recover", and that is as early as the machine
+    # can manage: launching the car, clearing b.payloadId and leaving the
+    # "release" phase all happen in the same frame, so the earliest sync that
+    # can see any of it is the next one. That coincidence also makes the
+    # b.launched guard in armourSubject defensive rather than load-bearing -
+    # deleting it changes no outcome here, because payloadId and the phase
+    # have already both said no. It is kept because it is the guard that
+    # states the actual rule.
+    launched_at, seen_release = None, False
+    for index in range(40000):
+        tick(module)
+        phase = str(status(module).phase)
+        if phase == "release":
+            seen_release = True
+        elif seen_release and launched_at is None:
+            launched_at = index
+        if armour_traffic(state, SUBJECT_ID)[-1][0] == "off":
+            break
+    else:
+        raise AssertionError("the car was never handed its structure back")
+    assert launched_at is not None
+    assert index - launched_at <= 1, (
+        f"the car flew rigid for {index - launched_at} frames after launch")
+
+    run_until(module, lambda s: s.phase == "idle", limit=40000)
+    assert armour_traffic(state, SUBJECT_ID) == [
+        ("on", SUBJECT_ID), ("off", SUBJECT_ID)], (
+        "the launched car was not handed its structure back")
+
+
+@pytest.mark.parametrize("ending", ["abort", "prop_reset", "subject_gone"])
+def test_no_ending_leaves_a_car_permanently_indestructible(rig, ending):
+    """The failure that matters is not a dent, it is a car that drives away
+    invincible for the rest of the session.
+
+    Three ways a ride can end other than a launch. Each has to give the
+    structure back, and the machine has to stop believing it holds one.
+    """
+
+    lua, state, module, spec = rig
+    register_prop(state, module, spec)
+    board_payload(lua, state, module, spec)
+    module.pressPanelButtonByVehicle(PROP_ID, "btn_launch")
+    run_until(module, lambda s: s.phase == "spinup", limit=20000)
+    assert armour_traffic(state, SUBJECT_ID) == [("on", SUBJECT_ID)]
+
+    if ending == "abort":
+        module.pressPanelButtonByVehicle(PROP_ID, "btn_abort")
+    elif ending == "prop_reset":
+        module.onVehicleResetted(PROP_ID)
+    else:
+        module.onVehicleResetted(SUBJECT_ID)
+    tick(module, steps=4)
+
+    assert armour_traffic(state, SUBJECT_ID)[-1] == ("off", SUBJECT_ID), (
+        f"{ending} left the car pinned")
+    assert not errors(state)

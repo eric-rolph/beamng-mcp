@@ -2420,6 +2420,28 @@ BEHAVIOR = {
     "safety_node_dist": 40.0,
     "safety_check_interval": 1.0,
     "safety_release_seconds": 12.0,
+    # --- payload armour ---------------------------------------------------
+    # DO NOT SHRED THE SPECIMEN.
+    #
+    # Only the ref-node CLUSTER is velocity-driven (see applyTetherField).
+    # Every other node in the car is in free flight between field updates
+    # and has to be hauled back onto a 15.9 m circle by its own beams, so
+    # the structure carries the whole centripetal load: v^2/r is 5.0 g on
+    # POWER 1 and 212.4 g on POWER 8. A car body is not a 212 g structure,
+    # and nothing here ever mitigated that - the machine was delivering a
+    # wreck to the muzzle and then throwing it.
+    #
+    # While a payload is committed its beams are pinned to math.huge deform
+    # and strength, which is the value the engine's own jbeam loader uses
+    # for "no limit" (jbeam/stage2.lua passes math.huge as a deform limit).
+    # The beams still stretch - the car flexes and rings exactly as before -
+    # they simply do not take a permanent set and do not break.
+    #
+    # FREEZE, NEVER REPAIR. The originals are read back out of v.data.beams
+    # and restored on release, so a car that drove in already dented is
+    # launched still dented, and the LANDING is a completely normal crash.
+    # That is the whole point of the machine.
+    "payload_armour": True,
     # --- purge ------------------------------------------------------------
     "purge_up_mps": 34.0,
     "purge_out_mps": 26.0,
@@ -2610,10 +2632,24 @@ local REQUIRED = {
   "pump_spin_rate", "camera_distance",
 }
 
+-- The same contract for the FLAG tunables, which the list above cannot
+-- carry: it tests for "number", so a boolean fails it on arrival and a
+-- build.py-only run ships Lua the gate rejects outright. Splitting them by
+-- type is not cosmetic - a missing flag reads as nil, nil is falsy, and the
+-- feature simply switches itself off with nothing said. That is the exact
+-- silent-and-total failure this gate exists to prevent, and until now the
+-- pack's boolean tunables were the only ones it could not see.
+local REQUIRED_FLAGS = {
+  "safety_enabled", "payload_armour",
+}
+
 local function tunablesPresent(state)
   local missing = {}
   for _, name in ipairs(REQUIRED) do
     if type(B[name]) ~= "number" then missing[#missing + 1] = name end
+  end
+  for _, name in ipairs(REQUIRED_FLAGS) do
+    if type(B[name]) ~= "boolean" then missing[#missing + 1] = name end
   end
   if #missing == 0 then return true end
   emitError(state, "handoff_tunables_missing", {keys = table.concat(missing, ",")})
@@ -2798,6 +2834,107 @@ local function subjectHalfExtent(vehicle)
     worst = math.max(extents.x, math.max(extents.y, extents.z))
   end)
   return worst
+end
+
+-- ---------------------------------------------------------------------
+-- Payload armour: do not shred the specimen.
+-- ---------------------------------------------------------------------
+--
+-- See B.payload_armour. The short version: the field drives the ref-node
+-- CLUSTER, so the rest of the car is hauled round a 15.9 m circle by its
+-- own beams and eats the entire v^2/r, which is 43 g on the nominal rung
+-- and 212 g on POWER 8. Pin deform and strength to math.huge for the ride
+-- and the beams still stretch - the car flexes, rings and settles exactly
+-- as it did - but they take no permanent set and none of them break.
+--
+-- The originals are read out of v.data.beams and put back on release, so
+-- this FREEZES damage, it never repairs it: a car that limped in on three
+-- wheels is launched still on three wheels, and the landing is an ordinary
+-- crash. Anything else would be a repair bay wearing a launcher's hat.
+local ARMOUR_ON = [==[
+if not spinLaunchArmour and v and v.data and v.data.beams then
+  local saved = {}
+  for _, beam in pairs(v.data.beams) do
+    local cid = beam.cid
+    if cid then
+      saved[cid] = {beam.beamDeform, beam.beamStrength}
+      if type(beam.beamDeform) == "number" then obj:setBeamDeform(cid, math.huge) end
+      if type(beam.beamStrength) == "number" then obj:setBeamStrength(cid, math.huge) end
+    end
+  end
+  spinLaunchArmour = saved
+end
+]==]
+
+-- Restore per PROPERTY, not per beam. A beam whose jbeam never carried a
+-- beamDeform was never overridden either, and writing a default back into
+-- it would invent a limit the car did not ship with.
+local ARMOUR_OFF = [==[
+if spinLaunchArmour then
+  for cid, was in pairs(spinLaunchArmour) do
+    if type(was[1]) == "number" then obj:setBeamDeform(cid, was[1]) end
+    if type(was[2]) == "number" then obj:setBeamStrength(cid, was[2]) end
+  end
+  spinLaunchArmour = nil
+end
+]==]
+
+-- The phases in which the machine is holding the car against the circle.
+-- "arming" is absent for READABILITY rather than for effect: b.payloadId is
+-- only set by armPayload, which sets the phase to "sealing" in the same
+-- breath, so there is no id to pin during the countdown and listing it here
+-- would change nothing. Measured: adding arming = true to this table alters
+-- no test outcome. The guard that actually protects a car which merely
+-- idled on the cradle is the payloadId check below.
+local ARMOUR_PHASES = {
+  sealing = true, evacuating = true, engaging = true,
+  spinup = true, hold = true, release = true,
+}
+
+local function armourSubject(state)
+  local b = state.behavior
+  if not B.payload_armour then return nil end
+  local id = b.payloadId
+  if not id then return nil end
+  if not ARMOUR_PHASES[b.phase or ""] then return nil end
+  -- The frame the field lets go, the car is ballistic and the landing has
+  -- to be a real crash. "release" stays in the table above because the car
+  -- is still on the tether for most of that phase.
+  if b.launched and b.launched[id] then return nil end
+  -- A quarantined payload has already lost the field. Leaving it pinned
+  -- would hand the player an indestructible wreck.
+  if b.quarantine and b.quarantine[id] then return nil end
+  return id
+end
+
+local function sendArmour(vehicleId, chunk)
+  if not vehicleId then return end
+  local vehicle = be:getObjectByID(vehicleId)
+  if not vehicle then return end
+  pcall(function() vehicle:queueLuaCommand(chunk) end)
+end
+
+-- IDEMPOTENT, AND RUN EVERY FRAME ON PURPOSE.
+--
+-- The failure that matters here is not "the car got dented", it is "the car
+-- drove away invincible for the rest of the session". Scattering an arm
+-- call at armPayload and a disarm call at each of the six ways a payload
+-- can stop being the payload is exactly how one of those six gets missed.
+-- So nothing calls the chunks directly: this diffs what SHOULD be armoured
+-- against what IS, every frame, and converges. A path nobody thought of
+-- still ends with the car restored on the next tick.
+local function syncPayloadArmour(state)
+  local b = state.behavior
+  local want = armourSubject(state)
+  if want == b.armouredId then return end
+  if b.armouredId then
+    sendArmour(b.armouredId, ARMOUR_OFF)
+    b.armouredId = nil
+  end
+  if want then
+    sendArmour(want, ARMOUR_ON)
+    b.armouredId = want
+  end
 end
 
 -- Carry a part that is bolted to a rotating assembly. The part's own pivot
@@ -3650,6 +3787,13 @@ behavior.init = function(state)
   b.armCandidateId = nil
   b.chamberBlockSaid = nil
   b.pumpAngle = 0
+  -- SEND the restore, do not merely forget the id. Resetting the PROP does
+  -- not reset the CAR, so dropping the id here without telling the vehicle
+  -- would strand a rigid car in the chamber for the rest of the session -
+  -- and the sync loop could not fix it, because it would no longer know
+  -- there was anything to fix.
+  sendArmour(b.armouredId, ARMOUR_OFF)
+  b.armouredId = nil
   b.payloadId = nil
   b.launched = {}
   b.quarantine = {}
@@ -4058,6 +4202,9 @@ behavior.update = function(state, dtSim, dtReal)
 
 
   runSafetySweep(state, dt)
+  -- AFTER the sweep, so a payload quarantined this very frame is restored
+  -- on this frame rather than riding one more tick pinned.
+  syncPayloadArmour(state)
 
   -- Tether integration. theta DECREASES; every consumer of it wraps.
   local previousTheta = b.theta or math.rad(B.load_theta_deg)
