@@ -377,7 +377,11 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
     mesh_cache = require_confined_profile_target(
         user, Path("temp") / "vehicles" / MOD_ID
     )
-    assert not mesh_cache.exists(), mesh_cache
+    # GEOMETRY only. Cooked textures are deliberately spared - purging them
+    # buys no freshness (the engine re-cooks from the source PNG) and races the
+    # material loader into refusing half-written uploads - so the directory
+    # itself can legitimately survive the purge. The .cdae must not.
+    assert not list(mesh_cache.glob("*.cdae")), mesh_cache
     shipped_meshes = {
         Path(name).stem
         for name in zipfile.ZipFile(archive).namelist()

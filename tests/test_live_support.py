@@ -545,14 +545,22 @@ def _sentinel_profile(tmp_path: Path) -> Path:
     return user
 
 
-def test_mesh_purge_clears_both_cache_roots_including_nested_textures(
+def test_mesh_purge_clears_geometry_from_both_roots_but_keeps_cooked_textures(
     tmp_path: Path,
 ) -> None:
+    """Geometry goes; a cooked texture stays exactly where it was.
+
+    The staleness bug this helper exists for is .cdae-specific. A .dds is
+    stamped from its source and re-cooked when that source changes, so purging
+    one buys no freshness and only races the material loader into uploading a
+    half-written texture. See ``_MESH_CACHE_PURGE_SUFFIXES``.
+    """
+
     user = _sentinel_profile(tmp_path)
     vehicles = user / "temp" / "vehicles" / "ericrolph_spin_launch"
     (vehicles / "textures").mkdir(parents=True)
     (vehicles / "ericrolph_spin_launch.cdae").write_bytes(b"stale")
-    (vehicles / "textures" / "shell.dds").write_bytes(b"stale")
+    (vehicles / "textures" / "shell.dds").write_bytes(b"cooked")
     shapes = user / "temp" / "art" / "shapes" / "ericrolph_spin_launch"
     shapes.mkdir(parents=True)
     (shapes / "ericrolph_spin_launch.cdae").write_bytes(b"stale")
@@ -562,11 +570,34 @@ def test_mesh_purge_clears_both_cache_roots_including_nested_textures(
 
     removed = purge_cached_prop_meshes(user, "ericrolph_spin_launch")
 
-    assert not vehicles.exists()
-    assert not shapes.exists()
+    # Every compiled mesh is gone from BOTH roots - that is the geometry proof.
+    assert not (vehicles / "ericrolph_spin_launch.cdae").exists()
+    assert not shapes.exists()  # held nothing else, so the purge emptied it
+    # The texture survives untouched, and so do the directories holding it.
+    assert (vehicles / "textures" / "shell.dds").read_bytes() == b"cooked"
     assert (unrelated / "keep.cdae").read_bytes() == b"keep"
-    # three files plus the two textures/ and mod directories and the shapes dir
-    assert len(removed) == 6
+    # Two .cdae plus the emptied shapes dir. The vehicles dir and its textures/
+    # both still hold the .dds, so neither is reported and neither is removed.
+    assert len(removed) == 3
+
+
+def test_mesh_purge_leaves_a_texture_only_cache_completely_alone(
+    tmp_path: Path,
+) -> None:
+    """Nothing to purge is not the same as nothing to understand.
+
+    A cache holding only cooked textures is recognised in full, so the purge
+    must neither raise nor rmdir its way through the directories on the way
+    back out.
+    """
+
+    user = _sentinel_profile(tmp_path)
+    vehicles = user / "temp" / "vehicles" / "ericrolph_spin_launch"
+    (vehicles / "textures").mkdir(parents=True)
+    (vehicles / "textures" / "shell.color.dds").write_bytes(b"cooked")
+
+    assert purge_cached_prop_meshes(user, "ericrolph_spin_launch") == ()
+    assert (vehicles / "textures" / "shell.color.dds").read_bytes() == b"cooked"
 
 
 def test_mesh_purge_is_a_no_op_when_nothing_was_ever_compiled(tmp_path: Path) -> None:

@@ -33,6 +33,19 @@ _MESH_CACHE_ROOTS = (Path("temp") / "vehicles", Path("temp") / "art" / "shapes")
 # broken assumption about what the cache holds, and the purge refuses rather
 # than deleting a file it does not understand.
 _MESH_CACHE_SUFFIXES = frozenset({".cdae", ".dds", ".dts"})
+# ...of which only these are DELETED. Recognising a file and needing to destroy
+# it are separate questions, and .dds answers them differently. A cooked
+# texture is stamped from its source and re-cooked when that source changes, so
+# it is never stale: measured 2026-08-25, ericrolph_pachinko_tower's 16 cooked
+# .dds still carried the installing ZIP's 22:52:31 stamp NINE DAYS after a
+# session that recompiled every .cdae in the same directory. Deleting them
+# bought no freshness and raced the material loader on the next boot - up to 52
+# "non streamable texture got a dds with 4 missing finest mips, refusing to
+# upload" failures, leaving the console's bar sockets untextured on roughly
+# half of purged boots. A .cdae has the opposite problem, and is the whole
+# point of this helper: stamped at compile time with no link back to its
+# source, nothing but this purge ever invalidates it.
+_MESH_CACHE_PURGE_SUFFIXES = frozenset({".cdae", ".dts"})
 _MESH_CACHE_MAX_DEPTH = 3
 # Anchored, no separators, no dots: a mod id must be a bare literal before it
 # is ever concatenated into a deletion path.
@@ -411,11 +424,12 @@ def purge_cached_prop_meshes(user: Path, mod_id: str) -> tuple[Path, ...]:
       reparse point in any component;
     - the walk is depth-capped, and a link discovered inside the cache raises
       instead of being followed;
-    - and it is NOT a recursive delete. Only files whose suffix is a known
-      cache artifact are unlinked; anything else means the assumption about
-      what lives here is wrong, so it raises and removes nothing further.
-      Directories go only through ``rmdir``, bottom-up, exactly as
-      :func:`cleanup_exact_live_artifacts` does.
+    - and it is NOT a recursive delete. Only compiled GEOMETRY is unlinked
+      (:data:`_MESH_CACHE_PURGE_SUFFIXES`); a cooked texture is recognised but
+      deliberately left alone; anything else means the assumption about what
+      lives here is wrong, so it raises and removes nothing further.
+      Directories go only through ``rmdir``, bottom-up and only once empty,
+      exactly as :func:`cleanup_exact_live_artifacts` does.
 
     Returns every path removed, newest-first per root, so a caller can assert
     the purge was real rather than a silent no-op.
@@ -450,14 +464,23 @@ def purge_cached_prop_meshes(user: Path, mod_id: str) -> tuple[Path, ...]:
                     if entry.is_dir(follow_symlinks=False):
                         stack.append((child, depth + 1))
                         continue
-                    if child.suffix.casefold() not in _MESH_CACHE_SUFFIXES:
+                    suffix = child.suffix.casefold()
+                    if suffix not in _MESH_CACHE_SUFFIXES:
                         raise RuntimeError(
                             "unexpected file in the compiled-mesh cache, "
                             f"refusing to purge: {child}"
                         )
+                    if suffix not in _MESH_CACHE_PURGE_SUFFIXES:
+                        continue
                     child.unlink()
                     removed.append(child)
+        # Bottom-up, and only where the purge actually emptied it: a directory
+        # still holding its cooked textures is now the EXPECTED outcome, not an
+        # anomaly. rmdir stays non-recursive, so a survivor is left in place
+        # rather than destroyed on the way past.
         for directory in reversed(directories):
+            if any(directory.iterdir()):
+                continue
             directory.rmdir()
             removed.append(directory)
     return tuple(removed)
