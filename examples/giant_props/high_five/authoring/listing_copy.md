@@ -149,7 +149,7 @@ It already knows when you will get here.
 # Upload
 
 **Not yet submitted.** This mod has no `repo_update/` or `repo_submission/`
-staging, and should not get one until the live gate below is done.
+staging, and should not get one until the visual play-test below is done.
 
 In-game, the vehicle selector card comes from the mod itself —
 `authoring/ericrolph_high_five_thumbnail.jpg` is copied to `default.jpg`
@@ -168,38 +168,62 @@ The Blender stage must run first. The palette ships inside the handoff, so
 a `spec.py` edit followed by `build.py all` alone rebuilds the material
 JSON from the *previous* palette — a trap this mod fell into once already.
 
-**Textures are NOT pre-cooked.** All 36 maps ship as source PNG, so every
-player pays the TextureCooker on first load and sees BeamNG's IMPORTING
-TEXTURE placeholder until it converges. The ZIP is 80 MB, `ZIP_STORED`. To
-fix that after a live session:
+**Textures are pre-cooked.** All 36 maps ship as DDS harvested from a game
+session that actually loaded serial 25, certified against today's source
+PNGs in `textures_cooked/ericrolph_high_five.harvest.json`. Players pay no
+cook on first load and never see BeamNG's IMPORTING TEXTURE placeholder;
+the trade is download size, 78.6 MB of PNG becoming 98.6 MB of DDS. To
+re-harvest after any texture change:
 
 ```
-# play the mod once so the game cooks the PNGs, then:
-GIANT_PROPS_PROFILE=%LOCALAPPDATA%\BeamNG\BeamNG.drive\current \
-    python examples/giant_props/build.py high_five harvest
+# play the mod once so the game cooks the new PNGs, then:
+GIANT_PROPS_PROFILE=%LOCALAPPDATA%\BeamNG\BeamNG.drive\current     python examples/giant_props/build.py high_five harvest
 python examples/giant_props/build.py high_five all
 ```
 
+Note the pack's re-zip trap applies from here on: `build.py <key> prop`
+rewrites cooked DDS back to raw PNG for any mod WITHOUT a certified
+manifest. This mod now has one, so `prop` keeps the DDS — but verify the
+zip's member extensions after any re-cut rather than assuming it.
+
+**Live gate: PASSING.** `tests/test_high_five_live.py` boots BeamNG in the
+sentinel-isolated profile, spawns the prop, puts an ETK 800 85 m up the
+approach corridor and drives it at the machine under its own power. It
+asserts the full chain against a car that never stopped moving, which is
+the one thing the headless harness cannot reach — a reactive machine would
+produce most of this chain against a PARKED car and miss a moving one,
+because a 0.85 s wind-up is 19 m at this speed. Measured in-engine:
+
+| | measured |
+|---|---|
+| approach speed at the corridor's end | 25.8 m/s |
+| outcome | `high_five_slapped`, not `high_five_whiffed` |
+| slap speed the runtime rolled | 43.2–45.4 m/s across runs |
+| speed the car actually reached | within 0.06 m/s of it |
+| launch elevation vs WRIST TILT setting | **14.0 deg vs 14.0 deg** |
+| runtime errors | none |
+
+That elevation row is the console's whole premise — the launch leaves along
+the palm normal, so TILT is a ballistic control and not a decoration — and
+until this gate existed it was only ever the arithmetic that produces it,
+never the physics that results.
+
 **Still owed before upload:**
 
-1. **The pack's live play-test rule.** Nothing here has been driven at. The
-   whole behaviour is verified in a headless Lua harness against the real
-   generated `runtime.lua` under stubbed engine globals — which is
-   necessary and not sufficient. Specifically unverified in-engine: that a
-   collisionless palm passing through a car reads as a slap rather than as
-   a miss; the click-box positions on the console caps; and the frame cost
-   of the hand's mesh.
-2. **A cooked-DDS harvest**, which needs that same session.
-3. **`machined_steel`'s effective diffuse (0.0279) sits below the matte
+1. **The visual questions the headless gate cannot answer.** Does a
+   collisionless palm passing through a car read as a slap or as a miss?
+   Are the console cap click-boxes where a player's cursor expects them?
+   What does the hand cost per frame? All need a human at a screen.
+2. **`machined_steel`'s effective diffuse (0.0279) sits below the matte
    enamel's (0.0352)** — the bare metal is darker than the paint, which is
    backwards. Deliberately not corrected against a studio rig whose dim
    world flatters dielectrics and starves metals; check it under a real
    sky first.
-4. In-game action screenshots would beat the studio renders for a gallery.
+3. In-game action screenshots would beat the studio renders for a gallery.
    Nobody believes a slap machine until they see a car leave.
 
 **Note on release hashes:** this mod has crossed the packaging timestamp
-clamp (serial 25 against 24 days since the 2026-08-01 epoch), so its
+clamp (serial 26 against 24 days since the 2026-08-01 epoch), so its
 `member_timestamp` now rides the build clock and a no-op rebuild no longer
 reproduces its sha256. Its lock cannot be verified by re-cutting the way
 the rest of the pack's can.
