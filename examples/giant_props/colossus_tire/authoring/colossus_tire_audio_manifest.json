@@ -1,0 +1,32 @@
+{
+  "channels": 1,
+  "codec": "ogg/vorbis",
+  "cues": [
+    {
+      "loop": false,
+      "momentary_dbfs": -21.17,
+      "name": "release_crack",
+      "pcm_sha256": "2b7d2a4259892e945e5a2ee89e6c4a6f1cce4898fd4a38f881576c9dda91a04e",
+      "peak_dbfs": -0.27,
+      "seconds": 2.4
+    },
+    {
+      "loop": true,
+      "loop_wrap_ratio": 0.317,
+      "momentary_dbfs": -16.67,
+      "name": "roll_loop",
+      "pcm_sha256": "714eabe01a411961842b7fa14371f17ff804cf91c78300326b8bf9a6f7b3cc20",
+      "peak_dbfs": -3.31,
+      "seconds": 4.0
+    },
+    {
+      "loop": false,
+      "momentary_dbfs": -14.13,
+      "name": "capsize_boom",
+      "pcm_sha256": "9a54c6e9ea3d0acf5f56c9570b9277a4156d0037214c3813fc418a6019a94b4b",
+      "peak_dbfs": -0.93,
+      "seconds": 3.6
+    }
+  ],
+  "samplerate": 48000
+}

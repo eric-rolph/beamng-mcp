@@ -656,7 +656,9 @@ rides the wall clock and every rebuild yields a new sha256. Re-staging `dist/rep
 
 **`high_five` is the first mod to cross that clamp** — it reached serial 25 on 2026-08-25, i.e. 25
 serials against 24 days since 2026-08-01, so its `member_timestamp` now reads the build clock
-(`2026-08-25T05:09:30`) instead of a synthetic day. Two practical consequences: a no-op rebuild of
+(`2026-08-25T05:09:30`) instead of a synthetic day. **`colossus_tire` is the second** — past serial 49
+after round 5's iteration burst, so its lock likewise cannot be verified by re-cutting from a
+clean checkout. Two practical consequences: a no-op rebuild of
 this mod no longer reproduces its sha256, so its lock cannot be verified by re-cutting; and anyone
 diffing two builds across a day boundary will see `member_timestamp` move for no content reason.
 That is the scheme working as named, not a defect — but it is the point at which hash-stability
@@ -714,11 +716,13 @@ a prop rather than a structural one. Four things learned building them:
   against 0.852 on a 23-degree hillside - so the hill number was camber and
   terrain, not scrub, and a whole line of investigation was wrong.
 
-The results worth carrying forward: a 48-station collision hull with 30 mm of
-facet sagitta rides at 6.4 mm RMS under a contact patch that deflects 250 mm,
-so a deflecting carcass swallows its own polygon; and rolling resistance in
-this engine is hysteretic beam damping spread across every rubber family, not
-concentrated in the tread - halving the tread alone moved Crr by 0.2 points.
+The results worth carrying forward: a 48-station collision hull with 30 mm
+of facet sagitta rides at 7.3 mm RMS under a ~95 mm contact patch, so a
+deflecting carcass swallows its own polygon; and rolling resistance in this
+engine ultimately lives in the CONTACT model and scales with weight - beam
+damping, stiffness and node friction were each measured and none owned the
+loss (Crr went 6.2% -> 5.4% under a x3.2 stiffening and only reached 2.3%
+when the mass came down with k/M held constant).
 
 ### Giant Props: tan-delta is not a damping ratio
 
@@ -728,6 +732,62 @@ heaviest-node measure - four to eight times what tread compound implies. The
 gate that "checked" it passed, because its band was written from the same
 mistaken reading. When a damping ratio is argued from a material property,
 write down which property and how it converts.
+
+
+### Giant Props: the contact patch is a built-in chock
+
+A deflecting tire's ground reaction can migrate to the leading edge of its
+contact patch and statically react torque up to about `(M + m) * g * e`
+before the wheel HAS to roll - and on a 48-station collision hull `e`
+reaches the SECOND facet, ~2.7 m out on colossus. Three consequences, all
+measured live:
+
+* A car driving inside the cavity applies `m * g * R_liner * sin(phi)` at
+  its climb angle, so the hamster wheel turns only when
+  `m / (M + m) > e / (R * sin(phi))` - the DRIVER'S mass fraction is the
+  whole game, and no amount of torque, grip, or patience substitutes for it.
+  The 115 kNm hold was measured at the 6 t tune (40/40 straps audited
+  broken); at the shipped 4.2 t the patch holds ~94 kNm against the
+  ~125-133 a mid-wall station supplies. An etk800 sits exactly on the
+  line; a roamer clears it.
+* Gravity cannot start a parked carcass below `tan(theta) ~ e / R` (~8 deg
+  here). What looked like "rolling resistance vs grade" arithmetic on gentle
+  slopes was really patch-edge statics.
+* Rolling resistance in this engine bottoms out in the CONTACT MODEL, not
+  the beams: Crr went 6.2% -> 5.4% under a x3.2 stiffening and only reached
+  2.3% when the mass came down with k/M held constant. Beam damping, node
+  friction (both directions), and deflection were all measured and none of
+  them owned the loss.
+
+### Giant Props: a mechanism is not released until its furniture is gone
+
+Free-body chock wedges with selfCollision made the chocks REAL - and that
+cut both ways: a wedge lying against the tread props the carcass through
+the ramp geometry even with every strap verifiably broken (40/40 audited),
+and a 16 degree ramp self-locks against ground friction above tan(16) =
+0.29, so quasi-static torque can never shove it on the flat. The shipped
+release therefore winches each wedge clear along its own toe-to-heel axis
+(`thrusters.applyImpulse`, a public vehicle-VM API), sized against MEASURED
+skid friction - the node frictionCoef multiplies the groundmodel's own
+coefficient, so 0.55 authored reads ~0.87 effective and a winch sized to
+the authored number moved the wedge 0.29 m instead of metres. The winch
+echoes its completion count into GE so a silent no-op cannot masquerade as
+an immovable chock, which cost a day here: `breakBreakGroup` + ram/gravity
+force-snapping the straps made every earlier gate pass without the cut ever
+being load-bearing.
+
+### Giant Props: calibrate spawn rotation, never derive it
+
+BeamNG reads `rot_quat` with the OPPOSITE handedness to the textbook
+matrix->quat: a +45 degree yaw quat spawns the prop yawed -45. A derived
+slope-alignment quat therefore put the axle ALONG the fall line - the tire
+side-on to the hill - and the error hid at cardinal fall lines and appeared
+as "the tire settles leaning by its own grade" at rotated ones, which
+mimicked terrain problems well enough to burn four hill runs on
+spot-shopping. One smallgrid calibration boot (pure yaw, the derived quat,
+and its conjugate, measuring axle azimuth and lean) pinned the convention:
+use the CONJUGATE. Cheap to run, and it converts a guess into a fact the
+file can cite.
 
 ### Giant Props: a prop with a permanent attachment must be BALANCED about its axle
 
@@ -776,10 +836,14 @@ the same reason the Collada normaliser is.
 
 ### Giant Props: colossus_tire's mass is a documented departure
 
-TIRE_MASS is 10,500 kg where an honest 28.168 m carcass would be ~1,923,000 kg (rubber goes as
+TIRE_MASS is 4,200 kg where an honest 28.168 m carcass would be ~1,923,000 kg (rubber goes as
 volume, and the scale factor is 7.0455). It is not taste: it is solved backwards from a
-playability requirement - a stock car pushing the inner liner at mu 0.75 has to spin the tire up to
-30 km/h in 12-28 s - through the CONTACT-POINT rolling inertia I_cm + M*R^2, not the axle inertia.
+playability requirement through the CONTACT-POINT rolling inertia I_cm + M*R^2, and it has
+moved twice on live measurements - 10,500 -> 6,000 when the engine's contact model pinned
+rolling resistance at ~5% of weight, and 6,000 -> 4,200 when patch-edge statics (see the
+hamster inequality above) still held the wheel against everything a car inside could apply.
+Every move scaled every beam family by the same factor, k/M and c/sqrt(kM) constant, so the
+deflection, the integrator margins and the damping ratios never changed.
 Any change to the size code, the mass or the friction has to re-run that solve, and the beam
 families rescale with it: every `beamSpring` by the mass ratio and every `beamDamp` by its square
 root, which is what keeps the damping ratios where the materials argument put them.

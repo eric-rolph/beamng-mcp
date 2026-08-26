@@ -11,6 +11,12 @@
     ],
     "id": "ericrolph_colossus_tire",
     "physics_cage": "ericrolph_colossus_tire_cage",
+    "visual_groups": [
+      "chock_0",
+      "chock_1",
+      "chock_2",
+      "chock_3"
+    ],
     "visual_mesh": "ericrolph_colossus_tire_visual"
   },
   "base_nodes": [
@@ -56,22 +62,10 @@
       "beamSpring": 15000000.0,
       "beamStrength": "FLT_MAX"
     },
-    "gangway": {
-      "beamDamp": 611.0,
-      "beamDeform": "FLT_MAX",
-      "beamSpring": 875000.0,
-      "beamStrength": "FLT_MAX"
-    },
     "inflation": {
       "beamDamp": 270.0,
       "beamDeform": "FLT_MAX",
       "beamSpring": 84000.0,
-      "beamStrength": "FLT_MAX"
-    },
-    "port_frame": {
-      "beamDamp": 611.0,
-      "beamDeform": "FLT_MAX",
-      "beamSpring": 875000.0,
       "beamStrength": "FLT_MAX"
     },
     "rigid": {
@@ -55509,6 +55503,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_0",
       "id": "ericrolph_colossus_tire_chock_0_toe_l",
       "node_material": "|NM_METAL",
       "position": [
@@ -55528,6 +55523,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_0",
       "id": "ericrolph_colossus_tire_chock_0_toe_r",
       "node_material": "|NM_METAL",
       "position": [
@@ -55547,6 +55543,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_0",
       "id": "ericrolph_colossus_tire_chock_0_heel_l",
       "node_material": "|NM_METAL",
       "position": [
@@ -55566,6 +55563,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_0",
       "id": "ericrolph_colossus_tire_chock_0_heel_r",
       "node_material": "|NM_METAL",
       "position": [
@@ -55585,6 +55583,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_0",
       "id": "ericrolph_colossus_tire_chock_0_top_l",
       "node_material": "|NM_METAL",
       "position": [
@@ -55604,6 +55603,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_0",
       "id": "ericrolph_colossus_tire_chock_0_top_r",
       "node_material": "|NM_METAL",
       "position": [
@@ -55699,6 +55699,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_1",
       "id": "ericrolph_colossus_tire_chock_1_toe_l",
       "node_material": "|NM_METAL",
       "position": [
@@ -55718,6 +55719,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_1",
       "id": "ericrolph_colossus_tire_chock_1_toe_r",
       "node_material": "|NM_METAL",
       "position": [
@@ -55737,6 +55739,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_1",
       "id": "ericrolph_colossus_tire_chock_1_heel_l",
       "node_material": "|NM_METAL",
       "position": [
@@ -55756,6 +55759,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_1",
       "id": "ericrolph_colossus_tire_chock_1_heel_r",
       "node_material": "|NM_METAL",
       "position": [
@@ -55775,6 +55779,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_1",
       "id": "ericrolph_colossus_tire_chock_1_top_l",
       "node_material": "|NM_METAL",
       "position": [
@@ -55794,6 +55799,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_1",
       "id": "ericrolph_colossus_tire_chock_1_top_r",
       "node_material": "|NM_METAL",
       "position": [
@@ -55889,6 +55895,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_2",
       "id": "ericrolph_colossus_tire_chock_2_toe_l",
       "node_material": "|NM_METAL",
       "position": [
@@ -55908,6 +55915,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_2",
       "id": "ericrolph_colossus_tire_chock_2_toe_r",
       "node_material": "|NM_METAL",
       "position": [
@@ -55927,6 +55935,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_2",
       "id": "ericrolph_colossus_tire_chock_2_heel_l",
       "node_material": "|NM_METAL",
       "position": [
@@ -55946,6 +55955,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_2",
       "id": "ericrolph_colossus_tire_chock_2_heel_r",
       "node_material": "|NM_METAL",
       "position": [
@@ -55965,6 +55975,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_2",
       "id": "ericrolph_colossus_tire_chock_2_top_l",
       "node_material": "|NM_METAL",
       "position": [
@@ -55984,6 +55995,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_2",
       "id": "ericrolph_colossus_tire_chock_2_top_r",
       "node_material": "|NM_METAL",
       "position": [
@@ -56079,6 +56091,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_3",
       "id": "ericrolph_colossus_tire_chock_3_toe_l",
       "node_material": "|NM_METAL",
       "position": [
@@ -56098,6 +56111,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_3",
       "id": "ericrolph_colossus_tire_chock_3_toe_r",
       "node_material": "|NM_METAL",
       "position": [
@@ -56117,6 +56131,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_3",
       "id": "ericrolph_colossus_tire_chock_3_heel_l",
       "node_material": "|NM_METAL",
       "position": [
@@ -56136,6 +56151,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_3",
       "id": "ericrolph_colossus_tire_chock_3_heel_r",
       "node_material": "|NM_METAL",
       "position": [
@@ -56155,6 +56171,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_3",
       "id": "ericrolph_colossus_tire_chock_3_top_l",
       "node_material": "|NM_METAL",
       "position": [
@@ -56174,6 +56191,7 @@
       "collision": true,
       "fixed": false,
       "friction": 0.55,
+      "group": "chock_3",
       "id": "ericrolph_colossus_tire_chock_3_top_r",
       "node_material": "|NM_METAL",
       "position": [
@@ -56360,15 +56378,39 @@
         "srgb": true
       }
     },
+    "ericrolph_colossus_tire_chock_paint": {
+      "color": [
+        0.72,
+        0.5,
+        0.1,
+        1.0
+      ],
+      "metallic": 0.15,
+      "roughness": 0.52,
+      "texture": {
+        "family": "steel_worn",
+        "normal_strength": 3.0,
+        "params": {
+          "base": [
+            0.72,
+            0.5,
+            0.1
+          ],
+          "relief": 8.0,
+          "rough": 0.52
+        },
+        "srgb": true
+      }
+    },
     "ericrolph_colossus_tire_hazard": {
       "color": [
-        0.9,
-        0.55,
+        0.95,
+        0.75,
         0.08,
         1.0
       ],
       "metallic": 0.1,
-      "roughness": 0.5,
+      "roughness": 0.59,
       "texture": {
         "family": "hazard_chevron",
         "normal_strength": 3.0,
@@ -56406,7 +56448,7 @@
         1.0
       ],
       "metallic": 0.0,
-      "roughness": 0.54,
+      "roughness": 0.8,
       "texture": {
         "family": "tire_sidewall",
         "normal_strength": 2.8,
@@ -56423,7 +56465,7 @@
         1.0
       ],
       "metallic": 0.0,
-      "roughness": 0.5,
+      "roughness": 0.84,
       "texture": {
         "family": "tire_sidewall_print",
         "normal_strength": 1.7,
@@ -56432,7 +56474,7 @@
           "lines": [
             "E-4  ***  TL  RADIAL",
             "DOT XR 9K CLS8 3426",
-            "MAX LOAD 4964 t AT 600 kPa COLD",
+            "MAX LOAD 4960000 kg AT 600 kPa COLD",
             "TKPH 42194   TUBELESS"
           ]
         },
@@ -56448,7 +56490,7 @@
         1.0
       ],
       "metallic": 0.0,
-      "roughness": 0.3,
+      "roughness": 0.58,
       "texture": {
         "family": "tire_sidewall",
         "normal_strength": 1.4,
@@ -56463,24 +56505,6 @@
         "srgb": true
       }
     },
-    "ericrolph_colossus_tire_steel_worn": {
-      "color": [
-        0.5,
-        0.53,
-        0.57,
-        1.0
-      ],
-      "metallic": 0.85,
-      "roughness": 0.42,
-      "texture": {
-        "family": "steel_worn",
-        "normal_strength": 3.0,
-        "params": {
-          "relief": 8.0
-        },
-        "srgb": true
-      }
-    },
     "ericrolph_colossus_tire_tread": {
       "color": [
         0.043,
@@ -56489,7 +56513,7 @@
         1.0
       ],
       "metallic": 0.0,
-      "roughness": 0.62,
+      "roughness": 0.83,
       "texture": {
         "family": "tire_tread",
         "normal_strength": 3.2,
@@ -82667,6 +82691,38 @@
     {
       "ground_model": "metal",
       "nodes": [
+        "ericrolph_colossus_tire_chock_0_toe_l",
+        "ericrolph_colossus_tire_chock_0_heel_l",
+        "ericrolph_colossus_tire_chock_0_top_l"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_colossus_tire_chock_0_top_r",
+        "ericrolph_colossus_tire_chock_0_heel_r",
+        "ericrolph_colossus_tire_chock_0_toe_r"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_colossus_tire_chock_0_toe_l",
+        "ericrolph_colossus_tire_chock_0_toe_r",
+        "ericrolph_colossus_tire_chock_0_heel_r"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_colossus_tire_chock_0_toe_l",
+        "ericrolph_colossus_tire_chock_0_heel_r",
+        "ericrolph_colossus_tire_chock_0_heel_l"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
         "ericrolph_colossus_tire_chock_1_top_l",
         "ericrolph_colossus_tire_chock_1_top_r",
         "ericrolph_colossus_tire_chock_1_toe_r"
@@ -82694,6 +82750,38 @@
         "ericrolph_colossus_tire_chock_1_heel_l",
         "ericrolph_colossus_tire_chock_1_top_r",
         "ericrolph_colossus_tire_chock_1_top_l"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_colossus_tire_chock_1_toe_l",
+        "ericrolph_colossus_tire_chock_1_heel_l",
+        "ericrolph_colossus_tire_chock_1_top_l"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_colossus_tire_chock_1_top_r",
+        "ericrolph_colossus_tire_chock_1_heel_r",
+        "ericrolph_colossus_tire_chock_1_toe_r"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_colossus_tire_chock_1_toe_l",
+        "ericrolph_colossus_tire_chock_1_toe_r",
+        "ericrolph_colossus_tire_chock_1_heel_r"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_colossus_tire_chock_1_toe_l",
+        "ericrolph_colossus_tire_chock_1_heel_r",
+        "ericrolph_colossus_tire_chock_1_heel_l"
       ]
     },
     {
@@ -82731,6 +82819,38 @@
     {
       "ground_model": "metal",
       "nodes": [
+        "ericrolph_colossus_tire_chock_2_top_l",
+        "ericrolph_colossus_tire_chock_2_heel_l",
+        "ericrolph_colossus_tire_chock_2_toe_l"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_colossus_tire_chock_2_toe_r",
+        "ericrolph_colossus_tire_chock_2_heel_r",
+        "ericrolph_colossus_tire_chock_2_top_r"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_colossus_tire_chock_2_heel_l",
+        "ericrolph_colossus_tire_chock_2_heel_r",
+        "ericrolph_colossus_tire_chock_2_toe_r"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_colossus_tire_chock_2_heel_l",
+        "ericrolph_colossus_tire_chock_2_toe_r",
+        "ericrolph_colossus_tire_chock_2_toe_l"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
         "ericrolph_colossus_tire_chock_3_toe_l",
         "ericrolph_colossus_tire_chock_3_toe_r",
         "ericrolph_colossus_tire_chock_3_top_r"
@@ -82759,17 +82879,49 @@
         "ericrolph_colossus_tire_chock_3_heel_r",
         "ericrolph_colossus_tire_chock_3_heel_l"
       ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_colossus_tire_chock_3_top_l",
+        "ericrolph_colossus_tire_chock_3_heel_l",
+        "ericrolph_colossus_tire_chock_3_toe_l"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_colossus_tire_chock_3_toe_r",
+        "ericrolph_colossus_tire_chock_3_heel_r",
+        "ericrolph_colossus_tire_chock_3_top_r"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_colossus_tire_chock_3_heel_l",
+        "ericrolph_colossus_tire_chock_3_heel_r",
+        "ericrolph_colossus_tire_chock_3_toe_r"
+      ]
+    },
+    {
+      "ground_model": "metal",
+      "nodes": [
+        "ericrolph_colossus_tire_chock_3_heel_l",
+        "ericrolph_colossus_tire_chock_3_toe_r",
+        "ericrolph_colossus_tire_chock_3_toe_l"
+      ]
     }
   ],
   "visual": {
     "materials": [
       "ericrolph_colossus_tire_bead",
+      "ericrolph_colossus_tire_chock_paint",
       "ericrolph_colossus_tire_hazard",
       "ericrolph_colossus_tire_liner",
       "ericrolph_colossus_tire_sidewall",
       "ericrolph_colossus_tire_sidewall_print",
       "ericrolph_colossus_tire_sidewall_type",
-      "ericrolph_colossus_tire_steel_worn",
       "ericrolph_colossus_tire_tread"
     ],
     "meshes": {
@@ -82798,24 +82950,24 @@
       "ericrolph_colossus_tire_visual": {
         "bounds": {
           "max": [
-            4.1,
-            4.400001,
-            0.564952
+            4.126,
+            4.6,
+            0.554952
           ],
           "min": [
-            -4.1,
-            -4.400001,
+            -4.126,
+            -4.6,
             0.0
           ]
         },
         "materials": [
-          "ericrolph_colossus_tire_hazard",
-          "ericrolph_colossus_tire_steel_worn"
+          "ericrolph_colossus_tire_chock_paint",
+          "ericrolph_colossus_tire_hazard"
         ]
       }
     },
     "path": "vehicles/ericrolph_colossus_tire/ericrolph_colossus_tire.dae",
-    "sha256": "bfd5d3a5935282d5101438b668e4a070f126bffe3b1da2a6fd0ffda5ab932c18",
-    "size": 36182103
+    "sha256": "87c56f0586c9f09de468f4675742b730523726542941d3f9c0c7c825b90ceff9",
+    "size": 36245678
   }
 }

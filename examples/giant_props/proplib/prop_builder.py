@@ -149,7 +149,11 @@ def build_jbeam(
         ],
         "flexbodies": [
             ["mesh", "[group]:"],
-            [handoff["asset"]["visual_mesh"], [group]],
+            [
+                handoff["asset"]["visual_mesh"],
+                [f"{mod_id}_{g}" for g in handoff["asset"].get("visual_groups", [])]
+                or [group],
+            ],
             *[
                 [extra_flex["mesh"], [f"{mod_id}_{g}" for g in extra_flex["groups"]]]
                 for extra_flex in handoff["asset"].get("flexbodies_extra", [])
@@ -1079,15 +1083,19 @@ def build_prop(example_root: Path, spec: Any) -> dict[str, Any]:
         vehicle_root / "main.materials.json",
         build_materials(mod_id, handoff, example_root, vehicle_root, spec),
     )
-    write_json(
-        vehicle_root / "info.json",
-        {
-            "Author": AUTHOR,
-            "Name": display_name,
-            "Type": "Prop",
-            "default_pc": "standard",
-        },
-    )
+    info: dict[str, Any] = {
+        "Author": AUTHOR,
+        "Name": display_name,
+        "Type": "Prop",
+        "default_pc": "standard",
+    }
+    # The picker's description line is the one discoverability channel a
+    # prop has; a spec that authors one ships it (colossus_tire's drivable
+    # cavity went a whole review round invisible without it).
+    description = getattr(spec, "DESCRIPTION", None)
+    if description:
+        info["Description"] = str(description)
+    write_json(vehicle_root / "info.json", info)
     write_json(
         vehicle_root / "standard.pc",
         {
@@ -1102,7 +1110,10 @@ def build_prop(example_root: Path, spec: Any) -> dict[str, Any]:
         {
             "Configuration": "Standard",
             "Value": int(spec.VALUE_DOLLARS),
-            "Weight": total_mass,
+            # The picker Weight defaults to the cage total, which for a prop
+            # with buried fixed anchors OVERSTATES the thing you see: a spec
+            # may author the free-body figure instead.
+            "Weight": float(getattr(spec, "INFO_WEIGHT_KG", total_mass)),
         },
     )
     bootstrap_dir = vehicle_root / "lua"

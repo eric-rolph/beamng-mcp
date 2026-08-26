@@ -340,7 +340,14 @@ def test_jbeam_matches_handoff(mod_key: str) -> None:
 
     flex_mesh, groups = part["flexbodies"][1]
     assert flex_mesh == handoff["asset"]["visual_mesh"]
-    assert groups == [f"{spec.MOD_ID}_physics"]
+    # The visual flexbody binds the handoff's authored visual_groups
+    # (mod-prefixed) when a spec declares them, else the default physics
+    # group - the same contract prop_builder implements. colossus_tire binds
+    # its chock visual to four per-wedge groups so the skin never references
+    # a fixed anchor.
+    declared = handoff["asset"].get("visual_groups") or []
+    expected = [f"{spec.MOD_ID}_{g}" for g in declared] if declared else [f"{spec.MOD_ID}_physics"]
+    assert groups == expected
 
 
 # The ref node IS the spawn datum. BeamNG places a vehicle by its BASE
@@ -406,6 +413,20 @@ def test_reference_node_is_the_lowest_node(mod_key: str) -> None:
     part = jbeam[spec.MOD_ID]
 
     positions = {row[0]: (row[1], row[2], row[3]) for row in part["nodes"][1:]}
+    # A mod may AUTHOR an allowance for nodes that are buried below its
+    # datum by design: colossus_tire's strap anchors are fixed, collisionless
+    # tie-down points 0.6 m under grade that the release cuts away from.
+    # The allowance is a named spec constant, not a flag heuristic, because
+    # collision-false alone does not prove a node cannot matter to placement
+    # (sumo_gyro_platform's moat floor is collision-false and still the
+    # subject of a strict xfail about exactly that).
+    buried_ok = tuple(getattr(spec, "SPAWN_DATUM_BURIED_OK", ()))
+    if buried_ok:
+        positions = {
+            identifier: position
+            for identifier, position in positions.items()
+            if not any(marker in identifier for marker in buried_ok)
+        }
     ref = part["refNodes"][1][0]
     assert ref == handoff["refnodes"]["ref"], (
         f"{mod_key}: shipped jbeam refNodes[0] is {ref!r} but the handoff "

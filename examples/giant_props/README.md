@@ -19,7 +19,7 @@ every runtime file is generated — never hand-edited.
 | `pendulum_gauntlet` | Wrecking Ball Pendulum Gauntlet | Four real physics pendulums (heavy free-node balls on cables, authored displaced ±40°) over a squishy inflated-mat bridge. |
 | `spin_launch` | Spin Launch Kinetic Accelerator | Drive into a 43 m vacuum chamber standing on edge. The airlock seals, the chamber pumps down, the load deck sinks away, and a composite tether whips you round until the tangent points where the console says. POWER 28-182 m/s and ELEVATION 34-72 deg, on a launch tube that pivots around the rim to stay tangent to the release point. |
 | `high_five` | Charlie's High Five | An 8.6 m foam-latex hand on a 12.6 m slewing arm. It LEADS you: it reads your closing speed and starts the swing so the palm arrives when you do, at any speed. POWER 1-10 and WRIST TILT 0-42 deg; the launch always leaves along the palm normal. Hold the mast-side line and it goes past your door. |
-| `colossus_tire` | COLOSSUS 10350/80R457 | A 28.17 m earthmover radial standing on its tread, and the only prop in the pack that moves entirely on its own physics. Board through the bolted access port in its right sidewall, the tie-downs are cut, and from then on it rolls because YOU push its inner liner and its tread pushes the ground. The runtime never touches it — it fits the axle to three live crown nodes and reports what the physics did, and it is one of two mods in the pack (with `catapult_seesaw`) that set `ALLOW_SUBJECT_MUTATION = False` so it structurally cannot. |
+| `colossus_tire` | COLOSSUS 10350/80R457 | A 28.17 m earthmover radial standing chocked in a yard, and the only prop in the pack that moves entirely on its own physics. Come near it and the release cuts all forty tie-downs and WINCHES the chocks clear; after that you can push it, release it on a grade and chase it, or get a car into the cavity (deliberately no ramp — teleport in) and drive: the liner is a real surface, and driving inside turns the wheel. The runtime never drives it — it fits the axle to three live crown nodes, narrates, and cues the audio, and it is one of two mods in the pack (with `catapult_seesaw`) that set `ALLOW_SUBJECT_MUTATION = False` so it structurally cannot. |
 | `giant_fan` | The Giant Fan | A GALEFORCE GF-3600 table fan at 108x with the guard CUT OFF. Each blade is a city bus long and passes 0.35 m over a drivable deck. The rotor is a real jbeam `rotators` body - the stock large_spinner mechanism - so a blade wrecks a car with moving collision geometry at the solver's 2000 Hz, and bogs when it does. The dial keeps the reference detent order 0-3-2-1, so THE FIRST CLICK FROM OFF IS FULL POWER; the chrome plunger on the housing crown starts the 90 deg sweep; BLADE HEIGHT picks which vehicles get hit. |
 
 Design rule shared by every contraption: **exaggerate the anticipation**.
@@ -122,8 +122,7 @@ tread cap, with steel cord cross-sections at their own per-band pitch),
 # real cage under gravity TO A RESIDUAL - not to a step count, which stopped
 # with the ground carrying a third of the weight and made every number taken
 # off the settle a measurement of a falling tire - and then fails if the
-# contact patch comes out too narrow to stand on, or if the boarding
-# centreline has a hole or a step in it once everything has sagged.
+# contact patch comes out too narrow to stand on.
 #
 # It also parses the SHIPPED Collada, which for a long time nothing did: zero
 # degenerate faces, zero duplicated faces, zero edges traversed the same way
@@ -148,11 +147,11 @@ tread cap, with steel cord cross-sections at their own per-band pitch),
 # generates: register -> zone -> tick -> POP -> launch.
 #
 # The Colossus one proves the four things static gates structurally cannot
-# reach for a free-rolling body: that 1,072 free nodes carrying 10.5 t stand
-# upright and stay round after real physics has had them; that the dock and
-# the inner liner are solid FROM ABOVE (a one-sided collision triangle wound
-# the wrong way is invisible to everything else); that the doorway is clear;
-# and that pushing the SUBJECT rolls the tire. Its first run found a bug
+# reach for a free-rolling body: that 1,080 free nodes carrying 5.0 t stand
+# upright and stay round after real physics has had them; that the shipped
+# release really frees it (the ram waits for the release EVENT, and the
+# winched wedges leave the ram line); that the coast is a roll and not a
+# slide; and that pushing the SUBJECT rolls the tire. Its first run found a bug
 # nothing headless could - the runaway detector measured 3D drift, and a 28 m
 # carcass settles 0.36 m onto its own contact patch, so it fired "the
 # tie-downs have parted" before anyone boarded and suppressed the whole
@@ -160,44 +159,59 @@ tread cap, with steel cord cross-sections at their own per-band pitch),
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_giant_props_live.py
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_colossus_tire_live.py
 
-# ...and the HILL gate, which is the only one that answers the question the
-# prop actually raises. It boots on `utah`, settles the carcass on a MEASURED
-# slope, cuts the tie-downs and then touches nothing: everything after that
-# is gravity. Two grades, because they prove opposite things.
+# ...the HILL gate: `utah`, three measured slopes, spawn SQUARE TO THE HILL
+# (the slope quat is calibrated against BeamNG's opposite-handed rot_quat -
+# uncorrected it stood the tire side-on to the fall line), cut the ties, winch
+# the chocks clear the way the shipped release does, then touch nothing:
 #
-#   3.4 deg   the chocks HOLD. It has to climb its own 0.705 m wedge to get
-#             out, which needs about 16 deg of grade, so it creeps 0.96 m in
-#             30 s. A chock that let 10.5 tonnes walk out of it would be
-#             scenery rather than hardware, so that is asserted too.
-#   22.9 deg  gravity climbs the chock and it goes: 78 m of travel, 47 m of
-#             descent, 1.24 revolutions, ~11 km/h average - and it finally
-#             lies over on the camber, which is what a free tire does.
-#
+#   3.4 deg    CHOCKED. Patch-edge statics: gravity cannot start the carcass
+#              below tan(theta) ~ e/R ~ 0.14, so it creeps under a metre and
+#              stands. A chock that let the tire walk away would be scenery.
+#   13.1 deg   THE RUNAWAY DEMO. Cutting the ties is enough: it rolls off,
+#              26 m of displacement, whole-run slip 1.19, then carves into
+#              its lean and lies down - which is what dropped tires
+#              notoriously do. The gate deliberately does NOT assert the
+#              fall line or staying up; no free tire promises either.
+#   22.9 deg   IT THUNDERS: 38 of 40 m straight down the fall line, 254 deg
+#              of rotation at upright slip 0.81, over at ~38 m.
+.\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_colossus_tire_hill_live.py
+
+# ...and the HAMSTER gate, the mod's whole point: a car TELEPORTED into the
+# cavity (spawn placement silently relocates a vehicle spawned inside another
+# one - measured twice at identical coordinates) lands on the liner, arms the
+# machine by being in the approach zone, and after the shipped release cuts
+# the ties and winches the chocks clear, DRIVING INSIDE TURNS THE WHEEL:
+# 8.55 m of tire travel at hamster slip 0.984, car still inside. The mass is
+# set by that inequality - breakaway needs m/(M+m) > e/(R sin phi), because
+# the tire's own contact patch is a built-in chock that statically reacts
+# ~(M+m)*g*e before the wheel has to roll. Measured at the 6 t tune: 115 kNm
+# held with all 40 straps audited broken; at the shipped 4.2 t the patch
+# holds ~94 kNm against the ~125-133 a mid-wall station supplies.
+.\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_colossus_tire_hamster_live.py
+
 # The FLAT gate carries the material measurements, because smallgrid is a
 # perfect plane and there is nothing to blame a reading on:
 #
-#   slip ratio 1.007   coasting freely at 3.2 m/s, path length against
-#                      R x d-theta. It rolls without slipping to 0.7%.
-#   ripple 6.4 mm RMS  steady rolling, against a 30.2 mm facet sagitta on the
-#                      48-station collision hull. The contact patch swallows
-#                      the polygon by about five to one.
-#   Crr 0.062          free-coast deceleration over g. Hysteretic - the right
-#                      mechanism - but high: a real tire is 1-2% on hard
-#                      ground and 5-8% on soft, so this reads as soft ground.
-#                      Halving the tread damping moved it by 0.2 points, so
-#                      the loss is spread across sidewall, casing and the
-#                      inflation truss, not concentrated in the tread.
-#   ring 458 mm p-p    the carcass oscillating on its own compliance after an
-#                      18 m/s impact, decaying over a few seconds. A rigid
-#                      hoop would not do it at all.
-#
-# The measurement that matters is PATH LENGTH against R x d-theta over the
-# UPRIGHT segment: 0.852, where a rigid drum reads 1.000. That shortfall is
-# the loaded-tire signature (0.89 against the loaded radius rather than the
-# free one), and it is the one number that separates this from a barrel.
-# The carcass held its shape through all of it: 0.37 m worst radius error
-# over a 90 m run that ended in a tumble.
-.\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_colossus_tire_hill_live.py
+#   slip ratio 1.008   coasting freely, path length against R x d-theta.
+#                      It rolls without slipping (0.994 driven from inside,
+#                      0.997-1.02 across every clean-ground run).
+#   ripple 15 mm RMS   steady rolling, against a 30.2 mm facet sagitta on
+#                      the 48-station collision hull: the ~95 mm contact
+#                      patch swallows the polygon.
+#   Crr 0.023-0.031    free-coast deceleration over g, by speed window -
+#                      real-tire territory (1-2% hard ground, 5-8% soft).
+#                      It took three retunes to get here from 6.2%:
+#                      stiffness x3.2 to the integrator ceiling, then two
+#                      mass rescales with k/M held constant, because the
+#                      residual loss lives in the engine's contact model and
+#                      scales with weight.
+#   ring ~0.2 m p-p    after a 12 m/s ram, decaying in about a second - and
+#                      the run's first metres now include honestly SHOVING
+#                      both 200 kg front chocks out of the path (their
+#                      collision hulls are closed; nothing ghosts through
+#                      them). The jelly this carcass shipped with - 458 mm
+#                      of ring, 250 mm of static sag - is gone: deflection
+#                      is ~95 mm on a 14 m radius, modes ~1.8x higher.
 ```
 
 The live gate exercises the shared runtime core every mod generates
@@ -228,15 +242,17 @@ before any public upload; see AGENTS.md for the sentinel-profile rules.
   velocity space and the car cannot fall off. The soft body still takes the
   full escalating G-load, because only the ref-node cluster is driven and
   every other node has to follow it through its own beams.
-- `colossus_tire` goes the other way and drives NOTHING. It is 212,484
-  visual triangles over 1,074 free nodes
-  in a tire-shaped cage — bead bundles, casing plies, a steel belt package
-  with long chords to stations ±2 and ±3, sidewall rubber, a tread slab that
-  flattens into a contact patch, and a soft damped truss across the cavity
-  standing in for the air a real tire is pressurised with. The car rolls it
-  by pushing on the inner liner; the ground rolls it back. Its runtime fits a
-  circle to three live crown nodes 120° apart to recover the axle, the
-  rotation and the ground speed, which is exact and keeps working 300 m from
-  the dock where a trigger box cannot follow. Damping is picked per material —
-  the rubber families run 15-20% of critical because rubber's loss tangent
-  really is that high, the steel families 4-6%.
+- `colossus_tire` goes the other way and drives NOTHING. It is ~264,000
+  visual triangles over 1,080 free nodes (1,056 carcass + 24 in four loose
+  chock wedges) in a tire-shaped cage — bead bundles, casing plies, a steel
+  belt package with long chords to stations ±2 and ±3, sidewall rubber, a
+  tread slab that flattens into a contact patch, and a soft damped truss
+  across the cavity standing in for the air a real tire is pressurised
+  with. A car rolls it by pushing on the inner liner; the ground rolls it
+  back. Its runtime fits a circle to three live crown nodes 120° apart to
+  recover the axle, the rotation and the ground speed, which is exact and
+  keeps working 300 m from its spawn where a trigger box cannot follow.
+  Damping is a RATIO, not a loss tangent (that lesson is recorded in
+  AGENTS.md): rubber families sit at 0.12-0.25 of critical — the material's
+  tan-delta converts to ~5-12% and the rest is settling margin the live
+  gates pay for — and the steel families under 0.12.

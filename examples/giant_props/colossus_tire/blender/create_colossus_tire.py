@@ -7,16 +7,17 @@ Run with the validated Blender 4.5.4:
 
 Everything here is built from ``spec.py``'s size code. There is no modelled
 mesh checked in and no primitive-plus-boolean stack: the carcass, the tread
-pattern and the access port are all emitted vertex by vertex, because a tire
-is a surface of revolution with a designed tread pitch sequence on it, and
-that is exactly the kind of thing a boolean pipeline gets wrong (see
-``blender_kit.cut_openings``' standing bevel/boolean bug).
+pattern and the chocks are all emitted vertex by vertex, because a tire is a
+surface of revolution with a designed tread pitch sequence on it, and that
+is exactly the kind of thing a boolean pipeline gets wrong (see
+``blender_kit.cut_openings``' standing bevel/boolean bug). The access port,
+dock and gangway this file once built are gone by user decree; the carcass
+is a fully closed shell and the only furniture is four fabricated chocks.
 
 Frames. Authored right-handed, metres, Z-up, +Y = the direction the tire
 rolls. The tire's axle lies along X at height OUTER_RADIUS, so station 0 is
-the contact patch and the access port is at the bottom, facing the dock at
-+X. ``blender_kit`` maps the whole thing into BeamNG vehicle space through
-the shared proper 180 deg Z rotation.
+the contact patch. ``blender_kit`` maps the whole thing into BeamNG vehicle
+space through the shared proper 180 deg Z rotation.
 """
 
 from __future__ import annotations
@@ -1094,6 +1095,14 @@ def add_wear_indicator(mesh: Mesh, theta: float, x0: float, x1: float) -> None:
         (theta - half, lo_x), (theta + half, lo_x),
         (theta + half, hi_x), (theta - half, hi_x),
     ]
+    # PER-CORNER local floor, the add_tie_bar pattern. Round 5 "fixed"
+    # this with a constant seat at GROOVE_RADIUS and had the geometry
+    # backwards: the crown arc can only DROP base_r off-centre
+    # (crown_r(x) = R_O - x^2/(2*TREAD_ARC_RADIUS)), so the constant seat
+    # left every OUTER-groove bar floating ~42 mm above its own floor while
+    # the inner bars only survived because their 6-8 mm drop hid under the
+    # 10 mm seat. Round 6's per-component gates now make this class of
+    # defect unshippable.
     bottom = [
         mesh.vertex(polar(x, base_r(x) - spec.LUG_SEAT, angle))
         for angle, x in corners
@@ -1401,7 +1410,7 @@ def build_print_band(materials) -> list:
 
 
 # ---------------------------------------------------------------------------
-# Visual: the loading dock (fixed structure)
+# Visual: the chocks (the yard hardware)
 # ---------------------------------------------------------------------------
 def chock_geometry(sign: float) -> dict:
     """The one wedge, derived from the tire it is holding.
@@ -1439,85 +1448,225 @@ CHOCK_PLACES = tuple(
 
 
 def build_chocks(materials) -> list:
-    """Two steel chocks at the contact patch.
+    """Four fabricated steel chocks, one under each shoulder.
 
-    THE ONLY FIXED STRUCTURE LEFT. The loading dock, the boarding gangway and
-    the bolted access port are gone: this is a TIRE, and the brief for it is
-    realism. What a 10.5 tonne carcass standing in a yard actually has under
-    it is a pair of chocks, and they earn their place three times over - they
-    are what a real one would have, they are what stops it rolling off on the
-    first frame, and the pack's one-cage rule needs somewhere fixed to hang
-    the spawn datum from.
+    ROUND 5 REBUILT THESE TWICE OVER. The old wedges were six-vertex CAD
+    placeholders whose hazard stripes were floating open quads wound INTO
+    the steel - all sixteen stripe triangles shipped facing (0, +/-0.22,
+    -0.97) and rendered on zero pixels in game. Now each chock is what a
+    yard fabricates: a painted wedge body with a blunted toe, side plates
+    proud of the body, heel gussets, a tow handle, and hazard bands that
+    are CLOSED SLABS lying on the climb face and the side plates. Every
+    piece is a closed solid wound away from its own centroid, and the
+    orientation audit judges all of it - ground objects included - under
+    the "_chock_" rule instead of being waved past.
+
+    Nothing here touches the cage: same six nodes, same mass, same seat
+    gap, so every live measurement stays valid.
     """
 
-    steel = materials[f"{MOD_ID}_steel_worn"]
+    paint = materials[f"{MOD_ID}_chock_paint"]
     hazard = materials[f"{MOD_ID}_hazard"]
-    tile = tile_of(steel)
+    tile = tile_of(paint)
     stripe_tile = tile_of(hazard)
     objects = []
+
+    def orient_outward(obj):
+        """Every chock piece is a CLOSED solid, so let the manifold decide.
+
+        recalc_face_normals orients a closed volume consistently outward;
+        hand-derived winding branches are exactly how the old stripes ended
+        up facing into the steel, so the closure IS the correctness proof
+        here, and the orientation audit re-measures it after the fact.
+        """
+
+        bm = bmesh.new()
+        bm.from_mesh(obj.data)
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        bm.to_mesh(obj.data)
+        bm.free()
+        obj.data.update()
+        return obj
+
+    def slab(mesh, corners, thickness, direction, tile_m):
+        """A closed six-face slab: `corners` (4 points, wound so the face
+        looks along `direction`), extruded `thickness` along `direction`."""
+
+        d = Vector(direction).normalized() * thickness
+        base = [mesh.vertex(c) for c in corners]
+        top = [mesh.vertex((Vector(c) + d)) for c in corners]
+        width = (Vector(corners[1]) - Vector(corners[0])).length
+        height = (Vector(corners[3]) - Vector(corners[0])).length
+        uv = (
+            (0.0, 0.0), (width / tile_m, 0.0),
+            (width / tile_m, height / tile_m), (0.0, height / tile_m),
+        )
+        edge_uv = ((0.0, 0.0), (width / tile_m, 0.0),
+                   (width / tile_m, thickness / tile_m), (0.0, thickness / tile_m))
+        mesh.quad(top[0], top[1], top[2], top[3], uv)
+        mesh.quad(base[3], base[2], base[1], base[0], uv)
+        for index in range(4):
+            nxt = (index + 1) % 4
+            mesh.quad(base[index], base[nxt], top[nxt], top[index], edge_uv)
+
     for index, sign, offset in CHOCK_PLACES:
         shape = chock_geometry(sign)
         near, far = shape["near"], shape["far"]
         height, half = shape["height"], shape["half"]
-        ramp = math.hypot(far - near, height)
+        length = abs(far - near)
+        ramp = math.hypot(length, height)
+        # Silhouette in (t, z), t = 0 at the toe growing toward the heel.
+        # The toe is BLUNTED: a real chock's leading edge is a rolled plate,
+        # not a knife; two chamfer segments read as the roll at this scale.
+        grade = height / length
+        outline = (
+            (0.10, 0.0),
+            (0.115, 0.022),
+            (0.15, 0.15 * grade),
+            (length, height),
+            (length, 0.0),
+        )
 
-        body = Mesh(f"{MOD_ID}_chock_{index}", steel)
-        toe_l = body.vertex((offset - half, near, 0.0))
-        toe_r = body.vertex((offset + half, near, 0.0))
-        heel_l = body.vertex((offset - half, far, 0.0))
-        heel_r = body.vertex((offset + half, far, 0.0))
-        top_l = body.vertex((offset - half, far, height))
-        top_r = body.vertex((offset + half, far, height))
+        def at(tz, x):
+            return (x, near + sign * tz[0], tz[1])
 
-        ramp_uv = (
-            (0.0, 0.0), (2.0 * half / tile, 0.0),
-            (2.0 * half / tile, ramp / tile), (0.0, ramp / tile),
-        )
-        back_uv = (
-            (0.0, 0.0), (2.0 * half / tile, 0.0),
-            (2.0 * half / tile, height / tile), (0.0, height / tile),
-        )
-        base_uv = (
-            (0.0, 0.0), (2.0 * half / tile, 0.0),
-            (2.0 * half / tile, (far - near) / tile), (0.0, (far - near) / tile),
-        )
-        side_uv = (
-            (0.0, 0.0), (abs(far - near) / tile, 0.0), (abs(far - near) / tile, height / tile)
-        )
-        if sign > 0:
-            body.quad(toe_l, toe_r, top_r, top_l, ramp_uv)       # the climb
-            body.quad(top_r, heel_r, heel_l, top_l, back_uv)     # the heel
-            body.quad(toe_r, toe_l, heel_l, heel_r, base_uv)     # the ground
-            body.face((toe_l, top_l, heel_l), side_uv)
-            body.face((heel_r, top_r, toe_r), side_uv)
-        else:
-            body.quad(top_l, top_r, toe_r, toe_l, ramp_uv)
-            body.quad(top_l, heel_l, heel_r, top_r, back_uv)
-            body.quad(heel_r, heel_l, toe_l, toe_r, base_uv)
-            body.face((heel_l, top_l, toe_l), side_uv)
-            body.face((toe_r, top_r, heel_r), side_uv)
-        objects.append(body.build())
-
-        # Two hazard bands up the climb face, the way yard kit is painted.
-        stripe = Mesh(f"{MOD_ID}_chock_stripe_{index}", hazard)
-        lift = 0.010
-        for edge in (-1.0, 1.0):
-            outer = offset + edge * (half - 0.06)
-            inner = offset + edge * (half - 0.06 - spec.CHOCK_STRIPE)
-            uv = (
-                (0.0, 0.0), (spec.CHOCK_STRIPE / stripe_tile, 0.0),
-                (spec.CHOCK_STRIPE / stripe_tile, ramp / stripe_tile),
-                (0.0, ramp / stripe_tile),
-            )
-            a = stripe.vertex((outer, near - sign * lift, lift))
-            b = stripe.vertex((inner, near - sign * lift, lift))
-            c = stripe.vertex((inner, far - sign * lift, height + lift))
-            d = stripe.vertex((outer, far - sign * lift, height + lift))
-            if (edge * sign) > 0:
-                stripe.quad(a, b, c, d, uv)
+        # BODY: the wedge prism, silhouette caps fanned, faces outward.
+        body = Mesh(f"{MOD_ID}_chock_body_{index}", paint)
+        left = [body.vertex(at(tz, offset - half)) for tz in outline]
+        right = [body.vertex(at(tz, offset + half)) for tz in outline]
+        count = len(outline)
+        cap_uv = ((0.0, 0.0), (0.4, 0.0), (0.4, 0.4))
+        for step in range(1, count - 1):
+            if sign > 0:
+                body.face((left[0], left[step + 1], left[step]), cap_uv)
+                body.face((right[0], right[step], right[step + 1]), cap_uv)
             else:
-                stripe.quad(d, c, b, a, uv)
-        objects.append(stripe.build())
+                body.face((left[0], left[step], left[step + 1]), cap_uv)
+                body.face((right[0], right[step + 1], right[step]), cap_uv)
+        for step in range(count):
+            nxt = (step + 1) % count
+            seg = math.dist(outline[step], outline[nxt])
+            uv = ((0.0, 0.0), (2.0 * half / tile, 0.0),
+                  (2.0 * half / tile, seg / tile), (0.0, seg / tile))
+            if sign > 0:
+                body.quad(left[step], right[step], right[nxt], left[nxt], uv)
+            else:
+                body.quad(right[step], left[step], left[nxt], right[nxt], uv)
+        objects.append(orient_outward(body.build()))
+
+        # SIDE PLATES: the fabricated silhouette, 20 mm proud of each face.
+        for side, tag in ((-1.0, "l"), (1.0, "r")):
+            plate = Mesh(f"{MOD_ID}_chock_plate_{index}_{tag}", paint)
+            x_face = offset + side * half
+            base = [plate.vertex(at(tz, x_face)) for tz in outline]
+            top = [plate.vertex(at(tz, x_face + side * 0.020)) for tz in outline]
+            for step in range(1, count - 1):
+                if (side > 0) == (sign > 0):
+                    plate.face((top[0], top[step], top[step + 1]), cap_uv)
+                    plate.face((base[0], base[step + 1], base[step]), cap_uv)
+                else:
+                    plate.face((top[0], top[step + 1], top[step]), cap_uv)
+                    plate.face((base[0], base[step], base[step + 1]), cap_uv)
+            for step in range(count):
+                nxt = (step + 1) % count
+                seg = math.dist(outline[step], outline[nxt])
+                uv = ((0.0, 0.0), (0.02 / tile, 0.0),
+                      (0.02 / tile, seg / tile), (0.0, seg / tile))
+                if (side > 0) == (sign > 0):
+                    plate.quad(base[step], base[nxt], top[nxt], top[step], uv)
+                else:
+                    plate.quad(base[nxt], base[step], top[step], top[nxt], uv)
+            objects.append(orient_outward(plate.build()))
+
+        # HEEL GUSSETS: two triangular ribs bracing the back wall.
+        for lane, tag in ((-0.45, "a"), (0.45, "b")):
+            gusset = Mesh(f"{MOD_ID}_chock_gusset_{index}_{tag}", paint)
+            x0 = offset + lane - 0.015
+            tri = (
+                (x0, far, 0.0),
+                (x0, far, height - 0.03),
+                (x0, far + sign * 0.20, 0.0),
+            )
+            a = [gusset.vertex(pt) for pt in tri]
+            b = [gusset.vertex((pt[0] + 0.03, pt[1], pt[2])) for pt in tri]
+            if sign > 0:
+                gusset.face((a[0], a[1], a[2]), cap_uv)
+                gusset.face((b[2], b[1], b[0]), cap_uv)
+            else:
+                gusset.face((a[2], a[1], a[0]), cap_uv)
+                gusset.face((b[0], b[1], b[2]), cap_uv)
+            edge_uv = ((0.0, 0.0), (0.2 / tile, 0.0),
+                       (0.2 / tile, 0.03 / tile), (0.0, 0.03 / tile))
+            for step in range(3):
+                nxt = (step + 1) % 3
+                if sign > 0:
+                    gusset.quad(a[nxt], a[step], b[step], b[nxt], edge_uv)
+                else:
+                    gusset.quad(a[step], a[nxt], b[nxt], b[step], edge_uv)
+            objects.append(orient_outward(gusset.build()))
+
+        # TOW HANDLE: a staple of three small bars on the heel face, the
+        # thing the winch line hooks. Three separate closed boxes so the
+        # centroid rule holds for each.
+        top_z = height - 0.06
+        for piece, (x0, x1, y0, y1, z0, z1) in (
+            ("a", (offset - 0.135, offset - 0.105, far, far + sign * 0.10, top_z - 0.015, top_z + 0.015)),
+            ("b", (offset + 0.105, offset + 0.135, far, far + sign * 0.10, top_z - 0.015, top_z + 0.015)),
+            ("c", (offset - 0.135, offset + 0.135, far + sign * 0.07, far + sign * 0.10, top_z - 0.015, top_z + 0.015)),
+        ):
+            bar = Mesh(f"{MOD_ID}_chock_eye_{index}_{piece}", paint)
+            lo_y, hi_y = min(y0, y1), max(y0, y1)
+            corners = [
+                (x0, lo_y, z0), (x1, lo_y, z0), (x1, hi_y, z0), (x0, hi_y, z0),
+                (x0, lo_y, z1), (x1, lo_y, z1), (x1, hi_y, z1), (x0, hi_y, z1),
+            ]
+            v = [bar.vertex(c) for c in corners]
+            box_uv = ((0.0, 0.0), (0.1, 0.0), (0.1, 0.1), (0.0, 0.1))
+            for face in (
+                (0, 3, 2, 1), (4, 5, 6, 7),
+                (0, 1, 5, 4), (2, 3, 7, 6),
+                (1, 2, 6, 5), (3, 0, 4, 7),
+            ):
+                bar.quad(*(v[i] for i in face), box_uv)
+            objects.append(orient_outward(bar.build()))
+
+        # HAZARD BANDS: closed 6 mm slabs, never floating quads. Two on the
+        # climb face, one on each side plate - visible from the approach,
+        # from the side, and in every render that sees a chock.
+        ramp_dir = Vector((0.0, sign * length, height)).normalized()
+        ramp_normal = Vector((0.0, -sign * height, length)).normalized()
+        climb_t0, climb_t1 = 0.30, length - 0.15
+        for edge, tag in ((-1.0, "l"), (1.0, "r")):
+            outer = offset + edge * (half - 0.10)
+            inner = offset + edge * (half - 0.10 - spec.CHOCK_STRIPE)
+            stripe = Mesh(f"{MOD_ID}_chock_stripe_{index}_{tag}", hazard)
+            span = climb_t1 - climb_t0
+            uv_h = span / stripe_tile
+            base_pt = Vector((0.0, near, 0.0))
+            p0 = base_pt + ramp_dir * climb_t0
+            p1 = base_pt + ramp_dir * climb_t1
+            corners = [
+                (outer, p0.y, p0.z), (inner, p0.y, p0.z),
+                (inner, p1.y, p1.z), (outer, p1.y, p1.z),
+            ]
+            if (edge * sign) < 0:
+                corners = list(reversed(corners))
+            slab(stripe, corners, 0.006, ramp_normal, stripe_tile)
+            objects.append(orient_outward(stripe.build()))
+        for side, tag in ((-1.0, "pl"), (1.0, "pr")):
+            x_face = offset + side * (half + 0.020)
+            stripe = Mesh(f"{MOD_ID}_chock_stripe_{index}_{tag}", hazard)
+            t0, t1 = 1.55, length - 0.05
+            z0, z1 = 0.05, 0.35
+            corners = [
+                (x_face, near + sign * t0, z0), (x_face, near + sign * t1, z0),
+                (x_face, near + sign * t1, z1), (x_face, near + sign * t0, z1),
+            ]
+            if (side > 0) == (sign < 0):
+                corners = list(reversed(corners))
+            stripe.name = f"{MOD_ID}_chock_stripe_{index}_{tag}"
+            slab(stripe, corners, 0.006, Vector((side, 0.0, 0.0)), stripe_tile)
+            objects.append(orient_outward(stripe.build()))
     return objects
 
 
@@ -1640,16 +1789,28 @@ def add_oriented_quad(cage: bk.CageBuilder, corners, target: Vector, **kwargs) -
     cage.add_quad(list(corners), **kwargs)
 
 
+def add_oriented_tri(cage: bk.CageBuilder, corners, target: Vector, **kwargs) -> None:
+    """One-sided collision triangle wound so its normal follows ``target``."""
+
+    normal = quad_normal(cage, corners)
+    if normal.dot(target) < 0:
+        corners = list(reversed(corners))
+    cage.add_triangle(*corners, **kwargs)
+
+
 def balance_carcass(cage: bk.CageBuilder) -> None:
     """Null the free body's first mass moment about the axle.
 
-    THE PREMISE IS THAT IT ROLLS, and it barely did. The boarding gangway is
-    {} kg bolted to the port sill at the BOTTOM of the carcass, and it stays
-    bolted after the straps are cut - so the free body's centre of mass sat
-    0.922 m off the axle. That is a 102 kNm gravity pendulum against roughly
-    123 kNm of drive torque from a car pushing the liner: the tire climbs its
-    own imbalance and rocks back rather than rolling away, which is exactly
-    what the live gate's 7.40 m of travel (31.6 degrees of rotation) was.
+    THE PREMISE IS THAT IT ROLLS, and it barely did. The boarding gangway
+    (900 kg, since deleted with the rest of the furniture) hung at the BOTTOM
+    of the carcass and stayed bolted after the straps were cut, so the free
+    body's centre of mass sat 0.922 m off the axle. That is a 102 kNm gravity
+    pendulum against roughly 123 kNm of drive torque from a car pushing the
+    liner: the tire climbs its own imbalance and rocks back rather than
+    rolling away, which is exactly what the live gate's 7.40 m of travel
+    (31.6 degrees of rotation) was. The furniture is gone and the solve now
+    lands at x1.000, but the mechanism stays: any future asymmetric mass
+    goes through this balance or the tire stops being a wheel.
 
     Real OTR tires are balanced with compound laid opposite the light spot,
     and that is what this is: a first-harmonic modulation of the CARCASS node
@@ -1740,7 +1901,7 @@ def build_cage() -> bk.CageBuilder:
         cage.define_beam_spec(
             name, beamDeform="FLT_MAX", beamStrength="FLT_MAX", **values
         )
-    cage.define_beam_spec("chock", **spec.DOCK_BEAM)
+    cage.define_beam_spec("chock", **spec.ANCHOR_GLUE_BEAM)
     cage.define_beam_spec("wedge", **spec.WEDGE_BEAM)
     cage.define_beam_spec("strap", **spec.STRAP_SPEC)
 
@@ -1957,6 +2118,12 @@ def build_cage() -> bk.CageBuilder:
                 weight=spec.WEDGE_NODE_MASS,
                 friction=spec.WEDGE_FRICTION,
                 node_material="|NM_METAL",
+                # Per-wedge flexbody group. Without it these landed in the
+                # default <mod>_physics group NEXT TO the 16 fixed anchors -
+                # each buried 0.6 m under a corner, closer than most of the
+                # wedge's own nodes - so the chock visual skinned to nodes
+                # that stay pinned while the winch drags the wedge 5 m.
+                group=f"chock_{index}",
             )
         # The anchors: one under each base corner, buried and collisionless.
         # They are the only fixed nodes in the prop, and none of them can
@@ -2012,6 +2179,36 @@ def build_cage() -> bk.CageBuilder:
                 chock_ids[(index, "top_r")], chock_ids[(index, "top_l")],
             ],
             Vector((0.0, sign, 0.0)),
+            ground_model="metal",
+        )
+        # ...and the sides and base, so the hull is CLOSED: a skidded loose
+        # wedge can be hit from any direction, and an open side is a face a
+        # car clips through (round 5, beamng-physics lens).
+        add_oriented_tri(
+            cage,
+            [
+                chock_ids[(index, "toe_l")], chock_ids[(index, "heel_l")],
+                chock_ids[(index, "top_l")],
+            ],
+            Vector((-1.0, 0.0, 0.0)),
+            ground_model="metal",
+        )
+        add_oriented_tri(
+            cage,
+            [
+                chock_ids[(index, "toe_r")], chock_ids[(index, "heel_r")],
+                chock_ids[(index, "top_r")],
+            ],
+            Vector((1.0, 0.0, 0.0)),
+            ground_model="metal",
+        )
+        add_oriented_quad(
+            cage,
+            [
+                chock_ids[(index, "toe_l")], chock_ids[(index, "toe_r")],
+                chock_ids[(index, "heel_r")], chock_ids[(index, "heel_l")],
+            ],
+            Vector((0.0, 0.0, -1.0)),
             ground_model="metal",
         )
 
@@ -2135,6 +2332,7 @@ def assert_no_coincident_nodes(cage: bk.CageBuilder, minimum: float = 0.01) -> N
 # ---------------------------------------------------------------------------
 ORIENTATION_RULES = (
     # (name fragment, how to derive the direction the face must point)
+    ("_chock_", "away_from_own_centroid"),
     ("sidewall_outer", "away_from_centre_plane"),
     ("_shoulder", "away_from_shell"),
     ("sidewall_inner", "toward_centre_plane"),
@@ -2145,7 +2343,6 @@ ORIENTATION_RULES = (
     ("tread_tiebars", "away_from_axle_radial_only"),
     ("tread_ejectors", "away_from_axle_radial_only"),
     ("bead_toe", "toward_axle"),
-    ("lane_marks", "toward_axle"),
     ("print_band", "away_from_centre_plane"),
 )
 
@@ -2157,11 +2354,6 @@ ORIENTATION_RULES = (
 # build rather than being waved through.
 ORIENTATION_EXEMPT = (
     "_letter_",
-    "_port_bezel",
-    "_port_cut",
-    "_tongue",
-    "_strap",
-    "_dock_",
 )
 
 
@@ -2238,10 +2430,33 @@ def assert_face_orientation(objects) -> None:
         good = bad = 0
         matrix = obj.matrix_world
         normal_matrix = matrix.to_3x3()
+        # The centroid rule serves every closed chock solid: a fabricated
+        # part has no radial or shell reference, but every face of a closed
+        # convex-ish piece looks away from the piece's own middle. This is
+        # what put the ground objects under the audit at all - the stripe
+        # quads that shipped facing INTO the wedge steel were invisible to
+        # a gate that only ever judged the tire.
+        centroid = None
+        if rule == "away_from_own_centroid":
+            total = Vector((0.0, 0.0, 0.0))
+            for polygon in obj.data.polygons:
+                total += matrix @ polygon.center
+            centroid = total / max(1, len(obj.data.polygons))
         for polygon in obj.data.polygons:
             centre = matrix @ polygon.center
             normal = normal_matrix @ polygon.normal
             radial = Vector((0.0, centre.y - axle.y, centre.z - axle.z))
+            if rule == "away_from_own_centroid":
+                want = centre - centroid
+                if want.length < 1e-9:
+                    continue
+                want.normalize()
+                if normal.normalized().dot(want) > 0.0:
+                    good += 1
+                else:
+                    bad += 1
+                    failures.append((obj.name, tuple(round(c, 3) for c in centre)))
+                continue
             if radial.length < 1e-6:
                 continue
             radial.normalize()
@@ -2324,9 +2539,11 @@ def quantise_collada(text: str) -> str:
     byte-identical" was wrong - it fixed the first and never touched the
     second, and a two-run A/B still differed in the map-0 UV float_array.
 
-    Six decimals is a micrometre on a 28 m tire and 1e-6 on a unit normal:
-    far below anything the engine, the gates or the eye can resolve, and it
-    makes the file a function of the source rather than of the run.
+    FIVE decimals - and five is measured, not preferred: it is 10 um on
+    metre-scale coordinates, far below anything the engine, the gates or the
+    eye can resolve, and it is the largest precision this mesh survives
+    byte-reproducibly. Six decimals still left 97 bytes of last-ULP churn
+    between two otherwise identical runs.
     """
 
     def number(match: "re.Match[str]") -> str:
@@ -2476,9 +2693,47 @@ def assert_furniture_is_seated(tire_objects) -> None:
     base_r(x), for sidewall furniture it is the outer half width at a radius.
     """
 
-    # The DEEPEST vertex of each family is its rim, and that is the one that
-    # has to be inside the surface. Everything above it is the shell.
+    # PER CONNECTED COMPONENT, not per object: the wear bars weld into the
+    # ejectors object, and a per-object deepest-vertex check let ~72 seated
+    # ejectors and 12 seated inner bars vouch for 12 floating outer bars
+    # through two green rounds. Union-find over shared vertices splits each
+    # family object back into its shells, and every shell's own rim has to
+    # be inside its own local surface.
     floor = spec.LUG_SEAT * 0.5
+
+    def component_minima(obj, gap_of):
+        """Min gap per connected vertex component of one object."""
+
+        parent: dict[int, int] = {}
+
+        def find(a: int) -> int:
+            while parent.get(a, a) != a:
+                parent[a] = parent.get(parent[a], parent[a])
+                a = parent[a]
+            return a
+
+        def union(a: int, b: int) -> None:
+            parent.setdefault(a, a)
+            parent.setdefault(b, b)
+            ra, rb = find(a), find(b)
+            if ra != rb:
+                parent[ra] = rb
+
+        for polygon in obj.data.polygons:
+            verts = polygon.vertices
+            for index in range(1, len(verts)):
+                union(int(verts[0]), int(verts[index]))
+        minima: dict[int, float] = {}
+        matrix = obj.matrix_world
+        for vert in obj.data.vertices:
+            root = find(vert.index)
+            if root not in parent and vert.index not in parent:
+                continue
+            gap = gap_of(matrix @ vert.co)
+            if root not in minima or gap < minima[root]:
+                minima[root] = gap
+        return minima
+
     tread_deepest = {}
     for obj in tire_objects:
         if not any(
@@ -2553,144 +2808,11 @@ def assert_surfaces_stay_home(tire_objects) -> None:
     )
 
 
-SWEPT_BINS = 512
-
-
-def swept_profile(tire_objects, crossing=("_tongue", "_strap")) -> list:
-    """Half width the tire occupies at each radius from the axle, as built.
-
-    This is the shape that actually sweeps past the dock. The tire is a solid
-    of revolution about the axle, so a vertex at radius r and half width |x|
-    will, at some point in the roll, be at EVERY point of the circle of radius
-    r - which is why the constant-plane test was answering a question nobody
-    asked. Binned by radius so the answer is a profile, not a single number.
-    """
-
-    profile = [0.0] * (SWEPT_BINS + 1)
-    for obj in tire_objects:
-        if any(fragment in obj.name for fragment in crossing):
-            continue
-        matrix = obj.matrix_world
-        for vertex in obj.data.vertices:
-            point = matrix @ vertex.co
-            radius = math.hypot(point.y, R_O - point.z)
-            index = min(SWEPT_BINS, int(radius / R_O * SWEPT_BINS))
-            profile[index] = max(profile[index], abs(point.x))
-    # Dilate by one bin either way: a dock vertex landing on a bin boundary
-    # must answer to the widest tire section that can reach it.
-    return [
-        max(profile[max(0, index - 1):min(len(profile), index + 2)])
-        for index in range(len(profile))
-    ]
-
-
-def assert_outboard_clearance(tire_objects, dock_objects,
-                              crossing=("_tongue", "_strap")) -> None:
-    """Nothing FIXED may enter the volume the tire sweeps as it rolls past.
-
-    DOCK_CLEAR_X is the whole reason the dock survives the first revolution,
-    and rounds 2 and 3 defended the CONSTANT: they measured the tire against
-    5.675 and stopped. The dock's own geometry never answered to it - the
-    first girder reaches 5.465 and its pier pads 5.225, both inboard of the
-    plane spec.py says everything fixed lives outboard of, and inboard of the
-    port bezel's own reach. They are in fact clear, because at the radius
-    where they sit the tire is only 4.65 m wide, but nothing here knew that.
-    This measures the real swept solid against the real dock and reports the
-    true minimum approach.
-
-    Two things cross on purpose and are exempt: the boarding gangway, which
-    lifts away on the first quarter turn, and the tie-down webbing, which
-    spans tire to dock by definition. Both are in the release break group.
-    """
-
-    profile = swept_profile(tire_objects, crossing)
-    reach = max(profile)
-    worst = None
-    for obj in dock_objects:
-        matrix = obj.matrix_world
-        for vertex in obj.data.vertices:
-            point = matrix @ vertex.co
-            radius = math.hypot(point.y, R_O - point.z)
-            index = min(SWEPT_BINS, int(radius / R_O * SWEPT_BINS))
-            tire_half = profile[index] if radius <= R_O else 0.0
-            margin = abs(point.x) - tire_half
-            if worst is None or margin < worst[0]:
-                worst = (margin, obj.name, radius, abs(point.x), tire_half)
-    if worst is None:
-        raise SystemExit("no dock geometry to check clearance against")
-    margin, name, radius, dock_x, tire_half = worst
-    if margin <= 0.0:
-        raise SystemExit(
-            f"{name} sits {-margin:.3f} m INSIDE the tire's swept volume "
-            f"(|x| {dock_x:.3f} against a {tire_half:.3f} m half width at radius "
-            f"{radius:.3f}); the first revolution would destroy it"
-        )
-    print(
-        f"COLOSSUS outboard reach: {reach:.3f} m; nearest fixed approach "
-        f"{margin:.3f} m ({name} at radius {radius:.2f})"
-    )
-
-
-def assert_tongue_sweep(tire_objects, dock_objects) -> None:
-    """The gangway swings away through 90 degrees without touching the quay.
-
-    The tongue is the ONE piece of tire geometry allowed outboard of the
-    clearance plane, so it is the one piece whose swept arc has to be checked
-    explicitly - and nothing did. At 6 degrees of roll, about a second after
-    the straps cut, its corner reached y 4.750, z 1.710: through the dock kerb
-    at y +/-4.74 and through the first stanchion's z span, on the beat the
-    whole prop is built around.
-    """
-
-    boxes = []
-    for obj in dock_objects:
-        matrix = obj.matrix_world
-        points = [matrix @ vertex.co for vertex in obj.data.vertices]
-        if not points:
-            continue
-        boxes.append((
-            obj.name,
-            min(p.x for p in points), max(p.x for p in points),
-            min(p.y for p in points), max(p.y for p in points),
-            min(p.z for p in points), max(p.z for p in points),
-        ))
-    steps = 90
-    worst = None
-    for obj in tire_objects:
-        if "_tongue" not in obj.name:
-            continue
-        matrix = obj.matrix_world
-        for vertex in obj.data.vertices:
-            point = matrix @ vertex.co
-            radius = math.hypot(point.y, R_O - point.z)
-            angle0 = math.atan2(point.y, R_O - point.z)
-            for step in range(steps + 1):
-                angle = angle0 + math.radians(step)
-                y = radius * math.sin(angle)
-                z = R_O - radius * math.cos(angle)
-                for name, x0, x1, y0, y1, z0, z1 in boxes:
-                    if not (x0 <= point.x <= x1):
-                        continue
-                    if not (y0 <= y <= y1 and z0 <= z <= z1):
-                        continue
-                    depth = min(y - y0, y1 - y, z - z0, z1 - z)
-                    # Surfaces that TOUCH are the point - the gangway rests on
-                    # the quay. Only real penetration is a failure.
-                    if depth < 0.008:
-                        continue
-                    if worst is None or depth > worst[0]:
-                        worst = (depth, obj.name, name, step, y, z)
-    if worst is not None:
-        depth, tongue_name, dock_name, step, y, z = worst
-        raise SystemExit(
-            f"{tongue_name} sweeps {depth * 1000:.0f} mm into {dock_name} at "
-            f"{step} deg of roll (y {y:.3f}, z {z:.3f}); the gangway would tear "
-            f"the dock apart on its way up"
-        )
-    print("COLOSSUS gangway sweep: clear of every fixed object through 90 deg")
-
-
 def assert_authored_claims(cage) -> None:
+    assert len(spec.PITCH_SEQUENCE) == spec.TREAD_PITCHES, (
+        f"PITCH_SEQUENCE has {len(spec.PITCH_SEQUENCE)} entries against an "
+        f"authored TREAD_PITCHES of {spec.TREAD_PITCHES}"
+    )
     """Check the numbers spec.py argues from against what was actually built."""
 
     if spec.FACET_SAGITTA > spec.FACET_SAGITTA_CEILING:
@@ -2814,7 +2936,7 @@ def main() -> None:
     ground_objects = build_chocks(materials)
 
     swept = clean_degenerates(tire_objects + ground_objects)
-    assert_face_orientation(tire_objects)
+    assert_face_orientation(tire_objects + ground_objects)
     assert_shell_rings_close(tire_objects)
     assert_shoulder_falls_away(tire_objects)
     assert_furniture_is_seated(tire_objects)
@@ -2877,6 +2999,7 @@ def main() -> None:
         visual=visual,
         visual_dae_relative=f"vehicles/{MOD_ID}/{MOD_ID}.dae",
         visual_mesh_name=f"{MOD_ID}_visual",
+        visual_groups=[f"chock_{index}" for index in range(4)],
         parts=[],
         palette=spec.PALETTE,
         behavior={

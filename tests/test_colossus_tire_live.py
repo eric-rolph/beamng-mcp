@@ -4,7 +4,7 @@ The static gates prove the evidence chain, the cage arithmetic and the runtime
 logic. There are four claims this mod rests on that NONE of them can reach,
 because each is a property of the engine actually running the thing:
 
-1. IT STANDS UP. 1,072 free nodes in a 28 m ring carrying 10.5 t with its
+1. IT STANDS UP. 1,080 free nodes in a 28 m ring carrying 5.0 t with its
    centre of mass 14 m off the ground. The headless static solver says it
    settles onto an 8.3 x 3.7 m footprint, but a static solver cannot see
    integrator drift, contact chatter, or a carcass that slowly ovalises over
@@ -12,7 +12,8 @@ because each is a property of the engine actually running the thing:
    height after real physics has had it for several seconds.
 
 2. THE FLOORS ARE SOLID FROM THE RIGHT SIDE. jbeam collision triangles are
-   one-sided, and the whole first round of this mod shipped with its dock
+   one-sided, and the whole first round of this mod shipped with its (since
+   deleted) dock
    facing down and its cavity floor wound inside out. A car parked on each
    surface, in-engine, is the only test that actually settles that.
 
@@ -51,6 +52,7 @@ from tests.live_support import (
     cleanup_exact_live_artifacts,
     cleanup_owned_beamng_session,
     isolated_profile_lock,
+    namespace_conflicts,
     require_confined_profile_target,
     reserve_loopback_ports,
 )
@@ -197,9 +199,7 @@ def _fit_axle(points):
     v1mv2 = tuple(v1[i] - v2[i] for i in range(3))
     alpha = v2v2 * sum(v1[i] * v1mv2[i] for i in range(3)) / (2 * nn)
     beta = v1v1 * sum(v2[i] * -v1mv2[i] for i in range(3)) / (2 * nn)
-    centre = tuple(
-        (ax, ay, az)[i] + v1[i] * alpha + v2[i] * beta for i in range(3)
-    )
+    centre = tuple((ax, ay, az)[i] + v1[i] * alpha + v2[i] * beta for i in range(3))
     length = math.sqrt(nn)
     axis = tuple(component / length for component in normal)
     radius = math.dist(centre, (ax, ay, az))
@@ -283,15 +283,10 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
         safety.enter_context(isolated_profile_lock(user))
         reservation = safety.enter_context(reserve_loopback_ports(1))
         (tcom_port,) = reservation.ports
-        existing_conflicts = (
-            [
-                str(path)
-                for path in (user / "mods").glob("*.zip")
-                if MOD_ID in path.name and path != installed_zip
-            ]
-            if (user / "mods").is_dir()
-            else []
-        )
+        # CONTENT-based shadow scan, not filename: colossus' own dist zip is
+        # colossus_tire_ericrolph.zip, which no substring check on the mod id
+        # ever sees, and BeamNG mounts every zip under mods/ recursively.
+        existing_conflicts = namespace_conflicts(user, MOD_ID, installed_zip)
         if existing_conflicts:
             pytest.fail(
                 f"competing {MOD_ID} archives in the isolated profile: {existing_conflicts}"
@@ -342,7 +337,7 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
             # A REAL VEHICLE, NOT A PIGEON. The subject used to be driven
             # INSIDE the carcass, where its weight on the liner is a torque
             # about the axle and 300 kg is plenty. There is no inside any
-            # more: the push is a collision from outside against 10.5 tonnes,
+            # more: the push is a collision from outside against the carcass,
             # and momentum is the only thing that matters.
             subject = Vehicle(SUBJECT_NAME, "etk800", license="ROLL")
             scenario.add_vehicle(
@@ -372,9 +367,7 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
             surface_z = float(surface["surface_z"])
 
             prop = Vehicle(PROP_NAME, MOD_ID, license="COLOSSUS")
-            spawned = bng.vehicles.spawn(
-                prop, (0.0, 0.0, surface_z), (0, 0, 0, 1), False, True
-            )
+            spawned = bng.vehicles.spawn(prop, (0.0, 0.0, surface_z), (0, 0, 0, 1), False, True)
             assert spawned is True
 
             state: dict[str, Any] = {}
@@ -393,7 +386,7 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
             origin = state["origin"]
 
             # ---- CLAIM 1: it stands up, stays round, and does not sink.
-            bng.control.step(300, wait=True)          # five seconds of settling
+            bng.control.step(300, wait=True)  # five seconds of settling
             points = None
             for _ in range(20):
                 points = _marker_points(bng)
@@ -424,9 +417,7 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
             # doorway and nothing to board any more, so what has to hold is
             # the surface a car actually meets: park one against the flank and
             # it must not pass through the carcass.
-            flank_target = _authored_to_world(
-                origin, (SPEC.SECTION_HALF + 3.4, 0.0, 1.2)
-            )
+            flank_target = _authored_to_world(origin, (SPEC.SECTION_HALF + 3.4, 0.0, 1.2))
             subject.teleport(pos=flank_target, rot_quat=(0, 0, 0, 1), reset=True)
             bng.control.step(180, wait=True)
             beside = _subject_probe(bng)
@@ -476,11 +467,11 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
             released = False
             for _ in range(40):
                 bng.control.step(15, wait=True)
-                mid_records, _mid_issues = _runtime_log_records(log_path, log_start)
-                if any(
-                    "colossus_released" in str(record.get("event", ""))
-                    for record in mid_records
-                ):
+                # Poll the runtime STATE, not the log: beamng.log flushes
+                # lazily and a log-tail here raced the flush into a false
+                # "never fired" while the release was on time.
+                stats = _runtime_state(bng).get("behavior_stats") or {}
+                if stats.get("released"):
                     released = True
                     break
             assert released, "the release never fired after arming"
@@ -490,13 +481,13 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
             subject.teleport(pos=ram_from, rot_quat=(0, 0, 1, 0), reset=True)
             bng.control.step(90, wait=True)
             start_probe = _subject_probe(bng)
-            # 10 m/s, not the original 18: the push was sized against a
-            # 10.5 t carcass, and the same ram into today's 4.2 t delivered
-            # 2.8x the delta-v and put the tire on its side mid-coast. The
-            # claim is "a car pushing the tread rolls it", not "survives a
-            # highway impact".
+            # 12 m/s: sized twice. 18 (the 10.5 t original) flipped the
+            # 4.2 t carcass mid-coast; 10 rolled it, but round 5's closed
+            # wedge hulls mean the tire now spends real momentum shoving
+            # both 200 kg front chocks out of its own path - honest physics
+            # that halved the coast - so the push gets one notch back.
             for _ in range(18):
-                subject.set_velocity(10.0, dt=0.12)
+                subject.set_velocity(12.0, dt=0.12)
                 bng.control.step(45, wait=True)
             end_probe = _subject_probe(bng)
             report["subject_ran_m"] = round(
@@ -561,8 +552,11 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
                 mean_ride = sum(heights) / count
                 span = sum((index - mean_index) ** 2 for index in range(count))
                 gradient = (
-                    sum((index - mean_index) * (value - mean_ride)
-                        for index, value in enumerate(heights)) / span
+                    sum(
+                        (index - mean_index) * (value - mean_ride)
+                        for index, value in enumerate(heights)
+                    )
+                    / span
                     if span
                     else 0.0
                 )
@@ -571,8 +565,7 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
                     for index, value in enumerate(heights)
                 ]
                 distance = sum(
-                    math.dist(places[index], places[index + 1])
-                    for index in range(len(places) - 1)
+                    math.dist(places[index], places[index + 1]) for index in range(len(places) - 1)
                 )
                 seconds = count * stride / 60.0
                 speed = distance / seconds if seconds else 0.0
@@ -583,9 +576,7 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
                     "mean_speed_ms": round(speed, 2),
                     "mean_ride_m": round(mean_ride, 3),
                     "facet_hz": round(speed / chord, 2) if chord else None,
-                    "ripple_peak_to_peak_mm": round(
-                        (max(residual) - min(residual)) * 1000, 1
-                    ),
+                    "ripple_peak_to_peak_mm": round((max(residual) - min(residual)) * 1000, 1),
                     "ripple_rms_mm": round(
                         math.sqrt(sum(v * v for v in residual) / count) * 1000, 1
                     ),
@@ -599,9 +590,7 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
                 }
 
             chord_m = 2.0 * SPEC.OUTER_RADIUS * math.sin(math.pi / SPEC.STATIONS)
-            facet_sagitta_mm = (
-                SPEC.OUTER_RADIUS * (1.0 - math.cos(math.pi / SPEC.STATIONS)) * 1000
-            )
+            facet_sagitta_mm = SPEC.OUTER_RADIUS * (1.0 - math.cos(math.pi / SPEC.STATIONS)) * 1000
             report["facet"] = {
                 "stations": SPEC.STATIONS,
                 "chord_m": round(chord_m, 3),
@@ -627,9 +616,7 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
             ring = report["ring"]
             steady = report["steady"]
             if ring and steady and ring["seconds"] > 0:
-                decel = (ring["mean_speed_ms"] - steady["mean_speed_ms"]) / (
-                    ring["seconds"]
-                )
+                decel = (ring["mean_speed_ms"] - steady["mean_speed_ms"]) / (ring["seconds"])
                 report["rolling"] = {
                     "decel_ms2": round(decel, 3),
                     "crr": round(decel / 9.81, 4),

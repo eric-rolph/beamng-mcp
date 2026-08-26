@@ -118,6 +118,16 @@ VIEWS = (
     ("contact", (9.0, -11.0, 2.4), (0.0, -2.0, 0.7), 40.0, (1000, 620)),
     ("scale", (26.0, -52.0, 3.2), (2.0, -4.0, 8.0), 50.0, (1000, 620)),
     ("underside", (16.0, -20.0, 1.0), (1.0, 0.0, 1.4), 40.0, (1000, 620)),
+    # THE DRIVER'S FRAME. Round 4's worst pixel defect lived on the liner and
+    # round 5 found the surface shipping visually unreviewed: no exterior
+    # view can see the one surface the hamster mode is driven on. Lit by the
+    # render-only cabin lamp; in game this space is honestly dark until a car
+    # brings headlights.
+    ("cavity", (0.0, -5.0, 2.4), (0.0, 9.0, 5.2), 30.0, (1000, 700)),
+    # Straight at a climb face: the hazard stripes and the side-plate band.
+    # The old stripe decals were invisible from EVERY authored angle, which
+    # is how sixteen inward-wound triangles survived four review rounds.
+    ("chock_face", (5.9, -8.2, 3.4), (2.7, -2.9, 0.3), 42.0, (1000, 700)),
 )
 
 

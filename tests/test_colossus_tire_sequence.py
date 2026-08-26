@@ -40,9 +40,7 @@ def spec():
 
 @pytest.fixture(scope="module")
 def runtime_source(spec):
-    path = (
-        EXAMPLE_ROOT / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID / "runtime.lua"
-    )
+    path = EXAMPLE_ROOT / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID / "runtime.lua"
     if not path.is_file():
         pytest.skip("no generated GE runtime")
     return path.read_text(encoding="utf-8")
@@ -332,7 +330,7 @@ def _seed_frame_nodes(state, source):
     import re
 
     marker = "local FRAME_NODES = {"
-    block = source[source.index(marker):]
+    block = source[source.index(marker) :]
     block = block[: block.index(chr(10) + "}")]
     pattern = re.compile(
         r'name = "([^"]+)", mesh = vec3\(\s*([-0-9.e]+),\s*([-0-9.e]+),\s*([-0-9.e]+)\s*\)'
@@ -396,8 +394,9 @@ def test_the_runtime_finds_the_axle_and_counts_a_revolution(rig):
     steps = 72
     for index in range(1, steps + 1):
         angle = 2.0 * math.pi * index / steps
-        state.setTire(0.0, spec.OUTER_RADIUS * angle, spec.OUTER_RADIUS,
-                      spec.OUTER_RADIUS, -angle, None)
+        state.setTire(
+            0.0, spec.OUTER_RADIUS * angle, spec.OUTER_RADIUS, spec.OUTER_RADIUS, -angle, None
+        )
         tick(module)
     assert state.said("Revolution 1"), list(state.messages.values())
     assert not state.said("Revolution 2"), "a single turn counted twice"
@@ -414,10 +413,23 @@ def test_release_is_claimed_from_movement_not_from_the_queued_command(rig):
     assert state.eventCount("colossus_released") == 1, list(state.events.values())
 
 
-def test_chocks_that_let_go_on_their_own_are_noticed(rig):
-    """Four beams under a 103 kN body. If they part, the runtime says so."""
+def test_the_closing_beat_ships(runtime_source):
+    """The at-rest scoreboard line exists in the shipped runtime.
 
-    lua, state, module, spec = rig
+    The lupa rig cannot cheaply roll the tire 10 m and park it, so the beat
+    is pinned at the source level: the string, the settle window, and the
+    re-arm threshold all have to survive refactors.
+    """
+
+    assert "At rest: %.0f m, %d revolutions." in runtime_source
+    assert "b.restClock" in runtime_source
+    assert "b.restAnnounced" in runtime_source
+
+
+def test_chocks_that_let_go_on_their_own_are_noticed(rig):
+    """Forty tie-downs under the carcass. If they part, the runtime says so."""
+
+    _lua, state, module, spec = rig
     tick(module, int(spec.BEHAVIOR["settle_seconds"] * 60) + 30)
     state.clearMessages()
     # Sinking alone must NOT count, however far it sinks.
@@ -467,8 +479,9 @@ def test_a_downed_colossus_stays_down(rig):
     tick(module, 3)
     state.clearMessages()
     for index in range(40):
-        state.setTire(0.0, 6.0 + index * 0.5, spec.OUTER_RADIUS,
-                      spec.OUTER_RADIUS, -0.5 - index * 0.05, 0.85)
+        state.setTire(
+            0.0, 6.0 + index * 0.5, spec.OUTER_RADIUS, spec.OUTER_RADIUS, -0.5 - index * 0.05, 0.85
+        )
         tick(module)
     assert not state.said("Revolution"), list(state.messages.values())
     assert state.eventCount("colossus_tipped") == 1
@@ -484,8 +497,7 @@ def test_the_lean_warnings_come_before_it_is_too_late(rig):
     state.clearMessages()
     for index in range(1, 30):
         lean = math.sin(math.radians(index * 1.4))
-        state.setTire(0.0, index * 0.4, spec.OUTER_RADIUS, spec.OUTER_RADIUS,
-                      -index * 0.03, lean)
+        state.setTire(0.0, index * 0.4, spec.OUTER_RADIUS, spec.OUTER_RADIUS, -index * 0.03, lean)
         tick(module)
     assert state.said("SHE IS LEANING"), list(state.messages.values())
     assert state.said("SHE IS GOING OVER"), list(state.messages.values())
@@ -495,8 +507,9 @@ def test_the_runtime_never_drives_anything(rig):
     """The premise is that the physics does it. Prove the shipped Lua does not.
 
     The generated runtime carries the pack's shared subject-mutation helpers
-    only when a mod opts in; this one must not, and must issue exactly one
-    queued vehicle command in its whole life: the break-group cut.
+    only when a mod opts in; this one must not, and may queue exactly two
+    vehicle commands in its whole life, both in the release beat: the
+    break-group cut, and the winch that pulls its own CHOCKS clear.
     """
 
     lua, state, module, spec = rig
@@ -515,5 +528,10 @@ def test_the_runtime_never_drives_anything(rig):
     assert len(winches) == 1, commands
     named = re.findall(r'"([a-z0-9_]+)"', winches[0])
     assert named and all("chock_" in name for name in named), winches
+    # Everything else the runtime ever queues must be an AUDIO dispatch into
+    # its own vehicle extension - cue names and mixer pushes, no physics.
+    others = [command for command in commands if command not in cuts and command not in winches]
+    strays = [c for c in others if "_vehicle.ctAudio" not in c and "Registered')" not in c]
+    assert not strays, strays
     forbidden = ("setVelocity", "applyForce(", "setPosition", "teleport")
     assert not [c for c in commands if any(word in c for word in forbidden)], commands

@@ -663,3 +663,35 @@ def temporary_lua_bridge_config(
         yield TemporaryLuaEndpoint(port=port, token=token)
     finally:
         _atomic_private_write(config_path, original, mode)
+
+
+def namespace_conflicts(profile: Path, mod_id: str, allowed: Path) -> list[str]:
+    """Archives that would shadow this mod's vehicle or GE-extension namespace.
+
+    BeamNG mounts EVERY zip below ``mods/`` recursively, so a second archive
+    carrying the same namespace shadows the installed runtime
+    nondeterministically. Matching on FILENAME is not enough - the profile
+    really did hold a ``pachinko_tower_ericrolph.zip`` shipping
+    ``ericrolph_pachinko_tower``, and colossus' own dist zip is
+    ``colossus_tire_ericrolph.zip``, which no substring check on the mod id
+    ever sees. Look at what each archive actually CONTAINS.
+    """
+
+    import zipfile as _zipfile
+
+    mods_root = profile / "mods"
+    if not mods_root.is_dir():
+        return []
+    prefixes = (f"vehicles/{mod_id}/", f"lua/ge/extensions/{mod_id}/")
+    conflicts = []
+    for candidate in sorted(mods_root.rglob("*.zip")):
+        if candidate == allowed:
+            continue
+        try:
+            with _zipfile.ZipFile(candidate) as archive:
+                names = archive.namelist()
+        except (_zipfile.BadZipFile, OSError):
+            continue
+        if any(name.startswith(prefixes) for name in names):
+            conflicts.append(str(candidate))
+    return conflicts

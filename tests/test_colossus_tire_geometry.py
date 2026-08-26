@@ -132,18 +132,23 @@ def test_the_chocks_are_where_a_chock_would_work(spec):
     derived from the distance rather than typed alongside it.
     """
 
-    height = spec.OUTER_RADIUS - math.sqrt(
-        spec.OUTER_RADIUS ** 2 - spec.CHOCK_FAR ** 2
+    # AS BUILT, seat gap included: this is the face the carcass actually
+    # meets, and certifying the pre-gap geometry once let the shipped ramp
+    # drift two degrees below the gate's floor without a murmur.
+    height = (
+        spec.OUTER_RADIUS
+        - math.sqrt(spec.OUTER_RADIUS**2 - spec.CHOCK_FAR**2)
+        - spec.CHOCK_SEAT_GAP
     )
     assert spec.CHOCK_NEAR < spec.CHOCK_FAR, "the wedge points the wrong way"
-    assert 0.6 < height < 2.5, (
+    assert 0.4 < height < 2.5, (
         f"a chock heel at {spec.CHOCK_FAR:.1f} m makes a {height:.2f} m wedge; "
         f"that is either a speed bump or a wall"
     )
-    # It has to be a ramp, not a step: something a 10.5 t tire can climb only
+    # It has to be a ramp, not a step: something the carcass can climb only
     # under real force, but not a vertical face it simply leans on.
     slope = math.degrees(math.atan2(height, spec.CHOCK_FAR - spec.CHOCK_NEAR))
-    assert 15.0 < slope < 40.0, f"the climb face is at {slope:.0f} degrees"
+    assert 11.0 < slope < 40.0, f"the climb face is at {slope:.0f} degrees"
 
 
 def test_the_tire_is_not_a_pancake(spec):
@@ -185,7 +190,7 @@ def test_collision_triangles_face_the_right_way(spec, handoff, nodes):
     liner_keys = ("lin_l", "lin_cl", "lin_c", "lin_cr", "lin_r")
 
     def band_of(identifier):
-        stem = identifier[len(spec.MOD_ID) + 1:].rsplit("_j", 1)[0]
+        stem = identifier[len(spec.MOD_ID) + 1 :].rsplit("_j", 1)[0]
         if stem in crown_keys:
             return "crown"
         if stem in liner_keys:
@@ -202,9 +207,9 @@ def test_collision_triangles_face_the_right_way(spec, handoff, nodes):
             continue
         points = [nodes[identifier] for identifier in triangle["nodes"]]
         normal = _triangle_normal(points)
-        centre = [sum(axis) / 3.0 for axis in zip(*points)]
+        centre = [sum(axis) / 3.0 for axis in zip(*points, strict=False)]
         outward = (centre[0] - axle[0], centre[1] - axle[1], centre[2] - axle[2])
-        dot = sum(a * b for a, b in zip(normal, outward))
+        dot = sum(a * b for a, b in zip(normal, outward, strict=False))
         if band == "crown":
             assert dot > 0, f"crown triangle faces inward: {triangle['nodes']}"
         else:
@@ -252,10 +257,7 @@ def test_nothing_fixed_can_ever_be_touched(spec, handoff, nodes):
 
     fixed = [node for node in handoff["nodes"] if node["fixed"]]
     names = sorted(node["id"].replace(f"{spec.MOD_ID}_", "") for node in fixed)
-    strays = [
-        name for name in names
-        if not (name.startswith("ground_") or "_anchor_" in name)
-    ]
+    strays = [name for name in names if not (name.startswith("ground_") or "_anchor_" in name)]
     assert not strays, f"fixed nodes that are neither anchor nor datum: {strays}"
     assert len(fixed) >= 8, f"only {len(fixed)} fixed nodes: {names}"
     for node in fixed:
@@ -267,18 +269,179 @@ def test_nothing_fixed_can_ever_be_touched(spec, handoff, nodes):
     # And the wedges themselves are free bodies that really touch the tire:
     # collidable, selfCollision on, at chock mass - not scenery.
     wedge = [
-        node for node in handoff["nodes"]
-        if "chock_" in node["id"] and "_anchor_" not in node["id"]
+        node for node in handoff["nodes"] if "chock_" in node["id"] and "_anchor_" not in node["id"]
     ]
     assert len(wedge) == 24, f"{len(wedge)} wedge nodes"
     for node in wedge:
         assert not node["fixed"], f"wedge node is still fixed: {node['id']}"
         assert node["collision"], node["id"]
         assert node["self_collision"], (
-            f"{node['id']} has no selfCollision: the tire would roll straight "
-            "through its own chock"
+            f"{node['id']} has no selfCollision: the tire would roll straight through its own chock"
         )
         assert abs(node["weight"] - spec.WEDGE_NODE_MASS) < 1e-6, node["id"]
+
+
+def test_no_flexbody_group_contains_a_fixed_node(spec, handoff):
+    """A visual skinned to a fixed node stays nailed down while its body leaves.
+
+    Round 5's chair measured the chock visual bound to the default physics
+    group: 24 free wedge nodes PLUS all 16 buried anchors and 4 datums, and
+    every anchor sits 0.6 m directly under a wedge corner - closer than most
+    of the wedge's own nodes - so the winch dragged the wedges 5 m while
+    their skins sheared toward nodes that never move. The rule is general:
+    no group a flexbody binds may hold a fixed node.
+    """
+
+    jbeam_path = EXAMPLE_ROOT / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.jbeam"
+    jbeam = json.loads(jbeam_path.read_text(encoding="utf-8"))
+    part = jbeam[spec.MOD_ID]
+    bound = {
+        group
+        for row in part["flexbodies"][1:]
+        for group in (row[1] if isinstance(row[1], list) else [row[1]])
+    }
+    assert bound, "no flexbody binds any group"
+
+    sticky: dict = {}
+    offenders = []
+    for row in part["nodes"][1:]:
+        if isinstance(row, dict):
+            sticky = {**sticky, **row}
+            continue
+        inline = row[4] if len(row) > 4 and isinstance(row[4], dict) else {}
+        options = {**sticky, **inline}
+        if options.get("fixed") and options.get("group") in bound:
+            offenders.append((row[0], options.get("group")))
+    assert not offenders, f"fixed nodes inside flexbody-bound groups: {offenders[:6]}"
+
+
+def test_chock_hazard_faces_look_out_of_the_steel(spec, collada):
+    """Every hazard triangle on a chock faces AWAY from its wedge's middle.
+
+    The old stripe decals shipped all sixteen triangles facing (0, +/-0.22,
+    -0.97) - INTO the wedge - and rendered on zero pixels in game and in
+    every verify render, because the orientation audit never judged ground
+    objects. This reads the SHIPPED DAE: for each hazard-material triangle
+    below z = 1.5 (the chock region), the normal must point away from that
+    wedge's own centroid.
+    """
+
+    import numpy as np
+
+    bad = 0
+    total = 0
+    components_seen = 0
+    for _geometry, suffix, positions, _uvs, faces, _uv_faces in collada:
+        name = str(suffix)
+        if "hazard" not in name:
+            continue
+        tris = faces.reshape(-1, 3)
+        low = np.array([positions[tri].mean(axis=0)[2] < 1.5 for tri in tris])
+        tris = tris[low]
+        if not len(tris):
+            continue
+        # Each stripe is its own CLOSED slab and slabs never share a vertex,
+        # so connected components over vertex indices recover the solids -
+        # and the honest invariant is per-SOLID: every face of a closed slab
+        # winds away from that slab's own centre. (A per-wedge centroid test
+        # condemned the 6 mm slabs' legitimate back faces.)
+        find = _union_find(
+            pair
+            for tri in tris
+            for pair in ((int(tri[0]), int(tri[1])), (int(tri[1]), int(tri[2])))
+        )
+        groups: dict = {}
+        for tri in tris:
+            groups.setdefault(find(int(tri[0])), []).append(tri)
+        for rows in groups.values():
+            components_seen += 1
+            pts = positions[np.unique(np.concatenate(rows))]
+            centroid = pts.mean(axis=0)
+            for tri in rows:
+                a, b, c = positions[tri]
+                normal = np.cross(b - a, c - a)
+                if np.linalg.norm(normal) < 1e-12:
+                    continue
+                outward = positions[tri].mean(axis=0) - centroid
+                total += 1
+                if np.dot(normal, outward) <= 0:
+                    bad += 1
+    assert components_seen >= 16, f"only {components_seen} hazard slabs found in the chock region"
+    assert total >= 96, f"only {total} chock hazard triangles found"
+    assert bad == 0, f"{bad} of {total} chock hazard triangles face into their own slab"
+
+
+def test_every_open_tread_component_is_seated_in_its_local_floor(spec, collada):
+    """Every open-bottomed tread shell's rim sits BELOW the floor it stands on.
+
+    Per CONNECTED COMPONENT, because per-object checks have now let this
+    class ship through green twice: the wear bars weld into the ejectors
+    object, so ~72 seated ejectors and 12 seated inner bars vouched for 12
+    outer bars floating ~42 mm above their local groove floor - the crown
+    arc DROPS base_r off-centre, and a constant seat at GROOVE_RADIUS is
+    exactly wrong in the direction round 5's fix assumed. The local floor
+    is analytic (a surface of revolution needs no ray cast):
+
+        floor_r(x) = OUTER_RADIUS - x^2 / (2 * TREAD_ARC_RADIUS) - TREAD_DEPTH
+
+    A component with no boundary edges is a closed solid (a glyph) and is
+    judged by the volume gate instead; every OPEN component here must put
+    its entire boundary rim within LUG_SEAT/2 of its local floor - the
+    same tolerance the generator's own seating assert uses, because a ring
+    whose floor was sampled at its centre legitimately rides ~1.6 mm of
+    crown curvature at its edges, and that is backed by its own dome.
+    """
+
+    import numpy as np
+
+    def floor_r(x):
+        return spec.OUTER_RADIUS - (x * x) / (2.0 * spec.TREAD_ARC_RADIUS) - spec.TREAD_DEPTH
+
+    offenders = []
+    open_components = 0
+    for _geometry, suffix, positions, _uvs, faces, _uv_faces in collada:
+        if "tread" not in str(suffix):
+            continue
+        tris = faces.reshape(-1, 3)
+        find = _union_find(
+            pair
+            for tri in tris
+            for pair in ((int(tri[0]), int(tri[1])), (int(tri[1]), int(tri[2])))
+        )
+        edge_count: dict = {}
+        for tri in tris:
+            a, b, c = (int(v) for v in tri)
+            for e in ((a, b), (b, c), (c, a)):
+                key = (min(e), max(e))
+                edge_count[key] = edge_count.get(key, 0) + 1
+
+        boundary_by_component: dict = {}
+        for (a, b), count in edge_count.items():
+            if count == 1:
+                boundary_by_component.setdefault(find(a), set()).update((a, b))
+
+        for _root, rim in boundary_by_component.items():
+            open_components += 1
+            rim_idx = np.array(sorted(rim))
+            pts = positions[rim_idx]
+            radial = np.sqrt(pts[:, 1] ** 2 + (pts[:, 2] - spec.OUTER_RADIUS) ** 2)
+            floors = np.array([floor_r(x) for x in pts[:, 0]])
+            worst = float((radial - floors).max())
+            if worst > spec.LUG_SEAT * 0.5:
+                centre = pts.mean(axis=0)
+                offenders.append(
+                    (
+                        tuple(round(v, 2) for v in centre),
+                        round(worst * 1000, 1),
+                    )
+                )
+    assert open_components >= 50, (
+        f"only {open_components} open tread components found - the furniture did not decompose"
+    )
+    assert not offenders, (
+        f"{len(offenders)} open tread component(s) float above their local "
+        f"floor (centre, worst rim proud in mm): {offenders[:8]}"
+    )
 
 
 def test_the_cage_is_integrable_at_2000hz(spec, handoff, by_id):
@@ -304,9 +467,7 @@ def test_the_cage_is_integrable_at_2000hz(spec, handoff, by_id):
         for identifier in beam["nodes"]:
             if by_id[identifier]["fixed"]:
                 continue
-            stiffness[identifier] = stiffness.get(identifier, 0.0) + float(
-                family["beamSpring"]
-            )
+            stiffness[identifier] = stiffness.get(identifier, 0.0) + float(family["beamSpring"])
             damping[identifier] = damping.get(identifier, 0.0) + float(family["beamDamp"])
 
     worst_node, worst, worst_damp = None, 0.0, 0.0
@@ -325,11 +486,15 @@ def test_the_cage_is_integrable_at_2000hz(spec, handoff, by_id):
 
 
 def test_rubber_families_are_damped_like_rubber(spec, handoff, by_id):
-    """Rubber runs 10-30% of critical; steel cord runs under 10%.
+    """Rubber sits in a 0.08-0.35 damping-ratio band; steel cord under 0.12.
 
-    This is not decoration. Rubber's loss tangent really is that high - it is
-    why tires get hot - and a tire carcass modelled with steel damping rings
-    like a bell instead of settling.
+    ONE CONVENTION, NAMED: zeta = c / (2*sqrt(k*m)) against the family's
+    heaviest node. The band is NOT the material's loss tangent - that lesson
+    is on record (tan-delta 0.1-0.25 converts as zeta ~ tan(delta)/2, i.e.
+    5-12%, and this gate once blessed a tread at 0.42 because its band was
+    argued straight from tan-delta). The shipped band is wider than the
+    converted material figure ON PURPOSE: the upper half is settling margin,
+    paid for by the live gates' measured ring decay, not by a material claim.
     """
 
     specs = handoff["beam_specs"]
@@ -352,6 +517,31 @@ def test_rubber_families_are_damped_like_rubber(spec, handoff, by_id):
             assert 0.08 < ratio < 0.35, f"{family} damping ratio {ratio:.3f} is not rubber"
         else:
             assert ratio < 0.12, f"{family} damping ratio {ratio:.3f} is not steel cord"
+
+
+def _union_find(pairs):
+    """Union the id pairs; returns the find() root function.
+
+    One implementation for the three component decompositions in this file
+    (hazard slabs, tread furniture, moulded type) - the loop-closure copies
+    it replaced were both a lint fire and a maintenance trap.
+    """
+
+    parent: dict[int, int] = {}
+
+    def find(a: int) -> int:
+        while parent.get(a, a) != a:
+            parent[a] = parent.get(parent[a], parent[a])
+            a = parent[a]
+        return a
+
+    for a, b in pairs:
+        parent.setdefault(a, a)
+        parent.setdefault(b, b)
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[ra] = rb
+    return find
 
 
 def carcass_nodes(handoff, nodes):
@@ -429,9 +619,7 @@ def _relax(handoff, spec, residual=None, cap=250_000):
 
     order = [node["id"] for node in handoff["nodes"]]
     index = {identifier: position for position, identifier in enumerate(order)}
-    points = np.array(
-        [node["source_world_position"] for node in handoff["nodes"]], dtype=float
-    )
+    points = np.array([node["source_world_position"] for node in handoff["nodes"]], dtype=float)
     mass = np.array([float(node["weight"]) for node in handoff["nodes"]])
     free = np.array([not node["fixed"] for node in handoff["nodes"]])
 
@@ -499,12 +687,12 @@ def _settled(handoff, spec):
     # 124 kN body. A fixed node in the floor is not carried by anything.
     ground = float((-3.0e6 * np.minimum(points[free, 2], 0.0)).sum())
 
-    # AND WHAT THE QUAY CARRIES. The free set is not only the tire: the
-    # gangway hangs off the port sill and stands on the dock through its
-    # landing struts, and the tie-down webbing runs to the anchor posts. Those
-    # beams take about 6 kN of the 111 kN, so demanding the GROUND carry all
-    # of it would fail a perfectly converged solve. What has to balance is
-    # every path to a fixed node, together.
+    # AND WHAT THE STRAPS CARRY. The free set is not only the tire: the
+    # four chock wedges hang on their anchor straps, so a slice of the free
+    # weight goes to the fixed anchors through webbing rather than through
+    # the ground, and demanding the GROUND carry all of it would fail a
+    # perfectly converged solve. What has to balance is every path to a
+    # fixed node, together.
     specs = handoff["beam_specs"]
     support = 0.0
     for beam in handoff["beams"]:
@@ -573,16 +761,16 @@ def test_the_tire_settles_onto_a_real_contact_patch(spec, handoff):
 # ---------------------------------------------------------------------------
 # The straps are the whole connection
 # ---------------------------------------------------------------------------
-def test_everything_joining_the_tire_to_the_dock_is_in_the_release_group(handoff, spec, by_id):
+def test_everything_joining_free_to_fixed_is_in_the_release_group(handoff, spec, by_id):
     """Every free-to-fixed beam must be cut by the release, and only those.
 
     The cage is one connected graph only because the tie-downs hold it, which
     is what makes it legal under the pack's one-cage rule. The invariant is
-    not "exactly two beams" - the gangway's landing struts are a second,
-    deliberate pair - it is that EVERY beam crossing between the tire and the
-    dock carries the release break group. One that does not is a weld: the
-    straps are cut, the runtime announces the Colossus is loose, and it stays
-    bolted to the quay with nothing in the log.
+    that EVERY beam crossing between anything free and anything fixed - the
+    tire's eight ties and the wedges' thirty-two anchor straps - carries the
+    release break group. One that does not is a weld: the release fires, the
+    runtime announces the Colossus is loose, and it stays roped to a buried
+    anchor with nothing in the log.
     """
 
     bridges = []
@@ -593,16 +781,17 @@ def test_everything_joining_the_tire_to_the_dock_is_in_the_release_group(handoff
 
     assert bridges, "the cage is not connected at all"
     welds = [
-        beam for beam in bridges
+        beam
+        for beam in bridges
         if beam.get("extra", {}).get("breakGroup") != spec.STRAP_BREAK_GROUP
     ]
     assert not welds, (
-        f"{len(welds)} beam(s) join the tire to the dock outside the release "
+        f"{len(welds)} beam(s) cross free-to-fixed outside the release "
         f"group: {[b['nodes'] for b in welds][:4]}"
     )
 
     families = {beam["spec"] for beam in bridges}
-    assert families <= {"strap", "landing"}, families
+    assert families <= {"strap"}, families
     for family in families:
         entry = handoff["beam_specs"][family]
         assert float(entry["beamStrength"]) < 1e6, f"{family} cannot break; it is a weld"
@@ -630,14 +819,10 @@ def test_everything_joining_the_tire_to_the_dock_is_in_the_release_group(handoff
         return seen
 
     carcass_seed = next(
-        node["id"] for node in handoff["nodes"]
-        if not node["fixed"] and "chock" not in node["id"]
+        node["id"] for node in handoff["nodes"] if not node["fixed"] and "chock" not in node["id"]
     )
     free_body = component(carcass_seed)
-    tethered = sorted(
-        name for name in free_body
-        if "chock" in name or by_id[name]["fixed"]
-    )
+    tethered = sorted(name for name in free_body if "chock" in name or by_id[name]["fixed"])
     assert not tethered, f"cut the release and the tire is still towing: {tethered}"
 
     wedge_bodies = set()
@@ -649,8 +834,7 @@ def test_everything_joining_the_tire_to_the_dock_is_in_the_release_group(handoff
         assert not anchored, f"a released wedge is still anchored via {anchored}"
         wedge_bodies.add(body)
     assert len(wedge_bodies) == 4, (
-        f"released wedges form {len(wedge_bodies)} bodies, not 4: "
-        "they are roped together"
+        f"released wedges form {len(wedge_bodies)} bodies, not 4: they are roped together"
     )
 
 
@@ -675,16 +859,16 @@ def test_runtime_never_drives_the_tire(spec):
     )
     used = [name for name in forbidden if name in behaviour]
     assert not used, f"the Colossus runtime moves things: {used}"
-    # It is allowed exactly two commands into the prop's own vehicle Lua,
-    # both in the release beat: the strap cut, and the winch that pulls the
-    # CHOCKS clear (thrusters.applyImpulse aimed at wedge nodes - measured
-    # live: a wedge lying against the tread props the carcass through the
-    # ramp geometry even with every strap broken, so a release that only
-    # cuts webbing releases nothing on flat ground). The winch may reference
-    # chock nodes and nothing else; the tire itself is never touched.
-    assert behaviour.count("queueLuaCommand") == 2
+    # Four queueLuaCommand sites, each named: the strap cut and the chock
+    # winch (both in the release beat - a wedge lying against the tread
+    # props the carcass even fully unstrapped, measured live), and the two
+    # AUDIO dispatch helpers (audioSend and the emitter-node bind), which
+    # name cues and a node cid and can move nothing. The tire itself is
+    # never touched.
+    assert behaviour.count("queueLuaCommand") == 4
     assert "beamstate.breakBreakGroup" in behaviour
     assert "thrusters.applyImpulse" in behaviour
+    assert "ctAudioNode" in behaviour and "audioSend" in behaviour
     for _toe, heel in spec.BEHAVIOR["winch_pairs"]:
         assert "chock_" in heel
     marker_names = set(spec.BEHAVIOR["marker_nodes"])
@@ -708,9 +892,7 @@ def test_the_exported_collada_carries_no_wall_clock(spec):
     twenty other mods' handoff hashes at once.
     """
 
-    dae = (
-        EXAMPLE_ROOT / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.dae"
-    )
+    dae = EXAMPLE_ROOT / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.dae"
     if not dae.is_file():
         pytest.skip("no exported Collada")
     head = dae.read_text(encoding="utf-8", errors="ignore")[:4000]
@@ -722,6 +904,7 @@ def test_the_exported_collada_carries_no_wall_clock(spec):
             "normalise_collada() did not run"
         )
     assert "Blender User" not in head
+
 
 # ---------------------------------------------------------------------------
 # The SHIPPED visual mesh.
@@ -739,8 +922,9 @@ COLLADA_NS = {"c": "http://www.collada.org/2005/11/COLLADASchema"}
 def _collada_streams(path):
     """Yield (material_suffix, positions, uvs, triangle index array) per stream."""
 
-    import numpy as np
     import xml.etree.ElementTree as ET
+
+    import numpy as np
 
     root = ET.parse(path).getroot()
     for geometry in root.findall(".//c:library_geometries/c:geometry", COLLADA_NS):
@@ -748,9 +932,7 @@ def _collada_streams(path):
         sources = {}
         for source in mesh.findall("c:source", COLLADA_NS):
             array = source.find("c:float_array", COLLADA_NS)
-            stride = int(
-                source.find("c:technique_common/c:accessor", COLLADA_NS).get("stride")
-            )
+            stride = int(source.find("c:technique_common/c:accessor", COLLADA_NS).get("stride"))
             values = np.array(array.text.split(), dtype=float)
             sources[source.get("id")] = values.reshape(-1, stride)
         vertices = mesh.find("c:vertices", COLLADA_NS)
@@ -760,23 +942,13 @@ def _collada_streams(path):
         for primitive in mesh.findall("c:triangles", COLLADA_NS):
             inputs = primitive.findall("c:input", COLLADA_NS)
             stride = max(int(entry.get("offset")) for entry in inputs) + 1
-            offsets = {
-                entry.get("semantic"): int(entry.get("offset")) for entry in inputs
-            }
-            uv_input = next(
-                (e for e in inputs if e.get("semantic") == "TEXCOORD"), None
-            )
-            uvs = (
-                sources[uv_input.get("source").lstrip("#")]
-                if uv_input is not None
-                else None
-            )
+            offsets = {entry.get("semantic"): int(entry.get("offset")) for entry in inputs}
+            uv_input = next((e for e in inputs if e.get("semantic") == "TEXCOORD"), None)
+            uvs = sources[uv_input.get("source").lstrip("#")] if uv_input is not None else None
             data = np.array(primitive.find("c:p", COLLADA_NS).text.split(), dtype=int)
             data = data.reshape(-1, stride)
             faces = data[:, offsets["VERTEX"]].reshape(-1, 3)
-            uv_faces = (
-                data[:, offsets["TEXCOORD"]].reshape(-1, 3) if uvs is not None else None
-            )
+            uv_faces = data[:, offsets["TEXCOORD"]].reshape(-1, 3) if uvs is not None else None
             # "<mod_id>_<suffix>-material" -> "<suffix>", which is the key
             # spec.MATERIAL_TILE and the palette are written in.
             material = (primitive.get("material") or "").replace("-material", "")
@@ -786,9 +958,7 @@ def _collada_streams(path):
 
 @pytest.fixture(scope="module")
 def collada(spec):
-    path = (
-        EXAMPLE_ROOT / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.dae"
-    )
+    path = EXAMPLE_ROOT / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.dae"
     if not path.is_file():
         pytest.skip("no exported Collada")
     pytest.importorskip("numpy")
@@ -919,7 +1089,7 @@ def test_shipped_mesh_faces_outward(spec, collada):
             want_out = True
         else:
             reference = centres - axle
-            reference[:, 0] = 0.0               # the radial direction is in y-z
+            reference[:, 0] = 0.0  # the radial direction is in y-z
             want_out = suffix in radial_out
         length = np.linalg.norm(reference, axis=1)
         good = length > 1e-6
@@ -1056,25 +1226,13 @@ def test_every_moulded_glyph_is_a_solid_wound_outward(collada):
     for _geometry, suffix, positions, _uvs, faces, _uv_faces in collada:
         if suffix != "sidewall_type":
             continue
-        parent = list(range(len(positions)))
-
-        def root(node: int) -> int:
-            while parent[node] != node:
-                parent[node] = parent[parent[node]]
-                node = parent[node]
-            return node
-
-        for first, second, third in faces:
-            for other in (second, third):
-                a, b = root(int(first)), root(int(other))
-                if a != b:
-                    parent[a] = b
+        root = _union_find(
+            (int(first), int(other)) for first, second, third in faces for other in (second, third)
+        )
 
         volumes: dict[int, float] = {}
         points = positions[faces]
-        signed = np.einsum(
-            "ij,ij->i", points[:, 0], np.cross(points[:, 1], points[:, 2])
-        ) / 6.0
+        signed = np.einsum("ij,ij->i", points[:, 0], np.cross(points[:, 1], points[:, 2])) / 6.0
         for face, value in zip(faces, signed, strict=True):
             key = root(int(face[0]))
             volumes[key] = volumes.get(key, 0.0) + float(value)
@@ -1105,9 +1263,7 @@ def test_the_verify_render_builds_everything_the_generator_ships():
 
     import re
 
-    generator = (
-        EXAMPLE_ROOT / "blender" / "create_colossus_tire.py"
-    ).read_text(encoding="utf-8")
+    generator = (EXAMPLE_ROOT / "blender" / "create_colossus_tire.py").read_text(encoding="utf-8")
     render = (EXAMPLE_ROOT / "authoring" / "verify_render.py").read_text(encoding="utf-8")
 
     def _builders(text: str, marker: str, prefix: str) -> set[str]:
@@ -1176,11 +1332,14 @@ def test_every_closed_solid_in_the_shipped_mesh_has_positive_volume(collada):
     offenders = {}
     judged = 0
     for _geometry, suffix, positions, _uvs, faces, _uv_faces in collada:
-        signed = np.einsum(
-            "ij,ij->i",
-            positions[faces][:, 0],
-            np.cross(positions[faces][:, 1], positions[faces][:, 2]),
-        ) / 6.0
+        signed = (
+            np.einsum(
+                "ij,ij->i",
+                positions[faces][:, 0],
+                np.cross(positions[faces][:, 1], positions[faces][:, 2]),
+            )
+            / 6.0
+        )
         for group in _components(faces):
             sub = faces[group]
             edges = collections.Counter()

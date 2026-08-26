@@ -1449,6 +1449,7 @@ def write_handoff(
     behavior: dict[str, Any],
     flexbodies_extra: list[dict[str, Any]] | None = None,
     panel: dict[str, Any] | None = None,
+    visual_groups: list[str] | None = None,
 ) -> dict[str, Any]:
     structure = cage.structure()
     handoff = {
@@ -1458,6 +1459,14 @@ def write_handoff(
             "display_name": display_name,
             "physics_cage": f"{mod_id}_cage",
             "visual_mesh": visual_mesh_name,
+            # Optional: bind the main visual flexbody to these node groups
+            # (mod-prefixed by prop_builder) instead of the default
+            # <mod>_physics group. colossus_tire needed it when its chock
+            # visual, left on the default, skinned to a group that held the
+            # 16 FIXED buried anchors - each 0.6 m under a wedge corner,
+            # closer than the wedge's own nodes - so the winch dragged the
+            # wedges 5 m while their visuals stayed nailed to the ground.
+            "visual_groups": visual_groups or [],
             "flexbodies_extra": flexbodies_extra or [],
         },
         "coordinate_system": {
