@@ -448,12 +448,25 @@ BOOM_ROOT_DEPTH = 2.05     # box-section depth at the shoulder
 # 0.28 m of a 1.99 m problem and a reviewer recomputed it to rubble).
 # So the boom is a luffing-derrick dogleg: a shallow shoulder segment
 # from the hub OVER the ring, a knee joint outside it, then the steep
-# drop to the elbow. At (2.85, 9.10) the shoulder run's belly clears the
-# ring top by 0.10-0.22 m through its depth taper and the drop segment's
-# inboard face stays 0.67 m outside the ring. test_the_boom_clears_the
-# _slew_ring holds these numbers.
+# drop to the elbow.
+#
+# THE KNEE IS AT z 9.45, NOT THE 9.10 FIRST DERIVED -- because the first
+# derivation walked the girders and forgot the JOINT. The knee box is
+# 1.55 m tall; centred at 9.10 its bottom face reached z 8.325, which is
+# 0.208 m INTO the slew teeth (z 8.087-8.533) across their full radial
+# depth -- eleven teeth bitten at any azimuth, all 96 ground through per
+# swing, invisible in every render because it reads as tight machinery.
+# A reviewer walked the box envelope the gate did not. At 9.45 the box
+# bottom (8.675) clears the tooth band by 0.142 m and the ring top by
+# 0.055; the shoulder shallows to 20.2 degrees (belly clearance grows)
+# and the drop steepens to 80.7 (still 0.25+ m outside the ring).
+# test_the_boom_clears_the_slew_ring now walks BOTH girders AND the box.
 BOOM_KNEE_R = 2.85
-BOOM_KNEE_Z = 9.10
+BOOM_KNEE_Z = 9.45
+#: (across-arm, along-arm, tall) of the knee joint box. In spec rather
+#: than inline in the generator so the clearance gate walks the same
+#: numbers the mesh is built from.
+BOOM_KNEE_BOX = (1.62, 1.55, 1.55)
 BOOM_ELBOW_DEPTH = 1.62    # both members at the elbow pin
 BOOM_TIP_DEPTH = 1.18      # at the wrist collar
 BOOM_WIDTH = 1.40
@@ -2094,7 +2107,12 @@ end
 
 behavior.reset = function(state)
   behavior.init(state)
+  -- ALL the burst emitters: a reset landing inside the 0.3 s dust window
+  -- stranded slap_dust2 and slap_grit emitting forever, because this list
+  -- predated them.
   setEffectActive(state, "slap_dust", false)
+  setEffectActive(state, "slap_dust2", false)
+  setEffectActive(state, "slap_grit", false)
   setEffectActive(state, "slew_steam", false)
 end
 
@@ -2226,6 +2244,10 @@ finalizeWatch = function(state, flyer, up)
   local b = state.behavior
   local w = b.watch
   b.watch = nil
+  -- A new scoreline claims the wince: if flight A earned a pending
+  -- "pretends not to look" and flight B scores inside the 2.5 s window,
+  -- the aside must not trail B's number as if it were about B.
+  b.winceAt = nil
   if not w then return end
   local rest = flyer:getPosition()
   local dx, dy = rest.x - w.x, rest.y - w.y

@@ -939,7 +939,7 @@ def build_arm(materials) -> tuple[list, list]:
     knee_box = bk.add_box(
         f"{MOD_ID}_arm_knee",
         (KNEE.x, KNEE.y, KNEE.z),
-        (spec.BOOM_WIDTH + 0.22, 1.55, 1.55),
+        spec.BOOM_KNEE_BOX,
         rig,
         bevel=0.05,
         metric_uv=(1.0, 1.0),

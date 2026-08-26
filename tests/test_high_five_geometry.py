@@ -1563,6 +1563,25 @@ def test_the_boom_clears_the_slew_ring():
             "of the slew ring radius inside the ring band"
         )
 
+    # THE KNEE BOX, which the first version of this gate did not walk --
+    # and the joint promptly bit the slew teeth by 0.208 m while both
+    # girders passed. Swept about the mast, the box's minimum radius is
+    # the closest point of its horizontal rectangle to the axis; its
+    # bottom face must clear the tooth band wherever that annulus
+    # overlaps the teeth.
+    tooth_outer = spec.SLEW_RING_R + 0.08
+    tooth_top = spec.MAST_TOP_Z + spec.SLEW_RING_H - 0.09
+    across, along, tall = spec.BOOM_KNEE_BOX
+    box_min_r = spec.BOOM_KNEE_R - max(across, along) / 2.0
+    box_bottom = spec.BOOM_KNEE_Z - tall / 2.0
+    if box_min_r < tooth_outer:
+        clearance = box_bottom - tooth_top
+        assert clearance > 0.05, (
+            f"the knee box bottom comes within {clearance:+.3f} m of the "
+            "slew tooth band -- eleven teeth bitten at any azimuth, all 96 "
+            "ground through per swing"
+        )
+
     # And the gate must be able to see the OLD defect: a straight
     # hub-to-elbow member through the same walk fails by metres, which is
     # the negative verification built in rather than trusted.

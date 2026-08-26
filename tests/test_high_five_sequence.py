@@ -198,7 +198,10 @@ end
 function vehmt:getVelocity()
   return vec3(self.vel.x, self.vel.y, self.vel.z)
 end
-function vehmt:getDirectionVectorUp() return vec3(0, 0, 1) end
+function vehmt:getDirectionVectorUp()
+  local up = self.up or {x = 0, y = 0, z = 1}
+  return vec3(up.x, up.y, up.z)
+end
 function vehmt:getRotation() return self.rot end
 function vehmt:applyClusterVelocityScaleAdd(_node, scale, x, y, z)
   S.velocities[#S.velocities + 1] = {id = self.id, scale = scale,
@@ -233,6 +236,9 @@ end
 -- Drive a subject up-road at a constant closing speed. The runtime reads
 -- BOTH position and velocity every frame, so the test has to actually move
 -- the car rather than just claim a speed.
+function S.setUpVector(id, x, y, z)
+  S.vehicles[id].up = {x = x, y = y, z = z}
+end
 function S.setMotion(id, speed)
   S.vehicles[id].vel = {x = 0, y = speed, z = 0}
 end
@@ -1335,4 +1341,50 @@ def test_a_superseded_flight_is_scored_not_eaten(rig):
     assert scored, (
         f"the first flight was superseded and never scored; messages: "
         f"{messages}"
+    )
+
+
+def test_the_wince_follows_the_scoreline_after_a_beat(rig):
+    """The aside must trail the score, not stomp it.
+
+    The first wince fired in the same tick as the scoreline it commented
+    on -- showMessage shares one UI category and same-category messages
+    replace, so "On the ROOF." died unread at the exact moment it was
+    earned. The wince is now clock-deferred 2.5 s. This forces a roof
+    landing (the stub's up vector is settable) and asserts the ORDER:
+    scoreline present and unaccompanied first, the aside only after the
+    beat.
+    """
+
+    import re
+
+    lua, state, module = rig
+    state.addVehicle(SUBJECT_ID, "pickup", 0.0, 0.0, 0.5)
+    state.setMotion(SUBJECT_ID, 0.0)
+    drive(state, module, SUBJECT_ID, 3.0,
+          until=lambda s: state.lastVelocity() is not None)
+    state.setUpVector(SUBJECT_ID, 0.0, 0.0, -1.0)
+
+    def messages():
+        found = []
+        index = 1
+        while True:
+            entry = state.messages[index]
+            if entry is None:
+                break
+            found.append(str(entry))
+            index += 1
+        return found
+
+    drive(state, module, SUBJECT_ID,
+          SPEC.BEHAVIOR["score_settle_seconds"] + 0.4, until=None)
+    at_score = messages()
+    scoreline = [m for m in at_score if re.match(r"^\d+ m\. ", m)]
+    assert scoreline and "ROOF" in scoreline[-1], at_score
+    assert "The hand pretends not to look." not in at_score, (
+        "the wince fired with the scoreline instead of after it"
+    )
+    drive(state, module, SUBJECT_ID, 2.6, until=None)
+    assert "The hand pretends not to look." in messages(), (
+        "the wince never arrived after its beat"
     )
