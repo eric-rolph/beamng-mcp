@@ -97,13 +97,38 @@ end
 
 local quatmt = {}
 quatmt.__index = quatmt
+-- REAL quaternion algebra, not the old identity passthrough. The
+-- passthrough silently made every stub frame the identity, so a mirrored
+-- or unrotated spin axis on a rotated placement -- the exact bug family
+-- that shipped in giant_props on slopes (2026-08-24) -- passed every
+-- gate. With real math, MODEL_ALIGNMENT_ROTATION and the vehicle's own
+-- attitude actually rotate vectors in the harness, and the rotated-frame
+-- gate below has something honest to measure.
 function quatmt.__mul(a, b)
-  if getmetatable(b) == vecmt then return vec3(b.x, b.y, b.z) end
-  return quat(0, 0, 0, 1)
+  if getmetatable(b) == vecmt then
+    -- rotate: v' = v + 2q x (q x v + w v)
+    local qx, qy, qz, qw = a.x, a.y, a.z, a.w
+    local tx = 2 * (qy * b.z - qz * b.y)
+    local ty = 2 * (qz * b.x - qx * b.z)
+    local tz = 2 * (qx * b.y - qy * b.x)
+    return vec3(
+      b.x + qw * tx + (qy * tz - qz * ty),
+      b.y + qw * ty + (qz * tx - qx * tz),
+      b.z + qw * tz + (qx * ty - qy * tx))
+  end
+  -- Hamilton product
+  return quat(
+    a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
+    a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
+    a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
+    a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z)
 end
 function quatmt:toTorqueQuat() return self end
 function quat(x, y, z, w)
-  if type(x) == "table" then x, y, z, w = x[1] or 0, x[2] or 0, x[3] or 0, x[4] or 1 end
+  if type(x) == "table" then
+    if x.w ~= nil then x, y, z, w = x.x or 0, x.y or 0, x.z or 0, x.w or 1
+    else x, y, z, w = x[1] or 0, x[2] or 0, x[3] or 0, x[4] or 1 end
+  end
   return setmetatable({x = x or 0, y = y or 0, z = z or 0, w = w or 1}, quatmt)
 end
 function quatFromDir() return quat(0, 0, 0, 1) end
@@ -174,6 +199,7 @@ function vehmt:getVelocity()
   return vec3(self.vel.x, self.vel.y, self.vel.z)
 end
 function vehmt:getDirectionVectorUp() return vec3(0, 0, 1) end
+function vehmt:getRotation() return self.rot end
 function vehmt:applyClusterVelocityScaleAdd(_node, scale, x, y, z)
   S.velocities[#S.velocities + 1] = {id = self.id, scale = scale,
                                      x = x, y = y, z = z}
@@ -182,11 +208,21 @@ function vehmt:setPositionRotation() end
 
 map = {objects = {}}
 
-function S.addVehicle(id, model, x, y, z, hx, hy, hz)
+function S.addVehicle(id, model, x, y, z, hx, hy, hz, yawDeg)
+  -- The PROP's default attitude is the inverse of the runtime's
+  -- MODEL_ALIGNMENT_ROTATION (both are 180 degrees about z, and the flip
+  -- is self-inverse), so modelRotation composes to IDENTITY and the
+  -- harness's founding premise -- authored frame == world frame -- stays
+  -- exactly true for every existing test now that the quat math is real.
+  -- yawDeg then composes a real prop yaw on top for the rotated-frame
+  -- gate. Cars never read their own rotation, so sharing the convention
+  -- costs nothing.
+  local half = math.rad(((yawDeg or 0) + 180.0) / 2)
   local vehicle = setmetatable({
     id = id, model = model,
     pos = {x = x, y = y, z = z},
     vel = {x = 0, y = 0, z = 0},
+    rot = {x = 0, y = 0, z = math.sin(half), w = math.cos(half)},
     half = {x = hx or 0.95, y = hy or 2.3, z = hz or 0.75},
   }, vehmt)
   S.vehicles[id] = vehicle
@@ -558,7 +594,7 @@ def test_a_subject_that_vanishes_mid_hold_does_not_wedge_the_arm(rig):
 # ---------------------------------------------------------------------------
 
 
-def fresh_rig():
+def fresh_rig(yaw_deg=0.0):
     """A brand-new runtime, registered and idle.
 
     Measurements that need several full passes build one of these each
@@ -574,7 +610,8 @@ def fresh_rig():
         PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / SPEC.MOD_ID / "runtime.lua"
     ).read_text(encoding="utf-8")
     module = lua.execute(runtime)
-    state.addVehicle(PROP_ID, SPEC.MOD_ID, 0.0, 0.0, 0.0, 20.0, 30.0, 12.0)
+    state.addVehicle(
+        PROP_ID, SPEC.MOD_ID, 0.0, 0.0, 0.0, 20.0, 30.0, 12.0, yaw_deg)
     module.registerProp(PROP_ID)
     _ZONES[id(module)] = Zones(lua, state, module)
     return lua, state, module
@@ -1057,9 +1094,13 @@ def test_the_slap_spins_the_car(rig):
         f"spin magnitude {magnitude:.2f} rad/s against the model's "
         f"{expected:.2f}"
     )
-    # The axis: roll-dominant, negative x; drag yaw negative z; nothing
-    # along the flight path.
+    # The axis. The stub prop's default attitude cancels the model
+    # alignment (see addVehicle), so world == authored here and the signs
+    # read straight off the r x d model: negative x is top-over roll,
+    # negative z is drag yaw. The rotated-frame gate below is where the
+    # composition gets exercised for real.
     assert omega[0] < 0, "the tumble must carry the car top-over, not back"
+
     assert abs(omega[0]) > abs(omega[2]), "roll must dominate yaw"
     assert omega[2] < 0, "the drag yaw must follow the palm sweep"
     assert abs(omega[1]) < 0.25 * magnitude, (
@@ -1177,3 +1218,54 @@ def test_the_machine_reports_the_score(rig):
     )
     assert "rotation" in scored[-1], scored[-1]
     assert re.search(r"(wheels|side|ROOF)", scored[-1]), scored[-1]
+
+
+def test_the_spin_axis_follows_the_prop_frame():
+    """A rotated machine must spin the car about ROTATED axes.
+
+    Magnitude gates cannot see a mirrored or unrotated axis: put the prop
+    at 90 degrees of yaw and a frame bug preserves |omega| exactly while
+    turning forward tumble into backspin. That is the family that shipped
+    in this pack on slopes (2026-08-24), and it is killable in the stub
+    now that the harness does real quaternion algebra.
+
+    The prop spawns at yaw 90. The expected world axis is the identity
+    case's authored axis pushed through yaw-then-alignment, exactly the
+    composition propFrame documents (MODEL_ALIGNMENT_ROTATION *
+    vehicleRotation, quats composing left to right).
+    """
+
+    lua, state, module = fresh_rig(yaw_deg=90.0)
+    state.addVehicle(SUBJECT_ID, "pickup", 0.0, 0.0, 0.5)
+    state.setMotion(SUBJECT_ID, 0.0)
+    drive(state, module, SUBJECT_ID, 3.0,
+          until=lambda s: _spin_command(state) is not None)
+    spun = _spin_command(state)
+    assert spun is not None, "the rotated prop never queued a spin"
+
+    # The authored-frame axis, from the model itself.
+    tilt = math.radians(
+        SPEC.BEHAVIOR["default_tilt_index"] * SPEC.BEHAVIOR["tilt_step_deg"])
+    r = (-0.8, 0.0, 1.30)
+    d = (0.0, math.cos(tilt), math.sin(tilt))
+    axis = (
+        r[1] * d[2] - r[2] * d[1],
+        r[2] * d[0] - r[0] * d[2],
+        r[0] * d[1] - r[1] * d[0],
+    )
+    size = math.sqrt(sum(c * c for c in axis))
+    axis = tuple(c / size for c in axis)
+    # The default attitude cancels the alignment flip, so a yaw_deg=90
+    # rig composes to a pure +90 yaw about z: (x, y, z) -> (-y, x, z).
+    expected_dir = (-axis[1], axis[0], axis[2])
+
+    omega = spun["omega"]
+    magnitude = math.sqrt(sum(c * c for c in omega))
+    assert magnitude > 1.0
+    unit = tuple(c / magnitude for c in omega)
+    for measured, wanted, name in zip(unit, expected_dir, "xyz"):
+        assert abs(measured - wanted) < 0.05, (
+            f"spin axis {name}: {measured:+.3f} against the rotated "
+            f"model's {wanted:+.3f} -- the tumble is not following the "
+            "prop frame, which is backspin-on-a-forward-launch territory"
+        )

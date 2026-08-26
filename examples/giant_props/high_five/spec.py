@@ -1396,7 +1396,9 @@ EFFECTS = {
 #             (The previous revision plated 630 A off a 2,320 A figure
 #             that reproduced from no equation in the file.)
 #
-#             THE THREE LINES ABOVE ARE THE ONES THAT GO STALE. They were
+#             HISTORY, kept as a warning (the lines it once pointed at
+#             were rewritten in the 2026-08-26 recompute):
+#             THE STROKE-DERIVED LINES ARE THE ONES THAT GO STALE. They were
 #             computed against a 0.30 s QUADRATIC swing and survived the
 #             change to 0.45 s on t^1.4 — energy goes as omega^2, so they
 #             were out by 4.6x while the two lines above them had already
@@ -2167,6 +2169,14 @@ behavior.update = function(state, dtSim)
       -- Accumulated attitude change: the honest rotation count, measured
       -- off the car, not read back from the injected seed (the engine
       -- amplifies the tumble 30-90% after the palm leaves).
+      -- YAW-BLIND, by choice: up-vector drift never sees rotation
+      -- about the up axis, so a flat-spin helicopter scores "no full
+      -- rotation" while doing 720. "Rotations" here means TUMBLES --
+      -- the end-over-end that reads on camera -- and the injected axis
+      -- is roll-dominant, but roughly half the yaw component goes
+      -- uncounted. If the scoreboard ever under-sells obvious flat
+      -- spins, this is why, and the fix is tracking the forward vector
+      -- too.
       local dot = math.max(-1, math.min(1,
         up.x * w.lastUpX + up.y * w.lastUpY + up.z * w.lastUpZ))
       w.rolled = w.rolled + math.acos(dot)
