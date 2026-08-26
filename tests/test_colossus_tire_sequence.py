@@ -9,7 +9,7 @@ the capsize beat survives the frame it is written in.
 
 The prop is a tire and nothing else now - no dock, no gangway, no access port,
 nobody inside it - so the loop under test is short: come near it, the chocks
-come out, and after that it is a free 10.5 tonne body being measured.
+come out, and after that it is a free 4.2 tonne body being measured.
 
 RUN IT FROM THE REPO VENV. Without lupa every one of these SKIPS silently,
 which is exactly what happened to one review panel.

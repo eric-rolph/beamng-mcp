@@ -717,7 +717,9 @@ a prop rather than a structural one. Four things learned building them:
   terrain, not scrub, and a whole line of investigation was wrong.
 
 The results worth carrying forward: a 48-station collision hull with 30 mm
-of facet sagitta rides at 7.3 mm RMS under a ~95 mm contact patch, so a
+of facet sagitta rides at 7-15 mm RMS (by speed window and ram energy;
+7.3 measured at the 4.2 t tune's first flat run) under a ~95 mm contact
+patch, so a
 deflecting carcass swallows its own polygon; and rolling resistance in this
 engine ultimately lives in the CONTACT model and scales with weight - beam
 damping, stiffness and node friction were each measured and none owned the
@@ -791,10 +793,11 @@ file can cite.
 
 ### Giant Props: a prop with a permanent attachment must be BALANCED about its axle
 
-`colossus_tire` rolls because a car pushes its liner. Its boarding gangway is
-900 kg bolted to the port sill at the BOTTOM of the carcass and it stays bolted
-after the tie-downs are cut, so the free body's centre of mass sat 0.922 m off
-the axle: a 102 kNm gravity pendulum against roughly 123 kNm of drive torque.
+`colossus_tire` rolls because a car pushes its liner. Its boarding gangway
+(since deleted with the whole furniture era) was 900 kg bolted to the port
+sill at the BOTTOM of the carcass and stayed bolted after the tie-downs were
+cut, so the free body's centre of mass sat 0.922 m off the axle: a 102 kNm
+gravity pendulum against roughly 123 kNm of drive torque.
 The tire climbed its own imbalance and rocked back instead of rolling away, and
 the live gate's headline number - 7.40 m of axle travel, which is 31.6 degrees
 of rotation - was exactly that signature passing a 0.25 m bar.

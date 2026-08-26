@@ -824,7 +824,8 @@ CHOCK_OFFSET = 3.00            # from the centre plane to each chock's middle
 # the fixed-node chocks: their nodes shipped without selfCollision, so the
 # tire never actually pressed on them (the straps did all the holding), and
 # being fixed meant that after release the tire rolled straight THROUGH their
-# meshes. So each wedge is a free ~540 kg steel body whose base corners are
+# meshes. So each wedge is a free steel body (~540 kg then, ~200 kg as
+# shipped after the winch sizing) whose base corners are
 # strapped to buried anchors in the same break group as the tie-downs, and
 # its nodes carry selfCollision so the carcass genuinely rests against it.
 # Release now means what it means in a yard: the ties are cut, and 10.5
@@ -1174,7 +1175,6 @@ PRINT_BAND_RADIUS = next(
 TILE_TREAD = 2.20
 TILE_SIDEWALL = 2.60
 TILE_LINER = 2.40
-TILE_STEEL = 1.60
 MATERIAL_TILE = {
     "tread": TILE_TREAD,
     "sidewall": TILE_SIDEWALL,
@@ -1182,7 +1182,6 @@ MATERIAL_TILE = {
     "sidewall_print": TILE_SIDEWALL,
     "liner": TILE_LINER,
     "bead": TILE_SIDEWALL,
-    "steel_worn": TILE_STEEL,
     "chock_paint": 1.00,
     "hazard": 1.20,
 }
@@ -1646,8 +1645,10 @@ local function cutChocks(state)
   end
   -- The commands are QUEUED into the vehicle VM, not executed here, so a
   -- successful pcall proves only that they were asked for. Release is
-  -- claimed from the tire having MOVED (updateRunaway), which is also what
-  -- catches a tie-down that parts on its own.
+  -- CLAIMED on the announced beat itself (behavior.update sees
+  -- chockCutRequested and marks released next frame); the movement path in
+  -- updateRunaway exists as the FALLBACK for tie-downs that part on their
+  -- own before anyone asks.
   b.chockCutRequested = true
   b.countdown = nil
   -- The sidewall's own rating, not the compromised physics mass: player-
@@ -1659,6 +1660,7 @@ local function cutChocks(state)
   -- game rather than only in the README: cutChocks runs once per prop
   -- instance, so this is inherently once per session.
   showChatter("Its cavity is drivable. A car inside can walk this wheel.", 6.0)
+  b.chatterHoldUntil = b.clock + 2.5
 end
 
 behavior.init = function(state)
@@ -1666,6 +1668,10 @@ behavior.init = function(state)
   b.clock = 0
   b.released = false
   b.nextMilestone = 5.0
+  b.restClock = 0
+  b.restAnnounced = false
+  b.rollAudio = false
+  b.chatterHoldUntil = 0
   -- Exposed through getSystemState's behavior_stats: the hamster gate
   -- asserts at least one milestone fired during its drive, which is what
   -- keeps this feedback channel from silently dying in a refactor.
@@ -1727,11 +1733,11 @@ local function updateRelease(state, dtSim)
   end
 end
 
--- The tie-downs can also let go on their own: four beams under a 103 kN
--- body, and a hard enough arrival will break them before anyone asks. Claiming
--- release from the queued Lua command alone would leave the runtime silent
--- for the rest of the session if that happened, so release is claimed from
--- the tire HAVING MOVED, whatever caused it.
+-- The tie-downs can also let go on their own: forty strap beams under a
+-- 41 kN body, and a hard enough arrival will break them before anyone asks.
+-- The announced release beat claims release itself; THIS path is the
+-- fallback that notices the tire moving while nothing was ever requested,
+-- so a strap that parts on its own still gets called.
 local function updateRunaway(state, tire)
   local b = state.behavior
   if b.released or not b.originCentre then return end
@@ -1833,7 +1839,9 @@ behavior.update = function(state, dtSim)
   local turns = math.floor(math.abs(unwrapped - b.angleZero) / TWO_PI)
   if turns > b.revolutions then
     b.revolutions = turns
-    if b.released then
+    -- not b.tipped: the capsize line already carries the final score, and a
+    -- downed carcass spinning on the dirt is not "revolutions".
+    if b.released and not b.tipped then
       -- METRES FIRST. One revolution is 88.5 m of ground, so a headline that
       -- leads with the revolution count reads 0 on essentially every ride a
       -- player will actually complete.
@@ -1888,7 +1896,7 @@ behavior.update = function(state, dtSim)
   -- spoke while moving. Once released and genuinely travelled, three
   -- settled seconds under walking pace close the run with a total; any
   -- real movement re-arms it.
-  if b.released and b.distance > 10.0 then
+  if b.released and not b.tipped and b.distance > 10.0 then
     if b.speed < 0.2 then
       b.restClock = (b.restClock or 0) + dtSim
       if b.restClock >= 3.0 and not b.restAnnounced then
@@ -1912,10 +1920,15 @@ behavior.update = function(state, dtSim)
   -- (measured: 8.55 m of tire travel in a 30 s interior run). First beat at
   -- 5 m, then every 15: the wheel answers the driver inside within seconds
   -- of first moving, and the revolution line stays the rare big beat.
-  if b.released and b.distance >= b.nextMilestone then
+  if b.released and not b.tipped and b.distance >= b.nextMilestone then
     b.nextMilestone = b.nextMilestone + 15.0
     b.stats.milestones = b.stats.milestones + 1
-    showChatter(string.format("%.0f m of ground.", b.distance), 1.8)
+    -- The once-per-release drivability hint owns the chatter slot for its
+    -- first beats; a milestone that fires into it would wipe the one line
+    -- that makes the headline mode discoverable.
+    if b.clock >= (b.chatterHoldUntil or 0) then
+      showChatter(string.format("%.0f m of ground.", b.distance), 1.8)
+    end
   end
 
   updateRunaway(state, tire)

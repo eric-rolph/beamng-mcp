@@ -63,7 +63,6 @@ TAU = 2.0 * math.pi
 TILE_TREAD = 2.20
 TILE_SIDEWALL = 2.60
 TILE_LINER = 2.40
-TILE_STEEL = 1.60
 
 # Authored in spec.py so the generator and the gate that measures the shipped
 # DAE read ONE table rather than two that can drift apart.
@@ -829,7 +828,6 @@ def build_tread(materials) -> list:
     groove_angle = spec.LATERAL_GROOVE / spec.GROOVE_RADIUS
     for x0, x1, row_index in rows:
         phase = spec.ROW_PHASE[row_index]
-        shoulder = row_index == len(spec.TREAD_ROWS) - 1
         # Phase by a CONSTANT arc - the mean pitch - not by each pitch's own
         # span. Round 2 used the local span, so at every pitch-length change
         # the two neighbouring lugs shifted by different amounts and the
@@ -1121,18 +1119,24 @@ def add_ejector(mesh: Mesh, theta: float, x: float) -> None:
     radius = spec.STONE_EJECTOR_R
     rings = 4
     segments = 10
-    base = base_r(x)
-    apex = mesh.vertex(polar(x, base + radius * 0.95, theta))
+    apex = mesh.vertex(polar(x, base_r(x) + radius * 0.95, theta))
     previous = None
     for ring in range(rings, 0, -1):
         t = ring / rings
+        # The base ring (t == 1) sinks LUG_SEAT into the floor like every
+        # other open rim, and every ring samples base_r at ITS OWN x: one
+        # centre sample left outer-groove rims 4.5 mm proud on the crown
+        # arc, inside the gate's tolerance but outside the discipline.
+        sink = spec.LUG_SEAT if ring == rings else 0.0
         row = []
         for segment in range(segments):
             angle = TAU * segment / segments
             dx = math.cos(angle) * radius * t
             da = math.sin(angle) * radius * t / spec.GROOVE_RADIUS
             lift = radius * 0.95 * math.sqrt(max(0.0, 1.0 - t * t))
-            row.append(mesh.vertex(polar(x + dx, base + lift, theta + da)))
+            row.append(
+                mesh.vertex(polar(x + dx, base_r(x + dx) + lift - sink, theta + da))
+            )
         if previous is not None:
             for segment in range(segments):
                 nxt = (segment + 1) % segments
@@ -2053,8 +2057,6 @@ def build_cage() -> bk.CageBuilder:
         # the world hits them from the outside.
         for chain, sign in ((SIDEWALL_L, -1.0), (SIDEWALL_R, 1.0)):
             for index in range(len(chain) - 1):
-                radius_lo = section[[k for k, _, _ in section].index(chain[index])][2]
-                radius_hi = section[[k for k, _, _ in section].index(chain[index + 1])][2]
                 cage.add_quad_both(
                     [
                         ids[(chain[index], station)],
@@ -2086,13 +2088,13 @@ def build_cage() -> bk.CageBuilder:
     # nodes shipped without selfCollision, so the tire never pressed on its
     # own chocks - the straps did all the holding - and after release the
     # carcass rolled straight through the wedge meshes. Now each wedge is a
-    # free ~540 kg body: its nodes carry selfCollision so the carcass really
+    # free ~200 kg body: its nodes carry selfCollision so the carcass really
     # rests against the climb face, and its base corners are strapped to
     # buried fixed anchors in the SAME break group as the tie-downs. Every
     # beam that crosses between fixed and free carries that group, so cutting
-    # the release leaves a completely free 10.5 tonne body and four loose
-    # chocks it shoves out of the way - which is what release means in a
-    # yard. The pack gate checks the crossing rule exactly.
+    # the release leaves a completely free 4.2 tonne carcass and four loose
+    # chocks the winch drags out of the way - which is what release means in
+    # a yard. The pack gate checks the crossing rule exactly.
     # -----------------------------------------------------------------------
     chock_ids: dict[tuple[int, str], str] = {}
     anchor_ids: dict[tuple[int, str], str] = {}
@@ -2346,12 +2348,12 @@ ORIENTATION_RULES = (
     ("print_band", "away_from_centre_plane"),
 )
 
-# Objects with no radial or shell reference to test against: closed solids
-# built as loops (bolts, lift lugs, the bezel box section), flat plates whose
-# "outward" is their own local up (the gangway, the dock), and the extruded
-# type, whose back cap sits flush on a surface that is itself checked. Each is
-# listed on purpose; an object that is neither ruled nor exempt fails the
-# build rather than being waved through.
+# Objects with no radial or shell reference to test against. The mechanism
+# was built for the furniture era (bolts, lift lugs, the port bezel, the
+# gangway and dock plates - all deleted with the boarding concept); what
+# survives is the extruded type, whose back cap sits flush on a surface that
+# is itself checked. Each entry is listed on purpose; an object that is
+# neither ruled nor exempt fails the build rather than being waved through.
 ORIENTATION_EXEMPT = (
     "_letter_",
 )
@@ -2693,16 +2695,19 @@ def assert_furniture_is_seated(tire_objects) -> None:
     base_r(x), for sidewall furniture it is the outer half width at a radius.
     """
 
-    # PER CONNECTED COMPONENT, not per object: the wear bars weld into the
-    # ejectors object, and a per-object deepest-vertex check let ~72 seated
-    # ejectors and 12 seated inner bars vouch for 12 floating outer bars
-    # through two green rounds. Union-find over shared vertices splits each
-    # family object back into its shells, and every shell's own rim has to
-    # be inside its own local surface.
+    # PER CONNECTED COMPONENT, not per object - and round 7 caught the
+    # first cut of this claim being a comment rather than code: the helper
+    # existed with zero call sites while the sweep below it still keyed by
+    # object name, exactly the vouching pattern that let 12 floating outer
+    # wear bars ship through two green rounds inside the seated ejectors
+    # object. The semantic mirrors the shipped-DAE gate
+    # (test_every_open_tread_component_is_seated_in_its_local_floor): per
+    # component, the BOUNDARY RIM (edges used once) may sit at most
+    # LUG_SEAT/2 proud of its own local floor.
     floor = spec.LUG_SEAT * 0.5
 
-    def component_minima(obj, gap_of):
-        """Min gap per connected vertex component of one object."""
+    def component_rim_extremes(obj, gap_of):
+        """Max boundary-rim gap per connected component of one object."""
 
         parent: dict[int, int] = {}
 
@@ -2719,41 +2724,50 @@ def assert_furniture_is_seated(tire_objects) -> None:
             if ra != rb:
                 parent[ra] = rb
 
+        edge_count: dict[tuple[int, int], int] = {}
         for polygon in obj.data.polygons:
-            verts = polygon.vertices
+            verts = [int(v) for v in polygon.vertices]
             for index in range(1, len(verts)):
-                union(int(verts[0]), int(verts[index]))
-        minima: dict[int, float] = {}
+                union(verts[0], verts[index])
+            for index in range(len(verts)):
+                a, b = verts[index], verts[(index + 1) % len(verts)]
+                key = (min(a, b), max(a, b))
+                edge_count[key] = edge_count.get(key, 0) + 1
+        rim: set[int] = set()
+        for (a, b), count in edge_count.items():
+            if count == 1:
+                rim.update((a, b))
+        extremes: dict[int, float] = {}
         matrix = obj.matrix_world
-        for vert in obj.data.vertices:
-            root = find(vert.index)
-            if root not in parent and vert.index not in parent:
-                continue
-            gap = gap_of(matrix @ vert.co)
-            if root not in minima or gap < minima[root]:
-                minima[root] = gap
-        return minima
+        for index in rim:
+            root = find(index)
+            gap = gap_of(matrix @ obj.data.vertices[index].co)
+            if root not in extremes or gap > extremes[root]:
+                extremes[root] = gap
+        return extremes
 
-    tread_deepest = {}
+    worst_tread = None
     for obj in tire_objects:
         if not any(
             fragment in obj.name
             for fragment in ("_tread_lugs", "_tread_tiebars", "_tread_ejectors")
         ):
             continue
-        for vertex in obj.data.vertices:
-            point = obj.matrix_world @ vertex.co
+
+        def tread_gap(point):
             radius = math.hypot(point.y, R_O - point.z)
-            gap = radius - base_r(point.x)
-            if obj.name not in tread_deepest or gap < tread_deepest[obj.name]:
-                tread_deepest[obj.name] = gap
-    for name, gap in sorted(tread_deepest.items()):
-        if gap > -floor:
-            raise SystemExit(
-                f"{name}'s rim sits {gap * 1000:+.1f} mm against its groove floor, "
-                f"not the {floor * 1000:.0f} mm inside it a seated shell needs; it "
-                f"will show daylight at grazing angles"
-            )
+            return radius - base_r(point.x)
+
+        for root, gap in sorted(component_rim_extremes(obj, tread_gap).items()):
+            if worst_tread is None or gap > worst_tread[0]:
+                worst_tread = (gap, obj.name)
+            if gap > floor:
+                raise SystemExit(
+                    f"a component of {obj.name} has rim {gap * 1000:+.1f} mm "
+                    f"proud of its own local groove floor (limit "
+                    f"{floor * 1000:.0f} mm); it will show daylight at "
+                    f"grazing angles"
+                )
 
     letter_deepest = None
     for obj in tire_objects:
@@ -2773,8 +2787,9 @@ def assert_furniture_is_seated(tire_objects) -> None:
             f"shell needs"
         )
     print(
-        f"COLOSSUS seating: tread furniture {min(tread_deepest.values()) * 1000:.1f} mm "
-        f"into its floor, type {letter_deepest * 1000:.1f} mm into the flank"
+        f"COLOSSUS seating: worst tread rim {worst_tread[0] * 1000:+.1f} mm "
+        f"vs its local floor ({worst_tread[1]}), type "
+        f"{letter_deepest * 1000:.1f} mm into the flank"
     )
 
 
@@ -2812,6 +2827,22 @@ def assert_authored_claims(cage) -> None:
     assert len(spec.PITCH_SEQUENCE) == spec.TREAD_PITCHES, (
         f"PITCH_SEQUENCE has {len(spec.PITCH_SEQUENCE)} entries against an "
         f"authored TREAD_PITCHES of {spec.TREAD_PITCHES}"
+    )
+    # THE STAMP IS DERIVED, NOT DECORATED. Tread class is depth relative to
+    # the tire: E-4 deep tread runs ~2.0-2.6% of OD, E-3 regular ~1.3-1.7%.
+    # Round 5 restamped the sidewall E-3 against the mould's own 2.25% and
+    # the drift cost a review round; now the same print-vs-hardware law that
+    # covers the size code covers the service class.
+    depth_ratio = spec.TREAD_DEPTH / (2.0 * spec.OUTER_RADIUS)
+    if depth_ratio >= 0.020:
+        derived_class = "E-4"
+    elif depth_ratio >= 0.013:
+        derived_class = "E-3"
+    else:
+        derived_class = "E-2"
+    assert spec.SERVICE_CODE.startswith(derived_class), (
+        f"SERVICE_CODE {spec.SERVICE_CODE!r} disagrees with the moulded depth: "
+        f"{depth_ratio * 100:.2f}% of OD derives {derived_class}"
     )
     """Check the numbers spec.py argues from against what was actually built."""
 

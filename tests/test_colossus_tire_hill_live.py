@@ -113,12 +113,15 @@ LEVEL = "utah"
 #              calibrated slope quat - an earlier conjugation bug stood the
 #              tire side-on to the fall here, where it sat pocketed and this
 #              comment briefly claimed rough ground holds it), release sends
-#              it 38 of 40 m straight down the fall line at upright slip
-#              0.81, 254 degrees of rotation, and it finally lies over at
-#              ~38 m - which is how a runaway giant actually ends.
+#              it down the fall line - final committed run: 42 of 45 m
+#              downhill, 334 degrees of rotation at pre-tip slip 0.84,
+#              over at ~42 m - which is how a runaway giant actually ends.
 SPOTS = {
     "gentle": {"xy": (0.0, -600.0), "grade_band": (0.04, 0.09), "claim": "chocked"},
     # SPOT-SHOPPED TWICE, because the terrain is part of the experiment.
+    # ("moderate" is nominal 12.4 deg from the probe grid; the gate's own
+    # 30 m four-point measurement reads 13.07 deg at the spawn, and the
+    # measured figure is the one the claims are judged against.)
     # (450, -600), same grade, dished 0.175 m: the carcass settled leaning
     # 4.85 degrees and CARVED - spiralled into its lean and lay down by
     # 17 m, twice measured, which is what a leaning free tire does.

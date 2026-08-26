@@ -387,9 +387,11 @@ def test_every_open_tread_component_is_seated_in_its_local_floor(spec, collada):
     A component with no boundary edges is a closed solid (a glyph) and is
     judged by the volume gate instead; every OPEN component here must put
     its entire boundary rim within LUG_SEAT/2 of its local floor - the
-    same tolerance the generator's own seating assert uses, because a ring
-    whose floor was sampled at its centre legitimately rides ~1.6 mm of
-    crown curvature at its edges, and that is backed by its own dome.
+    same tolerance the generator's own seating assert uses. The margin is
+    real and measured from both ends: centre-sampled ejector rings rode
+    +1.6 mm (inner grooves) to +4.5 mm (outer, on the crown arc) before
+    round 7 seated them per-vertex, and the 12 floating wear bars this
+    gate was built to catch sat +47 mm.
     """
 
     import numpy as np
@@ -1024,11 +1026,12 @@ def test_shipped_mesh_uv_density_is_metric_per_material(spec, collada):
             ratios.append(uv_edge[keep] / world_edge[keep] * tile)
         if not any(len(chunk) for chunk in ratios):
             continue
-        # KEYED BY GEOMETRY TOO. Three materials - deck, hazard and
-        # steel_worn - appear in BOTH the carcass and the dock meshes, and a
-        # bare suffix key let the second silently overwrite the first: the
-        # gangway kerb measured 2.554 against a 0.55..1.8 band and this went
-        # green because the dock's copy of `hazard` landed at 1.255 after it.
+        # KEYED BY GEOMETRY TOO. In the furniture era three materials
+        # appeared in BOTH the carcass and the dock meshes, and a bare
+        # suffix key let the second silently overwrite the first (a kerb at
+        # 2.554 went green because the dock's copy landed at 1.255 after
+        # it). The dock is gone; hazard still spans the carcass and chock
+        # meshes today, so the composite key stays load-bearing.
         report[(geometry, suffix)] = float(np.median(np.concatenate(ratios)))
 
     assert report, "no textured streams found"

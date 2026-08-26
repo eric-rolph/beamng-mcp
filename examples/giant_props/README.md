@@ -152,8 +152,8 @@ tread cap, with steel cord cross-sections at their own per-band pitch),
 # release really frees it (the ram waits for the release EVENT, and the
 # winched wedges leave the ram line); that the coast is a roll and not a
 # slide; and that pushing the SUBJECT rolls the tire. Its first run found a bug
-# nothing headless could - the runaway detector measured 3D drift, and a 28 m
-# carcass settles 0.36 m onto its own contact patch, so it fired "the
+# nothing headless could - the runaway detector measured 3D drift, and the
+# round-2 10.5 t tune settled 0.36 m onto its own contact patch, so it fired "the
 # tie-downs have parted" before anyone boarded and suppressed the whole
 # boarding beat for the rest of the session.
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_giant_props_live.py
@@ -164,16 +164,18 @@ tread cap, with steel cord cross-sections at their own per-band pitch),
 # uncorrected it stood the tire side-on to the fall line), cut the ties, winch
 # the chocks clear the way the shipped release does, then touch nothing:
 #
-#   3.4 deg    CHOCKED. Patch-edge statics: gravity cannot start the carcass
-#              below tan(theta) ~ e/R ~ 0.14, so it creeps under a metre and
-#              stands. A chock that let the tire walk away would be scenery.
-#   13.1 deg   THE RUNAWAY DEMO. Cutting the ties is enough: it rolls off,
-#              26 m of displacement, whole-run slip 1.19, then carves into
-#              its lean and lies down - which is what dropped tires
-#              notoriously do. The gate deliberately does NOT assert the
-#              fall line or staying up; no free tire promises either.
-#   22.9 deg   IT THUNDERS: 38 of 40 m straight down the fall line, 254 deg
-#              of rotation at upright slip 0.81, over at ~38 m.
+# (numbers are the final committed run, serial 60)
+#   3.4 deg    PATCH STATICS HOLD IT. The release winches the chocks away,
+#              so nothing scripted restrains it: the transient walks it
+#              4.5 m downhill at rolling slip 1.21, then it stands. What it
+#              may not do is run or fall.
+#   13.1 deg   THE RUNAWAY DEMO (nominal 12.4, measured 13.07). Cutting the
+#              ties is enough: it rolls off ~29 m of displacement with real
+#              rotation, then carves into its ~6 deg settle lean and lies
+#              down - which is what dropped tires notoriously do. The gate
+#              deliberately does NOT assert the fall line or staying up.
+#   22.9 deg   IT THUNDERS: 42 of 45 m down the fall line, 334 deg of
+#              rotation at pre-tip slip 0.84, over at ~42 m.
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_colossus_tire_hill_live.py
 
 # ...and the HAMSTER gate, the mod's whole point: a car TELEPORTED into the
@@ -181,7 +183,9 @@ tread cap, with steel cord cross-sections at their own per-band pitch),
 # one - measured twice at identical coordinates) lands on the liner, arms the
 # machine by being in the approach zone, and after the shipped release cuts
 # the ties and winches the chocks clear, DRIVING INSIDE TURNS THE WHEEL:
-# 8.55 m of tire travel at hamster slip 0.984, car still inside. The mass is
+# a straight lap measured 93.75 m of tire travel at slip 0.994; the final
+# committed run steered a curved lap - path 32.1 m against arc 39.3 m,
+# rolling ratio 0.82 - car still inside throughout. The mass is
 # set by that inequality - breakaway needs m/(M+m) > e/(R sin phi), because
 # the tire's own contact patch is a built-in chock that statically reacts
 # ~(M+m)*g*e before the wheel has to roll. Measured at the 6 t tune: 115 kNm
@@ -195,9 +199,9 @@ tread cap, with steel cord cross-sections at their own per-band pitch),
 #   slip ratio 1.008   coasting freely, path length against R x d-theta.
 #                      It rolls without slipping (0.994 driven from inside,
 #                      0.997-1.02 across every clean-ground run).
-#   ripple 15 mm RMS   steady rolling, against a 30.2 mm facet sagitta on
-#                      the 48-station collision hull: the ~95 mm contact
-#                      patch swallows the polygon.
+#   ripple 7-15 mm RMS steady rolling by speed window, against a 30.2 mm
+#                      facet sagitta on the 48-station collision hull: the
+#                      ~95 mm contact patch swallows the polygon.
 #   Crr 0.023-0.031    free-coast deceleration over g, by speed window -
 #                      real-tire territory (1-2% hard ground, 5-8% soft).
 #                      It took three retunes to get here from 6.2%:
