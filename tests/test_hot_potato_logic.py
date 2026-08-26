@@ -10,9 +10,10 @@ This runs the REAL generated ``runtime.lua`` under lupa against stubbed engine
 globals. It cannot prove physics - no deformation, no particles, no lights are
 real here - but it proves the logic those things hang off:
 
-- driving through the gate starts a round and gives the potato to that car,
-- contact passes it to the nearest eligible car,
-- the previous carrier is immune for the cooldown, so it cannot bounce back,
+- driving onto the medallion picks the potato up (a POSITIONAL sweep, after a
+  Contains trigger shipped in v1 and never fired once in a real session),
+- a hard enough tap passes it, and a gentle brush does not,
+- a tag-back needs immunity, minimum hold AND a foot of real separation,
 - the fuse runs on the wall clock and detonates the CURRENT carrier,
 - detonation issues the vehicle-side break/crush/fire commands,
 - a carrier that despawns sends the potato home instead of picking a victim.
@@ -67,6 +68,11 @@ end
 function vecmt.__unm(a) return vec3(-a.x, -a.y, -a.z) end
 function vecmt:length() return math.sqrt(self.x^2 + self.y^2 + self.z^2) end
 function vecmt:dot(o) return self.x * o.x + self.y * o.y + self.z * o.z end
+function vecmt:cross(o)
+  return vec3(self.y * o.z - self.z * o.y,
+              self.z * o.x - self.x * o.z,
+              self.x * o.y - self.y * o.x)
+end
 function vecmt:normalize()
   local l = self:length()
   if l > 0 then self.x, self.y, self.z = self.x / l, self.y / l, self.z / l end
@@ -169,11 +175,15 @@ function vehmt:applyClusterVelocityScaleAdd(_node, _scale, x, y, z)
   S.velocities[#S.velocities + 1] = {id = self.id, x = x, y = y, z = z}
 end
 function vehmt:setPositionRotation() end
+function vehmt:getVelocity() return vec3(self.vel.x, self.vel.y, self.vel.z) end
+function vehmt:getDirectionVector() return vec3(0, 1, 0) end
+function vehmt:getDirectionVectorUp() return vec3(0, 0, 1) end
 
 function S.addVehicle(id, model, x, y, z, hx, hy, hz)
   local vehicle = setmetatable({
     id = id, model = model,
     pos = {x = x, y = y, z = z},
+    vel = {x = 0, y = 0, z = 0},
     half = {x = hx or 0.95, y = hy or 2.3, z = hz or 0.75},
   }, vehmt)
   S.vehicles[id] = vehicle
@@ -183,6 +193,11 @@ end
 function S.moveVehicle(id, x, y, z)
   local vehicle = S.vehicles[id]
   vehicle.pos.x, vehicle.pos.y, vehicle.pos.z = x, y, z
+end
+
+function S.setVelocity(id, x, y, z)
+  local vehicle = S.vehicles[id]
+  vehicle.vel.x, vehicle.vel.y, vehicle.vel.z = x, y, z
 end
 
 function S.removeVehicle(id) S.vehicles[id] = nil end
@@ -215,6 +230,14 @@ end
 function jsonEncode(value) return tostring(value) end
 core_vehicle_manager = {getVehicleData = function() return nil end}
 function loadJsonMaterialsFile() return true end
+S.sounds = {}
+Engine.Audio = {playOnce = function(_channel, event, opts)
+  S.sounds[#S.sounds + 1] = {event = event, pitch = opts and opts.pitch or 1}
+end}
+-- No settings file in the harness: options fall back to the shipped table.
+S.settings = nil
+function jsonReadFile() return S.settings end
+function jsonWriteFile(_path, payload) S.settings = payload return true end
 
 return S
 """
@@ -237,7 +260,7 @@ PROP_ID = 1
 
 
 def register_prop(state, module):
-    state.addVehicle(PROP_ID, "ericrolph_hot_potato", 0.0, 0.0, 0.0, 5.6, 7.0, 3.1)
+    state.addVehicle(PROP_ID, "ericrolph_hot_potato", 0.0, 0.0, 0.0, 15.0, 2.0, 15.6)
     module.registerProp(PROP_ID)
 
 
@@ -245,152 +268,361 @@ def tick(state, module, seconds=0.05, steps=1):
     for _ in range(steps):
         state.clockMs = state.clockMs + seconds * 1000.0
         module.onPreRender(seconds, seconds, seconds)
+    failures = [
+        entry.message
+        for entry in state.events.values()
+        if entry.level == "E" and "behavior_update_failed" in str(entry.message)
+    ]
+    assert not failures, f"behaviour raised during update: {failures[:2]}"
 
 
-def drive_through_gate(lua, state, module, vehicle_id):
-    """Deliver the Contains enter event the way the engine would."""
+def run_until(state, module, predicate, *, limit_seconds, seconds=0.2):
+    """Step until `predicate` holds, and FAIL rather than spin forever.
 
-    trigger_name = f"ericrolph_hot_potato_p{PROP_ID}_start_gate"
-    trigger = state.scene[trigger_name]
-    # A Python dict crosses as an opaque object; the runtime's first guard is
-    # `type(data) ~= "table"`, so the event has to be a real Lua table.
-    module.onBeamNGTrigger(lua.table_from({
-        "event": "enter",
-        "triggerID": trigger.id,
-        "triggerName": trigger_name,
-        "subjectID": vehicle_id,
-    }))
+    An unbounded `while True` turns a behaviour bug into a hung test run
+    instead of a message - which is exactly what a missing vec3:cross() in
+    these stubs did, once.
+    """
+
+    elapsed = 0.0
+    while elapsed < limit_seconds:
+        if predicate():
+            return elapsed
+        tick(state, module, seconds=seconds)
+        elapsed += seconds
+    raise AssertionError(
+        f"condition never held within {limit_seconds}s of simulated play"
+    )
 
 
-def test_registers_with_triggers_effects_and_the_potato(rig):
+def _carrier_of(module):
+    """The carrier id, read back through the runtime's own telemetry.
+
+    behavior.stats is the only generic channel getSystemState exposes, and -1
+    is the runtime's "nobody" (a nil field would vanish from the table).
+    """
+
+    stats = module.getSystemState(PROP_ID).behavior_stats
+    carrier = int(stats.carrier)
+    return None if carrier < 0 else carrier
+
+
+def _remaining(module):
+    return float(module.getSystemState(PROP_ID).behavior_stats.fuse_remaining)
+
+
+def start_round(state, module, vehicle_id, x=0.0, y=0.0):
+    """Drive onto the medallion; the idle sweep hands the potato over."""
+
+    state.moveVehicle(vehicle_id, x, y, 0.0)
+    tick(state, module)
+    return _carrier_of(module)
+
+
+def close_in(state, module, mover, target, speed_mps, gap=2.0, axis="x"):
+    """Put `mover` next to `target` and actually closing on it.
+
+    Stub vehicles face +Y, so `axis="x"` is a side-swipe and `axis="y"` is
+    nose-to-tail. Contact range differs by a factor of ~2.5 between them,
+    which is exactly what the support-radius model exists to express.
+    """
+
+    tpos = state.vehicles[target].pos
+    if axis == "y":
+        state.moveVehicle(mover, tpos.x, tpos.y + gap, tpos.z)
+        state.setVelocity(mover, 0.0, -speed_mps, 0.0)
+    else:
+        state.moveVehicle(mover, tpos.x + gap, tpos.y, tpos.z)
+        state.setVelocity(mover, -speed_mps, 0.0, 0.0)
+    state.setVelocity(target, 0.0, 0.0, 0.0)
+
+
+def test_registers_with_trigger_effects_and_the_potato(rig):
     _lua, state, module, _spec = rig
     register_prop(state, module)
     system = module.getSystemState(PROP_ID)
     assert system.registered is True
     assert system.part_count == 1
     assert system.trigger_count == 1
-    assert system.triggers.start_gate.mode == "Contains"
-    assert system.triggers.start_gate.test_type == "Bounding box"
+    assert system.triggers.pad.mode == "Overlaps"
     # Three declared particle emitters plus the three beacon light objects the
     # behaviour makes itself and parks in state.effects for teardown.
     assert system.effect_count == 6
 
 
-def test_gate_entry_starts_a_round(rig):
-    lua, state, module, _spec = rig
+def test_driving_onto_the_pad_picks_the_potato_up(rig):
+    """The v1 regression, pinned.
+
+    v1 gated pickup on a Contains BeamNGTrigger. The player's beamng.log
+    recorded prop_registered and then not one zone_enter across a whole
+    session of driving through it, so the potato just bobbed. A position test
+    cannot miss, and this asserts it without any trigger event at all.
+    """
+
+    _lua, state, module, _spec = rig
     register_prop(state, module)
-    state.addVehicle(2, "etk800", 0.0, 0.0, 0.0)
+    state.addVehicle(2, "etk800", 60.0, 60.0, 0.0)
     tick(state, module)
-    drive_through_gate(lua, state, module, 2)
-    tick(state, module)
+    assert _carrier_of(module) is None, "picked up from 85 m away"
+
+    assert start_round(state, module, 2) == 2
     assert module.getSystemState(PROP_ID).behavior_phase == "live"
     assert any("GOT IT" in message for message in state.messages.values())
 
 
-def test_contact_passes_the_potato_and_the_cooldown_stops_the_bounce_back(rig):
-    lua, state, module, spec = rig
+def test_a_hard_tap_passes_and_a_gentle_brush_does_not(rig):
+    _lua, state, module, spec = rig
     register_prop(state, module)
-    state.addVehicle(2, "etk800", 0.0, 0.0, 0.0)
-    state.addVehicle(3, "etk800", 60.0, 0.0, 0.0)
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 90.0, 0.0, 0.0)
     tick(state, module)
-    drive_through_gate(lua, state, module, 2)
-    # Everyone on the field at round start carries the join-immunity grace,
-    # so wait it out before testing the pass itself.
+    start_round(state, module, 2)
     tick(state, module, seconds=0.1,
          steps=int(spec.BEHAVIOR["join_immunity_seconds"] / 0.1) + 4)
 
-    # Well apart: no pass.
-    tick(state, module, steps=3)
-    assert _carrier_of(module) == 2
+    # Touching, but crawling: below the impact threshold nothing happens.
+    close_in(state, module, 3, 2, speed_mps=1.0)
+    tick(state, module, steps=4)
+    assert _carrier_of(module) == 2, "a fender brush should not transfer"
 
-    # Bumper to bumper: the pass lands on the next tick.
-    state.moveVehicle(3, 2.0, 0.0, 0.0)
+    # Same geometry, a real hit.
+    close_in(state, module, 3, 2,
+             speed_mps=spec.BEHAVIOR["impact_kmh"] / 3.6 + 2.0)
     tick(state, module)
     assert _carrier_of(module) == 3
     assert any("PASSED" in message for message in state.messages.values())
 
-    # Still touching. The immunity window on vehicle 2 is what has to stop the
-    # potato returning; without it this ping-pongs every single tick.
-    cooldown = spec.BEHAVIOR["cooldown_seconds"]
-    tick(state, module, seconds=0.05, steps=int(cooldown / 0.05) - 4)
-    assert _carrier_of(module) == 3, "potato bounced back inside the cooldown"
 
-    # Once the window expires it may legitimately come back.
-    tick(state, module, seconds=0.05, steps=12)
-    assert _carrier_of(module) == 2
+def test_a_rear_end_tap_at_real_car_spacing_registers(rig):
+    """The geometry the live gate caught and this harness had been missing.
 
+    Two etk800s bumper to bumper have their CENTRES about 4.7 m apart, because
+    each is ~4.8 m long. The first contact model used one averaged radius per
+    car - 1.68 m for an etk800 - so "contact" was 3.9 m and a rear-end tap
+    could never transfer the potato, while a side-swipe would fire early. Every
+    headless test passed anyway, because they all placed cars 2 m apart, which
+    is inside even the wrong range. This one uses real spacing, and it also
+    checks the other side: cars a clear two lengths apart must NOT transfer.
+    """
 
-def test_join_immunity_protects_a_car_that_just_appeared(rig):
-    lua, state, module, spec = rig
+    _lua, state, module, spec = rig
     register_prop(state, module)
-    state.addVehicle(2, "etk800", 0.0, 0.0, 0.0)
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 200.0, 0.0, 0.0)
     tick(state, module)
-    drive_through_gate(lua, state, module, 2)
-    tick(state, module)
+    start_round(state, module, 2)
+    tick(state, module, seconds=0.1,
+         steps=int(spec.BEHAVIOR["join_immunity_seconds"] / 0.1) + 4)
 
-    # Spawning right on top of the carrier must not be instant death.
-    state.addVehicle(3, "etk800", 1.5, 0.0, 0.0)
+    fast = spec.BEHAVIOR["impact_kmh"] / 3.6 + 2.0
+
+    # Two car lengths clear, nose to tail: no transfer, however fast.
+    close_in(state, module, 3, 2, speed_mps=fast, gap=11.0, axis="y")
+    tick(state, module, steps=4)
+    assert _carrier_of(module) == 2, "transferred from 11 m away"
+
+    # A side-swipe at rear-end spacing must also miss: 4.7 m apart abreast is
+    # two lanes of clear air, and the old averaged-radius model could not tell
+    # these two cases apart at all.
+    close_in(state, module, 3, 2, speed_mps=fast, gap=4.7, axis="x")
+    tick(state, module, steps=4)
+    assert _carrier_of(module) == 2, "transferred from 4.7 m abreast"
+
+    # Nose to tail with centres 4.7 m apart - two etk800s touching bumpers.
+    # This MUST register.
+    close_in(state, module, 3, 2, speed_mps=fast, gap=4.7, axis="y")
+    tick(state, module, steps=2)
+    assert _carrier_of(module) == 3, (
+        "a bumper-to-bumper rear-end tap did not transfer - contact range is "
+        "smaller than two cars parked touching"
+    )
+
+
+def test_tag_back_needs_immunity_hold_and_a_foot_of_separation(rig):
+    _lua, state, module, spec = rig
+    register_prop(state, module)
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 90.0, 0.0, 0.0)
     tick(state, module)
-    assert _carrier_of(module) == 2
-    tick(state, module, seconds=0.05,
-         steps=int(spec.BEHAVIOR["join_immunity_seconds"] / 0.05) + 4)
+    start_round(state, module, 2)
+    tick(state, module, seconds=0.1,
+         steps=int(spec.BEHAVIOR["join_immunity_seconds"] / 0.1) + 4)
+
+    fast = spec.BEHAVIOR["impact_kmh"] / 3.6 + 2.0
+    close_in(state, module, 3, 2, speed_mps=fast)
+    tick(state, module)
+    assert _carrier_of(module) == 3
+
+    # Locked together at speed for well past the immunity window. The
+    # separation latch is what has to hold it on 3.
+    for _ in range(80):
+        close_in(state, module, 2, 3, speed_mps=fast)
+        tick(state, module, seconds=0.1)
+        if _carrier_of(module) != 3:
+            break
+    assert _carrier_of(module) == 3, (
+        "potato tagged back while the pair never separated - the separation "
+        "latch is what stops a locked-bumper pair trading it forever"
+    )
+
+    # Part them by more than a foot beyond contact, then come back hard.
+    state.moveVehicle(2, 200.0, 0.0, 0.0)
+    state.setVelocity(2, 0.0, 0.0, 0.0)
+    tick(state, module, seconds=0.1,
+         steps=int(spec.BEHAVIOR["tagback_min_hold_seconds"] / 0.1) + 40)
+    close_in(state, module, 2, 3, speed_mps=fast)
+    tick(state, module, steps=3)
+    assert _carrier_of(module) == 2, "a properly separated tag-back was refused"
+
+
+def test_radius_mode_transfers_without_contact(rig):
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    assert module.hotPotatoSetOption("transfer_mode", "radius") is True
+    assert module.hotPotatoSetOption("radius_m", 10.0) is True
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 300.0, 0.0, 0.0)
+    tick(state, module)
+    start_round(state, module, 2)
+    tick(state, module, seconds=0.1, steps=30)
+
+    # Eight metres apart and stationary: no contact and no closing speed, but
+    # inside the bubble.
+    carrier = state.vehicles[_carrier_of(module)].pos
+    state.moveVehicle(3, carrier.x + 8.0, carrier.y, carrier.z)
+    tick(state, module, steps=2)
     assert _carrier_of(module) == 3
 
 
-def test_fuse_detonates_the_current_carrier(rig):
-    lua, state, module, spec = rig
+def test_mod_controls_clamp_and_reject(rig):
+    _lua, state, module, _spec = rig
     register_prop(state, module)
-    state.addVehicle(2, "etk800", 0.0, 0.0, 0.0)
-    state.addVehicle(3, "etk800", 80.0, 0.0, 0.0)
     tick(state, module)
-    drive_through_gate(lua, state, module, 2)
-    # Drop the prop's own registration acknowledgement so what is left is
-    # exactly what the detonation sent.
+    assert module.hotPotatoSetOption("radius_m", 1000.0) is True
+    assert module.hotPotatoGetOptions().radius_m == 60.0, "out-of-range not clamped"
+    assert module.hotPotatoSetOption("transfer_mode", "banana") is False
+    assert module.hotPotatoSetOption("not_an_option", 1) is False
+    assert module.hotPotatoSetOption("audio_enabled", False) is True
+    assert module.hotPotatoGetOptions().audio_enabled is False
+
+
+def test_fuse_is_gaussian_inside_its_clamp(rig):
+    """Every draw must land in [min, max], and they must not all be equal."""
+
+    _lua, state, module, spec = rig
+    register_prop(state, module)
+    tick(state, module)
+    draws = []
+    for _ in range(40):
+        state.addVehicle(2, "etk800", 0.0, 0.0, 0.0)
+        tick(state, module)
+        draws.append(_remaining(module))
+        state.removeVehicle(2)
+        module.onVehicleDestroyed(2)
+        tick(state, module)
+    low = spec.BEHAVIOR["fuse_min_seconds"] - 0.5
+    high = spec.BEHAVIOR["fuse_max_seconds"] + 0.5
+    assert all(low <= draw <= high for draw in draws), (
+        f"fuse escaped its clamp: {min(draws)}..{max(draws)}"
+    )
+    assert len(set(round(draw, 3) for draw in draws)) > 5, "fuse is not varying"
+
+
+def test_fuse_detonates_the_carrier_and_carrying_is_harmless(rig):
+    _lua, state, module, spec = rig
+    register_prop(state, module)
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 300.0, 0.0, 0.0)
+    tick(state, module)
+    start_round(state, module, 2)
     state.clear()
 
-    # The fuse is randomised per round, so watch for the transition rather
-    # than ticking a fixed count: a short draw plus a fixed count runs clean
-    # past the whole boom sequence and lands back in idle.
     elapsed = 0.0
     deadline = spec.BEHAVIOR["fuse_max_seconds"] + 5.0
     while elapsed < deadline and module.getSystemState(PROP_ID).behavior_phase != "boom":
         tick(state, module, seconds=0.2)
         elapsed += 0.2
+        if elapsed < spec.BEHAVIOR["fuse_min_seconds"] - 1.0:
+            # While merely carrying, the car must receive no vehicle-side
+            # command at all: no crush, no breakgroups, no fire.
+            assert not list(state.commands.values()), (
+                "a carrying vehicle was sent a Lua command before detonation"
+            )
     assert module.getSystemState(PROP_ID).behavior_phase == "boom"
     assert elapsed >= spec.BEHAVIOR["fuse_min_seconds"] - 0.5, "fuse fired early"
-    assert elapsed <= spec.BEHAVIOR["fuse_max_seconds"] + 0.5, "fuse overran"
 
-    commands = [entry for entry in state.commands.values()]
-    victims = {entry.id for entry in commands}
-    assert victims == {2}, "detonation hit the wrong vehicle"
+    commands = list(state.commands.values())
+    assert {entry.id for entry in commands} == {2}, "detonation hit the wrong vehicle"
     joined = " ".join(entry.command for entry in commands)
     assert "breakAllBreakgroups" in joined
     assert "applyForceVector" in joined
     assert "explodeVehicle" in joined
 
-    # The launch lands a tick behind the press.
     tick(state, module, seconds=0.2, steps=2)
     launches = [entry for entry in state.velocities.values() if entry.id == 2]
     assert launches, "carrier was never launched"
-    assert launches[0].z == pytest.approx(spec.BEHAVIOR["detonate_launch_mps"])
+
+
+def test_a_late_transfer_still_grants_the_hot_window(rig):
+    """Being tagged with a second left is a scare, not an execution."""
+
+    _lua, state, module, spec = rig
+    register_prop(state, module)
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 300.0, 0.0, 0.0)
+    tick(state, module)
+    start_round(state, module, 2)
+
+    run_until(state, module, lambda: _remaining(module) <= 1.0,
+              limit_seconds=spec.BEHAVIOR["fuse_max_seconds"] + 10.0)
+    close_in(state, module, 3, 2, speed_mps=spec.BEHAVIOR["impact_kmh"] / 3.6 + 2.0)
+    tick(state, module)
+    assert _carrier_of(module) == 3
+    remaining = _remaining(module)
+    assert remaining >= spec.BEHAVIOR["grace_seconds"] - 0.5, (
+        f"receiver got only {remaining:.2f}s, below the guaranteed hot window"
+    )
+
+
+def test_the_tick_accelerates_and_rises_in_pitch(rig):
+    """No numeric countdown: urgency rides the cue, so the cue must move."""
+
+    _lua, state, module, spec = rig
+    register_prop(state, module)
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    tick(state, module)
+    start_round(state, module, 2)
+
+    early, late = [], []
+    budget = spec.BEHAVIOR["fuse_max_seconds"] + 10.0
+    spent = 0.0
+    while spent < budget:
+        remaining = _remaining(module)
+        if remaining <= 0.5:
+            break
+        state.clear()
+        tick(state, module, seconds=0.2, steps=10)  # two wall seconds
+        spent += 2.0
+        beeps = [s for s in state.sounds.values() if "Beep" in s.event]
+        sample = (len(beeps), max((b.pitch for b in beeps), default=1.0))
+        if remaining > spec.BEHAVIOR["cue_window_seconds"] + 2.0:
+            early.append(sample)
+        elif remaining < 4.0:
+            late.append(sample)
+
+    assert early and late
+    assert late[0][0] > early[0][0], "the tick did not speed up"
+    assert late[0][1] > early[0][1] + 0.2, "the tick did not rise in pitch"
 
 
 def test_countdown_is_wall_clock_not_dtsim(rig):
-    """The fuse must agree with the player's own clock.
+    """dtSim is NOT wall seconds (measured ~3x fast); the fuse must not use it."""
 
-    dtSim inside a prop's behavior.update is NOT wall seconds (measured ~3x
-    fast), so a fuse accumulating dtSim would fire roughly three times early.
-    Feeding a dtSim three times larger than the wall step must not move the
-    detonation.
-    """
-
-    lua, state, module, spec = rig
+    _lua, state, module, spec = rig
     register_prop(state, module)
     state.addVehicle(2, "etk800", 0.0, 0.0, 0.0)
     tick(state, module)
-    drive_through_gate(lua, state, module, 2)
 
-    # 3x dtSim per 0.1 s of wall clock, run to just under the shortest fuse.
     elapsed = 0.0
     while elapsed < spec.BEHAVIOR["fuse_min_seconds"] - 1.0:
         state.clockMs = state.clockMs + 100.0
@@ -402,44 +634,28 @@ def test_countdown_is_wall_clock_not_dtsim(rig):
 
 
 def test_losing_the_carrier_sends_the_potato_home(rig):
-    lua, state, module, _spec = rig
+    _lua, state, module, _spec = rig
     register_prop(state, module)
-    state.addVehicle(2, "etk800", 0.0, 0.0, 0.0)
-    state.addVehicle(3, "etk800", 3.0, 0.0, 0.0)
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 300.0, 0.0, 0.0)
     tick(state, module)
-    drive_through_gate(lua, state, module, 2)
-    tick(state, module)
-    carrier = _carrier_of(module)
+    carrier = start_round(state, module, 2)
 
     state.removeVehicle(carrier)
     module.onVehicleDestroyed(carrier)
     tick(state, module)
     assert module.getSystemState(PROP_ID).behavior_phase == "idle"
-    # The survivor must NOT have silently inherited the potato.
+    # The survivor is 300 m away and must NOT have inherited the potato.
     assert _carrier_of(module) is None
 
 
 def test_teardown_removes_every_scene_object(rig):
-    lua, state, module, _spec = rig
+    _lua, state, module, _spec = rig
     register_prop(state, module)
     state.addVehicle(2, "etk800", 0.0, 0.0, 0.0)
-    tick(state, module)
-    drive_through_gate(lua, state, module, 2)
     tick(state, module)
     assert any(name.find("ericrolph_hot_potato_p1") == 0 for name in state.scene)
 
     module.onClientEndMission("/levels/gridmap_v2/main")
-    leftovers = [name for name in state.scene if name.find("ericrolph_hot_potato_p1") == 0]
+    leftovers = [n for n in state.scene if n.find("ericrolph_hot_potato_p1") == 0]
     assert not leftovers, f"scene objects survived mission end: {leftovers}"
-
-
-def _carrier_of(module):
-    """The carrier id, read back through the runtime's own telemetry.
-
-    behavior.stats is the only generic channel getSystemState exposes, and
-    -1 is the runtime's "nobody" (a nil field would vanish from the table).
-    """
-
-    stats = module.getSystemState(PROP_ID).behavior_stats
-    carrier = int(stats.carrier)
-    return None if carrier < 0 else carrier

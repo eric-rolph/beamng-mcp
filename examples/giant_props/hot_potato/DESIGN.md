@@ -1,12 +1,12 @@
 # Hot Potato — design blueprint
 
-Status: **built** (2026-08-14). `spec.py`, the Blender generator, the
-generated mod tree and the distribution ZIP all exist; the pack's static
-suite and a dedicated headless state-machine gate
-(`tests/test_hot_potato_logic.py`) pass. **Not yet play-tested in game** —
-the live gate on a sentinel-isolated profile is still outstanding, so every
-physics claim below (deformation, particles, lights) is designed-for, not
-proven. See §8 for what the live run has to cover.
+Status: **built and play-tested live** (2026-08-25). Static suite, a 14-case
+headless state-machine gate (`tests/test_hot_potato_logic.py`) and a live run
+on the sentinel-isolated profile all pass: pickup, transfer on a real impact,
+and detonation were each confirmed in game with screenshots.
+
+v2 replaced the structure and the pickup. What v1 shipped and why it failed is
+kept below, because the failure is the useful part.
 
 A carried explosive passes between vehicles on contact or proximity. When the
 fuse runs out, whoever is holding it gets wrecked. Last car intact wins.
@@ -326,3 +326,53 @@ pack's existing single-subject live tests will not catch a transfer bug.
   `map.objects[vehId].damage` is available GE-side (traffic respawns at ≥500,
   the game's own code calls >1000 notable and >5000 heavy) and is the obvious
   candidate.
+
+---
+
+## 10. What the live run changed (2026-08-25)
+
+The first build shipped and the potato just bobbed under the arch. The
+player's own `beamng.log` settled it in one read: `prop_registered`, then no
+`zone_enter` at all across 100 seconds of driving through the gate. The
+`Contains` trigger never fired once. Four things came out of the live work:
+
+- **Pickup is a positional sweep now, not a trigger.** The trigger survives as
+  telemetry and a secondary path; in the live run it fires ~30 ms *after* the
+  sweep has already handed the potato over.
+- **Contact range had to become directional.** The first model used one
+  averaged radius per car (1.68 m for an etk800), so two of them bumper to
+  bumper - centres 4.6 m apart - sat outside a 3.9 m "contact" range and a
+  rear-end tap could never transfer, while a side-swipe would fire early. It
+  is now the exact box support function along the separation axis: ~5.15 m
+  nose-to-tail, ~2.25 m abreast. Every headless test passed before this fix
+  because they all placed cars 2 m apart.
+- **The fuse only burns while the simulation runs.** It is still wall-clock
+  (dtSim is ~3x fast), but it accumulates a per-frame delta gated on
+  `dtSim > 0` and clamps any jump over 0.5 s. Found live: under a
+  paused-and-stepped session a 62 s fuse expired during 18 s of stepping.
+  A player who pauses should not lose the round.
+- **The tuber anchors on the body centre.** `getPosition()` is the ref node,
+  which sits forward of centre on most vehicles and left the potato
+  overhanging the windscreen; `getSpawnWorldOOBB():getCenter()` is the
+  geometric middle.
+
+Two things the screenshots caught that no assertion would have: the fuse
+emitter (`BNGP_waterfallsteam`) threw a 30 m column that read as a separate
+object hanging over the car - it is `BNGP_34` now - and the detonation is
+genuinely spectacular, which is not something a green gate can tell you.
+
+## 11. Mod controls
+
+Every gameplay number is a live option, clamped on the way in and persisted to
+`settings/ericrolph_hot_potato.json` in the user folder. There is no UI app
+yet; the surface is the GE extension, which the console drives directly:
+
+```
+extensions.ericrolph__hot__potato_runtime.hotPotatoSetOption("transfer_mode", "radius")
+extensions.ericrolph__hot__potato_runtime.hotPotatoSetOption("radius_m", 18)
+extensions.ericrolph__hot__potato_runtime.hotPotatoGetOptions()
+extensions.ericrolph__hot__potato_runtime.hotPotatoResetOptions()
+```
+
+A UI app would call the same three functions through `bngApi.engineLua`, which
+is why they are exported as hooks rather than buried in the behaviour.

@@ -29,29 +29,174 @@ MOD_ROOT = EXAMPLE_ROOT / "mod"
 VEHICLE_DIR = MOD_ROOT / "vehicles" / MOD_ID
 AUTHORING_ROOT = EXAMPLE_ROOT / "authoring"
 
-AHX = spec.APRON_HALF_X
-AHY = spec.APRON_HALF_Y
-ATZ = spec.APRON_TOP_Z
-POST_X = spec.POST_X
-POST_HALF = spec.POST_HALF
-POST_TOP_Z = spec.POST_TOP_Z
-HHX = spec.HEADER_HALF_X
-HHY = spec.HEADER_HALF_Y
-HZ0 = spec.HEADER_Z0
-HZ1 = spec.HEADER_Z1
+L = spec.ARCH_HALF_SPAN
+H = spec.ARCH_HEIGHT
+C = spec.ARCH_C
 HOME = spec.POTATO_HOME
 
-# The tuber's silhouette: a fixed bank of spherical ripples over the
-# ellipsoid, drawn once from a seeded RNG so the shape is identical on every
-# machine, forever.
+# --------------------------------------------------------------------------
+# The Gateway Arch
 #
+# The real thing is a WEIGHTED catenary with an equilateral-triangle cross
+# section tapering from 54 ft at the base to 17 ft at the top - the taper and
+# the triangle are what make it read as the Gateway Arch rather than as a
+# croquet hoop. Its published centroid curve is
+#     y = 693.8597 - 68.7672 * cosh(0.0100333 x)   (feet, |x| <= 299.2239)
+# which is the normalised form below with C = 0.0100333 * 299.2239 = 3.0023
+# and a height-to-half-span ratio of 2.089. Both live in spec.py so the cage
+# and the visual are sampled from one curve.
+# --------------------------------------------------------------------------
+
+
+def arch_height(x: float) -> float:
+    return H * (math.cosh(C) - math.cosh(C * x / L)) / (math.cosh(C) - 1.0)
+
+
+def arch_side(z: float) -> float:
+    """Triangle side length at height z: linear taper, base to apex."""
+
+    t = max(0.0, min(1.0, 1.0 - z / H))
+    return spec.ARCH_TOP_SIDE + (spec.ARCH_BASE_SIDE - spec.ARCH_TOP_SIDE) * t
+
+
+def arch_stations() -> list[dict]:
+    """Stations spaced by ARC LENGTH, each with a tangent and outward normal.
+
+    Equal steps in x bunch stations near the apex, where the curve is flat,
+    and stretch them down the legs where it is steep - backwards for both the
+    mesh and the cage. Resampling on arc length keeps the segments even all
+    the way round.
+    """
+
+    reach = L * spec.ARCH_FOOT_OVERRUN
+    fine = 2000
+    points = []
+    for index in range(fine + 1):
+        x = -reach + 2.0 * reach * index / fine
+        points.append(Vector((x, 0.0, arch_height(x))))
+    cumulative = [0.0]
+    for index in range(1, len(points)):
+        cumulative.append(cumulative[-1] + (points[index] - points[index - 1]).length)
+    total = cumulative[-1]
+
+    stations = []
+    count = spec.ARCH_STATIONS
+    cursor = 0
+    for index in range(count):
+        target = total * index / (count - 1)
+        while cursor < len(cumulative) - 2 and cumulative[cursor + 1] < target:
+            cursor += 1
+        span = cumulative[cursor + 1] - cumulative[cursor]
+        blend = 0.0 if span <= 0 else (target - cumulative[cursor]) / span
+        position = points[cursor].lerp(points[cursor + 1], blend)
+        tangent = (points[min(cursor + 2, fine)] - points[max(cursor - 1, 0)]).normalized()
+        # Outward normal in the arch plane: +Z at the apex and +X at the
+        # right foot. (-tz, 0, tx) satisfies both.
+        normal = Vector((-tangent.z, 0.0, tangent.x)).normalized()
+        stations.append({
+            "p": position,
+            "t": tangent,
+            "n": normal,
+            "s": target,
+            "side": arch_side(position.z),
+        })
+
+    # Sit the arch's lowest CORNER exactly on z = 0. BeamNG places a prop by
+    # base origin from its ref node, so the ref (the pad centre, z = 0) has to
+    # be the lowest node in the cage - and with the feet overrunning past the
+    # theoretical foot, the leg corners were dipping 0.5 m below it. Left
+    # alone the whole monument would spawn half a metre in the air.
+    lowest = min(
+        corner.z for station in stations for corner in arch_corners(station)
+    )
+    if lowest < 0.0:
+        for station in stations:
+            station["p"] = station["p"] + Vector((0.0, 0.0, -lowest))
+    return stations
+
+
+def arch_corners(station: dict) -> list[Vector]:
+    """The three cross-section corners: one vertex outward, flat face in."""
+
+    side = station["side"]
+    circum = side / math.sqrt(3.0)
+    inradius = side / (2.0 * math.sqrt(3.0))
+    position, normal = station["p"], station["n"]
+    binormal = Vector((0.0, 1.0, 0.0))
+    return [
+        position + normal * circum,
+        position - normal * inradius + binormal * (side * 0.5),
+        position - normal * inradius - binormal * (side * 0.5),
+    ]
+
+
+def build_arch(material) -> bpy.types.Object:
+    stations = arch_stations()
+    rings = [arch_corners(station) for station in stations]
+
+    vertices: list[tuple[float, float, float]] = []
+    faces: list[tuple[int, int, int, int]] = []
+    uvs: list[tuple[float, float]] = []
+    tile = spec.ARCH_UV_TILE
+
+    # Three separate strips with their own vertices: the arch's three ridges
+    # are crisp on the real structure, and duplicating along them buys hard
+    # edges for free instead of fighting the auto-smooth angle.
+    for corner in range(3):
+        nxt = (corner + 1) % 3
+        base = len(vertices)
+        for index, station in enumerate(stations):
+            ring = rings[index]
+            vertices.append(tuple(ring[corner]))
+            vertices.append(tuple(ring[nxt]))
+            uvs.append((0.0, station["s"] / tile))
+            uvs.append((station["side"] / tile, station["s"] / tile))
+        for index in range(len(stations) - 1):
+            a = base + index * 2
+            quad = (a, a + 1, a + 3, a + 2)
+            # Wind outward by construction, comparing the face normal against
+            # the direction from the section centre to the face centre.
+            # Deriving windings by hand is exactly how this pack shipped an
+            # invisible ramp and an invisible door leaf.
+            p0 = Vector(vertices[quad[0]])
+            p1 = Vector(vertices[quad[1]])
+            p2 = Vector(vertices[quad[2]])
+            centroid = (p0 + p1 + p2 + Vector(vertices[quad[3]])) / 4.0
+            middle = (stations[index]["p"] + stations[index + 1]["p"]) / 2.0
+            normal = (p1 - p0).cross(p2 - p0)
+            faces.append(quad if normal.dot(centroid - middle) > 0 else tuple(reversed(quad)))
+
+    mesh = bpy.data.meshes.new(f"{MOD_ID}_arch_mesh")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    layer = mesh.uv_layers.new(name="UVMap")
+    for polygon in mesh.polygons:
+        for loop_index in polygon.loop_indices:
+            layer.data[loop_index].uv = uvs[mesh.loops[loop_index].vertex_index]
+    obj = bpy.data.objects.new(f"{MOD_ID}_arch", mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    bk.assign_material(obj, material)
+
+    bpy.ops.object.select_all(action="DESELECT")
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    try:
+        bpy.ops.object.shade_auto_smooth(angle=math.radians(40.0))
+    except Exception:
+        bpy.ops.object.shade_smooth()
+    obj.select_set(False)
+    return obj
+
+
+# --------------------------------------------------------------------------
+# The potato
+# --------------------------------------------------------------------------
+
 # The frequency band is the whole thing. Each entry displaces by
 # sin(dot(direction, axis) * pi + phase), so |axis| IS the number of half
 # cycles across the sphere - and the first cut used |axis| up to 3.4 for the
 # lumps and 11 for the crinkle, which is not a potato, it is a rock: the
 # silhouette came out jagged and flat-topped, closer to a pitta than a tuber.
-# A real potato is smooth at every scale you can see from a car; its
-# character is a few broad swellings, not high-frequency noise.
 _SHAPE_RNG = random.Random(20260814)  # noqa: S311 - shape authoring, not crypto
 LUMPS = [
     (
@@ -65,8 +210,6 @@ LUMPS = [
     )
     for _ in range(6)
 ]
-# One octave up: the gentle undulation that keeps the surface from being a
-# clean arc anywhere, still well below the scale that reads as damage.
 CRINKLE = [
     (
         Vector((
@@ -89,38 +232,22 @@ POTATO_RINGS = 64
 
 
 def eye_directions() -> list[Vector]:
-    """Unit directions for the buds, on a golden-angle spiral.
-
-    Real eyes crowd toward the bud end and sit on a loose spiral, never on a
-    grid. The same distribution is used by the potato_skin texture family, so
-    the modelled dimples and the painted ones are the same idea at two
-    scales (they are deliberately NOT registered to each other - a UV-exact
-    match would need the texture to know the mesh's unwrap, and the eye is
-    read as a dimple with a dark centre either way).
-    """
+    """Unit directions for the buds, on a golden-angle spiral."""
 
     directions: list[Vector] = []
     for index in range(EYE_COUNT):
-        # Bias z toward the +X (bud) end rather than spreading evenly.
         t = (index + 0.5) / EYE_COUNT
-        z = 1.0 - 2.0 * (t ** 1.35)
+        z = 1.0 - 2.0 * (t**1.35)
         radius = math.sqrt(max(0.0, 1.0 - z * z))
         theta = index * 2.399963229728653
-        directions.append(Vector((
-            radius * math.cos(theta),
-            radius * math.sin(theta),
-            z,
-        )).normalized())
+        directions.append(
+            Vector((radius * math.cos(theta), radius * math.sin(theta), z)).normalized()
+        )
     return directions
 
 
 def sculpt_potato(obj: bpy.types.Object) -> None:
-    """Displace a unit sphere into a tuber, in place.
-
-    Everything is radial on the UNIT sphere and the triaxial scale is applied
-    afterwards, so lump amplitudes stay proportional to the tuber instead of
-    stretching with its long axis.
-    """
+    """Displace a unit sphere into a tuber, in place."""
 
     eyes = eye_directions()
     mesh = obj.data
@@ -132,37 +259,11 @@ def sculpt_potato(obj: bpy.types.Object) -> None:
         for axis, phase, amplitude in CRINKLE:
             radius += amplitude * math.sin(direction.dot(axis) * math.pi + phase)
         for eye in eyes:
-            # Angular distance to the bud, so the dimple stays round on the
-            # sphere rather than smearing near the poles.
             angle = math.acos(max(-1.0, min(1.0, direction.dot(eye))))
             radius -= EYE_DEPTH * math.exp(-((angle / EYE_SIGMA) ** 2))
-            # The brow ridge: the raised lip just outside the bowl is what
-            # separates a real eye from a drilled hole.
             brow = (angle - EYE_SIGMA * 1.45) / (EYE_SIGMA * 0.62)
-            radius += EYE_DEPTH * BROW_GAIN * math.exp(-(brow ** 2))
+            radius += EYE_DEPTH * BROW_GAIN * math.exp(-(brow**2))
         vertex.co = direction * radius
-
-
-def panel_uvs(obj: bpy.types.Object, half_x: float, half_z: float) -> None:
-    """Map a flat board's faces to the FULL 0..1 texture in x/z.
-
-    Blender's primitive cube unwraps its six faces into separate regions of
-    UV space, so a sign board left on default UVs shows a sliver of the map
-    rather than the artwork - the first render put "HOT POTATO" as a few blue
-    marks in the corner. bk.add_metric_box_uvs is no help here either: it is
-    deliberately metric and origin-relative, so a centred board would sample
-    -0.5..0.5 and split the lettering across the wrap seam.
-    """
-
-    mesh = obj.data
-    layer = mesh.uv_layers.get("UVMap") or mesh.uv_layers.new(name="UVMap")
-    for polygon in mesh.polygons:
-        for loop_index in polygon.loop_indices:
-            co = mesh.vertices[mesh.loops[loop_index].vertex_index].co
-            layer.data[loop_index].uv = (
-                0.5 + co.x / (2.0 * half_x),
-                0.5 + co.z / (2.0 * half_z),
-            )
 
 
 def build_materials() -> dict[str, object]:
@@ -170,131 +271,57 @@ def build_materials() -> dict[str, object]:
 
 
 def build_visual(materials) -> list:
-    concrete = materials[f"{MOD_ID}_concrete"]
-    steel = materials[f"{MOD_ID}_steel"]
-    red = materials[f"{MOD_ID}_paint_red"]
-    hazard = materials[f"{MOD_ID}_hazard"]
-    sign = materials[f"{MOD_ID}_sign"]
+    cream = materials[f"{MOD_ID}_arch_cream"]
+    stone = materials[f"{MOD_ID}_medallion_stone"]
+    bronze = materials[f"{MOD_ID}_bronze"]
 
-    objects = []
+    objects = [build_arch(cream)]
+
+    # The landing medallion: a low stone disc under the apex. It is the
+    # pickup pad, the visual "stand here", and the cage's ground datum.
     objects.append(
-        bk.add_box(
-            f"{MOD_ID}_apron",
-            (0.0, 0.0, ATZ / 2),
-            (2 * AHX, 2 * AHY, ATZ),
-            concrete,
-            bevel=0.0,
+        bk.add_cylinder(
+            f"{MOD_ID}_medallion",
+            (0.0, 0.0, spec.MEDALLION_TOP_Z / 2),
+            spec.MEDALLION_RADIUS,
+            spec.MEDALLION_TOP_Z,
+            stone,
+            vertices=64,
             metric_uv=(3.0, 3.0),
         )
     )
-    # Approach chevrons painted on the apron, pointing through the gate.
-    for index in range(4):
-        objects.append(
-            bk.add_box(
-                f"{MOD_ID}_apron_chevron_{index}",
-                (0.0, -5.6 + index * 1.5, ATZ + 0.004),
-                (5.4, 0.42, 0.008),
-                hazard,
-                bevel=0.0,
-                metric_uv=(1.2, 0.5),
-            )
+    objects.append(
+        bk.add_torus(
+            f"{MOD_ID}_medallion_ring",
+            (0.0, 0.0, spec.MEDALLION_TOP_Z),
+            spec.MEDALLION_RADIUS - 0.28,
+            0.055,
+            bronze,
+            major_segments=72,
+            minor_segments=8,
         )
-
-    for side, sx in (("w", -POST_X), ("e", POST_X)):
-        objects.append(
-            bk.add_box(
-                f"{MOD_ID}_post_{side}",
-                (sx, 0.0, POST_TOP_Z / 2),
-                (2 * POST_HALF, 2 * POST_HALF, POST_TOP_Z),
-                steel,
-                bevel=0.05,
-                metric_uv=(1.6, 1.6),
-            )
+    )
+    objects.append(
+        bk.add_torus(
+            f"{MOD_ID}_medallion_ring_inner",
+            (0.0, 0.0, spec.MEDALLION_TOP_Z),
+            spec.MEDALLION_RADIUS * 0.42,
+            0.04,
+            bronze,
+            major_segments=56,
+            minor_segments=8,
         )
-        # Hazard collar at bumper height, where a post actually gets hit.
-        objects.append(
-            bk.add_box(
-                f"{MOD_ID}_post_collar_{side}",
-                (sx, 0.0, 0.62),
-                (2 * POST_HALF + 0.06, 2 * POST_HALF + 0.06, 1.05),
-                hazard,
-                bevel=0.02,
-                metric_uv=(0.9, 0.9),
-            )
-        )
-        objects.append(
-            bk.add_box(
-                f"{MOD_ID}_post_base_{side}",
-                (sx, 0.0, 0.09),
-                (2 * POST_HALF + 0.44, 2 * POST_HALF + 0.44, 0.18),
-                steel,
-                bevel=0.03,
-                metric_uv=(1.2, 1.2),
-            )
-        )
-        # Beacon housing on the cap: dressing only. The beacon the player
-        # actually sees is a real light on the CARRIER, made at runtime.
+    )
+    for side, sx in (("w", -1.0), ("e", 1.0)):
         objects.append(
             bk.add_cylinder(
-                f"{MOD_ID}_post_lamp_{side}",
-                (sx, 0.0, POST_TOP_Z + 0.18),
-                0.24,
-                0.36,
-                red,
-                vertices=16,
-            )
-        )
-
-    objects.append(
-        bk.add_box(
-            f"{MOD_ID}_header",
-            (0.0, 0.0, (HZ0 + HZ1) / 2),
-            (2 * HHX, 2 * HHY, HZ1 - HZ0),
-            steel,
-            bevel=0.05,
-            metric_uv=(2.0, 2.0),
-        )
-    )
-    # 9.4 x 0.98 m board = 9.59:1, which is the aspect the marquee family
-    # draws its lettering at. A sign panel at any other aspect gets the text
-    # squashed, because the family stretches one strip into the square map.
-    sign_face = bk.add_box(
-        f"{MOD_ID}_sign_face",
-        (0.0, -HHY - 0.05, spec.SIGN_MID_Z),
-        (2 * spec.SIGN_HALF_X, 0.1, 2 * spec.SIGN_HALF_Z),
-        sign,
-        bevel=0.0,
-    )
-    panel_uvs(sign_face, spec.SIGN_HALF_X, spec.SIGN_HALF_Z)
-    objects.append(sign_face)
-    objects.append(
-        bk.add_box(
-            f"{MOD_ID}_sign_frame",
-            (0.0, -HHY - 0.03, spec.SIGN_MID_Z),
-            (2 * spec.SIGN_HALF_X + 0.16, 0.08, 2 * spec.SIGN_HALF_Z + 0.16),
-            red,
-            bevel=0.02,
-        )
-    )
-    # The release claw the potato hangs under at idle.
-    objects.append(
-        bk.add_box(
-            f"{MOD_ID}_claw_mount",
-            (0.0, 0.0, HZ0 - 0.16),
-            (0.7, 0.7, 0.32),
-            red,
-            bevel=0.04,
-        )
-    )
-    for index, angle in enumerate((0.0, math.pi / 2)):
-        objects.append(
-            bk.add_box(
-                f"{MOD_ID}_claw_arm_{index}",
-                (0.0, 0.0, HZ0 - 0.5),
-                (0.9, 0.12, 0.5),
-                steel,
-                bevel=0.03,
-                rotation=(0.0, 0.0, angle),
+                f"{MOD_ID}_foot_{side}",
+                (sx * L, 0.0, 0.10),
+                spec.ARCH_BASE_SIDE * 0.82,
+                0.20,
+                stone,
+                vertices=48,
+                metric_uv=(2.0, 2.0),
             )
         )
     return objects
@@ -311,17 +338,11 @@ def build_parts(materials) -> dict[str, dict[str, object]]:
         rings=POTATO_RINGS,
     )
     sculpt_potato(potato)
-    # Triaxial scale AFTER the radial sculpt, so lump amplitudes are
-    # proportional to the tuber rather than stretched along its long axis.
     potato.scale = (spec.POTATO_SEMI_X, spec.POTATO_SEMI_Y, spec.POTATO_SEMI_Z)
     bpy.ops.object.select_all(action="DESELECT")
     potato.select_set(True)
     bpy.context.view_layer.objects.active = potato
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-    # Re-assert smooth shading: the sculpt moved every vertex, and a faceted
-    # hero object is the one thing a 2048 skin map cannot rescue. The
-    # join-and-export path flattens Blender's smoothing marks anyway, so the
-    # real defence is the 96 x 64 segment count above.
     try:
         bpy.ops.object.shade_auto_smooth(angle=math.radians(60.0))
     except Exception:
@@ -332,72 +353,97 @@ def build_parts(materials) -> dict[str, dict[str, object]]:
 
 def build_cage() -> bk.CageBuilder:
     cage = bk.CageBuilder(MOD_ID)
-    apron = cage.add_box_lattice(
-        "apron",
-        (-AHX, -AHY, 0.0),
-        (AHX, AHY, ATZ),
-        subdivisions=(2, 4, 1),
+    stations = arch_stations()
+
+    medallion = cage.add_box_lattice(
+        "pad",
+        (-spec.PAD_HALF, -spec.PAD_HALF, 0.0),
+        (spec.PAD_HALF, spec.PAD_HALF, spec.MEDALLION_TOP_Z),
+        subdivisions=(2, 2, 1),
         fixed=True,
         collision=False,
         collision_faces=("top",),
         face_ground_models={"top": "asphalt"},
     )
-    posts = {}
-    for side, sx in (("w", -POST_X), ("e", POST_X)):
-        posts[side] = cage.add_box_lattice(
-            f"post_{side}",
-            (sx - POST_HALF, -POST_HALF, 0.0),
-            (sx + POST_HALF, POST_HALF, POST_TOP_Z),
-            subdivisions=(1, 1, 3),
+
+    pylons = {}
+    for side, sx in (("w", -1.0), ("e", 1.0)):
+        foot_x = sx * L
+        pylons[side] = cage.add_box_lattice(
+            f"pylon_{side}",
+            (foot_x - spec.PYLON_HALF, -spec.PYLON_HALF, 0.0),
+            (foot_x + spec.PYLON_HALF, spec.PYLON_HALF, spec.PYLON_TOP_Z),
+            subdivisions=(1, 1, 2),
             fixed=True,
             collision=False,
             collision_faces=("north", "south", "east", "west", "top"),
         )
-    header = cage.add_box_lattice(
-        "header",
-        (-HHX, -HHY, HZ0),
-        (HHX, HHY, HZ1),
-        subdivisions=(4, 1, 1),
-        fixed=True,
-        collision=False,
-    )
 
-    # One connected graph. Each post's four base corners tie to the apron
-    # edge beside it; each post cap ties to the header end above it. The
-    # apron is 2 x 4 cells (ix 0..2, iy 0..4) and the header 4 x 1 (ix 0..4).
-    for side, apron_ix in (("w", 0), ("e", 2)):
-        for corner_x in (0, 1):
-            for corner_y in (0, 1):
-                base = posts[side][(corner_x, corner_y, 0)]
-                for apron_iy in (1, 2, 3):
-                    cage.stitch(base, apron[(apron_ix, apron_iy, 0)])
-                    cage.stitch(base, apron[(apron_ix, apron_iy, 1)])
-    for side, header_ix in (("w", 0), ("e", 4)):
-        for corner_x in (0, 1):
-            for corner_y in (0, 1):
-                cap = posts[side][(corner_x, corner_y, 3)]
-                for header_iz in (0, 1):
-                    cage.stitch(cap, header[(header_ix, corner_y, header_iz)])
+    # Cage rings along the arch. The flexbody skins each visual vertex to a
+    # local triad of nearby cage nodes, so a 31 m visual over a cage that only
+    # covers the feet is how you get invisible bands: the spine has to follow
+    # the structure it carries.
+    ring_ids: list[list[str]] = []
+    for index in range(0, len(stations), spec.CAGE_RING_STRIDE):
+        station = stations[index]
+        corners = arch_corners(station)
+        ids = []
+        for corner_index, corner in enumerate(corners):
+            ids.append(
+                cage.add_node(
+                    f"arch_{index:03d}_{corner_index}",
+                    corner,
+                    fixed=True,
+                    collision=corner[2] < spec.ARCH_COLLIDE_MAX_Z,
+                    weight=90.0,
+                )
+            )
+        for first in range(3):
+            cage.add_beam(ids[first], ids[(first + 1) % 3])
+        ring_ids.append(ids)
+
+    for index in range(len(ring_ids) - 1):
+        lower, upper = ring_ids[index], ring_ids[index + 1]
+        for corner in range(3):
+            cage.add_beam(lower[corner], upper[corner])
+            cage.add_beam(lower[corner], upper[(corner + 1) % 3])
+        first_z = cage.nodes[cage.node_index[lower[0]]]["source_world_position"][2]
+        second_z = cage.nodes[cage.node_index[upper[0]]]["source_world_position"][2]
+        # Collision skin only where a car can actually reach it.
+        if max(first_z, second_z) < spec.ARCH_COLLIDE_MAX_Z:
+            for corner in range(3):
+                nxt = (corner + 1) % 3
+                cage.add_quad([lower[corner], lower[nxt], upper[nxt], upper[corner]])
+
+    # Tie the spine's ends into the pylons and the pylons to the pad, so the
+    # whole cage stays one connected graph.
+    for side, ring in (("w", ring_ids[0]), ("e", ring_ids[-1])):
+        for corner in range(3):
+            for ix in (0, 1):
+                for iy in (0, 1):
+                    cage.stitch(ring[corner], pylons[side][(ix, iy, 2)])
+    for side in ("w", "e"):
+        for ix in (0, 1):
+            for iy in (0, 1):
+                for pad_ix in (0, 1, 2):
+                    cage.stitch(pylons[side][(ix, iy, 0)], medallion[(pad_ix, 1, 0)])
 
     cage.set_refnodes_existing(
-        ref=apron[(1, 2, 0)],
-        back=apron[(1, 1, 0)],
-        left=apron[(0, 2, 0)],
-        up=apron[(1, 2, 1)],
+        ref=medallion[(1, 1, 0)],
+        back=medallion[(1, 0, 0)],
+        left=medallion[(0, 1, 0)],
+        up=medallion[(1, 1, 1)],
     )
-    # The envelope rides the POSTS, not the apron: set_spawn_envelope forces
-    # collision on its eight corners, and a collidable node on the driveable
-    # apron edge is the tyre-slicer class the pack has already paid for.
     cage.set_spawn_envelope(
         [
-            posts["w"][(0, 0, 0)],
-            posts["w"][(0, 1, 0)],
-            posts["w"][(0, 0, 3)],
-            posts["w"][(0, 1, 3)],
-            posts["e"][(1, 0, 0)],
-            posts["e"][(1, 1, 0)],
-            posts["e"][(1, 0, 3)],
-            posts["e"][(1, 1, 3)],
+            pylons["w"][(0, 0, 0)],
+            pylons["w"][(0, 1, 0)],
+            pylons["w"][(0, 0, 2)],
+            pylons["w"][(0, 1, 2)],
+            pylons["e"][(1, 0, 0)],
+            pylons["e"][(1, 1, 0)],
+            pylons["e"][(1, 0, 2)],
+            pylons["e"][(1, 1, 2)],
         ]
     )
     cage.auto_base_nodes()
@@ -445,10 +491,10 @@ def main() -> None:
     )
     bk.render_thumbnail(
         AUTHORING_ROOT / f"{MOD_ID}_thumbnail.jpg",
-        camera_location=(9.5, -16.0, 6.4),
-        look_at=(0.0, 0.0, 3.8),
+        camera_location=(34.0, -66.0, 24.0),
+        look_at=(0.0, 0.0, 13.5),
     )
-    print(f"HOT_POTATO generator complete: {len(parts)} parts")
+    print(f"HOT_POTATO generator complete: {len(parts)} parts, {len(cage.nodes)} nodes")
 
 
 if __name__ == "__main__":
