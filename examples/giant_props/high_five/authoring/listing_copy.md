@@ -70,8 +70,8 @@ draw for up to 3.2 seconds waiting for you, and it drops you as a target if
 you slow below 2.5 m/s of closing speed, because a machine that swings at
 someone who parked is a machine that looks stupid.
 
-Then the swing: 104 degrees through to 0, in 0.45 seconds, easing into the
-contact. Everything in the strike zone — 9.0 m across, 7.6 m deep, 3.9 m
+Then the swing: 104 degrees through to 0, in 0.28 seconds, accelerating all
+the way into the contact. Everything in the strike zone — 9.0 m across, 7.6 m deep, 3.9 m
 tall — leaves at 28 to 34 m/s, rolled fresh per car, before the console
 gets involved. Follow-through carries the arm on to +78 degrees, holds
 0.4 s, and then takes 2.1 s to swing home. 1.2 s of cooldown, and it is

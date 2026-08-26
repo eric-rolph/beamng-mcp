@@ -73,7 +73,40 @@ ZIP_BASENAME = "high_five_ericrolph.zip"
 
 # Nothing under assets/ is loaded by the game at runtime: the hand is
 # generated, not imported, so there is no hero GLB to ship.
-SHIP_ASSETS = ()
+# The slap thwack: synthesized from source by authoring/make_slap_audio.py
+# (deterministic, seeded), played through the pack's only proven-audible
+# path (obj:createSFXSource, the centrifuge mechanism).
+SHIP_ASSETS = ("sound/ericrolph_high_five_slap.ogg",)
+
+# Vehicle-side Lua: the one-shot slap sound. The loop profile is the only
+# proven-audible path, so the clip carries a 1.2 s silent tail and the GE
+# runtime queues the stop while the cursor is inside it -- the cut is never
+# heard and the wrap is never reached (the centrifuge's defuse, 2026-08-09).
+VEHICLE_LUA_EXTRA = f'''
+local slapSfxId = nil
+local SLAP_OGG = "vehicles/{MOD_ID}/sound/{MOD_ID}_slap.ogg"
+
+local function playSlap()
+  if slapSfxId == nil then
+    local ok, id = pcall(function()
+      return obj:createSFXSource(SLAP_OGG, "AudioDefaultLoop3D",
+        "high_five_slap", 0)
+    end)
+    slapSfxId = (ok and id) or nil
+    if slapSfxId then
+      pcall(function() obj:setVolumePitch(slapSfxId, 1.0, 1) end)
+    end
+  end
+  if slapSfxId then pcall(function() obj:playSFX(slapSfxId) end) end
+end
+
+local function stopSlap()
+  if slapSfxId then pcall(function() obj:stopSFX(slapSfxId) end) end
+end
+
+M.playSlap = playSlap
+M.stopSlap = stopSlap
+'''
 
 # ---------------------------------------------------------------------------
 # Hand anatomy — one scale factor, human millimetres beside every ratio
@@ -158,16 +191,28 @@ FINGER_SPLAY_DEG = {"index": 10.0, "middle": 0.0, "ring": -5.0, "little": -7.0}
 # accumulated flexion, which put the middle fingertip 2.07 m proud of a
 # palm only 0.91 m thick — a claw. These sum to 23-32 deg, which is a
 # gentle arc over 4 m of finger and still not a flat cartoon glove.
+# THIRD pass, and the direction of travel has been one way the whole
+# time: 43-60 deg (relaxed anatomy) read as a claw; 23-32 read as a hand
+# reaching for a doorknob the moment the alert twitch stacked on top of
+# it. The reference prop's fingers are DEAD STRAIGHT, packed together and
+# bound into one paddle by two elastic straps -- tension, not anatomy, is
+# the read a high five wants. 9-15 deg keeps just enough arc that the
+# paddle is not a plank; the straps (built into the hand part) do the
+# unifying the earlier splay tuning was trying to fake.
 FINGER_CURL_DEG = {
-    "index": (7.0, 10.0, 6.0),
-    "middle": (7.0, 11.0, 6.0),
-    "ring": (8.0, 12.0, 7.0),
-    "little": (10.0, 14.0, 8.0),
+    "index": (3.0, 4.0, 2.0),
+    "middle": (3.0, 4.0, 2.0),
+    "ring": (4.0, 5.0, 3.0),
+    "little": (5.0, 6.0, 4.0),
 }
-# Alert twitch: extra degrees added at every joint while the hand has
-# noticed you but has not committed. Scaled per finger so the ripple runs
+# Alert twitch: degrees of EXTENSION rippled through the joints while the
+# hand has noticed you but has not committed. Extension, not flexion: a
+# hand about to slap TENSES FLAT -- the fingers strain straighter, they do
+# not curl toward a grab. (Flexion twitch on top of the old 23-32 deg curl
+# hit 44-53 deg in the armed state: the hand a driver actually approached
+# read as reaching for a doorknob.) Scaled per finger so the ripple runs
 # little -> index like a real drum-roll.
-TWITCH_DEG = 7.0
+TWITCH_DEG = 4.0
 TWITCH_PHASE = {"little": 0.0, "ring": 0.7, "middle": 1.4, "index": 2.1}
 
 # Thumb: a two-phalanx ray off the trapezium, abducted out of the palm
@@ -403,7 +448,14 @@ RAM_BORE_R = 0.30          # the elbow ram that sets the forearm angle
 # axis (see the mass ledger under BEHAVIOR).
 CWT_R = -4.10              # negative radius = opposite the boom
 CWT_PLATES = 7
-CWT_PLATE = (2.45, 0.44, 1.55)   # (across, thick, tall) per plate
+# (across, thick, tall) per plate. Resized 2026-08-26 from
+# (2.45, 0.44, 1.55): a rescale had reached the plates but not the ledger,
+# and the shipped stack was 91.8 t = 4.8x overbalanced against the arm's
+# 78.9 t.m while the ledger sold 1.53x. These give 7 x 4.19 t = 29.4 t at
+# 4.10 m = 120 t.m = 1.52x, which is the number the paragraph always
+# claimed. The plate stack is the ledger's load-bearing wall; they move
+# together or the nameplate lies.
+CWT_PLATE = (1.68, 0.30, 1.06)
 CWT_Z = 9.30
 
 # Mast: a tapered black steel tower on a bolted flange, gusseted, with a
@@ -842,16 +894,25 @@ PALETTE = {
                 # worse than no claim because it reads as verified.
                 #
                 # B/G 0.89: the reference nails are a desaturated PINK.
-                "base": [0.215, 0.168, 0.150],
+                # ROSE PINK, airbrushed -- the film prop's tips are rounded pink
+                # spray, not grey-tan plates. Same linear luminance as the
+                # tan it replaces (0.1767, the value the shipped-map ratio
+                # gate holds at 1.05-1.30 x foam), so only the hue moves.
+                "base": [0.270, 0.1505, 0.161],
                 # Sampled off the reference frames: the real nails read
                 # PINK — blue above green, saturation about a third of the
                 # surrounding foam — and a near-neutral lunula was the other
                 # half of why they looked like plasters.
                 # PINK, per the reference frames: blue above green, and only
                 # a third the saturation of the surrounding foam.
-                "lunula": [0.250, 0.200, 0.210],
-                "striate": 0.75,
-                "rough": 0.52,
+                "lunula": [0.305, 0.180, 0.195],
+                # 0.22, down from 0.75. The striation grain at 0.75 read as woven
+                # tape at 1080p in-game -- fabric, not keratin. The film tips
+                # are smooth airbrushed spray; what little grain survives is
+                # under the gloss.
+                "striate": 0.22,
+                # Airbrushed lacquer over foam: glossier than skin.
+                "rough": 0.38,
                 # The colour the plate dissolves into at the lateral fold:
                 # the foam it sits in, not white.
                 "bed": [0.280, 0.185, 0.055],
@@ -861,7 +922,7 @@ PALETTE = {
             # gloss break, which is why the nails read as sticking plasters.
             "normal_strength": 8.0,
         },
-        "color": [0.215, 0.168, 0.150, 1.0],
+        "color": [0.270, 0.1505, 0.161, 1.0],
         # A cast prop's nails are chalky matte pink with no highlight at
         # all. At roughness 0.24 and metallic 0.05 they were the ONLY
         # specular surface on a prop where everything else is 0.78, so they
@@ -1134,8 +1195,8 @@ PALETTE = {
                     [0.5, 0.665, "SALUTATION MACHINERY", 0.8],
                     [0.5, 0.530, "MODEL HF-5   SER. 0041", 0.75],
                     [0.5, 0.395, "6600 V  3 PH  60 CY", 0.75],
-                    [0.5, 0.260, "630 A   8540 H.P.", 0.75],
-                    [0.5, 0.110, "PAT. PEND.   MADE IN U.S.A.", 0.58],
+                    [0.5, 0.260, "990 A   13300 H.P.", 0.75],
+                    [0.5, 0.110, "DUTY S5 6 OPS/MIN   PAT. PEND.   U.S.A.", 0.52],
                 ],
                 "rules": [[0.775, 0.30, 0.014]],
             },
@@ -1230,11 +1291,20 @@ TRIGGERS = {
 }
 
 EFFECTS = {
-    # Tyre smoke off the road where the palm lands.
+    # Impact burst AT the strike interface, thrown down-road -- not fog on
+    # the tarmac. The old single node sat at the pad surface and stayed on
+    # for the whole follow+hold (1.3 s): a beige dome squatting on the
+    # stencil through every after-shot of the mod. Two nodes now bracket
+    # the contact height and the swing turns them off 0.3 s after the hit.
     "slap_dust": {
         "emitter": "BNGP_2",
-        "position": [0.0, 0.0, 0.45],
-        "direction": [0.0, 0.0, 1.0],
+        "position": [0.0, 0.4, 1.5],
+        "direction": [0.0, 0.65, 0.76],
+    },
+    "slap_dust2": {
+        "emitter": "BNGP_2",
+        "position": [0.6, -0.4, 0.9],
+        "direction": [0.2, 0.55, 0.81],
     },
     # Steam off the slew gearbox after a swing — the drive dumping heat.
     "slew_steam": {
@@ -1247,42 +1317,71 @@ EFFECTS = {
 # ---------------------------------------------------------------------------
 # Behaviour
 # ---------------------------------------------------------------------------
-# Power ledger behind the 2850 H.P. nameplate, derived from the numbers in
-# this file rather than invented:
+# Power ledger behind the 13300 H.P. nameplate, derived from the numbers
+# in this file rather than invented. A reviewer's recompute (2026-08-26)
+# caught THREE figures here that did not reproduce -- the swung inertia
+# had forgotten the counterweight it swings, the cwt paragraph was a full
+# rescale stale (its shipped mass was 4.8x the balance its own text
+# claimed), and the 2300 V "ceiling" argument used a current that was
+# arithmetic fiction. Everything below re-derives, and the cwt GEOMETRY
+# was resized to make the balance paragraph true rather than the
+# paragraph bent to excuse the geometry.
 #
-#   hand      8.6 m of foam latex over a steel spine, ~4.1 t
-#   arm       6.66 m upper + 6.54 m forearm + collar, ~13.8 t, c.g. at 5.6 m
-#   swung     I about the slew axis = hand 4.1 t at 11.9 m (5.81e5)
-#             + arm 13.8 t as a rod to 9.6 m (4.24e5) = 1.005e6 kg m^2
-#             (the earlier 6.74e5 was computed against the 6.9 m boom this
-#             machine had before the rescale, and every figure below it was
-#             wrong by the same factor — the one block in this file that had
-#             stopped descending from the shipped geometry)
-#   cwt       7 plates x 1.85 x 0.34 x 1.15 m of steel = 7 x 5.68 t
-#             = 39.8 t at 3.05 m, first moment 121 t.m against the arm's
-#             hand 42.2 + boom 36.7 = 78.9 t.m — deliberately OVER-balanced,
-#             because the reference stand is chain-guyed and a real slew
-#             bearing prefers its overturning moment on the machine side
+#   hand      8.6 m of foam latex over a steel spine, ~4.1 t. As a rod
+#             from 9.6 to 18.2 m (not a point mass at 11.9, which
+#             understated its own spread): I = m(r1^2+r1r2+r2^2)/3
+#             = 8.18e5 kg m^2
+#   arm       6.66 m upper + 6.54 m forearm + collar, ~13.8 t, c.g. at
+#             5.6 m: 4.24e5
+#   cwt       7 plates x 1.68 x 0.30 x 1.06 m of steel = 7 x 4.19 t
+#             = 29.4 t at 4.10 m, first moment 120 t.m against the arm's
+#             hand 42.2 + boom 36.7 = 78.9 t.m — deliberately OVER-balanced
+#             at 1.52x, because the reference stand is chain-guyed and a
+#             real slew bearing prefers its overturning moment on the
+#             machine side. (The plates measured 2.45 x 0.44 x 1.55 for
+#             one round: a rescale reached them but not this paragraph,
+#             and the stack was 4.8x overbalanced while the text said
+#             1.53x. The geometry moved to meet the text.)
+#   swung     I = 8.18e5 + 4.24e5 + cwt (29.4e3 x 4.10^2 + spread 2.1e4
+#             = 5.14e5) = 1.756e6 kg m^2 — the cwt SLEWS WITH THE ARM,
+#             which is the whole point of a counterweight, and the one
+#             component the previous total forgot
 #   stroke    -104 -> 0 deg in slap_seconds on a t^slap_ease pose, so
 #             omega peaks at ease*dtheta/T = 1.5*1.8151/0.28 = 9.72 rad/s,
-#             a 177 m/s fingertip and 115 m/s at the palm centre
-#   energy    arm 0.5*1.005e6*9.72^2 = 47.5 MJ, plus 1.4 MJ into a 1.6 t
-#             car at the default power setting = 48.9 MJ per slap
-#   PEAK      48.9 MJ / 0.28 s = 175 MW — which is exactly why a machine
-#             like this stores and dumps rather than drawing live, so the
-#             peak is NOT what goes on the plate
-#   LINE      the plate rates a DUTY CYCLE. 48.9 MJ every 9.03 s is
-#             5.41 MW mechanical, 6.37 MW electrical at 85% drive
-#             efficiency = 8540 H.P. That power class OUTGROWS the old
-#             2300 V bus -- 6.37 MW at 2300 V pf 0.88 is 2320 A, past the
-#             ~2000 A ceiling of standard 2300 V gear -- so the machine is
-#             re-rated onto the 6600 V class real drives of this size use:
-#             6.37e6 / (1.732 * 6600 * 0.88) = 633 A, plated 630 A.
-#             9.03 s is the machine's own shortest cycle (0.45 alert +
-#             0.85 windup + 0.28 slap + 0.55 follow + 0.40 hold + 2.10
-#             return + 1.20 cooldown, plus the 3.2 s blind hold on a whiff).
-#             The rig is rated for exactly what it can physically do
-#             back-to-back, which is what a nameplate means.
+#             a 177 m/s fingertip and 115 m/s at the palm centre.
+#             NOT "a real slap at scale": Froude time scaling at 44.1x is
+#             sqrt(44.1) = 6.64, which maps a 0.10-0.15 s human strike to
+#             0.66-1.0 s; 0.28 s back-translates to a 42 ms human stroke,
+#             beyond any recorded human motion, and the fingertip runs
+#             Mach 0.52. The argument for it is FILM GRAMMAR (the strike
+#             is subliminal violence between a staged draw and a held
+#             follow-through -- see the slap block below), and the ledger
+#             claims the physics it has, not the realism it does not.
+#   power     theta ~ t^1.5 is the CONSTANT-POWER trajectory: P = I a w
+#             = 1.125 I dtheta^2 / T^3 = 296 MW, flat across the whole
+#             stroke -- precisely what an ideal flywheel dumping through a
+#             power-limited drive does. (Torque diverges as t^-0.5 at the
+#             first instant; a real drive torque-limits the first degree.)
+#             The ease exponent was chosen for feel and turned out to be
+#             the machine's most literal piece of engineering.
+#   energy    arm 0.5 * 1.756e6 * 9.7237^2 = 83.0 MJ, plus 1.4 MJ into a
+#             1.6 t car at the default power setting = 84.4 MJ per slap
+#   contact   the 0.12 s injection dwell is defensible twice over: it is
+#             the Froude-scaled human slap contact (10-30 ms x 6.64 =
+#             66-200 ms) AND the kinematic window before the 59 m/s
+#             follow-through palm falls behind the launched car.
+#   LINE      the plate rates a DUTY, and the duty is PRINTED ON IT --
+#             "S5 6 OPS/MIN" -- because "shortest possible cycle" was
+#             false twice over (the corridor cycle is 5.83 s with no
+#             hold and the pad path cycles in 4.53 s, and pairing the
+#             slap's energy with the whiff's period was incoherent).
+#             At 6 slaps/min: 84.4 MJ / 10 s = 8.44 MW mechanical,
+#             9.93 MW electrical at 85% drive efficiency = 13,300 H.P.
+#             That genuinely outgrows a 2300 V bus (9.93e6 / (1.732 x
+#             2300 x 0.88) = 2,830 A against ~2,000 A gear), so 6600 V:
+#             9.93e6 / (1.732 * 6600 * 0.88) = 987 A, plated 990 A.
+#             (The previous revision plated 630 A off a 2,320 A figure
+#             that reproduced from no equation in the file.)
 #
 #             THE THREE LINES ABOVE ARE THE ONES THAT GO STALE. They were
 #             computed against a 0.30 s QUADRATIC swing and survived the
@@ -1364,7 +1463,28 @@ BEHAVIOR = {
     # spins less than a full corridor windup, for free.
     "slap_contact_seconds": 0.12,
     "slap_spin_transfer": 0.35,
+    # NOTE: the maximum reachable spin is 0.35 * 9.7237 * 2.6 = 8.85, so
+    # this cap binds at NO console setting today -- it guards future edits
+    # to transfer/ease/timing, not the shipped ladder.
     "slap_spin_cap_rps": 9.0,
+    # THE RELEASE FIRES EARLY BY THIS MUCH. Measured live (frames3 track,
+    # 2026-08-26): the palm arrived with the car centre 2.9 m PAST the
+    # strike plane at 26.5 m/s -- 0.11 s late, three-quarters of the slap
+    # zone's depth consumed. The 60 Hz headless stub cannot reproduce it
+    # (its quantization ceiling is ~0.9 m), so it is live-loop cadence:
+    # trigger-entry latency plus update sampling. The stub gate stays
+    # honest either way because the bias only re-centres the error band.
+    "release_bias_seconds": 0.10,
+    # The pad path swings from REST, so its palm arrives at 72/104 of the
+    # windup swing's speed -- and the LAUNCH scales the same way, because
+    # one physical model covers speed and spin or it covers neither.
+    # (The spin already did this via swingFrom; the speed draw did not,
+    # which a reviewer read as the model applied by halves.)
+    "pad_alert_seconds": 0.5,
+    # Flight scoreboard: the machine watches what it launched and reports.
+    "score_settle_mps": 1.5,
+    "score_settle_seconds": 0.8,
+    "score_timeout_seconds": 12.0,
     # The palm held out down-road after the car it just launched. It is what
     # a person does after a high five, and it is the frame the clip gets cut
     # on.
@@ -1491,6 +1611,8 @@ local REQUIRED = {
   "cooldown_seconds", "slap_speed_min_mps", "slap_speed_max_mps",
   "slap_ease", "follow_hold_seconds",
   "slap_contact_seconds", "slap_spin_transfer", "slap_spin_cap_rps",
+  "release_bias_seconds", "pad_alert_seconds",
+  "score_settle_mps", "score_settle_seconds", "score_timeout_seconds",
   "twitch_deg", "twitch_rate",
   "power_levels", "power_multiplier_max", "tilt_levels", "tilt_step_deg",
   "default_power_level", "default_tilt_index", "camera_distance",
@@ -1624,12 +1746,14 @@ local function poseDigits(state, azimuthDeg, tiltDeg, twitchDeg, clock)
   for _, name in ipairs(DIGITS) do
     local axis = DIGIT_AXES[name]
     local pivot = DIGIT_PIVOTS[name]
-    -- abs(sin) keeps the twitch strictly ADDITIVE to the authored curl: a
-    -- signed wobble would extend the finger past straight on half of every
-    -- cycle, which no relaxed hand does.
+    -- abs(sin), SUBTRACTED: the twitch is EXTENSION. A hand about to
+    -- slap tenses flat -- the fingers strain straighter than their
+    -- authored rest arc, they do not curl toward a grab. (Flexion twitch
+    -- was the old read, and stacked on the old 23-32 deg curls it put the
+    -- armed hand at 44-53 deg: a doorknob reach, the opposite of a five.)
     local flexDeg = 0
     if twitchDeg > 0 then
-      flexDeg = math.abs(
+      flexDeg = -math.abs(
         math.sin(clock * B.twitch_rate + (TWITCH_PHASE[name] or 0))) * twitchDeg
     end
     -- Position: the pivot is carried by the hand's roll and then the arm's
@@ -1744,6 +1868,11 @@ end
 local function slapStrikeZone(state)
   local mult = powerMult(state)
   local tilt = math.rad(tiltDegrees(state))
+  -- ONE physical model covers speed and spin, or it covers neither: the
+  -- palm from REST arrives at 72/104 of the windup swing's speed, so the
+  -- launch scales exactly as the spin already did via swingFrom.
+  local fromRadShared = math.rad(math.abs(state.behavior.swingFrom or WINDUP_DEG))
+  local reachScale = fromRadShared / math.rad(math.abs(WINDUP_DEG))
   -- The palm normal at contact: the sweep tangent, rolled up by TILT about
   -- the forearm axis. At CONTACT_DEG the tangent is authored +y exactly, so
   -- the rolled normal is (0, cos tilt, sin tilt) and the launch elevation IS
@@ -1755,20 +1884,26 @@ local function slapStrikeZone(state)
     local vehicle = exactVehicle(vehicleId)
     if vehicle then
       local speed = (B.slap_speed_min_mps
-        + math.random() * (B.slap_speed_max_mps - B.slap_speed_min_mps)) * mult
+        + math.random() * (B.slap_speed_max_mps - B.slap_speed_min_mps))
+        * mult * reachScale
       if launchSubject(state, vehicle, direction * speed) then
         -- THE TUMBLE. See the slap_spin_* tunables for the model. The spin
         -- goes through the vehicle's OWN physics (thrusters.applyAccel ->
         -- obj:applyClusterLinearAngularAccel) over the contact dwell, so
         -- what happens after the palm leaves is the engine's honest
         -- integration, not an animation.
-        local fromRad = math.rad(math.abs(state.behavior.swingFrom or WINDUP_DEG))
-        local armRate = B.slap_ease * fromRad / B.slap_seconds
+        local armRate = B.slap_ease * fromRadShared / B.slap_seconds
         local spin = math.min(
           B.slap_spin_cap_rps, B.slap_spin_transfer * armRate * mult)
-        -- r: palm centre relative to the struck car's CoM, authored frame.
-        -- The palm arrives from the mast side (-x) with its centre near
-        -- 2 m on an 8.6 m hand against a car CoM near 0.6 m.
+        -- r: the EFFECTIVE CONTACT CENTROID relative to the struck car's
+        -- CoM, authored frame. Not derived -- bounded: the palm plane
+        -- centre sits ~1.8 m above a pickup's CoM, the car-face contact
+        -- centroid ~0.5 m, and 1.30 is the authored point between them
+        -- (foam wraps the roofline, so the pressure centre rides high).
+        -- The engine then redistributes whatever is injected: measured
+        -- live, torque-free precession amplifies the tumble 30-90% toward
+        -- the car's low-inertia roll axis (Dzhanibekov), inside the
+        -- energy bound sqrt(2E/I_roll). The injected number is the SEED.
         local r = vec3(-0.8, 0, 1.30)
         local d = vec3(0, math.cos(tilt), math.sin(tilt))
         local axis = vec3(
@@ -1790,7 +1925,10 @@ local function slapStrikeZone(state)
         emitEvent(state, "I", "high_five_slapped", {
           subject_id = vehicleId,
           slap_speed_mps = speed,
-          spin_rps = math.floor(spin * 100) / 100,
+          -- INJECTED, not final: the engine's rigid-body redistribution
+          -- runs it up 30-90% after the palm leaves. The scoreboard
+          -- measures the real thing; this field seeds it.
+          spin_injected_rps = math.floor(spin * 100) / 100,
           power_mult = math.floor(mult * 100) / 100,
           tilt_deg = tiltDegrees(state),
         })
@@ -1799,7 +1937,43 @@ local function slapStrikeZone(state)
   end
   if slapped > 0 then
     setEffectActive(state, "slap_dust", true)
+    setEffectActive(state, "slap_dust2", true)
     setEffectActive(state, "slew_steam", true)
+    -- The thwack, on the prop's own vehicle VM, with the stop parked in
+    -- the clip's silent tail (see VEHICLE_LUA_EXTRA).
+    pcall(function()
+      local propObj = be:getObjectByID(state.propId)
+      if propObj then
+        propObj:queueLuaCommand(string.format(
+          "if extensions.%s_vehicle and extensions.%s_vehicle.playSlap"
+          .. " then extensions.%s_vehicle.playSlap() end",
+          PROP_MODEL, PROP_MODEL, PROP_MODEL))
+      end
+    end)
+    state.behavior.slapSfxOffAt = state.behavior.clock + 1.4
+    -- THE SCOREBOARD ARMS. The machine launched something; now it watches
+    -- where it lands, because a 200 m tumbling flight that nobody
+    -- measures reads as a glitch and one that gets a number reads as a
+    -- score. Primary subject only -- the one it was aiming at, or the
+    -- first thing it hit.
+    local watchId = state.behavior.aimedAt
+    if not watchId then
+      for vehicleId in pairs(zoneOccupants(state, "slap_zone")) do
+        watchId = vehicleId
+        break
+      end
+    end
+    local watched = watchId and exactVehicle(watchId) or nil
+    if watched then
+      local origin = watched:getPosition()
+      local up = watched:getDirectionVectorUp()
+      state.behavior.watch = {
+        id = watchId,
+        x = origin.x, y = origin.y,
+        lastUpX = up.x, lastUpY = up.y, lastUpZ = up.z,
+        rolled = 0, settled = 0, elapsed = 0,
+      }
+    end
     -- Thresholded on the LADDER, not on the multiplier:
     -- power_multiplier_max came down 5.0 -> 2.6 and left this gated at
     -- >= 4.0, so maxing the console gave the same line as leaving it alone.
@@ -1952,6 +2126,83 @@ behavior.update = function(state, dtSim)
   b.elapsed = b.elapsed + dtSim
   local tilt = tiltDegrees(state)
 
+  -- The slap sound's queued stop, parked in the clip's silent tail.
+  if b.slapSfxOffAt and b.clock >= b.slapSfxOffAt then
+    b.slapSfxOffAt = nil
+    pcall(function()
+      local propObj = be:getObjectByID(state.propId)
+      if propObj then
+        propObj:queueLuaCommand(string.format(
+          "if extensions.%s_vehicle and extensions.%s_vehicle.stopSlap"
+          .. " then extensions.%s_vehicle.stopSlap() end",
+          PROP_MODEL, PROP_MODEL, PROP_MODEL))
+      end
+    end)
+  end
+
+  -- THE SCOREBOARD. The machine watches what it launched until it stops
+  -- moving, then says the number out loud while the palm is still held
+  -- out. Runs in every phase: the flight outlasts the follow-through.
+  if b.watch then
+    local w = b.watch
+    w.elapsed = w.elapsed + dtSim
+    local flyer = exactVehicle(w.id)
+    if not flyer then
+      b.watch = nil
+    else
+      local up = flyer:getDirectionVectorUp()
+      -- Accumulated attitude change: the honest rotation count, measured
+      -- off the car, not read back from the injected seed (the engine
+      -- amplifies the tumble 30-90% after the palm leaves).
+      local dot = math.max(-1, math.min(1,
+        up.x * w.lastUpX + up.y * w.lastUpY + up.z * w.lastUpZ))
+      w.rolled = w.rolled + math.acos(dot)
+      w.lastUpX, w.lastUpY, w.lastUpZ = up.x, up.y, up.z
+      local speed = flyer:getVelocity():length()
+      if speed < B.score_settle_mps then
+        w.settled = w.settled + dtSim
+      else
+        w.settled = 0
+      end
+      if w.settled >= B.score_settle_seconds
+          or w.elapsed >= B.score_timeout_seconds then
+        b.watch = nil
+        local rest = flyer:getPosition()
+        local dx, dy = rest.x - w.x, rest.y - w.y
+        local metres = math.sqrt(dx * dx + dy * dy)
+        local turns = w.rolled / (2 * math.pi)
+        local attitude = "On its wheels."
+        if up.z < -0.5 then
+          attitude = "On the ROOF."
+        elseif up.z < 0.6 then
+          attitude = "On its side."
+        end
+        local turnsText
+        if turns < 0.75 then
+          turnsText = "No full rotation."
+        elseif turns < 1.5 then
+          turnsText = "One rotation."
+        else
+          turnsText = string.format("%d rotations.", math.floor(turns + 0.5))
+        end
+        showMessage(
+          string.format("%d m. %s %s", math.floor(metres + 0.5),
+            turnsText, attitude), 4.0)
+        if attitude == "On the ROOF." then
+          -- The wince. The palm is still held out; the machine looks at
+          -- what it did and says the quiet part.
+          showMessage("The hand pretends not to look.", 2.4)
+        end
+        emitEvent(state, "I", "high_five_scored", {
+          subject_id = w.id,
+          distance_m = math.floor(metres * 10 + 0.5) / 10,
+          rotations = math.floor(turns * 100 + 0.5) / 100,
+          attitude = attitude,
+        })
+      end
+    end
+  end
+
   -- RE-SCORE THE SUBJECT, every frame, in every tracking phase.
   --
   -- Latching first-come meant a 12 m/s car entering ahead of a 40 m/s one
@@ -2014,15 +2265,28 @@ behavior.update = function(state, dtSim)
     if zoneCount(state, "slap_zone") > 0 then
       local onPad = firstOccupant(state, "slap_zone")
       if onPad then
+        -- SETUP, then punchline. The line and the swing used to land in
+        -- the same tick, so the player read "You are standing ON it."
+        -- while already airborne -- setup and punchline inside one 0.28 s
+        -- beat. Half a second of the alert ripple first converts "random
+        -- explosion" into "I watched it decide", and you still cannot
+        -- escape: the swing needs 0.28 s and you are 0 m from the palm.
         b.subjectId = onPad:getId()
         b.aimedAt = b.subjectId
-        b.swingFrom = REST_DEG
-        b.phase = "slapping"
+        b.phase = "pad_alert"
         b.elapsed = 0
-        b.slapped = false
         showMessage("You are standing ON it.", 1.2)
-        emitEvent(state, "I", "high_five_pad_swing", {subject_id = b.subjectId})
       end
+    end
+
+  elseif b.phase == "pad_alert" then
+    poseMachine(state, REST_DEG, tilt, B.twitch_deg, b.clock)
+    if b.elapsed >= B.pad_alert_seconds then
+      b.swingFrom = REST_DEG
+      b.phase = "slapping"
+      b.elapsed = 0
+      b.slapped = false
+      emitEvent(state, "I", "high_five_pad_swing", {subject_id = b.subjectId})
     end
 
   elseif b.phase == "alert" then
@@ -2047,7 +2311,7 @@ behavior.update = function(state, dtSim)
     -- earn the slap, and a half-drawn arm snapping forward looks more
     -- alarmed than a tidy one, which is the right read.
     local lead = leadSeconds(state, b)
-    if lead ~= nil and lead <= B.swing_lead_seconds then
+    if lead ~= nil and lead <= B.swing_lead_seconds + B.release_bias_seconds then
       b.phase = "slapping"
       b.aimedAt = b.subjectId
       b.swingFrom = azimuth
@@ -2086,7 +2350,9 @@ behavior.update = function(state, dtSim)
       release = b.blind >= B.max_hold_seconds
     else
       b.blind = 0
-      release = lead <= B.swing_lead_seconds
+      -- Biased early: live, the palm lands ~0.11 s behind the maths
+      -- (see release_bias_seconds).
+      release = lead <= B.swing_lead_seconds + B.release_bias_seconds
     end
     if release then
       b.phase = "slapping"
@@ -2105,9 +2371,10 @@ behavior.update = function(state, dtSim)
     end
 
   elseif b.phase == "slapping" then
-    -- Quadratic ease-IN: the arm accelerates all the way to contact, which is
-    -- what a flywheel dump looks like and what puts the strike on the beat
-    -- instead of coasting into it.
+    -- t^1.5 ease-IN, which is not a feel curve: theta ~ t^1.5 is the
+    -- CONSTANT-POWER trajectory (P = I a w = 1.125 I dtheta^2 / T^3, flat
+    -- across the whole stroke) -- literally what an ideal flywheel dumping
+    -- through a power-limited drive does. See the power ledger.
     local t = math.min(1, b.elapsed / B.slap_seconds)
     local from = b.swingFrom or WINDUP_DEG
     poseMachine(
@@ -2124,6 +2391,13 @@ behavior.update = function(state, dtSim)
     local smooth = 1 - (1 - t) * (1 - t)
     poseMachine(
       state, CONTACT_DEG + (FOLLOW_DEG - CONTACT_DEG) * smooth, tilt, 0, b.clock)
+    -- The dust is an IMPACT, not weather: 0.3 s and gone. Left on through
+    -- follow+hold it stood as a beige dome on the pad stencil in every
+    -- after-shot of the mod.
+    if b.elapsed >= 0.30 then
+      setEffectActive(state, "slap_dust", false)
+      setEffectActive(state, "slap_dust2", false)
+    end
     if t >= 1 then
       b.phase = "holding"
       b.elapsed = 0
@@ -2135,7 +2409,9 @@ behavior.update = function(state, dtSim)
     if b.elapsed >= B.follow_hold_seconds then
       b.phase = "returning"
       b.elapsed = 0
+      -- Belt-and-braces off; the follow window is the real owner now.
       setEffectActive(state, "slap_dust", false)
+      setEffectActive(state, "slap_dust2", false)
     end
 
   elseif b.phase == "returning" then

@@ -167,6 +167,13 @@ end
 function vehmt:queueLuaCommand(cmd)
   S.commands[#S.commands + 1] = {id = self.id, cmd = cmd}
 end
+function vehmt:getPosition()
+  return vec3(self.pos.x, self.pos.y, self.pos.z)
+end
+function vehmt:getVelocity()
+  return vec3(self.vel.x, self.vel.y, self.vel.z)
+end
+function vehmt:getDirectionVectorUp() return vec3(0, 0, 1) end
 function vehmt:applyClusterVelocityScaleAdd(_node, scale, x, y, z)
   S.velocities[#S.velocities + 1] = {id = self.id, scale = scale,
                                      x = x, y = y, z = z}
@@ -900,14 +907,28 @@ def test_a_car_that_only_touches_the_pad_is_slapped(rig):
     state.addVehicle(SUBJECT_ID, "pickup", 0.0, 0.0, 0.5)
     state.setMotion(SUBJECT_ID, 0.0)
 
-    swung = drive(state, module, SUBJECT_ID, 3.0, until=lambda s: s.phase == "slapping")
-    assert swung is not None, (
-        "a car sitting on the painted pad never got swung at; the affordance "
+    # The RESPONSE is immediate; the punchline waits 0.5 s for its setup.
+    # "You are standing ON it." used to fire on the same tick as the swing,
+    # so setup and punchline landed inside one 0.28 s beat and were read
+    # airborne. The beat is the fix; the immediacy is the requirement.
+    noticed = drive(
+        state, module, SUBJECT_ID, 3.0, until=lambda s: s.phase == "pad_alert"
+    )
+    assert noticed is not None, (
+        "a car sitting on the painted pad never got noticed; the affordance "
         "and the trigger are still different things"
     )
-    assert swung < 0.25, (
-        f"the pad swing took {swung:.2f} s to start. A car is AT the contact "
-        "point already, so there is nothing to lead and no reason to wait"
+    assert noticed < 0.25, (
+        f"the pad response took {noticed:.2f} s to start; the machine must "
+        "react the moment a wheel is on the paint"
+    )
+    swung = drive(
+        state, module, SUBJECT_ID, 2.0, until=lambda s: s.phase == "slapping"
+    )
+    assert swung is not None, "the pad alert never released into the swing"
+    assert swung < SPEC.BEHAVIOR["pad_alert_seconds"] + 0.15, (
+        f"the pad beat held {swung:.2f} s past the alert; setup then "
+        "punchline, not a stall"
     )
 
     drive(state, module, SUBJECT_ID, 2.0, until=lambda s: state.lastVelocity() is not None)
@@ -1112,3 +1133,47 @@ def test_a_pad_slap_spins_less_than_a_full_windup(rig):
         f"pad spin {pad_mag:.2f} rad/s against the from-rest model's "
         f"{expected:.2f} -- the tumble is not reading the real swingFrom"
     )
+
+
+def test_the_machine_reports_the_score(rig):
+    """The aftermath must be MEASURED and SAID, or it never happened.
+
+    A reviewer walked all three live films and found the machine's best
+    material — a 200 m tumbling flight with a bounce onto the roof —
+    happening off-frame, unmeasured, unannounced. The runtime computed
+    slap speed, spin and power for every slap and showed them to nobody.
+    The scoreboard is the fix: the machine watches what it launched until
+    it stops moving, then says the number while the palm is still out.
+
+    The stub car never moves after launch (setMotion 0), so the flight
+    settles immediately and the toast reads zero distance and no rotation
+    — which is exactly right for a car that went nowhere, and proves the
+    reporting path rather than the physics (frames3 proved the physics).
+    """
+
+    import re
+
+    lua, state, module = rig
+    state.addVehicle(SUBJECT_ID, "pickup", 0.0, 0.0, 0.5)
+    state.setMotion(SUBJECT_ID, 0.0)
+    drive(state, module, SUBJECT_ID, 3.0,
+          until=lambda s: state.lastVelocity() is not None)
+    assert state.lastVelocity() is not None
+
+    settle = SPEC.BEHAVIOR["score_settle_seconds"] + 0.6
+    drive(state, module, SUBJECT_ID, settle, until=None)
+
+    messages = []
+    index = 1
+    while True:
+        entry = state.messages[index]
+        if entry is None:
+            break
+        messages.append(str(entry))
+        index += 1
+    scored = [m for m in messages if re.match(r"^\d+ m\. ", m)]
+    assert scored, (
+        f"no scoreboard toast after a settled flight; messages: {messages}"
+    )
+    assert "rotation" in scored[-1], scored[-1]
+    assert re.search(r"(wheels|side|ROOF)", scored[-1]), scored[-1]

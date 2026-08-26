@@ -315,7 +315,8 @@ def add_bolt(name, centre, normal, radius, material, *, proud=None):
     return bk._finish_primitive(obj, name, material, radius * 0.12)
 
 
-def add_chain(name, start, end, material, link_radius, wire_radius, *, stretch=1.55):
+def add_chain(name, start, end, material, link_radius, wire_radius, *,
+              stretch=1.55, sag=0.0):
     """A run of chain as alternating quarter-turn torus links.
 
     The link COUNT is derived from the span, never passed in. Authored by
@@ -335,12 +336,21 @@ def add_chain(name, start, end, material, link_radius, wire_radius, *, stretch=1
     links = max(3, int(round(length / (link_length * 0.70))))
     step = span / links
     direction = span.normalized()
+
+    # SAG. A taut guy is a rod that happens to be drawn as links; the
+    # reference stand's chains are utility slack. `sag` is the midpoint
+    # dip as a fraction of the run, applied as a parabola — close enough
+    # to a catenary at these ratios that nobody standing under an 8.6 m
+    # hand will take out a theodolite.
+    def dip(fraction):
+        return UP * (-4.0 * sag * length * fraction * (1.0 - fraction))
     side = direction.cross(UP)
     if side.length < 1e-4:
         side = Vector((1.0, 0.0, 0.0))
     side.normalize()
     for index in range(links):
-        centre = start + step * (index + 0.5)
+        fraction = (index + 0.5) / links
+        centre = start + step * (index + 0.5) + dip(fraction)
         axis = side if index % 2 == 0 else direction.cross(side).normalized()
         bpy.ops.mesh.primitive_torus_add(
             location=centre,
@@ -579,11 +589,46 @@ def build_mast(materials) -> list:
                 metric_uv=(2.0 * math.pi * 0.13, 0.4),
             )
         )
-        top = azimuth_point(azimuth, spec.MAST_TOP * 0.62, spec.MAST_TOP_Z - 0.75)
+        # The old top anchor sat at r = MAST_TOP*0.62 — 0.17 m INSIDE the
+        # mast face along this bearing, so the first links grew out of bare
+        # plate. A welded lug now stands the eye off the face at r 1.90.
+        lug_root = azimuth_point(azimuth, 1.66, spec.MAST_TOP_Z - 0.75)
+        lug_tip = azimuth_point(azimuth, 1.94, spec.MAST_TOP_Z - 0.75)
+        lug_dir = (lug_tip - lug_root).normalized()
+        lug = bk.add_box(
+            f"{MOD_ID}_guy_lug{index}",
+            ((lug_root.x + lug_tip.x) / 2.0, (lug_root.y + lug_tip.y) / 2.0,
+             spec.MAST_TOP_Z - 0.75),
+            (0.34, 0.34, 0.30),
+            rig,
+            bevel=0.02,
+            metric_uv=(0.4, 0.4),
+            rotation=(0.0, 0.0, math.radians(azimuth)),
+        )
+        objects.append(lug)
+        eye_ring = bk.add_cylinder(
+            f"{MOD_ID}_guy_lug_eye{index}",
+            (lug_tip.x, lug_tip.y, spec.MAST_TOP_Z - 0.75),
+            0.11,
+            0.09,
+            steel,
+            vertices=18,
+            axis="Z",
+            metric_uv=(0.6, 0.2),
+        )
+        _orient(eye_ring, lug_dir.cross(UP).normalized())
+        objects.append(eye_ring)
+        top = azimuth_point(azimuth, 1.94, spec.MAST_TOP_Z - 0.75)
         # Turnbuckle a third of the way down the run, as it is on the
         # reference stand.
         run = eye - top
-        barrel_centre = top + run * 0.34
+        # The turnbuckle rides the SAGGED path, not the chord — a tensioner
+        # floating above its own slack chain is the old floating-hardware
+        # read all over again.
+        GUY_SAG = 0.05
+        sag_at = lambda fraction: UP * (
+            -4.0 * GUY_SAG * run.length * fraction * (1.0 - fraction))
+        barrel_centre = top + run * 0.34 + sag_at(0.34)
         # ORIENTED along the run. It was built axis="Z" and never turned,
         # so a tensioner in a diagonal chain stood bolt upright beside its
         # own chain in four separate renders — the same "floating hardware"
@@ -600,14 +645,18 @@ def build_mast(materials) -> list:
         )
         _orient(barrel, run.normalized())
         objects.append(barrel)
+        # Blackened utility chain, half the old link. The 0.22 m polished
+        # links read as battleship anchor chain against the reference's
+        # slack black rigging.
         objects.extend(
             add_chain(
                 f"{MOD_ID}_guy_chain{index}",
                 top,
                 barrel_centre - run.normalized() * 0.50,
-                steel,
-                0.22,
-                0.052,
+                rig,
+                0.13,
+                0.040,
+                sag=0.035,
             )
         )
         objects.extend(
@@ -615,9 +664,10 @@ def build_mast(materials) -> list:
                 f"{MOD_ID}_guy_chain{index}b",
                 barrel_centre + run.normalized() * 0.50,
                 eye,
-                steel,
-                0.22,
-                0.052,
+                rig,
+                0.13,
+                0.040,
+                sag=0.035,
             )
         )
 
@@ -837,10 +887,36 @@ def build_arm(materials) -> tuple[list, list]:
             )
         return add_loft(name, rings, rig, uv_scale=(1.4, 1.4))
 
+    # THE ROOT SHOE. The girder used to start AT the hub at full
+    # BOOM_ROOT_DEPTH, which drove its underside up to 1.97 m radially
+    # inside the solid slew ring and 1.07 m below the mast-top plane —
+    # rotating steel through fixed steel at every azimuth, visible from
+    # any low orbit. The girder now starts 1.2 m out at a reduced root and
+    # a forged shoe bridges pin to girder between the existing cheeks.
+    SHOE_ALONG = 1.2
+    SHOE_ROOT_DEPTH = 1.45
+    objects.append(
+        add_loft(
+            f"{MOD_ID}_arm_root_shoe",
+            [
+                rounded_rect_ring(
+                    HUB + A1 * 0.30, E2, A3,
+                    spec.BOOM_WIDTH * 0.40, 0.58, 0.10),
+                rounded_rect_ring(
+                    HUB + A1 * SHOE_ALONG, E2, A3,
+                    spec.BOOM_WIDTH / 2.0, SHOE_ROOT_DEPTH / 2.0, 0.10),
+            ],
+            rig,
+            uv_scale=(1.2, 1.2),
+            cap_start=True,
+            cap_end=False,
+        )
+    )
     objects.append(
         girder(
-            f"{MOD_ID}_upper_arm", HUB, A1, A3, spec.UPPER_LENGTH,
-            spec.BOOM_ROOT_DEPTH, spec.BOOM_ELBOW_DEPTH,
+            f"{MOD_ID}_upper_arm", HUB + A1 * SHOE_ALONG, A1, A3,
+            spec.UPPER_LENGTH - SHOE_ALONG,
+            SHOE_ROOT_DEPTH, spec.BOOM_ELBOW_DEPTH,
             spec.BOOM_WIDTH, spec.BOOM_WIDTH * 0.88,
         )
     )
@@ -884,8 +960,9 @@ def build_arm(materials) -> tuple[list, list]:
                     )
 
     splices(
-        f"{MOD_ID}_upper", HUB, A1, A3, spec.UPPER_LENGTH,
-        spec.BOOM_ROOT_DEPTH, spec.BOOM_ELBOW_DEPTH,
+        f"{MOD_ID}_upper", HUB + A1 * SHOE_ALONG, A1, A3,
+        spec.UPPER_LENGTH - SHOE_ALONG,
+        SHOE_ROOT_DEPTH, spec.BOOM_ELBOW_DEPTH,
         spec.BOOM_WIDTH, spec.BOOM_WIDTH * 0.88, (0.30, 0.66),
     )
     splices(
@@ -993,6 +1070,42 @@ def build_arm(materials) -> tuple[list, list]:
                     centre, 0.065, stack + 0.36, steel,
                 )
             )
+    # THE CARRIER. The plate stack used to hang beside the hub with
+    # nothing visibly holding 29 tonnes — a floating pale block. A tail
+    # beam now runs from the shoulder out over the stack and two hanger
+    # plates take the weight, which is the whole story a counterweight
+    # has to tell.
+    tail_dir = U * (-1.0 if spec.CWT_R < 0 else 1.0)
+    tail_len = abs(spec.CWT_R) + spec.CWT_PLATE[0] * 0.62
+    tail_mid = HUB + tail_dir * (tail_len / 2.0)
+    objects.append(
+        bk.add_box(
+            f"{MOD_ID}_cwt_tail",
+            (tail_mid.x, tail_mid.y, spec.HUB_Z - 0.42),
+            (tail_len, 0.74, 0.66),
+            rig,
+            bevel=0.04,
+            metric_uv=(1.2, 0.8),
+            rotation=(0.0, 0.0, math.radians(spec.REST_DEG)),
+        )
+    )
+    hanger_top = spec.HUB_Z - 0.75
+    hanger_bottom = spec.CWT_Z - spec.CWT_PLATE[2] * 0.18
+    for along in (-1.0, 1.0):
+        hang_centre = HUB + U * (spec.CWT_R + along * spec.CWT_PLATE[0] * 0.40)
+        objects.append(
+            bk.add_box(
+                f"{MOD_ID}_cwt_hanger{int(along)}",
+                (hang_centre.x, hang_centre.y,
+                 (hanger_top + hanger_bottom) / 2.0),
+                (0.30, 0.62, hanger_top - hanger_bottom),
+                rig,
+                bevel=0.02,
+                metric_uv=(0.6, 1.0),
+                rotation=(0.0, 0.0, math.radians(spec.REST_DEG)),
+            )
+        )
+
     # Nuts on the ends of the tie rods and a pair of lifting eyes on top:
     # 92 tonnes of plate has to LOOK like something that was craned into
     # place and bolted, not like a box glued to the hub.
@@ -1143,16 +1256,58 @@ def build_arm(materials) -> tuple[list, list]:
         )
 
     # The tilt actuator: a rotary drive on the collar is what physically
-    # rolls the wrist, and TILT on the console is its dial.
-    drive = collar_centre + UP * (spec.COLLAR_R + 0.42)
+    # rolls the wrist, and TILT on the console is its dial. It was one
+    # flat light-grey box — the brightest thing on the arm and the only
+    # part that read as placeholder. Now it is a machine: gearbox against
+    # the collar, finned motor barrel along the roll axis, terminal box.
+    drive = collar_centre + UP * (spec.COLLAR_R + 0.34)
     cuff.append(
         bk.add_box(
-            f"{MOD_ID}_tilt_drive",
+            f"{MOD_ID}_tilt_gearbox",
             (drive.x, drive.y, drive.z),
-            (1.05, 0.86, 0.80),
+            (0.78, 0.86, 0.64),
             iron,
             bevel=0.03,
             metric_uv=(0.7, 0.7),
+            rotation=(0.0, 0.0, math.radians(spec.REST_DEG)),
+        )
+    )
+    motor_centre = drive + U * 0.92
+    motor = bk.add_cylinder(
+        f"{MOD_ID}_tilt_motor",
+        (motor_centre.x, motor_centre.y, motor_centre.z),
+        0.30,
+        1.10,
+        rig,
+        vertices=28,
+        axis="Z",
+        metric_uv=(2.0 * math.pi * 0.30, 0.7),
+    )
+    _orient(motor, U)
+    cuff.append(motor)
+    for fin in range(4):
+        fin_centre = motor_centre - U * 0.35 + U * (fin * 0.22)
+        ring = bk.add_cylinder(
+            f"{MOD_ID}_tilt_fin{fin}",
+            (fin_centre.x, fin_centre.y, fin_centre.z),
+            0.345,
+            0.045,
+            rig,
+            vertices=28,
+            axis="Z",
+            metric_uv=(2.0 * math.pi * 0.345, 0.1),
+        )
+        _orient(ring, U)
+        cuff.append(ring)
+    terminal = motor_centre + UP * 0.36 - U * 0.18
+    cuff.append(
+        bk.add_box(
+            f"{MOD_ID}_tilt_terminal",
+            (terminal.x, terminal.y, terminal.z),
+            (0.30, 0.26, 0.22),
+            iron,
+            bevel=0.02,
+            metric_uv=(0.3, 0.3),
             rotation=(0.0, 0.0, math.radians(spec.REST_DEG)),
         )
     )
@@ -1194,7 +1349,114 @@ def build_hand_parts(materials) -> dict[str, dict]:
             "objects": [digit, plate],
             "pivot": tuple(spec.DIGIT_PIVOTS[name]),
         }
+
+    # THE STRAPS. The reference prop's fingers are bound into one paddle by
+    # two black elastic bands — it is the single loudest "this is THAT
+    # prop" detail, and it settles the old splay-versus-distance argument
+    # honestly: separated fingers SHOULD read as one mass, because on the
+    # real prop they are strapped into one. Each band is the convex hull
+    # of the four fingers' actual surface sections at its station, offset
+    # outward and pillowed at the edges. Built into the HAND part: with
+    # the curls at 9-15 deg and the twitch a few degrees of extension, the
+    # fingers move millimetres against a rubber band authored proud of the
+    # skin, and rubber stretches.
+    rig = materials[f"{MOD_ID}_rig_black"]
+    # The bands are cut on FIXED PLANES perpendicular to the finger run,
+    # not at a per-digit fraction: four digits of four lengths sampled at
+    # one t are not coplanar, and the first build's bands came out as
+    # diagonal rods binding the knuckles. Each plane collects every digit
+    # surface point within its slab, hulls them, and the band hugs
+    # whatever actually crosses it.
+    finger_names = ("index", "middle", "ring", "little")
+    mean_dir = Vector((0.0, 0.0, 0.0))
+    for name in finger_names:
+        finger_surface = surfaces[name]
+        mean_dir = mean_dir + (
+            finger_surface.point(0.6, 0.0) - finger_surface.point(0.1, 0.0))
+    mean_dir.normalize()
+    anchor = surfaces["middle"].point(0.0, 0.0)
+    for band_index, along_m in enumerate((1.05, 2.30)):
+        plane_point = anchor + mean_dir * along_m
+        slab = []
+        for name in finger_names:
+            finger_surface = surfaces[name]
+            for step in range(70):
+                t = 0.02 + 0.76 * step / 69.0
+                for column in range(16):
+                    theta = TWO_PI * column / 16.0
+                    point = finger_surface.point(t, theta)
+                    if abs((point - plane_point).dot(mean_dir)) < 0.10:
+                        slab.append(point)
+        if len(slab) < 8:
+            continue
+        centroid = Vector((0.0, 0.0, 0.0))
+        for point in slab:
+            centroid = centroid + point
+        centroid = centroid / len(slab)
+        basis_a = mean_dir.cross(Vector((0.0, 0.0, 1.0)))
+        if basis_a.length < 1e-4:
+            basis_a = mean_dir.cross(Vector((0.0, 1.0, 0.0)))
+        basis_a.normalize()
+        basis_b = mean_dir.cross(basis_a).normalized()
+        flat = []
+        for point in slab:
+            offset = point - centroid
+            flat.append((offset.dot(basis_a), offset.dot(basis_b)))
+        hull = _convex_hull_2d(flat)
+
+        def hull_ring(proud, along):
+            ring = []
+            for u, v in hull:
+                length = math.hypot(u, v) or 1e-6
+                grow = (length + proud) / length
+                ring.append(
+                    centroid
+                    + basis_a * (u * grow)
+                    + basis_b * (v * grow)
+                    + mean_dir * along
+                )
+            ring.append(ring[0])
+            return ring
+
+        strap = add_loft(
+            f"{MOD_ID}_finger_strap{band_index}",
+            [
+                hull_ring(0.045, -0.21),
+                hull_ring(0.085, -0.13),
+                hull_ring(0.085, 0.13),
+                hull_ring(0.045, 0.21),
+            ],
+            rig,
+            uv_scale=(0.8, 0.8),
+            cap_start=True,
+            cap_end=True,
+        )
+        _place(strap, to_world)
+        parts["hand"]["objects"].append(strap)
     return parts
+
+
+def _convex_hull_2d(points):
+    """Andrew's monotone chain. Tiny, dependency-free, deterministic."""
+
+    ordered = sorted(set(points))
+    if len(ordered) <= 2:
+        return list(ordered)
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+    lower = []
+    for point in ordered:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], point) <= 0:
+            lower.pop()
+        lower.append(point)
+    upper = []
+    for point in reversed(ordered):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], point) <= 0:
+            upper.pop()
+        upper.append(point)
+    return lower[:-1] + upper[:-1]
 
 
 # ---------------------------------------------------------------------------
@@ -2003,6 +2265,20 @@ def main() -> None:
             resolution=(880, 660),
             **REVIEW_LIGHT,
         )
+    # THE LAMP AT DUSK: the one shot the review set never had. The armed
+    # lamp is the machine's only self-illumination and no daylight frame
+    # can prove it reads; this is the approach-lane view a driver gets at
+    # nightfall, rendered before the studio stage exists so the scene is
+    # lit by the dusk sky and the lamp's own emissive alone.
+    bk.render_thumbnail(
+        AUTHORING_ROOT / "review" / f"{MOD_ID}_lamp_dusk.jpg",
+        camera_location=(0.5, -34.0, 2.1),
+        look_at=(-7.0, -4.0, 3.2),
+        resolution=(880, 660),
+        sun_energy=0.55,
+        world_color=(0.10, 0.09, 0.15),
+        world_strength=0.30,
+    )
     stage = build_studio_stage()
     # THE SAME LIGHTING AS THE REVIEW SET. The studio stage adds three
     # fills on top of render_thumbnail's own sun, and the thumbnail was
