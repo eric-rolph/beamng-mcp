@@ -338,7 +338,7 @@ def test_collada_geometry_controller_material_and_node_ids_are_namespaced() -> N
         ),
     ]
     for dae_path, materials_path, collision_expected in dae_and_materials:
-        root = ET.parse(dae_path).getroot()  # noqa: S314 - repository-owned fixture
+        root = ET.parse(dae_path).getroot()
         elements = [
             *root.findall(".//c:library_geometries/c:geometry", COLLADA_NAMESPACE),
             *root.findall(".//c:library_controllers/c:controller", COLLADA_NAMESPACE),
