@@ -64,6 +64,12 @@ def _read(name):
 
 
 def _read_shipped(name):
+    # The staged bank is gitignored build output (mod/ tree); on a fresh
+    # checkout these gates have nothing to measure. sf.read raises a
+    # soundfile error rather than FileNotFoundError, so the conftest
+    # artifact hook cannot classify it - gate here instead.
+    if not SHIPPED_SOUND.is_dir():
+        pytest.skip("staged sound bank absent (gitignored); run build.py spin_launch all")
     data, rate = sf.read(SHIPPED_SOUND / f"{SPEC.MOD_ID}_{name}.ogg", dtype="float32")
     return data, rate
 
@@ -465,6 +471,8 @@ def test_the_staged_bank_is_the_bank_the_generator_made():
     re-encode.
     """
 
+    if not SHIPPED_SOUND.is_dir():
+        pytest.skip("staged sound bank absent (gitignored); run build.py spin_launch all")
     assert sorted(path.name for path in SHIPPED_SOUND.glob("*.ogg")) == sorted(
         f"{SPEC.MOD_ID}_{name}.ogg" for name in SPEC.AUDIO_CUE_NAMES
     )
