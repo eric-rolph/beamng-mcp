@@ -277,7 +277,6 @@ def test_gforce_centrifuge_spins_and_flings_normal_car(tmp_path: Path) -> None:
 
             # Orbit check: real tangential speed at a wall-adjacent radius.
             orbiting = False
-            orbit_sample: dict[str, Any] = {}
             for _ in range(160):
                 bng.control.step(15, wait=True)
                 probe = _subject_probe(bng)
@@ -289,7 +288,6 @@ def test_gforce_centrifuge_spins_and_flings_normal_car(tmp_path: Path) -> None:
                     and MIN_ORBIT_RADIUS < radius < MAX_ORBIT_RADIUS
                 ):
                     orbiting = True
-                    orbit_sample = {"radius": radius, "speed": probe["speed"]}
                     break
             assert orbiting, {
                 "detail": "subject never reached a wall orbit",

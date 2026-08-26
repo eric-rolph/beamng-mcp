@@ -378,7 +378,8 @@ def build_interaction(handoff: dict[str, Any]) -> dict[str, Any]:
             "order": float(order),
             "onDown": (
                 "obj:queueGameEngineLua(string.format("
-                f"\"extensions.ericrolph__cannon__car__wash_runtime.pressPanelButtonByVehicle(%d, '{suffix}')\""
+                '"extensions.ericrolph__cannon__car__wash_runtime'
+                f".pressPanelButtonByVehicle(%d, '{suffix}')\""
                 ", objectId))"
             ),
             "title": button["title"],

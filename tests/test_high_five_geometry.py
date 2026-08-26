@@ -53,7 +53,7 @@ spec = load_spec()
 
 
 def dot(a, b):
-    return sum(x * y for x, y in zip(a, b))
+    return sum(x * y for x, y in zip(a, b, strict=False))
 
 
 def cross(a, b):
@@ -74,11 +74,11 @@ def unit(a):
 
 
 def sub(a, b):
-    return tuple(x - y for x, y in zip(a, b))
+    return tuple(x - y for x, y in zip(a, b, strict=False))
 
 
 def add(a, b):
-    return tuple(x + y for x, y in zip(a, b))
+    return tuple(x + y for x, y in zip(a, b, strict=False))
 
 
 def scale(a, k):
@@ -121,7 +121,7 @@ def test_hand_frame_is_orthonormal_and_right_handed_for_a_right_hand():
     assert dot(u, v) == pytest.approx(0.0, abs=1e-9)
     assert dot(u, n) == pytest.approx(0.0, abs=1e-9)
     assert dot(v, n) == pytest.approx(0.0, abs=1e-9)
-    for actual, expected in zip(cross(v, u), n):
+    for actual, expected in zip(cross(v, u), n, strict=False):
         assert actual == pytest.approx(expected, abs=1e-9)
     # Thumb up.
     assert v == (0.0, 0.0, 1.0)
@@ -152,7 +152,7 @@ def test_the_origin_is_the_strike_point():
     """
 
     assert spec.CONTACT_DEG == 0.0
-    contact_u = (1.0, 0.0, 0.0)          # azimuth 0 points +x
+    contact_u = (1.0, 0.0, 0.0)  # azimuth 0 points +x
     palm_centre = add(
         (spec.MAST_X, spec.MAST_Y, spec.WRIST_Z),
         scale(contact_u, spec.WRIST_R + spec.PALM_CENTRE_U),
@@ -224,10 +224,7 @@ def test_the_palm_still_reaches_a_cars_body():
         "is under a metre and the slap would be all air"
     )
     low, _where = swept_low_point()
-    assert low < 0.60, (
-        f"the lowest thing on the hand is {low:.2f} m up — nothing reaches a "
-        "bumper"
-    )
+    assert low < 0.60, f"the lowest thing on the hand is {low:.2f} m up — nothing reaches a bumper"
 
 
 # ---------------------------------------------------------------------------
@@ -270,12 +267,10 @@ def test_metacarpal_heads_cover_the_palms_distal_end(name):
     """
 
     order = list(spec.FINGER_ORDER)
+
     def head(finger):
         _u, v, _n = spec.mcp_local(finger)
-        radius = (
-            spec._mm(spec.FINGER_DIAMETER_MM[finger]) / 2.0
-            * (1.0 + spec.MCP_HEAD_SWELL)
-        )
+        radius = spec._mm(spec.FINGER_DIAMETER_MM[finger]) / 2.0 * (1.0 + spec.MCP_HEAD_SWELL)
         return v, radius
 
     index = order.index(name)
@@ -283,9 +278,7 @@ def test_metacarpal_heads_cover_the_palms_distal_end(name):
     if index + 1 < len(order):
         v_next, r_next = head(order[index + 1])
         gap = abs(v_here - v_next) - (r_here + r_next)
-        assert gap < 0.0, (
-            f"{name} and {order[index + 1]} knuckles do not touch: {gap:.3f} m apart"
-        )
+        assert gap < 0.0, f"{name} and {order[index + 1]} knuckles do not touch: {gap:.3f} m apart"
     # And the whole row must reach at least to the palm's own half width on
     # the ulnar side, where there is no thumb to cover the corner.
     lows = [v - r for v, r in (head(f) for f in order)]
@@ -340,9 +333,7 @@ def swing_and_roll(point, azimuth_deg, tilt_deg):
     """
 
     wrist = spec.WRIST_POINT
-    rolled = add(
-        rodrigues(sub(point, wrist), spec.U_REST, math.radians(tilt_deg)), wrist
-    )
+    rolled = add(rodrigues(sub(point, wrist), spec.U_REST, math.radians(tilt_deg)), wrist)
     return spin_z(rolled, (spec.MAST_X, spec.MAST_Y), math.radians(azimuth_deg - spec.REST_DEG))
 
 
@@ -405,9 +396,9 @@ def test_ballistic_range_ladder_is_monotonic_and_lands_on_the_map():
     speed = (behavior["slap_speed_min_mps"] + behavior["slap_speed_max_mps"]) / 2.0
 
     def ranged(power_level, tilt_index):
-        multiplier = 1.0 + (power_level - 1) * (
-            behavior["power_multiplier_max"] - 1.0
-        ) / (behavior["power_levels"] - 1)
+        multiplier = 1.0 + (power_level - 1) * (behavior["power_multiplier_max"] - 1.0) / (
+            behavior["power_levels"] - 1
+        )
         v = speed * multiplier
         theta = math.radians(tilt_index * behavior["tilt_step_deg"])
         # Launched from the palm's height, so solve the full quadratic.
@@ -425,8 +416,7 @@ def test_ballistic_range_ladder_is_monotonic_and_lands_on_the_map():
         "two TILT detents give the same range"
     )
     assert max(powers) < 4000.0, (
-        f"top of the ladder throws a car {max(powers):.0f} m — that is a teleport, "
-        "not a slap"
+        f"top of the ladder throws a car {max(powers):.0f} m — that is a teleport, not a slap"
     )
 
 
@@ -436,10 +426,7 @@ def test_ballistic_range_ladder_is_monotonic_and_lands_on_the_map():
 
 
 def emitted_runtime() -> str:
-    path = (
-        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID
-        / "runtime.lua"
-    )
+    path = PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID / "runtime.lua"
     return path.read_text(encoding="utf-8")
 
 
@@ -464,12 +451,12 @@ def test_generated_lua_carries_the_spec_geometry():
     for name in spec.DIGIT_ORDER:
         # Each digit appears once in DIGIT_AXES and once in DIGIT_PIVOTS; the
         # tables are emitted in that order, so search the blocks separately.
-        axes_block = source[source.index("local DIGIT_AXES"):source.index("local DIGIT_PIVOTS")]
-        pivots_block = source[source.index("local DIGIT_PIVOTS"):source.index("local TWITCH_PHASE")]
+        axes_block = source[source.index("local DIGIT_AXES") : source.index("local DIGIT_PIVOTS")]
+        pivots_block = source[
+            source.index("local DIGIT_PIVOTS") : source.index("local TWITCH_PHASE")
+        ]
         assert parse_vec3(axes_block, name) == pytest.approx(spec.DIGIT_AXES[name], abs=1e-5)
-        assert parse_vec3(pivots_block, name) == pytest.approx(
-            spec.DIGIT_PIVOTS[name], abs=1e-5
-        )
+        assert parse_vec3(pivots_block, name) == pytest.approx(spec.DIGIT_PIVOTS[name], abs=1e-5)
 
 
 def test_generated_lua_azimuths_match_the_spec():
@@ -603,11 +590,7 @@ def test_the_approach_corridor_does_not_arm_the_console_apron():
     )
     # And it still has to be long enough for the machine to wind up.
     behavior = spec.BEHAVIOR
-    needed = (
-        behavior["alert_seconds"]
-        + behavior["windup_seconds"]
-        + behavior["swing_lead_seconds"]
-    )
+    needed = behavior["alert_seconds"] + behavior["windup_seconds"] + behavior["swing_lead_seconds"]
     fastest = 60.0
     assert corridor["dimensions"][1] >= needed * fastest, (
         f"{corridor['dimensions'][1]:.0f} m of corridor is under the "
@@ -645,11 +628,10 @@ def test_the_hero_colour_survives_the_srgb_round_trip():
     # exposure-invariant, and the rendered palm was measuring 0.22 against
     # the reference's 0.48-0.55 while this gate happily passed.
     sampled = (146, 120, 66)
-    for component, expected, channel in zip(entry["params"]["base"], sampled, "RGB"):
+    for component, expected, channel in zip(entry["params"]["base"], sampled, "RGB", strict=False):
         byte = encode(component) * 255.0
         assert byte == pytest.approx(expected, abs=4.0), (
-            f"foam_latex base {channel} encodes to {byte:.0f}, not the sampled "
-            f"{expected}"
+            f"foam_latex base {channel} encodes to {byte:.0f}, not the sampled {expected}"
         )
     # And the material's own colour field must agree with the map it wears.
     assert spec.PALETTE[f"{spec.MOD_ID}_foam_latex"]["color"][:3] == pytest.approx(
@@ -694,10 +676,9 @@ def test_the_generated_map_keeps_the_colour_the_base_promises():
         "near-neutral, so they are the usual culprits"
     )
     # And it must not drift far from the swatch in overall level either.
-    for value, expected, channel in zip(mean, (146, 120, 66), "RGB"):
+    for value, expected, channel in zip(mean, (146, 120, 66), "RGB", strict=False):
         assert value == pytest.approx(expected, abs=34.0), (
-            f"generated map mean {channel} is {value:.0f} against a sampled "
-            f"{expected}"
+            f"generated map mean {channel} is {value:.0f} against a sampled {expected}"
         )
 
 
@@ -779,7 +760,7 @@ def test_the_palm_never_emerges_between_the_knuckles():
     uncovered = None
     dome = surface.u_knuckle + surface.cap_length
     for station in range(60):
-        s = 0.75 + 0.25 * station / 59.0        # the cap region only
+        s = 0.75 + 0.25 * station / 59.0  # the cap region only
         for column in range(96):
             theta = 2.0 * math.pi * column / 96.0
             point = surface.point(s, theta)
@@ -841,8 +822,8 @@ def test_the_cuff_moves_with_the_hand_it_holds():
     )
     # And the cuff must not take the roll itself, or it would counter-rotate
     # against the hand turning inside it.
-    wrist_call = source[source.index('state, "wrist"'):]
-    wrist_call = wrist_call[:wrist_call.index(")\n") + 1]
+    wrist_call = source[source.index('state, "wrist"') :]
+    wrist_call = wrist_call[: wrist_call.index(")\n") + 1]
     assert "rollQ" not in wrist_call, (
         "the cuff is being rolled; it is the housing the hand turns INSIDE"
     )
@@ -876,9 +857,7 @@ def test_digit_tips_converge_on_a_point():
 
     for name, surface in hand_sculpt.digit_surfaces(spec).items():
         pole = [surface.point(1.0, 2.0 * math.pi * k / 24.0) for k in range(24)]
-        spread = max(
-            math.dist(tuple(a), tuple(b)) for a in pole for b in pole
-        )
+        spread = max(math.dist(tuple(a), tuple(b)) for a in pole for b in pole)
         assert spread < 0.001, (
             f"{name}'s tip pole spans {spread * 1000:.0f} mm instead of "
             "converging — the dome's asymmetry is not vanishing at the pole"
@@ -940,10 +919,7 @@ def test_the_thumb_web_is_a_fold_and_not_a_gap():
         for offset in range(31):
             u = thumb_u - 1.5 + offset * 0.1
             a, b = surface.radius(u, theta)
-            gap = (
-                math.sqrt((thumb_v - a) ** 2 + (thumb_n - b) ** 2 + (thumb_u - u) ** 2)
-                - thumb_r
-            )
+            gap = math.sqrt((thumb_v - a) ** 2 + (thumb_n - b) ** 2 + (thumb_u - u) ** 2) - thumb_r
             if closest is None or gap < closest:
                 closest = gap
     # -0.15, not -0.05. A bound that merely forbids a GAP is satisfied by
@@ -963,7 +939,6 @@ def test_the_thumb_web_is_a_fold_and_not_a_gap():
         f"the flank penetrates the thumb ball by {-closest:.2f} m; the thenar "
         "belongs to the THUMB part, and the palm is eating it"
     )
-
 
 
 def test_the_parting_seam_is_a_fin_and_not_a_hill():
@@ -1011,19 +986,27 @@ def test_the_parting_seam_is_a_fin_and_not_a_hill():
     # `section` gives the part's own half-extents on the crest meridian.
     # It cannot be read off point(), because a digit's point() carries the
     # digit's offset in the hand and hypot() of that is not a radius.
-    parts = [("palm", palm.point, palm.seam_divisions, 224, 20, 190,
-              lambda: palm.radius(1.30, 0.0))]
+    parts = [
+        ("palm", palm.point, palm.seam_divisions, 224, 20, 190, lambda: palm.radius(1.30, 0.0))
+    ]
     for name, digit in hand_sculpt.digit_surfaces(spec).items():
-        parts.append((name, digit.point, digit.seam_divisions, 176, 14, 162,
-                      (lambda d: lambda: d.profile(0.5, 0.0))(digit)))
+        parts.append(
+            (
+                name,
+                digit.point,
+                digit.seam_divisions,
+                176,
+                14,
+                162,
+                (lambda d: lambda: d.profile(0.5, 0.0))(digit),
+            )
+        )
 
     def sub(a, b):
         return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
 
     def cross(a, b):
-        return (a[1] * b[2] - a[2] * b[1],
-                a[2] * b[0] - a[0] * b[2],
-                a[0] * b[1] - a[1] * b[0])
+        return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
 
     def unit(a):
         size = math.sqrt(sum(c * c for c in a))
@@ -1037,6 +1020,7 @@ def test_the_parting_seam_is_a_fin_and_not_a_hill():
     )
 
     for name, sampler, divisions, stations, low, high, section in parts:
+
         def at(station, column, _s=sampler, _d=divisions, _n=stations):
             p = _s(station / _n, 2.0 * math.pi * (column % _d) / _d)
             return (p[0], p[1], p[2])
@@ -1047,13 +1031,11 @@ def test_the_parting_seam_is_a_fin_and_not_a_hill():
                 here = at(station, crest)
                 before = at(station, crest - 1)
                 after = at(station, crest + 1)
-                first = unit(cross(sub(here, before),
-                                   sub(at(station + 1, crest - 1), before)))
-                second = unit(cross(sub(after, here),
-                                    sub(at(station + 1, crest), here)))
+                first = unit(cross(sub(here, before), sub(at(station + 1, crest - 1), before)))
+                second = unit(cross(sub(after, here), sub(at(station + 1, crest), here)))
                 if not first or not second:
                     continue
-                dot = max(-1.0, min(1.0, sum(x * y for x, y in zip(first, second))))
+                dot = max(-1.0, min(1.0, sum(x * y for x, y in zip(first, second, strict=False))))
                 angles.append(math.degrees(math.acos(dot)))
 
             assert angles, f"{name}/{meridian}: no crest samples"
@@ -1104,9 +1086,16 @@ def test_the_parting_seam_is_a_fin_and_not_a_hill():
             for station in range(int(0.78 * stations), int(0.94 * stations)):
                 lit = sampler(station / stations, 0.0)
                 bare = sampler(station / stations, 0.0, with_flash=False)
-                beads.append(math.sqrt(sum((x - y) ** 2 for x, y in
-                                           zip((lit[0], lit[1], lit[2]),
-                                               (bare[0], bare[1], bare[2])))))
+                beads.append(
+                    math.sqrt(
+                        sum(
+                            (x - y) ** 2
+                            for x, y in zip(
+                                (lit[0], lit[1], lit[2]), (bare[0], bare[1], bare[2]), strict=False
+                            )
+                        )
+                    )
+                )
             spread = (max(beads) - min(beads)) / max(beads)
             assert spread < 0.02, (
                 f"the seam's bead varies {100 * spread:.1f}% across the "
@@ -1114,8 +1103,7 @@ def test_the_parting_seam_is_a_fin_and_not_a_hill():
                 "held at the height the mould gap sets"
             )
             assert min(beads) > 0.5 * height, (
-                f"the bead is down to {min(beads):.3f} m in the cap against "
-                f"a full {height:.3f} m"
+                f"the bead is down to {min(beads):.3f} m in the cap against a full {height:.3f} m"
             )
             # AND THE POLE IS STILL A POINT. `test_digit_tips_converge_on_
             # a_point` asserts this for the five digits and nothing
@@ -1125,8 +1113,7 @@ def test_the_parting_seam_is_a_fin_and_not_a_hill():
             # last six stations, and all 74 gates still passed. The defect
             # DigitSurface.point describes at length, reproduced on the one
             # part its own test does not cover.
-            pole = [sampler(1.0, 2.0 * math.pi * column / divisions)
-                    for column in range(divisions)]
+            pole = [sampler(1.0, 2.0 * math.pi * column / divisions) for column in range(divisions)]
             for axis in (1, 2):
                 spread = max(p[axis] for p in pole) - min(p[axis] for p in pole)
                 assert spread < 1e-6, (
@@ -1168,13 +1155,11 @@ def test_the_parting_seam_is_creased_by_marking_and_not_by_angle():
     edge would leave the hand smooth with no seam and no error.
     """
 
-    sculpt = (PACK_ROOT / MOD_KEY / "blender" / "hand_sculpt.py").read_text(
-        encoding="utf-8"
-    )
+    sculpt = (PACK_ROOT / MOD_KEY / "blender" / "hand_sculpt.py").read_text(encoding="utf-8")
     # Scoped to _grid_to_object, which builds the palm and the digits.
     # build_nail may use the angle test and does: a nail plate is a small
     # well-conditioned grid whose rim is a real geometric edge.
-    body = sculpt[sculpt.index("def _grid_to_object("):]
+    body = sculpt[sculpt.index("def _grid_to_object(") :]
     body = body[: body.index(chr(10) + "def ", 1)]
     assert "bpy.ops.object.shade_auto_smooth(" not in body, (
         "the palm and digits must not use an angle test — their cap carries "
@@ -1237,9 +1222,7 @@ def test_no_part_of_the_hand_carries_folded_quads():
         return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
 
     def cross(a, b):
-        return (a[1] * b[2] - a[2] * b[1],
-                a[2] * b[0] - a[0] * b[2],
-                a[0] * b[1] - a[1] * b[0])
+        return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
 
     def length(a):
         return math.sqrt(sum(c * c for c in a))
@@ -1247,7 +1230,7 @@ def test_no_part_of_the_hand_carries_folded_quads():
     def apart(first, second):
         if not first or not second:
             return 0.0
-        dot = max(-1.0, min(1.0, sum(x * y for x, y in zip(first, second))))
+        dot = max(-1.0, min(1.0, sum(x * y for x, y in zip(first, second, strict=False))))
         return math.degrees(math.acos(dot))
 
     # A quad whose two parameter directions are nearly collinear has no
@@ -1264,21 +1247,22 @@ def test_no_part_of_the_hand_carries_folded_quads():
     failures = []
     sliver_counts = {}
     for name, sampler, divisions, stations, ceiling in parts:
+
         def point(station, column, _s=sampler, _d=divisions, _n=stations):
             p = _s(station / _n, 2.0 * math.pi * (column % _d) / _d)
             return (p[0], p[1], p[2])
 
         def tangents(station, column):
             here = point(station, column)
-            return (sub(point(station, column + 1), here),
-                    sub(point(station + 1, column), here))
+            return (sub(point(station, column + 1), here), sub(point(station + 1, column), here))
 
         def separation(station, column):
             across, along = tangents(station, column)
             if length(across) < 1e-12 or length(along) < 1e-12:
                 return 0.0
-            dot = (sum(x * y for x, y in zip(across, along))
-                   / (length(across) * length(along)))
+            dot = sum(x * y for x, y in zip(across, along, strict=False)) / (
+                length(across) * length(along)
+            )
             return math.degrees(math.acos(max(-1.0, min(1.0, dot))))
 
         def face(station, column):
@@ -1287,12 +1271,15 @@ def test_no_part_of_the_hand_carries_folded_quads():
             size = length(normal)
             return None if size < 1e-12 else tuple(c / size for c in normal)
 
-        def authored(column):
-            """The two mould meridians are deliberate discontinuities."""
+        def authored(column, divisions=divisions):
+            """The two mould meridians are deliberate discontinuities.
+
+            ``divisions`` is bound as a default (B023) so the closure holds
+            this iteration's value structurally.
+            """
 
             for crest in (0, divisions // 2):
-                if min((column - crest) % divisions,
-                       (crest - column) % divisions) <= 1:
+                if min((column - crest) % divisions, (crest - column) % divisions) <= 1:
                     return True
             return False
 
@@ -1313,8 +1300,7 @@ def test_no_part_of_the_hand_carries_folded_quads():
                     slivers += 1
                     continue
                 here = face(station, column)
-                for other in ((station - 1, column),
-                              (station, (column - 1) % divisions)):
+                for other in ((station - 1, column), (station, (column - 1) % divisions)):
                     if separation(*other) < DEGENERATE_DEG:
                         continue
                     if apart(face(*other), here) > 120.0:
@@ -1367,14 +1353,14 @@ def test_the_nail_holds_its_ratio_to_the_foam():
     textures = PACK_ROOT / MOD_KEY / "textures"
 
     def linear_luminance(name):
-        pixels = np.asarray(
-            Image.open(textures / f"{name}.color.png").convert("RGB"), dtype=float
-        ) / 255.0
-        linear = np.where(pixels <= 0.04045, pixels / 12.92,
-                          ((pixels + 0.055) / 1.055) ** 2.4)
-        return float((0.2126 * linear[..., 0]
-                      + 0.7152 * linear[..., 1]
-                      + 0.0722 * linear[..., 2]).mean())
+        pixels = (
+            np.asarray(Image.open(textures / f"{name}.color.png").convert("RGB"), dtype=float)
+            / 255.0
+        )
+        linear = np.where(pixels <= 0.04045, pixels / 12.92, ((pixels + 0.055) / 1.055) ** 2.4)
+        return float(
+            (0.2126 * linear[..., 0] + 0.7152 * linear[..., 1] + 0.0722 * linear[..., 2]).mean()
+        )
 
     foam = linear_luminance(f"{spec.MOD_ID}_foam_latex")
     nail = linear_luminance(f"{spec.MOD_ID}_nail")
@@ -1456,13 +1442,12 @@ def test_the_rust_stays_legible_against_the_iron_it_stains():
     from PIL import Image
 
     pixels = np.asarray(
-        Image.open(PACK_ROOT / MOD_KEY / "textures"
-                   / f"{spec.MOD_ID}_cast_iron.color.png").convert("RGB"),
+        Image.open(PACK_ROOT / MOD_KEY / "textures" / f"{spec.MOD_ID}_cast_iron.color.png").convert(
+            "RGB"
+        ),
         dtype=float,
     )
-    luma = (0.2126 * pixels[..., 0]
-            + 0.7152 * pixels[..., 1]
-            + 0.0722 * pixels[..., 2])
+    luma = 0.2126 * pixels[..., 0] + 0.7152 * pixels[..., 1] + 0.0722 * pixels[..., 2]
 
     # The oxide bloom is the reddest 1% of the map.
     chroma = pixels[..., 0] - pixels[..., 2]

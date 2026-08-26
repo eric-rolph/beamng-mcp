@@ -16,6 +16,7 @@ itself.
 from __future__ import annotations
 
 import importlib.util
+import itertools
 import json
 import math
 import sys
@@ -60,7 +61,7 @@ def node_table(part) -> dict[str, dict]:
 # derived, so these gates prove the derivation round-trips.
 # ---------------------------------------------------------------------------
 def test_the_dial_ratios_reproduce_the_authored_tip_speeds() -> None:
-    for setting, (ratio, want) in enumerate(zip(S.DIAL_RATIO, S.TIP_MPS)):
+    for setting, (ratio, want) in enumerate(zip(S.DIAL_RATIO, S.TIP_MPS, strict=False)):
         got = ratio * S.MOTOR_MAX_AV / S.GEAR_RATIO * S.TIP_R
         assert got == pytest.approx(want, abs=1e-9), setting
 
@@ -93,7 +94,7 @@ def test_the_tilt_ladder_reproduces_the_authored_strike_heights() -> None:
     number the blade really does has to be the number that was solved.
     """
 
-    for rung, (angle, want) in enumerate(zip(S.TILT_RAD, S.TILT_CLEAR_M)):
+    for rung, (angle, want) in enumerate(zip(S.TILT_RAD, S.TILT_CLEAR_M, strict=False)):
         assert S.blade_clearance_at_pitch(angle) == pytest.approx(want, abs=1e-9), rung
     # And the tip-only closed form must NOT be what produced them.
     tip_only = (
@@ -351,9 +352,7 @@ def test_the_motor_block_configures_a_device_that_exists() -> None:
     assert part["motor"]["soundConfig"] in part, "the sound config is orphaned too"
 
     motor = next(r for r in rows if r["name"] == "motor")
-    factories = Path(
-        "E:/SteamLibrary/steamapps/common/BeamNG.drive/lua/vehicle/powertrain"
-    )
+    factories = Path("E:/SteamLibrary/steamapps/common/BeamNG.drive/lua/vehicle/powertrain")
     if factories.is_dir():
         available = {path.stem for path in factories.glob("*.lua")}
         assert motor["type"] in available, (motor["type"], sorted(available))
@@ -445,12 +444,8 @@ def test_the_sweep_limits_are_the_cranks_own_lengths() -> None:
     options = hydro_row(part, "fanSweep")[2]
 
     # (a) the limits ARE the crank's ratios at the authored half-sweep
-    assert options["inLimit"] == pytest.approx(
-        built_yaw_ratio(nodes, -S.SWEEP_HALF_RAD), abs=1e-6
-    )
-    assert options["outLimit"] == pytest.approx(
-        built_yaw_ratio(nodes, +S.SWEEP_HALF_RAD), abs=1e-6
-    )
+    assert options["inLimit"] == pytest.approx(built_yaw_ratio(nodes, -S.SWEEP_HALF_RAD), abs=1e-6)
+    assert options["outLimit"] == pytest.approx(built_yaw_ratio(nodes, +S.SWEEP_HALF_RAD), abs=1e-6)
 
     # (b) neither limit may pass the crank's dead centre, at any yaw
     sweep = [built_yaw_ratio(nodes, math.radians(d)) for d in range(-180, 181)]
@@ -499,9 +494,7 @@ def tilt_rig():
     cg_y = sum(n.get("nodeWeight", 125.0) * n["pos"][1] for n in body) / mass
     cg_z = sum(n.get("nodeWeight", 125.0) * n["pos"][2] for n in body) / mass
 
-    blades = [
-        n["pos"] for n in nodes.values() if n.get("group") == f"{S.MOD_ID}_blade"
-    ]
+    blades = [n["pos"] for n in nodes.values() if n.get("group") == f"{S.MOD_ID}_blade"]
     assert len(blades) >= 60, len(blades)
     # Axial station and radius about the hub axis, which runs along Y through
     # the trunnion height. The rotor TURNS, so the radius is what reaches the
@@ -516,16 +509,11 @@ def tilt_rig():
 
     def swept_floor(theta: float) -> float:
         return trunnion_z + min(
-            -station * math.sin(theta) - radius * math.cos(theta)
-            for station, radius in swept
+            -station * math.sin(theta) - radius * math.cos(theta) for station, radius in swept
         )
 
     def potential(theta: float, commanded: float) -> float:
-        height = (
-            trunnion_z
-            - cg_y * math.sin(theta)
-            + (cg_z - trunnion_z) * math.cos(theta)
-        )
+        height = trunnion_z - cg_y * math.sin(theta) + (cg_z - trunnion_z) * math.cos(theta)
         stretch = (ratio(theta) - commanded) * rest
         return mass * GRAVITY * height + 0.5 * options["beamSpring"] * stretch**2
 
@@ -577,10 +565,7 @@ def settled_pitch(rig, commanded: float) -> float:
     lo, hi = samples[index] - step, samples[index] + step
     for _ in range(80):
         mid = 0.5 * (lo + hi)
-        slope = (
-            rig["potential"](mid + 1e-7, commanded)
-            - rig["potential"](mid - 1e-7, commanded)
-        )
+        slope = rig["potential"](mid + 1e-7, commanded) - rig["potential"](mid - 1e-7, commanded)
         if slope < 0.0:
             lo = mid
         else:
@@ -599,9 +584,9 @@ def test_the_tilt_body_ledger_matches_the_built_cage() -> None:
     assert rig["mass"] == pytest.approx(S.TILT_BODY_KG, rel=1e-6), rig["mass"]
     # Authored +Y is forward; the built cage flips it.
     assert -rig["cg_y"] == pytest.approx(S.TILT_BODY_CG_Y, abs=1e-4), rig["cg_y"]
-    assert rig["cg_z"] - rig["trunnion_z"] == pytest.approx(
-        S.TILT_BODY_CG_DZ, abs=1e-4
-    ), rig["cg_z"]
+    assert rig["cg_z"] - rig["trunnion_z"] == pytest.approx(S.TILT_BODY_CG_DZ, abs=1e-4), rig[
+        "cg_z"
+    ]
 
 
 def test_the_tilt_rungs_strike_the_heights_the_console_announces() -> None:
@@ -624,7 +609,7 @@ def test_the_tilt_rungs_strike_the_heights_the_console_announces() -> None:
 
     rig = tilt_rig()
     out_limit = rig["options"]["outLimit"]
-    for rung, (command, want) in enumerate(zip(S.TILT_INPUT, S.TILT_CLEAR_M)):
+    for rung, (command, want) in enumerate(zip(S.TILT_INPUT, S.TILT_CLEAR_M, strict=False)):
         # hydros.lua: center is 1, inputCenter 0, inputOutLimit 1.
         commanded = 1.0 + command * (out_limit - 1.0)
         theta = settled_pitch(rig, commanded)
@@ -730,7 +715,7 @@ def test_the_oscillation_verb_is_on_the_plunger() -> None:
 
 def test_the_stop_pad_can_actually_contain_a_car() -> None:
     dims = S.TRIGGERS["stop_pad"]["dimensions"]
-    for got, want in zip(dims, (2.9, 4.5, 3.0)):
+    for got, want in zip(dims, (2.9, 4.5, 3.0), strict=False):
         assert got >= want, dims
 
 
@@ -760,28 +745,27 @@ def controller_under_lupa():
 
     lupa = pytest.importorskip("lupa")
     path = (
-        PACK_ROOT / MOD_KEY / "mod" / "vehicles" / S.MOD_ID
-        / "lua" / "controller" / "giantFan.lua"
+        PACK_ROOT / MOD_KEY / "mod" / "vehicles" / S.MOD_ID / "lua" / "controller" / "giantFan.lua"
     )
     if not path.is_file():
         pytest.skip("giant_fan is not built; run build.py giant_fan prop")
     lua = lupa.LuaRuntime(unpack_returned_tuples=True)
     lua.execute(
-        """
+        f"""
         nop = function() end
-        electrics = {values = {}}
-        MOTOR = {maxAV = %r, outputAV1 = 0.0,
-                 setIgnition = function() end, sendTorqueData = function() end}
-        ROT = {name = "fan_rotor", wheelDir = -1,
-               brakeTorque = %r, desiredBrakingTorque = 0}
-        powertrain = {getDevice = function() return MOTOR end}
-        wheels = {wheelRotatorCount = 1, wheelRotators = {[0] = ROT}}
-        playerInfo = {firstPlayerSeated = true}
+        electrics = {{values = {{}}}}
+        MOTOR = {{maxAV = {float(S.MOTOR_MAX_AV)!r}, outputAV1 = 0.0,
+                 setIgnition = function() end, sendTorqueData = function() end}}
+        ROT = {{name = "fan_rotor", wheelDir = -1,
+               brakeTorque = {float(S.BRAKE_TORQUE)!r}, desiredBrakingTorque = 0}}
+        powertrain = {{getDevice = function() return MOTOR end}}
+        wheels = {{wheelRotatorCount = 1, wheelRotators = {{[0] = ROT}}}}
+        playerInfo = {{firstPlayerSeated = true}}
         function _throttle() return electrics.values.throttle or 0.0 end
         function _brake() return ROT.desiredBrakingTorque or 0.0 end
         function _setav(v) MOTOR.outputAV1 = v end
         function _tipspeed() return electrics.values.fanTipSpeed or 0.0 end
-        """ % (float(S.MOTOR_MAX_AV), float(S.BRAKE_TORQUE))
+        """
     )
     module = lua.eval("function(src) return load(src, 'giantFan') end")(
         path.read_text(encoding="utf-8")
@@ -807,7 +791,7 @@ def motor_curve():
 
     def torque(rpm: float) -> float:
         rpm = min(max(rpm, curve[0][0]), curve[-1][0])
-        for (r0, t0), (r1, t1) in zip(curve, curve[1:]):
+        for (r0, t0), (r1, t1) in itertools.pairwise(curve):
             if r0 <= rpm <= r1:
                 span = (rpm - r0) / (r1 - r0) if r1 != r0 else 0.0
                 return t0 + span * (t1 - t0)
@@ -826,8 +810,7 @@ def aero_torque(omega: float, segments: int = 48) -> float:
         radius = S.HUB_R + station * S.BLADE_SPAN
         chord = S.blade_chord(station) * math.sin(S.blade_pitch(station))
         total += (
-            0.5 * rho * drag * (omega * radius) ** 2
-            * chord * (S.BLADE_SPAN / segments) * radius
+            0.5 * rho * drag * (omega * radius) ** 2 * chord * (S.BLADE_SPAN / segments) * radius
         )
     return S.BLADE_COUNT * total
 
@@ -933,27 +916,18 @@ def load_dae() -> dict:
         mesh = geometry.find("c:mesh", DAE_NS)
         raw = [
             float(value)
-            for value in mesh.find("c:source", DAE_NS)
-            .find("c:float_array", DAE_NS)
-            .text.split()
+            for value in mesh.find("c:source", DAE_NS).find("c:float_array", DAE_NS).text.split()
         ]
-        points = [
-            (-raw[i], -raw[i + 1], raw[i + 2]) for i in range(0, len(raw), 3)
-        ]
+        points = [(-raw[i], -raw[i + 1], raw[i + 2]) for i in range(0, len(raw), 3)]
         by_material = {}
         for triangles in mesh.findall("c:triangles", DAE_NS):
             material = triangles.get("material", "").replace("-material", "")
             inputs = triangles.findall("c:input", DAE_NS)
             stride = max(int(i.get("offset")) for i in inputs) + 1
-            offset = next(
-                int(i.get("offset"))
-                for i in inputs
-                if i.get("semantic") == "VERTEX"
-            )
-            indices = [
-                int(value)
-                for value in triangles.find("c:p", DAE_NS).text.split()
-            ][offset::stride]
+            offset = next(int(i.get("offset")) for i in inputs if i.get("semantic") == "VERTEX")
+            indices = [int(value) for value in triangles.find("c:p", DAE_NS).text.split()][
+                offset::stride
+            ]
             bucket = by_material.setdefault(material, [])
             bucket.extend(points[i] for i in set(indices))
         out[geometry.get("name")] = by_material
@@ -981,14 +955,9 @@ def load_dae_faces() -> list[tuple[str, str, tuple, tuple]]:
         sources = {}
         for source in mesh.findall("c:source", DAE_NS):
             stride = int(
-                source.find("c:technique_common", DAE_NS)
-                .find("c:accessor", DAE_NS)
-                .get("stride")
+                source.find("c:technique_common", DAE_NS).find("c:accessor", DAE_NS).get("stride")
             )
-            values = [
-                float(value)
-                for value in source.find("c:float_array", DAE_NS).text.split()
-            ]
+            values = [float(value) for value in source.find("c:float_array", DAE_NS).text.split()]
             sources[source.get("id")] = [
                 tuple(values[i : i + stride]) for i in range(0, len(values), stride)
             ]
@@ -1006,9 +975,7 @@ def load_dae_faces() -> list[tuple[str, str, tuple, tuple]]:
                     alias.get(source, source),
                     int(entry.get("offset")),
                 )
-            indices = [
-                int(value) for value in triangles.find("c:p", DAE_NS).text.split()
-            ]
+            indices = [int(value) for value in triangles.find("c:p", DAE_NS).text.split()]
             for face in range(len(indices) // stride // 3):
                 points, uvs = [], []
                 for corner in range(3):
@@ -1021,9 +988,7 @@ def load_dae_faces() -> list[tuple[str, str, tuple, tuple]]:
                         uvs.append(sources[key][indices[base + offset]])
                     else:
                         uvs.append((0.0, 0.0))
-                faces.append(
-                    (geometry.get("name"), material, tuple(points), tuple(uvs))
-                )
+                faces.append((geometry.get("name"), material, tuple(points), tuple(uvs)))
     return faces
 
 
@@ -1107,9 +1072,7 @@ ESC_CENTRE = (0.0, 12.45 - S.ESC_RECESS, S.ESC_C_Z)
         ("hub_badge", (0.0, 1.0, 0.0), None, None),
     ],
 )
-def test_every_printed_legend_covers_its_whole_map(
-    material, view, width_axis, height_axis
-) -> None:
+def test_every_printed_legend_covers_its_whole_map(material, view, width_axis, height_axis) -> None:
     """ONE_TILE_MATERIALS is necessary and nowhere near sufficient.
 
     One tile only helps if the primitive's default UV puts the artwork on the
@@ -1127,8 +1090,7 @@ def test_every_printed_legend_covers_its_whole_map(
     outward = [
         (points, uvs)
         for _geometry, name, points, uvs in load_dae_faces()
-        if name == key
-        and sum(face_normal(points)[i] * view[i] for i in range(3)) > 0.5
+        if name == key and sum(face_normal(points)[i] * view[i] for i in range(3)) > 0.5
     ]
     assert outward, key
 
@@ -1187,8 +1149,7 @@ def test_the_dial_face_is_not_sealed_inside_its_own_bezel() -> None:
 
     def world(across, up, out):
         return tuple(
-            ESC_CENTRE[i] + across * (1.0, 0.0, 0.0)[i] + up * ESC_UP[i]
-            + out * ESC_NORMAL[i]
+            ESC_CENTRE[i] + across * (1.0, 0.0, 0.0)[i] + up * ESC_UP[i] + out * ESC_NORMAL[i]
             for i in range(3)
         )
 
@@ -1309,9 +1270,7 @@ def test_the_yoke_is_one_body_and_not_a_pair_of_islands() -> None:
         )
 
     for root, box in boxes.items():
-        nearest = min(
-            gap(box, other) for key_, other in boxes.items() if key_ != root
-        )
+        nearest = min(gap(box, other) for key_, other in boxes.items() if key_ != root)
         assert nearest < 0.10, (box, nearest)
 
 
@@ -1320,9 +1279,7 @@ def neck_radius(z: float) -> float:
 
 
 def housing_radius(y: float) -> float:
-    return S.HSG_R_REAR + (S.HSG_R_FRONT - S.HSG_R_REAR) * (
-        (y - S.HSG_REAR_Y) / S.HSG_L
-    )
+    return S.HSG_R_REAR + (S.HSG_R_FRONT - S.HSG_R_REAR) * ((y - S.HSG_REAR_Y) / S.HSG_L)
 
 
 def test_the_moulded_warning_bands_hug_the_shells_they_are_moulded_into() -> None:
@@ -1402,9 +1359,7 @@ def test_the_gantry_is_carried_by_the_neck_it_climbs() -> None:
     for i in range(count):
         z = S.DECK_Z + (i + 1) * S.GANTRY_STAIR_RISE
         reach = [
-            abs(y) - neck_radius(point_z)
-            for _x, y, point_z in rungs
-            if abs(point_z - z) < 0.09
+            abs(y) - neck_radius(point_z) for _x, y, point_z in rungs if abs(point_z - z) < 0.09
         ]
         assert reach, i
         assert min(reach) < 0.0, (i, z, min(reach))
@@ -1420,9 +1375,7 @@ def test_the_hub_badge_stands_proud_of_the_cap() -> None:
     badge = dae[f"{S.MOD_ID}_head_mesh"][f"{S.MOD_ID}_hub_badge"]
     assert badge
     centre_y = S.DISC_OFFSET_Y + S.CAP_PROUD * 0.35
-    rim_y = centre_y + S.CAP_DOME_RISE * math.sqrt(
-        1.0 - (S.BADGE_A / (2.0 * S.CAP_R)) ** 2
-    )
+    rim_y = centre_y + S.CAP_DOME_RISE * math.sqrt(1.0 - (S.BADGE_A / (2.0 * S.CAP_R)) ** 2)
     apex_y = centre_y + S.CAP_DOME_RISE
     front = max(point[1] for point in badge)
     back = min(point[1] for point in badge)
@@ -1472,9 +1425,7 @@ def test_every_palette_entry_becomes_a_shipped_material() -> None:
     shipped none of them.
     """
 
-    path = (
-        PACK_ROOT / MOD_KEY / "mod" / "vehicles" / S.MOD_ID / "main.materials.json"
-    )
+    path = PACK_ROOT / MOD_KEY / "mod" / "vehicles" / S.MOD_ID / "main.materials.json"
     if not path.is_file():
         pytest.skip("giant_fan is not built; run build.py giant_fan prop")
     shipped = set(json.loads(path.read_text(encoding="utf-8")))
@@ -1486,16 +1437,7 @@ def test_every_palette_entry_becomes_a_shipped_material() -> None:
 
 
 def runtime_source() -> str:
-    path = (
-        PACK_ROOT
-        / MOD_KEY
-        / "mod"
-        / "lua"
-        / "ge"
-        / "extensions"
-        / S.MOD_ID
-        / "runtime.lua"
-    )
+    path = PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / S.MOD_ID / "runtime.lua"
     if not path.is_file():
         pytest.skip("giant_fan is not built; run build.py giant_fan prop")
     return path.read_text(encoding="utf-8")
@@ -1543,7 +1485,7 @@ def test_the_stop_pad_banks_no_dwell_while_the_fan_is_off() -> None:
     assert "(b.dial or 0) ~= 0" in body[guard:accumulate], body[guard:accumulate]
 
     press = source.index("function behavior.onPanelButton")
-    head = source[press : source.index('if buttonId ==', press)]
+    head = source[press : source.index("if buttonId ==", press)]
     assert "padDwell = 0.0" in head, head
 
 
@@ -1564,9 +1506,7 @@ def test_no_material_on_this_machine_is_translucent() -> None:
     police light glass.
     """
 
-    path = (
-        PACK_ROOT / MOD_KEY / "mod" / "vehicles" / S.MOD_ID / "main.materials.json"
-    )
+    path = PACK_ROOT / MOD_KEY / "mod" / "vehicles" / S.MOD_ID / "main.materials.json"
     if not path.is_file():
         pytest.skip("giant_fan is not built; run build.py giant_fan prop")
     book = json.loads(path.read_text(encoding="utf-8"))
@@ -1713,20 +1653,14 @@ def test_the_drivable_deck_reaches_the_deck_you_can_see() -> None:
         if abs(point[2] - S.DECK_Z) < 0.005
     ]
     assert len(visible) >= 100, len(visible)
-    worst = max(
-        min(surface_gap(point, triangle) for triangle in drivable)
-        for point in visible
-    )
+    worst = max(min(surface_gap(point, triangle) for triangle in drivable) for point in visible)
     assert worst < 0.10, worst
 
     # ...and the plinth is solid from outside, not an open-sided lattice.
     flanks = [
         triangle
         for triangle in faces
-        if all(
-            S.BASE_UNDERSIDE_Z - 0.01 <= point[2] <= S.DECK_Z + 0.01
-            for point in triangle
-        )
+        if all(S.BASE_UNDERSIDE_Z - 0.01 <= point[2] <= S.DECK_Z + 0.01 for point in triangle)
         and len({round(point[2], 3) for point in triangle}) > 1
     ]
     assert len(flanks) >= 16, len(flanks)
@@ -1801,19 +1735,14 @@ def behavior_chunk():
     """The SHIPPED behaviour, loaded standalone with the engine stubbed out."""
 
     lupa = pytest.importorskip("lupa")
-    path = (
-        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / S.MOD_ID
-        / "runtime.lua"
-    )
+    path = PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / S.MOD_ID / "runtime.lua"
     if not path.is_file():
         pytest.skip("giant_fan is not built")
     source = path.read_text(encoding="utf-8")
     tunables = source[source.index("local B = {") :]
     tunables = tunables[: tunables.index("\n}") + 2].replace("local B = {", "B = {", 1)
     chunk = source[
-        source.index("local behavior = {}") : source.index(
-            "local function synchronizeInstallation"
-        )
+        source.index("local behavior = {}") : source.index("local function synchronizeInstallation")
     ].replace("local behavior = {}", "behavior = {}", 1)
 
     lua = lupa.LuaRuntime(unpack_returned_tuples=True)
@@ -1938,26 +1867,18 @@ def test_the_tilt_pin_carries_its_worst_load_inside_the_force_ceiling() -> None:
 
     steps = 720
     step = S.SWEEP_PERIOD_S / steps
-    angles = [
-        yaw_for(math.sin(2.0 * math.pi * i / steps)) for i in range(steps)
-    ]
-    peak_rate = max(
-        abs(angles[(i + 1) % steps] - angles[i]) / step for i in range(steps)
-    )
+    angles = [yaw_for(math.sin(2.0 * math.pi * i / steps)) for i in range(steps)]
+    peak_rate = max(abs(angles[(i + 1) % steps] - angles[i]) / step for i in range(steps))
 
     gyroscopic = peak_rate * spin_inertia * S.OMEGA_3
     weight = rig["mass"] * GRAVITY * abs(rig["cg_y"])
-    lever = (
-        S.tilt_length_ratio(1e-7) - S.tilt_length_ratio(-1e-7)
-    ) * S.TILT_REST_LEN / 2e-7
+    lever = (S.tilt_length_ratio(1e-7) - S.tilt_length_ratio(-1e-7)) * S.TILT_REST_LEN / 2e-7
     force = (weight + gyroscopic) / lever
 
     pin = nodes[f"{S.MOD_ID}_tilt_pin"]["nodeWeight"]
     anchor = nodes[f"{S.MOD_ID}_tilt_anchor"]["nodeWeight"]
     for weight_kg in (pin, anchor):
-        assert force / weight_kg <= S.NODE_FORCE_CEIL, (
-            force, weight_kg, force / weight_kg
-        )
+        assert force / weight_kg <= S.NODE_FORCE_CEIL, (force, weight_kg, force / weight_kg)
 
 
 # ---------------------------------------------------------------------------
@@ -2039,9 +1960,7 @@ def test_no_car_sized_gap_exists_inside_the_motor_housing() -> None:
     misses = []
     for iy in range(9):
         y_auth = S.HSG_REAR_Y + (S.HSG_FRONT_Y - S.HSG_REAR_Y) * iy / 8.0
-        radius = S.HSG_R_REAR + (S.HSG_R_FRONT - S.HSG_R_REAR) * (
-            (y_auth - S.HSG_REAR_Y) / S.HSG_L
-        )
+        radius = S.HSG_R_REAR + (S.HSG_R_FRONT - S.HSG_R_REAR) * ((y_auth - S.HSG_REAR_Y) / S.HSG_L)
         for ix in range(-2, 3):
             for iz in range(-2, 3):
                 x = radius * ix / 3.0

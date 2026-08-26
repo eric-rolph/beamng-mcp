@@ -225,8 +225,7 @@ return S
 @pytest.fixture()
 def rig():
     runtime_path = (
-        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / SPEC.MOD_ID
-        / "runtime.lua"
+        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / SPEC.MOD_ID / "runtime.lua"
     )
     lua = lupa.LuaRuntime(unpack_returned_tuples=True)
     state = lua.execute(STUBS)
@@ -249,23 +248,31 @@ def tick(module, seconds=1.0 / 60.0, steps=1):
 def enter_zone(lua, state, module, zone, vehicle_id):
     name = f"{SPEC.MOD_ID}_p{PROP_ID}_{zone}"
     trigger = state.scene[name]
-    module.onBeamNGTrigger(lua.table_from({
-        "event": "enter",
-        "triggerID": trigger.id,
-        "triggerName": name,
-        "subjectID": vehicle_id,
-    }))
+    module.onBeamNGTrigger(
+        lua.table_from(
+            {
+                "event": "enter",
+                "triggerID": trigger.id,
+                "triggerName": name,
+                "subjectID": vehicle_id,
+            }
+        )
+    )
 
 
 def exit_zone(lua, state, module, zone, vehicle_id):
     name = f"{SPEC.MOD_ID}_p{PROP_ID}_{zone}"
     trigger = state.scene[name]
-    module.onBeamNGTrigger(lua.table_from({
-        "event": "exit",
-        "triggerID": trigger.id,
-        "triggerName": name,
-        "subjectID": vehicle_id,
-    }))
+    module.onBeamNGTrigger(
+        lua.table_from(
+            {
+                "event": "exit",
+                "triggerID": trigger.id,
+                "triggerName": name,
+                "subjectID": vehicle_id,
+            }
+        )
+    )
 
 
 # Half the length of the car this harness drives. The trigger mode is
@@ -353,8 +360,7 @@ def drive(state, module, vehicle_id, seconds, *, dt=1.0 / 60.0, until=None):
     steps = int(seconds / dt)
     for step in range(steps):
         if zones is not None:
-            zones.update(vehicle_id, state.lateralOf(vehicle_id),
-                         state.positionOf(vehicle_id))
+            zones.update(vehicle_id, state.lateralOf(vehicle_id), state.positionOf(vehicle_id))
         if until is not None and until(status(module)):
             return step * dt
         state.advance(vehicle_id, dt)
@@ -487,7 +493,9 @@ def test_a_parked_car_is_slapped_anyway_by_the_hold_timer(rig):
     assert status(module).phase == "cocked"
     state.setMotion(SUBJECT_ID, 0.0)
     held = drive(
-        state, module, SUBJECT_ID,
+        state,
+        module,
+        SUBJECT_ID,
         SPEC.BEHAVIOR["max_hold_seconds"] + 1.0,
         until=lambda s: s.phase != "cocked",
     )
@@ -515,7 +523,9 @@ def test_leaving_the_corridor_does_not_disarm_the_trap(rig):
         "line 16 m short of the strike plane"
     )
     drive(
-        state, module, SUBJECT_ID,
+        state,
+        module,
+        SUBJECT_ID,
         SPEC.BEHAVIOR["max_hold_seconds"] + 1.0,
         until=lambda s: s.phase != "cocked",
     )
@@ -550,8 +560,7 @@ def fresh_rig():
     lua = lupa.LuaRuntime(unpack_returned_tuples=True)
     state = lua.execute(STUBS)
     runtime = (
-        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / SPEC.MOD_ID
-        / "runtime.lua"
+        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / SPEC.MOD_ID / "runtime.lua"
     ).read_text(encoding="utf-8")
     module = lua.execute(runtime)
     state.addVehicle(PROP_ID, SPEC.MOD_ID, 0.0, 0.0, 0.0, 20.0, 30.0, 12.0)
@@ -591,7 +600,7 @@ def test_the_launch_leaves_along_the_palm_normal():
     for tilt_index in range(behavior["tilt_levels"]):
         lua, state, module = fresh_rig()
         launched = slap_once(lua, state, module, power=1, tilt=tilt_index)
-        speed = math.sqrt(launched.x ** 2 + launched.y ** 2 + launched.z ** 2)
+        speed = math.sqrt(launched.x**2 + launched.y**2 + launched.z**2)
         elevation = math.degrees(math.asin(max(-1.0, min(1.0, launched.z / speed))))
         expected = tilt_index * behavior["tilt_step_deg"]
         assert elevation == pytest.approx(expected, abs=0.5), (
@@ -606,15 +615,13 @@ def test_power_scales_the_launch_across_its_whole_ladder():
     for level in (1, behavior["power_levels"]):
         lua, state, module = fresh_rig()
         launched = slap_once(lua, state, module, power=level, tilt=0)
-        speeds.append(
-            math.sqrt(launched.x ** 2 + launched.y ** 2 + launched.z ** 2)
-        )
+        speeds.append(math.sqrt(launched.x**2 + launched.y**2 + launched.z**2))
     ratio = speeds[1] / speeds[0]
     # Both draws are random inside slap_speed_min..max, so the ratio is a
     # band, not a number: worst case is min at full power over max at 1x.
-    lowest = (
-        behavior["slap_speed_min_mps"] * behavior["power_multiplier_max"]
-    ) / behavior["slap_speed_max_mps"]
+    lowest = (behavior["slap_speed_min_mps"] * behavior["power_multiplier_max"]) / behavior[
+        "slap_speed_max_mps"
+    ]
     assert ratio > lowest * 0.95, f"POWER ladder ratio {ratio:.2f} is too flat"
 
 
@@ -654,8 +661,14 @@ def test_the_full_cycle_returns_to_idle(rig):
     # — assert the seven phases it does walk, in order, and separately that
     # it got as far as cooldown.
     assert seen[:8] == [
-        "alert", "windup", "cocked", "slapping", "follow", "holding",
-        "returning", "cooldown",
+        "alert",
+        "windup",
+        "cocked",
+        "slapping",
+        "follow",
+        "holding",
+        "returning",
+        "cooldown",
     ], seen
 
 
@@ -733,11 +746,7 @@ def test_no_lua_errors_were_logged(rig):
     lua, state, module = rig
     approach(lua, state, module, speed=25.0)
     drive(state, module, SUBJECT_ID, 20.0)
-    errors = [
-        event.message
-        for event in state.events.values()
-        if event.level == "E"
-    ]
+    errors = [event.message for event in state.events.values() if event.level == "E"]
     assert not errors, errors
 
 
@@ -764,8 +773,7 @@ def test_the_corridor_can_actually_deliver_the_lead_it_promises():
     lead = SPEC.BEHAVIOR["swing_lead_seconds"]
     slowest = SPEC.BEHAVIOR["min_closing_mps"]
     runtime = (
-        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / SPEC.MOD_ID
-        / "runtime.lua"
+        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / SPEC.MOD_ID / "runtime.lua"
     ).read_text(encoding="utf-8")
     holds = "if TRACKING_PHASES[b.phase] then return end" in runtime
     assert holds or lead * slowest >= near_edge, (
@@ -793,9 +801,7 @@ def test_it_connects_across_the_whole_drivable_range(speed):
     # `slapped` is set when the STROKE completes, before slapStrikeZone runs
     # — it means "the swing happened", not "a car was hit". Without this the
     # whole sweep would stay green if the strike zone stopped connecting.
-    assert state.velocityCount() > 0, (
-        f"the swing completed at {speed} m/s but nothing was launched"
-    )
+    assert state.velocityCount() > 0, f"the swing completed at {speed} m/s but nothing was launched"
     at_contact = state.positionOf(SUBJECT_ID)
     tolerance = SPEC.TRIGGERS["slap_zone"]["dimensions"][1] / 2.0 + CAR_HALF
     assert abs(at_contact) < tolerance, (
@@ -817,9 +823,7 @@ def test_holding_the_mast_side_line_is_a_real_escape():
     dodge_x = zone["center"][0] - zone["dimensions"][0] / 2.0 - CAR_HALF_WIDTH - 0.3
     corridor = SPEC.TRIGGERS["approach"]
     armed_x = corridor["center"][0] - corridor["dimensions"][0] / 2.0 - CAR_HALF_WIDTH
-    assert dodge_x > armed_x, (
-        "there is no lane that both wakes the machine and escapes it"
-    )
+    assert dodge_x > armed_x, "there is no lane that both wakes the machine and escapes it"
     approach(lua, state, module, speed=30.0, x=dodge_x)
     drive(state, module, SUBJECT_ID, 40.0, until=lambda s: s.phase == "follow")
     assert status(module).phase == "follow", "the machine never swung"
@@ -880,7 +884,7 @@ def test_a_car_that_only_touches_the_pad_is_slapped(rig):
     straight down the centreline.
     """
 
-    lua, state, module = rig
+    _lua, state, module = rig
     corridor = SPEC.TRIGGERS["approach"]
     near_edge = corridor["center"][1] + corridor["dimensions"][1] / 2.0
     assert near_edge < -CAR_HALF, (
@@ -892,9 +896,7 @@ def test_a_car_that_only_touches_the_pad_is_slapped(rig):
     state.addVehicle(SUBJECT_ID, "pickup", 0.0, 0.0, 0.5)
     state.setMotion(SUBJECT_ID, 0.0)
 
-    swung = drive(
-        state, module, SUBJECT_ID, 3.0, until=lambda s: s.phase == "slapping"
-    )
+    swung = drive(state, module, SUBJECT_ID, 3.0, until=lambda s: s.phase == "slapping")
     assert swung is not None, (
         "a car sitting on the painted pad never got swung at; the affordance "
         "and the trigger are still different things"
@@ -923,7 +925,10 @@ def test_the_corridor_still_leads_after_the_pad_shortcut(rig):
     approach(lua, state, module, speed=25.0)
     seen = []
     drive(
-        state, module, SUBJECT_ID, 6.0,
+        state,
+        module,
+        SUBJECT_ID,
+        6.0,
         until=lambda s: (seen.append(s.phase) or False) if s.phase not in seen else False,
     )
     assert "alert" in seen, seen

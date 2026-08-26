@@ -609,9 +609,7 @@ def test_mesh_purge_is_a_no_op_when_nothing_was_ever_compiled(tmp_path: Path) ->
     "mod_id",
     ["..", "../mods", "..\\mods", "a/b", "C:/Windows", "", "with space", ".hidden"],
 )
-def test_mesh_purge_refuses_anything_that_is_not_a_bare_mod_id(
-    tmp_path: Path, mod_id: str
-) -> None:
+def test_mesh_purge_refuses_anything_that_is_not_a_bare_mod_id(tmp_path: Path, mod_id: str) -> None:
     user = _sentinel_profile(tmp_path)
     keep = user / "mods"
     keep.mkdir()
@@ -650,9 +648,7 @@ def test_mesh_purge_refuses_a_cache_directory_that_is_a_link(tmp_path: Path) -> 
     cache_parent = user / "temp" / "vehicles"
     cache_parent.mkdir(parents=True)
     try:
-        (cache_parent / "ericrolph_spin_launch").symlink_to(
-            outside, target_is_directory=True
-        )
+        (cache_parent / "ericrolph_spin_launch").symlink_to(outside, target_is_directory=True)
     except OSError as exc:
         pytest.skip(f"directory links are unavailable on this host: {exc}")
     with pytest.raises(RuntimeError, match="link or reparse"):

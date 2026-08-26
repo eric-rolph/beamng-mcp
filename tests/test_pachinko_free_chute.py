@@ -262,9 +262,7 @@ def test_control_the_historic_left_wall_lane_fires_the_vertical_assert(
         _run(generator, "assert_no_clean_column")
 
 
-def test_control_a_defect_in_the_lower_edge_span_alone_is_caught(
-    generator, spec, monkeypatch
-):
+def test_control_a_defect_in_the_lower_edge_span_alone_is_caught(generator, spec, monkeypatch):
     """The second pass must not be a no-op.
 
     The scratchpad control for this returned ``spec.peg_row_runs(rank)``
@@ -280,9 +278,7 @@ def test_control_a_defect_in_the_lower_edge_span_alone_is_caught(
         _run(generator, "assert_no_clean_column")
 
 
-def test_control_a_straight_diagonal_fires_the_diagonal_assert(
-    generator, spec, monkeypatch
-):
+def test_control_a_straight_diagonal_fires_the_diagonal_assert(generator, spec, monkeypatch):
     """One gate per rank, centred on a straight line, too narrow to fall down.
 
     Shearing the real lattice cannot produce this control and it is worth
@@ -304,9 +300,7 @@ def test_control_a_straight_diagonal_fires_the_diagonal_assert(
         _run(generator, "assert_no_clean_column")
 
 
-def test_control_an_achievable_parabola_fires_the_ballistic_assert(
-    generator, spec, monkeypatch
-):
+def test_control_an_achievable_parabola_fires_the_ballistic_assert(generator, spec, monkeypatch):
     """No straight line threads it; exactly one achievable launch does.
 
     A parabola is strictly convex, so a lattice whose only gates sit on one

@@ -163,16 +163,11 @@ def test_handoff_authors_dense_ten_short_ton_guided_counterweight() -> None:
     assert sum(beam["spec"] == "release_latch" for beam in release_beams) == 2
     assert sum(beam["spec"] == "rest_hold" for beam in release_beams) == 15
     assert all(
-        float(handoff["beam_specs"][beam["spec"]]["beamSpring"]) > 0
-        for beam in release_beams
+        float(handoff["beam_specs"][beam["spec"]]["beamSpring"]) > 0 for beam in release_beams
     )
 
     weight_ids = {node["id"] for node in weight_nodes}
-    permanent_weight_beams = [
-        beam
-        for beam in handoff["beams"]
-        if set(beam["nodes"]) <= weight_ids
-    ]
+    permanent_weight_beams = [beam for beam in handoff["beams"] if set(beam["nodes"]) <= weight_ids]
     assert permanent_weight_beams, "releasing the supports must not dissolve the weight cage"
     assert not [node for node in handoff["nodes"] if node.get("extra", {}).get("couplerTag")]
 
@@ -213,9 +208,7 @@ def test_generated_jbeam_preserves_dense_weight_mass_release_and_vertical_guide(
     assert not [row for row in part["nodes"][1:] if row[-1].get("couplerTag")]
 
     rail_name = f"{MOD_ID}_weight_guide"
-    assert part["rails"][rail_name]["links:"] == [
-        f"{rail_name}_{index}" for index in range(5)
-    ]
+    assert part["rails"][rail_name]["links:"] == [f"{rail_name}_{index}" for index in range(5)]
     slider_rows = part["slidenodes"][1:]
     assert {row[0] for row in slider_rows} == {
         f"{MOD_ID}_weight_2_2_0",
@@ -228,9 +221,7 @@ def test_asymmetric_lever_authors_six_metre_drop_and_departure_geometry() -> Non
     spec = _load_spec()
     assert spec.COUNTERWEIGHT_MASS_KG == pytest.approx(9_070.0)
     assert spec.FREE_FALL_DISTANCE == pytest.approx(6.0, abs=0.02)
-    assert spec.WEIGHT_BOTTOM_REST_Z - spec.SURFACE_REST_AT_WEIGHT == pytest.approx(
-        6.0, abs=0.02
-    )
+    assert spec.WEIGHT_BOTTOM_REST_Z - spec.SURFACE_REST_AT_WEIGHT == pytest.approx(6.0, abs=0.02)
     assert spec.PLANK_CAR_ARM + spec.PLANK_WEIGHT_ARM == pytest.approx(spec.PLANK_LENGTH)
     assert spec.PLANK_CAR_ARM / spec.PLANK_WEIGHT_ARM >= 1.5
     assert 0.0 < spec.GANTRY_Y < spec.PLANK_WEIGHT_ARM
@@ -294,8 +285,7 @@ def test_direct_full_width_impact_bank_matches_the_structural_plank_rib() -> Non
     generated_pairs = {
         frozenset(row[:2])
         for row in part["beams"][1:]
-        if row[-1].get("beamType") == "|BOUNDED"
-        and frozenset(row[:2]) in expected_pairs
+        if row[-1].get("beamType") == "|BOUNDED" and frozenset(row[:2]) in expected_pairs
     }
     assert generated_pairs == expected_pairs
 
@@ -317,14 +307,10 @@ def test_five_bounded_hydraulic_catchers_and_snubbers_arrest_rebound() -> None:
     assert len(snubbers) == 5
     snubber_spec = handoff["beam_specs"]["rebound_snubber"]
     assert snubber_spec["beamType"] == "|BOUNDED"
-    assert float(snubber_spec["beamLimitDamp"]) > float(
-        snubber_spec["beamLimitDampRebound"]
-    )
+    assert float(snubber_spec["beamLimitDamp"]) > float(snubber_spec["beamLimitDampRebound"])
     assert all(beam["extra"]["longBoundRange"] == pytest.approx(6.5) for beam in snubbers)
 
-    generated = [
-        row for row in part["beams"][1:] if row[-1].get("beamType") == "|BOUNDED"
-    ]
+    generated = [row for row in part["beams"][1:] if row[-1].get("beamType") == "|BOUNDED"]
     assert len(generated) == 15
     assert all(float(row[-1]["beamLimitSpring"]) > 0.0 for row in generated)
     assert all(float(row[-1]["beamLimitDampRebound"]) > 0.0 for row in generated)

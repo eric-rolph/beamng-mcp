@@ -44,8 +44,10 @@ SOUND = PACK_ROOT / MOD_KEY / "assets" / "sound"
 # now measured on THESE.
 SHIPPED_SOUND = PACK_ROOT / MOD_KEY / "mod" / "vehicles" / SPEC.MOD_ID / "sound"
 MANIFEST = json.loads(
-    (PACK_ROOT / MOD_KEY / "authoring" / "spin_launch_audio_manifest.json")
-    .read_text(encoding="utf-8"))
+    (PACK_ROOT / MOD_KEY / "authoring" / "spin_launch_audio_manifest.json").read_text(
+        encoding="utf-8"
+    )
+)
 BY_NAME = {entry["name"]: entry for entry in MANIFEST["cues"]}
 
 # The pack's own pad rule, read off pachinko_audio_manifest.json (pin_soft_01
@@ -62,8 +64,7 @@ def _read(name):
 
 
 def _read_shipped(name):
-    data, rate = sf.read(
-        SHIPPED_SOUND / f"{SPEC.MOD_ID}_{name}.ogg", dtype="float32")
+    data, rate = sf.read(SHIPPED_SOUND / f"{SPEC.MOD_ID}_{name}.ogg", dtype="float32")
     return data, rate
 
 
@@ -80,8 +81,8 @@ def momentary_dbfs(samples, rate):
     x = np.asarray(samples, dtype=np.float64)
     window = int(MOMENTARY_WINDOW_S * rate)
     if len(x) <= window:
-        return 10.0 * np.log10(float(np.mean(x ** 2)) + 1e-20)
-    cumulative = np.concatenate(([0.0], np.cumsum(x ** 2)))
+        return 10.0 * np.log10(float(np.mean(x**2)) + 1e-20)
+    cumulative = np.concatenate(([0.0], np.cumsum(x**2)))
     hop = max(1, int(MOMENTARY_HOP_S * rate))
     energies = (cumulative[window::hop] - cumulative[:-window:hop]) / window
     return 10.0 * np.log10(float(np.max(energies)) + 1e-20)
@@ -104,7 +105,8 @@ def test_manifest_and_cue_table_and_ship_assets_agree():
 
     assert set(BY_NAME) == set(SPEC.AUDIO_CUE_NAMES)
     assert set(SPEC.SHIP_ASSETS) == {
-        f"sound/{SPEC.MOD_ID}_{name}.ogg" for name in SPEC.AUDIO_CUE_NAMES}
+        f"sound/{SPEC.MOD_ID}_{name}.ogg" for name in SPEC.AUDIO_CUE_NAMES
+    }
     assert len(SPEC.SHIP_ASSETS) == 16
     on_disk = {path.name for path in SOUND.glob("*.ogg")}
     assert on_disk == {f"{SPEC.MOD_ID}_{n}.ogg" for n in SPEC.AUDIO_CUE_NAMES}
@@ -160,7 +162,7 @@ def test_cue_is_audible_and_unclipped(name):
     peak = float(np.max(np.abs(samples)))
     assert 0.80 <= peak <= 0.95, f"{name}: peak {peak:.3f}"
     assert int(np.sum(np.abs(samples) >= 0.9999)) == 0, f"{name}: clipped"
-    rms = float(np.sqrt(np.mean(samples ** 2)))
+    rms = float(np.sqrt(np.mean(samples**2)))
     assert rms > 0.02, f"{name}: rms {rms:.4f} - effectively silent"
     assert abs(float(np.mean(samples))) < 5e-3, f"{name}: DC offset"
 
@@ -184,11 +186,13 @@ def test_stop_clock_lands_inside_a_silent_pad(name, stop, _vol):
     assert stop == entry["recommended_stop_s"], f"{name}: table vs manifest"
     audible = entry["audible_end_s"]
     assert abs((audible + STOP_OFFSET) - stop) < 1e-9, (
-        f"{name}: stop is not audible_end + {STOP_OFFSET} (the pack's pad rule)")
-    tail = data[int(stop * rate):]
+        f"{name}: stop is not audible_end + {STOP_OFFSET} (the pack's pad rule)"
+    )
+    tail = data[int(stop * rate) :]
     assert len(tail) > 0
     assert float(np.max(np.abs(tail))) < 1e-3, (
-        f"{name}: audible content after the stop clock at {stop} s")
+        f"{name}: audible content after the stop clock at {stop} s"
+    )
     # ...and the cue is not simply empty on the near side of it.
     body = data[: int(audible * rate)]
     assert float(np.max(np.abs(body))) > 0.5, f"{name}: nothing before the stop"
@@ -250,7 +254,8 @@ def test_spin_loop_cannot_alias_when_the_runtime_pitches_it_up():
     assert ceiling == pytest.approx(10813.2, abs=0.1)
     above = spectrum[freqs > ceiling]
     assert float(np.max(above)) < 0.01 * float(np.max(spectrum)), (
-        f"spin_loop has energy above {ceiling:.0f} Hz and will alias")
+        f"spin_loop has energy above {ceiling:.0f} Hz and will alias"
+    )
 
 
 def test_stage_tick_cannot_alias_across_its_ladder():
@@ -289,8 +294,9 @@ def test_the_shipped_runtime_carries_the_pitch_ladder_spec_solved():
     spectrum, by test_spin_loop_cannot_alias_when_the_runtime_pitches_it_up.
     """
 
-    runtime = (PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions"
-               / SPEC.MOD_ID / "runtime.lua").read_text(encoding="utf-8")
+    runtime = (
+        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / SPEC.MOD_ID / "runtime.lua"
+    ).read_text(encoding="utf-8")
 
     def shipped(name):
         match = re.search(rf"^local {name} = ([-\d.]+)$", runtime, re.MULTILINE)
@@ -300,29 +306,28 @@ def test_the_shipped_runtime_carries_the_pitch_ladder_spec_solved():
     # The ladder the console prints, re-derived from POWER_STEPS_MPS here and
     # compared against what a player's copy of the Lua actually holds.
     assert shipped("AUDIO_SPIN_PITCH_REF") == pytest.approx(
-        SPEC.POWER_STEPS_MPS[SPEC.POWER_NOM_INDEX - 1], abs=1e-9)
+        SPEC.POWER_STEPS_MPS[SPEC.POWER_NOM_INDEX - 1], abs=1e-9
+    )
     assert shipped("AUDIO_SPIN_PITCH_MAX") == pytest.approx(
-        SPEC.POWER_STEPS_MPS[-1] / SPEC.POWER_STEPS_MPS[SPEC.POWER_NOM_INDEX - 1],
-        abs=5e-5)
+        SPEC.POWER_STEPS_MPS[-1] / SPEC.POWER_STEPS_MPS[SPEC.POWER_NOM_INDEX - 1], abs=5e-5
+    )
     assert shipped("AUDIO_SPIN_PITCH_MIN") == pytest.approx(
-        SPEC.POWER_STEPS_MPS[0]
-        / SPEC.POWER_STEPS_MPS[SPEC.POWER_NOM_INDEX - 1] / 2.0, abs=5e-5)
-    assert shipped("AUDIO_SPIN_VOL_TOP_MPS") == pytest.approx(
-        SPEC.POWER_STEPS_MPS[-1], abs=1e-9)
+        SPEC.POWER_STEPS_MPS[0] / SPEC.POWER_STEPS_MPS[SPEC.POWER_NOM_INDEX - 1] / 2.0, abs=5e-5
+    )
+    assert shipped("AUDIO_SPIN_VOL_TOP_MPS") == pytest.approx(SPEC.POWER_STEPS_MPS[-1], abs=1e-9)
 
     # The tick ladder, likewise: one semitone per rung, resolving a perfect
     # fifth, and the shipped table has to have as many entries as the runtime
     # has rungs or the top rung silently replays pitch 1.0.
-    match = re.search(r"^local AUDIO_TICK_PITCH = \{([^}]*)\}$",
-                      runtime, re.MULTILINE)
+    match = re.search(r"^local AUDIO_TICK_PITCH = \{([^}]*)\}$", runtime, re.MULTILINE)
     assert match, "the shipped runtime has no tick ladder"
     ticks = [float(token) for token in match.group(1).split(",")]
     rungs = runtime.split("local STAGE_FRACS = {")[1].split("}")[0].count(",") + 1
     assert len(ticks) == rungs, (len(ticks), rungs)
-    assert ticks == pytest.approx(
-        [2.0 ** (index / 12.0) for index in range(rungs)], abs=5e-5)
+    assert ticks == pytest.approx([2.0 ** (index / 12.0) for index in range(rungs)], abs=5e-5)
     assert ticks[-1] == pytest.approx(2.0 ** (7 / 12), abs=5e-5), (
-        "the ladder no longer resolves on a perfect fifth")
+        "the ladder no longer resolves on a perfect fifth"
+    )
 
     # ...and the volume law's ceiling stays under release_bang's 1.00, so the
     # throw is still the loudest single event in the mod.
@@ -357,10 +362,18 @@ def test_the_audio_emitter_is_resolved_by_name_from_the_chamber():
     import math
 
     name = SPEC.AUDIO_EMITTER_NODE_NAME
-    vehicle_lua = (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / SPEC.MOD_ID
-                   / "lua" / f"{SPEC.MOD_ID}_vehicle.lua").read_text(encoding="utf-8")
-    runtime_lua = (PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions"
-                   / SPEC.MOD_ID / "runtime.lua").read_text(encoding="utf-8")
+    vehicle_lua = (
+        PACK_ROOT
+        / MOD_KEY
+        / "mod"
+        / "vehicles"
+        / SPEC.MOD_ID
+        / "lua"
+        / f"{SPEC.MOD_ID}_vehicle.lua"
+    ).read_text(encoding="utf-8")
+    runtime_lua = (
+        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / SPEC.MOD_ID / "runtime.lua"
+    ).read_text(encoding="utf-8")
     assert f'local AUDIO_NODE_NAME = "{name}"' in vehicle_lua
     assert f'local AUDIO_NODE_NAME = "{name}"' in runtime_lua
     # The GE side must resolve it the way the placement frame does, and push
@@ -376,10 +389,11 @@ def test_the_audio_emitter_is_resolved_by_name_from_the_chamber():
     assert "state.nodeCids = nil" in SPEC.LUA_BEHAVIOR
 
     jbeam = json.loads(
-        (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / SPEC.MOD_ID
-         / f"{SPEC.MOD_ID}.jbeam").read_text(encoding="utf-8"))
-    rows = [row for row in jbeam[SPEC.MOD_ID]["nodes"]
-            if isinstance(row, list) and row[0] != "id"]
+        (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / SPEC.MOD_ID / f"{SPEC.MOD_ID}.jbeam").read_text(
+            encoding="utf-8"
+        )
+    )
+    rows = [row for row in jbeam[SPEC.MOD_ID]["nodes"] if isinstance(row, list) and row[0] != "id"]
     matches = [row for row in rows if row[0] == name]
     assert len(matches) == 1, f"{name} appears {len(matches)}x in the cage"
     x, y, z = (float(value) for value in matches[0][1:4])
@@ -389,7 +403,8 @@ def test_the_audio_emitter_is_resolved_by_name_from_the_chamber():
     in_plane = math.hypot(y, z - SPEC.HUB_Z)
     assert in_plane <= SPEC.SHELL_R, (
         f"{name} is {in_plane:.2f} m from the spin axis - outside the shell,"
-        " so every cue emits from off the machine")
+        " so every cue emits from off the machine"
+    )
     assert abs(x) <= SPEC.OUTER_HALF_X, f"{name} is {x:.2f} m off the disc"
     # ...and the throb the module docstring claims is a real consequence of
     # that position: the payload's distance from this emitter has to swing
@@ -397,13 +412,16 @@ def test_the_audio_emitter_is_resolved_by_name_from_the_chamber():
     # per-revolution loudness change at all. Node 0 measured 18.5..50.0 m -
     # never inside 20 - which is the failure this number catches.
     distances = [
-        math.dist((x, y, z),
-                  (0.0, SPEC.PAYLOAD_R * math.cos(a),
-                   SPEC.HUB_Z + SPEC.PAYLOAD_R * math.sin(a)))
-        for a in (i * math.pi / 180.0 for i in range(360))]
+        math.dist(
+            (x, y, z),
+            (0.0, SPEC.PAYLOAD_R * math.cos(a), SPEC.HUB_Z + SPEC.PAYLOAD_R * math.sin(a)),
+        )
+        for a in (i * math.pi / 180.0 for i in range(360))
+    ]
     assert min(distances) < 20.0 < max(distances), (
         f"payload distance sweeps {min(distances):.2f}..{max(distances):.2f} m,"
-        " which never crosses the 20 m rolloff reference")
+        " which never crosses the 20 m rolloff reference"
+    )
     assert min(distances) == pytest.approx(6.12, abs=0.05)
     assert max(distances) == pytest.approx(36.49, abs=0.05)
 
@@ -416,12 +434,21 @@ def test_the_audio_emitter_index_is_never_authored():
     exactly, and every other assertion here would still pass.
     """
 
-    vehicle_lua = (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / SPEC.MOD_ID
-                   / "lua" / f"{SPEC.MOD_ID}_vehicle.lua").read_text(encoding="utf-8")
+    vehicle_lua = (
+        PACK_ROOT
+        / MOD_KEY
+        / "mod"
+        / "vehicles"
+        / SPEC.MOD_ID
+        / "lua"
+        / f"{SPEC.MOD_ID}_vehicle.lua"
+    ).read_text(encoding="utf-8")
     assert not re.search(r"AUDIO_NODE\s*=\s*-?\d", vehicle_lua), (
-        "the emitter node is authored as a literal index again")
+        "the emitter node is authored as a literal index again"
+    )
     assert not hasattr(SPEC, "AUDIO_EMITTER_NODE"), (
-        "AUDIO_EMITTER_NODE is back; the emitter is a NAME")
+        "AUDIO_EMITTER_NODE is back; the emitter is a NAME"
+    )
     # createSFXSource must take the bound variable and nothing else.
     assert "audioNode)" in vehicle_lua
 
@@ -439,14 +466,16 @@ def test_the_staged_bank_is_the_bank_the_generator_made():
     """
 
     assert sorted(path.name for path in SHIPPED_SOUND.glob("*.ogg")) == sorted(
-        f"{SPEC.MOD_ID}_{name}.ogg" for name in SPEC.AUDIO_CUE_NAMES)
+        f"{SPEC.MOD_ID}_{name}.ogg" for name in SPEC.AUDIO_CUE_NAMES
+    )
     for name in SPEC.AUDIO_CUE_NAMES:
         authored, authored_rate = _read(name)
         shipped, shipped_rate = _read_shipped(name)
         assert shipped_rate == authored_rate, name
-        assert hashlib.sha256(
-            np.ascontiguousarray(shipped).tobytes()).hexdigest() == hashlib.sha256(
-            np.ascontiguousarray(authored).tobytes()).hexdigest(), name
+        assert (
+            hashlib.sha256(np.ascontiguousarray(shipped).tobytes()).hexdigest()
+            == hashlib.sha256(np.ascontiguousarray(authored).tobytes()).hexdigest()
+        ), name
 
 
 @pytest.mark.parametrize("name", SPEC.AUDIO_CUE_NAMES)
@@ -468,7 +497,8 @@ def test_the_manifest_loudness_is_what_the_shipped_file_measures(name):
     measured = momentary_dbfs(data, rate)
     assert measured == pytest.approx(BY_NAME[name]["momentary_dbfs"], abs=0.02), (
         f"{name}: the shipped file measures {measured:.4f} dBFS against a"
-        f" manifest claiming {BY_NAME[name]['momentary_dbfs']:.4f}")
+        f" manifest claiming {BY_NAME[name]['momentary_dbfs']:.4f}"
+    )
 
 
 def test_the_delivered_mix_is_the_ladder_the_design_states():
@@ -495,17 +525,18 @@ def test_the_delivered_mix_is_the_ladder_the_design_states():
 
     assert SPEC.AUDIO_MIX_IS_MEASURED, (
         "spec.py fell back to the un-measured ladder: the audio manifest is"
-        " missing, so the shipped mix was never derived from anything")
+        " missing, so the shipped mix was never derived from anything"
+    )
     assert MANIFEST["momentary_window_s"] == MOMENTARY_WINDOW_S
     volumes = {name: volume for name, _stop, volume in SPEC.AUDIO_CUE_TABLE}
     loudness = measured_momentary()
-    delivered = {name: loudness[name] + 20 * np.log10(volumes[name])
-                 for name in volumes}
+    delivered = {name: loudness[name] + 20 * np.log10(volumes[name]) for name in volumes}
     reference = delivered["release_bang"]
     for name, rung in SPEC.AUDIO_MIX_LADDER_DB.items():
         assert delivered[name] - reference == pytest.approx(rung, abs=0.05), (
             f"{name} delivers {delivered[name] - reference:+.2f} dB against a"
-            f" ladder rung of {rung:+.2f}")
+            f" ladder rung of {rung:+.2f}"
+        )
     spread = max(delivered.values()) - min(delivered.values())
     assert spread == pytest.approx(6.0, abs=0.10), f"delivered spread {spread:.2f} dB"
 
@@ -518,8 +549,7 @@ def test_release_bang_is_the_loudest_thing_the_machine_does():
 
     volumes = {name: volume for name, _stop, volume in SPEC.AUDIO_CUE_TABLE}
     loudness = measured_momentary()
-    delivered = {name: loudness[name] + 20 * np.log10(volumes[name])
-                 for name in volumes}
+    delivered = {name: loudness[name] + 20 * np.log10(volumes[name]) for name in volumes}
     order = sorted(delivered, key=delivered.get, reverse=True)
     assert order[0] == "release_bang", f"loudest is {order[0]}, not the throw"
     assert volumes["release_bang"] == 1.00
@@ -542,16 +572,18 @@ def test_stage_tick_is_audible_over_the_ride_bed():
     bed = BY_NAME["spin_loop"]["momentary_dbfs"] + 20 * np.log10(SPEC.AUDIO_SPIN_VOL_CEIL)
     assert tick - bed >= 1.0, (
         f"stage_tick delivers {tick - bed:+.2f} dB against the ride bed at its"
-        " ceiling; it fires on top of it")
+        " ceiling; it fires on top of it"
+    )
     # ...and the bed's ceiling is the table's own fader, not a second copy.
     assert SPEC.AUDIO_SPIN_VOL_CEIL == volumes["spin_loop"]
     assert SPEC.AUDIO_PUMP_VOL_STRUCT + SPEC.AUDIO_PUMP_VOL_GAS == pytest.approx(
-        volumes["pump_down"], abs=1e-4)
+        volumes["pump_down"], abs=1e-4
+    )
 
 
 @pytest.mark.parametrize(
-    "name", [n for n, s, _v in SPEC.AUDIO_CUE_TABLE
-             if s is None and n != "arm_charge"])
+    "name", [n for n, s, _v in SPEC.AUDIO_CUE_TABLE if s is None and n != "arm_charge"]
+)
 def test_loops_hold_their_level_across_the_wrap(name):
     """THE SEAM TEST ABOVE IS A SAMPLE-STEP TEST AND IS BLIND TO THIS.
 
@@ -577,9 +609,9 @@ def test_loops_hold_their_level_across_the_wrap(name):
     head = float(np.sqrt(np.mean(samples[:width] ** 2)))
     tail = float(np.sqrt(np.mean(samples[-width:] ** 2)))
     assert 0.8 <= tail / head <= 1.25, (
-        f"{name}: {20 * np.log10(head / tail):+.2f} dB level step at the wrap")
-    assert 20 * np.log10(head / tail) == pytest.approx(
-        BY_NAME[name]["loop_wrap_db"], abs=0.02)
+        f"{name}: {20 * np.log10(head / tail):+.2f} dB level step at the wrap"
+    )
+    assert 20 * np.log10(head / tail) == pytest.approx(BY_NAME[name]["loop_wrap_db"], abs=0.02)
 
 
 def test_arm_charge_exactly_fills_the_arm_countdown():
@@ -599,8 +631,7 @@ def test_arm_charge_exactly_fills_the_arm_countdown():
     where a reader will look for it.
     """
 
-    assert BY_NAME["arm_charge"]["seconds"] == pytest.approx(
-        SPEC.BEHAVIOR["arm_delay_s"], abs=1e-9)
+    assert BY_NAME["arm_charge"]["seconds"] == pytest.approx(SPEC.BEHAVIOR["arm_delay_s"], abs=1e-9)
     assert BY_NAME["arm_charge"]["loop"]
     assert 'cueLoop(state, "arm_charge", b.phase == "arming")' in SPEC.LUA_BEHAVIOR
 
@@ -612,20 +643,28 @@ def test_vehicle_chunk_splices_and_exports():
 
     extra = SPEC.VEHICLE_LUA_EXTRA
     assert "--@AUDIO_" not in extra
-    for entry in ("M.slAudioPlay", "M.slAudioStop", "M.slAudioSet",
-                  "M.slAudioStopAll", "M.slAudioReport",
-                  "M.updateGFX = audioUpdateGFX", "M.onReset = audioOnReset",
-                  "M.onExtensionUnloaded = audioOnExtensionUnloaded"):
+    for entry in (
+        "M.slAudioPlay",
+        "M.slAudioStop",
+        "M.slAudioSet",
+        "M.slAudioStopAll",
+        "M.slAudioReport",
+        "M.updateGFX = audioUpdateGFX",
+        "M.onReset = audioOnReset",
+        "M.onExtensionUnloaded = audioOnExtensionUnloaded",
+    ):
         assert entry in extra, entry
     for name, stop, volume in SPEC.AUDIO_CUE_TABLE:
         stop_lua = "nil" if stop is None else repr(stop)
         assert f"  {name} = {{stop = {stop_lua}, vol = {volume}}}," in extra
     assert "AudioDefaultLoop3D" in extra
-    assert f'vehicles/{SPEC.MOD_ID}/sound/{SPEC.MOD_ID}_' in extra
+    assert f"vehicles/{SPEC.MOD_ID}/sound/{SPEC.MOD_ID}_" in extra
     # The wrappers must capture the bootstrap's own locals, not globals.
-    for capture in ("local audioBaseUpdateGFX = updateGFX",
-                    "local audioBaseOnReset = onReset",
-                    "local audioBaseOnExtensionUnloaded = onExtensionUnloaded"):
+    for capture in (
+        "local audioBaseUpdateGFX = updateGFX",
+        "local audioBaseOnReset = onReset",
+        "local audioBaseOnExtensionUnloaded = onExtensionUnloaded",
+    ):
         assert capture in extra, capture
 
 
@@ -637,17 +676,31 @@ def test_ge_side_helpers_are_defined_before_use():
 
     body = SPEC.LUA_BEHAVIOR
     definition = body.index("local function audioSend(")
-    for helper in ("local function cue(", "local function cueAt(",
-                   "local function cueLoop(", "local function cueTrack(",
-                   "local function cueRide("):
+    for helper in (
+        "local function cue(",
+        "local function cueAt(",
+        "local function cueLoop(",
+        "local function cueTrack(",
+        "local function cueRide(",
+    ):
         assert body.index(helper) > definition, helper
-    last_helper = max(body.index(helper) for helper in (
-        "local function cue(", "local function cueAt(",
-        "local function cueLoop(", "local function cueTrack(",
-        "local function cueRide("))
-    for caller in ("local function armPayload", "local function enterRecover",
-                   "local function fireLaunch", "behavior.init = function",
-                   "behavior.update = function"):
+    last_helper = max(
+        body.index(helper)
+        for helper in (
+            "local function cue(",
+            "local function cueAt(",
+            "local function cueLoop(",
+            "local function cueTrack(",
+            "local function cueRide(",
+        )
+    )
+    for caller in (
+        "local function armPayload",
+        "local function enterRecover",
+        "local function fireLaunch",
+        "behavior.init = function",
+        "behavior.update = function",
+    ):
         assert body.index(caller) > last_helper, f"{caller} precedes the helpers"
 
 
@@ -669,8 +722,7 @@ def test_every_phase_edge_dispatches_its_cue():
     assert body.count("local function cueRide(state, dt)") == 1
     assert body.count("\n    cueRide(state, dt)") == 4
     # Every loop that is started outside enterRecover has a matching stop.
-    for loop in ("arm_charge", "door_travel", "pump_down", "deck_retract",
-                 "repress"):
+    for loop in ("arm_charge", "door_travel", "pump_down", "deck_retract", "repress"):
         assert body.count(f'cueLoop(state, "{loop}"') >= 1, loop
     for latched_off in ("spin_loop", "release_alarm", "abort_klaxon"):
         assert f'cueLoop(state, "{latched_off}", false)' in body, latched_off

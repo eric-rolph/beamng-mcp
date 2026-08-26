@@ -41,8 +41,12 @@ _REPO_ROOT = Path(__file__).resolve().parents[1]
 # giant_props - the path test below mirrors the ignore rules rather than
 # blanket-matching every directory with one of these names.
 _GENERATED_PATTERNS = (
-    re.compile(r"[\\/]examples[\\/]giant_props[\\/][^\\/]+[\\/](mod|textures|textures_cooked)[\\/]"),
-    re.compile(r"[\\/]examples[\\/]giant_props[\\/][^\\/]+[\\/]authoring[\\/](review|listing|verify)[\\/]"),
+    re.compile(
+        r"[\\/]examples[\\/]giant_props[\\/][^\\/]+[\\/](mod|textures|textures_cooked)[\\/]"
+    ),
+    re.compile(
+        r"[\\/]examples[\\/]giant_props[\\/][^\\/]+[\\/]authoring[\\/](review|listing|verify)[\\/]"
+    ),
     re.compile(r"[\\/]dist[\\/]"),
 )
 

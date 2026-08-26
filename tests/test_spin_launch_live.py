@@ -80,7 +80,7 @@ DRIVE_START_ABOVE_DECK = 0.20
 # aiming claim is not a claim any more. The payload is a soft body leaving a
 # clamp, so this is deliberately loose in absolute terms and still far
 # tighter than the 38-degree span of the elevation ladder.
-LAUNCH_SPEED_TOLERANCE = 0.22   # fraction of commanded exit speed
+LAUNCH_SPEED_TOLERANCE = 0.22  # fraction of commanded exit speed
 LAUNCH_ELEVATION_TOLERANCE = 9.0  # degrees
 
 # Shot two reseats the payload straight onto the cradle rather than driving it
@@ -214,8 +214,9 @@ def _ride_steps(commanded_speed: float, payload_r: float) -> int:
     return max(1, int(budget))
 
 
-def _ride_digest(trace: list[dict[str, Any]], *, budget: int = 56,
-                 window: int = 4) -> list[dict[str, Any]]:
+def _ride_digest(
+    trace: list[dict[str, Any]], *, budget: int = 56, window: int = 4
+) -> list[dict[str, Any]]:
     """A bounded slice of the WHOLE ride that always contains the excursion.
 
     THE INSTRUMENT THIS REPLACES COULD NOT SEE THE EVENT IT WAS BUILT FOR.
@@ -282,12 +283,14 @@ def test_ride_digest_keeps_the_peak_and_every_phase_edge() -> None:
     where that run put them.
     """
 
-    phases = ([("engaging", 15.9)] * 47 + [("spinup", 15.9)] * 120
-              + [("hold", 15.9)] * 60 + [("release", 15.9)] * 23)
-    trace = [{"phase": phase, "r": radius, "omega": 2.5}
-             for phase, radius in phases]
-    for index, radius in ((108, 16.34), (109, 17.07), (110, 17.82),
-                          (111, 13.90), (112, 17.45)):
+    phases = (
+        [("engaging", 15.9)] * 47
+        + [("spinup", 15.9)] * 120
+        + [("hold", 15.9)] * 60
+        + [("release", 15.9)] * 23
+    )
+    trace = [{"phase": phase, "r": radius, "omega": 2.5} for phase, radius in phases]
+    for index, radius in ((108, 16.34), (109, 17.07), (110, 17.82), (111, 13.90), (112, 17.45)):
         trace[index]["r"] = radius
     digest = _ride_digest(trace)
 
@@ -300,15 +303,15 @@ def test_ride_digest_keeps_the_peak_and_every_phase_edge() -> None:
     # EVERY PHASE, so the reader can see which one the peak is in. This is
     # exactly what the phase-filtered slice could not do: it only ever
     # contained `engaging`, and the peak has never once been in `engaging`.
-    assert {sample["phase"] for sample in digest} == {
-        "engaging", "spinup", "hold", "release"}
+    assert {sample["phase"] for sample in digest} == {"engaging", "spinup", "hold", "release"}
     # The whole ride, not one end of it.
     assert digest[0] is trace[0] and digest[-1] is trace[-1]
     # Order preserved, so the digest reads as a ride and not as a bag. By
     # IDENTITY: most samples on a steady ride are equal dicts, so `.index`
     # would answer for the first one every time and prove nothing.
-    positions = [next(index for index, sample in enumerate(trace)
-                      if sample is entry) for entry in digest]
+    positions = [
+        next(index for index, sample in enumerate(trace) if sample is entry) for entry in digest
+    ]
     assert positions == sorted(positions)
     assert len(set(positions)) == len(positions)
     # Degenerate inputs are not a crash in an assertion payload.
@@ -316,8 +319,9 @@ def test_ride_digest_keeps_the_peak_and_every_phase_edge() -> None:
     assert _ride_digest(trace[:1]) == trace[:1]
 
 
-def _authored_to_world(origin: tuple[float, float, float],
-                       authored: tuple[float, float, float]) -> tuple[float, float, float]:
+def _authored_to_world(
+    origin: tuple[float, float, float], authored: tuple[float, float, float]
+) -> tuple[float, float, float]:
     """Identity spawn puts the model rotation at a 180-degree Z flip."""
 
     return (origin[0] - authored[0], origin[1] - authored[1], origin[2] + authored[2])
@@ -374,9 +378,7 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
     # Purge first, then assert below that the game recompiled every mesh.
     purged = purge_cached_prop_meshes(user, MOD_ID)
     report["mesh_cache"] = {"purged_entries": len(purged)}
-    mesh_cache = require_confined_profile_target(
-        user, Path("temp") / "vehicles" / MOD_ID
-    )
+    mesh_cache = require_confined_profile_target(user, Path("temp") / "vehicles" / MOD_ID)
     # GEOMETRY only. Cooked textures are deliberately spared - purging them
     # buys no freshness (the engine re-cooks from the source PNG) and races the
     # material loader into refusing half-written uploads - so the directory
@@ -514,21 +516,16 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
             # session, because the cache was purged before launch. Without this
             # the gate can only say the ZIP on disk is correct - it said
             # exactly that through three rebuilds that the game ignored.
-            cached = {
-                path.stem for path in mesh_cache.glob("*.cdae")
-            }
+            cached = {path.stem for path in mesh_cache.glob("*.cdae")}
             assert cached == shipped_meshes, {
                 "missing": sorted(shipped_meshes - cached),
                 "unexpected": sorted(cached - shipped_meshes),
             }
             zip_mtime = installed_zip.stat().st_mtime
             stale = sorted(
-                path.name
-                for path in mesh_cache.glob("*.cdae")
-                if path.stat().st_mtime < zip_mtime
+                path.name for path in mesh_cache.glob("*.cdae") if path.stat().st_mtime < zip_mtime
             )
-            assert not stale, {"detail": "served from a cache older than the ZIP",
-                               "stale": stale}
+            assert not stale, {"detail": "served from a cache older than the ZIP", "stale": stale}
             report["mesh_cache"]["recompiled"] = len(cached)
 
             origin = tuple(float(value) for value in state["origin"])
@@ -555,9 +552,11 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
             # of a runtime that has quietly stopped reading POWER_STEPS_MPS the
             # aiming claim degenerates into "the car moved".
             assert commanded_speed == pytest.approx(
-                spec.POWER_STEPS_MPS[spec.POWER_NOM_INDEX - 1], abs=1e-6), status
+                spec.POWER_STEPS_MPS[spec.POWER_NOM_INDEX - 1], abs=1e-6
+            ), status
             assert commanded_elevation == pytest.approx(
-                spec.TILT_STEPS_DEG[spec.TILT_NOM_INDEX - 1], abs=1e-6), status
+                spec.TILT_STEPS_DEG[spec.TILT_NOM_INDEX - 1], abs=1e-6
+            ), status
             report["commanded"] = {
                 "speed_mps": commanded_speed,
                 "elevation_deg": commanded_elevation,
@@ -569,9 +568,9 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
             #    have to carry a car, and the approach zone has to open the
             #    door before the car reaches it.
             # ---------------------------------------------------------------
-            start = _authored_to_world(origin, (
-                0.0, DRIVE_START_AUTHORED_Y,
-                spec.DECK_Z + DRIVE_START_ABOVE_DECK))
+            start = _authored_to_world(
+                origin, (0.0, DRIVE_START_AUTHORED_Y, spec.DECK_Z + DRIVE_START_ABOVE_DECK)
+            )
             subject.teleport(pos=start, rot_quat=(0, 0, 0, 1), reset=True)
             bng.control.step(30, wait=True)
             subject.control(parkingbrake=0.0, brake=0.0, throttle=0.32)
@@ -583,13 +582,15 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
                 probe = _subject_probe(bng)
                 live = _runtime_state(bng)
                 counts = live.get("zone_counts") or {}
-                drive_trace.append({
-                    "authored_y": round(origin[1] - float(probe["y"]), 2),
-                    "authored_z": round(float(probe["z"]) - origin[2], 2),
-                    "z": round(float(probe["z"]), 2),
-                    "speed": round(float(probe["speed"]), 2),
-                    "cradle": int(counts.get("cradle_zone", 0)),
-                })
+                drive_trace.append(
+                    {
+                        "authored_y": round(origin[1] - float(probe["y"]), 2),
+                        "authored_z": round(float(probe["z"]) - origin[2], 2),
+                        "z": round(float(probe["z"]), 2),
+                        "speed": round(float(probe["speed"]), 2),
+                        "cradle": int(counts.get("cradle_zone", 0)),
+                    }
+                )
                 if int(counts.get("cradle_zone", 0)) >= 1:
                     aboard = True
                     break
@@ -610,10 +611,8 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
             # the 1.94 m tunnel chord: at ~9 m/s and 10 steps a sample is 1.5 m
             # apart and would be missed about a quarter of the time. Crossing
             # from beyond TUNNEL_Y_OUT to past TUNNEL_Y_IN cannot be missed.
-            outside = [row for row in drive_trace
-                       if row["authored_y"] <= spec.TUNNEL_Y_OUT]
-            inside = [row for row in drive_trace
-                      if row["authored_y"] >= spec.TUNNEL_Y_IN]
+            outside = [row for row in drive_trace if row["authored_y"] <= spec.TUNNEL_Y_OUT]
+            inside = [row for row in drive_trace if row["authored_y"] >= spec.TUNNEL_Y_IN]
             assert outside and inside, {
                 "detail": "the car never crossed the shell wall",
                 "tunnel_y": [spec.TUNNEL_Y_OUT, spec.TUNNEL_Y_IN],
@@ -630,10 +629,14 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
             heights = [row["authored_z"] for row in drive_trace]
             assert min(heights) >= spec.DECK_Z - 0.5, {
                 "detail": "the car dropped below the drivable surface",
-                "min_authored_z": min(heights), "trace": drive_trace[-12:]}
+                "min_authored_z": min(heights),
+                "trace": drive_trace[-12:],
+            }
             assert max(heights) <= spec.DECK_Z + spec.TUNNEL_CLEAR_Z, {
                 "detail": "the car left through the roof, not the airlock",
-                "max_authored_z": max(heights), "trace": drive_trace[-12:]}
+                "max_authored_z": max(heights),
+                "trace": drive_trace[-12:],
+            }
 
             # Stop on the pad and let go of everything.
             #
@@ -701,19 +704,21 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
                     probe = _subject_probe(bng)
                     if probe.get("ok"):
                         radius = math.hypot(
-                            float(probe["y"]) - hub_y_one,
-                            float(probe["z"]) - hub_z_one)
+                            float(probe["y"]) - hub_y_one, float(probe["z"]) - hub_z_one
+                        )
                         orbit_one = max(orbit_one, radius)
-                        spin_trace.append({
-                            "phase": str(current),
-                            "r": round(radius, 2),
-                            "x_off": round(float(probe["x"]) - origin[0], 2),
-                            "omega": round(float(status_live.get("omega", 0.0)), 3),
-                            "theta": round(float(status_live.get("theta_deg", 0.0)), 1),
-                            "aboard": int(status_live.get("aboard", 0)),
-                            "lost": round(float(status_live.get("lost_clock", 0.0)), 2),
-                            "v": round(float(probe["speed"]), 1),
-                        })
+                        spin_trace.append(
+                            {
+                                "phase": str(current),
+                                "r": round(radius, 2),
+                                "x_off": round(float(probe["x"]) - origin[0], 2),
+                                "omega": round(float(status_live.get("omega", 0.0)), 3),
+                                "theta": round(float(status_live.get("theta_deg", 0.0)), 1),
+                                "aboard": int(status_live.get("aboard", 0)),
+                                "lost": round(float(status_live.get("lost_clock", 0.0)), 2),
+                                "v": round(float(probe["speed"]), 1),
+                            }
+                        )
                 if current == "recover":
                     # Sample the free flight for a few ticks and keep the
                     # fastest reading: the launch replaces the cluster
@@ -740,8 +745,8 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
                 "ride_trace": _ride_digest(spin_trace),
                 "ride_samples": len(spin_trace),
                 "orbit_peak_phase": (
-                    max(spin_trace, key=lambda sample: sample["r"])["phase"]
-                    if spin_trace else None),
+                    max(spin_trace, key=lambda sample: sample["r"])["phase"] if spin_trace else None
+                ),
             }
             # Name the cause before the symptom. A payload that drifted out of
             # the bore takes the field with it, and everything after that reads
@@ -761,10 +766,8 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
                 "spin_trace": spin_trace[-24:],
                 "state": _runtime_state(bng),
             }
-            for required in ("sealing", "evacuating", "engaging", "spinup",
-                            "hold", "release"):
-                assert required in phases, {"phases": phases,
-                                            "spin_trace": spin_trace[-24:]}
+            for required in ("sealing", "evacuating", "engaging", "spinup", "hold", "release"):
+                assert required in phases, {"phases": phases, "spin_trace": spin_trace[-24:]}
 
             # ---------------------------------------------------------------
             # 3. THE AIMING CLAIM, measured off the car and not off the
@@ -784,8 +787,9 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
             # happily as by a correct one - field_speed_cap_mps is 240, nearly
             # three times the commanded 82 - and "at least 64 m/s" is not the
             # claim this test's name makes.
-            assert abs(speed - commanded_speed) <= (
-                LAUNCH_SPEED_TOLERANCE * commanded_speed), report
+            assert abs(speed - commanded_speed) <= (LAUNCH_SPEED_TOLERANCE * commanded_speed), (
+                report
+            )
             assert abs(elevation - commanded_elevation) <= LAUNCH_ELEVATION_TOLERANCE, report
 
             # ---------------------------------------------------------------
@@ -804,8 +808,7 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
             assert float(reset_status["door_close"]) == pytest.approx(0.0, abs=1e-6)
             assert float(reset_status["deck_drop"]) == pytest.approx(0.0, abs=1e-6)
             assert float(reset_status["vac"]) == pytest.approx(1.0, abs=1e-6)
-            assert float(reset_status["theta_deg"]) == pytest.approx(
-                spec.LOAD_THETA_DEG, abs=0.5)
+            assert float(reset_status["theta_deg"]) == pytest.approx(spec.LOAD_THETA_DEG, abs=0.5)
 
             # ---------------------------------------------------------------
             # 5. The console actually moves the machine.
@@ -819,9 +822,11 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
             # The index moving is not the claim; the index SELECTING is. Both
             # numbers were being printed into the report and never compared.
             assert float(panel_status["exit_speed_mps"]) == pytest.approx(
-                spec.POWER_STEPS_MPS[spec.POWER_NOM_INDEX], abs=1e-6), panel_status
+                spec.POWER_STEPS_MPS[spec.POWER_NOM_INDEX], abs=1e-6
+            ), panel_status
             assert float(panel_status["elevation_deg"]) == pytest.approx(
-                spec.TILT_STEPS_DEG[spec.TILT_NOM_INDEX - 2], abs=1e-6), panel_status
+                spec.TILT_STEPS_DEG[spec.TILT_NOM_INDEX - 2], abs=1e-6
+            ), panel_status
             report["panel"] = {
                 "power_index": int(panel_status["power_index"]),
                 "exit_speed_mps": float(panel_status["exit_speed_mps"]),
@@ -866,9 +871,11 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
             assert int(armed["power_index"]) == len(spec.POWER_STEPS_MPS), armed
             assert int(armed["tilt_index"]) == 1, armed
             assert float(armed["exit_speed_mps"]) == pytest.approx(
-                spec.POWER_STEPS_MPS[-1], abs=1e-6), armed
+                spec.POWER_STEPS_MPS[-1], abs=1e-6
+            ), armed
             assert float(armed["elevation_deg"]) == pytest.approx(
-                spec.TILT_STEPS_DEG[0], abs=1e-6), armed
+                spec.TILT_STEPS_DEG[0], abs=1e-6
+            ), armed
 
             # Reseating the payload is also the ONLY live proof that the deck
             # came back. Step 4 asserts deck_drop == 0, but that is the runtime
@@ -876,19 +883,22 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
             # question is whether its bake re-ran. A car put on it either rests
             # or falls 3.6 m into the sump, and nothing else distinguishes the
             # two. The lupa gate checks collisionReloads; this checks gravity.
-            reseat = _authored_to_world(origin, (
-                0.0, 0.0, spec.DECK_Z + CRADLE_RESEAT_ABOVE_DECK))
+            reseat = _authored_to_world(origin, (0.0, 0.0, spec.DECK_Z + CRADLE_RESEAT_ABOVE_DECK))
             subject.teleport(pos=reseat, rot_quat=(0, 0, 0, 1), reset=True)
             subject.control(throttle=0.0, brake=0.0, parkingbrake=1.0)
             bng.control.step(60, wait=True)
             seated = _subject_probe(bng)
             assert seated.get("ok") is True, seated
             seated_z = float(seated["z"]) - origin[2]
-            report["reseat"] = {"authored_z": round(seated_z, 2),
-                                "speed": round(float(seated["speed"]), 2)}
+            report["reseat"] = {
+                "authored_z": round(seated_z, 2),
+                "speed": round(float(seated["speed"]), 2),
+            }
             assert seated_z >= spec.DECK_Z - DECK_RETURN_TOLERANCE, {
                 "detail": "the payload fell through the returned deck",
-                "authored_z": seated_z, "deck_z": spec.DECK_Z}
+                "authored_z": seated_z,
+                "deck_z": spec.DECK_Z,
+            }
             assert float(seated["speed"]) < 0.5, seated
 
             # The tether circle lies in the authored y-z plane about the hub,
@@ -911,8 +921,10 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
                 if current in ("spinup", "hold"):
                     probe = _subject_probe(bng)
                     if probe.get("ok"):
-                        orbit_max = max(orbit_max, math.hypot(
-                            float(probe["y"]) - hub_y, float(probe["z"]) - hub_z))
+                        orbit_max = max(
+                            orbit_max,
+                            math.hypot(float(probe["y"]) - hub_y, float(probe["z"]) - hub_z),
+                        )
                 if current == "recover":
                     for _ in range(8):
                         bng.control.step(2, wait=True)
@@ -945,8 +957,7 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
                 "bore_r": spec.CHAMBER_R,
                 "payload_r": spec.PAYLOAD_R,
             }
-            for required in ("sealing", "evacuating", "engaging", "spinup",
-                             "hold", "release"):
+            for required in ("sealing", "evacuating", "engaging", "spinup", "hold", "release"):
                 assert required in phases_two, {"phases": phases_two}
 
             vx2 = float(launched_two["vx"])
@@ -962,9 +973,11 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
                 "elevation_deg": round(elevation_two, 2),
             }
             assert abs(speed_two - spec.POWER_STEPS_MPS[-1]) <= (
-                LAUNCH_SPEED_TOLERANCE * spec.POWER_STEPS_MPS[-1]), report
-            assert abs(elevation_two - spec.TILT_STEPS_DEG[0]) <= (
-                LAUNCH_ELEVATION_TOLERANCE), report
+                LAUNCH_SPEED_TOLERANCE * spec.POWER_STEPS_MPS[-1]
+            ), report
+            assert abs(elevation_two - spec.TILT_STEPS_DEG[0]) <= (LAUNCH_ELEVATION_TOLERANCE), (
+                report
+            )
         finally:
             # ALWAYS print the report, pass or fail. A live run that dies
             # mid-sequence used to print nothing at all - every number this
@@ -1007,11 +1020,14 @@ def test_spin_launch_drives_in_and_throws_the_car(tmp_path: Path) -> None:
     # ladder is a third independent witness alongside the console readback and
     # the car's own velocity.
     assert float(launches[0]["speed_mps"]) == pytest.approx(
-        spec.POWER_STEPS_MPS[spec.POWER_NOM_INDEX - 1], abs=1e-6), launches[0]
-    assert float(launches[1]["speed_mps"]) == pytest.approx(
-        spec.POWER_STEPS_MPS[-1], abs=1e-6), launches[1]
-    assert float(launches[1]["elevation_deg"]) == pytest.approx(
-        spec.TILT_STEPS_DEG[0], abs=1e-6), launches[1]
+        spec.POWER_STEPS_MPS[spec.POWER_NOM_INDEX - 1], abs=1e-6
+    ), launches[0]
+    assert float(launches[1]["speed_mps"]) == pytest.approx(spec.POWER_STEPS_MPS[-1], abs=1e-6), (
+        launches[1]
+    )
+    assert float(launches[1]["elevation_deg"]) == pytest.approx(spec.TILT_STEPS_DEG[0], abs=1e-6), (
+        launches[1]
+    )
     assert not issues, issues
     report["events"] = events
     report["telemetry_launches"] = launches

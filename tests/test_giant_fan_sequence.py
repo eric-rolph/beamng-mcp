@@ -14,6 +14,7 @@ The pack's precedent is tests/test_spin_launch_sequence.py.
 from __future__ import annotations
 
 import importlib.util
+import itertools
 import math
 import sys
 from pathlib import Path
@@ -44,14 +45,7 @@ def controller_source() -> str:
     """The SHIPPED controller, not the spec's template."""
 
     path = (
-        PACK_ROOT
-        / MOD_KEY
-        / "mod"
-        / "vehicles"
-        / S.MOD_ID
-        / "lua"
-        / "controller"
-        / "giantFan.lua"
+        PACK_ROOT / MOD_KEY / "mod" / "vehicles" / S.MOD_ID / "lua" / "controller" / "giantFan.lua"
     )
     if not path.is_file():
         pytest.skip("giant_fan is not built; run build.py giant_fan prop")
@@ -81,9 +75,7 @@ def new_controller(brake_torque: float | None = None):
         function _setav(v) MOTOR.outputAV1 = v end
         """
     )
-    module = lua.eval("function(src) return load(src, 'giantFan') end")(
-        controller_source()
-    )
+    module = lua.eval("function(src) return load(src, 'giantFan') end")(controller_source())
     assert module, "the shipped controller does not compile"
     controller = module()
     controller.init(lua.table())
@@ -99,7 +91,7 @@ CURVE = S.JBEAM_SECTIONS["motor"]["torque"][1:]
 
 def motor_torque(rpm: float) -> float:
     rpm = min(max(rpm, CURVE[0][0]), CURVE[-1][0])
-    for (r0, t0), (r1, t1) in zip(CURVE, CURVE[1:]):
+    for (r0, t0), (r1, t1) in itertools.pairwise(CURVE):
         if r0 <= rpm <= r1:
             f = 0.0 if r1 == r0 else (rpm - r0) / (r1 - r0)
             return t0 + f * (t1 - t0)
@@ -167,7 +159,7 @@ def spin(lua, controller, seconds: float, omega: float = 0.0, dt: float = 1 / 60
 def test_the_first_click_from_off_is_full_power() -> None:
     """The real Lasko detent order, and the best joke on the machine."""
 
-    lua, controller = new_controller()
+    _lua, controller = new_controller()
     assert controller.status().dial == 0
     controller.stepDial()
     assert controller.status().dial == 3
@@ -175,7 +167,7 @@ def test_the_first_click_from_off_is_full_power() -> None:
 
 
 def test_the_dial_cycles_0_3_2_1_and_wraps() -> None:
-    lua, controller = new_controller()
+    _lua, controller = new_controller()
     seen = []
     for _ in range(len(S.DIAL_ORDER) * 2):
         controller.stepDial()
@@ -184,16 +176,14 @@ def test_the_dial_cycles_0_3_2_1_and_wraps() -> None:
 
 
 def test_off_goes_straight_to_zero_from_any_setting() -> None:
-    lua, controller = new_controller()
+    _lua, controller = new_controller()
     controller.stepDial()
     controller.dialOff()
     assert controller.status().dial == 0
 
 
 @pytest.mark.parametrize("clicks,setting", [(1, 3), (2, 2), (3, 1)])
-def test_every_setting_reaches_the_tip_speed_printed_on_it(
-    clicks: int, setting: int
-) -> None:
+def test_every_setting_reaches_the_tip_speed_printed_on_it(clicks: int, setting: int) -> None:
     """The pack's discipline: the number on the machine is the number it does.
 
     Run against the rotor's REAL inertia and its own blade drag, not a free
@@ -297,12 +287,10 @@ def test_tilt_rungs_clamp_at_both_ends_and_drive_the_hydro() -> None:
 
 
 def test_every_tilt_rung_reports_its_own_strike_height() -> None:
-    lua, controller = new_controller()
+    _lua, controller = new_controller()
     for rung in range(1, len(S.TILT_CLEAR_M) + 1):
         controller.setTiltRung(rung)
-        assert controller.status().tilt_clear == pytest.approx(
-            S.TILT_CLEAR_M[rung - 1]
-        )
+        assert controller.status().tilt_clear == pytest.approx(S.TILT_CLEAR_M[rung - 1])
 
 
 # ---------------------------------------------------------------------------
@@ -329,16 +317,7 @@ def test_reset_returns_the_machine_to_its_authored_pose() -> None:
 # The GE behaviour chunk.
 # ---------------------------------------------------------------------------
 def runtime_source() -> str:
-    path = (
-        PACK_ROOT
-        / MOD_KEY
-        / "mod"
-        / "lua"
-        / "ge"
-        / "extensions"
-        / S.MOD_ID
-        / "runtime.lua"
-    )
+    path = PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / S.MOD_ID / "runtime.lua"
     if not path.is_file():
         pytest.skip("giant_fan is not built")
     return path.read_text(encoding="utf-8")
@@ -412,9 +391,7 @@ def test_the_stop_pad_needs_a_dwell_not_a_crossing() -> None:
 def test_every_powertrain_input_names_a_device_that_exists() -> None:
     import json
 
-    path = (
-        PACK_ROOT / MOD_KEY / "mod" / "vehicles" / S.MOD_ID / f"{S.MOD_ID}.jbeam"
-    )
+    path = PACK_ROOT / MOD_KEY / "mod" / "vehicles" / S.MOD_ID / f"{S.MOD_ID}.jbeam"
     if not path.is_file():
         pytest.skip("giant_fan is not built")
     part = json.loads(path.read_text(encoding="utf-8"))[S.MOD_ID]
@@ -443,9 +420,7 @@ def test_the_motor_block_belongs_to_a_declared_device() -> None:
 
     import json
 
-    path = (
-        PACK_ROOT / MOD_KEY / "mod" / "vehicles" / S.MOD_ID / f"{S.MOD_ID}.jbeam"
-    )
+    path = PACK_ROOT / MOD_KEY / "mod" / "vehicles" / S.MOD_ID / f"{S.MOD_ID}.jbeam"
     if not path.is_file():
         pytest.skip("giant_fan is not built")
     part = json.loads(path.read_text(encoding="utf-8"))[S.MOD_ID]

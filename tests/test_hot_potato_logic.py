@@ -247,8 +247,7 @@ return S
 def rig():
     spec = load_spec()
     runtime_path = (
-        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID
-        / "runtime.lua"
+        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID / "runtime.lua"
     )
     lua = lupa.LuaRuntime(unpack_returned_tuples=True)
     state = lua.execute(STUBS)
@@ -290,9 +289,7 @@ def run_until(state, module, predicate, *, limit_seconds, seconds=0.2):
             return elapsed
         tick(state, module, seconds=seconds)
         elapsed += seconds
-    raise AssertionError(
-        f"condition never held within {limit_seconds}s of simulated play"
-    )
+    raise AssertionError(f"condition never held within {limit_seconds}s of simulated play")
 
 
 def _carrier_of(module):
@@ -381,8 +378,7 @@ def test_a_hard_tap_passes_and_a_gentle_brush_does_not(rig):
     state.addVehicle(3, "etk800", 90.0, 0.0, 0.0)
     tick(state, module)
     start_round(state, module, 2)
-    tick(state, module, seconds=0.1,
-         steps=int(spec.BEHAVIOR["join_immunity_seconds"] / 0.1) + 4)
+    tick(state, module, seconds=0.1, steps=int(spec.BEHAVIOR["join_immunity_seconds"] / 0.1) + 4)
 
     # Touching, but crawling: below the impact threshold nothing happens.
     close_in(state, module, 3, 2, speed_mps=1.0)
@@ -390,8 +386,7 @@ def test_a_hard_tap_passes_and_a_gentle_brush_does_not(rig):
     assert _carrier_of(module) == 2, "a fender brush should not transfer"
 
     # Same geometry, a real hit.
-    close_in(state, module, 3, 2,
-             speed_mps=spec.BEHAVIOR["impact_kmh"] / 3.6 + 2.0)
+    close_in(state, module, 3, 2, speed_mps=spec.BEHAVIOR["impact_kmh"] / 3.6 + 2.0)
     tick(state, module)
     assert _carrier_of(module) == 3
     assert any("PASSED" in message for message in state.messages.values())
@@ -415,8 +410,7 @@ def test_a_rear_end_tap_at_real_car_spacing_registers(rig):
     state.addVehicle(3, "etk800", 200.0, 0.0, 0.0)
     tick(state, module)
     start_round(state, module, 2)
-    tick(state, module, seconds=0.1,
-         steps=int(spec.BEHAVIOR["join_immunity_seconds"] / 0.1) + 4)
+    tick(state, module, seconds=0.1, steps=int(spec.BEHAVIOR["join_immunity_seconds"] / 0.1) + 4)
 
     fast = spec.BEHAVIOR["impact_kmh"] / 3.6 + 2.0
 
@@ -449,8 +443,7 @@ def test_tag_back_needs_immunity_hold_and_a_foot_of_separation(rig):
     state.addVehicle(3, "etk800", 90.0, 0.0, 0.0)
     tick(state, module)
     start_round(state, module, 2)
-    tick(state, module, seconds=0.1,
-         steps=int(spec.BEHAVIOR["join_immunity_seconds"] / 0.1) + 4)
+    tick(state, module, seconds=0.1, steps=int(spec.BEHAVIOR["join_immunity_seconds"] / 0.1) + 4)
 
     fast = spec.BEHAVIOR["impact_kmh"] / 3.6 + 2.0
     close_in(state, module, 3, 2, speed_mps=fast)
@@ -472,8 +465,9 @@ def test_tag_back_needs_immunity_hold_and_a_foot_of_separation(rig):
     # Part them by more than a foot beyond contact, then come back hard.
     state.moveVehicle(2, 200.0, 0.0, 0.0)
     state.setVelocity(2, 0.0, 0.0, 0.0)
-    tick(state, module, seconds=0.1,
-         steps=int(spec.BEHAVIOR["tagback_min_hold_seconds"] / 0.1) + 40)
+    tick(
+        state, module, seconds=0.1, steps=int(spec.BEHAVIOR["tagback_min_hold_seconds"] / 0.1) + 40
+    )
     close_in(state, module, 2, 3, speed_mps=fast)
     tick(state, module, steps=3)
     assert _carrier_of(module) == 2, "a properly separated tag-back was refused"
@@ -577,8 +571,12 @@ def test_a_late_transfer_still_grants_the_hot_window(rig):
     tick(state, module)
     start_round(state, module, 2)
 
-    run_until(state, module, lambda: _remaining(module) <= 1.0,
-              limit_seconds=spec.BEHAVIOR["fuse_max_seconds"] + 10.0)
+    run_until(
+        state,
+        module,
+        lambda: _remaining(module) <= 1.0,
+        limit_seconds=spec.BEHAVIOR["fuse_max_seconds"] + 10.0,
+    )
     close_in(state, module, 3, 2, speed_mps=spec.BEHAVIOR["impact_kmh"] / 3.6 + 2.0)
     tick(state, module)
     assert _carrier_of(module) == 3
@@ -678,17 +676,18 @@ def test_sole_survivor_wins_instead_of_detonating(rig):
     # The other car despawns mid-round.
     state.removeVehicle(3)
     module.onVehicleDestroyed(3)
-    run_until(state, module,
-              lambda: module.getSystemState(PROP_ID).behavior_phase == "idle",
-              limit_seconds=10.0)
+    run_until(
+        state,
+        module,
+        lambda: module.getSystemState(PROP_ID).behavior_phase == "idle",
+        limit_seconds=10.0,
+    )
     assert _carrier_of(module) is None
     assert any("LAST CAR STANDING" in m for m in state.messages.values()), (
         "field collapse must end as a win"
     )
     # And above all: nobody was detonated.
-    assert not list(state.commands.values()), (
-        "the sole survivor received a detonation command"
-    )
+    assert not list(state.commands.values()), "the sole survivor received a detonation command"
 
 
 def test_losing_the_carrier_sends_the_potato_home(rig):

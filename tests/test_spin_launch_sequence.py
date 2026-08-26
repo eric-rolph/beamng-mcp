@@ -426,42 +426,43 @@ def _vdata_stub(spec) -> str:
     """
 
     jbeam = json.loads(
-        (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / spec.MOD_ID
-         / f"{spec.MOD_ID}.jbeam").read_text(encoding="utf-8"))
-    rows = [row for row in jbeam[spec.MOD_ID]["nodes"]
-            if isinstance(row, list) and row[0] != "id"]
+        (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.jbeam").read_text(
+            encoding="utf-8"
+        )
+    )
+    rows = [row for row in jbeam[spec.MOD_ID]["nodes"] if isinstance(row, list) and row[0] != "id"]
     offset = len(rows) // 3
     rotated = rows[offset:] + rows[:offset]
-    entries = ",".join(
-        f'{{cid={index},name="{row[0]}"}}'
-        for index, row in enumerate(rotated))
+    entries = ",".join(f'{{cid={index},name="{row[0]}"}}' for index, row in enumerate(rotated))
     return (
         "local NODES = {" + entries + "}\n"
         "core_vehicle_manager = {getVehicleData = function()\n"
         "  return {vdata = {nodes = NODES}}\n"
-        "end}\n")
+        "end}\n"
+    )
 
 
 def expected_emitter_cid(spec) -> int:
     """Where _vdata_stub put the emitter, computed the same way."""
 
     jbeam = json.loads(
-        (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / spec.MOD_ID
-         / f"{spec.MOD_ID}.jbeam").read_text(encoding="utf-8"))
-    rows = [row for row in jbeam[spec.MOD_ID]["nodes"]
-            if isinstance(row, list) and row[0] != "id"]
+        (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.jbeam").read_text(
+            encoding="utf-8"
+        )
+    )
+    rows = [row for row in jbeam[spec.MOD_ID]["nodes"] if isinstance(row, list) and row[0] != "id"]
     offset = len(rows) // 3
     rotated = rows[offset:] + rows[:offset]
-    return next(index for index, row in enumerate(rotated)
-                if row[0] == spec.AUDIO_EMITTER_NODE_NAME)
+    return next(
+        index for index, row in enumerate(rotated) if row[0] == spec.AUDIO_EMITTER_NODE_NAME
+    )
 
 
 @pytest.fixture()
 def rig():
     spec = load_spec()
     runtime_path = (
-        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID
-        / "runtime.lua"
+        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID / "runtime.lua"
     )
     lua = lupa.LuaRuntime(unpack_returned_tuples=True)
     state = lua.execute(STUBS)
@@ -473,8 +474,9 @@ def rig():
 
 
 def runtime_source(spec) -> str:
-    return (PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions"
-            / spec.MOD_ID / "runtime.lua").read_text(encoding="utf-8")
+    return (
+        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID / "runtime.lua"
+    ).read_text(encoding="utf-8")
 
 
 def shipped_ref_offset(spec) -> tuple[float, float, float]:
@@ -486,8 +488,7 @@ def shipped_ref_offset(spec) -> tuple[float, float, float]:
     (~0, -RAMP_Y0, 0). Anything else and the rig's frame is a fiction.
     """
 
-    match = re.search(
-        r"local PROP_REF_OFFSET = vec3\(([^)]*)\)", runtime_source(spec))
+    match = re.search(r"local PROP_REF_OFFSET = vec3\(([^)]*)\)", runtime_source(spec))
     assert match, "the shipped runtime has no PROP_REF_OFFSET"
     return tuple(float(part) for part in match.group(1).split(","))
 
@@ -512,8 +513,7 @@ def register_prop(state, module, spec):
     offset = shipped_ref_offset(spec)
     # FLIP is a half turn about Z: it negates x and y and is its own inverse.
     spawn = (-offset[0], -offset[1], -offset[2])
-    state.addVehicle(PROP_ID, spec.MOD_ID, spawn[0], spawn[1], spawn[2],
-                     26.0, 46.0, 30.0)
+    state.addVehicle(PROP_ID, spec.MOD_ID, spawn[0], spawn[1], spawn[2], 26.0, 46.0, 30.0)
     state.setVehicleRotation(PROP_ID, *MODEL_ALIGNMENT_QUAT)
     module.registerProp(PROP_ID)
 
@@ -521,12 +521,16 @@ def register_prop(state, module, spec):
 def enter_zone(lua, state, module, zone, vehicle_id):
     name = f"{load_spec().MOD_ID}_p{PROP_ID}_{zone}"
     trigger = state.scene[name]
-    module.onBeamNGTrigger(lua.table_from({
-        "event": "enter",
-        "triggerID": trigger.id,
-        "triggerName": name,
-        "subjectID": vehicle_id,
-    }))
+    module.onBeamNGTrigger(
+        lua.table_from(
+            {
+                "event": "enter",
+                "triggerID": trigger.id,
+                "triggerName": name,
+                "subjectID": vehicle_id,
+            }
+        )
+    )
 
 
 def status(module):
@@ -594,9 +598,8 @@ def part_angle(state, spec, name, axis):
     dot = q[0] * axis[0] + q[1] * axis[1] + q[2] * axis[2]
     # Off-axis content means this is not a single rotation about `axis` and
     # the answer would be meaningless, so say so rather than return a number.
-    residual = math.sqrt(max(0.0, (q[0] ** 2 + q[1] ** 2 + q[2] ** 2) - dot ** 2))
-    assert residual <= 1e-9, (
-        f"{name} is not a pure rotation about {axis}: residual {residual:.3e}")
+    residual = math.sqrt(max(0.0, (q[0] ** 2 + q[1] ** 2 + q[2] ** 2) - dot**2))
+    assert residual <= 1e-9, f"{name} is not a pure rotation about {axis}: residual {residual:.3e}"
     return math.degrees(2.0 * math.atan2(dot, q[3]))
 
 
@@ -623,8 +626,7 @@ def run_until(module, predicate, limit=4000, seconds=0.05):
         if predicate(status(module)):
             return step * seconds
         tick(module, seconds)
-    raise AssertionError(
-        f"never satisfied after {limit} ticks; phase={status(module).phase}")
+    raise AssertionError(f"never satisfied after {limit} ticks; phase={status(module).phase}")
 
 
 def board_payload(lua, state, module, spec, position=None):
@@ -671,7 +673,7 @@ def armour_chunk(state, kind):
 
 
 def test_registers_and_starts_idle(rig):
-    lua, state, module, spec = rig
+    _lua, state, module, spec = rig
     register_prop(state, module, spec)
     result = module.getSystemState(PROP_ID)
     assert result.registered is True
@@ -695,7 +697,7 @@ def q_axis_angle(axis, degrees):
     """(n sin(theta/2), cos(theta/2)) - the same thing lua_kit's axisAngle is."""
 
     half = math.radians(degrees) * 0.5
-    length = math.sqrt(sum(component ** 2 for component in axis))
+    length = math.sqrt(sum(component**2 for component in axis))
     sine = math.sin(half) / length
     return (axis[0] * sine, axis[1] * sine, axis[2] * sine, math.cos(half))
 
@@ -736,10 +738,10 @@ def shipped_part_pivots(spec):
     found = {}
     for match in re.finditer(
         r"^\s+(\w+) = \{(?:collision = true, )?pivot = vec3\(([^)]*)\)",
-        runtime_source(spec), re.MULTILINE,
+        runtime_source(spec),
+        re.MULTILINE,
     ):
-        found[match.group(1)] = tuple(
-            float(part) for part in match.group(2).split(","))
+        found[match.group(1)] = tuple(float(part) for part in match.group(2).split(","))
     return found
 
 
@@ -780,7 +782,7 @@ def test_the_rig_quaternion_algebra_is_the_engines(rig):
       vector operator is exactly the plain Hamilton product.
     """
 
-    lua, state, module, spec = rig
+    _lua, state, _module, _spec = rig
 
     # 1. The basisQuat round trip, worked by hand. A quarter turn about +Z
     #    carries +X onto +Y, so its local->world basis is
@@ -805,7 +807,8 @@ def test_the_rig_quaternion_algebra_is_the_engines(rig):
     # 3. Python's re-derivation agrees with the Lua's, so the expected values
     #    the pose tests build below are the same algebra.
     assert lua_compose(state, first, second) == pytest.approx(
-        list(q_hamilton(first, second)), abs=1e-12)
+        list(q_hamilton(first, second)), abs=1e-12
+    )
 
 
 def test_the_rig_frame_is_the_shipped_ref_offset_and_authored_equals_world(rig):
@@ -818,7 +821,7 @@ def test_the_rig_frame_is_the_shipped_ref_offset_and_authored_equals_world(rig):
     turn really did cancel.
     """
 
-    lua, state, module, spec = rig
+    _lua, state, module, spec = rig
     offset = shipped_ref_offset(spec)
     assert offset[1] == pytest.approx(-spec.RAMP_Y0, abs=1e-4), offset
     assert offset[2] == pytest.approx(0.0, abs=1e-4), offset
@@ -827,8 +830,7 @@ def test_the_rig_frame_is_the_shipped_ref_offset_and_authored_equals_world(rig):
     pivots = shipped_part_pivots(spec)
     # 28 kinematic parts plus the one trigger spec the same table syntax
     # matches; the parts themselves are what getSystemState counts.
-    parts = {name: pivot for name, pivot in pivots.items()
-             if not name.endswith("_zone")}
+    parts = {name: pivot for name, pivot in pivots.items() if not name.endswith("_zone")}
     assert len(parts) == 28, sorted(parts)
 
     # Every part is placed, and placed where it was authored - except the
@@ -840,11 +842,16 @@ def test_the_rig_frame_is_the_shipped_ref_offset_and_authored_equals_world(rig):
         if name == "beacon":
             expected[2] -= 0.40
         for axis in range(3):
-            assert placed["position"][axis] == pytest.approx(
-                expected[axis], abs=1e-4), (name, placed["position"], expected)
+            assert placed["position"][axis] == pytest.approx(expected[axis], abs=1e-4), (
+                name,
+                placed["position"],
+                expected,
+            )
         # ...and at rest nothing is turned: the machine is a still photograph.
         assert quats_equal(placed["rotation"], (0.0, 0.0, 0.0, 1.0), 1e-9), (
-            name, placed["rotation"])
+            name,
+            placed["rotation"],
+        )
 
 
 def test_the_launch_tube_and_its_muzzle_track_the_elevation_ladder(rig):
@@ -855,7 +862,7 @@ def test_the_launch_tube_and_its_muzzle_track_the_elevation_ladder(rig):
     printed ladder and the authored pivot, not from the runtime's expression.
     """
 
-    lua, state, module, spec = rig
+    _lua, state, module, spec = rig
     register_prop(state, module, spec)
     for index, elevation in enumerate(spec.TILT_STEPS_DEG, start=1):
         while status(module).tilt_index < index:
@@ -869,14 +876,18 @@ def test_the_launch_tube_and_its_muzzle_track_the_elevation_ladder(rig):
         phi = elevation - spec.TILT_REF_DEG
         measured = part_angle(state, spec, "tube", (1.0, 0.0, 0.0))
         assert angle_delta(measured, phi) == pytest.approx(0.0, abs=1e-6), (
-            elevation, measured, phi)
+            elevation,
+            measured,
+            phi,
+        )
         # The tube pivots about the chamber axis, so its own origin does not
         # move; the muzzle, bolted 35 m out, does.
-        assert pose(state, spec, "tube")["position"] == pytest.approx(
-            tuple(spec.HUB), abs=1e-4)
+        assert pose(state, spec, "tube")["position"] == pytest.approx(tuple(spec.HUB), abs=1e-4)
         expected = carried_about_hub(spec, spec.MUZZLE_PIVOT, phi)
-        assert pose(state, spec, "muzzle")["position"] == pytest.approx(
-            expected, abs=1e-4), (elevation, expected)
+        assert pose(state, spec, "muzzle")["position"] == pytest.approx(expected, abs=1e-4), (
+            elevation,
+            expected,
+        )
 
 
 def test_the_tether_and_both_clamps_turn_as_one_assembly(rig):
@@ -899,20 +910,26 @@ def test_the_tether_and_both_clamps_turn_as_one_assembly(rig):
     phi = theta - spec.LOAD_THETA_DEG
     assert abs(angle_delta(phi, 0.0)) > 5.0, "the tether never left the cradle"
 
-    assert angle_delta(
-        part_angle(state, spec, "tether", (1.0, 0.0, 0.0)), phi
-    ) == pytest.approx(0.0, abs=1e-6)
+    assert angle_delta(part_angle(state, spec, "tether", (1.0, 0.0, 0.0)), phi) == pytest.approx(
+        0.0, abs=1e-6
+    )
 
     clamp_deg = reading.clamp * spec.BEHAVIOR["clamp_closed_deg"]
     spin = q_axis_angle((1.0, 0.0, 0.0), phi)
-    for name, pivot, sense in (("clamp_l", spec.CLAMP_PIVOT_L, 1.0),
-                               ("clamp_r", spec.CLAMP_PIVOT_R, -1.0)):
+    for name, pivot, sense in (
+        ("clamp_l", spec.CLAMP_PIVOT_L, 1.0),
+        ("clamp_r", spec.CLAMP_PIVOT_R, -1.0),
+    ):
         placed = pose(state, spec, name)
-        assert placed["position"] == pytest.approx(
-            carried_about_hub(spec, pivot, phi), abs=1e-4), name
+        assert placed["position"] == pytest.approx(carried_about_hub(spec, pivot, phi), abs=1e-4), (
+            name
+        )
         hinge = q_axis_angle((0.0, 1.0, 0.0), sense * clamp_deg)
         assert quats_equal(placed["rotation"], q_hamilton(hinge, spin), 1e-9), (
-            name, placed["rotation"], q_hamilton(hinge, spin))
+            name,
+            placed["rotation"],
+            q_hamilton(hinge, spin),
+        )
 
 
 def test_both_needles_rest_at_the_bottom_of_their_own_printed_scales(rig):
@@ -930,13 +947,13 @@ def test_both_needles_rest_at_the_bottom_of_their_own_printed_scales(rig):
     tick(module, 0.05, 4)
 
     axis = (0.0, 1.0, 0.0)
-    assert angle_delta(
-        part_angle(state, spec, "needle_vel", axis), 0.0
-    ) == pytest.approx(0.0, abs=1e-9)
+    assert angle_delta(part_angle(state, spec, "needle_vel", axis), 0.0) == pytest.approx(
+        0.0, abs=1e-9
+    )
     # vac rests at ATMOSPHERE, which is the zero end of its own travel.
-    assert angle_delta(
-        part_angle(state, spec, "needle_vac", axis), 0.0
-    ) == pytest.approx(0.0, abs=1e-9)
+    assert angle_delta(part_angle(state, spec, "needle_vac", axis), 0.0) == pytest.approx(
+        0.0, abs=1e-9
+    )
 
     board_payload(lua, state, module, spec)
     for _ in range(len(spec.POWER_STEPS_MPS) - spec.POWER_NOM_INDEX):
@@ -958,9 +975,9 @@ def test_both_needles_rest_at_the_bottom_of_their_own_printed_scales(rig):
     assert speed == pytest.approx(spec.POWER_STEPS_MPS[-1], rel=1e-6)
     assert speed < spec.GAUGE_MAX_MPS, "the dial no longer covers the top rung"
     expected = spec.GAUGE_SWEEP_DEG * speed / spec.GAUGE_MAX_MPS
-    assert angle_delta(
-        part_angle(state, spec, "needle_vel", axis), expected
-    ) == pytest.approx(0.0, abs=1e-4)
+    assert angle_delta(part_angle(state, spec, "needle_vel", axis), expected) == pytest.approx(
+        0.0, abs=1e-4
+    )
 
 
 def _segment_authored_y(spec, name):
@@ -972,8 +989,7 @@ def _segment_authored_y(spec, name):
     mesh + pose can, and the mesh has to come from the artefact.
     """
 
-    path = (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / spec.MOD_ID
-            / f"{spec.MOD_ID}_{name}.dae")
+    path = PACK_ROOT / MOD_KEY / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}_{name}.dae"
     for element in ElementTree.parse(path).iter():
         if element.tag.split("}")[-1] != "float_array":
             continue
@@ -985,10 +1001,13 @@ def _segment_authored_y(spec, name):
     raise AssertionError(f"no vertex positions in {path.name}")
 
 
-@pytest.mark.parametrize("row, button, ladder", [
-    ("pwr_seg", "btn_pwr", "POWER_STEPS_MPS"),
-    ("tilt_seg", "btn_tilt", "TILT_STEPS_DEG"),
-])
+@pytest.mark.parametrize(
+    "row, button, ladder",
+    [
+        ("pwr_seg", "btn_pwr", "POWER_STEPS_MPS"),
+        ("tilt_seg", "btn_tilt", "TILT_STEPS_DEG"),
+    ],
+)
 def test_the_bar_graphs_light_the_rung_the_console_prints(rig, row, button, ladder):
     """FOUR SEGMENTS THAT COULD NEVER LIGHT, caught from the outside.
 
@@ -1004,27 +1023,25 @@ def test_the_bar_graphs_light_the_rung_the_console_prints(rig, row, button, ladd
     above it exactly bar_hidden_dy behind.
     """
 
-    lua, state, module, spec = rig
+    _lua, state, module, spec = rig
     register_prop(state, module, spec)
     hidden = spec.BEHAVIOR["bar_hidden_dy"]
     pivots = shipped_part_pivots(spec)
-    meshes = {index: _segment_authored_y(spec, f"{row}{index}")
-              for index in range(1, 9)}
+    meshes = {index: _segment_authored_y(spec, f"{row}{index}") for index in range(1, 9)}
     # The authored hiding is real and is 0.16: without it there are no two
     # planes to be on and the rest of this test is vacuous.
-    nominal = spec.BEHAVIOR[
-        "power_nom_index" if row == "pwr_seg" else "tilt_nom_index"]
+    nominal = spec.BEHAVIOR["power_nom_index" if row == "pwr_seg" else "tilt_nom_index"]
     assert meshes[8] - meshes[1] == pytest.approx(hidden, abs=1e-6), meshes
     assert meshes[nominal] == pytest.approx(meshes[1], abs=1e-6), meshes
 
     for setting in range(1, len(getattr(spec, ladder)) + 1):
         while status(module).power_index if row == "pwr_seg" else True:
             break
-        current = (status(module).power_index if row == "pwr_seg"
-                   else status(module).tilt_index)
+        current = status(module).power_index if row == "pwr_seg" else status(module).tilt_index
         for _ in range(abs(setting - current)):
             module.pressPanelButtonByVehicle(
-                PROP_ID, f"{button}_up" if setting > current else f"{button}_down")
+                PROP_ID, f"{button}_up" if setting > current else f"{button}_down"
+            )
         tick(module, 0.05, 2)
 
         faces = {}
@@ -1037,8 +1054,7 @@ def test_the_bar_graphs_light_the_rung_the_console_prints(rig, row, button, ladd
         dark = [faces[index] for index in range(setting + 1, 9)]
         assert max(lit) - min(lit) < 1e-6, (setting, faces)
         for value in dark:
-            assert value - lit[0] == pytest.approx(hidden, abs=1e-6), (
-                setting, faces)
+            assert value - lit[0] == pytest.approx(hidden, abs=1e-6), (setting, faces)
 
 
 def test_the_deck_and_the_blast_door_travel_their_authored_strokes(rig):
@@ -1052,18 +1068,19 @@ def test_the_deck_and_the_blast_door_travel_their_authored_strokes(rig):
     lua, state, module, spec = rig
     register_prop(state, module, spec)
     pivots = shipped_part_pivots(spec)
-    assert pose(state, spec, "deck")["position"][2] == pytest.approx(
-        pivots["deck"][2], abs=1e-6)
+    assert pose(state, spec, "deck")["position"][2] == pytest.approx(pivots["deck"][2], abs=1e-6)
 
     board_payload(lua, state, module, spec)
     run_until(module, lambda s: s.phase == "evacuating", limit=20000)
     assert status(module).door_close == pytest.approx(1.0)
     assert pose(state, spec, "door")["position"][2] == pytest.approx(
-        pivots["door"][2] - spec.BEHAVIOR["door_travel"], abs=1e-6)
+        pivots["door"][2] - spec.BEHAVIOR["door_travel"], abs=1e-6
+    )
 
     run_until(module, lambda s: s.phase == "spinup", limit=20000)
     assert pose(state, spec, "deck")["position"][2] == pytest.approx(
-        pivots["deck"][2] - spec.BEHAVIOR["deck_drop"], abs=1e-6)
+        pivots["deck"][2] - spec.BEHAVIOR["deck_drop"], abs=1e-6
+    )
 
 
 def test_the_warning_beacon_stands_up_when_the_machine_is_live(rig):
@@ -1079,12 +1096,12 @@ def test_the_warning_beacon_stands_up_when_the_machine_is_live(rig):
     run_until(module, lambda s: s.phase == "spinup", limit=20000)
     tick(module, 0.05, 60)
     assert pose(state, spec, "beacon")["position"][2] == pytest.approx(
-        pivots["beacon"][2], abs=1e-6)
+        pivots["beacon"][2], abs=1e-6
+    )
     # ...and it is TURNING, which the lamps read off the same angle.
     first = part_angle(state, spec, "beacon", (0.0, 0.0, 1.0))
     tick(module, 0.05, 3)
-    assert abs(angle_delta(
-        part_angle(state, spec, "beacon", (0.0, 0.0, 1.0)), first)) > 1.0
+    assert abs(angle_delta(part_angle(state, spec, "beacon", (0.0, 0.0, 1.0)), first)) > 1.0
     assert state.lampField(spec.MOD_ID, PROP_ID, "beacon_glow", "isEnabled") == "1"
 
 
@@ -1128,9 +1145,7 @@ def test_an_abort_never_logs_an_error_either(rig):
 # WHO GETS THROWN, AND WHEN (items 3 and 5).
 # ---------------------------------------------------------------------------
 @pytest.mark.parametrize("on_the_bed", [SUBJECT_ID, 42])
-def test_the_payload_is_the_car_nearest_the_cradle_not_whichever_pairs_yields(
-    rig, on_the_bed
-):
+def test_the_payload_is_the_car_nearest_the_cradle_not_whichever_pairs_yields(rig, on_the_bed):
     """THE SELECTION WAS MADE BY pairs(), WHOSE ORDER LUA DOES NOT DEFINE.
 
     Two cars in a 14 m cradle box: one on the bed, one 5 m up the tunnel. The
@@ -1165,8 +1180,7 @@ def test_the_payload_is_the_car_nearest_the_cradle_not_whichever_pairs_yields(
 
     tick(module, 0.05, 4)
     assert status(module).aboard == 2
-    assert status(module).cradle_candidate_id == on_the_bed, (
-        status(module).cradle_candidate_id)
+    assert status(module).cradle_candidate_id == on_the_bed, status(module).cradle_candidate_id
     # ...and once the other car is gone, that IS the car it takes.
     other = 42 if on_the_bed == SUBJECT_ID else SUBJECT_ID
     state.removeVehicle(other)
@@ -1262,7 +1276,7 @@ def test_the_launch_tube_traverses_instead_of_teleporting(rig):
     is hypot(PAYLOAD_R + TUBE_BORE_R, TUBE_S1) = 35.22 m from the pivot.
     """
 
-    lua, state, module, spec = rig
+    _lua, state, module, spec = rig
     register_prop(state, module, spec)
     lever = math.hypot(spec.PAYLOAD_R + spec.TUBE_BORE_R, spec.TUBE_S1)
     rate = spec.BEHAVIOR["tube_traverse_deg_s"]
@@ -1326,8 +1340,9 @@ def test_the_release_will_not_fire_down_a_barrel_that_is_still_moving(rig):
     for _ in range(len(spec.TILT_STEPS_DEG)):
         module.pressPanelButtonByVehicle(PROP_ID, "btn_tilt_down")
     run_until(module, lambda s: s.phase == "engaging", limit=20000)
-    assert status(module).tube_deg == pytest.approx(
-        spec.TILT_STEPS_DEG[0], abs=1e-3), status(module).tube_deg
+    assert status(module).tube_deg == pytest.approx(spec.TILT_STEPS_DEG[0], abs=1e-3), status(
+        module
+    ).tube_deg
     for _ in range(len(spec.TILT_STEPS_DEG)):
         module.pressPanelButtonByVehicle(PROP_ID, "btn_tilt_up")
     assert status(module).tilt_index == len(spec.TILT_STEPS_DEG)
@@ -1339,7 +1354,8 @@ def test_the_release_will_not_fire_down_a_barrel_that_is_still_moving(rig):
     # arrives.
     run_until(module, lambda s: s.phase == "release", limit=20000)
     assert status(module).tube_aligned is False, (
-        "the barrel had already arrived; this test would prove nothing")
+        "the barrel had already arrived; this test would prove nothing"
+    )
     aligned_at, left_at = None, None
     for step in range(2000):
         tick(module, 0.05)
@@ -1351,18 +1367,15 @@ def test_the_release_will_not_fire_down_a_barrel_that_is_still_moving(rig):
             break
     assert aligned_at is not None, "the barrel never arrived"
     assert left_at is not None, "the release never ended"
-    assert left_at >= aligned_at, (
-        f"fired on frame {left_at}, barrel arrived on frame {aligned_at}")
+    assert left_at >= aligned_at, f"fired on frame {left_at}, barrel arrived on frame {aligned_at}"
     assert status(module).phase == "recover", status(module).phase
 
     # ...and the shot it eventually took is aimed where the ladder says.
     assert status(module).tube_aligned is True
-    assert status(module).tube_deg == pytest.approx(
-        spec.TILT_STEPS_DEG[-1], abs=1e-3)
+    assert status(module).tube_deg == pytest.approx(spec.TILT_STEPS_DEG[-1], abs=1e-3)
     launch = state.lastVelocity()
     assert launch is not None
-    elevation = math.degrees(math.atan2(
-        launch.z, math.hypot(launch.x, launch.y)))
+    elevation = math.degrees(math.atan2(launch.z, math.hypot(launch.x, launch.y)))
     assert elevation == pytest.approx(spec.TILT_STEPS_DEG[-1], abs=1e-4)
 
 
@@ -1434,8 +1447,9 @@ def test_auto_detect_needs_a_car_that_has_actually_stopped(rig):
     armed = run_until(module, lambda s: s.phase == "arming")
     assert armed <= 0.10, armed
     elapsed = armed + run_until(module, lambda s: s.phase == "sealing")
-    assert (0.9 * spec.BEHAVIOR["arm_delay_s"]
-            <= elapsed <= 1.6 * spec.BEHAVIOR["arm_delay_s"]), elapsed
+    assert 0.9 * spec.BEHAVIOR["arm_delay_s"] <= elapsed <= 1.6 * spec.BEHAVIOR["arm_delay_s"], (
+        elapsed
+    )
     assert status(module).phase == "sealing"
     assert any("PAYLOAD ON THE CRADLE" in line for line in messages(state))
 
@@ -1454,8 +1468,16 @@ def test_sequence_walks_every_phase_in_order(rig):
             break
         tick(module)
     assert seen == [
-        "idle", "arming", "sealing", "evacuating", "engaging", "spinup",
-        "hold", "release", "recover", "idle",
+        "idle",
+        "arming",
+        "sealing",
+        "evacuating",
+        "engaging",
+        "spinup",
+        "hold",
+        "release",
+        "recover",
+        "idle",
     ], seen
 
 
@@ -1494,8 +1516,8 @@ def test_the_chamber_actually_seals_and_evacuates(rig):
 # the spring's authority is NOT clipped, and the deck waits for the load -
 # and the live gate's `orbit_max <= CHAMBER_R` still owns the outcome.
 # ---------------------------------------------------------------------------
-PICKUP_DRAW_MPS = 3.5           # LUA_BODY's own constant, read from the source
-PICKUP_TAKEUP_MAX_S = 3.0       # ditto: the take-up watchdog
+PICKUP_DRAW_MPS = 3.5  # LUA_BODY's own constant, read from the source
+PICKUP_TAKEUP_MAX_S = 3.0  # ditto: the take-up watchdog
 
 
 def field_command(state, vehicle_id):
@@ -1525,8 +1547,7 @@ def follow_field(state, module, position, seconds=0.05):
     module.onPreRender(seconds, seconds, seconds)
     command = field_command(state, SUBJECT_ID)
     if command is not None:
-        position = tuple(p + v * seconds for p, v
-                         in zip(position, command, strict=True))
+        position = tuple(p + v * seconds for p, v in zip(position, command, strict=True))
         state.movePayload(SUBJECT_ID, *position)
     return position, command
 
@@ -1708,8 +1729,8 @@ def test_launch_speed_and_elevation_match_the_console(rig, tilt_index):
         module.pressPanelButtonByVehicle(PROP_ID, "btn_pwr_down")
     for _ in range(abs(tilt_index - spec.TILT_NOM_INDEX)):
         module.pressPanelButtonByVehicle(
-            PROP_ID,
-            "btn_tilt_up" if tilt_index > spec.TILT_NOM_INDEX else "btn_tilt_down")
+            PROP_ID, "btn_tilt_up" if tilt_index > spec.TILT_NOM_INDEX else "btn_tilt_down"
+        )
     assert status(module).power_index == 1
     assert status(module).tilt_index == tilt_index
 
@@ -1721,7 +1742,7 @@ def test_launch_speed_and_elevation_match_the_console(rig, tilt_index):
     assert launch is not None
     # Scale 0 is a REPLACE, which is what a launch must be.
     assert launch.scale == 0
-    speed = math.sqrt(launch.x ** 2 + launch.y ** 2 + launch.z ** 2)
+    speed = math.sqrt(launch.x**2 + launch.y**2 + launch.z**2)
     expected_speed = spec.POWER_STEPS_MPS[0]
     assert speed == pytest.approx(expected_speed, rel=1e-6)
 
@@ -1758,7 +1779,7 @@ def test_release_window_is_not_missed_at_full_power(rig):
     assert elapsed < spec.BEHAVIOR["release_timeout_s"]
 
     launch = state.lastVelocity()
-    speed = math.sqrt(launch.x ** 2 + launch.y ** 2 + launch.z ** 2)
+    speed = math.sqrt(launch.x**2 + launch.y**2 + launch.z**2)
     assert speed == pytest.approx(spec.POWER_STEPS_MPS[-1], rel=1e-6)
 
 
@@ -1811,7 +1832,7 @@ def test_purge_throws_whatever_is_aboard(rig):
     launch = state.lastVelocity()
     assert launch is not None and launch.scale == 0
     assert launch.z == pytest.approx(spec.BEHAVIOR["purge_up_mps"], rel=1e-6)
-    horizontal = math.sqrt(launch.x ** 2 + launch.y ** 2)
+    horizontal = math.sqrt(launch.x**2 + launch.y**2)
     assert horizontal == pytest.approx(spec.BEHAVIOR["purge_out_mps"], rel=1e-6)
 
 
@@ -1843,8 +1864,7 @@ def test_a_payload_outside_the_chamber_is_never_field_held(rig):
     enter_zone(lua, state, module, "chamber_zone", 99)
     state.clearVelocities()
     tick(module, 0.05, 6)
-    touched = {state.velocities[index + 1].id
-               for index in range(state.velocityCount())}
+    touched = {state.velocities[index + 1].id for index in range(state.velocityCount())}
     assert touched == {SUBJECT_ID}
 
 
@@ -1870,14 +1890,12 @@ def test_only_the_payload_is_ever_held_or_fired(rig):
 
     state.clearVelocities()
     tick(module, 0.05, 4)
-    held = {state.velocities[index + 1].id
-            for index in range(state.velocityCount())}
+    held = {state.velocities[index + 1].id for index in range(state.velocityCount())}
     assert held == {SUBJECT_ID}, held
 
     state.clearVelocities()
     run_until(module, lambda s: s.phase == "recover", limit=8000)
-    fired = {state.velocities[index + 1].id
-             for index in range(state.velocityCount())}
+    fired = {state.velocities[index + 1].id for index in range(state.velocityCount())}
     assert fired == {SUBJECT_ID}, fired
 
 
@@ -1905,7 +1923,7 @@ def test_purge_is_interlocked_against_the_running_sequence(rig):
 
     run_until(module, lambda s: s.phase == "recover", limit=8000)
     launch = state.lastVelocity()
-    speed = math.sqrt(launch.x ** 2 + launch.y ** 2 + launch.z ** 2)
+    speed = math.sqrt(launch.x**2 + launch.y**2 + launch.z**2)
     assert speed == pytest.approx(spec.POWER_STEPS_MPS[-1], rel=1e-6)
 
 
@@ -1957,9 +1975,9 @@ def test_abort_cannot_pin_the_machine_out_of_service(rig):
     run_until(module, lambda s: s.phase == "spinup")
     module.pressPanelButtonByVehicle(PROP_ID, "btn_abort")
     reached = None
-    for step in range(1200):                      # 60 s of sim
+    for step in range(1200):  # 60 s of sim
         tick(module, 0.05)
-        if step % 10 == 0:                        # 0.5 s < recover_hold_s
+        if step % 10 == 0:  # 0.5 s < recover_hold_s
             module.pressPanelButtonByVehicle(PROP_ID, "btn_abort")
         if status(module).phase == "idle":
             reached = step * 0.05
@@ -1976,7 +1994,7 @@ def test_losing_the_payload_mid_ride_recovers_the_machine(rig):
     board_payload(lua, state, module, spec)
     run_until(module, lambda s: s.phase == "spinup")
     tick(module, 0.05, 40)
-    module.onVehicleResetted(SUBJECT_ID)          # lua_kit -> onSubjectGone
+    module.onVehicleResetted(SUBJECT_ID)  # lua_kit -> onSubjectGone
     assert status(module).phase == "recover"
     run_until(module, lambda s: s.phase == "idle", limit=8000)
 
@@ -1987,7 +2005,7 @@ def test_a_payload_that_simply_vanishes_trips_the_watchdog(rig):
     board_payload(lua, state, module, spec)
     run_until(module, lambda s: s.phase == "spinup")
     tick(module, 0.05, 40)
-    state.removeVehicle(SUBJECT_ID)               # no event at all
+    state.removeVehicle(SUBJECT_ID)  # no event at all
     # Grace is one safety_check_interval - reused, not a new tunable.
     tick(module, 0.05, int(spec.BEHAVIOR["safety_check_interval"] / 0.05) + 4)
     assert status(module).phase == "recover"
@@ -2024,7 +2042,7 @@ def test_registration_bakes_collision_exactly_once(rig):
     runtime: 1 reload after registerProp, 2 after a single tick.
     """
 
-    lua, state, module, spec = rig
+    _lua, state, module, spec = rig
     register_prop(state, module, spec)
     tick(module, 0.05, 20)
     assert state.collisionReloads == 1
@@ -2040,14 +2058,15 @@ def test_the_release_timeout_is_a_stop_not_a_second_trigger(rig):
     """
 
     lua, state, module, spec = rig
-    bound = (spec.BEHAVIOR["muzzle_seconds"]
-             + 2.0 * math.pi * spec.PAYLOAD_R / spec.POWER_STEPS_MPS[0])
+    bound = (
+        spec.BEHAVIOR["muzzle_seconds"] + 2.0 * math.pi * spec.PAYLOAD_R / spec.POWER_STEPS_MPS[0]
+    )
     assert bound == pytest.approx(4.968, abs=0.01)
     assert bound < 0.4 * spec.BEHAVIOR["release_timeout_s"]
 
     register_prop(state, module, spec)
     board_payload(lua, state, module, spec)
-    for _ in range(spec.POWER_NOM_INDEX - 1):     # slowest rung = worst case
+    for _ in range(spec.POWER_NOM_INDEX - 1):  # slowest rung = worst case
         module.pressPanelButtonByVehicle(PROP_ID, "btn_pwr_down")
     run_until(module, lambda s: s.phase == "release", limit=20000)
     elapsed = run_until(module, lambda s: s.phase == "recover", limit=20000)
@@ -2063,8 +2082,7 @@ def test_the_release_timeout_is_a_stop_not_a_second_trigger(rig):
 # comes back to rest.
 # ---------------------------------------------------------------------------
 
-CUE_CALL = re.compile(
-    r"extensions\.\w+_vehicle\.(slAudio\w+)\(\s*(?:\"([\w]+)\")?")
+CUE_CALL = re.compile(r"extensions\.\w+_vehicle\.(slAudio\w+)\(\s*(?:\"([\w]+)\")?")
 
 
 def cues(state):
@@ -2083,8 +2101,11 @@ def cues(state):
 
 
 def cue_names(state, verb=None):
-    return [name for method, name in cues(state)
-            if name is not None and (verb is None or method == verb)]
+    return [
+        name
+        for method, name in cues(state)
+        if name is not None and (verb is None or method == verb)
+    ]
 
 
 def loops_left_on(module):
@@ -2116,41 +2137,42 @@ def test_every_phase_edge_dispatches_its_cue_in_order(rig):
     run_until(module, lambda s: s.phase == "idle", limit=20000)
 
     played = cue_names(state, "slAudioPlay") + [
-        name for method, name in cues(state) if method == "slAudioSet"
-        and name == "stage_tick"]
+        name for method, name in cues(state) if method == "slAudioSet" and name == "stage_tick"
+    ]
     assert state.luaCommands, "the rig never recorded a queueLuaCommand"
     assert played, "no cue was ever dispatched"
 
     # Order of FIRST appearance, one entry per cue, ignoring the automation
     # pushes that ride between them.
     ordered, seen = [], set()
-    for method, name in cues(state):
+    for _method, name in cues(state):
         if name is None or name in seen:
             continue
         seen.add(name)
         ordered.append(name)
     assert ordered == [
-        "arm_charge",     # the 3 s hold
+        "arm_charge",  # the 3 s hold
         "detect_klaxon",  # committed
-        "door_travel",    # the blast door
-        "door_slam",      # shut in
-        "pump_down",      # 7 s of evacuation
-        "hard_vacuum",    # it arrives
-        "deck_retract",   # the floor leaves
-        "clamp_close",    # the cradle takes your weight
-        "spin_loop",      # the ride
-        "stage_tick",     # eight rungs
-        "muzzle_open",    # the hatch
+        "door_travel",  # the blast door
+        "door_slam",  # shut in
+        "pump_down",  # 7 s of evacuation
+        "hard_vacuum",  # it arrives
+        "deck_retract",  # the floor leaves
+        "clamp_close",  # the cradle takes your weight
+        "spin_loop",  # the ride
+        "stage_tick",  # eight rungs
+        "muzzle_open",  # the hatch
         "release_alarm",  # the interlock
-        "release_bang",   # separation
-        "shutdown",       # power down
-        "repress",        # air comes back
+        "release_bang",  # separation
+        "shutdown",  # power down
+        "repress",  # air comes back
     ], ordered
     # abort_klaxon is the sixteenth and correctly absent: nothing aborted.
     assert "abort_klaxon" not in ordered
     # One tick per rung of STAGE_FRACS, no more and no fewer.
-    ticks = [name for method, name in cues(state)
-             if method == "slAudioSet" and name == "stage_tick"]
+    ticks = [
+        name for method, name in cues(state) if method == "slAudioSet" and name == "stage_tick"
+    ]
     assert len(ticks) == 8, ticks
 
 
@@ -2202,7 +2224,7 @@ def test_an_abort_mid_spin_silences_the_ride(rig):
     tick(module, 0.05, 20)
     module.pressPanelButtonByVehicle(PROP_ID, "btn_abort")
     run_until(module, lambda s: s.phase == "abort", limit=200)
-    tick(module, 0.05)          # run_until stops ON the edge, before the body
+    tick(module, 0.05)  # run_until stops ON the edge, before the body
     assert "abort_klaxon" in cue_names(state, "slAudioPlay")
     run_until(module, lambda s: s.phase == "recover", limit=20000)
     state.removeVehicle(SUBJECT_ID)
@@ -2224,7 +2246,7 @@ def test_resetting_the_prop_silences_everything_it_can_still_reach(rig):
     register_prop(state, module, spec)
     board_payload(lua, state, module, spec)
     run_until(module, lambda s: s.phase == "spinup", limit=20000)
-    tick(module, 0.05, 20)      # run_until stops ON the edge, before the body
+    tick(module, 0.05, 20)  # run_until stops ON the edge, before the body
     assert "spin_loop" in cue_names(state, "slAudioPlay")
     module.onVehicleResetted(PROP_ID)
     assert status(module).phase == "idle"
@@ -2247,15 +2269,18 @@ def test_the_audio_emitter_node_is_resolved_by_name_and_pushed(rig):
     the sound comes from.
     """
 
-    lua, state, module, spec = rig
+    _lua, state, module, spec = rig
     register_prop(state, module, spec)
     tick(module, steps=4)
 
     wanted = expected_emitter_cid(spec)
     assert wanted != 0, "the stub must not put the emitter at cid 0"
-    pushed = [command for index in range(len(state.luaCommands))
-              for command in (state.luaCommands[index + 1],)
-              if "slAudioNode" in command]
+    pushed = [
+        command
+        for index in range(len(state.luaCommands))
+        for command in (state.luaCommands[index + 1],)
+        if "slAudioNode" in command
+    ]
     assert pushed, "the GE side never resolved the audio emitter node"
     assert f"slAudioNode({wanted})" in pushed[0], pushed[0]
     # ...once, not once a frame: this is a latch, and every push is a
@@ -2311,8 +2336,10 @@ def test_the_armour_chunk_pins_every_beam_and_remembers_what_it_pinned(rig):
     vm.execute(armour_chunk(state, "on"))
 
     applied = vm.eval("applied")
-    writes = {(str(applied[i + 1][1]), int(applied[i + 1][2])): applied[i + 1][3]
-              for i in range(len(applied))}
+    writes = {
+        (str(applied[i + 1][1]), int(applied[i + 1][2])): applied[i + 1][3]
+        for i in range(len(applied))
+    }
     # The two fully specified beams are pinned on both properties.
     for cid in (0, 1):
         assert writes[("deform", cid)] == float("inf"), cid
@@ -2368,8 +2395,10 @@ def test_the_restore_hands_back_the_car_s_own_numbers_and_never_a_default(rig):
     vm.execute(armour_chunk(state, "off"))
 
     applied = vm.eval("applied")
-    writes = {(str(applied[i + 1][1]), int(applied[i + 1][2])): applied[i + 1][3]
-              for i in range(len(applied))}
+    writes = {
+        (str(applied[i + 1][1]), int(applied[i + 1][2])): applied[i + 1][3]
+        for i in range(len(applied))
+    }
     assert writes[("deform", 7)] == 1234
     assert writes[("strength", 7)] == 5678
     assert writes[("deform", 9)] == 4321
@@ -2407,7 +2436,8 @@ def test_the_payload_is_pinned_for_the_ride_and_freed_for_the_landing(rig):
     run_until(module, lambda s: s.phase == "sealing", limit=400)
     tick(module, steps=4)
     assert armour_traffic(state, SUBJECT_ID) == [("on", SUBJECT_ID)], (
-        "the payload was not pinned when it committed")
+        "the payload was not pinned when it committed"
+    )
 
     # Through the whole loaded ride it stays pinned exactly once - the sync
     # is a diff, not a resend, so a per-frame call must not spam the VM.
@@ -2440,12 +2470,13 @@ def test_the_payload_is_pinned_for_the_ride_and_freed_for_the_landing(rig):
         raise AssertionError("the car was never handed its structure back")
     assert launched_at is not None
     assert index - launched_at <= 1, (
-        f"the car flew rigid for {index - launched_at} frames after launch")
+        f"the car flew rigid for {index - launched_at} frames after launch"
+    )
 
     run_until(module, lambda s: s.phase == "idle", limit=40000)
-    assert armour_traffic(state, SUBJECT_ID) == [
-        ("on", SUBJECT_ID), ("off", SUBJECT_ID)], (
-        "the launched car was not handed its structure back")
+    assert armour_traffic(state, SUBJECT_ID) == [("on", SUBJECT_ID), ("off", SUBJECT_ID)], (
+        "the launched car was not handed its structure back"
+    )
 
 
 @pytest.mark.parametrize("ending", ["abort", "prop_reset", "subject_gone"])
@@ -2473,5 +2504,6 @@ def test_no_ending_leaves_a_car_permanently_indestructible(rig, ending):
     tick(module, steps=4)
 
     assert armour_traffic(state, SUBJECT_ID)[-1] == ("off", SUBJECT_ID), (
-        f"{ending} left the car pinned")
+        f"{ending} left the car pinned"
+    )
     assert not errors(state)

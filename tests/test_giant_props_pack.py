@@ -129,8 +129,7 @@ def test_local_helpers_defined_before_use(mod_key: str) -> None:
 
     spec = load_spec(mod_key)
     runtime = (
-        PACK_ROOT / mod_key / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID
-        / "runtime.lua"
+        PACK_ROOT / mod_key / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID / "runtime.lua"
     )
     if not runtime.is_file():
         pytest.skip("no generated GE runtime")
@@ -154,8 +153,9 @@ def test_local_helpers_defined_before_use(mod_key: str) -> None:
     for name, definition in defined_at.items():
         for number in range(definition):
             if re.search(rf"(?<![\w.:]){re.escape(name)}\s*\(", code[number]):
-                offenders.append(f"{name}() called at line {number + 1}, "
-                                 f"defined at line {definition + 1}")
+                offenders.append(
+                    f"{name}() called at line {number + 1}, defined at line {definition + 1}"
+                )
                 break
     assert not offenders, (
         f"{mod_key}: local helpers used before definition (nil at runtime): "
@@ -182,8 +182,7 @@ def test_required_tunables_all_ship(mod_key: str) -> None:
 
     spec = load_spec(mod_key)
     runtime = (
-        PACK_ROOT / mod_key / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID
-        / "runtime.lua"
+        PACK_ROOT / mod_key / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID / "runtime.lua"
     )
     if not runtime.is_file():
         pytest.skip("no generated GE runtime")
@@ -382,8 +381,7 @@ def _spawn_datum_params():
     return [
         pytest.param(
             key,
-            marks=pytest.mark.xfail(strict=True,
-                                    reason=SPAWN_DATUM_XFAIL[key]),
+            marks=pytest.mark.xfail(strict=True, reason=SPAWN_DATUM_XFAIL[key]),
         )
         if key in SPAWN_DATUM_XFAIL
         else key
@@ -403,12 +401,8 @@ def test_reference_node_is_the_lowest_node(mod_key: str) -> None:
 
     spec = load_spec(mod_key)
     handoff = load_handoff(mod_key)
-    jbeam_path = (
-        PACK_ROOT / mod_key / "mod" / "vehicles" / spec.MOD_ID
-        / f"{spec.MOD_ID}.jbeam"
-    )
-    jbeam = json.loads(jbeam_path.read_text(encoding="utf-8"),
-                       parse_constant=reject_constants)
+    jbeam_path = PACK_ROOT / mod_key / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.jbeam"
+    jbeam = json.loads(jbeam_path.read_text(encoding="utf-8"), parse_constant=reject_constants)
     part = jbeam[spec.MOD_ID]
 
     positions = {row[0]: (row[1], row[2], row[3]) for row in part["nodes"][1:]}
@@ -422,8 +416,7 @@ def test_reference_node_is_the_lowest_node(mod_key: str) -> None:
     min_z = min(z for (_x, _y, z) in positions.values())
     lift = ref_z - min_z
     lowest = sorted(
-        identifier for identifier, (_x, _y, z) in positions.items()
-        if z <= min_z + 1e-6
+        identifier for identifier, (_x, _y, z) in positions.items() if z <= min_z + 1e-6
     )
     assert lift <= SPAWN_DATUM_TOLERANCE, (
         f"{mod_key}: ref node {ref!r} is authored {lift:.3f} m above the "
@@ -490,11 +483,13 @@ def test_panel_button_chain_is_wired_end_to_end(mod_key: str) -> None:
         assert action is not None, (mod_key, action_id, sorted(actions))
         on_down = str(action["onDown"])
         assert f"extensions.{extension}.pressPanelButtonByVehicle" in on_down, (
-            mod_key, action_id, on_down)
+            mod_key,
+            action_id,
+            on_down,
+        )
         assert f"'{key}'" in on_down, (mod_key, action_id, on_down)
         assert action["title"] == button["title"], (mod_key, action_id)
-    assert set(actions) == expected_actions, (
-        mod_key, sorted(set(actions) ^ expected_actions))
+    assert set(actions) == expected_actions, (mod_key, sorted(set(actions) ^ expected_actions))
 
 
 @pytest.mark.parametrize("mod_key", MOD_KEYS)
@@ -599,8 +594,7 @@ def test_builder_moves_the_alpha_where_the_engine_reads_it() -> None:
     prop_builder, _ = load_proplib()
     stage0 = {"baseColorFactor": [0.62, 0.70, 0.74, 0.12]}
     prop_builder.move_alpha_to_opacity(stage0)
-    assert stage0 == {"baseColorFactor": [0.62, 0.70, 0.74, 1.0],
-                      "opacityFactor": 0.12}
+    assert stage0 == {"baseColorFactor": [0.62, 0.70, 0.74, 1.0], "opacityFactor": 0.12}
     # IDEMPOTENT. Once the alpha is 1.0 there is nothing left to move, so a
     # second pass must not overwrite an opacity that is already correct.
     prop_builder.move_alpha_to_opacity(stage0)
@@ -876,9 +870,9 @@ def test_cooked_harvest_survives_a_texture_rebuild(tmp_path: Path) -> None:
     reencoded = textures / map_names[0]
     with Image.open(reencoded) as image:
         pixels_before = image.tobytes()
-    reencoded.write_bytes(reencoded.read_bytes() + b"\x00")   # bytes move
+    reencoded.write_bytes(reencoded.read_bytes() + b"\x00")  # bytes move
     with Image.open(reencoded) as image:
-        assert image.tobytes() == pixels_before                # pixels do not
+        assert image.tobytes() == pixels_before  # pixels do not
     assert still_cooked(map_names[0]), "a re-encode retired a valid bake"
 
     # ...but a real edit to the source - one that moves a PIXEL - must still
@@ -984,9 +978,9 @@ def test_harvest_manifest_is_well_formed(mod_key: str) -> None:
         assert record["dds_sha256"] == hashlib.sha256(blob).hexdigest()
         assert len(blob) > 148, f"harvested DDS has no surface data: {cooked_name}"
         assert blob[:4] == b"DDS ", f"harvested DDS has no DDS magic: {cooked_name}"
-        assert (
-            int.from_bytes(blob[4:8], "little") == 124
-        ), f"harvested DDS has a malformed header: {cooked_name}"
+        assert int.from_bytes(blob[4:8], "little") == 124, (
+            f"harvested DDS has a malformed header: {cooked_name}"
+        )
         assert len(blob) != 1398281, (
             f"harvested DDS is the engine's IMPORTING TEXTURE placeholder: {cooked_name}"
         )
@@ -1074,6 +1068,7 @@ def test_vehicle_metadata(mod_key: str) -> None:
 # functions that enforce it were not, so the fixture exercised PIL and the
 # guard went untested. These four are the guard.
 # ---------------------------------------------------------------------------
+
 
 def _png(pixels, compress_level: int = 6) -> bytes:
     from io import BytesIO
@@ -1226,6 +1221,7 @@ def test_generator_is_import_safe(mod_key: str) -> None:
     ]
     assert guarded, f'{generator.name} has no `if __name__ == "__main__":` calling main()'
 
+
 # ---------------------------------------------------------------------------
 # Gates added 2026-08-25 after the colossus_tire critic round. Every one of
 # these exists because something shipped past the other 26 checks.
@@ -1345,8 +1341,7 @@ def test_behaviour_node_names_resolve_in_the_jbeam(mod_key: str) -> None:
         if beam.get("extra", {}).get("breakGroup")
     }
     runtime = (
-        PACK_ROOT / mod_key / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID
-        / "runtime.lua"
+        PACK_ROOT / mod_key / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID / "runtime.lua"
     )
     if runtime.is_file():
         text = runtime.read_text(encoding="utf-8")

@@ -104,9 +104,7 @@ TUNNEL_SURFACES = [
 
 
 @pytest.mark.parametrize("arc_name, radius_name", TUNNEL_SURFACES)
-def test_the_omitted_arc_ends_exactly_on_the_tunnel_s_clear_rectangle(
-    arc_name, radius_name
-):
+def test_the_omitted_arc_ends_exactly_on_the_tunnel_s_clear_rectangle(arc_name, radius_name):
     """Not "about the right place" - ON it, to floating-point.
 
     An arc that stops a degree short of the soffit is 1.8 m of open wall at
@@ -128,15 +126,15 @@ def test_the_sill_angles_land_on_the_chords_the_tunnel_was_cut_to():
     """
 
     assert yz(spec.TUNNEL_BORE_DEG[1], spec.CHAMBER_R)[0] == pytest.approx(
-        spec.TUNNEL_Y_IN, abs=1e-9)
+        spec.TUNNEL_Y_IN, abs=1e-9
+    )
     assert yz(spec.TUNNEL_SHELL_DEG[1], spec.SHELL_R)[0] == pytest.approx(
-        spec.TUNNEL_Y_OUT, abs=1e-9)
+        spec.TUNNEL_Y_OUT, abs=1e-9
+    )
 
 
 @pytest.mark.parametrize("arc_name, radius_name", TUNNEL_SURFACES)
-def test_no_omitted_point_lies_outside_the_thing_that_plugs_it(
-    arc_name, radius_name
-):
+def test_no_omitted_point_lies_outside_the_thing_that_plugs_it(arc_name, radius_name):
     """The whole defect in one assertion.
 
     The plug is a box. Every point of the hole has to be inside it - in Z
@@ -156,8 +154,10 @@ def test_no_omitted_point_lies_outside_the_thing_that_plugs_it(
 def test_the_floor_slab_reaches_both_sills():
     """The floor stops at TUNNEL_Y_IN, so both sills must be at or beyond it."""
 
-    for arc, radius in ((spec.TUNNEL_BORE_DEG, spec.CHAMBER_R),
-                        (spec.TUNNEL_SHELL_DEG, spec.SHELL_R)):
+    for arc, radius in (
+        (spec.TUNNEL_BORE_DEG, spec.CHAMBER_R),
+        (spec.TUNNEL_SHELL_DEG, spec.SHELL_R),
+    ):
         y = yz(arc[1], radius)[0]
         assert spec.TUNNEL_Y_FAR <= y <= spec.TUNNEL_Y_IN + 1e-9, (arc, y)
 
@@ -193,8 +193,7 @@ def _shell_mesh_points():
     foot: authored RAMP_Y0 = -76.0 appears here at y = +76.0.
     """
 
-    path = (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / spec.MOD_ID
-            / f"{spec.MOD_ID}.dae")
+    path = PACK_ROOT / MOD_KEY / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.dae"
     points = []
     for element in ElementTree.parse(path).iter():
         if element.tag.split("}")[-1] != "float_array":
@@ -203,8 +202,8 @@ def _shell_mesh_points():
             continue
         values = [float(token) for token in element.text.split()]
         points.extend(
-            (-x, -y, z) for x, y, z
-            in zip(values[0::3], values[1::3], values[2::3], strict=True))
+            (-x, -y, z) for x, y, z in zip(values[0::3], values[1::3], values[2::3], strict=True)
+        )
     assert points, f"no vertex positions in {path.name}"
     return points
 
@@ -212,8 +211,10 @@ def _shell_mesh_points():
 def _polar(point):
     """(chamber radius, theta in degrees) of an authored-frame point."""
 
-    return (math.hypot(point[1], point[2] - spec.HUB_Z),
-            math.degrees(math.atan2(point[2] - spec.HUB_Z, point[1])) % 360.0)
+    return (
+        math.hypot(point[1], point[2] - spec.HUB_Z),
+        math.degrees(math.atan2(point[2] - spec.HUB_Z, point[1])) % 360.0,
+    )
 
 
 def test_the_shingle_leaves_span_the_whole_omitted_arc():
@@ -244,11 +245,11 @@ def test_the_shingle_leaves_span_the_whole_omitted_arc():
     # hold every leaf including its lap, narrow enough to exclude the shell
     # furniture that happens to share a leaf's radius elsewhere on the ring.
     window = [
-        point for point in points
+        point
+        for point in points
         if abs(point[0]) <= spec.SLOT_LEAF_HALF_X + 1e-3
         and start - span <= _polar(point)[1] <= end + span
-        and spec.SLOT_LEAF_R0 - 1e-3
-        <= _polar(point)[0] <= spec.SLOT_LEAF_R_MAX + 1e-3
+        and spec.SLOT_LEAF_R0 - 1e-3 <= _polar(point)[0] <= spec.SLOT_LEAF_R_MAX + 1e-3
     ]
     assert window, "no leaf geometry at all in the shipped mesh"
 
@@ -258,13 +259,13 @@ def test_the_shingle_leaves_span_the_whole_omitted_arc():
         # Three tenths of a step: the leaves are 12 mm apart radially, so this
         # separates leaf i from leaf i+1 without catching a neighbour's edge
         # bevel, which half a step does.
-        leaf = [point for point in window
-                if abs(_polar(point)[0] - radius) <= 0.3 * spec.SLOT_LEAF_STEP]
+        leaf = [
+            point for point in window if abs(_polar(point)[0] - radius) <= 0.3 * spec.SLOT_LEAF_STEP
+        ]
         assert leaf, f"leaf {index} is missing from the shipped mesh at r={radius:.3f}"
         angles = [_polar(point)[1] for point in leaf]
         measured.append((min(angles), max(angles)))
-        expected = (start + span * (index - lap),
-                    start + span * (index + 1.0 + lap))
+        expected = (start + span * (index - lap), start + span * (index + 1.0 + lap))
         assert measured[-1][0] == pytest.approx(expected[0], abs=0.002), index
         assert measured[-1][1] == pytest.approx(expected[1], abs=0.002), index
 
@@ -294,21 +295,27 @@ def test_the_shingle_leaves_span_the_whole_profile_width():
     start, end = spec.SLOT_DEG
     shell_widths = []
     for sector in ((10.0, 45.0), (150.0, 195.0), (300.0, 340.0)):
-        band = [point for point in points
-                if abs(_polar(point)[0] - spec.SHELL_R) <= 0.01
-                and sector[0] <= _polar(point)[1] <= sector[1]]
+        band = [
+            point
+            for point in points
+            if abs(_polar(point)[0] - spec.SHELL_R) <= 0.01
+            and sector[0] <= _polar(point)[1] <= sector[1]
+        ]
         assert band, sector
         shell_widths.append(max(abs(point[0]) for point in band))
     # The profile is a revolve, so the three sectors must agree.
     assert max(shell_widths) - min(shell_widths) < 1e-6, shell_widths
 
-    leaves = [point for point in points
-              if start <= _polar(point)[1] <= end
-              and spec.SLOT_LEAF_R0 - 1e-3
-              <= _polar(point)[0] <= spec.SLOT_LEAF_R_MAX + 1e-3]
+    leaves = [
+        point
+        for point in points
+        if start <= _polar(point)[1] <= end
+        and spec.SLOT_LEAF_R0 - 1e-3 <= _polar(point)[0] <= spec.SLOT_LEAF_R_MAX + 1e-3
+    ]
     assert leaves, "no leaf geometry inside the opening"
     assert max(abs(point[0]) for point in leaves) >= max(shell_widths) - 1e-9, (
-        "the shingles are narrower than the shell they close")
+        "the shingles are narrower than the shell they close"
+    )
 
 
 def test_the_leaf_stack_is_closed_on_both_flanks():

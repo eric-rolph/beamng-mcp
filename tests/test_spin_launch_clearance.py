@@ -38,6 +38,7 @@ here to test.
 from __future__ import annotations
 
 import importlib.util
+import itertools
 import json
 import math
 from pathlib import Path
@@ -51,8 +52,7 @@ MOD_KEY = "spin_launch"
 
 def load_spec():
     spec_path = PACK_ROOT / MOD_KEY / "spec.py"
-    loader_spec = importlib.util.spec_from_file_location(
-        "spin_launch_clearance_spec", spec_path)
+    loader_spec = importlib.util.spec_from_file_location("spin_launch_clearance_spec", spec_path)
     module = importlib.util.module_from_spec(loader_spec)
     loader_spec.loader.exec_module(module)
     return module
@@ -72,16 +72,13 @@ def _sample_box(centre, axes, halves, steps=7):
         for b in _span(halves[1], steps):
             for c in _span(halves[2], steps):
                 yield tuple(
-                    centre[k] + axes[0][k] * a + axes[1][k] * b
-                    + axes[2][k] * c
-                    for k in range(3)
+                    centre[k] + axes[0][k] * a + axes[1][k] * b + axes[2][k] * c for k in range(3)
                 )
 
 
 def _ring(theta_deg, radius, x=0.0):
     angle = math.radians(theta_deg)
-    return (x, radius * math.cos(angle),
-            SPEC.HUB_Z + radius * math.sin(angle))
+    return (x, radius * math.cos(angle), SPEC.HUB_Z + radius * math.sin(angle))
 
 
 def _jamb_points(theta_deg):
@@ -91,8 +88,7 @@ def _jamb_points(theta_deg):
     return _sample_box(
         _ring(theta_deg, SPEC.SLOT_JAMB_R),
         ((1.0, 0.0, 0.0), tangent, radial),
-        (SPEC.OUTER_HALF_X + 0.35, SPEC.SLOT_JAMB_HALF_T,
-         SPEC.SLOT_JAMB_HALF_R),
+        (SPEC.OUTER_HALF_X + 0.35, SPEC.SLOT_JAMB_HALF_T, SPEC.SLOT_JAMB_HALF_R),
     )
 
 
@@ -116,7 +112,8 @@ def test_no_authored_fixture_enters_the_swept_bore():
         for tilt in SPEC.TILT_STEPS_DEG:
             gap = SPEC.bore_clearance(tilt, point) - radius
             assert gap >= SPEC.SWEPT_CLEARANCE_MIN, (
-                f"{name} is {gap:.3f} m from the bore at elevation {tilt:g}")
+                f"{name} is {gap:.3f} m from the bore at elevation {tilt:g}"
+            )
 
 
 def test_no_authored_fixture_touches_the_tube():
@@ -124,7 +121,8 @@ def test_no_authored_fixture_touches_the_tube():
         for tilt in SPEC.TILT_STEPS_DEG:
             gap = SPEC.tube_clearance(tilt, point) - radius
             assert gap >= SPEC.SWEPT_CLEARANCE_MIN, (
-                f"{name} is {gap:.3f} m from the tube at elevation {tilt:g}")
+                f"{name} is {gap:.3f} m from the tube at elevation {tilt:g}"
+            )
 
 
 def test_the_beacon_clears_the_tube_at_the_lowest_rung():
@@ -154,9 +152,9 @@ def test_the_slot_is_wide_enough_at_both_end_rungs():
     for theta in SPEC.SLOT_DEG:
         for point in _jamb_points(theta):
             for tilt in SPEC.TILT_STEPS_DEG:
-                assert SPEC.tube_clearance(tilt, point) >= (
-                    SPEC.SWEPT_CLEARANCE_MIN - 1e-6), (
-                    f"jamb at {theta:.3f} deg fouls the tube at {tilt:g}")
+                assert SPEC.tube_clearance(tilt, point) >= (SPEC.SWEPT_CLEARANCE_MIN - 1e-6), (
+                    f"jamb at {theta:.3f} deg fouls the tube at {tilt:g}"
+                )
 
 
 def test_the_apron_sits_proud_of_every_shingle():
@@ -166,8 +164,7 @@ def test_the_apron_sits_proud_of_every_shingle():
 
 
 def test_the_baffle_case_begins_outboard_of_the_shell_furniture():
-    inner = (SPEC.PAYLOAD_R + SPEC.BAFFLE_RADIAL
-             - SPEC.BAFFLE_RIB_HALF_RADIAL)
+    inner = SPEC.PAYLOAD_R + SPEC.BAFFLE_RADIAL - SPEC.BAFFLE_RIB_HALF_RADIAL
     reach = math.hypot(inner, SPEC.BAFFLE_S0 - SPEC.BAFFLE_RIB_HALF_AXIAL)
     assert reach >= SPEC.SLOT_RAIL_R1 + SPEC.SWEPT_CLEARANCE_MIN - 1e-6
     # Outboard, where tube_radial's docstring says the case hangs.
@@ -248,8 +245,10 @@ def _cage_nodes():
     """
 
     jbeam = json.loads(
-        (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / SPEC.MOD_ID
-         / f"{SPEC.MOD_ID}.jbeam").read_text(encoding="utf-8"))
+        (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / SPEC.MOD_ID / f"{SPEC.MOD_ID}.jbeam").read_text(
+            encoding="utf-8"
+        )
+    )
     section = jbeam[SPEC.MOD_ID]
     nodes = {
         row[0]: (-float(row[1]), -float(row[2]), float(row[3]))
@@ -262,8 +261,7 @@ def _cage_nodes():
     for row in section.get("triangles", []):
         if isinstance(row, list) and row[0] != "id1":
             collides.update(row[:3])
-    return {name: position for name, position in nodes.items()
-            if name in collides}
+    return {name: position for name, position in nodes.items() if name in collides}
 
 
 def _part_points(name, pivot, drop):
@@ -273,8 +271,7 @@ def _part_points(name, pivot, drop):
     so a pose is one number.
     """
 
-    path = (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / SPEC.MOD_ID
-            / f"{SPEC.MOD_ID}_{name}.dae")
+    path = PACK_ROOT / MOD_KEY / "mod" / "vehicles" / SPEC.MOD_ID / f"{SPEC.MOD_ID}_{name}.dae"
     points = []
     for element in ElementTree.parse(path).iter():
         if element.tag.split("}")[-1] != "float_array":
@@ -284,8 +281,8 @@ def _part_points(name, pivot, drop):
         values = [float(token) for token in element.text.split()]
         points.extend(
             (x + pivot[0], y + pivot[1], z + pivot[2] - drop)
-            for x, y, z
-            in zip(values[0::3], values[1::3], values[2::3], strict=True))
+            for x, y, z in zip(values[0::3], values[1::3], values[2::3], strict=True)
+        )
     assert points, f"no vertex positions in {path.name}"
     return points
 
@@ -301,26 +298,23 @@ def test_nothing_solid_stands_in_the_payload_s_orbit():
     evidence chain could say so.
     """
 
-    worst = min(
-        (_orbit_distance(position), name)
-        for name, position in _cage_nodes().items())
-    assert worst[0] >= ORBIT_KEEPOUT_MIN, (
-        f"cage node {worst[1]} is {worst[0]:.3f} m from the orbit")
+    worst = min((_orbit_distance(position), name) for name, position in _cage_nodes().items())
+    assert worst[0] >= ORBIT_KEEPOUT_MIN, f"cage node {worst[1]} is {worst[0]:.3f} m from the orbit"
 
     # ...and the two collision PARTS, in the poses a stale bake can leave
     # them at while the tether is turning. The deck's parked pose is the
     # cradle bed and is exempt by construction - see the block above.
     poses = (
         ("deck", (0.0, 0.0, SPEC.DECK_Z), (SPEC.BEHAVIOR["deck_drop"],)),
-        ("door", (0.0, SPEC.TUNNEL_Y_OUT - 0.35, SPEC.DECK_Z),
-         (0.0, SPEC.BEHAVIOR["door_travel"])),
+        ("door", (0.0, SPEC.TUNNEL_Y_OUT - 0.35, SPEC.DECK_Z), (0.0, SPEC.BEHAVIOR["door_travel"])),
     )
     for name, pivot, drops in poses:
         for drop in drops:
             points = _part_points(name, pivot, drop)
             gap = min(_orbit_distance(point) for point in points)
             assert gap >= ORBIT_KEEPOUT_MIN, (
-                f"{name} at drop {drop:g} is {gap:.3f} m from the orbit")
+                f"{name} at drop {drop:g} is {gap:.3f} m from the orbit"
+            )
 
 
 def test_the_airlock_mouth_is_nowhere_near_the_orbit():
@@ -335,17 +329,16 @@ def test_the_airlock_mouth_is_nowhere_near_the_orbit():
     assert SPEC.CHAMBER_R - SPEC.PAYLOAD_R == pytest.approx(4.5, abs=1e-9)
     # The constant really is the deck plane's intersection, not something
     # that happens to be near the orbit.
-    assert _ring(SPEC.TUNNEL_FLOOR_DEG, SPEC.CHAMBER_R)[2] == pytest.approx(
-        SPEC.DECK_Z, abs=1e-9)
+    assert _ring(SPEC.TUNNEL_FLOOR_DEG, SPEC.CHAMBER_R)[2] == pytest.approx(SPEC.DECK_Z, abs=1e-9)
     # Nothing in the cage lives inside the omitted arc at bore radius.
     low, high = SPEC.CAGE_TUNNEL_DEG
     for name, position in _cage_nodes().items():
-        theta = math.degrees(math.atan2(
-            position[2] - SPEC.HUB_Z, position[1])) % 360.0
+        theta = math.degrees(math.atan2(position[2] - SPEC.HUB_Z, position[1])) % 360.0
         radius = math.hypot(position[1], position[2] - SPEC.HUB_Z)
         if low + 1e-6 < theta < high - 1e-6:
             assert abs(radius - SPEC.CAGE_BORE_R) > 1e-6, (
-                f"{name} is a bore-ring node inside the omitted tunnel arc")
+                f"{name} is a bore-ring node inside the omitted tunnel arc"
+            )
 
 
 def _tube_mesh_points():
@@ -356,8 +349,7 @@ def _tube_mesh_points():
     chamber radius of a point on the barrel.
     """
 
-    path = (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / SPEC.MOD_ID
-            / f"{SPEC.MOD_ID}_tube.dae")
+    path = PACK_ROOT / MOD_KEY / "mod" / "vehicles" / SPEC.MOD_ID / f"{SPEC.MOD_ID}_tube.dae"
     points = []
     for element in ElementTree.parse(path).iter():
         if element.tag.split("}")[-1] != "float_array":
@@ -393,15 +385,17 @@ def test_the_roller_trucks_are_built_on_the_rail_the_slot_carries():
     """
 
     assert len(SPEC.ROLLER_OFFSETS) == len(SPEC.ROLLER_RADIAL), (
-        "a truck grew without a radial offset to place it")
+        "a truck grew without a radial offset to place it"
+    )
 
     points = _tube_mesh_points()
     theta = math.radians(SPEC.release_theta_deg(SPEC.TILT_REF_DEG))
-    axial = (math.sin(theta), -math.cos(theta))       # along the bore
+    axial = (math.sin(theta), -math.cos(theta))  # along the bore
     # Everything outboard of the lid plates that sits in the rail's own
     # radial band. The wheels are the only barrel geometry out there.
     band = [
-        point for point in points
+        point
+        for point in points
         if abs(point[0]) > SPEC.OUTER_HALF_X + 0.05
         and SPEC.ROLLER_RUN_R - SPEC.ROLLER_R - 0.02
         <= math.hypot(point[1], point[2])
@@ -414,10 +408,10 @@ def test_the_roller_trucks_are_built_on_the_rail_the_slot_carries():
         station = SPEC.TUBE_PIERCE_S + offset
         for flank in (-1.0, 1.0):
             wheel = [
-                point for point in band
+                point
+                for point in band
                 if point[0] * flank > 0.0
-                and abs(point[1] * axial[0] + point[2] * axial[1] - station)
-                <= 0.35
+                and abs(point[1] * axial[0] + point[2] * axial[1] - station) <= 0.35
             ]
             assert wheel, f"no roller at station {station:.3f} on flank {flank:+.0f}"
             seen += 1
@@ -426,8 +420,7 @@ def test_the_roller_trucks_are_built_on_the_rail_the_slot_carries():
             half = 0.5 * (max(radii) - min(radii))
             # The wheel is centred ON the running locus. Measured to 0.1 mm
             # on the shipped barrel: 21.8500 / 21.8500 / 21.8501 m.
-            assert centre == pytest.approx(SPEC.ROLLER_RUN_R, abs=1e-3), (
-                station, centre)
+            assert centre == pytest.approx(SPEC.ROLLER_RUN_R, abs=1e-3), (station, centre)
             # ...and it is ROLLER_R across. The tolerance is 10 mm because a
             # faceted cylinder's VERTICES sample its circle, so the measured
             # radial extremes depend on where the facets fall: 0.2999,
@@ -442,15 +435,16 @@ def test_the_roller_trucks_are_built_on_the_rail_the_slot_carries():
             assert min(abs(point[0]) for point in wheel) < SPEC.SLOT_RAIL_X
             assert max(abs(point[0]) for point in wheel) > SPEC.SLOT_RAIL_X
             # ...and its underside still clears the rib fan.
-            assert min(radii) - SPEC.LID_RIB_R1 >= (
-                SPEC.SWEPT_CLEARANCE_MIN - 0.01), (station, min(radii))
+            assert min(radii) - SPEC.LID_RIB_R1 >= (SPEC.SWEPT_CLEARANCE_MIN - 0.01), (
+                station,
+                min(radii),
+            )
     assert seen == 2 * len(SPEC.ROLLER_OFFSETS)
     # Nothing ELSE of the barrel is allowed into the rail's band out there:
     # a fourth truck nobody declared would be measured by nothing.
-    stations = sorted({
-        round(point[1] * axial[0] + point[2] * axial[1], 3) for point in band})
+    stations = sorted({round(point[1] * axial[0] + point[2] * axial[1], 3) for point in band})
     clusters = 1
-    for previous, following in zip(stations, stations[1:]):
+    for previous, following in itertools.pairwise(stations):
         if following - previous > 0.5:
             clusters += 1
     assert clusters == len(SPEC.ROLLER_OFFSETS), (clusters, stations)

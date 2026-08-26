@@ -217,7 +217,7 @@ def test_parse_log_reads_the_tagged_lines_and_skips_the_rest(reduce_mod, tmp_pat
             "0.12|I|GELua.something|unrelated chatter",
             f"1.00|I|GELua.x|{reduce_mod.LOG_TAG} {payload}",
             f"1.01|I|GELua.x|{reduce_mod.LOG_TAG} not json at all",
-            "1.02|I|GELua.x|no tag here {\"event\": \"pachinko_scored\"}",
+            '1.02|I|GELua.x|no tag here {"event": "pachinko_scored"}',
         ]
     )
     records = reduce_mod.parse_log(text)
@@ -294,9 +294,7 @@ def _code_only(source: str) -> str:
     """
 
     assert "--[[" not in source, "long comments present - this stripper is now wrong"
-    return "\n".join(
-        line for line in source.splitlines() if not line.lstrip().startswith("--")
-    )
+    return "\n".join(line for line in source.splitlines() if not line.lstrip().startswith("--"))
 
 
 @pytest.fixture(scope="module")

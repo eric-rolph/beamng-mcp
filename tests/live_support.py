@@ -436,9 +436,7 @@ def purge_cached_prop_meshes(user: Path, mod_id: str) -> tuple[Path, ...]:
     """
 
     if not _MOD_ID_PATTERN.fullmatch(mod_id):
-        raise RuntimeError(
-            f"refusing to purge a mesh cache for a non-literal mod id: {mod_id!r}"
-        )
+        raise RuntimeError(f"refusing to purge a mesh cache for a non-literal mod id: {mod_id!r}")
 
     removed: list[Path] = []
     for cache_root in _MESH_CACHE_ROOTS:
@@ -451,16 +449,12 @@ def purge_cached_prop_meshes(user: Path, mod_id: str) -> tuple[Path, ...]:
             current, depth = stack.pop()
             directories.append(current)
             if depth >= _MESH_CACHE_MAX_DEPTH:
-                raise RuntimeError(
-                    f"compiled-mesh cache is deeper than expected: {current}"
-                )
+                raise RuntimeError(f"compiled-mesh cache is deeper than expected: {current}")
             with os.scandir(current) as entries:
                 for entry in entries:
                     child = require_confined_profile_target(user, Path(entry.path))
                     if _is_link_or_reparse(child):
-                        raise RuntimeError(
-                            f"compiled-mesh cache contains a link: {child}"
-                        )
+                        raise RuntimeError(f"compiled-mesh cache contains a link: {child}")
                     if entry.is_dir(follow_symlinks=False):
                         stack.append((child, depth + 1))
                         continue

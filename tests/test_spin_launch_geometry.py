@@ -118,13 +118,15 @@ def test_launch_corridor_is_clear_across_the_whole_elevation_ladder() -> None:
             if radius < closest[0]:
                 closest = (radius, name, station)
             if radius < spec.TUBE_BORE_R:
-                breaches.append({
-                    "tilt_deg": tilt_deg,
-                    "obstacle": name,
-                    "station_m": round(station, 3),
-                    "clearance_m": round(radius, 3),
-                    "clear_bore_r": spec.TUBE_BORE_R,
-                })
+                breaches.append(
+                    {
+                        "tilt_deg": tilt_deg,
+                        "obstacle": name,
+                        "station_m": round(station, 3),
+                        "clearance_m": round(radius, 3),
+                        "clear_bore_r": spec.TUBE_BORE_R,
+                    }
+                )
         tightest[f"{tilt_deg:g}"] = {
             "clearance_m": round(closest[0], 3),
             "obstacle": closest[1],
@@ -164,13 +166,15 @@ def test_no_other_part_pivot_rides_inside_the_barrel() -> None:
         for tilt_deg in spec.TILT_STEPS_DEG:
             station, radius = _bore_frame(spec, tuple(part["pivot_world"]), tilt_deg)
             if spec.TUBE_S0 <= station <= spec.TUBE_S1 and radius < spec.TUBE_RIB_R:
-                intrusions.append({
-                    "tilt_deg": tilt_deg,
-                    "part": part["name"],
-                    "station_m": round(station, 3),
-                    "clearance_m": round(radius, 3),
-                    "barrel_r": spec.TUBE_RIB_R,
-                })
+                intrusions.append(
+                    {
+                        "tilt_deg": tilt_deg,
+                        "part": part["name"],
+                        "station_m": round(station, 3),
+                        "clearance_m": round(radius, 3),
+                        "barrel_r": spec.TUBE_RIB_R,
+                    }
+                )
     assert not intrusions, intrusions
 
 
@@ -204,8 +208,7 @@ def test_no_render_only_scale_prop_reaches_a_shipped_artefact() -> None:
         for needle in needles:
             if needle.encode() in blob:
                 offenders.append(f"{path.name}: {needle}")
-    handoff = (root / "authoring" / f"{MOD_ID}.handoff.json").read_text(
-        encoding="utf-8")
+    handoff = (root / "authoring" / f"{MOD_ID}.handoff.json").read_text(encoding="utf-8")
     for needle in needles:
         if needle in handoff:
             offenders.append(f"handoff: {needle}")
@@ -222,8 +225,7 @@ def test_no_render_only_scale_prop_reaches_a_shipped_artefact() -> None:
 def _body_mesh_points(spec):
     """The SHIPPED body mesh in the authored frame (mesh x and y negated)."""
 
-    path = (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / spec.MOD_ID
-            / f"{spec.MOD_ID}.dae")
+    path = PACK_ROOT / MOD_KEY / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.dae"
     points = []
     for element in ElementTree.parse(path).iter():
         if element.tag.split("}")[-1] != "float_array":
@@ -232,15 +234,14 @@ def _body_mesh_points(spec):
             continue
         values = [float(token) for token in element.text.split()]
         points.extend(
-            (-x, -y, z) for x, y, z
-            in zip(values[0::3], values[1::3], values[2::3], strict=True))
+            (-x, -y, z) for x, y, z in zip(values[0::3], values[1::3], values[2::3], strict=True)
+        )
     assert points, f"no vertex positions in {path.name}"
     return points
 
 
 def _shipped_materials(spec):
-    path = (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / spec.MOD_ID
-            / "main.materials.json")
+    path = PACK_ROOT / MOD_KEY / "mod" / "vehicles" / spec.MOD_ID / "main.materials.json"
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -276,14 +277,18 @@ def test_all_eight_bar_windows_read_at_rest() -> None:
     for gauge in ("pwr", "tilt"):
         row_z = spec.BAR_SEG_Z[gauge]
         for index, x in enumerate(spec.BAR_SEG_X, start=1):
-            local = [point for point in points
-                     if abs(point[0] - x) <= 0.085
-                     and abs(point[2] - row_z) <= 0.070
-                     and abs(point[1] - front) <= 0.06]
+            local = [
+                point
+                for point in points
+                if abs(point[0] - x) <= 0.085
+                and abs(point[2] - row_z) <= 0.070
+                and abs(point[1] - front) <= 0.06
+            ]
             assert local, f"{gauge}{index} has no console geometry at all"
             signatures[(gauge, index)] = frozenset(
-                (round(point[0] - x, 4), round(point[1] - front, 4),
-                 round(point[2] - row_z, 4)) for point in local)
+                (round(point[0] - x, 4), round(point[1] - front, 4), round(point[2] - row_z, 4))
+                for point in local
+            )
 
     # EVERY position identical: a row where positions 5-8 are cheaper than
     # 1-4 is a row whose top half does not exist.
@@ -295,8 +300,7 @@ def test_all_eight_bar_windows_read_at_rest() -> None:
     # ...and the face is a WINDOW. The frontmost plane has to carry an outer
     # rectangle and an inner one; a solid box would carry only the outer.
     face = min(dy for _dx, dy, _dz in signatures[("pwr", 1)])
-    rim = {(dx, dz) for dx, dy, dz in signatures[("pwr", 1)]
-           if abs(dy - face) < 1e-9}
+    rim = {(dx, dz) for dx, dy, dz in signatures[("pwr", 1)] if abs(dy - face) < 1e-9}
     outer = {(abs(dx), abs(dz)) for dx, dz in rim}
     assert len(outer) >= 2, sorted(rim)
     widest = max(outer)
@@ -304,8 +308,7 @@ def test_all_eight_bar_windows_read_at_rest() -> None:
     assert opening[0] < widest[0] and opening[1] < widest[1], (opening, widest)
     # The opening is the bit a player sees INTO: it has to be most of the
     # window, or the bezel is a picture frame with nothing in it.
-    assert (opening[0] * opening[1]) / (widest[0] * widest[1]) > 0.55, (
-        opening, widest)
+    assert (opening[0] * opening[1]) / (widest[0] * widest[1]) > 0.55, (opening, widest)
 
     # ...and what sits in the opening has to be distinguishable from the
     # plate around it, which is the half the old bar_socket failed.
@@ -321,8 +324,8 @@ def test_all_eight_bar_windows_read_at_rest() -> None:
     # the plate on luma and 3.14x in red. Assert the channel the contrast is
     # actually in, and assert the hue difference itself.
     assert lens[0] / plate[0] >= 2.5, (
-        f"the unlit lens is {lens[0] / plate[0]:.2f}x the plate in red: it"
-        " reads as panel")
+        f"the unlit lens is {lens[0] / plate[0]:.2f}x the plate in red: it reads as panel"
+    )
     assert lens[0] / max(lens[1], 1e-6) >= 2.0, "the lens is not amber"
     assert plate[0] / max(plate[1], 1e-6) < 1.5, "the plate is not neutral"
     assert _luma(lens[:3]) > _luma(plate)
@@ -385,10 +388,8 @@ def test_every_lettered_surface_is_resolved_or_declared() -> None:
     """
 
     spec = load_spec()
-    assert 2.0 * spec.SIGN_HALF_X == pytest.approx(
-        LETTERED_SURFACES["sign_panel"][0], abs=1e-6)
-    assert 2.0 * spec.SIGN_HALF_Z == pytest.approx(
-        LETTERED_SURFACES["sign_panel"][1], abs=1e-4)
+    assert 2.0 * spec.SIGN_HALF_X == pytest.approx(LETTERED_SURFACES["sign_panel"][0], abs=1e-6)
+    assert 2.0 * spec.SIGN_HALF_Z == pytest.approx(LETTERED_SURFACES["sign_panel"][1], abs=1e-4)
 
     for name, (width, height) in LETTERED_SURFACES.items():
         entry = spec.PALETTE[f"{spec.MOD_ID}_{name}"]
@@ -399,14 +400,18 @@ def test_every_lettered_surface_is_resolved_or_declared() -> None:
             assert across == pytest.approx(LETTERED_EXEMPTIONS[name], abs=0.05), (
                 f"{name} is now {across:.1f} px/m across, not the "
                 f"{LETTERED_EXEMPTIONS[name]} px/m this exemption was written "
-                "for - if it clears the line, delete the exemption")
+                "for - if it clears the line, delete the exemption"
+            )
             assert across < LETTERED_PX_PER_M_MIN, (
-                f"{name} clears the line now; delete its exemption")
+                f"{name} clears the line now; delete its exemption"
+            )
             continue
         assert across >= LETTERED_PX_PER_M_MIN, (
-            f"{name} is {across:.1f} px/m across, under {LETTERED_PX_PER_M_MIN}")
+            f"{name} is {across:.1f} px/m across, under {LETTERED_PX_PER_M_MIN}"
+        )
         assert down >= LETTERED_PX_PER_M_MIN, (
-            f"{name} is {down:.1f} px/m down, under {LETTERED_PX_PER_M_MIN}")
+            f"{name} is {down:.1f} px/m down, under {LETTERED_PX_PER_M_MIN}"
+        )
 
 
 def test_the_marquee_does_not_flood_its_own_lettering() -> None:
@@ -437,7 +442,8 @@ def test_the_marquee_does_not_flood_its_own_lettering() -> None:
     day_band_floor = 1500.0
     assert night_band[0] <= nits <= night_band[1], (
         f"sign_panel is {nits} nits: a backlit marquee belongs in the night"
-        f" band {night_band}, not between the bands")
+        f" band {night_band}, not between the bands"
+    )
     assert nits < day_band_floor
     # The emissive itself has to stay declared, or prop_builder drops the
     # generated glow map and the panel has no night behaviour at all.
@@ -451,17 +457,16 @@ def test_the_marquee_does_not_flood_its_own_lettering() -> None:
     # the shipped source: two-valued, ink 0.0929 against board 0.9482.
     numpy = pytest.importorskip("numpy")
     image = pytest.importorskip("PIL.Image")
-    path = (PACK_ROOT / MOD_KEY / "textures"
-            / f"{spec.MOD_ID}_sign_panel.color.png")
+    path = PACK_ROOT / MOD_KEY / "textures" / f"{spec.MOD_ID}_sign_panel.color.png"
     with image.open(path) as handle:
         pixels = numpy.asarray(handle.convert("RGB"), dtype=numpy.float64) / 255.0
-    luma = (0.2126 * pixels[..., 0] + 0.7152 * pixels[..., 1]
-            + 0.0722 * pixels[..., 2])
+    luma = 0.2126 * pixels[..., 0] + 0.7152 * pixels[..., 1] + 0.0722 * pixels[..., 2]
     ink = float(numpy.mean(luma[luma <= numpy.percentile(luma, 10)]))
     board = float(numpy.mean(luma[luma >= numpy.percentile(luma, 40)]))
     assert board / ink >= 6.0, (
         f"the marquee source is only {board / ink:.1f}:1; the print itself"
-        " has gone flat and no emissive setting will rescue it")
+        " has gone flat and no emissive setting will rescue it"
+    )
 
 
 def _console_face_points(spec):
@@ -471,8 +476,7 @@ def _console_face_points(spec):
     with x and y negated - so the conversion is one sign change per axis.
     """
 
-    path = (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / spec.MOD_ID
-            / f"{spec.MOD_ID}.dae")
+    path = PACK_ROOT / MOD_KEY / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.dae"
     points = []
     for element in ElementTree.parse(path).iter():
         if element.tag.split("}")[-1] != "float_array":
@@ -481,8 +485,7 @@ def _console_face_points(spec):
             continue
         values = [float(token) for token in element.text.split()]
         for x, y, z in zip(values[0::3], values[1::3], values[2::3], strict=True):
-            if (abs(-x - spec.CONSOLE_X) <= 2.0
-                    and abs(-y - spec.CONSOLE_FACE_Y) <= 0.20):
+            if abs(-x - spec.CONSOLE_X) <= 2.0 and abs(-y - spec.CONSOLE_FACE_Y) <= 0.20:
                 points.append((-x, -y, z))
     assert points, f"no console geometry in {path.name}"
     return points
@@ -525,11 +528,12 @@ def test_the_nameplate_band_is_clear_of_both_dial_silhouettes() -> None:
     spec = load_spec()
     plate_top = spec.BINNACLE_PLATE_Z + spec.BINNACLE_PLATE_H * 0.5
     plate_bottom = spec.BINNACLE_PLATE_Z - spec.BINNACLE_PLATE_H * 0.5
-    plate_x = (spec.CONSOLE_X - spec.BINNACLE_PLATE_W * 0.5,
-               spec.CONSOLE_X + spec.BINNACLE_PLATE_W * 0.5)
+    plate_x = (
+        spec.CONSOLE_X - spec.BINNACLE_PLATE_W * 0.5,
+        spec.CONSOLE_X + spec.BINNACLE_PLATE_W * 0.5,
+    )
     console = _console_face_points(spec)
-    for tag, pivot in (("vel", spec.GAUGE_VEL_PIVOT),
-                       ("vac", spec.GAUGE_VAC_PIVOT)):
+    for tag, pivot in (("vel", spec.GAUGE_VEL_PIVOT), ("vac", spec.GAUGE_VAC_PIVOT)):
         # The words sit at u = 0.25 and 0.75 of the plate, i.e. directly
         # under the dial centres - that is the design, so an x-only clearance
         # can never be the answer and the whole guard is the z gap.
@@ -538,19 +542,26 @@ def test_the_nameplate_band_is_clear_of_both_dial_silhouettes() -> None:
         # A 50 mm column straight down the dial's own centre line. The
         # nameplate has no vertices there, so the lowest thing in it IS the
         # bezel can's underside.
-        column = [point for point in console
-                  if abs(point[0] - pivot[0]) <= 0.05
-                  and spec.BINNACLE_BOTTOM_Z - 0.05 <= point[2] <= pivot[2]]
+        column = [
+            point
+            for point in console
+            if abs(point[0] - pivot[0]) <= 0.05
+            and spec.BINNACLE_BOTTOM_Z - 0.05 <= point[2] <= pivot[2]
+        ]
         assert column, f"the {tag} dial is not on the shipped console at all"
         bezel_bottom = min(point[2] for point in column)
-        assert bezel_bottom == pytest.approx(
-            pivot[2] - spec.GAUGE_BEZEL_R, abs=2e-3), (tag, bezel_bottom)
+        assert bezel_bottom == pytest.approx(pivot[2] - spec.GAUGE_BEZEL_R, abs=2e-3), (
+            tag,
+            bezel_bottom,
+        )
 
         # ...and the highest console geometry BELOW it, across the whole
         # plate, is the nameplate's top edge.
-        below = [point[2] for point in console
-                 if plate_x[0] - 1e-4 <= point[0] <= plate_x[1] + 1e-4
-                 and point[2] < bezel_bottom - 1e-6]
+        below = [
+            point[2]
+            for point in console
+            if plate_x[0] - 1e-4 <= point[0] <= plate_x[1] + 1e-4 and point[2] < bezel_bottom - 1e-6
+        ]
         assert below, "nothing under the dials on the shipped console"
         measured_plate_top = max(below)
         gap = bezel_bottom - measured_plate_top
@@ -564,17 +575,21 @@ def test_the_nameplate_band_is_clear_of_both_dial_silhouettes() -> None:
         # ...and the thing it measured really is the plate, not some
         # unrelated moulding that happened to be the nearest surface.
         assert measured_plate_top == pytest.approx(plate_top, abs=2e-3), (
-            tag, measured_plate_top, plate_top)
+            tag,
+            measured_plate_top,
+            plate_top,
+        )
     # ...and the band has to stay ON the case, or the fix is a plate hanging
     # in mid air under the binnacle.
-    assert plate_bottom >= spec.BINNACLE_BOTTOM_Z - 1e-9, (
-        plate_bottom, spec.BINNACLE_BOTTOM_Z)
+    assert plate_bottom >= spec.BINNACLE_BOTTOM_Z - 1e-9, (plate_bottom, spec.BINNACLE_BOTTOM_Z)
     assert plate_top <= spec.BINNACLE_TOP_Z, (plate_top, spec.BINNACLE_TOP_Z)
     # The dials have to stay on it too - the cheap way to satisfy the gap is
     # to push them through the roof the status tower stands on.
     for pivot in (spec.GAUGE_VEL_PIVOT, spec.GAUGE_VAC_PIVOT):
         assert pivot[2] + spec.GAUGE_BEZEL_R <= spec.BINNACLE_TOP_Z - 0.04, (
-            "the dial reaches the status tower's base flange", pivot)
+            "the dial reaches the status tower's base flange",
+            pivot,
+        )
 
 
 def test_the_observation_ring_is_a_window_and_not_a_lamp() -> None:
@@ -606,8 +621,10 @@ def test_the_observation_ring_is_a_window_and_not_a_lamp() -> None:
     """
 
     materials = json.loads(
-        (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / MOD_ID
-         / "main.materials.json").read_text(encoding="utf-8"))
+        (PACK_ROOT / MOD_KEY / "mod" / "vehicles" / MOD_ID / "main.materials.json").read_text(
+            encoding="utf-8"
+        )
+    )
     glass = materials[f"{MOD_ID}_obs_glass"]
     stage = glass["Stages"][0]
     assert glass.get("translucent") is True, glass
@@ -624,4 +641,6 @@ def test_the_observation_ring_is_a_window_and_not_a_lamp() -> None:
     plate = sum(materials[f"{MOD_ID}_lid_plate"]["Stages"][0]["baseColorFactor"][:3])
     assert pane < plate * 0.5, {
         "detail": "the observation ring is as bright as the lid it is set into",
-        "pane": stage["baseColorFactor"][:3], "lid_plate_sum": round(plate, 4)}
+        "pane": stage["baseColorFactor"][:3],
+        "lid_plate_sum": round(plate, 4),
+    }

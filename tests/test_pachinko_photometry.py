@@ -28,8 +28,7 @@ MOD = PACK / "pachinko_tower"
 
 @pytest.fixture(scope="module")
 def spec():
-    loader = importlib.util.spec_from_file_location(
-        "pachinko_spec_photometry", MOD / "spec.py")
+    loader = importlib.util.spec_from_file_location("pachinko_spec_photometry", MOD / "spec.py")
     module = importlib.util.module_from_spec(loader)
     loader.loader.exec_module(module)
     return module
@@ -38,6 +37,7 @@ def spec():
 # ---------------------------------------------------------------------------
 # THE CONVERSION BOUNDARY
 # ---------------------------------------------------------------------------
+
 
 def test_calibration_law_constants(spec):
     """5000 cd == brightness 1.0, measured over 3269 of 3269 shipped paired
@@ -78,14 +78,15 @@ def test_the_k_squared_law_is_not_silently_applied(spec):
     number gets into a ledger.
     """
     assert spec.PROP_SCALE == pytest.approx(48.85, abs=0.01)
-    k_squared_lm = 650.0 * spec.PROP_SCALE ** 2
+    k_squared_lm = 650.0 * spec.PROP_SCALE**2
     assert spec.FIXTURE_CLASSES["marquee"]["fill_lumens"] < k_squared_lm / 10.0
-    assert spec.point_brightness(k_squared_lm) > 6.0   # would exceed the clamp
+    assert spec.point_brightness(k_squared_lm) > 6.0  # would exceed the clamp
 
 
 # ---------------------------------------------------------------------------
 # THE MEASURED BANDS
 # ---------------------------------------------------------------------------
+
 
 def test_every_scheduled_night_value_is_inside_the_measured_band(spec):
     """Usable night band ~60-400 nit, saturation somewhere in the open interval
@@ -116,6 +117,7 @@ def test_the_brightest_surface_sits_exactly_on_the_rung(spec):
 # STRUCTURE
 # ---------------------------------------------------------------------------
 
+
 def test_fixture_classes_cover_the_commission(spec):
     """The owner's six classes, plus the two this review added.
 
@@ -128,8 +130,14 @@ def test_fixture_classes_cover_the_commission(spec):
     nobody adds a fixture class without saying so here.
     """
     assert set(spec.FIXTURE_CLASSES) == {
-        "marquee", "playfield_edge", "centre_strobe", "peg_spot",
-        "bezel", "gasket", "letter_flood", "letter_plate",
+        "marquee",
+        "playfield_edge",
+        "centre_strobe",
+        "peg_spot",
+        "bezel",
+        "gasket",
+        "letter_flood",
+        "letter_plate",
     }
     for entry in spec.FIXTURE_CLASSES.values():
         assert entry["si"], "every class states its SI target in words"
@@ -149,8 +157,9 @@ def test_spot_fixtures_are_derived_and_out_of_the_fall_volume(spec):
         # on the shaft's outboard FLANK where y is irrelevant. spec.py restated
         # this correctly in round 2 and this test kept the proxy - a third
         # stale-on-arrival assertion in this module.
-        assert (entry["pos"][1] <= spec.LAMP_TUBE_Y + 1e-9
-                or entry["pos"][0] >= spec.CAR_REACH_X), entry["slot"]
+        assert entry["pos"][1] <= spec.LAMP_TUBE_Y + 1e-9 or entry["pos"][0] >= spec.CAR_REACH_X, (
+            entry["slot"]
+        )
     # Every peg spot's z is derived from the row it lights, never retyped.
     rows = [e for e in spec.SPOT_SPECS if "row" in e]
     assert len(rows) == spec.PEG_ROWS
@@ -186,6 +195,7 @@ def test_the_write_budget_is_set_by_the_measured_cost(spec):
 # THE PALETTE, AND THE ONE RULE THAT KILLS EMISSION DEAD
 # ---------------------------------------------------------------------------
 
+
 def test_no_palette_entry_has_a_four_component_emissive(spec):
     """THREE components emit; FOUR are inert and nothing rescues four - not
     `emissive: true`, not `emissiveIntensityNits`, not a value above 1.0.
@@ -198,8 +208,7 @@ def test_no_palette_entry_has_a_four_component_emissive(spec):
 
 
 def test_emissive_palette_entries_carry_a_day_target(spec):
-    lit = {n for n, e in spec.PALETTE.items()
-           if isinstance(e.get("emissive"), (list, tuple))}
+    lit = {n for n, e in spec.PALETTE.items() if isinstance(e.get("emissive"), (list, tuple))}
     assert len(lit) >= 16
     for name in lit:
         stage = spec.PALETTE[name].get("stage") or {}
@@ -211,6 +220,7 @@ def test_emissive_palette_entries_carry_a_day_target(spec):
 # ---------------------------------------------------------------------------
 # THE GENERATED RUNTIME
 # ---------------------------------------------------------------------------
+
 
 def test_runtime_lua_carries_the_show_and_the_mandatory_flush(spec):
     lua = spec.LUA_BEHAVIOR
@@ -249,14 +259,14 @@ def test_every_photometric_number_in_the_runtime_arrived_by_splice(spec):
 # THE SHIPPED ARTEFACT
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture(scope="module")
 def shipped_materials():
     zip_path = MOD / "dist" / "pachinko_tower_ericrolph.zip"
     if not zip_path.is_file():
         pytest.skip("no dist zip built")
     with zipfile.ZipFile(zip_path) as archive:
-        return json.loads(
-            archive.read("vehicles/ericrolph_pachinko_tower/main.materials.json"))
+        return json.loads(archive.read("vehicles/ericrolph_pachinko_tower/main.materials.json"))
 
 
 def test_shipped_emissive_materials_are_three_component(shipped_materials):
@@ -274,10 +284,12 @@ def test_shipped_emissive_materials_are_three_component(shipped_materials):
 def test_the_glow_maps_actually_ship(shipped_materials):
     """The cookable-suffix law: a glow map must be `<base>_glow.color.png` or
     the cooker skips it SILENTLY and the material samples nothing."""
-    maps = [stage["emissiveMap"]
-            for definition in shipped_materials.values()
-            for stage in definition.get("Stages", [])
-            if stage.get("emissiveMap")]
+    maps = [
+        stage["emissiveMap"]
+        for definition in shipped_materials.values()
+        for stage in definition.get("Stages", [])
+        if stage.get("emissiveMap")
+    ]
     assert len(maps) >= 14
     for path in maps:
         assert path.endswith("_glow.color.png"), path
@@ -301,6 +313,7 @@ def test_the_glow_maps_actually_ship(shipped_materials):
 # carries the in-frame half.
 # ---------------------------------------------------------------------------
 
+
 def _luminance(rgb) -> float:
     return float(0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2])
 
@@ -320,24 +333,22 @@ def _plate_glow(spec, material: str):
     import numpy as np
 
     loader = importlib.util.spec_from_file_location(
-        "proplib_texture_kit_legibility",
-        PACK / "proplib" / "texture_kit.py")
+        "proplib_texture_kit_legibility", PACK / "proplib" / "texture_kit.py"
+    )
     kit = importlib.util.module_from_spec(loader)
     loader.loader.exec_module(kit)
 
     entry = spec.PALETTE[material]["texture"]
     params = dict(entry["params"])
     size = entry.get("size", 512)
-    color, _height, _rough, _alpha, emissive = kit.marquee(
-        size, np.random.default_rng(0), **params)
+    color, _height, _rough, _alpha, emissive = kit.marquee(size, np.random.default_rng(0), **params)
 
     fg = np.asarray(params["fg"], dtype=float)
     bg = np.asarray(params.get("bg", (0.93, 0.94, 0.95)), dtype=float)
     axis = fg - bg
     mask = ((color - bg) @ axis) / float(axis @ axis)
 
-    lum = (0.2126 * emissive[..., 0] + 0.7152 * emissive[..., 1]
-           + 0.0722 * emissive[..., 2])
+    lum = 0.2126 * emissive[..., 0] + 0.7152 * emissive[..., 1] + 0.0722 * emissive[..., 2]
     # Hard cores only. The anti-aliased rim is genuinely intermediate and
     # averaging it into either sample would flatter the contrast figure.
     return lum[mask > 0.9], lum[mask < 0.1]
@@ -404,8 +415,10 @@ def test_the_letter_plates_have_their_own_fixture_class(spec):
     lower nominal. Sharing `marquee` double-counted the light."""
 
     assert spec.FIXTURE_CLASSES["letter_plate"]["day_nits"] == 1200.0
-    assert spec.FIXTURE_CLASSES["letter_plate"]["night_nits"] < \
-        spec.FIXTURE_CLASSES["marquee"]["night_nits"]
+    assert (
+        spec.FIXTURE_CLASSES["letter_plate"]["night_nits"]
+        < spec.FIXTURE_CLASSES["marquee"]["night_nits"]
+    )
     letters = [e for e in spec.EMISSIVE_SPECS if e["slot"].startswith("sign_letter_")]
     assert len(letters) == 8
     assert all(e["cls"] == "letter_plate" for e in letters)
@@ -414,6 +427,7 @@ def test_the_letter_plates_have_their_own_fixture_class(spec):
 # ---------------------------------------------------------------------------
 # THE MOVING SUN
 # ---------------------------------------------------------------------------
+
 
 def test_the_write_demand_model_names_its_two_sources(spec):
     """Round 2's model contained only the breathe, so "no mode saturates" was a
@@ -425,9 +439,11 @@ def test_the_write_demand_model_names_its_two_sources(spec):
     # Exactly proportional to 1 / day_length, which is what makes the inverse
     # solvable in closed form.
     assert spec.emissive_tod_demand(600.0) == pytest.approx(
-        spec.emissive_tod_demand(1200.0) * 2.0, rel=1e-6)
-    assert spec.emissive_tod_demand(spec.EMISSIVE_TOD_MIN_DAY_SECONDS) == \
-        pytest.approx(spec.EMISSIVE_WRITE_CAP * 0.5, rel=1e-3)
+        spec.emissive_tod_demand(1200.0) * 2.0, rel=1e-6
+    )
+    assert spec.emissive_tod_demand(spec.EMISSIVE_TOD_MIN_DAY_SECONDS) == pytest.approx(
+        spec.EMISSIVE_WRITE_CAP * 0.5, rel=1e-3
+    )
 
 
 def test_the_quantiser_bands_against_the_regime_not_the_instant(spec):
@@ -459,8 +475,8 @@ def test_the_spot_table_is_counted_structurally(spec):
     the hand-written Lua contributed two hits of its own."""
 
     lua = spec.LUA_BEHAVIOR
-    table = lua[lua.index("local SPOT_SPECS = {"):]
-    table = table[:table.index("\n}")]
+    table = lua[lua.index("local SPOT_SPECS = {") :]
+    table = table[: table.index("\n}")]
     n = len(spec.SPOT_SPECS)
     for key in ("row = ", "letter = ", "rowz = ", "chase = "):
         assert table.count(key) == n, key

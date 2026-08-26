@@ -136,7 +136,9 @@ def _subject_probe(bng: BeamNGpy) -> dict[str, Any]:
     )
 
 
-def _authored(origin: tuple[float, float, float], probe: dict[str, Any]) -> tuple[float, float, float]:
+def _authored(
+    origin: tuple[float, float, float], probe: dict[str, Any]
+) -> tuple[float, float, float]:
     """World probe -> authored prop frame (identity spawn is a 180 deg Z flip)."""
 
     return (
@@ -287,9 +289,7 @@ def test_high_five_leads_a_moving_car_and_slaps_it(tmp_path: Path) -> None:
             surface_z = float(surface["surface_z"])
 
             prop = Vehicle(PROP_NAME, MOD_ID, license="HIGH5")
-            spawned = bng.vehicles.spawn(
-                prop, (0.0, 0.0, surface_z), (0, 0, 0, 1), False, True
-            )
+            spawned = bng.vehicles.spawn(prop, (0.0, 0.0, surface_z), (0, 0, 0, 1), False, True)
             assert spawned is True
 
             state: dict[str, Any] = {}
@@ -443,9 +443,7 @@ def test_high_five_leads_a_moving_car_and_slaps_it(tmp_path: Path) -> None:
     summary = {
         "pad_start_authored": [round(c, 2) for c in pad_start_authored],
         "pad_peak_speed_mps": round(pad_peak_speed, 2),
-        "seconds_per_step_call": (
-            round(seconds_per_call, 4) if seconds_per_call else None
-        ),
+        "seconds_per_step_call": (round(seconds_per_call, 4) if seconds_per_call else None),
         "mod": MOD_ID,
         "facing": facing_note,
         "approach_speed_mps": round(approach_speed, 2),
@@ -492,8 +490,9 @@ def test_high_five_leads_a_moving_car_and_slaps_it(tmp_path: Path) -> None:
     # tilt the runtime reported using.
     launch = by_event.get("subject_launched") or {}
     swing = by_event.get("high_five_swinging") or {}
-    horizontal = math.hypot(float(launch.get("velocity_x", 0.0)),
-                            float(launch.get("velocity_y", 0.0)))
+    horizontal = math.hypot(
+        float(launch.get("velocity_x", 0.0)), float(launch.get("velocity_y", 0.0))
+    )
     elevation = math.degrees(math.atan2(float(launch.get("velocity_z", 0.0)), horizontal))
     tilt_deg = float(swing.get("tilt_deg", -1.0))
     summary["launch_elevation_deg"] = round(elevation, 2)

@@ -52,9 +52,7 @@ PACK_ROOT = Path(__file__).resolve().parents[1] / "examples" / "giant_props"
 SUBJECT_NAME = "giant_props_gauntlet_subject"
 CATAPULT_SUBJECT_NAME = "giant_props_catapult_subject"
 CATAPULT_SUBJECT_MODEL = os.getenv("GIANT_PROPS_CATAPULT_MODEL", "bastion")
-CATAPULT_SUBJECT_CONFIG = os.getenv(
-    "GIANT_PROPS_CATAPULT_CONFIG", "vehicles/bastion/base_v6_A.pc"
-)
+CATAPULT_SUBJECT_CONFIG = os.getenv("GIANT_PROPS_CATAPULT_CONFIG", "vehicles/bastion/base_v6_A.pc")
 # World-space projection of the plank-local -10.8 m target at the authored
 # 30-degree rest angle. Keeping the test car on the painted X also validates
 # that static trigger coordinates and moving-plank coordinates are not mixed.
@@ -401,9 +399,7 @@ def scenario_catapult_seesaw(g: Gauntlet) -> dict[str, Any]:
             g.subject.control(parkingbrake=0.0, throttle=0.0, brake=0.0)
             parking_brake_released = True
         is_pre_release = not released and phase == "idle"
-        max_park_timer = max(
-            max_park_timer, float(status.get("park_timer_s") or 0.0)
-        )
+        max_park_timer = max(max_park_timer, float(status.get("park_timer_s") or 0.0))
         released = released or phase == "released"
         rise = float(subject["z"]) - float(subject_start["z"])
         relative = g.rel_authored(key, subject)
@@ -424,24 +420,16 @@ def scenario_catapult_seesaw(g: Gauntlet) -> dict[str, Any]:
             maximum_drop = max(maximum_drop, drop)
             if status.get("impacted") and impacted_at is None:
                 impacted_at = elapsed
-            if (
-                impacted_at is not None
-                and elapsed - impacted_at <= 2.5
-                and phase == "released"
-            ):
+            if impacted_at is not None and elapsed - impacted_at <= 2.5 and phase == "released":
                 post_impact_drops.append(drop)
         if angle_value is not None and phase == "released":
-            minimum_released_angle = min(
-                minimum_released_angle, float(angle_value)
-            )
+            minimum_released_angle = min(minimum_released_angle, float(angle_value))
         if is_pre_release and angle_value is not None and drop_value is not None:
             pre_release_trace.append(
                 {
                     "time_s": round(elapsed, 3),
                     "angle_deg": float(angle_value),
-                    "body_angle_deg": float(
-                        status.get("impact_body_angle_deg") or angle_value
-                    ),
+                    "body_angle_deg": float(status.get("impact_body_angle_deg") or angle_value),
                     "weight_drop_m": float(drop_value),
                     "subject_speed_mps": float(subject.get("speed") or 0.0),
                     "park_timer_s": float(status.get("park_timer_s") or 0.0),
@@ -509,9 +497,7 @@ def scenario_catapult_seesaw(g: Gauntlet) -> dict[str, Any]:
                     first_landing_downrange = forward
                     first_landing_elapsed = elapsed
                     first_landing_detection_reason = (
-                        "vertical_reversal"
-                        if vertical_reversal
-                        else "sharp_vertical_arrest"
+                        "vertical_reversal" if vertical_reversal else "sharp_vertical_arrest"
                     )
                     landed_this_sample = True
 
@@ -532,14 +518,10 @@ def scenario_catapult_seesaw(g: Gauntlet) -> dict[str, Any]:
                     {
                         "time_s": round(elapsed, 3),
                         "plank_angle_deg": (
-                            round(float(angle_value), 4)
-                            if angle_value is not None
-                            else None
+                            round(float(angle_value), 4) if angle_value is not None else None
                         ),
                         "weight_drop_m": (
-                            round(float(drop_value), 4)
-                            if drop_value is not None
-                            else None
+                            round(float(drop_value), 4) if drop_value is not None else None
                         ),
                         "impact_min_rod_length_m": (
                             round(float(status["impact_min_rod_length_m"]), 4)
@@ -574,9 +556,7 @@ def scenario_catapult_seesaw(g: Gauntlet) -> dict[str, Any]:
                             else None
                         ),
                         "impact_receiver_phase_error_deg": (
-                            round(
-                                float(status["impact_receiver_phase_error_deg"]), 4
-                            )
+                            round(float(status["impact_receiver_phase_error_deg"]), 4)
                             if status.get("impact_receiver_phase_error_deg") is not None
                             else None
                         ),
@@ -607,9 +587,7 @@ def scenario_catapult_seesaw(g: Gauntlet) -> dict[str, Any]:
                 )
             previous_released_vertical_velocity = velocity[2]
         else:
-            max_idle_subject_speed = max(
-                max_idle_subject_speed, float(subject.get("speed") or 0.0)
-            )
+            max_idle_subject_speed = max(max_idle_subject_speed, float(subject.get("speed") or 0.0))
 
     release_diagnostic = {
         "detail": "the three-second physical release never occurred",
@@ -649,37 +627,22 @@ def scenario_catapult_seesaw(g: Gauntlet) -> dict[str, Any]:
     full_angles = [sample["angle_deg"] for sample in pre_release_trace]
     settling_angles = [sample["angle_deg"] for sample in initial_settling_trace]
     steady_angles = [sample["angle_deg"] for sample in steady_state_trace]
-    steady_body_angles = [
-        sample["body_angle_deg"] for sample in steady_state_trace
-    ]
+    steady_body_angles = [sample["body_angle_deg"] for sample in steady_state_trace]
     steady_drops = [sample["weight_drop_m"] for sample in steady_state_trace]
-    steady_subject_speeds = [
-        sample["subject_speed_mps"] for sample in steady_state_trace
-    ]
-    idle_weight_bob = (
-        max(steady_drops) - min(steady_drops) if steady_drops else math.inf
-    )
-    idle_plank_jitter = (
-        max(steady_angles) - min(steady_angles) if steady_angles else math.inf
-    )
-    release_baseline_angle = (
-        float(median(steady_angles[-10:])) if steady_angles else initial_angle
-    )
+    steady_subject_speeds = [sample["subject_speed_mps"] for sample in steady_state_trace]
+    idle_weight_bob = max(steady_drops) - min(steady_drops) if steady_drops else math.inf
+    idle_plank_jitter = max(steady_angles) - min(steady_angles) if steady_angles else math.inf
+    release_baseline_angle = float(median(steady_angles[-10:])) if steady_angles else initial_angle
     full_angle_min = min(full_angles) if full_angles else math.inf
     full_angle_max = max(full_angles) if full_angles else -math.inf
     settling_angle_min = min(settling_angles) if settling_angles else math.inf
     settling_angle_max = max(settling_angles) if settling_angles else -math.inf
     steady_angle_min = min(steady_angles) if steady_angles else math.inf
     steady_angle_max = max(steady_angles) if steady_angles else -math.inf
-    steady_body_angle_min = (
-        min(steady_body_angles) if steady_body_angles else math.inf
-    )
-    steady_body_angle_max = (
-        max(steady_body_angles) if steady_body_angles else -math.inf
-    )
+    steady_body_angle_min = min(steady_body_angles) if steady_body_angles else math.inf
+    steady_body_angle_max = max(steady_body_angles) if steady_body_angles else -math.inf
     steady_duration = (
-        steady_state_trace[-1]["park_timer_s"]
-        - steady_state_trace[0]["park_timer_s"]
+        steady_state_trace[-1]["park_timer_s"] - steady_state_trace[0]["park_timer_s"]
         if len(steady_state_trace) >= 2
         else 0.0
     )
@@ -715,9 +678,7 @@ def scenario_catapult_seesaw(g: Gauntlet) -> dict[str, Any]:
         "steady_angle_range_deg": idle_plank_jitter,
         "steady_body_angle_min_deg": steady_body_angle_min,
         "steady_body_angle_max_deg": steady_body_angle_max,
-        "steady_body_angle_range_deg": (
-            steady_body_angle_max - steady_body_angle_min
-        ),
+        "steady_body_angle_range_deg": (steady_body_angle_max - steady_body_angle_min),
         "steady_weight_bob_m": idle_weight_bob,
         "steady_subject_peak_speed_mps": (
             max(steady_subject_speeds) if steady_subject_speeds else math.inf
@@ -726,9 +687,7 @@ def scenario_catapult_seesaw(g: Gauntlet) -> dict[str, Any]:
     }
     rebound = 0.0
     if post_impact_drops:
-        deepest_index = max(
-            range(len(post_impact_drops)), key=post_impact_drops.__getitem__
-        )
+        deepest_index = max(range(len(post_impact_drops)), key=post_impact_drops.__getitem__)
         rebound = max(post_impact_drops) - min(post_impact_drops[deepest_index:])
     horizontal_peak = math.hypot(peak_velocity[0], peak_velocity[1])
     elevation = math.degrees(math.atan2(peak_velocity[2], horizontal_peak))
@@ -1017,9 +976,7 @@ def test_giant_props_functional_gauntlet(tmp_path: Path) -> None:
     requested = os.getenv("GIANT_PROPS_LIVE_KEYS")
     selected_keys = TESTED_MOD_KEYS
     if requested:
-        selected_keys = tuple(
-            key.strip() for key in requested.split(",") if key.strip()
-        )
+        selected_keys = tuple(key.strip() for key in requested.split(",") if key.strip())
         unknown = sorted(set(selected_keys) - set(TESTED_MOD_KEYS))
         assert selected_keys and not unknown, {
             "detail": "invalid GIANT_PROPS_LIVE_KEYS selection",
