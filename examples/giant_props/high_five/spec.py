@@ -1220,6 +1220,19 @@ PALETTE = {
         "metallic": 0.0,
         "roughness": 0.35,
     },
+    # THE ARMED BEACON. The old "armed lamp" was an 8 cm unlit jelly-bean
+    # on an 8.6 m machine -- its arming gesture (a 9 cm slide) was
+    # invisible at any distance, which the dusk render finally proved.
+    # This is a real industrial dome beacon at the centrifuge's proven
+    # daylight-conspicuity rating; the slide gag stays on top of the glow.
+    f"{MOD_ID}_beacon_red": {
+        "color": [0.95, 0.10, 0.06, 1.0],
+        "emissive": [1.0, 0.10, 0.05],
+        "metallic": 0.0,
+        "roughness": 0.30,
+        "stage": {"emissiveIntensityNits": 1800},
+        "double_sided": True,
+    },
     f"{MOD_ID}_seg_red": {
         "color": [0.85, 0.14, 0.08, 1.0],
         "metallic": 0.0,

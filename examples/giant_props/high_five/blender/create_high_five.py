@@ -386,7 +386,13 @@ def add_chain(name, start, end, material, link_radius, wire_radius, *,
 
 
 def build_materials() -> dict[str, object]:
-    return bk.materials_from_palette(spec, EXAMPLE_ROOT / "textures")
+    # preview_emission is the per-mod opt-in blender_kit documents: it puts
+    # the beacon's glow into the PREVIEW shader (and this mod's own DAE
+    # bytes, which regenerate with every build anyway). Without it the dusk
+    # render showed an unlit red dome and proved nothing about the one
+    # light the machine owns.
+    return bk.materials_from_palette(
+        spec, EXAMPLE_ROOT / "textures", preview_emission=True)
 
 
 # ---------------------------------------------------------------------------
@@ -1742,19 +1748,39 @@ def build_console_parts(materials) -> dict[str, dict]:
             ],
             "pivot": centre,
         }
-    lamp = (cx, face_y, spec.PLATE_Z0 + spec.PLATE_H - 0.055)
+    # THE ARMED BEACON: a dome on the console roof, glowing at the
+    # centrifuge's 1800-nit conspicuity so the approach lane can read the
+    # machine's state at range, day or dusk. The 9 cm arming slide the old
+    # 8 cm jelly-bean performed invisibly now moves something a driver can
+    # actually see.
+    beacon_mat = materials[f"{MOD_ID}_beacon_red"]
+    steel = materials[f"{MOD_ID}_steel"]
+    cy = spec.CONSOLE_CY
+    roof_z = spec.CASE_Z1 + 0.02
+    lamp = (cx, cy, roof_z + 0.10)
+    beacon_parts = [
+        bk.add_cylinder(
+            f"{MOD_ID}_beacon_base",
+            (cx, cy, roof_z + 0.03),
+            0.115,
+            0.06,
+            steel,
+            vertices=28,
+            axis="Z",
+            metric_uv=(2.0 * math.pi * 0.115, 0.1),
+        ),
+        bk.add_sphere(
+            f"{MOD_ID}_armed_lamp",
+            lamp,
+            0.105,
+            beacon_mat,
+            segments=48,
+            rings=28,
+            scale=(1.0, 1.0, 1.25),
+        ),
+    ]
     parts["armed_lamp"] = {
-        "objects": [
-            bk.add_cylinder(
-                f"{MOD_ID}_armed_lamp",
-                lamp,
-                0.042,
-                0.030,
-                red,
-                vertices=24,
-                axis="Y",
-            )
-        ],
+        "objects": beacon_parts,
         "pivot": lamp,
     }
     return parts

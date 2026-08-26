@@ -3452,6 +3452,25 @@
     }
   ],
   "palette": {
+    "ericrolph_high_five_beacon_red": {
+      "color": [
+        0.95,
+        0.1,
+        0.06,
+        1.0
+      ],
+      "double_sided": true,
+      "emissive": [
+        1.0,
+        0.1,
+        0.05
+      ],
+      "metallic": 0.0,
+      "roughness": 0.3,
+      "stage": {
+        "emissiveIntensityNits": 1800
+      }
+    },
     "ericrolph_high_five_btn_bakelite": {
       "color": [
         0.00719,
@@ -3998,22 +4017,23 @@
         0.0,
         0.0
       ],
-      "sha256": "4cc55d25d872300d48b1a86b501e2e7a2ac44ba0dacf604388e4afa195054b76",
-      "size": 4537539
+      "sha256": "13e719a2f620c304d2283fe86644ef887fd915792548ec3d4759d96e11bb6c92",
+      "size": 4537402
     },
     {
       "materials": [
-        "ericrolph_high_five_seg_red"
+        "ericrolph_high_five_beacon_red",
+        "ericrolph_high_five_steel"
       ],
       "name": "armed_lamp",
       "path": "vehicles/ericrolph_high_five/ericrolph_high_five_armed_lamp.dae",
       "pivot_world": [
         -8.4,
-        -5.295,
-        1.575
+        -5.0,
+        1.86
       ],
-      "sha256": "6c58531ffc290b83326f985a3f453ea7206f5505c06603658053fc69a01688fc",
-      "size": 14453
+      "sha256": "82b5370cdb6b2a8340d41b9204f6e401517b0ca1a037e544df7175362ef5075f",
+      "size": 392665
     },
     {
       "materials": [
@@ -4027,7 +4047,7 @@
         -13.407412,
         3.7785
       ],
-      "sha256": "4164e3088d818735c3f7e2c92111fdeaf9b7ec9db91ff4dcb522191f452466d1",
+      "sha256": "e3f802e699f5736adc3ac3bf20d09162a416a42587f83e5a436c5667ade45701",
       "size": 6364815
     },
     {
@@ -4042,7 +4062,7 @@
         -12.946055,
         1.0441
       ],
-      "sha256": "1682098b77e9cd414d2ceb49fc0f6c01c6dea4d5ff94879f2d8ebd3cbedb2eec",
+      "sha256": "77f68ee83fcf172ea85e62d924d912e098059aaab766ee880656693b283e93c7",
       "size": 6356402
     },
     {
@@ -4057,7 +4077,7 @@
         -13.575178,
         2.72
       ],
-      "sha256": "1f23738cdd8a7d05825735ba1374ed28f72b874f90bf119a4ecb1e2b192fa1a0",
+      "sha256": "f49b34e16f30c0dd01cabc0b59866a0d5512d59d84cc4059603f054d9ecfaf30",
       "size": 6355789
     },
     {
@@ -4072,7 +4092,7 @@
         -13.365471,
         1.7497
       ],
-      "sha256": "fafd6201c3e19c79160334e88d2a5bc808296941ad1672c4a974be4ec9468cc3",
+      "sha256": "925db470d875a5519f5f1cb2ebed4632ca70c5d4f7f736b6188e0a36f1e5199e",
       "size": 6364819
     },
     {
@@ -4087,7 +4107,7 @@
         -10.292034,
         4.2195
       ],
-      "sha256": "80066827e291c1d4da1d56bb5527d3dd213cda4d1bbaf52081b0716521ed7e56",
+      "sha256": "16ee51bd23a95e82330da1d01bd5d3ae18b1d6872444e00164075b91e9dc3cef",
       "size": 6315954
     },
     {
@@ -4102,7 +4122,7 @@
         -9.130143,
         2.72
       ],
-      "sha256": "630860fe8784262f827260531d1d7f8be2b7b7b08aaa86b5f8d7763bc5e30d50",
+      "sha256": "2798c3ebff7491bb6a4faaa4ddbba10268699ae01b04248a49f87604b27118ad",
       "size": 11812365
     },
     {
@@ -4116,8 +4136,8 @@
         -5.295,
         1.345
       ],
-      "sha256": "03185acd056d7b93a17c92bac70452c71e334dd994206999bcaca63a495abf31",
-      "size": 17998
+      "sha256": "83d07a1cf735e2ae47e22c32a39507e92391a1755f619e052a4efaab7c293923",
+      "size": 17805
     },
     {
       "materials": [
@@ -4130,8 +4150,8 @@
         -5.295,
         1.345
       ],
-      "sha256": "718cc70b1f593c22ffcf9fffd74749b7317dd85d9bf724cfac0e0d08a7f52955",
-      "size": 17812
+      "sha256": "8a4f5154f4d1a21db4ca7f30f67894885281e94321996c3dd5fd4fc9f040776d",
+      "size": 17934
     },
     {
       "materials": [
@@ -4144,8 +4164,8 @@
         -5.295,
         1.345
       ],
-      "sha256": "93e853e0a387ba628e5fb864195fc3b9aa08212e89490fc0b943542027a9e056",
-      "size": 17856
+      "sha256": "d9c7581e497d6221e8e7b200e490c5710ea6dc9cb2a3586ad14119b0c2be1803",
+      "size": 17841
     },
     {
       "materials": [
@@ -4158,8 +4178,8 @@
         -5.295,
         1.345
       ],
-      "sha256": "744ef752471c404c10a7f7510061fb608187521b974cd1aef021aa4a09fcee82",
-      "size": 17841
+      "sha256": "573c69bb114184338f7de33f6df72d06fd326ebc410207a622896083e6b150d8",
+      "size": 17927
     },
     {
       "materials": [
@@ -4172,8 +4192,8 @@
         -5.295,
         1.345
       ],
-      "sha256": "feeaf46d52bc192220128e444b75ca002bbc97f09b3097647c606d7c5b520633",
-      "size": 17856
+      "sha256": "5ce96699cd26052e62c7d43de5834eca300b75687329904daa59eb155061d97b",
+      "size": 17876
     },
     {
       "materials": [
@@ -4186,8 +4206,8 @@
         -5.295,
         1.345
       ],
-      "sha256": "2d26828292771ee0bc0cf49f2cff40721d4f421e2d440e0cabd5247ae12d4b4a",
-      "size": 17841
+      "sha256": "d44ee492fc4147d5234533410723d81b422a6ef3d1f98d8c4b79d6aca80d3ae5",
+      "size": 17928
     },
     {
       "materials": [
@@ -4200,8 +4220,8 @@
         -5.295,
         1.345
       ],
-      "sha256": "a8701a2967271834358dce9f49aaf83c531a691dd2e759e933920c8c0c3e1845",
-      "size": 17892
+      "sha256": "8c7e7370080374ad76e6bf00b3222658ee82cce8fb8c286723e2314826b35081",
+      "size": 17805
     },
     {
       "materials": [
@@ -4214,8 +4234,8 @@
         -5.295,
         1.345
       ],
-      "sha256": "024102c6e4b91366b00d5098d1afe23983c34d2801da028c64f7c85986314a86",
-      "size": 17805
+      "sha256": "8b709e67ff6ddbb547cff35ecfa8479cceee91f97a194c8f39a5d1c7c6388b81",
+      "size": 17928
     },
     {
       "materials": [
@@ -4228,8 +4248,8 @@
         -5.295,
         1.345
       ],
-      "sha256": "ac7c63a368fe0928df016f3978a56f700c2ca0695bd91f90aa4156105cbc6a0b",
-      "size": 17985
+      "sha256": "6d9f58da69e470d20d681dd2115bd493885e4617ab51fb91c6558e774724f34c",
+      "size": 17792
     },
     {
       "materials": [
@@ -4242,8 +4262,8 @@
         -5.295,
         1.345
       ],
-      "sha256": "2a2fe05d8785f7678d968406a62767043085228899d4392303d00efa21614805",
-      "size": 17792
+      "sha256": "67ac01cbf18e26f91efbb1bbc25107749e17b57f36f67fe20184ed9e4338f402",
+      "size": 17914
     },
     {
       "materials": [
@@ -4256,8 +4276,8 @@
         -5.295,
         0.985
       ],
-      "sha256": "5c559f7962957c633753d6fb559f757c666094ff7c8f1bedfe1d04d022347b63",
-      "size": 17876
+      "sha256": "1941ec87b7935fdbb1ec3b0d50b56d5f5a88d1aeaec94115f6b59683ccf083a7",
+      "size": 17825
     },
     {
       "materials": [
@@ -4270,8 +4290,8 @@
         -5.295,
         0.985
       ],
-      "sha256": "7dc26f96490a2731ce0f3bc9ad336fa67bcfafb6dd3ddfdc9bfc5d1172718a2f",
-      "size": 17825
+      "sha256": "8483981b54f735469fea5667b65dac2451e2af9aa1adf9b6ad1ee170b93b6d2d",
+      "size": 17983
     },
     {
       "materials": [
@@ -4284,8 +4304,8 @@
         -5.295,
         0.985
       ],
-      "sha256": "30ccae1547d586c7dd9aae5baadc8afd60ff70b8b4bb4b6b7e3b4bc294e39d63",
-      "size": 17876
+      "sha256": "8b39ed92eec966e6d4c6ab9ed1a6215b56f52d1f7d288140db58b1efe7b4e308",
+      "size": 17896
     },
     {
       "materials": [
@@ -4298,8 +4318,8 @@
         -5.295,
         0.985
       ],
-      "sha256": "274eb176fe24918a97cc829432827d7bf1dec1c9a3a40d09b6debf5e3151d75e",
-      "size": 17825
+      "sha256": "06e648037b721a76f9cc49b166cdffe5f4691fce2025236aedeb8124eb29cf82",
+      "size": 17948
     },
     {
       "materials": [
@@ -4312,8 +4332,8 @@
         -5.295,
         0.985
       ],
-      "sha256": "5defc8885416d17951dc054575cbb009346eb24002af124b5d68cd67ba1d55b4",
-      "size": 17912
+      "sha256": "366b7be9735fff30f45a8f8e6d85c685ed6d97fe9ed930296ef4fe501b758e1d",
+      "size": 17825
     },
     {
       "materials": [
@@ -4326,8 +4346,8 @@
         -5.295,
         0.985
       ],
-      "sha256": "6f7ddf6d1df30210bf61f3c05ade7c146b469fe2bcfde1de5e8805fe124282ea",
-      "size": 17825
+      "sha256": "7e94eb4f97733fbba85c0d7251cddcbfbe644ab52b11cb18132eaffa0bda2469",
+      "size": 17948
     },
     {
       "materials": [
@@ -4340,8 +4360,8 @@
         -5.295,
         0.985
       ],
-      "sha256": "788a46df6136bb7b577042e3821425208e7592d52a0dae4afe0d36905d25465e",
-      "size": 18018
+      "sha256": "e363fba508e7a3e4c393917526610da69cd19379a57e41fa0d4c483a9a866b83",
+      "size": 17825
     },
     {
       "materials": [
@@ -4356,8 +4376,8 @@
         -9.130143,
         2.72
       ],
-      "sha256": "d52ad9502831d37cfa26b0e741a77af8c6305bbc54c8b22e7defa50c6c5b7863",
-      "size": 567265
+      "sha256": "6366bbe02eefb2b026a9dcaec8c5059c6e010e7c04ae7862be008ccf54b6f1f8",
+      "size": 567243
     }
   ],
   "rails": {},
@@ -5143,7 +5163,7 @@
       "ericrolph_high_five_steel"
     ],
     "path": "vehicles/ericrolph_high_five/ericrolph_high_five.dae",
-    "sha256": "2a343eb86c70b481b0ec7813d0a4045ec82da828b22050f3f7bfe886178ae051",
-    "size": 6290085
+    "sha256": "1b4711f1f074c02ff6a19bea274d9ea56230bdf6009c6613ad683b22dd0b7d57",
+    "size": 6289697
   }
 }
