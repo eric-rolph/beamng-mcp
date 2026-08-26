@@ -428,11 +428,19 @@ def build_cage() -> bk.CageBuilder:
                 for pad_ix in (0, 1, 2):
                     cage.stitch(pylons[side][(ix, iy, 0)], medallion[(pad_ix, 1, 0)])
 
+    # The refnodes double as the runtime's slope-placement FRAME_NODES, and
+    # the frame-math gate rejects a poorly conditioned frame. The pad is only
+    # 0.05 m tall, so the pad's own top node gave ref->up a 5 cm baseline -
+    # exactly the MIN_BASELINE_M floor, and it collapsed under rotation in
+    # test_every_viable_pair_recovers_the_same_rotation. The arch apex ring
+    # sits 31 m above the ref with zero authored x/y offset: as well
+    # conditioned as this monument can offer.
+    apex_up = ring_ids[len(ring_ids) // 2][0]
     cage.set_refnodes_existing(
         ref=medallion[(1, 1, 0)],
         back=medallion[(1, 0, 0)],
         left=medallion[(0, 1, 0)],
-        up=medallion[(1, 1, 1)],
+        up=apex_up,
     )
     cage.set_spawn_envelope(
         [

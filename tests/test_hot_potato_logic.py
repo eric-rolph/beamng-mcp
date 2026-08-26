@@ -312,10 +312,14 @@ def _remaining(module):
 
 
 def start_round(state, module, vehicle_id, x=0.0, y=0.0):
-    """Drive onto the medallion; the idle sweep hands the potato over."""
+    """Drive onto the medallion; the idle sweep hands the potato over.
+
+    Pickup respects the join-immunity window (a reset carrier standing on
+    the pad must not re-arm instantly), so park on the pad and wait it out.
+    """
 
     state.moveVehicle(vehicle_id, x, y, 0.0)
-    tick(state, module)
+    tick(state, module, seconds=0.1, steps=24)  # 2.4 s > join_immunity 2.0 s
     return _carrier_of(module)
 
 
@@ -515,7 +519,7 @@ def test_fuse_is_gaussian_inside_its_clamp(rig):
     draws = []
     for _ in range(40):
         state.addVehicle(2, "etk800", 0.0, 0.0, 0.0)
-        tick(state, module)
+        tick(state, module, seconds=0.1, steps=24)  # wait out join immunity
         draws.append(_remaining(module))
         state.removeVehicle(2)
         module.onVehicleDestroyed(2)
@@ -630,6 +634,60 @@ def test_countdown_is_wall_clock_not_dtsim(rig):
         elapsed += 0.1
     assert module.getSystemState(PROP_ID).behavior_phase == "live", (
         "fuse fired early - it is counting dtSim, not wall seconds"
+    )
+
+
+def test_resetting_a_sweep_discovered_carrier_sends_the_potato_home(rig):
+    """Review finding (PR #87): the framework reset path only fires for
+    vehicles it finds in state.zones, and a sweep-discovered carrier - the
+    normal case, since the pad trigger is only a secondary path - was in no
+    zone. Resetting it left the potato riding the reset car with the fuse
+    still burning. The carrier now registers itself in a synthetic zone."""
+
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 300.0, 0.0, 0.0)
+    tick(state, module)
+    carrier = start_round(state, module, 2)
+    assert carrier == 2
+
+    # The reset arrives through the FRAMEWORK hook, exactly as the engine
+    # delivers it - no trigger event was ever involved for this carrier.
+    module.onVehicleResetted(2)
+    tick(state, module)
+    assert module.getSystemState(PROP_ID).behavior_phase == "idle"
+    assert _carrier_of(module) is None, "potato kept riding a reset carrier"
+
+
+def test_sole_survivor_wins_instead_of_detonating(rig):
+    """Review finding (PR #87): when every non-carrier despawned mid-round,
+    the fuse kept burning and detonated the last car standing. The round now
+    ends as a win the moment the field collapses to one."""
+
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 300.0, 0.0, 0.0)
+    tick(state, module)
+    assert start_round(state, module, 2) == 2
+    # Drop the prop's own registration acknowledgement so the only commands
+    # left to see would be a wrongful detonation.
+    state.clear()
+
+    # The other car despawns mid-round.
+    state.removeVehicle(3)
+    module.onVehicleDestroyed(3)
+    run_until(state, module,
+              lambda: module.getSystemState(PROP_ID).behavior_phase == "idle",
+              limit_seconds=10.0)
+    assert _carrier_of(module) is None
+    assert any("LAST CAR STANDING" in m for m in state.messages.values()), (
+        "field collapse must end as a win"
+    )
+    # And above all: nobody was detonated.
+    assert not list(state.commands.values()), (
+        "the sole survivor received a detonation command"
     )
 
 

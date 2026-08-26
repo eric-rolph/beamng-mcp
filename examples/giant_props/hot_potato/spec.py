@@ -702,8 +702,10 @@ end
 local function parkPotato(state)
   local b = state.behavior
   b.carrier = nil
+  state.zones.carrier_watch = nil
   beaconLit(state, false)
   setEffectActive(state, "fuse", false)
+  setEffectActive(state, "blast", false)
   local home = toWorldPoint(state, B.potato_home)
   local bob = math.sin((b.now or 0) * OPT.bob_rate) * OPT.bob_amplitude
   local idleSpin = quat(0, 0, math.sin((b.spin or 0) * 0.5), math.cos((b.spin or 0) * 0.5))
@@ -728,6 +730,14 @@ local function giveTo(state, vehicle, reason)
   else
     b.pairFrom, b.pairTo, b.pairSeparated = nil, nil, true
   end
+  -- Register the carrier in a synthetic zone. The framework's reset path
+  -- (onVehicleResetted -> removeSubjectEverywhere -> behavior.onSubjectGone)
+  -- only fires for vehicles it finds in state.zones - and a sweep-discovered
+  -- carrier was never in any zone, so resetting it left the potato riding
+  -- the reset car with the fuse still burning (review finding, PR #87).
+  -- The zone name has no TRIGGER_SPECS entry on purpose: nothing poses it,
+  -- and rebuildTriggers clearing it is fine because every giveTo re-arms it.
+  state.zones.carrier_watch = {[id] = true}
   if not b.fuseEnds then
     -- The fuse is a SHARED POOL drawn once per round, not a per-carrier
     -- timer: passing it on buys you distance, not a fresh minute.
@@ -923,11 +933,26 @@ local function sweepForPickup(state)
   if #field < OPT.min_players then return false end
   for _, entry in ipairs(field) do
     local position = entry.vehicle:getPosition()
-    if finiteVector3(position) then
+    -- The same join-immunity window the transfer respects. Without it a
+    -- carrier who RESETS while standing on the medallion is re-armed on the
+    -- very next tick (the reset clears b.seen, roster re-seens the car, and
+    -- the pad sweep fires) - the "potato returned" beat never gets to exist.
+    -- It also keeps a car spawned directly onto the pad from being armed
+    -- before its driver has ever held the wheel.
+    if finiteVector3(position)
+      and (b.seen[entry.id] or 0) + OPT.join_immunity_seconds <= b.now then
+      -- Project into the AUTHORED frame before testing, like every other
+      -- placement in this runtime. World-axis tests turn the circular pad
+      -- into a tilted ellipse with asymmetric height clipping the moment the
+      -- prop settles on a slope (review finding, PR #87): at a steep
+      -- attitude a car sitting on the authored pad can read metres of
+      -- world-Z below the pad centre and be rejected.
+      local ex, ey, ez = authoredAxes(state)
       local offset = position - pad
-      local horizontal = math.sqrt(offset.x * offset.x + offset.y * offset.y)
+      local lx, ly, lz = offset:dot(ex), offset:dot(ey), offset:dot(ez)
+      local horizontal = math.sqrt(lx * lx + ly * ly)
       if horizontal <= OPT.pickup_radius
-        and offset.z >= -2.0 and offset.z <= OPT.pickup_height then
+        and lz >= -2.0 and lz <= OPT.pickup_height then
         b.fieldPeak = #field
         giveTo(state, entry.vehicle, "pad")
         announce(state, "YOU'VE GOT IT - pass it on!", 3.0, "round_started",
@@ -1043,6 +1068,11 @@ local function stepRound(state, dtSim)
     return
   end
 
+  -- Re-arm the watch every tick: the framework's rebuildTriggers clears
+  -- state.zones whenever ANY subject resets, and a one-shot registration in
+  -- giveTo would be lost with it.
+  state.zones.carrier_watch = {[b.carrier] = true}
+
   local anchor, rotation = carrierPose(state, carrier)
   posePotato(state, anchor, rotation)
   poseEffectAt(state, "fuse", anchor)
@@ -1052,6 +1082,21 @@ local function stepRound(state, dtSim)
 
   local field = #roster(state)
   if field > (b.fieldPeak or 0) then b.fieldPeak = field end
+  -- Everyone else despawned mid-round: the carrier is the last car standing
+  -- and must WIN, not sit alone waiting for the fuse (review finding, PR
+  -- #87). Same win predicate as the post-boom path: there was a field to
+  -- beat, and it is gone.
+  if field == 1 and (b.fieldPeak or 0) >= 2 then
+    local winner = b.carrier
+    b.phase = "idle"
+    b.fuseEnds = nil
+    parkPotato(state)
+    setEffectActive(state, "cheer", true)
+    playSound(SFX_WIN, 1.0, 1.0)
+    announce(state, "LAST CAR STANDING!", 4.0, "round_won",
+      {subject_id = winner})
+    return
+  end
   if ((b.fuseEnds or b.now) - b.now) <= 0 then
     detonate(state, carrier)
   end

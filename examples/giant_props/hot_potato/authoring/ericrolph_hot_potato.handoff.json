@@ -5050,7 +5050,7 @@
         0.0,
         5.6
       ],
-      "sha256": "9007e249cd4bfd88b74d3dd9ffbd9fdcd8287296f11c0e9161a7b6db4e71444a",
+      "sha256": "cb6e71c110b6093f6f36e8e78648c2159c831624fa2db478bc31b99cfdc356a7",
       "size": 1806986
     }
   ],
@@ -5059,7 +5059,7 @@
     "back": "ericrolph_hot_potato_pad_01_00_00",
     "left": "ericrolph_hot_potato_pad_00_01_00",
     "ref": "ericrolph_hot_potato_pad_01_01_00",
-    "up": "ericrolph_hot_potato_pad_01_01_01"
+    "up": "ericrolph_hot_potato_arch_060_0"
   },
   "schema": "ericrolph-giant-props-handoff-v1",
   "slidenodes": [],
@@ -5638,7 +5638,7 @@
       "ericrolph_hot_potato_medallion_stone"
     ],
     "path": "vehicles/ericrolph_hot_potato/ericrolph_hot_potato.dae",
-    "sha256": "b6c0cbebbce51a86d3de082e3ab663b06ddd08adb5d26a7bb4e1f640e676b129",
+    "sha256": "324a27af8326ed1ecd4d2b75835370c2e35961deecf961b57522cfd324260907",
     "size": 464099
   }
 }
