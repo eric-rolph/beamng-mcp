@@ -248,19 +248,27 @@ the palm normal, so TILT is a ballistic control and not a decoration — and
 until this gate existed it was only ever the arithmetic that produces it,
 never the physics that results.
 
+**The visual play-test happened** (2026-08-26, eight live sessions, three
+critic lanes unanimously wowed): the palm visibly connects on film, the
+dust travels, the scoreboard speaks on camera, the beacon proves itself
+at midnight, and in-game action frames now exist for a gallery
+(scratchpad frames2/3/4/6/7/8 of the build session).
+
 **Still owed before upload:**
 
-1. **The visual questions the headless gate cannot answer.** Does a
-   collisionless palm passing through a car read as a slap or as a miss?
-   Are the console cap click-boxes where a player's cursor expects them?
-   What does the hand cost per frame? All need a human at a screen.
+1. **Console cap click-boxes and frame cost** — the two questions only a
+   human at a screen with a mouse can answer.
 2. **`machined_steel`'s effective diffuse (0.0279) sits below the matte
    enamel's (0.0352)** — the bare metal is darker than the paint, which is
    backwards. Deliberately not corrected against a studio rig whose dim
    world flatters dielectrics and starves metals; check it under a real
    sky first.
-3. In-game action screenshots would beat the studio renders for a gallery.
-   Nobody believes a slap machine until they see a car leave.
+3. **A whiff plays the full slap clip** — the whoosh is right for hitting
+   air, but the foam whomp and crack play over nothing. A dedicated whiff
+   tail (whoosh + mast clang) would sell "Left hanging." harder.
+4. Filed for their own rounds: painted distance rungs down-road, a
+   mechanical slap counter on the console, selling TILT 0 as the
+   skipping-stone mode, documenting two-car pad griefing.
 
 **Note on release hashes:** this mod has crossed the packaging timestamp
 clamp (serial 26 against 24 days since the 2026-08-01 epoch), so its

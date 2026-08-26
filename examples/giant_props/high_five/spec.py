@@ -438,6 +438,12 @@ FORE_RUN = WRIST_R - ELBOW_R
 FORE_RISE = ELBOW_Z - WRIST_Z
 FORE_LENGTH = math.hypot(FORE_RUN, FORE_RISE)
 FORE_PITCH_DEG = math.degrees(math.atan2(FORE_RISE, FORE_RUN))
+# NOTE: UPPER_PITCH_DEG is the PRE-DOGLEG hub-to-elbow line (57 deg), kept
+# because this break angle describes the visual kink at the ELBOW between
+# the overall upper reach and the forearm -- the knee (BOOM_KNEE_*) is a
+# separate joint further up and does not change what the elbow ram spans.
+# A reviewer flagged the derivation as drift; it is deliberate, and now
+# says so.
 ELBOW_BREAK_DEG = UPPER_PITCH_DEG - FORE_PITCH_DEG
 BOOM_ROOT_DEPTH = 2.05     # box-section depth at the shoulder
 # THE KNEE. A straight member from the hub (r 0, z 10.5) to the elbow
