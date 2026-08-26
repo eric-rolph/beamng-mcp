@@ -29,6 +29,7 @@ import math
 from pathlib import Path
 from typing import Any
 
+import bmesh
 import bpy
 from mathutils import Matrix, Vector
 
@@ -1174,6 +1175,7 @@ def export_multi_flexbody(
     mod_id: str,
     dae_path: Path,
     mesh_groups: dict[str, list[bpy.types.Object]],
+    weld: float | None = None,
 ) -> dict[str, Any]:
     """Export several named flexbody meshes into ONE Collada file.
 
@@ -1181,6 +1183,16 @@ def export_multi_flexbody(
     the jbeam ``flexbodies`` table can bind each one to its own node group —
     the mechanism that lets a broken glass floor's mesh fall with its own
     nodes instead of smearing across the whole tower.
+
+    ``weld`` merges coincident vertices AFTER the join, which is the only
+    place it can be done: the generators build one object per surface and the
+    join leaves every shared ring as two coincident-but-separate vertex sets,
+    so the shaded normals are averaged per SURFACE and a false crease appears
+    along every seam. Measured on colossus_tire, 554 vertex pairs down each
+    edge of its drive lane had a median normal split of 30.75 degrees where
+    the welded geometry bends 2.5. OPT-IN, and defaulting to off, because
+    turning it on moves the exported bytes and therefore the lock of every mod
+    that calls this.
     """
 
     if not mesh_groups:
@@ -1215,6 +1227,13 @@ def export_multi_flexbody(
         merged = bpy.context.object
         merged.name = mesh_name
         merged.data.name = mesh_name
+        if weld is not None:
+            welder = bmesh.new()
+            welder.from_mesh(merged.data)
+            bmesh.ops.remove_doubles(welder, verts=welder.verts, dist=weld)
+            welder.to_mesh(merged.data)
+            welder.free()
+            merged.data.update()
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
         per_mesh[mesh_name] = {
             "bounds": object_bounds(merged),
@@ -1316,6 +1335,7 @@ def render_thumbnail(
     sun_energy: float = 3.0,
     world_color: tuple[float, float, float] = (0.72, 0.82, 0.92),
     world_strength: float = 1.0,
+    strip_stamp: bool = False,
 ) -> None:
     """Render one review/thumbnail frame.
 
@@ -1363,11 +1383,56 @@ def render_thumbnail(
     path.parent.mkdir(parents=True, exist_ok=True)
     scene.render.filepath = str(path)
     bpy.ops.render.render(write_still=True)
+    if strip_stamp:
+        strip_render_stamp(path)
     scene.camera = previous_camera
     bpy.data.objects.remove(camera, do_unlink=True)
     bpy.data.cameras.remove(camera_data)
     bpy.data.objects.remove(sun, do_unlink=True)
     bpy.data.lights.remove(sun_data)
+
+
+def strip_render_stamp(path: Path) -> bool:
+    """Drop Blender's wall-clock COM segments out of a rendered JPEG.
+
+    Blender writes ``Blender:Date:YYYY/MM/DD HH:MM:SS`` and
+    ``Blender:RenderTime`` into every JPEG it renders. prop_builder copies the
+    thumbnail into the shipped tree TWICE, so a pixel-identical re-render
+    still changes the mod's content sha, bumps its build serial and
+    invalidates the ZIP lock the live gate verifies against - the same defect
+    the Collada normaliser was written for, from the same Blender run, missed
+    because only the mesh was being looked at.
+
+    OPT-IN at the call site, following normalise_collada's precedent: turning
+    it on unconditionally would move the locks of every other mod in the pack.
+    """
+
+    blob = path.read_bytes()
+    if not blob.startswith(b"\xff\xd8"):
+        return False
+    out = bytearray(blob[:2])
+    index = 2
+    changed = False
+    while index + 4 <= len(blob):
+        if blob[index] != 0xFF:
+            break
+        marker = blob[index + 1]
+        if marker == 0xDA:                       # start of scan: the rest is data
+            out += blob[index:]
+            index = len(blob)
+            break
+        length = int.from_bytes(blob[index + 2:index + 4], "big")
+        segment = blob[index:index + 2 + length]
+        if marker == 0xFE and b"Blender:" in segment:
+            changed = True
+        else:
+            out += segment
+        index += 2 + length
+    if index < len(blob):
+        out += blob[index:]
+    if changed:
+        path.write_bytes(bytes(out))
+    return changed
 
 
 def write_handoff(

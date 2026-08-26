@@ -128,8 +128,19 @@ tread cap, with steel cord cross-sections at their own per-band pitch),
 # It also parses the SHIPPED Collada, which for a long time nothing did: zero
 # degenerate faces, zero duplicated faces, zero edges traversed the same way
 # by both their faces, zero triangles with world area and no UV area, every
-# material at its authored grain size, and every moulded glyph a closed solid
-# of positive volume.
+# material at its authored grain size KEYED BY GEOMETRY (three of them appear
+# in both meshes and a bare key let one silently overwrite the other), every
+# closed solid of positive volume - the one orientation rule with no escape
+# hatch, and the one that finally caught nine inside-out port gussets - and a
+# mesh that is already welded, because joining one object per surface for
+# export left 554 coincident vertex pairs down each edge of the drive lane
+# carrying a 30-degree false crease.
+
+# And the textures, which until round 4 nothing in the suite opened at all:
+# slope in the pack's band, slope that still survives two mip levels, no wrap
+# step larger than the map's own interior steps, and a decoded albedo that
+# matches what the palette says it asked the family for.
+.\.venv\Scripts\python.exe -m pytest -q .\tests\test_colossus_tire_textures.py
 .\.venv\Scripts\python.exe -m pytest -q .\tests\test_colossus_tire_geometry.py
 
 # Live gates (opt-in; sentinel-isolated profile). The toaster one boots BeamNG
@@ -148,6 +159,45 @@ tread cap, with steel cord cross-sections at their own per-band pitch),
 # boarding beat for the rest of the session.
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_giant_props_live.py
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_colossus_tire_live.py
+
+# ...and the HILL gate, which is the only one that answers the question the
+# prop actually raises. It boots on `utah`, settles the carcass on a MEASURED
+# slope, cuts the tie-downs and then touches nothing: everything after that
+# is gravity. Two grades, because they prove opposite things.
+#
+#   3.4 deg   the chocks HOLD. It has to climb its own 0.705 m wedge to get
+#             out, which needs about 16 deg of grade, so it creeps 0.96 m in
+#             30 s. A chock that let 10.5 tonnes walk out of it would be
+#             scenery rather than hardware, so that is asserted too.
+#   22.9 deg  gravity climbs the chock and it goes: 78 m of travel, 47 m of
+#             descent, 1.24 revolutions, ~11 km/h average - and it finally
+#             lies over on the camber, which is what a free tire does.
+#
+# The FLAT gate carries the material measurements, because smallgrid is a
+# perfect plane and there is nothing to blame a reading on:
+#
+#   slip ratio 1.007   coasting freely at 3.2 m/s, path length against
+#                      R x d-theta. It rolls without slipping to 0.7%.
+#   ripple 6.4 mm RMS  steady rolling, against a 30.2 mm facet sagitta on the
+#                      48-station collision hull. The contact patch swallows
+#                      the polygon by about five to one.
+#   Crr 0.062          free-coast deceleration over g. Hysteretic - the right
+#                      mechanism - but high: a real tire is 1-2% on hard
+#                      ground and 5-8% on soft, so this reads as soft ground.
+#                      Halving the tread damping moved it by 0.2 points, so
+#                      the loss is spread across sidewall, casing and the
+#                      inflation truss, not concentrated in the tread.
+#   ring 458 mm p-p    the carcass oscillating on its own compliance after an
+#                      18 m/s impact, decaying over a few seconds. A rigid
+#                      hoop would not do it at all.
+#
+# The measurement that matters is PATH LENGTH against R x d-theta over the
+# UPRIGHT segment: 0.852, where a rigid drum reads 1.000. That shortfall is
+# the loaded-tire signature (0.89 against the loaded radius rather than the
+# free one), and it is the one number that separates this from a barrel.
+# The carcass held its shape through all of it: 0.37 m worst radius error
+# over a 90 m run that ended in a tumble.
+.\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_colossus_tire_hill_live.py
 ```
 
 The live gate exercises the shared runtime core every mod generates
@@ -178,8 +228,8 @@ before any public upload; see AGENTS.md for the sentinel-profile rules.
   velocity space and the car cannot fall off. The soft body still takes the
   full escalating G-load, because only the ref-node cluster is driven and
   every other node has to follow it through its own beams.
-- `colossus_tire` goes the other way and drives NOTHING. It is 214,104
-  visual triangles over 1,072 free nodes
+- `colossus_tire` goes the other way and drives NOTHING. It is 212,484
+  visual triangles over 1,074 free nodes
   in a tire-shaped cage — bead bundles, casing plies, a steel belt package
   with long chords to stations ±2 and ±3, sidewall rubber, a tread slab that
   flattens into a contact patch, and a soft damped truss across the cavity

@@ -32,7 +32,6 @@ import create_colossus_tire as gen  # noqa: E402
 from proplib import blender_kit as bk  # noqa: E402
 
 OUT = EXAMPLE_ROOT / "authoring" / "verify"
-R_O = spec.OUTER_RADIUS
 
 # (name, camera, look_at, lens, resolution)
 _BAND_ANGLE = math.radians(68.9)          # up and to the left of the axle
@@ -53,30 +52,71 @@ def _band_camera(name: str) -> tuple[float, float, float]:
     return tuple(target[i] + _BAND_STANDOFF[i] for i in range(3))
 
 
+# THE FEATURE CAMERAS HAVE TO LOOK AT THEIR FEATURES. Round 4 found the
+# "buttress" frame aimed at radius 9.363, |x| 2.4 - which is 2.7 m INSIDE the
+# sidewall at the size-code band - while the wrap lives at radius 11.61-13.51,
+# |x| 4.61-5.29, and "shoulder" aimed at radius 10.935 against a shoulder at
+# 13.23-13.31. Both features had shipped defects for three rounds and no image
+# in authoring/verify/ contained either of them. A named view now derives its
+# look-at from the thing it is named for, and a gate checks the arithmetic.
+FEATURES = {
+    # name: (radius, axial, viewing angle round the tire, standoff)
+    "shoulder": (
+        spec.OUTER_RADIUS - spec.SECTION_HEIGHT * (1.0 - spec.SHL_FRACTION),
+        spec.TREAD_HALF + 0.45,
+        math.radians(115.0),
+        7.0,
+    ),
+    "buttress": (
+        0.5 * (spec.PROTECTOR_RADII[0] + spec.PROTECTOR_RADII[-1]),
+        spec.SECTION_HALF - 0.30,
+        math.radians(100.0),
+        8.5,
+    ),
+    "bead": (
+        spec.BEAD_RADIUS + 0.35,
+        spec.SECTION_HALF * 0.86,
+        math.radians(140.0),
+        6.0,
+    ),
+}
+
+
+def _feature_target(name: str) -> tuple[float, float, float]:
+    radius, axial, angle, _standoff = FEATURES[name]
+    return (
+        axial,
+        radius * math.sin(angle),
+        spec.OUTER_RADIUS - radius * math.cos(angle),
+    )
+
+
+def _feature_camera(name: str) -> tuple[float, float, float]:
+    radius, axial, angle, standoff = FEATURES[name]
+    # Outboard and out along the radius, a little further round the clock, so
+    # the feature is seen across its own curvature rather than end-on.
+    swing = angle + math.radians(-12.0)
+    reach = radius + standoff
+    return (
+        axial + standoff * 0.85,
+        reach * math.sin(swing),
+        spec.OUTER_RADIUS - reach * math.cos(swing),
+    )
+
+
 VIEWS = (
     ("hero", (40.0, -46.0, 20.0), (0.0, 0.0, 13.0), 42.0, (1000, 620)),
     ("profile", (2.0, -62.0, 14.0), (0.0, 0.0, 14.0), 55.0, (1000, 620)),
+    ("face", (34.0, 0.0, 14.0), (0.0, 0.0, 14.0), 46.0, (1000, 1000)),
     ("tread_close", (1.2, -13.0, 25.6), (0.0, -2.0, 25.0), 70.0, (1000, 700)),
-    ("shoulder", (9.5, -13.5, 24.0), (2.6, -3.0, 24.6), 60.0, (1000, 700)),
-    ("port", (13.5, -8.0, 4.6), (3.4, 0.4, 2.6), 45.0, (1000, 700)),
-    ("port_close", (9.0, -5.2, 3.0), (3.9, 0.2, 2.2), 50.0, (1000, 700)),
-    # Inside the carcass. The camera has to satisfy |p - axle| < CAVITY_RADIUS
-    # or it is standing outside the tire looking at the back of the tread,
-    # which is what the first two attempts at this frame were.
-    ("cabin", (-1.9, 5.0, 2.1), (3.2, -1.2, 1.7), 22.0, (1000, 620)),
-    ("cabin_far", (0.0, -5.4, 2.6), (0.0, 6.0, 4.2), 20.0, (1000, 620)),
-    ("floor", (0.0, -6.5, 3.0), (0.0, 1.0, 1.0), 34.0, (1000, 620)),
-    ("gangway", (7.6, -2.6, 2.15), (3.2, 0.2, 1.05), 40.0, (1000, 700)),
-    ("port_face", (13.2, 0.0, 2.35), (3.6, 0.0, 2.35), 42.0, (1000, 760)),
-    # DERIVED from the stack, not typed in. These two frames are named for the
-    # bands they show, and the moment spec.py's ladder moved they were both
-    # pointing at whatever now happens to sit at the old radius - which is how
-    # a view called "sidewall_print" spent a whole round framing the size code.
+    ("shoulder", _feature_camera("shoulder"), _feature_target("shoulder"), 52.0, (1000, 700)),
+    ("buttress", _feature_camera("buttress"), _feature_target("buttress"), 52.0, (1000, 700)),
+    ("bead", _feature_camera("bead"), _feature_target("bead"), 50.0, (1000, 700)),
     ("sidewall_type", _band_camera("SIZE_CODE"), _band_target("SIZE_CODE"), 55.0, (1000, 700)),
     ("sidewall_print", _band_camera("PRINT_BAND"), _band_target("PRINT_BAND"), 55.0, (1000, 700)),
-    ("buttress", (10.0, -16.0, 21.0), (2.4, -5.0, 22.0), 55.0, (1000, 700)),
+    ("chocks", (11.0, 13.5, 4.2), (0.0, 6.0, 1.0), 42.0, (1000, 700)),
+    ("contact", (9.0, -11.0, 2.4), (0.0, -2.0, 0.7), 40.0, (1000, 620)),
     ("scale", (26.0, -52.0, 3.2), (2.0, -4.0, 8.0), 50.0, (1000, 620)),
-    ("dock", (17.0, -15.0, 7.0), (7.5, 0.0, 1.2), 42.0, (1000, 620)),
     ("underside", (16.0, -20.0, 1.0), (1.0, 0.0, 1.4), 40.0, (1000, 620)),
 )
 
@@ -95,11 +135,9 @@ def scene() -> None:
     # has now failed twice.
     gen.build_carcass(materials)
     gen.build_tread(materials)
-    gen.build_port(materials)
-    gen.build_lane_marks(materials)
     gen.build_print_band(materials)
     gen.build_lettering(materials)
-    gen.build_dock(materials)
+    gen.build_chocks(materials)
 
     # BACKFACE CULLING ON, everywhere. BeamNG culls flexbody backfaces; EEVEE
     # does not unless told to, and that difference is exactly why round 1's

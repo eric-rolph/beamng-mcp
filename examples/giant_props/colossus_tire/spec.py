@@ -55,7 +55,7 @@ than a diameter that happened to match. It also lands 4 mm off the round-1
 outer diameter, so nothing downstream of OUTER_RADIUS moved.
 
 Two things came free with it, and neither was the reason for the change:
-the cavity lane went 7.20 m -> 8.24 m (a car can now turn round inside
+the cavity lane went 7.20 m -> 7.93 m (a car can now turn round inside
 without shuffling), and the tip-over angle went 16.6 deg -> 20.2 deg.
 
 Tread depth, undertread, belt package and inner liner are all scaled from
@@ -108,22 +108,50 @@ condition are the same line, and they meet at tan(phi) = mu_eff.
     2.24x optimistic, and shipping it would have meant a tire that took 36 s
     to reach a speed the file promised in 15.
 
-        required angular acceleration for 8.33 m/s in 18 s
-            (8.33 / OUTER_RADIUS) / 18                     = 0.0329 rad/s^2
-        admissible I_eff  = 123.9 kNm / 0.0329             = 3.77e6 kg m^2
+        required angular acceleration for 8.33 m/s in 7.2 s
+            (8.33 / OUTER_RADIUS) / 7.2                    = 0.0821 rad/s^2
+        admissible I_eff  = 123.9 kNm / 0.0821             = 1.51e6 kg m^2
         radius of gyration of this node layout (MEASURED by the generator
         from the authored positions, asserted against RADIUS_OF_GYRATION)
                                                             ~ 12.65 m
-        admissible mass   = 3.77e6 / (12.65^2 + 14.084^2)  ~ 10 500 kg
+        admissible mass   = 1.51e6 / (12.65^2 + 14.084^2)  ~ 4 200 kg
 
 So the number is a consequence of a stated design target, and if the target
 changes the number is re-derived, not re-guessed. ``tests/
 test_colossus_tire_geometry.py`` recomputes the whole solve from the
 measured node positions and fails if the spin-up time leaves the band.
 
-It still reads heavy: 10.5 t against a 1.6 t car is 6.6:1, and because the
-effective inertia is the rolling one, the first quarter-revolution takes
-just as much commitment as the axle figure suggested 18 t would.
+THE TARGET MOVED TWICE, AND LIVE MEASUREMENTS MOVED IT BOTH TIMES. The
+hamster gate - a car inside the cavity, driving the tire like a wheel - is
+the mod's whole point, and it exposed two different walls in turn:
+
+1. At 10 500 kg, rolling resistance: the engine's contact model pins Crr at
+   ~5% of weight no matter what the beams do (measured against beam
+   damping, stiffness, and node friction in both directions), and 5% of
+   11.7 t was more than a 1.6 t car could push.
+
+2. At 6 000 kg, THE CONTACT PATCH ITSELF. A car holding station at angle
+   phi inside the ring applies its weight m*g at R_liner*sin(phi) ahead of
+   the contact - about 112 kNm at the 33 degrees it settled to. But a
+   deflecting tire is its own chock: the ground reaction can migrate to the
+   leading edge of the +/-1.64 m contact patch and statically react up to
+   (M + m) * g * a ~ 122 kNm before the wheel HAS to roll. Measured live:
+   every one of the 40 tie-downs verified broken, ~115 kNm applied for 25
+   seconds, and the tire leant 90 mm onto the front of its patch and stood.
+
+Breakaway torque scales with (M + m) and the car's torque does not, so the
+mass is set where the car clears the threshold with margin: at 4 200 kg the
+patch can hold ~94 kNm and a mid-wall station supplies ~125-133. The
+scaling stays clean - every beam rate carries the same factor (k/M
+constant, so the ~95 mm deflection, the patch length, every omega*dt
+margin and every damping ratio are invariant) - and downhill behaviour
+does not change at all, because rolling under gravity never depended on
+mass in the first place.
+
+It still reads heavy: 4.2 t against a 1.6 t car is 2.6:1, the rolling
+inertia nearly doubles that in effect, and the patch statics above mean
+that even now a parked car CANNOT tip it - it takes a deliberate climb up
+the wall to walk this wheel.
 
 ===========================================================================
 Getting in: why the port is in the sidewall and the dock is where it is
@@ -302,7 +330,6 @@ LINER_THICKNESS = 0.0045 * SCALE                     # 0.032 m
 GROOVE_RADIUS = OUTER_RADIUS - TREAD_DEPTH           # 13.450 m (groove floor)
 CAVITY_RADIUS = GROOVE_RADIUS - UNDERTREAD - BELT_PACKAGE - LINER_THICKNESS
 # 13.150 m — the surface the car actually drives on.
-CAVITY_FLOOR_Z = OUTER_RADIUS - CAVITY_RADIUS        # 0.934 m at the bottom
 
 # Tread arc: the crown is not a cylinder, it is an arc that drops toward the
 # shoulders. Round 1 used 24 m, which drops 0.357 m across this tread half
@@ -450,11 +477,6 @@ def meridian_point(fraction: float, half_width_fraction: float) -> tuple[float, 
     return (half_width_fraction * SECTION_HALF, BEAD_RADIUS + fraction * SECTION_HEIGHT)
 
 
-def crown_radius(half_width: float) -> float:
-    """Radius of the lug crown at a given distance from the centre plane."""
-
-    return OUTER_RADIUS - half_width**2 / (2.0 * TREAD_ARC_RADIUS)
-
 
 # Inner liner half width. DERIVED, not typed: the floor runs out to just
 # inboard of where the sidewall's inner face reaches at CAVITY_RADIUS, and a
@@ -464,7 +486,6 @@ SHOULDER_FILLET = 0.360
 _SILL_HALF, _SILL_THICK = _meridian_lookup(CAVITY_RADIUS)
 # _SILL_HALF is the OUTER face, so the cavity side is a full thickness in.
 LINER_HALF = _SILL_HALF - _SILL_THICK - SHOULDER_FILLET
-CAVITY_LANE = 2.0 * LINER_HALF                       # 7.93 m of flat floor
 
 # ---------------------------------------------------------------------------
 # Physics cage resolution.
@@ -497,11 +518,21 @@ LINER_XS = (-LINER_HALF, -LINER_HALF / 2.0, 0.0, LINER_HALF / 2.0, LINER_HALF)
 # where it physically sits, between the undertread and the liner) fixes the
 # realism and the numerics with the same change.
 # ---------------------------------------------------------------------------
-TIRE_MASS = 10500.0
+TIRE_MASS = 4200.0
 MASS_TOTAL_TOLERANCE = 60.0
+# The crown block's 0.61 is split between its two rings IN PROPORTION TO THE
+# BEAM STIFFNESS EACH RING CARRIES, not by guessing at rubber vs steel. The
+# explicit integrator's per-node bound is omega*dt = sqrt(2*sum_k/m)*dt, so
+# for a fixed total mass the stiffest-loaded ring must also be the heaviest
+# or it alone caps how stiff the whole carcass may be. Measured off the
+# shipped cage: liner ring nodes carry ~4.6 MN/m of beams against the tread
+# ring's ~6.5 MN/m, and the old 0.19/0.42 split left the liner at 8.3 kg -
+# the single worst node in the prop, wasting a third of the stability budget.
+# 0.25/0.36 equalises the crown block at ~0.46 omega*dt and is also more
+# honest: the belt package under the tread IS the heavy steel in a real tire.
 MASS_FRACTIONS = {
-    "crown": 0.42,     # tread cap + undertread, 5 nodes/station
-    "liner": 0.19,     # steel belt package + inner liner, 5 nodes/station
+    "crown": 0.36,     # tread cap + undertread, 5 nodes/station
+    "liner": 0.25,     # steel belt package + inner liner, 5 nodes/station
     "sidewall": 0.29,  # 8 nodes/station (low/max/upp/shl, both sides)
     "bead": 0.10,      # 2 nodes/station
 }
@@ -511,8 +542,8 @@ RADIUS_OF_GYRATION = 12.60
 RADIUS_OF_GYRATION_TOLERANCE = 0.40
 MU_EFFECTIVE = 0.75
 SPINUP_TARGET_KPH = 30.0
-SPINUP_TARGET_SECONDS = 18.0
-SPINUP_SECONDS_BAND = (12.0, 28.0)
+SPINUP_TARGET_SECONDS = 7.2
+SPINUP_SECONDS_BAND = (5.0, 12.0)
 
 # ---------------------------------------------------------------------------
 # Beam families. beamSpring N/m, beamDamp N.s/m. See the module docstring for
@@ -554,14 +585,37 @@ SPINUP_SECONDS_BAND = (12.0, 28.0)
 # damping ratio is c / (2*sqrt(k*m)), so holding k/M and c/sqrt(k*M) constant
 # is what keeps the measured contact patch and the material damping arguments
 # above true after a mass change. The gates re-measure both regardless.
-_MASS_SCALE = 10500.0 / 18000.0
+_MASS_SCALE = 4200.0 / 18000.0
+#
+# RETUNED x3.2, TO THE INTEGRATOR CEILING. Watched rolling live, the carcass
+# at the rates above read as jelly: a ~1 Hz bounce mode, 458 mm of ring after
+# an impact, and a measured 6.2% rolling resistance that parked it on a 3.4
+# degree grade. A tire this size should read as nearly rigid - its deflection
+# is a couple of hundred mm on a 14 m radius - so every carcass family is
+# multiplied by the largest factor the 2000 Hz explicit integrator leaves
+# room for. With the crown mass re-split above, the worst node sits at
+# omega*dt 0.46 of a 0.90 ceiling: (0.90/0.46)^2 with margin is x3.2. That
+# takes the static deflection from ~250 mm to ~80 mm - still 2.6x the
+# collision hull's 30 mm facet sagitta, so the contact patch keeps swallowing
+# the polygon - and moves every mode up by x1.79 while its amplitude drops.
+#
+# Damping is x sqrt(3.2), because zeta = c / (2*sqrt(k*m)): scaling c by the
+# square root of the spring factor is what KEEPS the measured damping ratios
+# (tread ~0.17, sidewall ~0.25, steel under 0.12 - the tan-delta lesson:
+# zeta ~= tan(delta)/2, learned when the tread shipped at 0.42) while the
+# whole spectrum stiffens. The gates re-measure both regardless.
+# ...and re-scaled twice more alongside TIRE_MASS 10500 -> 6000 -> 4200
+# (the two hamster measurements in the module docstring): k/M and
+# c/sqrt(k*M) held constant each time, so every figure the paragraphs above
+# argue - the deflection, the integrator margins, the damping ratios, the
+# patch - survives unchanged.
 BEAM_SPECS = {
-    "bead": dict(beamSpring=730_000.0, beamDamp=650.0),        # steel, ~11%
-    "belt": dict(beamSpring=656_000.0, beamDamp=592.0),        # steel, ~7%
-    "casing": dict(beamSpring=292_000.0, beamDamp=637.0),      # cord+rubber
-    "sidewall": dict(beamSpring=87_500.0, beamDamp=378.0),     # rubber, ~15%
-    "tread": dict(beamSpring=219_000.0, beamDamp=1_135.0),     # rubber, ~22%
-    "inflation": dict(beamSpring=65_600.0, beamDamp=378.0),    # the air
+    "bead": dict(beamSpring=934_500.0, beamDamp=466.0),        # steel, ~11%
+    "belt": dict(beamSpring=840_000.0, beamDamp=424.0),        # steel, ~7%
+    "casing": dict(beamSpring=374_000.0, beamDamp=456.0),      # cord+rubber
+    "sidewall": dict(beamSpring=112_000.0, beamDamp=270.0),    # rubber, ~15%
+    "tread": dict(beamSpring=280_000.0, beamDamp=307.0),       # rubber, ~22%
+    "inflation": dict(beamSpring=84_000.0, beamDamp=270.0),    # the air
     "port_frame": dict(beamSpring=875_000.0, beamDamp=611.0),  # bolted ring
     "gangway": dict(beamSpring=875_000.0, beamDamp=611.0),     # steel plate
 }
@@ -587,121 +641,100 @@ STRAP_SPEC = dict(
 # cut, so it is part of the rolling body for the whole ride - which is why the
 # generator balances the carcass against it rather than pretending it is
 # scenery. 900 kg is about 23 m2 of 10 mm plate with stiffeners.
-GANGWAY_MASS = 900.0
 STRAP_BREAK_GROUP = "colossus_tiedown"
-# The gangway rests on the dock landing "the way a ship's gangway rests on a
-# quay" - except it cannot, because the tongue and the dock are nodes of the
-# SAME jbeam vehicle and BeamNG only tests a node against its own vehicle's
-# triangles when selfCollision is set, which it is not. So the resting is
-# authored as what it physically is: two landing struts in the tie-down break
-# group. Parked, they carry the gangway. Cut, it swings away with the tire.
-LANDING_SPEC = dict(
-    beamSpring=900_000.0,
-    beamDamp=1_400.0,
-    beamDeform=40_000.0,
-    beamStrength=70_000.0,
+
+# ---------------------------------------------------------------------------
+# The chocks.
+#
+# THE ONLY FIXED STRUCTURE ON THIS PROP. The loading dock, the boarding
+# gangway and the bolted access port were built so a car could get INSIDE the
+# carcass; the brief is now the tire itself, as real as it can be made, so all
+# three are gone and what a 10.5 tonne carcass standing in a yard actually has
+# under it is a pair of chocks.
+#
+# A chock only works if the tire has to climb it, so its height is DERIVED
+# from where its heel sits: at CHOCK_FAR from the contact patch the carcass is
+# OUTER_RADIUS - sqrt(OUTER_RADIUS^2 - CHOCK_FAR^2) off the ground, and that
+# is exactly how tall the wedge has to be for its top edge to touch. On a 28 m
+# tire that is 1.34 m at 6.0 m out - the curve is very flat down there, which
+# is why a chock for something this size is long rather than tall.
+# ---------------------------------------------------------------------------
+# A CHOCK STOPS IT CREEPING, IT DOES NOT PIN IT. The first cut put the heel
+# 6.0 m out, which makes a 1.34 m wall the tire cannot climb - and the live
+# gate caught exactly that: with the tie-downs cut and a car shoving it, the
+# axle moved 0.56 m and stopped against its own chock. A wedge whose heel is
+# 4.4 m out is 0.70 m tall at a 16 degree ramp: enough that it will not roll
+# off on a camber, not so much that a deliberate push cannot ride over it.
+CHOCK_NEAR = 2.00              # toe, toward the contact patch
+CHOCK_FAR = 4.40               # heel, where the top edge meets the carcass
+CHOCK_HALF_WIDTH = 1.10
+CHOCK_STRIPE = 0.34            # hazard band up the climb face
+# FOUR CHOCKS, UNDER THE SHOULDERS, not two on the centre line. An 8.28 m
+# tread gets chocked under its shoulders in the real world, and here it also
+# leaves the middle of the contact patch clear - which matters, because the
+# only thing that can move this tire now is a vehicle driving into it, and a
+# push 3.2 m off the centre line rolls it over instead of rolling it along.
+# (Measured live: 23 m of travel and a capsize.)
+CHOCK_OFFSET = 3.00            # from the centre plane to each chock's middle
+# THE WEDGES ARE BODIES NOW, NOT SCENERY. Two things were discovered about
+# the fixed-node chocks: their nodes shipped without selfCollision, so the
+# tire never actually pressed on them (the straps did all the holding), and
+# being fixed meant that after release the tire rolled straight THROUGH their
+# meshes. So each wedge is a free ~540 kg steel body whose base corners are
+# strapped to buried anchors in the same break group as the tie-downs, and
+# its nodes carry selfCollision so the carcass genuinely rests against it.
+# Release now means what it means in a yard: the ties are cut, and 10.5
+# tonnes shoves its own chocks skittering out of the way.
+# The wedge top must NOT carry the resting carcass. At 0.06 the settled
+# tread lay on the wedge with enough weight that 0.55 friction beat any
+# winch the release could plausibly apply (measured: 1.8 kN moved it 10-50
+# mm), and whether it escaped depended on bounce timing. 0.15 keeps the
+# wedge clear of the settled surface - the local drop 4.4 m from the patch
+# is a few tens of mm - so the chock engages a tire that tries to ROLL,
+# which is a chock's actual job, and the winch only ever fights the wedge's
+# own weight.
+CHOCK_SEAT_GAP = 0.15
+# SIZED TO BE SHOVED. The first free-body cut made each wedge 540 kg at 0.95
+# friction, and the released tire could not push two of them on a 3.4 degree
+# grade - 6.1 kN of grade force against ~10 kN of chock resistance, measured
+# as a 0.25 m creep that stopped dead. A wedge you cannot shove is a wall
+# with extra steps. 200 kg at 0.55 (steel skidding on dirt) keeps the chock
+# meaningful on gentle grades and lets 10.5 tonnes walk it out of the way on
+# a real one.
+WEDGE_NODE_MASS = 33.5         # 6 nodes/wedge -> ~200 kg of chock steel
+WEDGE_ANCHOR_DEPTH = 0.60      # buried, collisionless, fixed
+# HONEST STEEL, because the WINCH moves the wedges, not a friction fudge.
+# Two live findings sit behind this number. First, a 16 degree ramp is
+# self-locking against any ground friction above tan(16) = 0.29: pushing the
+# tire into it presses the wedge harder into the ground, so quasi-static
+# torque can never shove it on the flat (measured: ~115 kNm from a car
+# inside, 0.09 m of lean, wedge untouched). Second, a wedge lying against
+# the tread props the carcass through the ramp geometry even when every
+# strap is verifiably broken - the support point walks up the ramp and the
+# lever arm reaches 4.4 m. Both are exactly what a chock is FOR, so the
+# friction stays real and the RELEASE deals with the wedges the way a crew
+# does: the same beat that cuts the webbing winches each wedge clear
+# (thrusters.applyImpulse along its own toe-to-heel axis, see cutChocks).
+WEDGE_FRICTION = 0.55
+# The winch pull per wedge corner pair, sized against MEASURED skid
+# friction, not the node coefficient. BeamNG combines a node's frictionCoef
+# with the ground model's own coefficient, and a full-force probe read the
+# wedge's effective mu at ~0.87 - so 0.55-worth of winch (1800 N) netted
+# 80 N and dragged it 0.29 m. 2400 N per wedge against ~1740 N of measured
+# friction is a = 3.3 m/s^2 for 1.2 s: the wedge drags ~3.3 m and stops,
+# clear of the second collision facet's reach.
+WINCH_FORCE_N = 1500.0
+WINCH_SECONDS = 1.2
+# The wedge's own skeleton. DOCK_BEAM's 15 MN/m was tuned for fixed nodes,
+# where stiffness is free; on a free 33.5 kg node it costs omega*dt 1.23 and
+# diverges. 3 MN/m holds a 200 kg block perfectly rigid at omega*dt 0.48.
+WEDGE_BEAM = dict(
+    beamSpring=3_000_000.0,
+    beamDamp=1500.0,
+    beamDeform="FLT_MAX",
+    beamStrength="FLT_MAX",
 )
 
-# ---------------------------------------------------------------------------
-# The access port, in the RIGHT (+X) sidewall.
-#
-# The outer edge sits exactly on CAVITY_RADIUS so the sill is flush with the
-# cavity floor, and BOTH edges land on authored meridian stations so the cage
-# can cut the sidewall on a node ring rather than mid-panel. Round 1's outer
-# edge fell between two stations, which left the upp_r->shl_r collision band
-# uncut: an invisible 1.14 m barricade standing across the doorway.
-# ---------------------------------------------------------------------------
-PORT_STATIONS = 4                                     # 30 deg of arc
-PORT_SPAN_DEG = 360.0 * PORT_STATIONS / STATIONS
-PORT_OUTER_RADIUS = CAVITY_RADIUS                     # 13.150 m
-PORT_INNER_RADIUS = BEAD_RADIUS + LOW_FRACTION * SECTION_HEIGHT   # 8.288 m
-PORT_HEIGHT = PORT_OUTER_RADIUS - PORT_INNER_RADIUS   # 4.862 m
-PORT_ARC_WIDTH = math.radians(PORT_SPAN_DEG) * 0.5 * (
-    PORT_OUTER_RADIUS + PORT_INNER_RADIUS
-)                                                     # 5.613 m at mid height
-PORT_BEZEL_WIDTH = 0.62                               # machined steel ring frame
-# The frame's outboard reach is what decides whether the dock survives. Its
-# side rails sit at the port's mid-height, which is also MAXIMUM SECTION
-# WIDTH, so every millimetre it stands proud is a millimetre past the widest
-# part of the tire. At round 2's 0.30 proud plus a 0.26 box section plus
-# 0.46 m lifting lugs the frame reached 5.805 m and would have ploughed
-# straight through the loading dock on the first revolution - which the
-# generator now measures and refuses to build.
-PORT_BEZEL_PROUD = 0.16                               # stands off the sidewall
-PORT_BEZEL_DEPTH = 0.14                               # box section, not a sheet
-PORT_BOLTS = 58                                       # bolts round the ring
-PORT_BOLT_INSET = 0.240                               # bolt circle, in from the opening
-PORT_BOLT_ACROSS = 0.088                              # across flats
-PORT_BOLT_HEIGHT = 0.050
-PORT_GUSSETS = 14                                     # radial stiffeners
-PORT_LIFT_LUGS = 4                                    # strap / crane eyes
-PORT_LUG_HEIGHT = 0.24                                # eyes lie close to the frame
-# The bezel may not grow past this radius: beyond it is the buttress and then
-# the tread, and an unclamped frame grew straight out through the shoulder.
-PORT_BEZEL_MAX_RADIUS = PORT_OUTER_RADIUS + 0.34
-PORT_CLEAR_DEG = 21.0                                 # buttress wrap keep-out
-# The cut edge is the most "expert" surface on the prop and round 1 gave it
-# ONE flat quad band across its whole section - a plank with a texture on it.
-# Stepping it exposes the plies as real geometry.
-PORT_CUT_STEPS = 13
-# The plies the cut edge exposes, as (v_lo, v_hi, relief), cavity side first.
-# These band edges are THE SAME ONES texture_kit.tire_laminate(section=
-# "sidewall") uses, so the moulded step and the printed ply land on each
-# other instead of drifting apart. Gum layers shrink back from the plies when
-# a tire is cut; the plies stand slightly proud. That is what makes a cut edge
-# read as a laminate rather than as a printed plank.
-CUT_PLIES = (
-    (0.000, 0.100, 0.000),    # inner liner
-    (0.100, 0.160, -0.016),   # tie gum, recessed
-    (0.160, 0.380, 0.008),    # casing ply 1
-    (0.380, 0.560, 0.006),    # casing ply 2
-    (0.560, 0.640, -0.014),   # cushion gum, recessed
-    (0.640, 1.000, 0.002),    # sidewall compound
-)
-
-# The boarding tongue hangs off the port sill and rests on the dock landing.
-# Its tip radius is DERIVED from the landing height rather than guessed, so
-# the gangway lands ON the quay instead of 80 mm through it.
-TONGUE_ROOT_THICK = 0.100
-TONGUE_TIP_THICK = 0.050
-# EXACTLY half the port span. Round 2 made the gangway narrower than the
-# opening (11.5 deg against 15.0), and the cavity-floor threshold strip is
-# skipped over the WHOLE port arc on the grounds that the gangway covers it -
-# so a 3.5 deg wedge of open floor was left at each doorway corner.
-TONGUE_HALF_ARC_DEG = PORT_SPAN_DEG / 2.0
-TONGUE_RIBS = 5                                       # underside stiffeners
-# Six, not five: an odd count puts a column exactly on theta = 0, which is
-# exactly where the liner-edge cage node for station 0 already sits, and two
-# nodes at the same point make a zero-length beam.
-TONGUE_CAGE_COLUMNS = 6                               # free cage nodes across
-TONGUE_CAGE_ROWS = 3                                  # free cage nodes along
-
-# ---------------------------------------------------------------------------
-# The loading dock. Fixed steel. DOCK_CLEAR_X is the guarantee: nothing on
-# the tire reaches this far from its centre plane at any rotation or roll
-# position, so anything fixed outboard of the line can never be struck.
-#
-# It is NOT simply SECTION_HALF. Moulded sidewall type stands proud of the
-# sidewall - correctly, because a tire's section width is measured excluding
-# raised decoration - so the real outboard extent is 5.236 m against a 5.175 m
-# section half width. The generator MEASURES the true reach over every tire
-# object and fails the build if it touches this line, rather than trusting the
-# neater number. The boarding tongue is the one deliberate exception: it
-# crosses on purpose and lifts away on the first quarter turn.
-# ---------------------------------------------------------------------------
-# Clear of the MEASURED outboard reach of the whole tire - the bolted port
-# frame, not the section width - with 0.24 m to spare. assert_outboard_
-# clearance() in the generator measures every tire vertex against this.
-DOCK_CLEAR_X = SECTION_HALF + 0.500                   # 5.675
-DOCK_LANDING_Z = 0.780                                # the tongue rests here
-TONGUE_TIP_RADIUS = OUTER_RADIUS - DOCK_LANDING_Z - TONGUE_TIP_THICK
-TONGUE_REACH_X = DOCK_CLEAR_X + 0.310                 # overlaps the landing
-DOCK_LANDING_X1 = 7.600
-DOCK_RUN_X = 18.600                                   # ground end of the ramp
-DOCK_HALF_Y = 4.600                                   # deck half width
-DOCK_KERB_H = 0.30
-DOCK_RAIL_H = 1.10                                    # handrail above the kerb
-DOCK_GRADE = DOCK_LANDING_Z / (DOCK_RUN_X - DOCK_LANDING_X1)   # 7.1%
 
 # ---------------------------------------------------------------------------
 # Tread pattern. Deep-lug E-4/L-5 rock service.
@@ -748,6 +781,16 @@ LUG_CHAMFER = 0.085             # moulded chamfer on the lug crown
 # depth. No mould releases that, and it packs solid with fines on the first
 # pass. 0.085 total leaves a 0.186 m floor on the new 0.356 m grooves -
 # floor/top 0.52, correct for OTR - and 2.7 deg of draft over the depth.
+# HOW FAR EVERY PIECE OF FURNITURE SINKS INTO THE SURFACE IT STANDS ON.
+# The lugs, tie bars, ejectors, buttress wraps and moulded glyphs are all
+# open-bottomed shells, and they were built on the ANALYTIC surface - the
+# exact groove-floor radius, the exact sidewall half width. The surface they
+# actually sit on is TESSELLATED, and a 144-station chord dips about 3 mm
+# inside its own analytic radius, so every one of those rims stood a hairline
+# above its own floor: 2,461.6 m of open rim of which round 4 measured 82%
+# uncovered - a slot to the skybox at the root of every lug wall, all the way
+# round, worst exactly where the camera gets low.
+LUG_SEAT = 0.010
 LUG_ROOT_FILLET = 0.055
 LUG_DRAFT = 0.030
 STONE_EJECTOR_R = 0.110         # bumps in the circumferential groove floors
@@ -832,7 +875,13 @@ PATTERN_NAME = "TERRAVOLT RM-1"
 SERVICE_CODE = "E-4  ***  TL  RADIAL"
 # Real DOT TIN: DOT, 2-char plant, 2-char size, up to 4 optional, 4-digit date.
 BUILD_CODE = "DOT XR 9K CLS8 3426"     # plant XR, size 9K, week 34 of 2026
-TKPH = 850
+# TKPH is tonne-kilometres per hour: heat GENERATED goes as load x speed and
+# heat REJECTED goes as surface area, so like MAX_LOAD it scales as SCALE
+# squared. Round 4 found it carried straight off the reference tire as a bare
+# 850 and printed one line under a load four orders of magnitude larger, on
+# the very ring whose argument is that print and hardware cannot drift apart.
+REFERENCE_TKPH = 850                   # a 59/80R63
+TKPH = round(REFERENCE_TKPH * SCALE**2)
 REFERENCE_MAX_LOAD = 100_000.0         # a 59/80R63 at 600 kPa
 RATED_PRESSURE_KPA = 600               # scale-invariant: cord force ~ p*r
 # Load capacity is pressure x footprint AREA, so it goes as SCALE SQUARED.
@@ -896,7 +945,6 @@ TYPE_BAND_MARGIN = 0.30                # clear of the bead and the ribs
 PROTECTOR_RADII = (12.05, 12.70, 13.32)
 PROTECTOR_HEIGHT = 0.145
 PROTECTOR_HALF = 0.235
-SPEW_PER_STATION = 5                   # moulded vent whiskers, sidewall
 
 
 def _band_stack() -> tuple[tuple[str, float, float], ...]:
@@ -958,10 +1006,6 @@ PRINT_BAND_RADIUS = next(
 # INERT - prop_builder enforces it and the pack learned it the hard way.
 # ---------------------------------------------------------------------------
 LANE_MARK_NITS = 900
-LANE_MARK_EVERY = 3                    # a chevron every N cage stations
-LANE_MARK_LENGTH = 3.20
-LANE_MARK_WIDTH = 0.95
-LANE_MARK_OFFSET = 0.012               # stands off the liner, no z-fighting
 
 # ---------------------------------------------------------------------------
 # ONE TILE PER MATERIAL, not per object. The metric-UV machinery was always
@@ -985,15 +1029,9 @@ MATERIAL_TILE = {
     "sidewall_type": TILE_SIDEWALL,
     "sidewall_print": TILE_SIDEWALL,
     "liner": TILE_LINER,
-    "laminate": TILE_SIDEWALL,
     "bead": TILE_SIDEWALL,
-    "lane_mark": 1.30,
-    "steel": TILE_STEEL,
     "steel_worn": TILE_STEEL,
-    "deck": TILE_STEEL,
     "hazard": 1.20,
-    "strap": 0.65,
-    "concrete": TILE_STEEL,
 }
 
 # ---------------------------------------------------------------------------
@@ -1047,7 +1085,10 @@ PALETTE = {
                 "lines": (
                     SERVICE_CODE,
                     BUILD_CODE,
-                    f"MAX LOAD {MAX_LOAD_KG:.0f} kg AT {RATED_PRESSURE_KPA} kPa COLD",
+                    # Three significant figures. Seven digits is the one
+                    # thing on this ring that reads computed rather than
+                    # moulded, and no tire in the world has them.
+                    f"MAX LOAD {MAX_LOAD_KG / 1000:.0f} t AT {RATED_PRESSURE_KPA} kPa COLD",
                     f"TKPH {TKPH}   TUBELESS",
                 ),
             },
@@ -1060,87 +1101,40 @@ PALETTE = {
         "roughness": 0.5,
     },
     f"{MOD_ID}_liner": {
-        "texture": {"family": "tire_liner", "params": {}, "size": 1024, "srgb": True, "normal_strength": 2.0},
+        # THE ONE SURFACE THE BRIEF IS ABOUT. Round 4 measured the bladder
+        # lattice at 4 texels per cycle, so its p99.9 slope fell 39.5 -> 21.8
+        # -> 8.5 -> 5.3 across mips: gone at any distance a player sees it
+        # from, which is why the cavity read as smooth painted sheet metal.
+        # 64 cells is 37.5 mm on a 2.40 m tile - 5.3 mm at reference scale,
+        # squarely inside the 5-20 mm a real bladder vent grid runs at - and
+        # 16 texels per cell, which survives two mips. The groove is widened
+        # with it so the feature is a groove and not a single texel.
+        "texture": {
+            "family": "tire_liner",
+            # MEASURED, not guessed: widening the splices was tried and made
+            # mip 2 WORSE (11.9 against 14.3 degrees), because the same ridge
+            # height over a wider base is a gentler slope and a normal map
+            # stores slope. The lattice pitch is the lever that works.
+            "params": {"lattice": 64.0, "groove_width": 0.18},
+            "size": 1024,
+            "srgb": True,
+            "normal_strength": 2.6,
+        },
         "color": [0.088, 0.092, 0.086, 1.0],
         "metallic": 0.0,
         "roughness": 0.36,
     },
-    f"{MOD_ID}_laminate": {
-        "texture": {
-            "family": "tire_laminate",
-            "params": {"section": "sidewall"},
-            "size": 1024,
-            "srgb": True,
-            "normal_strength": 13.0,
-        },
-        "color": [0.10, 0.10, 0.10, 1.0],
-        "metallic": 0.2,
-        "roughness": 0.55,
-        # Measured across all fourteen maps this mod ships, the laminate was
-        # the only flat one: 95% of it under one degree, p99.9 at 5.1 deg,
-        # where every other map reaches 25-52. normal_strength is baked into
-        # the map as a finite-difference gain, and the cord sections are 53
-        # pixels wide, so 3.0 spread them to nothing. This is the surface the
-        # port's cut edge shows at two metres under headlights and the one
-        # forty lines of prose above are about.
-    },
     f"{MOD_ID}_bead": {
         "texture": {"family": "tire_bead", "params": {}, "size": 1024, "srgb": True, "normal_strength": 2.6},
         "color": [0.058, 0.056, 0.054, 1.0],
-        "metallic": 0.1,
-        "roughness": 0.48,
-    },
-    f"{MOD_ID}_lane_mark": {
-        # hazard_chevron, NOT stripe_decal: stripe_decal ships an opacity map,
-        # which makes prop_builder turn on alphaTest and punches holes in a
-        # marking that has to read as solid paint. The chevron SHAPE is the
-        # geometry's job here, not the texture's.
-        "texture": {
-            "family": "hazard_chevron",
-            # glow=True gives the emissive channel its own map. Without one an
-            # emissiveFactor emits UNIFORMLY, so the dark stripes glow exactly
-            # as hard as the amber ones and the chevron erases itself.
-            "params": {
-                "c1": [0.97, 0.74, 0.10],
-                "c2": [0.16, 0.13, 0.06],
-                "glow": True,
-                # The unlit stripes are nearly dark: an 0.10 floor lit the
-                # whole marking to a tenth of full and washed the chevron out.
-                "glow_floor": 0.02,
-                "relief": 1.0,
-            },
-            "size": 512,
-            "srgb": True,
-        },
-        "color": [0.92, 0.72, 0.10, 1.0],
         "metallic": 0.0,
-        "roughness": 0.55,
-        "emissive": [0.95, 0.66, 0.10],
-        # The brightness lives in emissiveIntensityNits on the STAGE, not in
-        # the factor - the pack's photometric law (prop_builder round 16/17).
-        "stage": {"emissiveIntensityNits": LANE_MARK_NITS},
-    },
-    # relief and normal_strength together: these two shipped with literally
-    # constant normal maps (128,128,255, std 0.00) because the family authored
-    # a 0.02-amplitude height field and _height_to_normal's default strength
-    # of 2.0 could not lift it above one byte.
-    f"{MOD_ID}_steel": {
-        "texture": {"family": "machined_steel", "params": {"relief": 6.0}, "srgb": True, "normal_strength": 3.0},
-        "color": [0.44, 0.46, 0.49, 1.0],
-        "metallic": 0.9,
-        "roughness": 0.36,
+        "roughness": 0.48,
     },
     f"{MOD_ID}_steel_worn": {
         "texture": {"family": "steel_worn", "params": {"relief": 8.0}, "srgb": True, "normal_strength": 3.0},
         "color": [0.5, 0.53, 0.57, 1.0],
         "metallic": 0.85,
         "roughness": 0.42,
-    },
-    f"{MOD_ID}_deck": {
-        "texture": {"family": "diamond_plate", "srgb": True, "normal_strength": 1.6},
-        "color": [0.38, 0.39, 0.41, 1.0],
-        "metallic": 0.8,
-        "roughness": 0.45,
     },
     f"{MOD_ID}_hazard": {
         "texture": {
@@ -1153,25 +1147,6 @@ PALETTE = {
         "metallic": 0.1,
         "roughness": 0.5,
     },
-    f"{MOD_ID}_strap": {
-        "texture": {
-            "family": "webbing",
-            "params": {"base": [0.86, 0.34, 0.03]},
-            "srgb": True,
-            "normal_strength": 1.9,
-        },
-        "color": [0.86, 0.34, 0.03, 1.0],
-        "metallic": 0.0,
-        "roughness": 0.72,
-    },
-    f"{MOD_ID}_concrete": {
-        "texture": {"family": "concrete", "srgb": True, "normal_strength": 2.6},
-        # Weathered concrete is 0.20-0.30 linear. 0.62 is gypsum, and it blew
-        # the dock pier pads out to pure white in every render.
-        "color": [0.26, 0.255, 0.243, 1.0],
-        "metallic": 0.0,
-        "roughness": 0.9,
-    },
 }
 
 # ---------------------------------------------------------------------------
@@ -1181,15 +1156,13 @@ PALETTE = {
 # because a trigger box cannot follow a body that rolls 300 m away.
 # ---------------------------------------------------------------------------
 TRIGGERS = {
-    "dock": {
+    # ONE zone, and it is the whole beat now. The dock and cabin zones existed
+    # so a car could board; there is nothing to board any more. What is left
+    # is: come near the tire and the chocks are pulled.
+    "approach": {
         "mode": "Overlaps",
-        "center": [11.5, 0.0, DOCK_LANDING_Z + 1.6],
-        "dimensions": [9.4, 8.2, 3.6],
-    },
-    "cabin": {
-        "mode": "Overlaps",
-        "center": [0.0, 0.0, CAVITY_FLOOR_Z + 1.5],
-        "dimensions": [7.6, 9.0, 3.0],
+        "center": [0.0, 0.0, 1.7],
+        "dimensions": [34.0, 30.0, 3.4],
     },
 }
 
@@ -1207,14 +1180,24 @@ BEHAVIOR = {
     ],
     "marker_stations": [0, 16, 32],
     "outer_radius": OUTER_RADIUS,
-    "cavity_radius": CAVITY_RADIUS,
     "section_half": SECTION_HALF,
-    "liner_half": LINER_HALF,
-    "port_station": 0,
-    "port_span_deg": PORT_SPAN_DEG,
     "tire_mass": TIRE_MASS,
     "strap_break_group": STRAP_BREAK_GROUP,
-    "release_countdown": 3.0,
+    # The crew's winch: on release, each wedge is pulled clear along its own
+    # toe-to-heel axis. Pairs are (toe, heel) node names; the impulse is
+    # applied at the heel, pointing away from the tire.
+    "winch_pairs": [
+        [f"{MOD_ID}_chock_{index}_toe_{side}", f"{MOD_ID}_chock_{index}_heel_{side}"]
+        for index in range(4)
+        for side in ("l", "r")
+    ],
+    "winch_force": WINCH_FORCE_N,
+    "winch_seconds": WINCH_SECONDS,
+    # Long enough that the arrival transient has died before the winch
+    # pulls: a vehicle thumping down near the carcass presses it onto the
+    # wedge tops, and 900 N loses to that friction spike (measured - the
+    # wedge moved 10 mm instead of metres). Release is a beat, not a race.
+    "release_countdown": 3.5,
     # Speed bands for the callouts, m/s.
     "speed_bands": [3.0, 6.0, 9.0, 13.0],
     # |axle . world_up| at the geometric point of no return: past a lean of
@@ -1225,9 +1208,7 @@ BEHAVIOR = {
     "tipping_dot": math.sin(math.atan(SECTION_HALF / OUTER_RADIUS)),
     "leaning_dot": 0.55 * math.sin(math.atan(SECTION_HALF / OUTER_RADIUS)),
     "tipped_dot": 0.72,        # fully down, past any recovery
-    "exit_lead_seconds": 4.0,  # how early the exit window is called
-    "record_min_m": 25.0,
-    "runaway_check_m": 0.9,    # HORIZONTAL drift meaning the straps have parted
+    "runaway_check_m": 0.9,    # HORIZONTAL drift meaning the chocks let go
     "settle_seconds": 3.0,     # ignore the settle before watching for it
 }
 
@@ -1238,11 +1219,11 @@ LUA_BEHAVIOR = r"""
 -- did during round 3's review, shipping runaway_check_m 0.6 against an
 -- authored 0.9 and no settle_seconds at all.
 local REQUIRED = {
-  "marker_nodes", "marker_stations", "outer_radius", "cavity_radius",
-  "section_half", "liner_half", "port_station", "port_span_deg", "tire_mass",
-  "strap_break_group", "release_countdown", "speed_bands", "tipping_dot",
-  "leaning_dot", "tipped_dot", "exit_lead_seconds", "record_min_m",
-  "runaway_check_m", "settle_seconds", "camera_distance",
+  "marker_nodes", "marker_stations", "outer_radius", "section_half",
+  "tire_mass", "strap_break_group", "release_countdown", "speed_bands",
+  "winch_pairs", "winch_force", "winch_seconds",
+  "tipping_dot", "leaning_dot", "tipped_dot", "runaway_check_m",
+  "settle_seconds", "camera_distance",
 }
 
 -- ===========================================================================
@@ -1314,34 +1295,10 @@ end
 -- Is a vehicle inside the carcass? Measured against the LIVE axle, which is
 -- the whole reason it exists: both triggers are anchored to the fixed dock
 -- and cannot follow a body that rolls 300 m away.
-local function insideTire(tire, vehicle)
-  local ok, position = pcall(function() return vehicle:getPosition() end)
-  if not ok or not position then return false end
-  local offset = position - tire.centre
-  local axial = offset:dot(tire.axis)
-  if math.abs(axial) > B.liner_half + 0.6 then return false end
-  local radial = (offset - tire.axis * axial):length()
-  return radial > B.cavity_radius - 4.2 and radial < B.cavity_radius + 1.2
-end
-
--- Where the access port is on the clock face: 0 rad = straight down, growing
--- the way the port travels.
-local function portClock(state, tire)
-  local base = state.behavior.angleZero
-  if not base then return nil end
-  local turned = tire.angle - base
-  while turned > math.pi do turned = turned - TWO_PI end
-  while turned < -math.pi do turned = turned + TWO_PI end
-  return turned
-end
-
--- THREE message categories, not two. Same-category messages replace one
--- another, which is what makes a per-frame refresh a HUD rather than spam -
--- but it also meant "Revolution 1. 88 m of ground." landed in the same slot
--- as "PORT IS DOWN - go now if you want out." and wiped the door call at the
--- exact moment it mattered. The odometer and the speed callouts are chatter
--- and now have their own slot.
-local HUD_CATEGORY = "ericrolph_colossus_tire_hud"
+-- TWO message categories. Same-category messages replace one another, so the
+-- odometer and the speed callouts get their own slot and can never wipe a
+-- lean warning - which, with nobody inside any more, is the only notice
+-- anyone gets that ten and a half tonnes is about to lie down.
 local CHATTER_CATEGORY = "ericrolph_colossus_tire_chatter"
 
 local function showChatter(message, ttl)
@@ -1381,82 +1338,78 @@ end
 -- open about 8% of each revolution, and the chevrons are identical to one
 -- another - so without this the player genuinely cannot tell where the door
 -- is, which way they are leaning, or how fast the floor is moving.
-local function showHud(state, tire, dtSim)
-  local b = state.behavior
-  -- Throttled. A per-frame guihooks.message at 60+ fps is 60 string
-  -- allocations and 60 UI pushes a second to say the same thing; 10 Hz is
-  -- faster than a driver can read and an order of magnitude cheaper.
-  b.hudClock = (b.hudClock or 0) + (dtSim or 0)
-  if b.hudClock < 0.1 then return end
-  b.hudClock = 0
-  local lean = math.deg(math.asin(math.min(1, math.abs(tire.axis.z))))
-  -- THREE STATES, and the middle one used to be missing. updateExitWindow
-  -- returns early while the port is down without ever writing b.exitIn, so
-  -- this printed the last pre-window countdown for the whole 1.2 s the door
-  -- was actually open - the one moment the line exists for.
-  local door
-  if b.tipped then
-    door = "PORT  --  "
-  elseif b.exitNow then
-    door = "PORT NOW  "
-  elseif b.exitIn then
-    door = string.format("PORT %4.1fs", b.exitIn)
-  else
-    door = "PORT  --  "
-  end
-  guihooks.message(
-    {txt = string.format(
-      "%s | LEAN %2.0f deg | %3.0f km/h | %.0f m",
-      door, lean, b.speed * 3.6, b.distance - (b.rideDistance0 or 0)
-    )},
-    0.4,
-    HUD_CATEGORY
-  )
-end
-
 local function markReleased(state, reason)
   local b = state.behavior
   if b.released then return end
   b.released = true
   b.releasedAt = b.clock
   b.countdown = nil
-  emitEvent(state, "I", "colossus_released", {
-    occupants = b.aboardCount or 0,
-    reason = reason,
-  })
+  emitEvent(state, "I", "colossus_released", {reason = reason})
 end
 
-local function cutStraps(state)
+-- The crew's winch, as one queued vehicle command: resolve each wedge's
+-- toe and heel by NAME inside the vehicle VM, then pull the wedge clear
+-- along its own axis with thrusters.applyImpulse. A wedge lying against
+-- the tread props the carcass through the ramp geometry even with every
+-- strap broken - measured live - so cutting the webbing without pulling
+-- the chocks releases nothing on flat ground.
+local function winchCommand()
+  local rows = {}
+  for _, pair in ipairs(B.winch_pairs) do
+    rows[#rows + 1] = string.format("{%q,%q}", pair[1], pair[2])
+  end
+  return "local function cid(name) "
+    .. "for _, n in pairs(v.data.nodes) do "
+    .. "if n.name == name then return n.cid end end end "
+    .. "local winched = 0 "
+    .. "for _, p in ipairs({" .. table.concat(rows, ",") .. "}) do "
+    .. "local a, b = cid(p[1]), cid(p[2]) "
+    .. "if a and b then winched = winched + 1 "
+    .. "thrusters.applyImpulse(a, b, "
+    .. B.winch_force .. ", " .. B.winch_seconds .. ") end end "
+    -- The completion echo: how many pairs actually resolved and pulled.
+    -- A release that silently winched nothing looks exactly like a chock
+    -- that cannot be moved, and that cost a day once.
+    .. "obj:queueGameEngineLua('COLOSSUS_WINCHED = ' .. winched)"
+end
+
+local function cutChocks(state)
   local b = state.behavior
-  if b.released or b.strapCutRequested then return end
+  if b.released or b.chockCutRequested then return end
   local prop = exactVehicle(state.propId)
   if not prop then return end
   local ok = pcall(function()
     prop:queueLuaCommand(
       "beamstate.breakBreakGroup('" .. B.strap_break_group .. "')"
     )
+    prop:queueLuaCommand(winchCommand())
   end)
   if not ok then
-    emitError(state, "strap_release_failed")
+    emitError(state, "chock_release_failed")
     return
   end
-  -- The command is QUEUED into the vehicle VM, not executed here, so a
-  -- successful pcall proves only that it was asked for. Release is claimed
-  -- from the tire having MOVED (updateRunaway), which is also what catches a
-  -- strap that parts on its own.
-  b.strapCutRequested = true
+  -- The commands are QUEUED into the vehicle VM, not executed here, so a
+  -- successful pcall proves only that they were asked for. Release is
+  -- claimed from the tire having MOVED (updateRunaway), which is also what
+  -- catches a tie-down that parts on its own.
+  b.chockCutRequested = true
   b.countdown = nil
-  showMessage("STRAPS CUT. The Colossus is loose - DRIVE.", 3.0)
+  showMessage(
+    string.format(
+      "CHOCKS CUT AND WINCHED CLEAR. %.1f tonnes, loose.",
+      B.tire_mass / 1000
+    ),
+    3.0
+  )
 end
 
 behavior.init = function(state)
   local b = state.behavior
   b.clock = 0
   b.released = false
-  b.strapCutRequested = false
+  b.chockCutRequested = false
   b.countdown = nil
-  b.aboard = {}
-  b.aboardCount = 0
+  b.armed = false
   b.revolutions = 0
   b.angleUnwrapped = nil
   b.angleZero = nil
@@ -1468,78 +1421,33 @@ behavior.init = function(state)
   b.speedBand = 0
   b.tipped = false
   b.tippedFinal = false
-  b.exitOpen = false
-  b.exitNow = false
-  b.hudClock = 0
-  b.exitWarned = false
-  b.riders = {}
-  b.tracked = {}
-  b.rideDistance0 = 0
-  b.rideTurns0 = 0
-  b.exitIn = nil
   b.leaning = false
   b.goingOver = false
-  b.best = b.best or 0
 end
 
 behavior.reset = function(state)
-  local best = state.behavior.best
   behavior.init(state)
-  state.behavior.best = best
-  showMessage("Colossus re-cradled and strapped down.", 2.4)
+  showMessage("Colossus re-chocked.", 2.4)
 end
 
+-- ONE ZONE, ONE BEAT. Come near it and the chocks come out.
 behavior.onEnter = function(state, zone, vehicle)
   local b = state.behavior
-  b.tracked[vehicle:getId()] = true
-  if zone == "dock" and not b.released then
-    showMessage("LOADING DOCK. Drive in through the access port.", 2.6)
-    return
-  end
-  if zone ~= "cabin" or b.released then return end
-  local id = vehicle:getId()
-  if b.aboard[id] then return end
-  b.aboard[id] = true
-  b.aboardCount = b.aboardCount + 1
-  b.riders[id] = true
-  -- Snapshot the odometer. b.distance and b.revolutions measure the TIRE from
-  -- registration; reporting them raw on dismount made every ride look like a
-  -- new record forever, because a monotonically rising number is always
-  -- greater than the last one it was compared against.
-  b.rideDistance0 = b.distance
-  b.rideTurns0 = b.revolutions
+  if zone ~= "approach" or b.armed or b.released then return end
+  b.armed = true
   b.countdown = B.release_countdown
-  showMessage("SUBJECT ABOARD. Cutting the tie-downs...", 2.4)
-  emitEvent(state, "I", "colossus_boarded", {subject_id = id})
+  showMessage("Stand clear - pulling the chocks.", 2.4)
+  emitEvent(state, "I", "colossus_armed", {subject_id = vehicle:getId()})
 end
 
 -- NOTE THE SIGNATURE. The shared runtime hands onEnter a vehicle OBJECT and
 -- onExit a vehicle ID - all three onExit call sites pass `vehicleId`. Round 2
 -- declared this as `(state, zone, vehicle)` and called `vehicle:getId()`,
 -- which is an index-a-number error inside the caller's pcall: it failed
--- silently on every single exit, so the abort beat never once ran.
-behavior.onExit = function(state, zone, id)
-  local b = state.behavior
-  if zone ~= "cabin" or b.released then return end
-  if not b.aboard[id] then return end
-  b.aboard[id] = nil
-  b.riders[id] = nil
-  b.aboardCount = math.max(0, b.aboardCount - 1)
-  if b.aboardCount == 0 then
-    b.countdown = nil
-    showMessage("Cabin clear. Tie-downs held.", 2.0)
-  end
-end
+-- silently on every single exit.
+behavior.onExit = function(state, zone, id) end
 
-behavior.onSubjectGone = function(state, vehicleId, reason)
-  local b = state.behavior
-  if b.aboard and b.aboard[vehicleId] then
-    b.aboard[vehicleId] = nil
-    b.aboardCount = math.max(0, b.aboardCount - 1)
-  end
-  if b.riders then b.riders[vehicleId] = nil end
-  if b.tracked then b.tracked[vehicleId] = nil end
-end
+behavior.onSubjectGone = function(state, vehicleId, reason) end
 
 local function updateRelease(state, dtSim)
   local b = state.behavior
@@ -1552,12 +1460,12 @@ local function updateRelease(state, dtSim)
   end
   if b.countdown <= 0 then
     b.countdown = nil
-    cutStraps(state)
+    cutChocks(state)
   end
 end
 
--- The straps can also part on their own: two 95 kN beams under a 177 kN body,
--- and a hard enough arrival will break them before anyone boards. Claiming
+-- The tie-downs can also let go on their own: four beams under a 103 kN
+-- body, and a hard enough arrival will break them before anyone asks. Claiming
 -- release from the queued Lua command alone would leave the runtime silent
 -- for the rest of the session if that happened, so release is claimed from
 -- the tire HAVING MOVED, whatever caused it.
@@ -1567,18 +1475,17 @@ local function updateRunaway(state, tire)
   -- HORIZONTAL drift only, and only once the carcass has stopped settling.
   -- The first live run caught this: a 28 m tire settles 0.36 m onto its
   -- contact patch, so a 3D displacement test against the spawn centre trips
-  -- on gravity alone. It fired colossus_strap_parted before anyone boarded,
-  -- which then suppressed the entire boarding beat for the rest of the
-  -- session, and nothing headless could have seen it.
+  -- on gravity alone, and it then suppressed the beat it was there to
+  -- announce. Nothing headless could have seen it.
   if b.clock < B.settle_seconds then return end
   local drift = tire.centre - b.originCentre
   drift.z = 0
   if drift:length() < B.runaway_check_m then return end
-  local parted = not b.strapCutRequested
-  markReleased(state, parted and "strap_parted" or "straps_cut")
+  local parted = not b.chockCutRequested
+  markReleased(state, parted and "chocks_failed" or "chocks_pulled")
   if parted then
     showMessage("The tie-downs have parted on their own. She is loose.", 3.0)
-    emitEvent(state, "W", "colossus_strap_parted", {})
+    emitEvent(state, "W", "colossus_chocks_failed", {})
   end
 end
 
@@ -1591,113 +1498,6 @@ end
 -- nothing, so the payoff still never fired. b.tracked is every vehicle that
 -- has entered EITHER zone, which is every vehicle that could plausibly be
 -- aboard, and it needs no engine API the pack has not already proven.
-local function updateRiders(state, tire)
-  local b = state.behavior
-  for vehicleId in pairs(b.tracked or {}) do
-    local vehicle = exactVehicle(vehicleId)
-    if vehicle then
-      local inside = insideTire(tire, vehicle)
-      local was = b.riders[vehicleId]
-      if inside and not was then
-        b.riders[vehicleId] = true
-        b.rideDistance0 = b.distance
-        b.rideTurns0 = b.revolutions
-        showMessage("Back aboard. Go again.", 2.0)
-        emitEvent(state, "I", "colossus_boarded", {subject_id = vehicleId})
-      elseif was and not inside then
-        b.riders[vehicleId] = nil
-        local ridden = b.distance - (b.rideDistance0 or 0)
-        local turns = b.revolutions - (b.rideTurns0 or 0)
-        -- THREADING THE PORT IS THE PAYOFF. Leaving through the wall is not.
-        -- insideTire rejects at |axial| > liner_half + 0.6, which a car on the
-        -- cavity floor crosses at about 20 deg of lean - so a capsize scored
-        -- "CLEAR. NEW BEST." a full 24 deg before "COLOSSUS IS DOWN", and in
-        -- the same UI category that then stomped it. A dismount is credited
-        -- only when the door was actually there and the tire was upright.
-        local upright = math.abs(tire.axis.z) < B.tipping_dot
-        local through = (b.exitOpen or b.exitNow) and upright
-        if through then
-          local record = ridden > b.best + B.record_min_m
-          showMessage(
-            string.format(
-              "CLEAR - threaded the port. %.0f m, %d revolutions.%s",
-              ridden, turns, record and " NEW BEST." or ""
-            ),
-            3.2
-          )
-          if record then b.best = ridden end
-        else
-          showMessage(
-            string.format("OUT THROUGH THE WALL. %.0f m, no credit.", ridden),
-            3.2
-          )
-        end
-        emitEvent(state, "I", "colossus_dismounted", {
-          subject_id = vehicleId,
-          revolutions = turns,
-          distance = ridden,
-          through_port = through,
-        })
-      end
-    end
-  end
-end
-
--- The exit window, called by TIME rather than by angle. At 8.3 m/s the port
--- sweeps 40 degrees in 1.2 s, and the manoeuvre it is asking for is a 90
--- degree turn in a 7.93 m lane, so an angle threshold gives no usable
--- warning. Round 1 set a flag here and never read it.
-local function updateExitWindow(state, tire)
-  local b = state.behavior
-  if b.tipped then
-    b.exitNow = false
-    b.exitIn = nil
-    return
-  end
-  local clock = portClock(state, tire)
-  if not clock then return end
-  local degrees = math.deg(math.abs(clock))
-  if degrees < 20.0 then
-    -- WRITE THE STATE, do not just return. Round 3 left b.exitIn holding its
-    -- last pre-window value for the entire 1.2 s the door was down, so the
-    -- HUD froze on a stale countdown at the exact moment the number mattered.
-    b.exitNow = true
-    b.exitIn = 0.0
-    if not b.exitOpen then
-      b.exitOpen = true
-      b.exitWarned = false
-      showMessage("PORT IS DOWN - go now if you want out.", 2.0)
-    end
-    return
-  end
-  b.exitNow = false
-  if b.exitOpen then
-    b.exitOpen = false
-    b.exitIn = nil
-    return
-  end
-  local rate = math.abs(b.spin or 0)
-  if rate < 1e-3 then
-    b.exitIn = nil
-    return
-  end
-  -- Time until the port next reaches the bottom, following the direction it
-  -- is actually turning.
-  local ahead = math.rad(degrees)
-  if (b.spin > 0) == (clock > 0) then ahead = TWO_PI - ahead end
-  b.exitIn = ahead / rate
-  -- REFRESHED, not latched. Round 2 latched on the first frame under the
-  -- lead time, so the number it printed was always the lead time itself and
-  -- the string was a constant. Messages replace within a category, so
-  -- re-issuing every frame reads as a live countdown rather than as spam.
-  if b.exitIn < B.exit_lead_seconds then
-    local text = b.exitIn < 3.0
-      and string.format("PORT IN %.1f - line up.", b.exitIn)
-      or string.format("PORT COMES ROUND IN %.0f - line up now.", b.exitIn)
-    showMessage(text, 0.5)
-  end
-end
-
 -- Three beats, not one. The Colossus is geometrically past saving at a lean
 -- of atan(SECTION_HALF / OUTER_RADIUS) = 20.2 deg; round 2 said nothing until
 -- 46 deg, which is well after the outcome was decided and gave the driver no
@@ -1707,7 +1507,16 @@ local function updateTipped(state, tire)
   local lean = math.abs(tire.axis.z)
   if not b.tipped and lean >= B.tipped_dot then
     b.tipped = true
-    showMessage("COLOSSUS IS DOWN. Reset the prop to stand it back up.", 3.4)
+    -- THE CAPSIZE IS A RESULT, so it reports one. Round 4 printed this and
+    -- then, in the same frame and the same UI category, printed a second
+    -- string straight over the top of it.
+    showMessage(
+      string.format(
+        "COLOSSUS IS DOWN at %.0f m, %d revolutions. Reset the prop to stand it back up.",
+        b.distance, b.revolutions
+      ),
+      4.0
+    )
     emitEvent(state, "I", "colossus_tipped", {
       revolutions = b.revolutions,
       distance = b.distance,
@@ -1725,7 +1534,7 @@ local function updateTipped(state, tire)
     b.goingOver = false
     if not b.leaning then
       b.leaning = true
-      showMessage("SHE IS LEANING - drive up the high side.", 2.4)
+      showMessage("SHE IS LEANING.", 2.4)
     end
   else
     b.goingOver = false
@@ -1784,27 +1593,20 @@ behavior.update = function(state, dtSim)
   b.lastCentre = tire.centre
 
   updateRunaway(state, tire)
+  if b.chockCutRequested and not b.released then
+    markReleased(state, "chocks_pulled")
+  end
   if b.released then
-    -- ORDER MATTERS. updateTipped runs FIRST so the lean it decides on is the
-    -- lean updateRiders judges a dismount against, and once it is down the
-    -- ride is over: round 3 kept scoring, kept counting revolutions, and let
-    -- a downed tire rocking across the threshold re-fire "Back aboard. Go
-    -- again." forever.
+    -- ORDER MATTERS. updateTipped runs FIRST, and once it is down the run is
+    -- over: round 4 kept scoring and kept counting revolutions of a tire
+    -- lying on its side.
     updateTipped(state, tire)
     if b.tipped then
-      if not b.tippedFinal then
-        b.tippedFinal = true
-        b.riders = {}
-        b.exitNow = false
-        b.exitIn = nil
-        showMessage("The ride is over. Reset the prop to stand it back up.", 4.0)
-      end
+      b.tippedFinal = true
       return
     end
     announceSpeed(state, b.speed)
-    updateExitWindow(state, tire)
-    updateRiders(state, tire)
-    if next(b.riders) then showHud(state, tire, dtSim) end
   end
 end
+
 """

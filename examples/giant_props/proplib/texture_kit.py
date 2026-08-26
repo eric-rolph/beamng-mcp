@@ -2606,7 +2606,8 @@ def steel_worn(size, rng, base=(0.5, 0.53, 0.57), rough=0.42, relief=1.0):
     return color.clip(0, 1), height, roughness.clip(0, 1), None
 
 
-def machined_steel(size, rng, base=(0.44, 0.46, 0.49), rough=0.38, relief=1.0):
+def machined_steel(size, rng, base=(0.44, 0.46, 0.49), rough=0.38, relief=1.0,
+                   grain_scale=1.0):
     """Machined/turned hardware steel: tight short grain, oily mottle,
     values compressed toward one grey.
 
@@ -2624,8 +2625,18 @@ def machined_steel(size, rng, base=(0.44, 0.46, 0.49), rough=0.38, relief=1.0):
     # Two grain scales: fine tooling scratches (height/roughness only -
     # they mip away in colour) and a medium-scale directional wash that
     # actually survives at viewing distance.
-    grain_fine = _streaks(size, rng, max(16, size // 2), length_frac=0.02)
-    grain_med = _streaks(size, rng, max(8, size // 8), length_frac=0.05)
+    # ``grain_scale`` COARSENS the tooling grain. At 1.0 - the default, and the
+    # behaviour every other mod in the pack was tuned against - the fine grain
+    # is a two-texel feature, so it is gone by the first mip and the whole
+    # family measured p99.9 15.2 degrees against a 29-46 band: the flattest
+    # functional map in the pack, on 2,420 triangles of dock girder, gangway
+    # frame, handrail and port bolts that read as pale plastic because of it.
+    # A larger value is a coarser tool, which is what a fabrication that size
+    # would leave anyway.
+    fine_cells = max(16, int(size // 2 * grain_scale))
+    med_cells = max(8, int(size // 8 * grain_scale))
+    grain_fine = _streaks(size, rng, fine_cells, length_frac=0.02 / max(grain_scale, 0.05))
+    grain_med = _streaks(size, rng, med_cells, length_frac=0.05 / max(grain_scale, 0.05))
     micro = _value_noise(size, size // 2, rng)
     mottle = _fbm(size, rng, base_cells=5, octaves=4)
     oil = np.clip((_fbm(size, rng, base_cells=3, octaves=3) - 0.58) * 3.2,
@@ -4363,9 +4374,14 @@ def tire_sidewall(size, rng, base=(0.048, 0.047, 0.049), ripples=104.0,
     # Wax kills specular outright, so the bloomed valleys are the matte part
     # and the ripple crowns stay waxy-glossy. That contrast is the whole
     # material read at distance.
+    # `band` MUST BE PERIODIC. A 0..1 ramp across v does not wrap, so the
+    # sheet's last row meets its first with a step - measured at 35.64 code
+    # values, the largest step anywhere in the map, and it crosses the moulded
+    # brand type once and the flank three times as a hard sheen line. A
+    # triangle wave carries the same bead-to-shoulder gradient and closes.
     roughness = (
         rough + wax * 0.85 + crazing * 0.35 + (radial - 0.5) * 0.10
-        + (broad - 0.5) * 0.34 + band * 0.14
+        + (broad - 0.5) * 0.34 + (1.0 - np.abs(2.0 * band - 1.0)) * 0.14
     )
     color *= (0.84 + broad * 0.30)[..., None]
     return color.clip(0, 1), height, roughness.clip(0.05, 1), None
@@ -4443,7 +4459,8 @@ def tire_sidewall_print(size, rng, lines=(), base=(0.052, 0.051, 0.053),
 
 
 def tire_liner(size, rng, base=(0.088, 0.092, 0.086), lattice=128.0, talc=0.42,
-               splices=2, rough=0.30, cord_pitch=54.0):
+               splices=2, rough=0.30, cord_pitch=54.0, groove_width=0.10,
+               splice_width=0.010):
     """Halobutyl inner liner, cured against a bladder.
 
     The lattice is the point. A curing bladder is moulded with a shallow vent
@@ -4472,7 +4489,7 @@ def tire_liner(size, rng, base=(0.088, 0.092, 0.086), lattice=128.0, talc=0.42,
     v = np.tile(np.linspace(0.0, lattice, size, endpoint=False)[:, None], (1, size))
     diag_a = np.abs(((u + v) % 1.0) - 0.5) * 2.0
     diag_b = np.abs(((u - v) % 1.0) - 0.5) * 2.0
-    groove = np.clip(1.0 - np.minimum(diag_a, diag_b) / 0.10, 0.0, 1.0)
+    groove = np.clip(1.0 - np.minimum(diag_a, diag_b) / groove_width, 0.0, 1.0)
 
     fine = _fbm(size, rng, base_cells=max(96, size // 6), octaves=3)
     dust = np.clip(
@@ -4488,8 +4505,13 @@ def tire_liner(size, rng, base=(0.088, 0.092, 0.086), lattice=128.0, talc=0.42,
     splice = np.zeros((size, size))
     for index in range(int(splices)):
         centre = (index + 0.5) / max(int(splices), 1)
+        # WIDE ENOUGH TO SURVIVE A MIP. A 0.010 gaussian is ten texels; the
+        # lattice above it is sixteen, so EVERY feature on the largest
+        # interior surface in the prop lived within one octave of Nyquist and
+        # the whole map halved with each mip level. A ply splice on a real
+        # liner is a raised band a few centimetres across, not a hairline.
         offset = (v / max(lattice, 1e-6)) - centre
-        splice = np.maximum(splice, np.exp(-((offset / 0.010) ** 2)))
+        splice = np.maximum(splice, np.exp(-((offset / splice_width) ** 2)))
 
     height = groove * -0.26 + (fine - 0.5) * 0.10 + splice * 0.30 + (cords - 0.5) * 0.045
     tone = (

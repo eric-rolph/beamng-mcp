@@ -1133,8 +1133,8 @@ PALETTE = {
                     [0.5, 0.855, "C H A R L I E   C O .", 1.25],
                     [0.5, 0.665, "SALUTATION MACHINERY", 0.8],
                     [0.5, 0.530, "MODEL HF-5   SER. 0041", 0.75],
-                    [0.5, 0.395, "2300 V  3 PH  60 CY", 0.75],
-                    [0.5, 0.260, "610 A   2850 H.P.", 0.75],
+                    [0.5, 0.395, "6600 V  3 PH  60 CY", 0.75],
+                    [0.5, 0.260, "630 A   8540 H.P.", 0.75],
                     [0.5, 0.110, "PAT. PEND.   MADE IN U.S.A.", 0.58],
                 ],
                 "rules": [[0.775, 0.30, 0.014]],
@@ -1185,7 +1185,10 @@ TRIGGERS = {
     # windup have run, so a subject must stay in the corridor for at least
     #
     #     alert_seconds + windup_seconds + swing_lead_seconds
-    #       = 0.45 + 0.85 + 0.30 = 1.60 s
+    #       = 0.45 + 0.85 + 0.28 = 1.58 s
+    #
+    # (This line has been stale once already -- it read 0.30 while the lead
+    # was 0.45. It is arithmetic on three BEHAVIOR keys; trust those.)
     #
     # or it is past the strike plane before the arm is cocked. At the
     # 60 m/s a committed player will actually arrive at, that is 96 m. 120 m
@@ -1261,22 +1264,25 @@ EFFECTS = {
 #             because the reference stand is chain-guyed and a real slew
 #             bearing prefers its overturning moment on the machine side
 #   stroke    -104 -> 0 deg in slap_seconds on a t^slap_ease pose, so
-#             omega peaks at ease*dtheta/T = 1.4*1.8151/0.45 = 5.65 rad/s,
-#             a 103 m/s fingertip and 67 m/s at the palm centre
-#   energy    arm 0.5*1.005e6*5.65^2 = 16.0 MJ, plus 1.4 MJ into a 1.6 t
-#             car at the default power setting = 17.4 MJ per slap
-#   PEAK      17.4 MJ / 0.45 s = 38.7 MW — which is exactly why a machine
+#             omega peaks at ease*dtheta/T = 1.5*1.8151/0.28 = 9.72 rad/s,
+#             a 177 m/s fingertip and 115 m/s at the palm centre
+#   energy    arm 0.5*1.005e6*9.72^2 = 47.5 MJ, plus 1.4 MJ into a 1.6 t
+#             car at the default power setting = 48.9 MJ per slap
+#   PEAK      48.9 MJ / 0.28 s = 175 MW — which is exactly why a machine
 #             like this stores and dumps rather than drawing live, so the
 #             peak is NOT what goes on the plate
-#   LINE      the plate rates a DUTY CYCLE. 17.4 MJ every 9.6 s is 1.81 MW
-#             mechanical, 2.13 MW electrical at 85% drive efficiency =
-#             2850 H.P., and at 2300 V 3-phase pf 0.88 that is 610 A.
-#             9.6 s is not a round number chosen to make the plate work: it
-#             is the machine's own shortest possible cycle (0.45 alert +
-#             0.85 windup + 0.45 slap + 0.55 follow + 0.40 hold + 2.10
-#             return + 1.20 cooldown, plus the 3.2 s blind hold on a whiff
-#             = 9.20 s measured). The rig is rated for exactly what it can
-#             physically do back-to-back, which is what a nameplate means.
+#   LINE      the plate rates a DUTY CYCLE. 48.9 MJ every 9.03 s is
+#             5.41 MW mechanical, 6.37 MW electrical at 85% drive
+#             efficiency = 8540 H.P. That power class OUTGROWS the old
+#             2300 V bus -- 6.37 MW at 2300 V pf 0.88 is 2320 A, past the
+#             ~2000 A ceiling of standard 2300 V gear -- so the machine is
+#             re-rated onto the 6600 V class real drives of this size use:
+#             6.37e6 / (1.732 * 6600 * 0.88) = 633 A, plated 630 A.
+#             9.03 s is the machine's own shortest cycle (0.45 alert +
+#             0.85 windup + 0.28 slap + 0.55 follow + 0.40 hold + 2.10
+#             return + 1.20 cooldown, plus the 3.2 s blind hold on a whiff).
+#             The rig is rated for exactly what it can physically do
+#             back-to-back, which is what a nameplate means.
 #
 #             THE THREE LINES ABOVE ARE THE ONES THAT GO STALE. They were
 #             computed against a 0.30 s QUADRATIC swing and survived the
@@ -1303,7 +1309,7 @@ BEHAVIOR = {
     # either alone mis-aims the whole machine by the difference times the
     # closing speed — 0.10 s at 40 m/s is 4 m, more than half the strike
     # zone. test_high_five_geometry asserts the identity.
-    "swing_lead_seconds": 0.45,
+    "swing_lead_seconds": 0.28,
     # Seconds WITHOUT A USABLE LEAD before the hand gives up and slaps
     # anyway. Not seconds spent cocked: a 12 m/s car legitimately needs
     # ~11 s of cocked time to cross the corridor, and when this counted
@@ -1320,16 +1326,45 @@ BEHAVIOR = {
     "min_closing_mps": 2.5,
 
     # --- the slap --------------------------------------------------------
-    # Frames-over-the-road is the number that matters, not frames of stroke.
-    # At 0.30 s with a t^2 ease-in the fingertip was above the 9.6 m road
-    # for 85 ms — 5 frames at 60 Hz, and 13 of the 18 stroke frames were
-    # spent behind the mast where nobody can see them. That is WORSE than
-    # the boot's rejected 0.12 s, which at least spent all seven frames near
-    # the car. 0.45 s on a t^1.4 ease puts ~100 ms over the road while still
-    # accelerating the whole way in, which is what a flywheel dump looks
-    # like.
-    "slap_seconds": 0.45,
-    "slap_ease": 1.4,
+    # 0.28 s on t^1.5, and this REVERSES an earlier play-test on purpose.
+    #
+    # The 2026-08-24 note here argued frames-over-the-road: at 0.30 s/t^2
+    # the stroke was 85 ms over the road and read as a flicker, so it was
+    # slowed to 0.45 s for legibility. The 2026-08-25 play-test overrode
+    # that: at 0.45 s the swing reads as MACHINERY, not as a slap. A real
+    # slap's strike phase is 0.10-0.15 s and on video it is 3-6 frames --
+    # the strike itself is subliminal violence, and the READ comes from the
+    # slow wind-up before it and the held follow-through after it, both of
+    # which this machine already stages. So the stroke is fast again, the
+    # legibility burden moves to the anticipation and the dust hit, and the
+    # two decisions and their dates are both kept here because whoever
+    # tunes this next needs to know it has already been pushed both ways.
+    #
+    # Peak omega = ease * 1.8151 rad / 0.28 s = 9.72 rad/s: a 177 m/s
+    # fingertip, 115 m/s at the palm centre. Every figure in the power
+    # ledger above descends from this pair -- recompute the chain and the
+    # builder's plate if either moves.
+    "slap_seconds": 0.28,
+    "slap_ease": 1.5,
+    # THE TUMBLE. launchSubject replaces linear velocity along the palm
+    # normal, which alone reads as a nudge from a giant air hockey paddle:
+    # the car sails flat. A real slap is an off-centre impulse -- the palm
+    # lands on the flank ABOVE the car's centre of mass, so it both throws
+    # and SPINS. The engine has no GE-side angular injection, but the
+    # vehicle VM's `thrusters.applyAccel(accel, dt, nodeId, angularAccel)`
+    # wraps obj:applyClusterLinearAngularAccel, so the runtime queues the
+    # spin into the car's own physics over a contact dwell and the tumble
+    # integrates honestly from there.
+    #
+    # One physical model, not two dials: spin axis = r x d, where r is the
+    # palm-centre-to-car-CoM offset and d the launch direction. That single
+    # cross product yields end-over-end roll AND drag yaw with coherent
+    # signs. Magnitude = transfer * (arm rate at contact) * POWER mult --
+    # the arm rate comes from the ACTUAL swingFrom, so a pad slap from rest
+    # spins less than a full corridor windup, for free.
+    "slap_contact_seconds": 0.12,
+    "slap_spin_transfer": 0.35,
+    "slap_spin_cap_rps": 9.0,
     # The palm held out down-road after the car it just launched. It is what
     # a person does after a high five, and it is the frame the clip gets cut
     # on.
@@ -1455,6 +1490,7 @@ local REQUIRED = {
   "min_closing_mps", "slap_seconds", "follow_seconds", "return_seconds",
   "cooldown_seconds", "slap_speed_min_mps", "slap_speed_max_mps",
   "slap_ease", "follow_hold_seconds",
+  "slap_contact_seconds", "slap_spin_transfer", "slap_spin_cap_rps",
   "twitch_deg", "twitch_rate",
   "power_levels", "power_multiplier_max", "tilt_levels", "tilt_step_deg",
   "default_power_level", "default_tilt_index", "camera_distance",
@@ -1721,10 +1757,40 @@ local function slapStrikeZone(state)
       local speed = (B.slap_speed_min_mps
         + math.random() * (B.slap_speed_max_mps - B.slap_speed_min_mps)) * mult
       if launchSubject(state, vehicle, direction * speed) then
+        -- THE TUMBLE. See the slap_spin_* tunables for the model. The spin
+        -- goes through the vehicle's OWN physics (thrusters.applyAccel ->
+        -- obj:applyClusterLinearAngularAccel) over the contact dwell, so
+        -- what happens after the palm leaves is the engine's honest
+        -- integration, not an animation.
+        local fromRad = math.rad(math.abs(state.behavior.swingFrom or WINDUP_DEG))
+        local armRate = B.slap_ease * fromRad / B.slap_seconds
+        local spin = math.min(
+          B.slap_spin_cap_rps, B.slap_spin_transfer * armRate * mult)
+        -- r: palm centre relative to the struck car's CoM, authored frame.
+        -- The palm arrives from the mast side (-x) with its centre near
+        -- 2 m on an 8.6 m hand against a car CoM near 0.6 m.
+        local r = vec3(-0.8, 0, 1.30)
+        local d = vec3(0, math.cos(tilt), math.sin(tilt))
+        local axis = vec3(
+          r.y * d.z - r.z * d.y,
+          r.z * d.x - r.x * d.z,
+          r.x * d.y - r.y * d.x)
+        local axisLen = axis:length()
+        if axisLen > 1e-6 and spin > 0.01 then
+          -- toWorldDir NORMALIZES -- it is a direction transform. Rotate
+          -- the unit axis, then scale, or the spin ships as 1.00 rad/s
+          -- whatever the model says (caught by the magnitude gate).
+          local w = toWorldDir(state, axis) * spin
+          local perDt = 1.0 / B.slap_contact_seconds
+          vehicle:queueLuaCommand(string.format(
+            "thrusters.applyAccel(vec3(0,0,0), %.4f, nil, vec3(%.4f, %.4f, %.4f))",
+            B.slap_contact_seconds, w.x * perDt, w.y * perDt, w.z * perDt))
+        end
         slapped = slapped + 1
         emitEvent(state, "I", "high_five_slapped", {
           subject_id = vehicleId,
           slap_speed_mps = speed,
+          spin_rps = math.floor(spin * 100) / 100,
           power_mult = math.floor(mult * 100) / 100,
           tilt_deg = tiltDegrees(state),
         })

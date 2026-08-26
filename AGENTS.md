@@ -690,6 +690,90 @@ measuring 95% of its texels under one degree of slope while every other map in t
 reached 25-52 degrees. Measure the shipped `.normal.png` slope distribution when a surface looks
 plastic - that is the fastest way to see it.
 
+### Giant Props: measuring whether a rolling prop behaves like a tire
+
+`tests/test_colossus_tire_hill_live.py` and the coast windows in
+`test_colossus_tire_live.py` are the pattern for asking a physical question of
+a prop rather than a structural one. Four things learned building them:
+
+* **PATH LENGTH, not displacement.** The single measurement that separates a
+  tire from a barrel is path length against `R * dtheta`. Straight-line
+  displacement is a different quantity and under-reports any curving run: the
+  first cut read 0.713 on a run that was rolling perfectly well.
+* **The axle fit jitters, so floor the steps.** Three markers fitted to a
+  circle wobble by centimetres a sample. Accumulating every step turned 0.96 m
+  of travel into 7.03 m of "path" and a slip ratio of 8.3. Only count steps
+  that are unambiguously motion.
+* **Separate the windows.** Straight after an impact the carcass RINGS - 458 mm
+  peak to peak on colossus, decaying over seconds. Measuring facet hop or
+  rolling resistance in that window measures the ring instead. Take a second
+  window once it has decayed; two equal consecutive windows also give the
+  free-coast deceleration, and `Crr = a / g`.
+* **Measure on a plane before blaming the prop.** smallgrid removes the
+  terrain from the argument entirely. colossus measured slip 1.007 there
+  against 0.852 on a 23-degree hillside - so the hill number was camber and
+  terrain, not scrub, and a whole line of investigation was wrong.
+
+The results worth carrying forward: a 48-station collision hull with 30 mm of
+facet sagitta rides at 6.4 mm RMS under a contact patch that deflects 250 mm,
+so a deflecting carcass swallows its own polygon; and rolling resistance in
+this engine is hysteretic beam damping spread across every rubber family, not
+concentrated in the tread - halving the tread alone moved Crr by 0.2 points.
+
+### Giant Props: tan-delta is not a damping ratio
+
+`zeta ~= tan(delta) / 2`. colossus_tire's beam families were argued straight
+from rubber's loss tangent and its tread landed at zeta 0.42 by the
+heaviest-node measure - four to eight times what tread compound implies. The
+gate that "checked" it passed, because its band was written from the same
+mistaken reading. When a damping ratio is argued from a material property,
+write down which property and how it converts.
+
+### Giant Props: a prop with a permanent attachment must be BALANCED about its axle
+
+`colossus_tire` rolls because a car pushes its liner. Its boarding gangway is
+900 kg bolted to the port sill at the BOTTOM of the carcass and it stays bolted
+after the tie-downs are cut, so the free body's centre of mass sat 0.922 m off
+the axle: a 102 kNm gravity pendulum against roughly 123 kNm of drive torque.
+The tire climbed its own imbalance and rocked back instead of rolling away, and
+the live gate's headline number - 7.40 m of axle travel, which is 31.6 degrees
+of rotation - was exactly that signature passing a 0.25 m bar.
+
+`balance_carcass()` solves a first-harmonic modulation of the CARCASS node
+weights (heavier opposite the port, which is what a real OTR balance patch is)
+against the whole free body, carrying the uniform term as a third unknown so
+TIRE_MASS comes out unchanged rather than being renormalised afterwards -
+renormalising a nulled moment does not keep it nulled. Measured effect: axle
+travel 7.40 m -> 35.29 m under the same push, plus 12.64 m of COAST in the same
+direction with no input at all, and the settled lean fell from 3.6 degrees to
+0.25. Two cautions learned doing it: correcting the AXIAL offset as well needed
+a +/-34% modulation that pushed the lightest port-frame node to omega*dt 0.934
+against a 0.9 ceiling (the radial offset is the one that matters; the axial one
+is a steady 0.4 m and an honest lean), and a single-interval travel measurement
+cannot tell rolling from rocking - the gate now stops pushing, steps 240 frames
+and requires the second interval to keep going the same way.
+
+### Giant Props: on a TEXTURED palette entry, `color` is a mirror, not a tint
+
+`prop_builder` writes `baseColorFactor [1,1,1,1]` whenever a texture exists, so
+a textured material's `color` reaches no pixel. Authoring an albedo correction
+there is a no-op: colossus_tire's concrete was corrected from 0.62 to 0.26 in
+`color` and the shipped PNG still decoded to 0.617 linear. The value belongs in
+`texture.params` (`{"base": [...]}`), with `color` kept as a mirror of it so
+the audit invariant still reads. Same shape of trap as `normal_strength` above,
+one level out in the other direction.
+
+### Giant Props: Blender stamps the wall clock into rendered JPEGs too
+
+`render_thumbnail` produces `Blender:Date` and `Blender:RenderTime` COM
+segments, and `prop_builder` copies the thumbnail into the shipped tree twice -
+so a pixel-identical re-render still moves the mod's content sha, bumps its
+build serial and invalidates the ZIP lock the live gate verifies against. This
+is the sibling of the Collada wall clock from the same Blender run, and it was
+missed for a round because only the mesh was being looked at.
+`blender_kit.strip_render_stamp()` removes them; it is opt-in per call site for
+the same reason the Collada normaliser is.
+
 ### Giant Props: colossus_tire's mass is a documented departure
 
 TIRE_MASS is 10,500 kg where an honest 28.168 m carcass would be ~1,923,000 kg (rubber goes as

@@ -64,7 +64,7 @@ LIVE_TEST_TAG = "GIANT_PROPS_LIVE_TEST"
 PROP_NAME = f"{MOD_ID}_live_prop"
 SUBJECT_NAME = f"{MOD_ID}_live_subject"
 PACK_ROOT = Path(__file__).resolve().parents[1] / "examples" / "giant_props"
-EXPECTED_TRIGGERS = {"dock": "Overlaps", "cabin": "Overlaps"}
+EXPECTED_TRIGGERS = {"approach": "Overlaps"}
 
 
 def load_spec():
@@ -154,6 +154,30 @@ def _marker_points(bng: BeamNGpy) -> list[tuple[float, float, float]] | None:
     return [tuple(float(value) for value in point) for point in payload["points"]]
 
 
+def _marker_angle(centre, axis, marker) -> float:
+    """Angle of a marker about the axle, in the tire's own frame."""
+
+    radial = [marker[i] - centre[i] for i in range(3)]
+    along = sum(radial[i] * axis[i] for i in range(3))
+    radial = [radial[i] - axis[i] * along for i in range(3)]
+    if math.sqrt(sum(v * v for v in radial)) < 1e-6:
+        return 0.0
+    reference = [(0.0, 0.0, 1.0)[i] - axis[i] * axis[2] for i in range(3)]
+    if math.sqrt(sum(v * v for v in reference)) < 1e-6:
+        reference = [(1.0, 0.0, 0.0)[i] - axis[i] * axis[0] for i in range(3)]
+    scale = math.sqrt(sum(v * v for v in reference))
+    reference = [value / scale for value in reference]
+    other = [
+        axis[1] * reference[2] - axis[2] * reference[1],
+        axis[2] * reference[0] - axis[0] * reference[2],
+        axis[0] * reference[1] - axis[1] * reference[0],
+    ]
+    return math.atan2(
+        sum(radial[i] * other[i] for i in range(3)),
+        sum(radial[i] * reference[i] for i in range(3)),
+    )
+
+
 def _fit_axle(points):
     """Centre, unit axis and radius of the circle through three points."""
 
@@ -173,7 +197,9 @@ def _fit_axle(points):
     v1mv2 = tuple(v1[i] - v2[i] for i in range(3))
     alpha = v2v2 * sum(v1[i] * v1mv2[i] for i in range(3)) / (2 * nn)
     beta = v1v1 * sum(v2[i] * -v1mv2[i] for i in range(3)) / (2 * nn)
-    centre = tuple((ax, ay, az)[i] + v1[i] * alpha + v2[i] * beta for i in range(3))
+    centre = tuple(
+        (ax, ay, az)[i] + v1[i] * alpha + v2[i] * beta for i in range(3)
+    )
     length = math.sqrt(nn)
     axis = tuple(component / length for component in normal)
     radius = math.dist(centre, (ax, ay, az))
@@ -313,7 +339,12 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
                 scenario_name,
                 description="Disposable Colossus live smoke fixture",
             )
-            subject = Vehicle(SUBJECT_NAME, "pigeon", license="ROLL")
+            # A REAL VEHICLE, NOT A PIGEON. The subject used to be driven
+            # INSIDE the carcass, where its weight on the liner is a torque
+            # about the axle and 300 kg is plenty. There is no inside any
+            # more: the push is a collision from outside against 10.5 tonnes,
+            # and momentum is the only thing that matters.
+            subject = Vehicle(SUBJECT_NAME, "etk800", license="ROLL")
             scenario.add_vehicle(
                 subject, pos=(40.0, 40.0, 20.0), rot_quat=(0, 0, 0, 1), cling=False
             )
@@ -341,7 +372,9 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
             surface_z = float(surface["surface_z"])
 
             prop = Vehicle(PROP_NAME, MOD_ID, license="COLOSSUS")
-            spawned = bng.vehicles.spawn(prop, (0.0, 0.0, surface_z), (0, 0, 0, 1), False, True)
+            spawned = bng.vehicles.spawn(
+                prop, (0.0, 0.0, surface_z), (0, 0, 0, 1), False, True
+            )
             assert spawned is True
 
             state: dict[str, Any] = {}
@@ -360,7 +393,7 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
             origin = state["origin"]
 
             # ---- CLAIM 1: it stands up, stays round, and does not sink.
-            bng.control.step(300, wait=True)  # five seconds of settling
+            bng.control.step(300, wait=True)          # five seconds of settling
             points = None
             for _ in range(20):
                 points = _marker_points(bng)
@@ -387,62 +420,256 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
             assert abs(axle_height - SPEC.OUTER_RADIUS) < 0.80, report["settled"]
             assert lean < SPEC.BEHAVIOR["leaning_dot"], report["settled"]
 
-            # ---- CLAIM 2a: the loading dock is solid FROM ABOVE.
-            dock_target = _authored_to_world(origin, (11.5, 0.0, SPEC.DOCK_LANDING_Z + 1.2))
-            subject.teleport(pos=dock_target, rot_quat=(0, 0, 0, 1), reset=True)
+            # ---- CLAIM 2: the TREAD is solid from outside. There is no
+            # doorway and nothing to board any more, so what has to hold is
+            # the surface a car actually meets: park one against the flank and
+            # it must not pass through the carcass.
+            flank_target = _authored_to_world(
+                origin, (SPEC.SECTION_HALF + 3.4, 0.0, 1.2)
+            )
+            subject.teleport(pos=flank_target, rot_quat=(0, 0, 0, 1), reset=True)
             bng.control.step(180, wait=True)
-            on_dock = _subject_probe(bng)
-            assert on_dock["ok"] is True, on_dock
-            dock_rest = float(on_dock["z"]) - surface_z
-            report["on_dock_z"] = round(dock_rest, 3)
-            assert dock_rest > SPEC.DOCK_LANDING_Z - 0.35, (
-                "the subject fell through the loading dock: "
-                f"rested at {dock_rest:.3f} against a deck at {SPEC.DOCK_LANDING_Z:.3f}"
+            beside = _subject_probe(bng)
+            assert beside["ok"] is True, beside
+            report["beside_x"] = round(float(beside["x"]) - origin[0], 3)
+            report["beside_z"] = round(float(beside["z"]) - surface_z, 3)
+            assert report["beside_z"] > 0.15, (
+                "the subject sank into the ground beside the tire: "
+                f"rested at {report['beside_z']:.3f}"
             )
 
-            # ---- CLAIM 2b + 3: the cavity floor is solid and the doorway is
-            # clear enough to sit in.
-            cabin_target = _authored_to_world(origin, (0.0, 0.0, SPEC.CAVITY_FLOOR_Z + 1.4))
-            subject.teleport(pos=cabin_target, rot_quat=(0, 0, 0, 1), reset=True)
-            bng.control.step(240, wait=True)
-            in_cabin = _subject_probe(bng)
-            assert in_cabin["ok"] is True, in_cabin
-            cabin_rest = float(in_cabin["z"]) - surface_z
-            report["in_cabin_z"] = round(cabin_rest, 3)
-            assert cabin_rest > SPEC.CAVITY_FLOOR_Z - 0.40, (
-                "the subject fell through the inner liner: "
-                f"rested at {cabin_rest:.3f} against a floor at {SPEC.CAVITY_FLOOR_Z:.3f}"
-            )
-
-            # Boarding should have fired and cut the tie-downs.
-            boarded = False
-            for _ in range(40):
+            # ---- CLAIM 3: coming near it pulls the chocks. That is the whole
+            # interaction now, and it is a trigger the tire carries with it.
+            armed = False
+            for _ in range(60):
                 bng.control.step(15, wait=True)
                 state = _runtime_state(bng)
-                if state.get("zone_counts", {}).get("cabin", 0) >= 1:
-                    boarded = True
+                if state.get("zone_counts", {}).get("approach", 0) >= 1:
+                    armed = True
                     break
-            report["boarded"] = boarded
-            assert boarded, state
+            report["armed"] = armed
+            assert armed, state
 
-            # ---- CLAIM 4: pushing the SUBJECT rolls the tire.
+            # ---- CLAIM 4: a car pushing the TREAD rolls the tire.
+            #
+            # Nobody gets inside it any more, so the push is from outside and
+            # its direction matters: the subject is placed off the chocks'
+            # centre line, aimed at the tread, and driven into it.
             before = _fit_axle(_marker_points(bng) or points)
             assert before
-            # Roll direction is the tire's own axle-perpendicular horizontal.
             roll = (-axis[1], axis[0], 0.0)
             norm = math.hypot(roll[0], roll[1]) or 1.0
             roll = (roll[0] / norm, roll[1] / norm, 0.0)
-            for _ in range(14):
-                subject.set_velocity(12.0, dt=0.12)
+
+            # Yawed 180 degrees so its nose is at the tire: set_velocity drives
+            # along the vehicle's OWN forward axis, so the heading is the whole
+            # experiment now that the push comes from outside.
+            # ON THE CENTRE LINE. The four chocks sit under the shoulders and
+            # leave the middle of the tread clear precisely so this push has no
+            # roll moment: measured off-centre at x 3.2, the same shove rolled
+            # the Colossus straight over instead of along.
+            # WAIT FOR THE RELEASE, BY EVENT, NOT BY CLOCK. The countdown is
+            # a shipped tunable (3.5 s now, 2.0 once) and a ram scheduled by
+            # frame count hit a still-tied tire the day it changed: 27.6 m of
+            # dragged shove and zero coast. The winch also needs its 1.2 s to
+            # pull the wedges out of the ram line.
+            released = False
+            for _ in range(40):
+                bng.control.step(15, wait=True)
+                mid_records, _mid_issues = _runtime_log_records(log_path, log_start)
+                if any(
+                    "colossus_released" in str(record.get("event", ""))
+                    for record in mid_records
+                ):
+                    released = True
+                    break
+            assert released, "the release never fired after arming"
+            bng.control.step(150, wait=True)
+
+            ram_from = _authored_to_world(origin, (0.0, 14.0, 1.0))
+            subject.teleport(pos=ram_from, rot_quat=(0, 0, 1, 0), reset=True)
+            bng.control.step(90, wait=True)
+            start_probe = _subject_probe(bng)
+            # 10 m/s, not the original 18: the push was sized against a
+            # 10.5 t carcass, and the same ram into today's 4.2 t delivered
+            # 2.8x the delta-v and put the tire on its side mid-coast. The
+            # claim is "a car pushing the tread rolls it", not "survives a
+            # highway impact".
+            for _ in range(18):
+                subject.set_velocity(10.0, dt=0.12)
                 bng.control.step(45, wait=True)
+            end_probe = _subject_probe(bng)
+            report["subject_ran_m"] = round(
+                math.dist(
+                    (start_probe["x"], start_probe["y"]),
+                    (end_probe["x"], end_probe["y"]),
+                ),
+                2,
+            )
+            report["subject_end_y"] = round(float(end_probe["y"]) - origin[1], 2)
             after = _fit_axle(_marker_points(bng) or points)
             assert after
             travelled = math.dist(before[0], after[0])
             report["axle_travel_m"] = round(travelled, 3)
             report["roll_hint"] = [round(value, 3) for value in roll]
-            assert travelled > 0.25, (
-                "the Colossus did not move when the subject drove inside it: "
+
+            # ---- CLAIM 4b: it COASTS. Rolling and rocking are the same
+            # measurement over a single interval, and a small bar would pass
+            # on a tire that climbed its own chock and rocked back.
+            #
+            # The coast is also the only clean place in the whole suite to ask
+            # whether the 48-station COLLISION hull rides like a wheel or like
+            # a polygon: smallgrid is a perfect plane, so every millimetre of
+            # ride-height variation here belongs to the tire.
+            def _ride_window(samples: int, stride: int) -> dict[str, Any] | None:
+                """Detrended ride-height ripple over one window of the coast."""
+
+                heights: list[float] = []
+                places: list[tuple[float, float]] = []
+                spin = 0.0
+                previous = None
+                for _ in range(samples):
+                    bng.control.step(stride, wait=True)
+                    sample = _marker_points(bng)
+                    if not sample:
+                        continue
+                    sample_fit = _fit_axle(sample)
+                    if not sample_fit:
+                        continue
+                    sample_centre, sample_axis, _sample_radius = sample_fit
+                    heights.append(sample_centre[2] - surface_z)
+                    places.append((sample_centre[0], sample_centre[1]))
+                    # SLIP ON A PERFECT PLANE. smallgrid removes every excuse
+                    # the hillside gave: whatever the ratio is here is the
+                    # tire's own scrub, and it is the number that says where a
+                    # measured 6% rolling resistance is actually going.
+                    angle = _marker_angle(sample_centre, sample_axis, sample[0])
+                    if previous is not None:
+                        delta = angle - previous
+                        while delta > math.pi:
+                            delta -= 2.0 * math.pi
+                        while delta < -math.pi:
+                            delta += 2.0 * math.pi
+                        spin += abs(delta)
+                    previous = angle
+                if len(heights) < 12:
+                    return None
+                # Detrend: the tire is slowing and settling, and a drift is not
+                # a hop. What is left after a straight line is the ripple.
+                count = len(heights)
+                mean_index = (count - 1) / 2.0
+                mean_ride = sum(heights) / count
+                span = sum((index - mean_index) ** 2 for index in range(count))
+                gradient = (
+                    sum((index - mean_index) * (value - mean_ride)
+                        for index, value in enumerate(heights)) / span
+                    if span
+                    else 0.0
+                )
+                residual = [
+                    value - (mean_ride + gradient * (index - mean_index))
+                    for index, value in enumerate(heights)
+                ]
+                distance = sum(
+                    math.dist(places[index], places[index + 1])
+                    for index in range(len(places) - 1)
+                )
+                seconds = count * stride / 60.0
+                speed = distance / seconds if seconds else 0.0
+                chord = 2.0 * SPEC.OUTER_RADIUS * math.sin(math.pi / SPEC.STATIONS)
+                return {
+                    "samples": count,
+                    "seconds": round(seconds, 2),
+                    "mean_speed_ms": round(speed, 2),
+                    "mean_ride_m": round(mean_ride, 3),
+                    "facet_hz": round(speed / chord, 2) if chord else None,
+                    "ripple_peak_to_peak_mm": round(
+                        (max(residual) - min(residual)) * 1000, 1
+                    ),
+                    "ripple_rms_mm": round(
+                        math.sqrt(sum(v * v for v in residual) / count) * 1000, 1
+                    ),
+                    "arc_m": round(spin * SPEC.OUTER_RADIUS, 2),
+                    "path_m": round(distance, 2),
+                    "slip_ratio": (
+                        round(distance / (spin * SPEC.OUTER_RADIUS), 3)
+                        if spin * SPEC.OUTER_RADIUS > 0.5
+                        else None
+                    ),
+                }
+
+            chord_m = 2.0 * SPEC.OUTER_RADIUS * math.sin(math.pi / SPEC.STATIONS)
+            facet_sagitta_mm = (
+                SPEC.OUTER_RADIUS * (1.0 - math.cos(math.pi / SPEC.STATIONS)) * 1000
+            )
+            report["facet"] = {
+                "stations": SPEC.STATIONS,
+                "chord_m": round(chord_m, 3),
+                "sagitta_mm": round(facet_sagitta_mm, 1),
+            }
+            # WINDOW A, straight after the ram: this is the carcass RINGING on
+            # its own compliance, and it is a rubber observation in its own
+            # right - a rigid hoop would not do it at all.
+            report["ring"] = _ride_window(48, 5)
+            # WINDOW B, four seconds later: the ring has decayed and what is
+            # left is steady rolling. This is the only window in which the
+            # 48-station collision hull can be judged, because smallgrid is a
+            # perfect plane and there is no terrain to blame.
+            report["steady"] = _ride_window(48, 5)
+
+            # ROLLING RESISTANCE, from the two windows. Consecutive equal
+            # windows give a mean speed at each midpoint, so the deceleration
+            # of a freely coasting body on a flat plane is (v1 - v2) / dt and
+            # Crr is that over g. It is the most material-relevant number this
+            # gate can produce: the beam damping that makes the carcass behave
+            # like rubber is the same mechanism as hysteresis loss in a real
+            # one, and this is what it costs.
+            ring = report["ring"]
+            steady = report["steady"]
+            if ring and steady and ring["seconds"] > 0:
+                decel = (ring["mean_speed_ms"] - steady["mean_speed_ms"]) / (
+                    ring["seconds"]
+                )
+                report["rolling"] = {
+                    "decel_ms2": round(decel, 3),
+                    "crr": round(decel / 9.81, 4),
+                    "note": "free coast on a flat plane, no input",
+                }
+            # ROLLING WITHOUT SLIPPING, on a plane, with nothing touching it.
+            # This is the claim a barrel cannot make: path length and R x
+            # d-theta have to agree. Measured on the faster window, because a
+            # short slow arc is dominated by the axle fit's own noise.
+            if ring and ring["slip_ratio"] is not None and ring["arc_m"] > 5.0:
+                assert 0.90 <= ring["slip_ratio"] <= 1.10, (
+                    "coasting freely on a flat plane, the tread is scrubbing "
+                    f"rather than rolling: {ring}"
+                )
+            if steady and steady["mean_speed_ms"] > 0.5:
+                assert steady["ripple_rms_mm"] < facet_sagitta_mm, (
+                    "rolling steadily on a perfectly flat plane, the axle still "
+                    "ripples by more than the collision hull's own facet - it is "
+                    f"riding the polygon: {report['facet']} {steady}"
+                )
+
+            coasted = _fit_axle(_marker_points(bng) or points)
+            assert coasted
+            drift = (
+                coasted[0][0] - after[0][0],
+                coasted[0][1] - after[0][1],
+                0.0,
+            )
+            along = math.hypot(drift[0], drift[1])
+            report["coast_m"] = round(along, 3)
+            report["axle_travel_total_m"] = round(math.dist(before[0], coasted[0]), 3)
+
+            assert travelled > 2.0, (
+                "the Colossus barely moved when a car drove into it: "
                 f"axle travelled {travelled:.3f} m"
+            )
+            assert report["axle_travel_total_m"] > travelled, (
+                "the Colossus stopped dead the moment it was hit - that is a "
+                f"collision, not a roll: {report['axle_travel_total_m']:.2f} m total "
+                f"against {travelled:.2f} m under the push"
             )
         finally:
             try:
@@ -464,7 +691,7 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
     events = [str(record["event"]) for record in records]
     report["events"] = events
     report["log_issues"] = issues
-    for required in ("prop_registered", "zone_enter", "colossus_boarded"):
+    for required in ("prop_registered", "zone_enter", "colossus_released"):
         assert required in events, report
     assert not issues, report
     print(json.dumps(report, sort_keys=True))

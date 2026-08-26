@@ -139,7 +139,7 @@ def sidewall_mid(radius: float) -> tuple[float, float]:
 SHOULDER_TOP_RADIUS = R_BEAD + spec.SHL_FRACTION * spec.SECTION_HEIGHT
 
 
-def shoulder_point(t: float) -> tuple[float, float]:
+def shoulder_point(t: float, theta: float = 0.0) -> tuple[float, float]:
     """(OUTER half width, radius) along the lofted shoulder, t = 0 at the
     last meridian station and t = 1 at the tread base's outboard ring.
 
@@ -154,7 +154,9 @@ def shoulder_point(t: float) -> tuple[float, float]:
     """
 
     top_half = (
-        sidewall_outer(SHOULDER_TOP_RADIUS)[0] + sidewall_relief(SHOULDER_TOP_RADIUS)
+        sidewall_outer(SHOULDER_TOP_RADIUS)[0]
+        + sidewall_relief(SHOULDER_TOP_RADIUS)
+        + buttress_relief(SHOULDER_TOP_RADIUS, theta)
     )
     end_half = spec.TREAD_HALF
     end_radius = base_r(spec.TREAD_HALF)
@@ -170,28 +172,27 @@ def shoulder_point(t: float) -> tuple[float, float]:
     )
 
 
+SHOULDER_BASE_RADIUS = base_r(spec.TREAD_HALF)
+
+
 def outer_half_at(radius: float) -> float:
     """The FULL outer half width anywhere on the carcass, relief included.
 
-    Above the tread base's outboard ring the surface is the lofted shoulder,
-    not a clamped sidewall, and the loft has to be inverted properly: a
-    24-step nearest-radius scan returns the SAME clamped answer for every
-    radius above the loft's peak, which is how the buttress wrap's top two
-    rows ended up sharing one half width and floating 0.43 m off the tire.
-    Bisection on the loft's descending branch is a real inverse.
+    NOW A CLOSED-FORM INVERSE. The loft's radius runs monotonically from
+    SHOULDER_TOP_RADIUS up to the tread base's outboard ring - the sine bulge
+    moved onto the half width alone - and the lathe below it is monotonic by
+    construction, so one comparison picks the branch and the loft inverts
+    linearly. Round 3 needed a bisection because the bulge made the curve turn
+    over; the 24-step nearest-radius scan before that returned the same clamped
+    answer for every radius above the turn, which is how the wrap's top rows
+    came to float 0.43 m off the tire.
     """
 
-    if radius < SHOULDER_BASE_RADIUS:
+    if radius <= SHOULDER_TOP_RADIUS:
         return sidewall_outer(radius)[0] + sidewall_relief(radius)
-    target = min(radius, SHOULDER_PEAK_RADIUS)
-    lo, hi = SHOULDER_PEAK_T, 1.0
-    for _ in range(60):
-        mid = 0.5 * (lo + hi)
-        if shoulder_point(mid)[1] > target:
-            lo = mid
-        else:
-            hi = mid
-    return shoulder_point(0.5 * (lo + hi))[0]
+    span = SHOULDER_BASE_RADIUS - SHOULDER_TOP_RADIUS
+    t = min(1.0, max(0.0, (radius - SHOULDER_TOP_RADIUS) / max(span, 1e-9)))
+    return shoulder_point(t)[0]
 
 
 def shell_normal(radius: float, side: float, theta: float) -> Vector:
@@ -242,21 +243,68 @@ def sidewall_relief(radius: float) -> float:
     return relief
 
 
-def _shoulder_extent() -> tuple[float, float, float]:
-    """(t at the loft's widest radius, that radius, the radius at t = 1).
+def shoulder_lug_centres() -> list[tuple[float, float]]:
+    """(centre angle, half angular width) of every SHOULDER lug.
 
-    The loft is NOT monotonic in radius: the bulge lifts it 5 mm above the top
-    station before it turns over and runs down to the tread base. Anything
-    inverting the loft has to know where the turn is, or it inverts onto the
-    wrong branch.
+    The buttress is the shoulder lug's own rubber running on down the flank,
+    so it has to know where those lugs are. Read from the same pitch table and
+    the same row phase build_tread uses, once, at import.
     """
 
-    samples = [step / 4096.0 for step in range(4097)]
-    peak_t = max(samples, key=lambda t: shoulder_point(t)[1])
-    return peak_t, shoulder_point(peak_t)[1], shoulder_point(1.0)[1]
+    pitches = pitch_angles()
+    groove = spec.LATERAL_GROOVE / spec.GROOVE_RADIUS
+    phase = spec.ROW_PHASE[len(spec.TREAD_ROWS) - 1]
+    offset = phase * (TAU / len(pitches))
+    spans = []
+    for start, end in pitches:
+        a0 = start + offset + groove * 0.5
+        a1 = end + offset - groove * 0.5
+        spans.append((0.5 * (a0 + a1), 0.5 * (a1 - a0)))
+    return spans
 
 
-SHOULDER_PEAK_T, SHOULDER_PEAK_RADIUS, SHOULDER_BASE_RADIUS = _shoulder_extent()
+BUTTRESS_LUGS = None            # filled after pitch_angles() is available
+
+
+def buttress_relief(radius: float, theta: float) -> float:
+    """The shoulder lug's rubber continuing down the upper sidewall.
+
+    A real E-4/L-5 shoulder lug does not stop at the tread edge - it runs on
+    down the buttress and feathers out, which is the silhouette feature that
+    separates a mining tire from a truck tire at 200 m. Round 4 built that as
+    180 separate slabs PER SIDE with a flat top, two vertical end walls and a
+    bottom lip, and it looked exactly like what it was: a row of paddles stuck
+    on the flank, the first thing anyone looking at the sidewall noticed, and
+    the source of a fresh defect in each of the last two rounds (floating in
+    one, detached with its end walls inside out in the next).
+
+    It is a moulded SWELLING OF THE SIDEWALL, so it is now a term in the
+    surface itself. The lathe grows it, which means it cannot have a wall, a
+    lip, a cap, a seam, a winding or a hole - and it feathers to nothing at
+    every edge, the way rubber released from a mould does.
+    """
+
+    if BUTTRESS_LUGS is None:
+        return 0.0
+    top = base_r(spec.TREAD_HALF)
+    bottom = spec.PROTECTOR_RADII[0]
+    if not (bottom <= radius <= top):
+        return 0.0
+    # Radial: full at the tread edge, feathering out at the first rib.
+    down = (top - radius) / (top - bottom)
+    radial = math.cos(0.5 * math.pi * down) ** 1.45
+
+    wrapped = (theta + math.pi) % TAU - math.pi
+    for centre, half in BUTTRESS_LUGS:
+        delta = (wrapped - centre + math.pi) % TAU - math.pi
+        if abs(delta) >= half:
+            continue
+        # Angular: a raised cosine across the lug, zero at the groove either
+        # side, so consecutive wraps are separated by real moulded valleys
+        # rather than by a pair of vertical faces.
+        across = math.cos(0.5 * math.pi * (delta / half)) ** 0.85
+        return spec.BUTTRESS_RELIEF * radial * across
+    return 0.0
 
 
 def meridian_fractions() -> list[float]:
@@ -307,6 +355,12 @@ def pitch_angles() -> list[tuple[float, float]]:
         angles.append((cursor, cursor + step))
         cursor += step
     return angles
+
+
+# Seeded here, where pitch_angles() finally exists. buttress_relief() reads it
+# and returns 0.0 until it is set, so the module still imports in the wrong
+# order rather than exploding somewhere downstream.
+BUTTRESS_LUGS = shoulder_lug_centres()
 
 
 class Mesh:
@@ -402,36 +456,14 @@ def tile_wraps(tile: float, reference: float | None = None) -> int:
 # ---------------------------------------------------------------------------
 # The access port: which sidewall panels are missing, in (station, segment).
 # ---------------------------------------------------------------------------
-PORT_QUADS = {
-    (index % STATIONS)
-    for index in range(-spec.PORT_STATIONS // 2, spec.PORT_STATIONS // 2)
-}
-PORT_HALF_ANGLE = math.radians(spec.PORT_SPAN_DEG) * 0.5
-
-
-def port_open_at(station: int, radius_lo: float, radius_hi: float) -> bool:
-    """True where the +X sidewall panel is inside the access port."""
-
-    if station % STATIONS not in PORT_QUADS:
-        return False
-    mid = 0.5 * (radius_lo + radius_hi)
-    return spec.PORT_INNER_RADIUS - 1e-6 <= mid <= spec.PORT_OUTER_RADIUS + 1e-6
-
-
-def port_open_theta(theta: float, radius: float) -> bool:
-    """True for a VISUAL sample inside the port opening (angle resolution)."""
-
-    wrapped = (theta + math.pi) % TAU - math.pi
-    return (
-        abs(wrapped) <= PORT_HALF_ANGLE
-        and spec.PORT_INNER_RADIUS <= radius <= spec.PORT_OUTER_RADIUS
-    )
-
-
 # ---------------------------------------------------------------------------
 # Visual: carcass shell (sidewalls outside and in, inner liner, bead toes)
 # ---------------------------------------------------------------------------
-VISUAL_STATIONS = 144           # 2.5 deg: 3.3 mm sagitta on a 14 m radius
+# 288 stations, 1.25 deg apart: 0.84 mm of sagitta on a 14 m radius, and -
+# the reason it doubled - eight stations across every shoulder lug, which is
+# what the buttress swelling needs to read as a moulded shape rather than as a
+# facet. The budget for it came from deleting the boarding hardware.
+VISUAL_STATIONS = 288
 INNER_STEPS = 13
 
 
@@ -460,13 +492,19 @@ def build_carcass(materials) -> list:
     inner = Mesh(f"{MOD_ID}_sidewall_inner", liner_mat)
     bead = Mesh(f"{MOD_ID}_bead_toe", bead_mat)
 
-    def shell(fraction: float, side: float, face: str) -> tuple[float, float]:
-        """(signed half width, radius) on one face of the sidewall shell."""
+    def shell(fraction: float, side: float, face: str,
+              theta: float = 0.0) -> tuple[float, float]:
+        """(signed half width, radius) on one face of the sidewall shell.
+
+        ``theta`` only matters on the OUTER face, and only in the buttress
+        band, where the shoulder lugs' rubber swells the sidewall.
+        """
 
         radius = R_BEAD + fraction * spec.SECTION_HEIGHT
         half, thick = sidewall_mid(radius)
         if face == "outer":
-            return (side * (half + thick * 0.5 + sidewall_relief(radius)), radius)
+            proud = sidewall_relief(radius) + buttress_relief(radius, theta)
+            return (side * (half + thick * 0.5 + proud), radius)
         return (side * (half - thick * 0.5), radius)
 
     def lathe_rows(mesh, fractions, side, face):
@@ -482,12 +520,21 @@ def build_carcass(materials) -> list:
         arc = 0.0
         previous = None
         for fraction in fractions:
+            # The arc walk (which is v) follows the UNSWOLLEN meridian, so the
+            # texture does not stretch where the buttress stands proud.
             half, radius = shell(fraction, side, face)
             if previous is not None:
                 arc += math.hypot(half - previous[0], radius - previous[1])
             previous = (half, radius)
             rows.append(
-                ([mesh.vertex(polar(half, radius, theta)) for theta in thetas], radius, arc)
+                (
+                    [
+                        mesh.vertex(polar(shell(fraction, side, face, theta)[0], radius, theta))
+                        for theta in thetas
+                    ],
+                    radius,
+                    arc,
+                )
             )
         return rows
 
@@ -503,10 +550,6 @@ def build_carcass(materials) -> list:
                     nxt = (column + 1) % VISUAL_STATIONS
                     theta0 = thetas[column]
                     theta1 = theta0 + step_angle
-                    if side > 0 and (
-                        port_open_theta(theta0 + step_angle * 0.5, 0.5 * (radius_lo + radius_hi))
-                    ):
-                        continue
                     # U is a function of THETA ONLY, on a whole number of
                     # tiles. Making it radius*theta looks right per row but
                     # adjacent meridian rows then drift apart by
@@ -535,6 +578,7 @@ def build_carcass(materials) -> list:
         inner_half, inner_radius = shell(0.0, side, "inner")
         steps = 6
         toe_rows = []
+        toe_profile = []
         for step in range(steps + 1):
             t = step / steps
             angle = t * math.pi
@@ -542,14 +586,37 @@ def build_carcass(materials) -> list:
             radius = 0.5 * (outer_radius + inner_radius) + 0.5 * (
                 outer_radius - inner_radius
             ) * math.cos(angle)
-            radius -= math.sin(angle) * spec.SIDEWALL_THICKNESS[0] * 0.22
+            # BOW IT OUTWARD, NOT INWARD. Dipping the toe's radius put the
+            # shipped bore at 11.317 m - 445.6 inches against the 457 the size
+            # code names, 2.5% under - a tire that will not go on its own rim,
+            # on the one meridian station the whole R457 claim rests on. A
+            # tubeless bore is not a plain cylinder anyway: it is two bead
+            # seats at the rim diameter with the centre relieved between them,
+            # which is exactly what the same term does with its sign flipped.
+            radius += math.sin(angle) * spec.SIDEWALL_THICKNESS[0] * 0.22
+            toe_profile.append((half, radius))
             toe_rows.append([bead.vertex(polar(half, radius, theta)) for theta in thetas])
+        # METRIC v, like every other lathe here. A flat step/steps over a
+        # 6-step profile made the bead the only anisotropic material on the
+        # tire - measured 2.45x its authored grain across the toe against 1.00
+        # round it - and doubling the station count is what finally moved the
+        # median far enough for the gate to see it.
+        toe_walk = [0.0]
+        for index in range(1, len(toe_profile)):
+            toe_walk.append(
+                toe_walk[-1]
+                + math.hypot(
+                    toe_profile[index][0] - toe_profile[index - 1][0],
+                    toe_profile[index][1] - toe_profile[index - 1][1],
+                )
+            )
         for step in range(steps):
             for column in range(VISUAL_STATIONS):
                 nxt = (column + 1) % VISUAL_STATIONS
                 theta0 = thetas[column]
                 theta1 = theta0 + step_angle
-                v0, v1 = step / steps, (step + 1) / steps
+                v0 = toe_walk[step] / TILE_SIDEWALL
+                v1 = toe_walk[step + 1] / TILE_SIDEWALL
                 wraps = tile_wraps(TILE_SIDEWALL, R_BEAD)
                 uv = (
                     (wraps * theta0 / TAU, v0),
@@ -619,13 +686,6 @@ def build_carcass(materials) -> list:
                 nxt = (column + 1) % VISUAL_STATIONS
                 theta0 = thetas[column]
                 theta1 = theta0 + step_angle
-                # Skip only where the boarding gangway replaces it. The
-                # gangway is narrower than the port, so skipping the whole
-                # port span left a 3.5 deg sliver of open cavity either side
-                # of it - a black slot along the threshold.
-                mid = (theta0 + step_angle * 0.5 + math.pi) % TAU - math.pi
-                if side > 0 and abs(mid) <= math.radians(spec.TONGUE_HALF_ARC_DEG):
-                    continue
                 v0, v1 = arcs[step], arcs[step + 1]
                 wraps = tile_wraps(TILE_LINER, R_CAV)
                 uv = (
@@ -656,7 +716,16 @@ def build_carcass(materials) -> list:
             half, radius = shoulder_point(step / spec.SHOULDER_ROWS)
             rows.append(
                 (
-                    [shoulder.vertex(polar(side * half, radius, theta)) for theta in thetas],
+                    [
+                        shoulder.vertex(
+                            polar(
+                                side * shoulder_point(step / spec.SHOULDER_ROWS, theta)[0],
+                                radius,
+                                theta,
+                            )
+                        )
+                        for theta in thetas
+                    ],
                     radius,
                     half,
                 )
@@ -720,12 +789,15 @@ def build_tread(materials) -> list:
     mesh = Mesh(f"{MOD_ID}_tread_lugs", tread_mat)
     detail = Mesh(f"{MOD_ID}_tread_tiebars", tread_mat)
     ejectors = Mesh(f"{MOD_ID}_tread_ejectors", tread_mat)
-    buttress = Mesh(f"{MOD_ID}_tread_buttress", tread_mat)
     pitches = pitch_angles()
 
     # --- Tread base: the continuous surface every groove floor sits on.
     base_steps = 26
-    base_columns = len(pitches) * 4
+    # THE SAME STATIONS THE SHOULDER USES. The tread base welds to the
+    # shoulder loft along its outboard ring, so the two have to agree station
+    # for station; when the sidewall went to 288 and this stayed at 144 the
+    # shell opened up 317 m of boundary along that seam.
+    base_columns = VISUAL_STATIONS
     base_xs = [
         -spec.TREAD_HALF + 2.0 * spec.TREAD_HALF * step / base_steps
         for step in range(base_steps + 1)
@@ -790,16 +862,6 @@ def build_tread(materials) -> list:
                 detail, a1, a1 + groove_angle, x0, x1,
                 zigzag=groove_zigzag(pitch_index + 1),
             )
-            if shoulder:
-                side = 1.0 if x1 > 0 else -1.0
-                # The port's outer edge sits 0.70 m below the tread edge, so a
-                # buttress wrap over the opening has no sidewall to lie on and
-                # hangs in the doorway. The bolted frame replaces the rubber
-                # buttress across the port sector; the wrap stops either side.
-                centre = (0.5 * (a0 + a1) + math.pi) % TAU - math.pi
-                keep_out = math.radians(spec.PORT_CLEAR_DEG)
-                if not (side > 0 and abs(centre) < keep_out):
-                    add_buttress(buttress, a0, a1, side)
 
     # --- Stone ejectors and tread wear indicators in the groove floors.
     for lo, hi in spec.TREAD_GROOVES:
@@ -813,10 +875,7 @@ def build_tread(materials) -> list:
                 elif pitch_index % 6 == 3:
                     add_wear_indicator(ejectors, middle, lo * sign, hi * sign)
 
-    return [
-        base.build(), mesh.build(), detail.build(),
-        ejectors.build(), buttress.build(),
-    ]
+    return [base.build(), mesh.build(), detail.build(), ejectors.build()]
 
 
 def groove_zigzag(boundary: int) -> float:
@@ -885,7 +944,7 @@ def add_lug(mesh: Mesh, a0: float, a1: float, x0: float, x1: float,
 
     # (grow, radius offset from the crown)
     levels = (
-        (fillet + draft, -spec.TREAD_DEPTH),
+        (fillet + draft, -spec.TREAD_DEPTH - spec.LUG_SEAT),
         (draft, -spec.TREAD_DEPTH + fillet),
         (0.0, -chamfer),
         (-chamfer, 0.0),
@@ -983,120 +1042,6 @@ def add_lug(mesh: Mesh, a0: float, a1: float, x0: float, x1: float,
             )
 
 
-def add_buttress(mesh: Mesh, a0: float, a1: float, side: float) -> None:
-    """Wrap a shoulder lug down over the buttress.
-
-    Earthmover shoulder lugs do not stop at the tread edge; they continue
-    down the upper sidewall. This is the silhouette feature that separates a
-    mining tire from a truck tire at 200 m, and round 1 did not have it.
-    """
-
-    steps = 5
-    edge = 3
-    # Start on the SHOULDER the wrap lies on. crown_r(TREAD_HALF) is 13.9457
-    # and the shoulder loft never reaches it - it tops out at 13.5094 - so the
-    # first two rows both took outer_half_at's clamp, came out at the same
-    # half width, and hung 0.44 m proud of any surface as an open-topped
-    # shell: the hooked spurs on the shoulder silhouette in every hero render.
-    top_radius = SHOULDER_PEAK_RADIUS
-    rows = []
-    for step in range(steps + 1):
-        t = step / steps
-        radius = top_radius - spec.BUTTRESS_DROP * t
-        stand = outer_half_at(radius)
-        # Ends on a real thickness. Round 1's taper hit exactly zero at the
-        # last row, so outer_row and inner_row were coincident vertex for
-        # vertex and 544 triangles collapsed to zero area. A real buttress
-        # wrap feathers; it does not vanish.
-        relief = spec.BUTTRESS_RELIEF * (1.0 - t * t) * 0.88 + spec.BUTTRESS_FEATHER
-        outer_row = []
-        inner_row = []
-        for corner in range(edge + 1):
-            angle = a0 + (a1 - a0) * corner / edge
-            taper = 1.0 - 0.18 * t
-            centre = 0.5 * (a0 + a1)
-            angle = centre + (angle - centre) * taper
-            outer_row.append(mesh.vertex(polar(side * (stand + relief), radius, angle)))
-            inner_row.append(mesh.vertex(polar(side * stand, radius, angle)))
-        rows.append((outer_row, inner_row, radius))
-
-    # Top cap. The wrap continues the shoulder lug, so its upper rim has to be
-    # closed onto the surface; left open it read as mould flash standing off
-    # the one feature that separates a mining tire from a truck tire at
-    # distance.
-    outer_first, inner_first, _ = rows[0]
-    for corner in range(edge):
-        uv = ((0.0, 0.0), (0.3, 0.0), (0.3, 0.12), (0.0, 0.12))
-        if side > 0:
-            mesh.quad(
-                inner_first[corner], inner_first[corner + 1],
-                outer_first[corner + 1], outer_first[corner], uv,
-            )
-        else:
-            mesh.quad(
-                outer_first[corner], outer_first[corner + 1],
-                inner_first[corner + 1], inner_first[corner], uv,
-            )
-
-    # V ACCUMULATES down the wrap. Round 1 restarted it at 0.0 -> 0.4 for
-    # every one of the five bands, so the tread texture began again five times
-    # down the most recognisable silhouette feature on the tire: five hard
-    # horizontal seams, at 0.775 m/tile against the tread's 2.20.
-    drop_v = [0.0]
-    for step in range(steps):
-        drop_v.append(drop_v[-1] + (spec.BUTTRESS_DROP / steps) / TILE_TREAD)
-    for step in range(steps):
-        outer_lo, inner_lo, radius_lo = rows[step]
-        outer_hi, inner_hi, radius_hi = rows[step + 1]
-        for corner in range(edge):
-            uv = (
-                (radius_lo * a0 / TILE_TREAD, drop_v[step]),
-                (radius_lo * a1 / TILE_TREAD, drop_v[step]),
-                (radius_hi * a1 / TILE_TREAD, drop_v[step + 1]),
-                (radius_hi * a0 / TILE_TREAD, drop_v[step + 1]),
-            )
-            if side > 0:
-                mesh.quad(
-                    outer_lo[corner], outer_lo[corner + 1],
-                    outer_hi[corner + 1], outer_hi[corner], uv,
-                )
-            else:
-                mesh.quad(
-                    outer_hi[corner], outer_hi[corner + 1],
-                    outer_lo[corner + 1], outer_lo[corner], uv,
-                )
-        for corner, direction in ((0, -1), (edge, 1)):
-            uv = ((0.0, 0.0), (0.3, 0.0), (0.3, 0.3), (0.0, 0.3))
-            a = outer_lo[corner]
-            b = outer_hi[corner]
-            c = inner_hi[corner]
-            d = inner_lo[corner]
-            # INVERTED FROM ROUND 3. Both end walls traversed their shared
-            # edge the same way the outer face does, which is the definition
-            # of a face wound inside out - 1,020 such edges in this one
-            # object. The orientation assert could not see it: an end wall is
-            # perpendicular to the shell, so the away_from_shell rule
-            # explicitly declines to judge it, and nothing else did either.
-            if direction * side < 0:
-                mesh.quad(a, b, c, d, uv)
-            else:
-                mesh.quad(d, c, b, a, uv)
-    # Bottom lip.
-    outer_last, inner_last, _ = rows[-1]
-    for corner in range(edge):
-        uv = ((0.0, 0.0), (0.3, 0.0), (0.3, 0.15), (0.0, 0.15))
-        if side > 0:
-            mesh.quad(
-                inner_last[corner + 1], inner_last[corner],
-                outer_last[corner], outer_last[corner + 1], uv,
-            )
-        else:
-            mesh.quad(
-                outer_last[corner + 1], outer_last[corner],
-                inner_last[corner], inner_last[corner + 1], uv,
-            )
-
-
 def add_tie_bar(mesh: Mesh, a0: float, a1: float, x0: float, x1: float,
                 zigzag: float = 0.0) -> None:
     """Low bar across a lateral groove floor: the anti-tear tie bar.
@@ -1120,7 +1065,10 @@ def add_tie_bar(mesh: Mesh, a0: float, a1: float, x0: float, x1: float,
         (zig(angle, x), x)
         for angle, x in ((a0, lo_x), (a1, lo_x), (a1, hi_x), (a0, hi_x))
     ]
-    bottom = [mesh.vertex(polar(x, base_r(x), angle)) for angle, x in corners]
+    bottom = [
+        mesh.vertex(polar(x, base_r(x) - spec.LUG_SEAT, angle))
+        for angle, x in corners
+    ]
     top = [mesh.vertex(polar(x, base_r(x) + height, angle)) for angle, x in corners]
     uv_top = tuple(
         (angle * spec.GROOVE_RADIUS / TILE_TREAD, x / TILE_TREAD) for angle, x in corners
@@ -1146,7 +1094,10 @@ def add_wear_indicator(mesh: Mesh, theta: float, x0: float, x1: float) -> None:
         (theta - half, lo_x), (theta + half, lo_x),
         (theta + half, hi_x), (theta - half, hi_x),
     ]
-    bottom = [mesh.vertex(polar(x, base_r(x), angle)) for angle, x in corners]
+    bottom = [
+        mesh.vertex(polar(x, base_r(x) - spec.LUG_SEAT, angle))
+        for angle, x in corners
+    ]
     top = [mesh.vertex(polar(x, base_r(x) + spec.TWI_HEIGHT, angle)) for angle, x in corners]
     uv = ((0.0, 0.0), (0.1, 0.0), (0.1, 0.3), (0.0, 0.3))
     mesh.quad(top[0], top[1], top[2], top[3], uv)
@@ -1190,574 +1141,6 @@ def add_ejector(mesh: Mesh, theta: float, x: float) -> None:
 
 # ---------------------------------------------------------------------------
 # Visual: the access port - cut edge, bolted bezel, boarding tongue
-# ---------------------------------------------------------------------------
-def port_perimeter(per_edge: int = 14) -> list[tuple[float, float, float, float]]:
-    """(theta, radius, outward_theta, outward_radius) around the opening.
-
-    The outward direction is carried per point so the bezel can be grown out
-    of the opening in the sidewall plane without re-deriving which edge each
-    point is on - the round-1 bezel guessed that per point and produced a
-    frame with kinked corners.
-    """
-
-    half = PORT_HALF_ANGLE
-    r0, r1 = spec.PORT_INNER_RADIUS, spec.PORT_OUTER_RADIUS
-    points: list[tuple[float, float, float, float]] = []
-
-    def edge(theta_a, radius_a, theta_b, radius_b, out_t, out_r):
-        for step in range(per_edge):
-            t = step / per_edge
-            points.append(
-                (
-                    theta_a + (theta_b - theta_a) * t,
-                    radius_a + (radius_b - radius_a) * t,
-                    out_t,
-                    out_r,
-                )
-            )
-
-    edge(-half, r0, half, r0, 0.0, -1.0)
-    edge(half, r0, half, r1, 1.0, 0.0)
-    edge(half, r1, -half, r1, 0.0, 1.0)
-    edge(-half, r1, -half, r0, -1.0, 0.0)
-
-    # Round the four corners by blending the outward direction across the
-    # points either side of each corner.
-    span = 3
-    smoothed = []
-    count = len(points)
-    for index, (theta, radius, out_t, out_r) in enumerate(points):
-        acc_t = acc_r = 0.0
-        for offset in range(-span, span + 1):
-            _, _, ot, orr = points[(index + offset) % count]
-            weight = 1.0 - abs(offset) / (span + 1.0)
-            acc_t += ot * weight
-            acc_r += orr * weight
-        length = math.hypot(acc_t, acc_r) or 1.0
-        smoothed.append((theta, radius, acc_t / length, acc_r / length))
-    return smoothed
-
-
-def strap_lug_points() -> tuple[tuple[float, float], ...]:
-    """(theta, radius) of the two tie-down lugs on the port frame's side rails.
-
-    These are the SAME two places the cage anchors its strap beams, so the
-    webbing you see and the beam that holds the tire are one strap and not
-    two. Both sit outside the opening.
-    """
-
-    radius = spec.PORT_INNER_RADIUS + (
-        spec.PORT_OUTER_RADIUS - spec.PORT_INNER_RADIUS
-    ) * 0.53
-    offset = PORT_HALF_ANGLE + spec.PORT_BEZEL_WIDTH * 0.5 / radius
-    return ((-offset, radius), (offset, radius))
-
-
-def build_port(materials) -> list:
-    laminate_mat = materials[f"{MOD_ID}_laminate"]
-    steel_mat = materials[f"{MOD_ID}_steel"]
-    deck_mat = materials[f"{MOD_ID}_deck"]
-    hazard_mat = materials[f"{MOD_ID}_hazard"]
-
-    cut = Mesh(f"{MOD_ID}_port_cut", laminate_mat)
-    bezel = Mesh(f"{MOD_ID}_port_bezel", steel_mat)
-    perimeter = port_perimeter(per_edge=26)
-    count = len(perimeter)
-
-    arcs: list[float] = []
-    arc = 0.0
-    for index, (theta, radius, _, _) in enumerate(perimeter):
-        if index:
-            prev_theta, prev_radius, _, _ = perimeter[index - 1]
-            arc += math.hypot(
-                (theta - prev_theta) * 0.5 * (radius + prev_radius), radius - prev_radius
-            )
-        arcs.append(arc)
-    arcs.append(arc + 0.35)
-
-    # --- Cut edge: the carcass laminate in section, right round the opening.
-    # UV v runs 1 -> 0 from the CAVITY side to the ROAD side, because the
-    # laminate texture is authored liner-first at array row 0, which lands at
-    # the top of the image, which is UV v = 1.
-    #
-    # STEPPED, not flat. Round 1 spent one quad band on the whole 0.6 m
-    # section - a plank with a texture on it, which is exactly what forty
-    # lines of spec prose say it must not be. Each ply now sits at its own
-    # slight relief, so raking light finds the laminate as geometry and the
-    # texture only has to supply the material.
-    steps = spec.PORT_CUT_STEPS
-
-    def ply_relief(t: float) -> float:
-        for lo, hi, relief in spec.CUT_PLIES:
-            if lo <= t <= hi:
-                return relief
-        return 0.0
-
-    rows = []
-    for step in range(steps):
-        t = step / (steps - 1)
-        row = []
-        for theta, radius, _, _ in perimeter:
-            half, thick = sidewall_mid(radius)
-            across = half - thick * 0.5 + thick * t
-            row.append(cut.vertex(polar(across, radius + ply_relief(t), theta)))
-        rows.append(row)
-    for step in range(steps - 1):
-        v0 = 1.0 - step / (steps - 1)
-        v1 = 1.0 - (step + 1) / (steps - 1)
-        for index in range(count):
-            nxt = (index + 1) % count
-            u0 = arcs[index] / TILE_SIDEWALL
-            u1 = arcs[index + 1] / TILE_SIDEWALL
-            uv = ((u0, v0), (u1, v0), (u1, v1), (u0, v1))
-            cut.quad(
-                rows[step][index], rows[step][nxt],
-                rows[step + 1][nxt], rows[step + 1][index], uv, False,
-            )
-
-    # --- Bezel: a BOX SECTION ring frame, not a sheet. Inner wall on the
-    # opening, a face plate standing PORT_BEZEL_PROUD off the sidewall, an
-    # outer wall, and a return onto the carcass.
-    width = spec.PORT_BEZEL_WIDTH
-    proud = spec.PORT_BEZEL_PROUD
-    depth = spec.PORT_BEZEL_DEPTH
-
-    def grow(theta, radius, out_t, out_r, distance):
-        out_radius = min(radius + out_r * distance, spec.PORT_BEZEL_MAX_RADIUS)
-        return (theta + out_t * distance / max(radius, 1e-6), out_radius)
-
-    profile = (
-        (0.0, 0.0),                    # lip on the opening, at the sidewall face
-        (0.0, proud),                  # up the inner wall
-        (width * 0.5, proud + depth * 0.35),
-        (width, proud),                # across the face plate
-        (width, 0.0),                  # down the outer wall
-        (width + 0.22, -0.06),         # return, tucked onto the carcass
-    )
-    def sill_blend(out_r):
-        """1 on the SILL edge of the opening, 0 on the other three.
-
-        The sill is the edge you drive over. A frame that stands 0.30 m proud
-        there is a kerb across the doorway, and it collided with the boarding
-        gangway that has to lie on top of it. Everywhere else the frame is a
-        raised bolted ring; along the sill it flattens into a threshold plate.
-        """
-
-        return max(0.0, min(1.0, out_r))
-
-    profile_walk = [0.0]
-    for index in range(1, len(profile)):
-        profile_walk.append(
-            profile_walk[-1]
-            + math.hypot(
-                profile[index][0] - profile[index - 1][0],
-                profile[index][1] - profile[index - 1][1],
-            )
-        )
-    rows = []
-    for distance, stand in profile:
-        row = []
-        for theta, radius, out_t, out_r in perimeter:
-            blend = sill_blend(out_r)
-            out_theta, out_radius = grow(
-                theta, radius, out_t, out_r, distance * (1.0 - 0.55 * blend)
-            )
-            half, thick = sidewall_mid(out_radius)
-            row.append(
-                bezel.vertex(
-                    polar(
-                        half + thick * 0.5 + stand * (1.0 - 0.88 * blend),
-                        out_radius,
-                        out_theta,
-                    )
-                )
-            )
-        rows.append(row)
-    for level in range(len(rows) - 1):
-        for index in range(count):
-            nxt = (index + 1) % count
-            # v is the distance ALONG the box section's profile, not the
-            # level index: the frame is steel and has to read at the same
-            # grain as every other steel surface beside it.
-            u0 = arcs[index] / TILE_STEEL
-            u1 = arcs[index + 1] / TILE_STEEL
-            v0 = profile_walk[level] / TILE_STEEL
-            v1 = profile_walk[level + 1] / TILE_STEEL
-            uv = ((u0, v0), (u1, v0), (u1, v1), (u0, v1))
-            bezel.quad(
-                rows[level][index], rows[level][nxt],
-                rows[level + 1][nxt], rows[level + 1][index], uv,
-            )
-
-    # --- Bolts, on a bolt CIRCLE set in from the opening.
-    #
-    # Round 3 sat them at width * 0.5 across the profile. On the port's outer
-    # edge the frame is clamped to PORT_BEZEL_MAX_RADIUS and only 0.34 m wide,
-    # so "half way across" landed on the clamp boundary and the heads stood
-    # out past the silhouette - 46 of them made the frame read as a cog. A
-    # fixed inset from the opening keeps them on the plate all the way round,
-    # and real inspection-port fasteners are smaller and closer together than
-    # this than round 3 made them.
-    inset = min(spec.PORT_BOLT_INSET, width * 0.55)
-    for bolt in range(spec.PORT_BOLTS):
-        index = int(bolt / spec.PORT_BOLTS * count) % count
-        theta, radius, out_t, out_r = perimeter[index]
-        blend = sill_blend(out_r)
-        out_theta, out_radius = grow(
-            theta, radius, out_t, out_r, inset * (1.0 - 0.55 * blend)
-        )
-        half, thick = sidewall_mid(out_radius)
-        add_bolt(
-            bezel,
-            half + thick * 0.5 + (proud + depth * 0.32) * (1.0 - 0.88 * blend),
-            out_radius,
-            out_theta,
-            spec.PORT_BOLT_ACROSS,
-            spec.PORT_BOLT_HEIGHT,
-        )
-
-    # --- Radial gussets between the face plate and the carcass.
-    for gusset in range(spec.PORT_GUSSETS):
-        index = int((gusset + 0.5) / spec.PORT_GUSSETS * count) % count
-        theta, radius, out_t, out_r = perimeter[index]
-        add_gusset(bezel, theta, radius, out_t, out_r, width, proud, depth)
-
-    # --- Lifting lugs. Placed deliberately, not spread evenly: the two SIDE
-    # rails carry the tie-downs (a strap anchored anywhere else runs straight
-    # across the doorway you have to drive through), and the two top corners
-    # are the crane picks.
-    for _theta, _radius in strap_lug_points() + (
-        (-PORT_HALF_ANGLE * 0.72, spec.PORT_OUTER_RADIUS - 0.30),
-        (PORT_HALF_ANGLE * 0.72, spec.PORT_OUTER_RADIUS - 0.30),
-    ):
-        half, thick = sidewall_mid(_radius)
-        add_lift_lug(bezel, half + thick * 0.5 + spec.PORT_BEZEL_PROUD * 0.4, _radius, _theta)
-
-    tongue_objects = build_tongue(deck_mat, hazard_mat, steel_mat)
-    return [cut.build(), bezel.build()] + tongue_objects
-
-
-def add_gusset(mesh: Mesh, theta: float, radius: float, out_t: float, out_r: float,
-               width: float, proud: float, depth: float) -> None:
-    """Stiffener wedge from the bezel face plate down onto the carcass.
-
-    Round 2 grew these 1.2 m outward with no bound on the resulting radius, so
-    every gusset on the outer edge speared straight out through the shoulder.
-    The reach is now short, the radius is clamped to the same bound the bezel
-    uses, and the wedge is closed rather than two loose triangles.
-    """
-
-    thickness = 0.050
-    reach = 0.42
-
-    def point(distance, stand, offset):
-        out_radius = min(radius + out_r * distance, spec.PORT_BEZEL_MAX_RADIUS)
-        out_theta = theta + (out_t * distance + offset) / max(radius, 1e-6)
-        half, thick = sidewall_mid(out_radius)
-        return polar(half + thick * 0.5 + stand, out_radius, out_theta)
-
-    profile = (
-        (width * 0.45, proud + depth * 0.30),
-        (width * 0.45 + reach, 0.02),
-        (width * 0.45, 0.02),
-    )
-    rings = []
-    for offset in (-thickness, thickness):
-        rings.append([mesh.vertex(point(d, s, offset)) for d, s in profile])
-    scale = reach / TILE_STEEL
-    uv3 = ((0.0, 0.0), (scale, 0.0), (0.0, scale))
-    mesh.face(tuple(rings[1]), uv3)
-    mesh.face(tuple(reversed(rings[0])), uv3)
-    for index in range(3):
-        nxt = (index + 1) % 3
-        uv = (
-            (0.0, 0.0), (scale, 0.0),
-            (scale, 2.0 * thickness / TILE_STEEL), (0.0, 2.0 * thickness / TILE_STEEL),
-        )
-        mesh.quad(rings[0][index], rings[0][nxt], rings[1][nxt], rings[1][index], uv)
-
-
-def add_lift_lug(mesh: Mesh, x: float, radius: float, theta: float) -> None:
-    """A plate eye welded to the bezel: where a strap or a crane hook goes."""
-
-    plate = 0.06
-    height = spec.PORT_LUG_HEIGHT
-    length = 0.40
-    corners = [
-        (radius - length * 0.5, x + 0.02),
-        (radius + length * 0.5, x + 0.02),
-        (radius + length * 0.32, x + height),
-        (radius - length * 0.32, x + height),
-    ]
-    for offset in (-plate, plate):
-        ring = [
-            mesh.vertex(polar(cx + offset, cr, theta))
-            for cr, cx in corners
-        ]
-        uv = (
-            (0.0, 0.0), (length / TILE_STEEL, 0.0),
-            (length / TILE_STEEL, height / TILE_STEEL), (0.0, height / TILE_STEEL),
-        )
-        if offset > 0:
-            mesh.quad(ring[0], ring[1], ring[2], ring[3], uv)
-        else:
-            mesh.quad(ring[3], ring[2], ring[1], ring[0], uv)
-
-
-TONGUE_HALF_ARC = math.radians(spec.TONGUE_HALF_ARC_DEG)
-
-
-def tongue_station(t: float) -> tuple[float, float]:
-    """(axial x, radius) along the gangway, t = 0 at the sill, 1 at the tip.
-
-    The CAGE and the VISUAL both call this. Round 1 modelled the gangway as
-    Blender meshes only and gave it no cage at all, so the drivable surface
-    ended at the dock edge and resumed 0.7 m away inside the tire with
-    nothing in between - a flexbody is paint, collision comes from triangles.
-    """
-
-    x = spec.LINER_HALF + (spec.TONGUE_REACH_X - spec.LINER_HALF) * t
-    radius = R_CAV + (spec.TONGUE_TIP_RADIUS - R_CAV) * (t ** 1.25)
-    return (x, radius)
-
-
-def tongue_thickness(t: float) -> float:
-    return spec.TONGUE_ROOT_THICK + (spec.TONGUE_TIP_THICK - spec.TONGUE_ROOT_THICK) * t
-
-
-# Where along the gangway the dock's leading edge passes underneath, in the
-# same parameter build_tongue's stations run on.
-QUAY_T = (spec.DOCK_CLEAR_X - spec.LINER_HALF) / (spec.TONGUE_REACH_X - spec.LINER_HALF)
-
-
-def build_tongue(deck_mat, hazard_mat, steel_mat) -> list:
-    """The boarding gangway: bolted to the port sill, resting on the dock."""
-
-    tongue = Mesh(f"{MOD_ID}_tongue", deck_mat)
-    kerb = Mesh(f"{MOD_ID}_tongue_kerb", hazard_mat)
-    ribs = Mesh(f"{MOD_ID}_tongue_ribs", steel_mat)
-
-    half_arc = TONGUE_HALF_ARC
-    steps = 8
-    columns = 8
-    thetas = [-half_arc + 2.0 * half_arc * step / columns for step in range(columns + 1)]
-
-    station = tongue_station
-    plate_thickness = tongue_thickness
-    x_start = spec.LINER_HALF
-
-    top_rows, bottom_rows = [], []
-    for step in range(steps + 1):
-        t = step / steps
-        x, radius = station(t)
-        thick = plate_thickness(t)
-        top_rows.append([tongue.vertex(polar(x, radius, theta)) for theta in thetas])
-        bottom_rows.append(
-            [tongue.vertex(polar(x, radius + thick, theta)) for theta in thetas]
-        )
-    # METRIC UVs. The first cut used 0.24 per step, which put a whole diamond
-    # plate tile on a 0.17 m step - 400 mm teardrops on a walkway, a metre of
-    # plate per tread. Both axes are now real distances in metres.
-    def uv_u(step):
-        x, radius = station(step / steps)
-        return math.hypot(x - x_start, radius - R_CAV) / TILE_STEEL
-
-    def uv_v(column, step):
-        _, radius = station(step / steps)
-        return radius * thetas[column] / TILE_STEEL
-
-    for step in range(steps):
-        for column in range(columns):
-            u0, u1 = uv_u(step), uv_u(step + 1)
-            v0, v1 = uv_v(column, step), uv_v(column + 1, step)
-            uv = ((u0, v0), (u1, v0), (u1, v1), (u0, v1))
-            tongue.quad(
-                top_rows[step][column], top_rows[step + 1][column],
-                top_rows[step + 1][column + 1], top_rows[step][column + 1], uv,
-            )
-            tongue.quad(
-                bottom_rows[step][column + 1], bottom_rows[step + 1][column + 1],
-                bottom_rows[step + 1][column], bottom_rows[step][column], uv,
-            )
-    for step in range(steps):
-        for column, direction in ((0, -1), (columns, 1)):
-            uv = ((0.0, 0.0), (0.3, 0.0), (0.3, 0.2), (0.0, 0.2))
-            a, b = top_rows[step][column], top_rows[step + 1][column]
-            c, d = bottom_rows[step + 1][column], bottom_rows[step][column]
-            if direction > 0:
-                tongue.quad(a, b, c, d, uv)
-            else:
-                tongue.quad(d, c, b, a, uv)
-    # Leading lip, so the gangway does not end in a raw edge on the landing.
-    x_tip, radius_tip = station(1.0)
-    for column in range(columns):
-        uv = ((0.0, 0.0), (0.3, 0.0), (0.3, 0.1), (0.0, 0.1))
-        tongue.quad(
-            top_rows[steps][column + 1], top_rows[steps][column],
-            bottom_rows[steps][column], bottom_rows[steps][column + 1], uv,
-        )
-
-    # Hazard kerbs down both sides.
-    for column, direction in ((0, -1.0), (columns, 1.0)):
-        theta = thetas[column]
-        rows = []
-        for step in range(steps + 1):
-            x, radius = station(step / steps)
-            rows.append(
-                [
-                    kerb.vertex(polar(x, radius, theta)),
-                    kerb.vertex(polar(x, radius - 0.24, theta)),
-                    kerb.vertex(polar(x, radius - 0.24, theta + direction * 0.014)),
-                    kerb.vertex(polar(x, radius, theta + direction * 0.014)),
-                ]
-            )
-        kerb_tile = tile_of(hazard_mat)
-        for step in range(steps):
-            u0 = step / steps * spec.TONGUE_REACH_X / kerb_tile
-            u1 = (step + 1) / steps * spec.TONGUE_REACH_X / kerb_tile
-            for corner in range(4):
-                nxt = (corner + 1) % 4
-                v0 = corner * 0.36 / kerb_tile
-                v1 = (corner + 1) * 0.36 / kerb_tile
-                uv = ((u0, v0), (u1, v0), (u1, v1), (u0, v1))
-                kerb.quad(
-                    rows[step][corner], rows[step + 1][corner],
-                    rows[step + 1][nxt], rows[step][nxt], uv,
-                )
-
-    # Underside stiffener ribs.
-    def rib_drop(t: float) -> float:
-        # THE RIBS DIE BEFORE THE QUAY. The tongue's tip radius is derived so
-        # its PLATE lands exactly on DOCK_LANDING_Z - but the stiffener ribs
-        # hang below the plate, and they were still 75 mm deep where the
-        # tongue crosses the dock's leading girder: 15 mm inside it at rest,
-        # 19 mm inside the landing deck a little further out. A gangway rests
-        # on a quay plate-down; its ribs stop short of it.
-        fade = min(1.0, max(0.0, (QUAY_T - 0.06 - t) / 0.25))
-        return 0.30 * math.sin(math.pi * min(1.0, t + 0.05)) * (1.0 - t * 0.8) * fade
-
-    # ...and they stop where they are still a rib. Running the fade to zero
-    # collapsed the box section onto its own top face for the last stations,
-    # which the post-build weld then turned into five edges shared by two
-    # faces pointing opposite ways - a rib that is a sheet is not a rib.
-    rib_last = max(
-        step for step in range(steps + 1) if rib_drop(step / steps) >= 0.020
-    )
-    for rib in range(spec.TONGUE_RIBS):
-        theta = -half_arc + 2.0 * half_arc * (rib + 0.5) / spec.TONGUE_RIBS
-        rows = []
-        for step in range(rib_last + 1):
-            t = step / steps
-            x, radius = station(t)
-            base = radius + plate_thickness(t)
-            drop = rib_drop(t)
-            rows.append(
-                [
-                    ribs.vertex(polar(x, base, theta - 0.004)),
-                    ribs.vertex(polar(x, base + drop, theta - 0.004)),
-                    ribs.vertex(polar(x, base + drop, theta + 0.004)),
-                    ribs.vertex(polar(x, base, theta + 0.004)),
-                ]
-            )
-        rib_tile = tile_of(steel_mat)
-        for step in range(rib_last):
-            u0 = step / steps * spec.TONGUE_REACH_X / rib_tile
-            u1 = (step + 1) / steps * spec.TONGUE_REACH_X / rib_tile
-            for corner in range(4):
-                nxt = (corner + 1) % 4
-                v0 = corner * 0.30 / rib_tile
-                v1 = (corner + 1) * 0.30 / rib_tile
-                uv = ((u0, v0), (u1, v0), (u1, v1), (u0, v1))
-                ribs.quad(
-                    rows[step][corner], rows[step + 1][corner],
-                    rows[step + 1][nxt], rows[step][nxt], uv,
-                )
-        end = rows[rib_last]
-        cap_uv = ((0.0, 0.0), (0.06, 0.0), (0.06, 0.2), (0.0, 0.2))
-        ribs.quad(end[3], end[2], end[1], end[0], cap_uv)
-    del x_tip, radius_tip
-    return [tongue.build(), kerb.build(), ribs.build()]
-
-
-def add_bolt(mesh: Mesh, x: float, radius: float, theta: float,
-             across: float, height: float) -> None:
-    """Hex-head bolt standing off the sidewall plane at +X."""
-
-    faces = 6
-    top_ring, base_ring = [], []
-    for index in range(faces):
-        angle = TAU * index / faces + math.pi / 6.0
-        dr = math.cos(angle) * across
-        dt = math.sin(angle) * across / radius
-        base_ring.append(mesh.vertex(polar(x, radius + dr, theta + dt)))
-        top_ring.append(mesh.vertex(polar(x + height, radius + dr * 0.92, theta + dt * 0.92)))
-    for index in range(faces):
-        nxt = (index + 1) % faces
-        span = across * 2.0 * math.pi / faces / TILE_STEEL
-        uv = (
-            (index * span, 0.0),
-            ((index + 1) * span, 0.0),
-            ((index + 1) * span, height / TILE_STEEL),
-            (index * span, height / TILE_STEEL),
-        )
-        mesh.quad(base_ring[index], base_ring[nxt], top_ring[nxt], top_ring[index], uv)
-    centre = mesh.vertex(polar(x + height, radius, theta))
-    for index in range(faces):
-        nxt = (index + 1) % faces
-        span = across / TILE_STEEL
-        mesh.face(
-            (top_ring[index], top_ring[nxt], centre),
-            ((0.0, 0.0), (span, 0.0), (span * 0.5, span)),
-        )
-
-
-def build_lane_marks(materials) -> list:
-    """Emissive chevrons down the middle of the cavity floor.
-
-    The inside of a closed torus whose only aperture rotates away is
-    genuinely pitch black, and everything after "STRAPS CUT" happens in
-    there. Round 1 shipped a near-black liner with no light and no landmark,
-    so once the port passed about 40 degrees the player was driving a black
-    drum with no directional cue and no way to find the exit.
-
-    These are moulded-in emissive chevrons at LANE_MARK_EVERY stations. They
-    do three jobs at once: they light the floor, they point the way round,
-    and because they stream past at a rate you can read they are the only
-    speed cue inside a surface with no horizon.
-    """
-
-    material = materials[f"{MOD_ID}_lane_mark"]
-    mesh = Mesh(f"{MOD_ID}_lane_marks", material)
-    radius = R_CAV - spec.LANE_MARK_OFFSET
-    half_len = spec.LANE_MARK_LENGTH * 0.5 / radius
-    half_w = spec.LANE_MARK_WIDTH * 0.5
-    for index in range(0, STATIONS, spec.LANE_MARK_EVERY):
-        theta = index * spec.STATION_ANGLE
-        # A chevron: two arms meeting on the centre line, pointing the way the
-        # tire turns when the car drives forward.
-        for sign in (-1.0, 1.0):
-            tip = (theta + half_len, 0.0)
-            root = (theta - half_len, sign * (spec.LANE_MARK_LENGTH * 0.42))
-            corners = (
-                (tip[0], tip[1]),
-                (root[0], root[1]),
-                (root[0] - half_w / radius, root[1]),
-                (tip[0] - half_w / radius * 1.6, tip[1]),
-            )
-            ring = [mesh.vertex(polar(x, radius, angle)) for angle, x in corners]
-            tile = MATERIAL_TILE["lane_mark"]
-            uv = tuple(
-                (radius * angle / tile, x / tile) for angle, x in corners
-            )
-            if sign > 0:
-                mesh.quad(ring[3], ring[2], ring[1], ring[0], uv)
-            else:
-                mesh.quad(ring[0], ring[1], ring[2], ring[3], uv)
-    return [mesh.build()]
-
-
-# ---------------------------------------------------------------------------
-# Visual: moulded sidewall lettering, as real extruded geometry
 # ---------------------------------------------------------------------------
 def build_lettering(materials) -> list:
     """Brand, pattern and size code, moulded proud of both sidewalls.
@@ -1817,8 +1200,6 @@ def build_lettering(materials) -> list:
                 layout.append((text, radius, height, centre, side))
 
     for index, (text, band_radius, height, centre, side) in enumerate(layout):
-        if side > 0 and port_open_theta(centre, band_radius):
-            continue
         curve = bpy.data.curves.new(f"{MOD_ID}_txt_{index}", "FONT")
         curve.body = text
         if font is not None:
@@ -1872,7 +1253,7 @@ def build_lettering(materials) -> list:
             # inside the sidewall. Shifting by the half-extrusion instead puts
             # the back face flush on the sidewall and makes the moulded relief
             # exactly LETTER_RELIEF, as the spec says it is.
-            back = curve.extrude + curve.bevel_depth
+            back = curve.extrude + curve.bevel_depth - spec.LUG_SEAT
             stand = half + thick * 0.5 + sidewall_relief(radius) + (local.z + back)
             vertex.co = Vector(polar(side * stand, radius, theta))
         mesh_obj.data.update()
@@ -2022,220 +1403,122 @@ def build_print_band(materials) -> list:
 # ---------------------------------------------------------------------------
 # Visual: the loading dock (fixed structure)
 # ---------------------------------------------------------------------------
-def build_dock(materials) -> list:
+def chock_geometry(sign: float) -> dict:
+    """The one wedge, derived from the tire it is holding.
+
+    A chock works by being something the tire has to climb, so its top edge
+    has to touch the tire: at spec.CHOCK_FAR from the contact patch the
+    carcass is exactly R - sqrt(R^2 - y^2) off the ground, and that is the
+    height. Nothing here is typed in but the two distances and the width.
+    """
+
+    near = sign * spec.CHOCK_NEAR
+    far = sign * spec.CHOCK_FAR
+    # SEAT_GAP: the wedge now really collides with the carcass (its nodes
+    # carry selfCollision), so a top edge authored to touch the UNLOADED
+    # surface would spawn preloaded into it. The settled carcass sags ~80 mm,
+    # which closes most of the gap; contact is a kiss, not a spring.
+    height = (
+        R_O - math.sqrt(max(R_O ** 2 - spec.CHOCK_FAR ** 2, 0.0))
+        - spec.CHOCK_SEAT_GAP
+    )
+    half = spec.CHOCK_HALF_WIDTH
+    return {"near": near, "far": far, "height": height, "half": half}
+
+
+# (index, fore/aft sign, axial centre) for each of the four chocks.
+CHOCK_PLACES = tuple(
+    (index, sign, offset)
+    for index, (sign, offset) in enumerate(
+        (
+            (-1.0, -spec.CHOCK_OFFSET), (-1.0, spec.CHOCK_OFFSET),
+            (1.0, -spec.CHOCK_OFFSET), (1.0, spec.CHOCK_OFFSET),
+        )
+    )
+)
+
+
+def build_chocks(materials) -> list:
+    """Two steel chocks at the contact patch.
+
+    THE ONLY FIXED STRUCTURE LEFT. The loading dock, the boarding gangway and
+    the bolted access port are gone: this is a TIRE, and the brief for it is
+    realism. What a 10.5 tonne carcass standing in a yard actually has under
+    it is a pair of chocks, and they earn their place three times over - they
+    are what a real one would have, they are what stops it rolling off on the
+    first frame, and the pack's one-cage rule needs somewhere fixed to hang
+    the spawn datum from.
+    """
+
     steel = materials[f"{MOD_ID}_steel_worn"]
-    deck = materials[f"{MOD_ID}_deck"]
     hazard = materials[f"{MOD_ID}_hazard"]
-    strap_mat = materials[f"{MOD_ID}_strap"]
-    concrete = materials[f"{MOD_ID}_concrete"]
-
+    tile = tile_of(steel)
+    stripe_tile = tile_of(hazard)
     objects = []
-    x0 = spec.DOCK_CLEAR_X
-    x1 = spec.DOCK_LANDING_X1
-    x2 = spec.DOCK_RUN_X
-    hy = spec.DOCK_HALF_Y
-    z = spec.DOCK_LANDING_Z
+    for index, sign, offset in CHOCK_PLACES:
+        shape = chock_geometry(sign)
+        near, far = shape["near"], shape["far"]
+        height, half = shape["height"], shape["half"]
+        ramp = math.hypot(far - near, height)
 
-    objects.append(
-        bk.add_box(
-            f"{MOD_ID}_dock_landing",
-            ((x0 + x1) / 2.0, 0.0, z - 0.09),
-            (x1 - x0, 2 * hy, 0.18),
-            deck,
-            bevel=0.0,
-            metric_uv=(tile_of(deck), tile_of(deck)),
+        body = Mesh(f"{MOD_ID}_chock_{index}", steel)
+        toe_l = body.vertex((offset - half, near, 0.0))
+        toe_r = body.vertex((offset + half, near, 0.0))
+        heel_l = body.vertex((offset - half, far, 0.0))
+        heel_r = body.vertex((offset + half, far, 0.0))
+        top_l = body.vertex((offset - half, far, height))
+        top_r = body.vertex((offset + half, far, height))
+
+        ramp_uv = (
+            (0.0, 0.0), (2.0 * half / tile, 0.0),
+            (2.0 * half / tile, ramp / tile), (0.0, ramp / tile),
         )
-    )
-    run = x2 - x1
-    ramp_len = math.hypot(run, z)
-    angle = math.atan2(z, run)
-    objects.append(
-        bk.add_box(
-            f"{MOD_ID}_dock_ramp",
-            ((x1 + x2) / 2.0, 0.0, z / 2.0 - math.cos(angle) * 0.10),
-            (ramp_len, 2 * hy, 0.20),
-            deck,
-            bevel=0.0,
-            rotation=(0.0, -angle, 0.0),
-            metric_uv=(tile_of(deck), tile_of(deck)),
+        back_uv = (
+            (0.0, 0.0), (2.0 * half / tile, 0.0),
+            (2.0 * half / tile, height / tile), (0.0, height / tile),
         )
-    )
-    # Kerbs and handrail START AT THE LANDING'S INBOARD EDGE, not at x0. A
-    # real loading dock's ship side is open - it is where the gangway lands -
-    # and running them to x0 put a kerb at y = +/-4.74 and a stanchion
-    # spanning z 0.78..1.88 exactly where the tongue's corner passes: at 6 deg
-    # of roll, about a second after the straps cut, that corner reaches
-    # y 4.750, z 1.710. It clipped on the one beat every player watches.
-    kerb_x0 = x1
-    for side, sy in (("l", -hy - 0.14), ("r", hy + 0.14)):
-        objects.append(
-            bk.add_box(
-                f"{MOD_ID}_dock_kerb_{side}",
-                ((kerb_x0 + x2) / 2.0, sy, z * 0.5 + spec.DOCK_KERB_H * 0.5),
-                (x2 - kerb_x0, 0.24, spec.DOCK_KERB_H),
-                hazard,
-                bevel=0.03,
-                rotation=(0.0, -angle * 0.5, 0.0),
-                metric_uv=(tile_of(hazard), tile_of(hazard)),
+        base_uv = (
+            (0.0, 0.0), (2.0 * half / tile, 0.0),
+            (2.0 * half / tile, (far - near) / tile), (0.0, (far - near) / tile),
+        )
+        side_uv = (
+            (0.0, 0.0), (abs(far - near) / tile, 0.0), (abs(far - near) / tile, height / tile)
+        )
+        if sign > 0:
+            body.quad(toe_l, toe_r, top_r, top_l, ramp_uv)       # the climb
+            body.quad(top_r, heel_r, heel_l, top_l, back_uv)     # the heel
+            body.quad(toe_r, toe_l, heel_l, heel_r, base_uv)     # the ground
+            body.face((toe_l, top_l, heel_l), side_uv)
+            body.face((heel_r, top_r, toe_r), side_uv)
+        else:
+            body.quad(top_l, top_r, toe_r, toe_l, ramp_uv)
+            body.quad(top_l, heel_l, heel_r, top_r, back_uv)
+            body.quad(heel_r, heel_l, toe_l, toe_r, base_uv)
+            body.face((heel_l, top_l, toe_l), side_uv)
+            body.face((toe_r, top_r, heel_r), side_uv)
+        objects.append(body.build())
+
+        # Two hazard bands up the climb face, the way yard kit is painted.
+        stripe = Mesh(f"{MOD_ID}_chock_stripe_{index}", hazard)
+        lift = 0.010
+        for edge in (-1.0, 1.0):
+            outer = offset + edge * (half - 0.06)
+            inner = offset + edge * (half - 0.06 - spec.CHOCK_STRIPE)
+            uv = (
+                (0.0, 0.0), (spec.CHOCK_STRIPE / stripe_tile, 0.0),
+                (spec.CHOCK_STRIPE / stripe_tile, ramp / stripe_tile),
+                (0.0, ramp / stripe_tile),
             )
-        )
-        # Handrail: stanchions and two runs of tube, the whole length.
-        posts = 7
-        for index in range(posts):
-            t = index / (posts - 1)
-            px = kerb_x0 + (x2 - kerb_x0) * t
-            deck_z = z if px <= x1 else max(0.0, z * (1.0 - (px - x1) / run))
-            objects.append(
-                bk.add_box(
-                    f"{MOD_ID}_dock_post_{side}_{index}",
-                    (px, sy, deck_z + spec.DOCK_RAIL_H * 0.5),
-                    (0.10, 0.10, spec.DOCK_RAIL_H),
-                    steel,
-                    bevel=0.01,
-                    metric_uv=(tile_of(steel), tile_of(steel)),
-                )
-            )
-        for level, height in (("top", spec.DOCK_RAIL_H), ("mid", spec.DOCK_RAIL_H * 0.55)):
-            rail = bk.add_cylinder(
-                f"{MOD_ID}_dock_rail_{side}_{level}",
-                ((kerb_x0 + x2) / 2.0, sy, z * 0.5 + height),
-                0.055,
-                x2 - kerb_x0,
-                steel,
-                vertices=10,
-                axis="X",
-            )
-            # add_cylinder bakes the axis rotation into the mesh, so the ramp
-            # grade goes on the object transform on top of it.
-            rail.rotation_euler = (0.0, -angle * 0.5, 0.0)
-            objects.append(rail)
-    # Under-structure.
-    girders = 5
-    for index in range(girders):
-        t = index / (girders - 1)
-        gx = x0 + (x2 - x0) * t
-        gz = z if gx <= x1 else max(0.10, z * (1.0 - (gx - x1) / run))
-        objects.append(
-            bk.add_box(
-                f"{MOD_ID}_dock_girder_{index}",
-                (gx, 0.0, gz * 0.5 - 0.02),
-                (0.42, 2 * hy + 0.5, max(gz - 0.04, 0.06)),
-                steel,
-                bevel=0.03,
-                metric_uv=(tile_of(steel), tile_of(steel)),
-            )
-        )
-        for side, sy in (("l", -hy - 0.05), ("r", hy + 0.05)):
-            objects.append(
-                bk.add_box(
-                    f"{MOD_ID}_dock_pad_{index}_{side}",
-                    (gx, sy, 0.07),
-                    (0.9, 0.9, 0.14),
-                    concrete,
-                    bevel=0.02,
-                    metric_uv=(tile_of(concrete), tile_of(concrete)),
-                )
-            )
-    # Strap anchor posts.
-    for side, sy in (("l", -hy + 0.6), ("r", hy - 0.6)):
-        objects.append(
-            bk.add_cylinder(
-                f"{MOD_ID}_dock_anchor_{side}",
-                (x0 + 1.2, sy, z + 0.30),
-                0.17,
-                0.90,
-                steel,
-                vertices=12,
-                axis="Z",
-            )
-        )
-    # Sign board at the foot of the ramp: the scale reference that tells the
-    # eye how big the tire behind it is.
-    objects.append(
-        bk.add_box(
-            f"{MOD_ID}_dock_sign_post_l",
-            (x2 - 0.6, -hy - 1.9, 1.35),
-            (0.14, 0.14, 2.70),
-            steel,
-            bevel=0.01,
-            metric_uv=(tile_of(steel), tile_of(steel)),
-        )
-    )
-    objects.append(
-        bk.add_box(
-            f"{MOD_ID}_dock_sign_post_r",
-            (x2 - 0.6, -hy - 4.5, 1.35),
-            (0.14, 0.14, 2.70),
-            steel,
-            bevel=0.01,
-            metric_uv=(0.8, 0.8),
-        )
-    )
-    objects.append(
-        bk.add_box(
-            f"{MOD_ID}_dock_sign",
-            (x2 - 0.6, -hy - 3.2, 2.25),
-            (0.08, 2.9, 1.30),
-            hazard,
-            bevel=0.02,
-            metric_uv=(tile_of(hazard), tile_of(hazard)),
-        )
-    )
-
-    # Two ratchet straps, dock anchor to the port frame's side-rail lugs. The
-    # lug positions come from the same helper the bezel and the cage use, so
-    # the webbing, the eye and the beam are all one strap. They are returned
-    # SEPARATELY and skinned to the carcass group: round 1 appended them into
-    # the dock's object list, so the visible webbing was bound to the 16 FIXED
-    # dock nodes and stayed welded to the quay after the physics beams broke -
-    # two orange ribbons pointing at a tire 200 m away.
-    straps = []
-    for index, (theta, radius) in enumerate(strap_lug_points()):
-        half, thick = sidewall_mid(radius)
-        lug = polar(half + thick * 0.5 + spec.PORT_BEZEL_PROUD * 0.4 + 0.30, radius, theta)
-        sy = (-hy + 0.6) if theta < 0 else (hy - 0.6)
-        anchor = (x0 + 1.2, sy, z + 0.62)
-        straps.extend(
-            strap_ribbon(f"{MOD_ID}_strap_{index}", anchor, lug, strap_mat, steel)
-        )
-    return objects, straps
-
-
-def strap_ribbon(name: str, start, end, webbing_mat, steel_mat) -> list:
-    """A flat webbing strap with a ratchet body, start to end."""
-
-    start_v = Vector(start)
-    end_v = Vector(end)
-    span = end_v - start_v
-    length = span.length
-    mid = (start_v + end_v) * 0.5
-    direction = span.normalized()
-    quat = direction.to_track_quat("X", "Z")
-    strap = bk.add_box(
-        name,
-        tuple(mid),
-        (length, 0.32, 0.024),
-        webbing_mat,
-        bevel=0.0,
-        rotation=tuple(quat.to_euler()),
-        metric_uv=(tile_of(webbing_mat), tile_of(webbing_mat)),
-    )
-    body = bk.add_box(
-        f"{name}_ratchet",
-        tuple(start_v + direction * (length * 0.30)),
-        (0.44, 0.36, 0.22),
-        steel_mat,
-        bevel=0.02,
-        rotation=tuple(quat.to_euler()),
-        metric_uv=(tile_of(steel_mat), tile_of(steel_mat)),
-    )
-    return [strap, body]
-
-
-# ---------------------------------------------------------------------------
-# Physics cage
-# ---------------------------------------------------------------------------
-CROSS_SECTION: list[tuple[str, float, float]] = []
+            a = stripe.vertex((outer, near - sign * lift, lift))
+            b = stripe.vertex((inner, near - sign * lift, lift))
+            c = stripe.vertex((inner, far - sign * lift, height + lift))
+            d = stripe.vertex((outer, far - sign * lift, height + lift))
+            if (edge * sign) > 0:
+                stripe.quad(a, b, c, d, uv)
+            else:
+                stripe.quad(d, c, b, a, uv)
+        objects.append(stripe.build())
+    return objects
 
 
 def _station(fraction: float) -> tuple[float, float]:
@@ -2252,14 +1535,18 @@ def _station(fraction: float) -> tuple[float, float]:
     raise KeyError(f"no meridian station at fraction {fraction}")
 
 
+# The meridian, built once and reused by every station.
+CROSS_SECTION: list[tuple[str, float, float]] = []
+
+
 def cross_section() -> list[tuple[str, float, float]]:
     """(key, half width, radius) for the 22-node meridian, once.
 
-    SILL is the station that makes the access port cuttable. Its radius IS
-    CAVITY_RADIUS, so the port's outer edge lands on a ring of cage nodes and
-    every band above it can be removed cleanly. Round 1 had no such ring, so
-    the band spanning the port's outer edge stayed in the collision mesh -
-    an invisible panel standing across the doorway.
+    The SILL station's radius IS CAVITY_RADIUS. It was put there so the access
+    port could be cut on a ring of cage nodes; the port is gone, but the ring
+    is still the right place to change families - it is where the tread's
+    inner face hands over to the sidewall, which is a real construction
+    boundary and not a convenience.
     """
 
     if CROSS_SECTION:
@@ -2290,8 +1577,16 @@ def cross_section() -> list[tuple[str, float, float]]:
             ("bead_r", bead_x, bead_r),
         ]
     )
+    # THE FLOOR IS A 48-GON, so putting its NODES on the cavity radius put the
+    # whole drivable surface INSIDE it: the chord between two stations sits
+    # 28 mm nearer the axle than the nodes do, which is 28 mm of headroom lost
+    # all the way round and a floor that is systematically higher than the
+    # radius every other number is quoted against. Pushing the ring out by
+    # 1/cos(half a station) lands the CHORD MIDPOINTS on CAVITY_RADIUS, which
+    # is the surface a car actually rides.
+    liner_radius = R_CAV / math.cos(spec.STATION_ANGLE * 0.5)
     for label, x in zip(("lin_l", "lin_cl", "lin_c", "lin_cr", "lin_r"), spec.LINER_XS):
-        entries.append((label, x, R_CAV))
+        entries.append((label, x, liner_radius))
     CROSS_SECTION.extend(entries)
     return CROSS_SECTION
 
@@ -2367,7 +1662,7 @@ def balance_carcass(cage: bk.CageBuilder) -> None:
 
     carcass = [
         node for node in cage.nodes
-        if not node["fixed"] and "tongue" not in node["id"]
+        if not node["fixed"] and "chock" not in node["id"]
     ]
     rider = [
         node for node in cage.nodes
@@ -2380,39 +1675,42 @@ def balance_carcass(cage: bk.CageBuilder) -> None:
         x, y, z = node["source_world_position"]
         return (x, y, z - R_O)
 
-    # Two shape functions, both mean-zero over a symmetric ring: the vertical
-    # first harmonic (which is the balance patch) and the axial one.
-    def shapes(node):
-        x, _y, dz = offset(node)
-        return (dz / spec.OUTER_RADIUS, x / spec.SECTION_HALF)
+    # ONE shape function: the vertical first harmonic, which IS the balance
+    # patch. The axial offset is deliberately left alone - it is 0.36 m and
+    # produces a steady 3.6 degree lean, which is honest for a carcass with a
+    # gangway bolted to one flank, and correcting it too needed a +/-34%
+    # modulation that pushed the lightest port-frame node to omega*dt 0.934
+    # against a 0.9 ceiling. The radial offset is the one that matters: it is
+    # a pendulum the drive torque has to climb on every revolution.
+    def shape(node):
+        _x, _y, dz = offset(node)
+        return dz / spec.OUTER_RADIUS
 
     rider_mass = sum(node["weight"] for node in rider)
     rider_moment = [
         sum(node["weight"] * offset(node)[axis] for node in rider) for axis in (0, 2)
     ]
 
-    # Solve [c, a, b] for: total mass, axial moment, vertical moment.
-    matrix = [[0.0] * 3 for _ in range(3)]
-    target = [spec.TIRE_MASS, -rider_moment[0], -rider_moment[1]]
+    # Solve [c, a] for: total mass and vertical moment.
+    matrix = [[0.0] * 2 for _ in range(2)]
+    target = [spec.TIRE_MASS, -rider_moment[1]]
     for node in carcass:
         weight = node["weight"]
-        vertical, axial = shapes(node)
-        basis = (1.0, vertical, axial)
-        dx, _dy, dz = offset(node)
-        for column in range(3):
+        basis = (1.0, shape(node))
+        _dx, _dy, dz = offset(node)
+        for column in range(2):
             matrix[0][column] += weight * basis[column]
-            matrix[1][column] += weight * basis[column] * dx
-            matrix[2][column] += weight * basis[column] * dz
+            matrix[1][column] += weight * basis[column] * dz
 
-    solution = _solve3(matrix, target)
-    if solution is None:
+    determinant = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]
+    if abs(determinant) < 1e-9:
         raise SystemExit("the carcass balance system is singular")
-    scale, vertical_gain, axial_gain = solution
+    scale = (target[0] * matrix[1][1] - matrix[0][1] * target[1]) / determinant
+    vertical_gain = (matrix[0][0] * target[1] - target[0] * matrix[1][0]) / determinant
 
     lowest = highest = None
     for node in carcass:
-        vertical, axial = shapes(node)
-        factor = scale + vertical_gain * vertical + axial_gain * axial
+        factor = scale + vertical_gain * shape(node)
         if factor <= 0.0:
             raise SystemExit(
                 f"balancing wants a negative weight on {node['id']} "
@@ -2431,27 +1729,9 @@ def balance_carcass(cage: bk.CageBuilder) -> None:
     free = total + rider_mass
     print(
         f"COLOSSUS balance: carcass weights x{lowest:.3f}..{highest:.3f}; free body "
-        f"{free:.1f} kg, centre of mass {math.hypot(moment[0], moment[1]) / free * 1000:.1f} mm "
-        f"from the axle"
+        f"{free:.1f} kg, centre of mass {abs(moment[1]) / free * 1000:.1f} mm off the "
+        f"axle radially and {abs(moment[0]) / free * 1000:.0f} mm axially"
     )
-
-
-def _solve3(matrix, target):
-    """Gaussian elimination with partial pivoting on a 3x3 system."""
-
-    rows = [list(matrix[index]) + [target[index]] for index in range(3)]
-    for column in range(3):
-        pivot = max(range(column, 3), key=lambda r: abs(rows[r][column]))
-        if abs(rows[pivot][column]) < 1e-12:
-            return None
-        rows[column], rows[pivot] = rows[pivot], rows[column]
-        for other in range(3):
-            if other == column:
-                continue
-            factor = rows[other][column] / rows[column][column]
-            for index in range(column, 4):
-                rows[other][index] -= factor * rows[column][index]
-    return [rows[index][3] / rows[index][index] for index in range(3)]
 
 
 def build_cage() -> bk.CageBuilder:
@@ -2460,9 +1740,9 @@ def build_cage() -> bk.CageBuilder:
         cage.define_beam_spec(
             name, beamDeform="FLT_MAX", beamStrength="FLT_MAX", **values
         )
-    cage.define_beam_spec("dock", **spec.DOCK_BEAM)
+    cage.define_beam_spec("chock", **spec.DOCK_BEAM)
+    cage.define_beam_spec("wedge", **spec.WEDGE_BEAM)
     cage.define_beam_spec("strap", **spec.STRAP_SPEC)
-    cage.define_beam_spec("landing", **spec.LANDING_SPEC)
 
     section = cross_section()
     ids: dict[tuple[str, int], str] = {}
@@ -2481,31 +1761,13 @@ def build_cage() -> bk.CageBuilder:
                 group="carcass",
             )
 
-    port_columns = {station % STATIONS for station in range(-2, 3)}
-
-    # The bolted ring frame REPLACES the carcass beams it runs along; it does
-    # not sit beside them. Collect its edges first so the one beam that spans
-    # each pair is emitted once, in the port_frame family. (Adding a second
-    # beam over the same pair is what CageBuilder refuses, and rightly -
-    # doubled beams double the stiffness silently.)
-    frame_edges: set[frozenset[str]] = set()
-    port_ring = ("low_r", "max_r", "upp_r", "sill_r")
-    for station in port_columns:
-        for index in range(len(port_ring) - 1):
-            frame_edges.add(
-                frozenset((ids[(port_ring[index], station)], ids[(port_ring[index + 1], station)]))
-            )
-        following = (station + 1) % STATIONS
-        if following in port_columns:
-            for key in port_ring:
-                frame_edges.add(frozenset((ids[(key, station)], ids[(key, following)])))
-
     def beam(key_a, station_a, key_b, station_b, family, extra=None):
-        first = ids[(key_a, station_a % STATIONS)]
-        second = ids[(key_b, station_b % STATIONS)]
-        if frozenset((first, second)) in frame_edges:
-            family = "port_frame"
-        cage.add_beam(first, second, family, extra=extra)
+        cage.add_beam(
+            ids[(key_a, station_a % STATIONS)],
+            ids[(key_b, station_b % STATIONS)],
+            family,
+            extra=extra,
+        )
 
     for station in range(STATIONS):
         nxt = (station + 1) % STATIONS
@@ -2577,15 +1839,6 @@ def build_cage() -> bk.CageBuilder:
             beam("bead_l", station, "bead_r", opposite, "inflation")
             beam("bead_r", station, "bead_l", opposite, "inflation")
 
-        # --- Bolted port ring frame. The edges themselves were claimed above;
-        # what is left is the lin_r member, which no carcass beam covers.
-        if station in port_columns:
-            for index in range(len(port_ring) - 1):
-                beam(port_ring[index], station, port_ring[index + 1], station, "port_frame")
-            following = (station + 1) % STATIONS
-            if following in port_columns:
-                for key in port_ring:
-                    beam(key, station, key, following, "port_frame")
 
     # -----------------------------------------------------------------------
     # Collision surfaces.
@@ -2626,9 +1879,6 @@ def build_cage() -> bk.CageBuilder:
             ("sill_l", "lin_l", -1.0),
             ("sill_r", "lin_r", 1.0),
         ):
-            # Over the port sector the boarding gangway IS this surface.
-            if sign > 0 and station in PORT_QUADS:
-                continue
             cage.add_quad_both(
                 [
                     ids[(liner_key, station)],
@@ -2644,8 +1894,6 @@ def build_cage() -> bk.CageBuilder:
             for index in range(len(chain) - 1):
                 radius_lo = section[[k for k, _, _ in section].index(chain[index])][2]
                 radius_hi = section[[k for k, _, _ in section].index(chain[index + 1])][2]
-                if sign > 0 and port_open_at(station, radius_lo, radius_hi):
-                    continue
                 cage.add_quad_both(
                     [
                         ids[(chain[index], station)],
@@ -2670,268 +1918,162 @@ def build_cage() -> bk.CageBuilder:
             )
 
     # -----------------------------------------------------------------------
-    # The dock: fixed steel, and the two straps that make this one cage.
+    # The chocks: four free steel wedges, each strapped to buried anchors,
+    # and the tie-downs that make it one cage.
+    #
+    # THE WEDGES USED TO BE FIXED, AND THAT MADE THEM FAKE TWICE OVER. Fixed
+    # nodes shipped without selfCollision, so the tire never pressed on its
+    # own chocks - the straps did all the holding - and after release the
+    # carcass rolled straight through the wedge meshes. Now each wedge is a
+    # free ~540 kg body: its nodes carry selfCollision so the carcass really
+    # rests against the climb face, and its base corners are strapped to
+    # buried fixed anchors in the SAME break group as the tie-downs. Every
+    # beam that crosses between fixed and free carries that group, so cutting
+    # the release leaves a completely free 10.5 tonne body and four loose
+    # chocks it shoves out of the way - which is what release means in a
+    # yard. The pack gate checks the crossing rule exactly.
     # -----------------------------------------------------------------------
-    x0 = spec.DOCK_CLEAR_X
-    x1 = spec.DOCK_LANDING_X1
-    x2 = spec.DOCK_RUN_X
-    hy = spec.DOCK_HALF_Y
-    z = spec.DOCK_LANDING_Z
-    dock: dict[tuple[str, int], str] = {}
-    columns = [(x0, z), (x1, z), (0.5 * (x1 + x2), z * 0.5), (x2, 0.0)]
-    for index, (dx, dz) in enumerate(columns):
-        for side, sy in (("l", -hy), ("r", hy)):
-            deck = cage.add_node(
-                f"dock_{side}_{index}", (dx, sy, dz), fixed=True, collision=True, weight=400.0
+    chock_ids: dict[tuple[int, str], str] = {}
+    anchor_ids: dict[tuple[int, str], str] = {}
+    for index, sign, offset in CHOCK_PLACES:
+        shape = chock_geometry(sign)
+        near, far = shape["near"], shape["far"]
+        height, half = shape["height"], shape["half"]
+        corners = {
+            "toe_l": (offset - half, near, 0.0),
+            "toe_r": (offset + half, near, 0.0),
+            "heel_l": (offset - half, far, 0.0),
+            "heel_r": (offset + half, far, 0.0),
+            "top_l": (offset - half, far, height),
+            "top_r": (offset + half, far, height),
+        }
+        for key, position in corners.items():
+            chock_ids[(index, key)] = cage.add_node(
+                f"chock_{index}_{key}",
+                position,
+                fixed=False,
+                collision=True,
+                self_collision=True,
+                weight=spec.WEDGE_NODE_MASS,
+                friction=spec.WEDGE_FRICTION,
+                node_material="|NM_METAL",
             )
-            dock[("deck_" + side, index)] = deck
-            # At the ramp's ground end the deck IS the ground, so there is no
-            # second node to put under it - authoring one anyway produced a
-            # zero-length beam, which the pack's jbeam gate rejects outright.
-            if dz > 0.25:
-                dock[("base_" + side, index)] = cage.add_node(
-                    f"dock_base_{side}_{index}", (dx, sy, 0.0), fixed=True,
-                    collision=True, weight=400.0,
-                )
-            else:
-                dock[("base_" + side, index)] = deck
-    for index in range(len(columns)):
-        cage.add_beam(dock[("deck_l", index)], dock[("deck_r", index)], "dock")
-        cage.add_beam(dock[("base_l", index)], dock[("base_r", index)], "dock")
-        for side in ("l", "r"):
-            cage.add_beam(dock[(f"deck_{side}", index)], dock[(f"base_{side}", index)], "dock")
-        if index:
-            for side in ("l", "r"):
+        # The anchors: one under each base corner, buried and collisionless.
+        # They are the only fixed nodes in the prop, and none of them can
+        # touch anything - the gate on fixed nodes asserts exactly that.
+        for key in ("toe_l", "toe_r", "heel_l", "heel_r"):
+            x, y, _z = corners[key]
+            anchor_ids[(index, key)] = cage.add_node(
+                f"chock_{index}_anchor_{key}",
+                (x, y, -spec.WEDGE_ANCHOR_DEPTH),
+                fixed=True,
+                collision=False,
+                weight=200.0,
+            )
+        # Hold-downs: a vertical strap per corner takes the settle bounce,
+        # and a fore-aft diagonal per corner takes the shove of a carcass
+        # leaning on the wedge on a grade. All of them break with the ties.
+        for key in ("toe_l", "toe_r", "heel_l", "heel_r"):
+            cage.add_beam(
+                chock_ids[(index, key)], anchor_ids[(index, key)],
+                "strap", extra={"breakGroup": spec.STRAP_BREAK_GROUP},
+            )
+        for key, partner in (
+            ("toe_l", "heel_l"), ("heel_l", "toe_l"),
+            ("toe_r", "heel_r"), ("heel_r", "toe_r"),
+        ):
+            cage.add_beam(
+                chock_ids[(index, key)], anchor_ids[(index, partner)],
+                "strap", extra={"breakGroup": spec.STRAP_BREAK_GROUP},
+            )
+        keys = list(corners)
+        for first in range(len(keys)):
+            for second in range(first + 1, len(keys)):
                 cage.add_beam(
-                    dock[(f"deck_{side}", index - 1)], dock[(f"deck_{side}", index)], "dock"
+                    chock_ids[(index, keys[first])],
+                    chock_ids[(index, keys[second])],
+                    "wedge",
                 )
-                cage.add_beam(
-                    dock[(f"base_{side}", index - 1)], dock[(f"base_{side}", index)], "dock"
-                )
-                cage.add_beam(
-                    dock[(f"base_{side}", index - 1)], dock[(f"deck_{side}", index)], "dock"
-                )
-            cage.add_beam(dock[("deck_l", index - 1)], dock[("deck_r", index)], "dock")
-            cage.add_beam(dock[("deck_r", index - 1)], dock[("deck_l", index)], "dock")
-    for index in range(len(columns) - 1):
-        # Route it through the SAME guard the tire's own surfaces use. Round 1
-        # called add_quad directly and the corner order walked -y then +x,
-        # whose cross product is -Z: all six triangles faced down, and a
-        # jbeam coltri only collides from its front face.
+        # The climb face and the heel, both collidable: a tire that rides up
+        # this has to have something to ride up.
         add_oriented_quad(
             cage,
             [
-                dock[("deck_l", index)],
-                dock[("deck_r", index)],
-                dock[("deck_r", index + 1)],
-                dock[("deck_l", index + 1)],
+                chock_ids[(index, "toe_l")], chock_ids[(index, "toe_r")],
+                chock_ids[(index, "top_r")], chock_ids[(index, "top_l")],
             ],
-            Vector((0.0, 0.0, 1.0)),
+            Vector((0.0, -sign, 1.0)).normalized(),
+            ground_model="metal",
+        )
+        add_oriented_quad(
+            cage,
+            [
+                chock_ids[(index, "heel_l")], chock_ids[(index, "heel_r")],
+                chock_ids[(index, "top_r")], chock_ids[(index, "top_l")],
+            ],
+            Vector((0.0, sign, 0.0)),
             ground_model="metal",
         )
 
-    # The tie-downs. Station +-2 is the port frame's side rail (the port spans
-    # +-2 stations), and max_r there is the cage node under the lifting lug the
-    # visible webbing hooks - so the strap you see and the beam that holds the
-    # Colossus down are the same strap, pulling in the same direction.
-    for station in (-2, 2):
-        cage.add_beam(
-            dock[("deck_l" if station < 0 else "deck_r", 0)],
-            ids[("max_r", station % STATIONS)],
-            "strap",
-            extra={"breakGroup": spec.STRAP_BREAK_GROUP},
-        )
-
-    # -----------------------------------------------------------------------
-    # The boarding gangway, as real physics. Free nodes on the carcass, so it
-    # is drivable AND it lifts away with the tire when the straps are cut.
-    # -----------------------------------------------------------------------
-    columns_n = spec.TONGUE_CAGE_COLUMNS
-    rows_n = spec.TONGUE_CAGE_ROWS
-    tongue: dict[tuple[int, int], str] = {}
-    # Provisional; the real per-node share is set once the grid is built,
-    # because reuse_or_add folds two of the eighteen slots onto liner nodes
-    # that already exist and dividing by the slot count silently lost 100 kg.
-    tongue_mass = spec.GANGWAY_MASS / (columns_n * rows_n)
-    # The gangway's half arc is exactly half the port span, so its root row's
-    # end columns land ON the liner-edge nodes at the port's boundary
-    # stations. Those are the same point, and the gangway really is bolted to
-    # the sill there - so REUSE the cage node rather than authoring a second
-    # one on top of it, which would be a zero-length beam.
-    existing = {
-        identifier: cage.nodes[index]["source_world_position"]
-        for identifier, index in cage.node_index.items()
-    }
-
-    def reuse_or_add(name, point):
-        for identifier, other in existing.items():
-            if math.dist(point, other) < 0.01:
-                return identifier
-        return cage.add_node(
-            name,
-            point,
-            fixed=False,
-            collision=True,
-            weight=tongue_mass,
-            friction=0.85,
-            node_material="|NM_METAL",
-            group="carcass",
-        )
-
-    for row in range(rows_n):
-        t = row / (rows_n - 1)
-        tx, tradius = tongue_station(t)
-        for column in range(columns_n):
-            theta = -TONGUE_HALF_ARC + 2.0 * TONGUE_HALF_ARC * column / (columns_n - 1)
-            tongue[(row, column)] = reuse_or_add(
-                f"tongue_r{row}_c{column}", polar(tx, tradius, theta)
-            )
-    # THE GANGWAY WEIGHS WHAT IT WEIGHS. Spread spec.GANGWAY_MASS over the
-    # nodes that were actually created, not over the grid slots that were
-    # asked for.
-    tongue_ids = sorted(set(tongue.values()) - set(existing))
-    for identifier in tongue_ids:
-        cage.nodes[cage.node_index[identifier]]["weight"] = (
-            spec.GANGWAY_MASS / len(tongue_ids)
-        )
-
-    def link(first, second, family):
-        """Add a beam unless the carcass already claims that pair.
-
-        The gangway reuses the liner-edge nodes at the port boundary, so some
-        of its bolts land on pairs the carcass has already joined with its own
-        family. Re-adding them would be a doubled beam - silently twice the
-        stiffness - which CageBuilder rightly refuses.
-        """
-
-        key = (min(first, second), max(first, second))
-        if first == second or key in cage.beams:
-            return
-        cage.add_beam(first, second, family)
-
-    for row in range(rows_n):
-        for column in range(columns_n):
-            if column:
-                link(tongue[(row, column - 1)], tongue[(row, column)], "gangway")
-            if row:
-                link(tongue[(row - 1, column)], tongue[(row, column)], "gangway")
-            if row and column:
-                link(tongue[(row - 1, column - 1)], tongue[(row, column)], "gangway")
-                link(tongue[(row - 1, column)], tongue[(row, column - 1)], "gangway")
-    # Bolt the root row into the port sill ring and the liner edge.
-    for column in range(columns_n):
-        theta = -TONGUE_HALF_ARC + 2.0 * TONGUE_HALF_ARC * column / (columns_n - 1)
-        nearest = int(round(theta / spec.STATION_ANGLE)) % STATIONS
-        for key in ("sill_r", "lin_r"):
-            link(tongue[(0, column)], ids[(key, nearest)], "port_frame")
-        link(tongue[(1, column)], ids[("sill_r", nearest)], "gangway")
-    # Landing struts. The gangway "rests on the dock landing the way a ship's
-    # gangway rests on a quay" - but the tongue and the dock are nodes of the
-    # SAME jbeam vehicle, and BeamNG only tests a node against its own
-    # vehicle's triangles when selfCollision is set. It is not, so nothing was
-    # holding the tongue up at all. Authoring the resting as two struts in the
-    # tie-down break group makes it a real bridge that is carried while it is
-    # strapped and swings away with the tire the moment it is cut, which is
-    # both the honest physics and the fiction.
-    #
-    # FOUR NEAR-VERTICAL POSTS, not two diagonals. The struts used to run from
-    # the tongue's two outer corners across to deck_l/deck_r[0] at y = +/-4.6:
-    # a vertical direction cosine of 0.383, nothing at all under the middle,
-    # and selfCollision is false so the tongue could not rest on the deck it
-    # is lying over. The mid-span sagged onto the terrain and left a step in
-    # the middle of the boarding centreline. The landing pads sit on the quay
-    # DIRECTLY BENEATH the tongue's tip row, which is what a gangway rests on.
-    landing_columns = (0, 2, 3, columns_n - 1)
-    tip_x, tip_radius = tongue_station(1.0)
-    for column in landing_columns:
-        theta = -TONGUE_HALF_ARC + 2.0 * TONGUE_HALF_ARC * column / (columns_n - 1)
-        point = polar(tip_x, tip_radius, theta)
-        pad = cage.add_node(
-            f"dock_pad_{column}",
-            (tip_x, point[1], spec.DOCK_LANDING_Z),
-            fixed=True,
-            collision=False,
-            weight=400.0,
-        )
-        # Tie the pad into the deck lattice it stands on, and down to grade,
-        # so it is a part of the quay rather than a floating anchor.
-        cage.add_beam(pad, dock[("deck_l", 0)], "dock")
-        cage.add_beam(pad, dock[("deck_r", 0)], "dock")
-        cage.add_beam(pad, dock[("deck_l", 1)], "dock")
-        cage.add_beam(pad, dock[("deck_r", 1)], "dock")
-        cage.add_beam(
-            tongue[(rows_n - 1, column)],
-            pad,
-            "landing",
-            extra={"breakGroup": spec.STRAP_BREAK_GROUP},
-        )
-
-    for row in range(rows_n - 1):
-        for column in range(columns_n - 1):
-            add_oriented_quad(
-                cage,
-                [
-                    tongue[(row, column)],
-                    tongue[(row, column + 1)],
-                    tongue[(row + 1, column + 1)],
-                    tongue[(row + 1, column)],
-                ],
-                Vector((0.0, 0.0, 1.0)),
-                ground_model="metal",
+    # THE TIE-DOWNS. Two per chock, from its top edge up to the crown ring
+    # nearest it - which is the station whose surface the chock's top edge is
+    # touching, derived rather than guessed.
+    for index, sign, offset in CHOCK_PLACES:
+        angle = math.asin(min(1.0, spec.CHOCK_FAR / spec.OUTER_RADIUS))
+        station = int(round(sign * angle / spec.STATION_ANGLE)) % STATIONS
+        crown = "crn_r" if offset > 0 else "crn_l"
+        for key in ("top_l", "top_r"):
+            cage.add_beam(
+                chock_ids[(index, key)],
+                ids[(crown, station)],
+                "strap",
+                extra={"breakGroup": spec.STRAP_BREAK_GROUP},
             )
 
-    # -----------------------------------------------------------------------
-    # Clear the doorway. port_open_at gates the SKIN, and a node keeps
-    # colliding after its skin is gone - BeamNG tests node spheres as well as
-    # triangles. Round 2 left nine collidable nodes standing in the opening,
-    # one of them at y = 0, 0.47 m above the sill: a car driving in hit an
-    # invisible post in the middle of the door. The nodes and their port_frame
-    # beams stay, because they are the bolted ring that holds the opening
-    # open; only their collision comes off.
-    cleared = 0
-    interior = {station % STATIONS for station in range(-1, 2)}
-    for key in ("low_r", "max_r", "upp_r"):
-        for station in interior:
-            node = cage.nodes[cage.node_index[ids[(key, station)]]]
-            node["collision"] = False
-            cleared += 1
-    print(f"COLOSSUS doorway: {cleared} nodes taken out of the collision set")
-
-    # A PROPER TRIAD. The engine builds the prop's reported orientation from
-    # the three edges ref->back, ref->left, ref->up, so they have to be
-    # independent and each dominant along its own axis. Round 2 reused deck
-    # corners: ref->left came out (0, +4.6, 0), exactly parallel to ref->back,
-    # and ref->up came out 94% along +X. Two purpose-built datum nodes cost
-    # nothing and make the basis unambiguous.
-    # -X, NOT +X. Measured across all 23 shipped jbeams, 22 return
-    # left - ref = +X in vehicle space and one sign of
-    # cross(left - ref, back - ref) . (up - ref); colossus alone returned the
-    # opposite of both, because the pipeline yaws the authored frame 180 deg.
-    # BeamNG builds the spawn basis from this table, so the prop could spawn
-    # mirrored with the dock, the port and the whole boarding approach on the
-    # wrong side - and the runtime's propFrame maps authored baselines onto
-    # live ones using the same roles on both sides, so nothing downstream
-    # would ever have reported it.
+    # A PROPER TRIAD, and the same handedness as the other 22 props in the
+    # pack: 22 of 23 return left - ref = +X in vehicle space and one sign of
+    # cross(left - ref, back - ref) . (up - ref). Two purpose-built datum
+    # nodes make the basis unambiguous; they carry no collision, so they cost
+    # nothing but their beams.
+    datum_x = spec.CHOCK_OFFSET + spec.CHOCK_HALF_WIDTH + 1.4
     datum_left = cage.add_node(
-        "ground_left", (x2 - 3.2, 0.0, 0.0), fixed=True, collision=False, weight=200.0
+        "ground_left", (-datum_x, spec.CHOCK_FAR, 0.0),
+        fixed=True, collision=False, weight=200.0,
     )
     datum_up = cage.add_node(
-        "ground_up", (x2, 0.0, 1.6), fixed=True, collision=False, weight=200.0
+        "ground_up", (0.0, spec.CHOCK_FAR, 1.6),
+        fixed=True, collision=False, weight=200.0,
     )
     for anchor in (datum_left, datum_up):
-        cage.add_beam(anchor, dock[("deck_l", 3)], "dock")
-        cage.add_beam(anchor, dock[("deck_r", 3)], "dock")
-    cage.add_beam(datum_left, datum_up, "dock")
+        cage.add_beam(anchor, anchor_ids[(2, "heel_l")], "chock")
+        cage.add_beam(anchor, anchor_ids[(3, "heel_r")], "chock")
+    cage.add_beam(datum_left, datum_up, "chock")
+    # The anchor grid is otherwise disconnected islands; tie it into one
+    # ground structure so the cage is a single graph before anything is cut,
+    # which is the pack's rule. All of these are fixed-to-fixed, so they are
+    # graph glue and carry no force - and none of them touch a wedge, because
+    # a wedge is a free body the moment the release is cut.
+    for index, _sign, _offset in CHOCK_PLACES:
+        for first, second in (
+            ("toe_l", "toe_r"), ("toe_r", "heel_r"),
+            ("heel_r", "heel_l"), ("heel_l", "toe_l"),
+        ):
+            cage.add_beam(
+                anchor_ids[(index, first)], anchor_ids[(index, second)], "chock"
+            )
+    for first, second in ((0, 1), (2, 3), (0, 2), (1, 3)):
+        cage.add_beam(
+            anchor_ids[(first, "heel_r")], anchor_ids[(second, "heel_l")], "chock"
+        )
     cage.set_ground_reference(
-        (x2, 0.0, 0.0),
-        (x2, -3.0, 0.0),
+        (0.0, spec.CHOCK_FAR, 0.0),
+        (0.0, spec.CHOCK_FAR - 3.0, 0.0),
         left=datum_left,
         up=datum_up,
+        # Fixed-to-fixed graph glue: the datum hangs off the ANCHOR grid,
+        # never off a wedge - a wedge is a free body once the release is cut.
         support_nodes=[
-            dock[("deck_l", 3)],
-            dock[("deck_r", 3)],
-            dock[("base_l", 2)],
-            dock[("base_r", 2)],
+            anchor_ids[(index, "heel_l")] for index, _sign, _offset in CHOCK_PLACES
         ],
     )
     cage.set_spawn_envelope(
@@ -2942,8 +2084,8 @@ def build_cage() -> bk.CageBuilder:
             ids[("max_l", STATIONS // 2)],
             ids[("max_r", STATIONS // 4)],
             ids[("max_r", 3 * STATIONS // 4)],
-            dock[("deck_l", 3)],
-            dock[("deck_r", 3)],
+            ids[("crn_c", STATIONS // 4)],
+            ids[("crn_c", 3 * STATIONS // 4)],
         ]
     )
     cage.auto_base_nodes()
@@ -3002,9 +2144,6 @@ ORIENTATION_RULES = (
     ("tread_lugs", "away_from_axle_radial_only"),
     ("tread_tiebars", "away_from_axle_radial_only"),
     ("tread_ejectors", "away_from_axle_radial_only"),
-    # The buttress wrap lies on the SIDEWALL, so it faces outboard, not out
-    # from the axle - the tread rule would judge it against the wrong normal.
-    ("tread_buttress", "away_from_shell"),
     ("bead_toe", "toward_axle"),
     ("lane_marks", "toward_axle"),
     ("print_band", "away_from_centre_plane"),
@@ -3216,9 +2355,11 @@ def normalise_collada(path: Path) -> dict[str, object]:
     return {"sha256": hashlib.sha256(blob).hexdigest(), "size": len(blob)}
 
 
-# The six surfaces that between them ARE the carcass. Welded, they have to
+# The SEVEN surfaces that between them ARE the carcass. Welded, they have to
 # close: a tire is a closed shell with one hole in it, and that hole is the
-# access port.
+# access port. The tread's lugs, tie bars, ejectors and buttress wrap are
+# furniture standing ON this shell and are deliberately not part of it - they
+# are judged by assert_surfaces_stay_home and by the shipped-mesh gates.
 CLOSED_SHELL = (
     "_sidewall_outer", "_sidewall_inner", "_bead_toe",
     "_liner_crown", "_liner_fillet", "_shoulder", "_tread_base",
@@ -3226,19 +2367,18 @@ CLOSED_SHELL = (
 
 
 def assert_shell_rings_close(tire_objects) -> None:
-    """The carcass is closed everywhere except the doorway.
+    """The carcass is a CLOSED shell. No exceptions any more.
 
-    THE GATE THAT WOULD HAVE CAUGHT ROUND 3. Every check in this file measured
-    constants and row tables; none of them looked at whether the surfaces
-    actually MET. Three separate defects hid behind that: the shoulder loft
-    started 0.0671 m inboard of the ring the lathe ended on, leaving an open
-    annulus 84.85 m long round each shoulder that culled straight to sky; the
-    inner lathe ran 0.93 m past the cavity floor; and the buttress wrap's top
-    rows floated off the surface entirely. A boundary-edge count on the welded
-    shell sees all three, and it will see the next one too.
+    THE GATE THAT WOULD HAVE CAUGHT ROUND 3. Every other check in this file
+    measured constants and row tables; none looked at whether the surfaces
+    actually MET. Two defects hid behind that: the shoulder loft started
+    0.0671 m inboard of the ring the lathe ended on, leaving an open annulus
+    84.85 m long round each shoulder that culled straight to sky, and the
+    inner lathe ran 0.93 m past the cavity floor.
 
-    Open edges are legal ONLY in the port sector - the doorway itself, and the
-    slot in the shoulder fillet the boarding gangway comes through.
+    It used to allow open boundary in one place - the access port. There is no
+    access port now, so the answer is simply zero, which is a much better test
+    than one with a sector-shaped hole in it.
     """
 
     master = bmesh.new()
@@ -3253,41 +2393,134 @@ def assert_shell_rings_close(tire_objects) -> None:
     bmesh.ops.remove_doubles(master, verts=master.verts, dist=1e-4)
     master.edges.ensure_lookup_table()
 
-    door_half = math.radians(spec.PORT_SPAN_DEG * 0.5) + math.radians(4.0)
     stray_length = 0.0
     worst = None
     for edge in master.edges:
-        if len(edge.link_faces) != 1:
-            continue
-        allowed = True
-        for vertex in edge.verts:
-            point = vertex.co
-            radius = math.hypot(point.y, R_O - point.z)
-            theta = math.atan2(point.y, R_O - point.z)
-            if not (
-                point.x > 0.0
-                and abs(theta) <= door_half
-                and radius <= spec.PORT_OUTER_RADIUS + 0.40
-            ):
-                allowed = False
-        if allowed:
+        if len(edge.link_faces) == 2:
             continue
         length = edge.calc_length()
         stray_length += length
         if worst is None or length > worst[0]:
-            mid = 0.5 * (edge.verts[0].co + edge.verts[1].co)
-            worst = (length, mid)
+            worst = (length, 0.5 * (edge.verts[0].co + edge.verts[1].co))
     master.free()
 
     if stray_length > 0.05:
         _, mid = worst
         radius = math.hypot(mid.y, R_O - mid.z)
         raise SystemExit(
-            f"the carcass has {stray_length:.2f} m of open boundary outside the "
-            f"doorway - it is not a closed shell. Worst near x {mid.x:.3f}, "
-            f"radius {radius:.3f}, theta {math.degrees(math.atan2(mid.y, R_O - mid.z)):.1f} deg"
+            f"the carcass has {stray_length:.2f} m of open or non-manifold boundary "
+            f"- it is not a closed shell. Worst near x {mid.x:.3f}, radius "
+            f"{radius:.3f}, theta {math.degrees(math.atan2(mid.y, R_O - mid.z)):.1f} deg"
         )
-    print("COLOSSUS carcass: closed everywhere except the doorway")
+    print("COLOSSUS carcass: closed, everywhere")
+
+
+def assert_shoulder_falls_away(tire_objects) -> None:
+    """Nothing outboard of the tread edge may stand above the groove floor.
+
+    THE THIRD DISGUISE OF THE SAME QUESTION. Round 2 had a clamped flange ring
+    where the shoulder should be; round 3 had a 0.0671 m slot at its start;
+    round 4 had it standing 0.198 m ABOVE the tread's own groove floor - 31%
+    of TREAD_DEPTH - which dams the mouth of every shoulder groove on a
+    pattern whose lateral grooves exist to throw stones out sideways. None of
+    the three was visible to anything that measured constants.
+
+    The invariant is the functional one and it needs no profile walk: a stone
+    leaving a shoulder groove travels outboard at the groove floor's radius,
+    so every OUTER carcass point outboard of the tread edge has to sit at or
+    below that radius. Inner surfaces are excluded - the liner is not what a
+    stone hits.
+    """
+
+    floor = base_r(spec.TREAD_HALF)
+    outer = ("_sidewall_outer", "_shoulder", "_tread_base")
+    worst = None
+    for obj in tire_objects:
+        if not any(fragment in obj.name for fragment in outer):
+            continue
+        for vertex in obj.data.vertices:
+            point = obj.matrix_world @ vertex.co
+            if abs(point.x) <= spec.TREAD_HALF + 1e-4:
+                continue
+            radius = math.hypot(point.y, R_O - point.z)
+            if worst is None or radius > worst[0]:
+                worst = (radius, abs(point.x), obj.name)
+    if worst is None:
+        raise SystemExit("no carcass surface outboard of the tread edge")
+    radius, axial, name = worst
+    if radius > floor + 1e-4:
+        raise SystemExit(
+            f"{name} reaches radius {radius:.4f} at |x| {axial:.3f}, "
+            f"{(radius - floor) * 1000:.0f} mm ABOVE the tread's groove floor at "
+            f"{floor:.4f}: a full-circumference dam across every shoulder groove"
+        )
+    print(
+        f"COLOSSUS shoulder: falls away outboard of the tread edge "
+        f"(crest {radius:.4f} against a {floor:.4f} groove floor, "
+        f"{(floor - radius) * 1000:.0f} mm clear)"
+    )
+
+
+def assert_furniture_is_seated(tire_objects) -> None:
+    """Every open-bottomed shell sinks into the surface it stands on.
+
+    A lug, a tie bar, an ejector, a buttress wrap and a moulded glyph are all
+    shells with no bottom: what closes them is the surface underneath. Built on
+    the ANALYTIC radius they sat exactly ON it, and the surface that actually
+    ships is tessellated - a 144-station chord dips ~3 mm inside its own
+    analytic radius - so every rim stood a hairline proud and 82% of 2,461.6 m
+    of open rim looked straight through to the skybox at grazing angles.
+
+    Both families are surfaces of revolution, so "the surface underneath" is a
+    function of one variable and needs no ray cast: for tread furniture it is
+    base_r(x), for sidewall furniture it is the outer half width at a radius.
+    """
+
+    # The DEEPEST vertex of each family is its rim, and that is the one that
+    # has to be inside the surface. Everything above it is the shell.
+    floor = spec.LUG_SEAT * 0.5
+    tread_deepest = {}
+    for obj in tire_objects:
+        if not any(
+            fragment in obj.name
+            for fragment in ("_tread_lugs", "_tread_tiebars", "_tread_ejectors")
+        ):
+            continue
+        for vertex in obj.data.vertices:
+            point = obj.matrix_world @ vertex.co
+            radius = math.hypot(point.y, R_O - point.z)
+            gap = radius - base_r(point.x)
+            if obj.name not in tread_deepest or gap < tread_deepest[obj.name]:
+                tread_deepest[obj.name] = gap
+    for name, gap in sorted(tread_deepest.items()):
+        if gap > -floor:
+            raise SystemExit(
+                f"{name}'s rim sits {gap * 1000:+.1f} mm against its groove floor, "
+                f"not the {floor * 1000:.0f} mm inside it a seated shell needs; it "
+                f"will show daylight at grazing angles"
+            )
+
+    letter_deepest = None
+    for obj in tire_objects:
+        if "_letter_" not in obj.name:
+            continue
+        for vertex in obj.data.vertices:
+            point = obj.matrix_world @ vertex.co
+            radius = math.hypot(point.y, R_O - point.z)
+            surface = sidewall_outer(radius)[0] + sidewall_relief(radius)
+            gap = abs(point.x) - surface
+            if letter_deepest is None or gap < letter_deepest:
+                letter_deepest = gap
+    if letter_deepest is not None and letter_deepest > -floor:
+        raise SystemExit(
+            f"the moulded type's back cap sits {letter_deepest * 1000:+.1f} mm "
+            f"against the flank, not the {floor * 1000:.0f} mm inside it a seated "
+            f"shell needs"
+        )
+    print(
+        f"COLOSSUS seating: tread furniture {min(tread_deepest.values()) * 1000:.1f} mm "
+        f"into its floor, type {letter_deepest * 1000:.1f} mm into the flank"
+    )
 
 
 def assert_surfaces_stay_home(tire_objects) -> None:
@@ -3314,24 +2547,6 @@ def assert_surfaces_stay_home(tire_objects) -> None:
             f"{(liner_worst - spec.CAVITY_RADIUS) * 1000:.0f} mm trench down the lane"
         )
 
-    wrap_worst = 0.0
-    for obj in tire_objects:
-        if "_tread_buttress" not in obj.name:
-            continue
-        for vertex in obj.data.vertices:
-            point = obj.matrix_world @ vertex.co
-            radius = math.hypot(point.y, R_O - point.z)
-            gap = abs(point.x) - outer_half_at(radius)
-            # The wrap stands BUTTRESS_RELIEF proud on its outer face; only
-            # its inner face is expected to lie on the surface, so this bounds
-            # how far the whole wrap can be off it, not how thick it is.
-            if gap < 0.0:
-                wrap_worst = min(wrap_worst, gap)
-    if wrap_worst < -0.005:
-        raise SystemExit(
-            f"the buttress wrap sinks {-wrap_worst * 1000:.0f} mm into the shoulder "
-            f"it is supposed to lie on"
-        )
     print(
         f"COLOSSUS surfaces: liner tops out at radius {liner_worst:.3f} "
         f"(cavity floor {spec.CAVITY_RADIUS:.3f})"
@@ -3532,10 +2747,26 @@ def assert_authored_claims(cage) -> None:
                 f"under {spec.TREAD_DEPTH * 1000:.0f} mm of depth; no mould releases that"
             )
 
+    # THE BEAD SEAT. spec.py says "the generator asserts it" about
+    # REFERENCE_RIM_RATIO and nothing did - both it and RIM_RATIO_TOLERANCE
+    # were referenced only at their own definitions, on the one meridian
+    # station with no gate at all and the one the R457 in the size code is a
+    # claim about. Measured off the mesh's INNER face at the bead, which is
+    # what a rim width is measured between.
+    seat_half, _ = sidewall_mid(R_BEAD)
+    seat_inner = seat_half - sidewall_outer(R_BEAD)[1] * 0.5
+    rim_ratio = 2.0 * seat_inner / spec.SECTION_WIDTH
+    if abs(rim_ratio - spec.REFERENCE_RIM_RATIO) > spec.RIM_RATIO_TOLERANCE:
+        raise SystemExit(
+            f"the bead seat measures {rim_ratio:.4f} of the section width against "
+            f"a reference {spec.REFERENCE_RIM_RATIO:.3f} +/- "
+            f"{spec.RIM_RATIO_TOLERANCE:.3f}; that is a different rim"
+        )
+
     # Radius of gyration and the spin-up the mass solve promises.
     inertia = mass = 0.0
     for node in cage.nodes:
-        if node["fixed"]:
+        if node["fixed"] or "chock" in node["id"]:
             continue
         _, y, z = node["source_world_position"]
         radius = math.hypot(y, R_O - z)
@@ -3563,6 +2794,7 @@ def assert_authored_claims(cage) -> None:
         )
     print(
         f"COLOSSUS checks: OD/W {spec.OD_TO_WIDTH:.3f}  rim/W {spec.RIM_TO_WIDTH:.3f}  "
+        f"seat/W {rim_ratio:.4f}  "
         f"net-to-gross {net_to_gross * 100:.1f}% (contact face "
         f"{contact_share * 100:.1f}% of it)  k_gyr {gyration:.2f} m  "
         f"spin-up {seconds:.1f} s  sagitta {spec.FACET_SAGITTA * 1000:.1f} mm"
@@ -3577,25 +2809,21 @@ def main() -> None:
 
     tire_objects = build_carcass(materials)
     tire_objects += build_tread(materials)
-    tire_objects += build_port(materials)
-    tire_objects += build_lane_marks(materials)
     tire_objects += build_print_band(materials)
     tire_objects += build_lettering(materials)
-    dock_objects, strap_objects = build_dock(materials)
-    # The webbing rides away with the carcass, not with the quay.
-    tire_objects += strap_objects
+    ground_objects = build_chocks(materials)
 
-    swept = clean_degenerates(tire_objects + dock_objects)
+    swept = clean_degenerates(tire_objects + ground_objects)
     assert_face_orientation(tire_objects)
-    assert_outboard_clearance(tire_objects, dock_objects)
-    assert_tongue_sweep(tire_objects, dock_objects)
     assert_shell_rings_close(tire_objects)
+    assert_shoulder_falls_away(tire_objects)
+    assert_furniture_is_seated(tire_objects)
     assert_surfaces_stay_home(tire_objects)
 
     dropped = sum(getattr(obj, "_dropped", 0) for obj in tire_objects)
     triangles = sum(
         max(len(polygon.vertices) - 2, 0)
-        for obj in tire_objects + dock_objects
+        for obj in tire_objects + ground_objects
         for polygon in obj.data.polygons
     )
     print(
@@ -3604,13 +2832,21 @@ def main() -> None:
     )
 
     dae_path = VEHICLE_DIR / f"{MOD_ID}.dae"
+    # WELD ON EXPORT. Every surface here is its own object so the orientation
+    # rules can name it, and the join that makes them one flexbody left each
+    # shared ring as two coincident vertex sets: 12,026 boundary edges and
+    # 4,666 m of them shipped, and down both edges of the drive lane 554 vertex
+    # pairs carried a 30.75 degree median normal split across geometry that
+    # bends 2.5 degrees - a hard false crease running the full 84 m
+    # circumference on the surface the driver stares at for the whole ride.
     visual = bk.export_multi_flexbody(
         MOD_ID,
         dae_path,
         {
-            f"{MOD_ID}_visual": dock_objects,
+            f"{MOD_ID}_visual": ground_objects,
             f"{MOD_ID}_carcass": tire_objects,
         },
+        weld=1e-6,
     )
     # Re-hash AFTER normalising, or the handoff certifies bytes that are no
     # longer on disk.
@@ -3618,7 +2854,9 @@ def main() -> None:
 
     cage = build_cage()
     free_mass = sum(
-        node["weight"] for node in cage.nodes if not node["fixed"] and "tongue" not in node["id"]
+        node["weight"]
+        for node in cage.nodes
+        if not node["fixed"] and "chock" not in node["id"]
     )
     if abs(free_mass - spec.TIRE_MASS) > spec.MASS_TOTAL_TOLERANCE:
         raise SystemExit(
@@ -3649,10 +2887,15 @@ def main() -> None:
         },
         flexbodies_extra=[{"mesh": f"{MOD_ID}_carcass", "groups": ["carcass"]}],
     )
+    # STRIP THE STAMP. Blender writes its wall clock into every JPEG it
+    # renders and prop_builder copies this one into the shipped tree twice, so
+    # without this a pixel-identical re-render still moves the mod's content
+    # sha, its build serial and the ZIP lock the LIVE gate verifies against.
     bk.render_thumbnail(
         AUTHORING_ROOT / f"{MOD_ID}_thumbnail.jpg",
         camera_location=(36.0, -36.0, 15.0),
         look_at=(0.0, 0.0, 12.0),
+        strip_stamp=True,
     )
     print("COLOSSUS generator complete")
 

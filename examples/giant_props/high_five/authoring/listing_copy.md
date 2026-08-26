@@ -41,7 +41,10 @@ will arrive. Then it waits — twitching on its mount, 7 degrees of idle
 tremble — until the moment when *starting the swing now* means the palm
 gets to the strike point exactly when you do.
 
-The swing takes 0.45 seconds. So it fires 0.45 seconds before you arrive.
+The swing takes 0.28 seconds — a real slap's strike is a tenth of a
+second and change, and on video it is four frames of violence between a
+slow draw and a held follow-through. So it fires 0.28 seconds before you
+arrive.
 That single equality is the whole machine, and it is asserted by a test
 that fails if the two numbers ever drift apart.
 
@@ -127,9 +130,13 @@ chains, hazard chevrons and a builder's plate. 8,010 kg, 26 posable parts.
 
 ### Details
 
-- Full sequence: 0.45 s alert, 0.85 s wind-up, up to 3.2 s hold, a 0.45 s
+- Full sequence: 0.45 s alert, 0.85 s wind-up, up to 3.2 s hold, a 0.28 s
   swing timed to arrive with you, 0.4 s follow hold, 0.55 s follow, 2.1 s
-  return, 1.2 s cooldown.
+  return, 1.2 s cooldown. The palm tip passes 177 m/s at contact.
+- The slap TUMBLES the car: the impulse lands on the flank above the
+  centre of mass, so the car leaves rolling end-over-end with a drag yaw,
+  through the engine's own physics — measured live at 6-7.6 rad/s. POWER
+  scales the spin along with the speed.
 - Launch speed rolled per car at 28–34 m/s, then multiplied by POWER.
 - Elevation comes from WRIST TILT alone; the launch is always along the
   palm normal, so the console reads as a real ballistic control.

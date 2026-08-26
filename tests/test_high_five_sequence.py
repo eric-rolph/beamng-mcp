@@ -66,6 +66,7 @@ local S = {}
 S.messages = {}
 S.events = {}
 S.velocities = {}
+S.commands = {}
 S.scene = {}
 S.vehicles = {}
 S.collisionReloads = 0
@@ -163,7 +164,9 @@ function vehmt:getSpawnWorldOOBB()
   local half = self.half
   return {getHalfExtents = function() return vec3(half.x, half.y, half.z) end}
 end
-function vehmt:queueLuaCommand() end
+function vehmt:queueLuaCommand(cmd)
+  S.commands[#S.commands + 1] = {id = self.id, cmd = cmd}
+end
 function vehmt:applyClusterVelocityScaleAdd(_node, scale, x, y, z)
   S.velocities[#S.velocities + 1] = {id = self.id, scale = scale,
                                      x = x, y = y, z = z}
@@ -200,6 +203,7 @@ function S.positionOf(id) return S.vehicles[id].pos.y end
 function S.lateralOf(id) return S.vehicles[id].pos.x end
 function S.removeVehicle(id) S.vehicles[id] = nil; map.objects[id] = nil end
 function S.clearVelocities() S.velocities = {} end
+function S.lastCommand() return S.commands[#S.commands] end
 function S.lastVelocity() return S.velocities[#S.velocities] end
 function S.velocityCount() return #S.velocities end
 function S.lastMessage() return S.messages[#S.messages] end
@@ -934,3 +938,177 @@ def test_the_corridor_still_leads_after_the_pad_shortcut(rig):
     assert "alert" in seen, seen
     assert "windup" in seen, seen
     assert seen.index("alert") < seen.index("windup"), seen
+
+
+def _spin_command(state):
+    """The newest thrusters.applyAccel command any slap queued, parsed.
+
+    NOT state.lastCommand(): queueLuaCommand is also how the PROP announces
+    its own registration hook, so the newest command in the log is not
+    necessarily the spin -- the first version of this helper grabbed
+    "extensions.hook(...)" off the prop and reported that no spin was ever
+    queued. Scan backwards for the command this gate is actually about.
+    """
+
+    import re
+
+    record = None
+    index = 1
+    newest = None
+    while True:
+        entry = state.commands[index]
+        if entry is None:
+            break
+        if "thrusters.applyAccel" in str(entry["cmd"]):
+            newest = entry
+        index += 1
+    record = newest
+    if record is None:
+        return None
+    command = record["cmd"]
+    match = re.search(
+        r"thrusters\.applyAccel\(vec3\(0,0,0\), ([0-9.]+), nil, "
+        r"vec3\((-?[0-9.]+), (-?[0-9.]+), (-?[0-9.]+)\)\)",
+        command,
+    )
+    if not match:
+        return None
+    dt = float(match.group(1))
+    accel = tuple(float(match.group(i)) for i in (2, 3, 4))
+    # angularAccel * dt = the angular velocity the contact dwell imparts.
+    return {
+        "id": record["id"],
+        "dt": dt,
+        "omega": tuple(a * dt for a in accel),
+    }
+
+
+def test_the_slap_spins_the_car(rig):
+    """A slap is an OFF-CENTRE impulse, and the spin is the Jackass in it.
+
+    launchSubject replaces linear velocity along the palm normal; alone
+    that reads as a nudge from a giant air-hockey paddle -- the car sails
+    flat, wheels down, and lands like a delivery. The palm lands on the
+    flank ABOVE the car's centre of mass, so the real impulse both throws
+    and tumbles. The runtime queues the tumble into the car's own physics
+    (thrusters.applyAccel -> obj:applyClusterLinearAngularAccel), so what
+    happens after the palm leaves is the engine's integration, not an
+    animation.
+
+    The stub prop sits at identity, so the queued world vector is directly
+    comparable to the authored-frame model: spin axis = r x d with
+    r = (-0.8, 0, 1.30) and d = (0, cos tilt, sin tilt). At the default
+    tilt the axis is dominated by -x (end-over-end roll, top of the car
+    carried down-road) with a -z drag-yaw component, and NO +y component
+    of any size -- a slap does not spin a car about its own flight path
+    like a rifle bullet.
+    """
+
+    lua, state, module = rig
+    slap_once(lua, state, module, power=3, tilt=2)
+    spin = _spin_command(state)
+    assert spin is not None, (
+        "the slap queued no thrusters.applyAccel -- the car leaves with "
+        "zero angular velocity and sails flat like a parcel"
+    )
+    assert spin["id"] == SUBJECT_ID
+    assert spin["dt"] == pytest.approx(
+        SPEC.BEHAVIOR["slap_contact_seconds"], abs=1e-3
+    )
+
+    omega = spin["omega"]
+    magnitude = math.sqrt(sum(component ** 2 for component in omega))
+    # Expected: transfer * armRate * mult, capped. Corridor slap swings
+    # from WINDUP (-104 deg); power 3 on the shipped ladder is 1.356x.
+    arm_rate = (
+        SPEC.BEHAVIOR["slap_ease"]
+        * math.radians(104.0)
+        / SPEC.BEHAVIOR["slap_seconds"]
+    )
+    mult = 1.0 + (3 - 1) * (SPEC.BEHAVIOR["power_multiplier_max"] - 1.0) / (
+        SPEC.BEHAVIOR["power_levels"] - 1
+    )
+    expected = min(
+        SPEC.BEHAVIOR["slap_spin_cap_rps"],
+        SPEC.BEHAVIOR["slap_spin_transfer"] * arm_rate * mult,
+    )
+    assert magnitude == pytest.approx(expected, rel=0.05), (
+        f"spin magnitude {magnitude:.2f} rad/s against the model's "
+        f"{expected:.2f}"
+    )
+    # The axis: roll-dominant, negative x; drag yaw negative z; nothing
+    # along the flight path.
+    assert omega[0] < 0, "the tumble must carry the car top-over, not back"
+    assert abs(omega[0]) > abs(omega[2]), "roll must dominate yaw"
+    assert omega[2] < 0, "the drag yaw must follow the palm sweep"
+    assert abs(omega[1]) < 0.25 * magnitude, (
+        "a slap does not rifle-spin a car about its own flight path"
+    )
+    # And it must be a real spin, not a garnish: at least one full
+    # revolution over a typical 3 s flight is 2.1 rad/s.
+    assert magnitude > 2.1, f"{magnitude:.2f} rad/s is a garnish, not a tumble"
+
+
+def test_the_spin_scales_with_the_power_dial(rig):
+    """POWER is sold as one dial for the whole slap. If the launch speed
+    scales 2.6x while the tumble stays fixed, max power reads as the same
+    slap with a longer throw -- the dial must make the whole event wilder,
+    up to the cap that keeps it this side of absurd."""
+
+    del rig  # two independent rigs, same pattern as the launch ladder test
+    lua, state, module = fresh_rig()
+    slap_once(lua, state, module, power=1, tilt=2)
+    low = _spin_command(state)
+    lua, state, module = fresh_rig()
+    slap_once(lua, state, module, power=10, tilt=2)
+    high = _spin_command(state)
+
+    assert low is not None and high is not None
+    low_mag = math.sqrt(sum(c ** 2 for c in low["omega"]))
+    high_mag = math.sqrt(sum(c ** 2 for c in high["omega"]))
+    cap = SPEC.BEHAVIOR["slap_spin_cap_rps"]
+    if high_mag < cap - 1e-6:
+        assert high_mag > low_mag * 1.5, (
+            f"power 10 spins at {high_mag:.2f} against power 1's "
+            f"{low_mag:.2f}; the dial is not reaching the tumble"
+        )
+    else:
+        assert high_mag == pytest.approx(cap, rel=0.02), (
+            "past the cap the spin must sit AT the cap, not above it"
+        )
+    assert low_mag > 1.0, "even power 1 must visibly tumble"
+
+
+def test_a_pad_slap_spins_less_than_a_full_windup(rig):
+    """The spin comes from the arm's actual rate at contact, which comes
+    from the ACTUAL swingFrom -- a pad swing starts at REST (-72 deg), a
+    corridor swing at WINDUP (-104), so the pad slap is gentler for free.
+    If these come out equal, somebody has hard-coded the windup angle into
+    the tumble and the model has become a dial."""
+
+    lua, state, module = rig
+    state.addVehicle(SUBJECT_ID, "pickup", 0.0, 0.0, 0.5)
+    state.setMotion(SUBJECT_ID, 0.0)
+    drive(state, module, SUBJECT_ID, 3.0,
+          until=lambda s: _spin_command(state) is not None)
+    pad = _spin_command(state)
+    assert pad is not None, "the pad slap queued no spin"
+    pad_mag = math.sqrt(sum(c ** 2 for c in pad["omega"]))
+
+    expected_ratio = 72.0 / 104.0
+    arm_rate = (
+        SPEC.BEHAVIOR["slap_ease"]
+        * math.radians(72.0)
+        / SPEC.BEHAVIOR["slap_seconds"]
+    )
+    mult = 1.0 + (SPEC.BEHAVIOR["default_power_level"] - 1) * (
+        SPEC.BEHAVIOR["power_multiplier_max"] - 1.0
+    ) / (SPEC.BEHAVIOR["power_levels"] - 1)
+    expected = min(
+        SPEC.BEHAVIOR["slap_spin_cap_rps"],
+        SPEC.BEHAVIOR["slap_spin_transfer"] * arm_rate * mult,
+    )
+    assert pad_mag == pytest.approx(expected, rel=0.05), (
+        f"pad spin {pad_mag:.2f} rad/s against the from-rest model's "
+        f"{expected:.2f} -- the tumble is not reading the real swingFrom"
+    )

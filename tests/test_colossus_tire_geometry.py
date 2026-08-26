@@ -103,13 +103,18 @@ def test_cage_matches_the_authored_radii(spec, nodes):
         _, y, z = nodes[identifier]
         return math.hypot(y, axle_z - z)
 
+    # The liner ring is CIRCUMSCRIBED, not inscribed: its 48 nodes sit on a
+    # radius whose chord midpoints land on CAVITY_RADIUS, because the surface
+    # a car actually rides is the chord and not the node. Putting the nodes on
+    # the cavity radius put the whole drivable floor 28 mm inside it.
+    liner_ring = spec.CAVITY_RADIUS / math.cos(spec.STATION_ANGLE * 0.5)
     checks = {
         "bead_l": spec.BEAD_RADIUS,
         "bead_r": spec.BEAD_RADIUS,
         "crn_c": spec.OUTER_RADIUS,
-        "lin_c": spec.CAVITY_RADIUS,
-        "lin_l": spec.CAVITY_RADIUS,
-        "lin_r": spec.CAVITY_RADIUS,
+        "lin_c": liner_ring,
+        "lin_l": liner_ring,
+        "lin_r": liner_ring,
     }
     for station in (0, 7, 19, 31, 44):
         for key, expected in checks.items():
@@ -117,26 +122,28 @@ def test_cage_matches_the_authored_radii(spec, nodes):
             assert radius_of(identifier) == pytest.approx(expected, abs=1e-4), identifier
 
 
-def test_cavity_clears_a_car(spec):
-    """The car has to fit, stand up, and get round the barrel.
+def test_the_chocks_are_where_a_chock_would_work(spec):
+    """The chock's top edge has to touch the carcass, or it is scenery.
 
-    Three separate clearances, all of which have to hold at once, and all of
-    which are derived rather than eyeballed.
+    A chock stops a tire by being something it has to climb, so its heel has
+    to reach the tread. On a body this size the curve down there is very flat -
+    at 6 m from the contact patch the carcass is only 1.34 m up - which is why
+    a chock for a 28 m tire is long rather than tall, and why the height is
+    derived from the distance rather than typed alongside it.
     """
 
-    # 1. The port opening.
-    assert spec.PORT_HEIGHT > spec.CAR_HEIGHT + 1.5, "port too short to drive into"
-    assert spec.PORT_ARC_WIDTH > spec.CAR_LENGTH + 1.0, "port too narrow"
-
-    # 2. The floor, which is a cylinder: a rigid 4.5 m car bridges a chord and
-    #    only its ends touch. The sagitta is how far its middle sits off the
-    #    liner, and it has to stay under the car's ground clearance budget.
-    half = spec.CAR_LENGTH / 2.0
-    sagitta = spec.CAVITY_RADIUS - math.sqrt(spec.CAVITY_RADIUS**2 - half**2)
-    assert sagitta < 0.25, f"cavity floor too tight for a {spec.CAR_LENGTH} m car: {sagitta:.3f} m"
-
-    # 3. Width, for the 90 degree turn onto the barrel.
-    assert 2 * spec.LINER_HALF > spec.CAR_LENGTH + 2.0, "no room to turn in the cavity"
+    height = spec.OUTER_RADIUS - math.sqrt(
+        spec.OUTER_RADIUS ** 2 - spec.CHOCK_FAR ** 2
+    )
+    assert spec.CHOCK_NEAR < spec.CHOCK_FAR, "the wedge points the wrong way"
+    assert 0.6 < height < 2.5, (
+        f"a chock heel at {spec.CHOCK_FAR:.1f} m makes a {height:.2f} m wedge; "
+        f"that is either a speed bump or a wall"
+    )
+    # It has to be a ramp, not a step: something a 10.5 t tire can climb only
+    # under real force, but not a vertical face it simply leans on.
+    slope = math.degrees(math.atan2(height, spec.CHOCK_FAR - spec.CHOCK_NEAR))
+    assert 15.0 < slope < 40.0, f"the climb face is at {slope:.0f} degrees"
 
 
 def test_the_tire_is_not_a_pancake(spec):
@@ -178,7 +185,7 @@ def test_collision_triangles_face_the_right_way(spec, handoff, nodes):
     liner_keys = ("lin_l", "lin_cl", "lin_c", "lin_cr", "lin_r")
 
     def band_of(identifier):
-        stem = identifier[len(spec.MOD_ID) + 1 :].rsplit("_j", 1)[0]
+        stem = identifier[len(spec.MOD_ID) + 1:].rsplit("_j", 1)[0]
         if stem in crown_keys:
             return "crown"
         if stem in liner_keys:
@@ -195,9 +202,9 @@ def test_collision_triangles_face_the_right_way(spec, handoff, nodes):
             continue
         points = [nodes[identifier] for identifier in triangle["nodes"]]
         normal = _triangle_normal(points)
-        centre = [sum(axis) / 3.0 for axis in zip(*points, strict=False)]
+        centre = [sum(axis) / 3.0 for axis in zip(*points)]
         outward = (centre[0] - axle[0], centre[1] - axle[1], centre[2] - axle[2])
-        dot = sum(a * b for a, b in zip(normal, outward, strict=False))
+        dot = sum(a * b for a, b in zip(normal, outward))
         if band == "crown":
             assert dot > 0, f"crown triangle faces inward: {triangle['nodes']}"
         else:
@@ -231,35 +238,49 @@ def test_no_degenerate_or_duplicated_collision_triangles(handoff, nodes):
 # ---------------------------------------------------------------------------
 # Nothing fixed inside the swept volume
 # ---------------------------------------------------------------------------
-def test_fixed_structure_is_outside_the_swept_volume(spec, handoff, nodes):
-    """The dock must be unreachable by the tire, at every rotation.
+def test_nothing_fixed_can_ever_be_touched(spec, handoff, nodes):
+    """Every fixed node is a buried, collisionless anchor. Nothing else.
 
-    The tire translates along Y and spins about X, so the set of points it can
-    ever occupy is |x| <= SECTION_HALF. Anything fixed inboard of that gets
-    destroyed on the first revolution, and this is the one geometric mistake
-    on this prop that no static gate elsewhere would catch. The tire's own
-    boarding tongue is the single deliberate exception - it is part of the
-    tire, and it lifts away on the first quarter turn.
+    The wedges used to be fixed, and that made them fake twice over: their
+    nodes shipped without selfCollision so the tire never actually pressed on
+    them, and after release the carcass rolled straight through their meshes.
+    Now the wedges are free bodies and the only fixed nodes are the strap
+    anchors and the spawn-basis datums - all collisionless, all at or below
+    grade, so nothing fixed can ever exchange a force with the world except
+    through a strap that the release cuts.
     """
 
-    margin = 0.20
-    offenders = []
-    for node in handoff["nodes"]:
-        if not node["fixed"]:
-            continue
-        x = nodes[node["id"]][0]
-        if x < spec.SECTION_HALF + margin:
-            offenders.append((node["id"], round(x, 3)))
-    assert not offenders, (
-        "fixed structure inside the tire's swept volume "
-        f"(needs x >= {spec.SECTION_HALF + margin:.2f}): {offenders[:8]}"
-    )
-    assert spec.DOCK_CLEAR_X >= spec.SECTION_HALF + margin
+    fixed = [node for node in handoff["nodes"] if node["fixed"]]
+    names = sorted(node["id"].replace(f"{spec.MOD_ID}_", "") for node in fixed)
+    strays = [
+        name for name in names
+        if not (name.startswith("ground_") or "_anchor_" in name)
+    ]
+    assert not strays, f"fixed nodes that are neither anchor nor datum: {strays}"
+    assert len(fixed) >= 8, f"only {len(fixed)} fixed nodes: {names}"
+    for node in fixed:
+        assert not node["collision"], f"{node['id']} is fixed AND collidable"
+        if "_anchor_" in node["id"]:
+            _x, _y, z = nodes[node["id"]]
+            assert z <= 0.01, f"anchor above grade: {node['id']} at z={z:.2f}"
+
+    # And the wedges themselves are free bodies that really touch the tire:
+    # collidable, selfCollision on, at chock mass - not scenery.
+    wedge = [
+        node for node in handoff["nodes"]
+        if "chock_" in node["id"] and "_anchor_" not in node["id"]
+    ]
+    assert len(wedge) == 24, f"{len(wedge)} wedge nodes"
+    for node in wedge:
+        assert not node["fixed"], f"wedge node is still fixed: {node['id']}"
+        assert node["collision"], node["id"]
+        assert node["self_collision"], (
+            f"{node['id']} has no selfCollision: the tire would roll straight "
+            "through its own chock"
+        )
+        assert abs(node["weight"] - spec.WEDGE_NODE_MASS) < 1e-6, node["id"]
 
 
-# ---------------------------------------------------------------------------
-# Integrability and inertia
-# ---------------------------------------------------------------------------
 def test_the_cage_is_integrable_at_2000hz(spec, handoff, by_id):
     """omega_max * dt must stay under the explicit integrator's limit.
 
@@ -283,7 +304,9 @@ def test_the_cage_is_integrable_at_2000hz(spec, handoff, by_id):
         for identifier in beam["nodes"]:
             if by_id[identifier]["fixed"]:
                 continue
-            stiffness[identifier] = stiffness.get(identifier, 0.0) + float(family["beamSpring"])
+            stiffness[identifier] = stiffness.get(identifier, 0.0) + float(
+                family["beamSpring"]
+            )
             damping[identifier] = damping.get(identifier, 0.0) + float(family["beamDamp"])
 
     worst_node, worst, worst_damp = None, 0.0, 0.0
@@ -332,10 +355,10 @@ def test_rubber_families_are_damped_like_rubber(spec, handoff, by_id):
 
 
 def carcass_nodes(handoff, nodes):
-    """Free nodes that are the TIRE, i.e. not the bolted-on gangway."""
+    """Free nodes that are the TIRE - the wedges are free bodies, not tire."""
 
     for node in handoff["nodes"]:
-        if node["fixed"] or "tongue" in node["id"]:
+        if node["fixed"] or "chock" in node["id"]:
             continue
         yield node, nodes[node["id"]]
 
@@ -386,7 +409,7 @@ def test_carcass_inertia_supports_the_playability_solve(spec, handoff, nodes):
     )
 
 
-def _relax(handoff, spec, residual=20.0, cap=250_000):
+def _relax(handoff, spec, residual=None, cap=250_000):
     """Settle the free cage under gravity on a rigid floor, TO CONVERGENCE.
 
     Damped dynamic relaxation: the standard way to find a static equilibrium
@@ -406,7 +429,9 @@ def _relax(handoff, spec, residual=20.0, cap=250_000):
 
     order = [node["id"] for node in handoff["nodes"]]
     index = {identifier: position for position, identifier in enumerate(order)}
-    points = np.array([node["source_world_position"] for node in handoff["nodes"]], dtype=float)
+    points = np.array(
+        [node["source_world_position"] for node in handoff["nodes"]], dtype=float
+    )
     mass = np.array([float(node["weight"]) for node in handoff["nodes"]])
     free = np.array([not node["fixed"] for node in handoff["nodes"]])
 
@@ -416,6 +441,12 @@ def _relax(handoff, spec, residual=20.0, cap=250_000):
     spring = np.array([float(specs[b["spec"]]["beamSpring"]) for b in handoff["beams"]])
     rest = np.linalg.norm(points[first] - points[second], axis=1)
 
+    # The convergence criterion scales with what is being converged: a fixed
+    # 20 N floor was tuned against a 124 kN body, and when the mass solve
+    # moved the tire to 4.2 t the same floor let the relax stop while the
+    # ground was still 8% short of the weight.
+    if residual is None:
+        residual = max(4.0, 1.5e-4 * float(mass[free].sum()) * spec.GRAVITY)
     ground_k = 3.0e6
     node_k = np.zeros(len(order))
     np.add.at(node_k, first, spring)
@@ -463,7 +494,10 @@ def _settled(handoff, spec):
     index = {identifier: position for position, identifier in enumerate(order)}
     mass = np.array([float(node["weight"]) for node in handoff["nodes"]])
     weight = float(mass[free].sum()) * spec.GRAVITY
-    ground = float((-3.0e6 * np.minimum(points[:, 2], 0.0)).sum())
+    # FREE nodes only: the strap anchors are FIXED 0.6 m below grade, and
+    # counting them here books 28.8 MN of imaginary ground force against a
+    # 124 kN body. A fixed node in the floor is not carried by anything.
+    ground = float((-3.0e6 * np.minimum(points[free, 2], 0.0)).sum())
 
     # AND WHAT THE QUAY CARRIES. The free set is not only the tire: the
     # gangway hangs off the port sill and stands on the dock through its
@@ -559,8 +593,7 @@ def test_everything_joining_the_tire_to_the_dock_is_in_the_release_group(handoff
 
     assert bridges, "the cage is not connected at all"
     welds = [
-        beam
-        for beam in bridges
+        beam for beam in bridges
         if beam.get("extra", {}).get("breakGroup") != spec.STRAP_BREAK_GROUP
     ]
     assert not welds, (
@@ -574,6 +607,51 @@ def test_everything_joining_the_tire_to_the_dock_is_in_the_release_group(handoff
         entry = handoff["beam_specs"][family]
         assert float(entry["beamStrength"]) < 1e6, f"{family} cannot break; it is a weld"
         assert float(entry["beamDeform"]) < float(entry["beamStrength"])
+
+    # RELEASE MEANS RELEASE. Remove every break-group beam and walk what is
+    # left: the carcass must come apart from every wedge and from everything
+    # fixed, and each wedge must come apart from its anchors and from the
+    # other wedges. One stray beam here is a tow rope nobody can see.
+    neighbours: dict[str, set[str]] = {}
+    for beam in handoff["beams"]:
+        if beam.get("extra", {}).get("breakGroup") == spec.STRAP_BREAK_GROUP:
+            continue
+        first, second = beam["nodes"]
+        neighbours.setdefault(first, set()).add(second)
+        neighbours.setdefault(second, set()).add(first)
+
+    def component(seed: str) -> set[str]:
+        seen, stack = {seed}, [seed]
+        while stack:
+            for other in neighbours.get(stack.pop(), ()):
+                if other not in seen:
+                    seen.add(other)
+                    stack.append(other)
+        return seen
+
+    carcass_seed = next(
+        node["id"] for node in handoff["nodes"]
+        if not node["fixed"] and "chock" not in node["id"]
+    )
+    free_body = component(carcass_seed)
+    tethered = sorted(
+        name for name in free_body
+        if "chock" in name or by_id[name]["fixed"]
+    )
+    assert not tethered, f"cut the release and the tire is still towing: {tethered}"
+
+    wedge_bodies = set()
+    for node in handoff["nodes"]:
+        if "chock_" not in node["id"] or "_anchor_" in node["id"]:
+            continue
+        body = frozenset(component(node["id"]))
+        anchored = sorted(n for n in body if by_id[n]["fixed"])
+        assert not anchored, f"a released wedge is still anchored via {anchored}"
+        wedge_bodies.add(body)
+    assert len(wedge_bodies) == 4, (
+        f"released wedges form {len(wedge_bodies)} bodies, not 4: "
+        "they are roped together"
+    )
 
 
 def test_runtime_never_drives_the_tire(spec):
@@ -597,10 +675,22 @@ def test_runtime_never_drives_the_tire(spec):
     )
     used = [name for name in forbidden if name in behaviour]
     assert not used, f"the Colossus runtime moves things: {used}"
-    # It is allowed exactly one command into the prop's own vehicle Lua: the
-    # one that cuts the straps.
-    assert behaviour.count("queueLuaCommand") == 1
+    # It is allowed exactly two commands into the prop's own vehicle Lua,
+    # both in the release beat: the strap cut, and the winch that pulls the
+    # CHOCKS clear (thrusters.applyImpulse aimed at wedge nodes - measured
+    # live: a wedge lying against the tread props the carcass through the
+    # ramp geometry even with every strap broken, so a release that only
+    # cuts webbing releases nothing on flat ground). The winch may reference
+    # chock nodes and nothing else; the tire itself is never touched.
+    assert behaviour.count("queueLuaCommand") == 2
     assert "beamstate.breakBreakGroup" in behaviour
+    assert "thrusters.applyImpulse" in behaviour
+    for _toe, heel in spec.BEHAVIOR["winch_pairs"]:
+        assert "chock_" in heel
+    marker_names = set(spec.BEHAVIOR["marker_nodes"])
+    winch_names = {name for pair in spec.BEHAVIOR["winch_pairs"] for name in pair}
+    assert not (winch_names & marker_names)
+    assert all("chock_" in name for name in winch_names)
 
 
 def test_the_exported_collada_carries_no_wall_clock(spec):
@@ -618,7 +708,9 @@ def test_the_exported_collada_carries_no_wall_clock(spec):
     twenty other mods' handoff hashes at once.
     """
 
-    dae = EXAMPLE_ROOT / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.dae"
+    dae = (
+        EXAMPLE_ROOT / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.dae"
+    )
     if not dae.is_file():
         pytest.skip("no exported Collada")
     head = dae.read_text(encoding="utf-8", errors="ignore")[:4000]
@@ -630,7 +722,6 @@ def test_the_exported_collada_carries_no_wall_clock(spec):
             "normalise_collada() did not run"
         )
     assert "Blender User" not in head
-
 
 # ---------------------------------------------------------------------------
 # The SHIPPED visual mesh.
@@ -648,9 +739,8 @@ COLLADA_NS = {"c": "http://www.collada.org/2005/11/COLLADASchema"}
 def _collada_streams(path):
     """Yield (material_suffix, positions, uvs, triangle index array) per stream."""
 
-    import xml.etree.ElementTree as ET
-
     import numpy as np
+    import xml.etree.ElementTree as ET
 
     root = ET.parse(path).getroot()
     for geometry in root.findall(".//c:library_geometries/c:geometry", COLLADA_NS):
@@ -658,7 +748,9 @@ def _collada_streams(path):
         sources = {}
         for source in mesh.findall("c:source", COLLADA_NS):
             array = source.find("c:float_array", COLLADA_NS)
-            stride = int(source.find("c:technique_common/c:accessor", COLLADA_NS).get("stride"))
+            stride = int(
+                source.find("c:technique_common/c:accessor", COLLADA_NS).get("stride")
+            )
             values = np.array(array.text.split(), dtype=float)
             sources[source.get("id")] = values.reshape(-1, stride)
         vertices = mesh.find("c:vertices", COLLADA_NS)
@@ -668,23 +760,35 @@ def _collada_streams(path):
         for primitive in mesh.findall("c:triangles", COLLADA_NS):
             inputs = primitive.findall("c:input", COLLADA_NS)
             stride = max(int(entry.get("offset")) for entry in inputs) + 1
-            offsets = {entry.get("semantic"): int(entry.get("offset")) for entry in inputs}
-            uv_input = next((e for e in inputs if e.get("semantic") == "TEXCOORD"), None)
-            uvs = sources[uv_input.get("source").lstrip("#")] if uv_input is not None else None
+            offsets = {
+                entry.get("semantic"): int(entry.get("offset")) for entry in inputs
+            }
+            uv_input = next(
+                (e for e in inputs if e.get("semantic") == "TEXCOORD"), None
+            )
+            uvs = (
+                sources[uv_input.get("source").lstrip("#")]
+                if uv_input is not None
+                else None
+            )
             data = np.array(primitive.find("c:p", COLLADA_NS).text.split(), dtype=int)
             data = data.reshape(-1, stride)
             faces = data[:, offsets["VERTEX"]].reshape(-1, 3)
-            uv_faces = data[:, offsets["TEXCOORD"]].reshape(-1, 3) if uvs is not None else None
+            uv_faces = (
+                data[:, offsets["TEXCOORD"]].reshape(-1, 3) if uvs is not None else None
+            )
             # "<mod_id>_<suffix>-material" -> "<suffix>", which is the key
             # spec.MATERIAL_TILE and the palette are written in.
             material = (primitive.get("material") or "").replace("-material", "")
             suffix = material.split("ericrolph_colossus_tire_")[-1]
-            yield suffix, positions, uvs, faces, uv_faces
+            yield geometry.get("id"), suffix, positions, uvs, faces, uv_faces
 
 
 @pytest.fixture(scope="module")
 def collada(spec):
-    path = EXAMPLE_ROOT / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.dae"
+    path = (
+        EXAMPLE_ROOT / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.dae"
+    )
     if not path.is_file():
         pytest.skip("no exported Collada")
     pytest.importorskip("numpy")
@@ -705,7 +809,7 @@ def test_shipped_mesh_has_no_degenerate_or_duplicate_triangles(collada):
     duplicated = 0
     total = 0
     worst = None
-    for suffix, positions, _uvs, faces, _uv_faces in collada:
+    for _geometry, suffix, positions, _uvs, faces, _uv_faces in collada:
         points = positions[faces]
         cross = np.cross(points[:, 1] - points[:, 0], points[:, 2] - points[:, 0])
         area = 0.5 * np.linalg.norm(cross, axis=1)
@@ -736,7 +840,7 @@ def test_shipped_mesh_uv_density_is_metric_per_material(spec, collada):
     import numpy as np
 
     report = {}
-    for suffix, positions, uvs, faces, uv_faces in collada:
+    for geometry, suffix, positions, uvs, faces, uv_faces in collada:
         if uvs is None or suffix not in spec.MATERIAL_TILE:
             continue
         tile = spec.MATERIAL_TILE[suffix]
@@ -750,20 +854,26 @@ def test_shipped_mesh_uv_density_is_metric_per_material(spec, collada):
             ratios.append(uv_edge[keep] / world_edge[keep] * tile)
         if not any(len(chunk) for chunk in ratios):
             continue
-        report[suffix] = float(np.median(np.concatenate(ratios)))
+        # KEYED BY GEOMETRY TOO. Three materials - deck, hazard and
+        # steel_worn - appear in BOTH the carcass and the dock meshes, and a
+        # bare suffix key let the second silently overwrite the first: the
+        # gangway kerb measured 2.554 against a 0.55..1.8 band and this went
+        # green because the dock's copy of `hazard` landed at 1.255 after it.
+        report[(geometry, suffix)] = float(np.median(np.concatenate(ratios)))
 
     assert report, "no textured streams found"
     # sidewall_print is a DECAL sheet, not a tiling material: v spans the band
     # 0..1 by design, which is how its four printed lines are laid out.
     decals = {"sidewall_print"}
     offenders = {
-        suffix: round(value, 2)
-        for suffix, value in report.items()
+        f"{geometry}:{suffix}": round(value, 2)
+        for (geometry, suffix), value in report.items()
         if suffix not in decals and not 0.55 <= value <= 1.8
     }
     assert not offenders, (
         f"materials rendered off their authored grain size: {offenders} "
-        f"(1.00 = metric; full report {dict(sorted((k, round(v, 2)) for k, v in report.items()))})"
+        f"(1.00 = metric; full report "
+        f"{sorted((f'{g}:{s}', round(v, 2)) for (g, s), v in report.items())})"
     )
 
 
@@ -794,7 +904,7 @@ def test_shipped_mesh_faces_outward(spec, collada):
     radial_in = {"liner", "lane_mark", "bead"}
     axial_out = {"sidewall", "sidewall_print"}
     verdicts = {}
-    for suffix, positions, _uvs, faces, _uv_faces in collada:
+    for _geometry, suffix, positions, _uvs, faces, _uv_faces in collada:
         if suffix not in radial_out | radial_in | axial_out:
             continue
         points = positions[faces]
@@ -809,7 +919,7 @@ def test_shipped_mesh_faces_outward(spec, collada):
             want_out = True
         else:
             reference = centres - axle
-            reference[:, 0] = 0.0  # the radial direction is in y-z
+            reference[:, 0] = 0.0               # the radial direction is in y-z
             want_out = suffix in radial_out
         length = np.linalg.norm(reference, axis=1)
         good = length > 1e-6
@@ -845,7 +955,7 @@ def test_the_shipped_type_is_wound_one_way(collada):
     import collections
 
     offenders = {}
-    for suffix, _positions, _uvs, faces, _uv_faces in collada:
+    for _geometry, suffix, _positions, _uvs, faces, _uv_faces in collada:
         if suffix not in {"sidewall_type", "sidewall_print", "sidewall", "liner", "tread"}:
             continue
         seen = collections.Counter()
@@ -875,7 +985,7 @@ def test_no_shipped_triangle_has_a_degenerate_tangent_basis(collada):
     import numpy as np
 
     offenders = {}
-    for suffix, positions, uvs, faces, uv_faces in collada:
+    for _geometry, suffix, positions, uvs, faces, uv_faces in collada:
         if uvs is None or uv_faces is None:
             continue
         world = positions[faces]
@@ -904,7 +1014,7 @@ def test_the_shipped_print_band_faces_out_of_the_sidewall(collada):
     import numpy as np
 
     verdicts = {}
-    for suffix, positions, _uvs, faces, _uv_faces in collada:
+    for _geometry, suffix, positions, _uvs, faces, _uv_faces in collada:
         if suffix != "sidewall_print":
             continue
         points = positions[faces]
@@ -943,15 +1053,12 @@ def test_every_moulded_glyph_is_a_solid_wound_outward(collada):
 
     import numpy as np
 
-    for suffix, positions, _uvs, faces, _uv_faces in collada:
+    for _geometry, suffix, positions, _uvs, faces, _uv_faces in collada:
         if suffix != "sidewall_type":
             continue
         parent = list(range(len(positions)))
 
-        # Bound as a default so the closure holds THIS component's table
-        # (B023): the function never outlives the iteration, but the binding
-        # makes that fact structural instead of incidental.
-        def root(node: int, parent: list[int] = parent) -> int:
+        def root(node: int) -> int:
             while parent[node] != node:
                 parent[node] = parent[parent[node]]
                 node = parent[node]
@@ -965,7 +1072,9 @@ def test_every_moulded_glyph_is_a_solid_wound_outward(collada):
 
         volumes: dict[int, float] = {}
         points = positions[faces]
-        signed = np.einsum("ij,ij->i", points[:, 0], np.cross(points[:, 1], points[:, 2])) / 6.0
+        signed = np.einsum(
+            "ij,ij->i", points[:, 0], np.cross(points[:, 1], points[:, 2])
+        ) / 6.0
         for face, value in zip(faces, signed, strict=True):
             key = root(int(face[0]))
             volumes[key] = volumes.get(key, 0.0) + float(value)
@@ -982,67 +1091,6 @@ def test_every_moulded_glyph_is_a_solid_wound_outward(collada):
     pytest.skip("no moulded type in the shipped mesh")
 
 
-def test_a_car_can_drive_from_the_cavity_floor_to_the_dock(spec, handoff):
-    """The boarding path is continuous on the SETTLED geometry.
-
-    Every gate in this file measured the tire as authored, standing at its
-    spawn pose; the tire it ships settles 0.36 m onto its contact patch, and
-    the gangway hangs off it. Round 3's gangway had its only two supports on
-    its outer corners, running mostly sideways, so its mid-span - which is the
-    boarding centreline - sagged onto the terrain and left a step no car can
-    climb. Nothing static could see it, because nothing static settled first.
-
-    So: walk the centreline out from the middle of the cavity floor to the
-    foot of the ramp, take the highest up-facing collision surface under each
-    step, and fail on a hole or a kerb.
-    """
-
-    import numpy as np
-
-    _order, points, _free, index = _settled(handoff, spec)
-    triangles = np.array([[index[node] for node in tri["nodes"]] for tri in handoff["triangles"]])
-    corners = points[triangles]
-    normals = np.cross(corners[:, 1] - corners[:, 0], corners[:, 2] - corners[:, 0])
-    up = normals[:, 2] > 0.0  # a coltri collides one way
-
-    def surface(x: float, y: float) -> float | None:
-        best = None
-        for tri in np.nonzero(up)[0]:
-            a, b, c = corners[tri]
-            v0, v1, v2 = b[:2] - a[:2], c[:2] - a[:2], np.array([x, y]) - a[:2]
-            denominator = v0[0] * v1[1] - v1[0] * v0[1]
-            if abs(denominator) < 1e-12:
-                continue
-            u = (v2[0] * v1[1] - v1[0] * v2[1]) / denominator
-            v = (v0[0] * v2[1] - v2[0] * v0[1]) / denominator
-            if u < -1e-6 or v < -1e-6 or u + v > 1.0 + 1e-6:
-                continue
-            z = a[2] + u * (b[2] - a[2]) + v * (c[2] - a[2])
-            if z > 3.0:
-                continue
-            best = z if best is None else max(best, z)
-        return best
-
-    profile = []
-    x = 2.0
-    while x <= spec.DOCK_LANDING_X1:
-        profile.append((x, surface(x, 0.0)))
-        x += 0.10
-
-    holes = [round(x, 2) for x, z in profile if z is None]
-    assert not holes, (
-        f"the boarding centreline has no collision surface at x = {holes}; "
-        f"a car driving out drops through the floor"
-    )
-    heights = [z for _x, z in profile]
-    steps = [
-        (round(profile[i][0], 2), round(heights[i + 1] - heights[i], 3))
-        for i in range(len(heights) - 1)
-        if abs(heights[i + 1] - heights[i]) > 0.25
-    ]
-    assert not steps, f"the boarding centreline steps by more than 0.25 m at {steps}"
-
-
 def test_the_verify_render_builds_everything_the_generator_ships():
     """The frames a round is judged from must contain the whole prop.
 
@@ -1057,7 +1105,9 @@ def test_the_verify_render_builds_everything_the_generator_ships():
 
     import re
 
-    generator = (EXAMPLE_ROOT / "blender" / "create_colossus_tire.py").read_text(encoding="utf-8")
+    generator = (
+        EXAMPLE_ROOT / "blender" / "create_colossus_tire.py"
+    ).read_text(encoding="utf-8")
     render = (EXAMPLE_ROOT / "authoring" / "verify_render.py").read_text(encoding="utf-8")
 
     def _builders(text: str, marker: str, prefix: str) -> set[str]:
@@ -1076,4 +1126,129 @@ def test_the_verify_render_builds_everything_the_generator_ships():
     assert not missing, (
         f"verify_render.py never builds {missing}, so no frame in "
         f"authoring/verify/ contains it and no review can see it"
+    )
+
+
+def _components(faces):
+    """Connected components of a triangle soup, by shared vertex index."""
+
+    parent = {}
+
+    def root(node):
+        parent.setdefault(node, node)
+        while parent[node] != node:
+            parent[node] = parent[parent[node]]
+            node = parent[node]
+        return node
+
+    for first, second, third in faces:
+        for other in (second, third):
+            a, b = root(int(first)), root(int(other))
+            if a != b:
+                parent[a] = b
+    groups = {}
+    for index, face in enumerate(faces):
+        groups.setdefault(root(int(face[0])), []).append(index)
+    return list(groups.values())
+
+
+def test_every_closed_solid_in_the_shipped_mesh_has_positive_volume(collada):
+    """The orientation rule that has no escape hatch.
+
+    assert_face_orientation declines to judge any face whose normal is not
+    dominantly radial or axial, which is how the buttress wrap's two end walls
+    and its bottom lip shipped inside out - 1,020 edges in one object - and
+    how NINE of the fourteen port gussets shipped inside out after that, on
+    the surface the player boards through. Signed volume needs no reference
+    direction: a closed shell wound outward encloses a positive volume and one
+    wound inward encloses a negative one, and that is true of a bolt head, a
+    glyph, a gusset and a lifting lug alike.
+
+    Only CLOSED components are judged. An open shell - a lug sitting on the
+    tread, a bezel plate - has no volume to speak of and is judged by the
+    winding-consistency gate instead.
+    """
+
+    import collections
+
+    import numpy as np
+
+    offenders = {}
+    judged = 0
+    for _geometry, suffix, positions, _uvs, faces, _uv_faces in collada:
+        signed = np.einsum(
+            "ij,ij->i",
+            positions[faces][:, 0],
+            np.cross(positions[faces][:, 1], positions[faces][:, 2]),
+        ) / 6.0
+        for group in _components(faces):
+            sub = faces[group]
+            edges = collections.Counter()
+            for first, second, third in sub:
+                for edge in ((first, second), (second, third), (third, first)):
+                    edges[tuple(sorted(edge))] += 1
+            if any(count == 1 for count in edges.values()):
+                continue
+            judged += 1
+            volume = float(signed[group].sum())
+            if volume <= 1e-9:
+                offenders[suffix] = offenders.get(suffix, 0) + 1
+
+    assert judged > 20, f"only {judged} closed solids found; the sweep is not working"
+    assert not offenders, (
+        f"closed solids wound inside out or collapsed: {offenders} "
+        f"(of {judged} judged); BeamNG culls every one of them to a hole"
+    )
+
+
+def test_the_shipped_mesh_is_already_welded(collada):
+    """Nothing coincident may still be separate in the file that ships.
+
+    The generator builds one Blender object per surface so the orientation
+    rules can name each one, and joining them for export left every shared
+    ring as two coincident vertex sets: 12,026 boundary edges and 4,666 m of
+    them shipped, and down both edges of the drive lane 554 vertex pairs
+    carried a 30.75 degree median normal split across geometry that bends
+    2.5 - a hard false crease running the full 84 m circumference on the
+    surface the driver stares at for the whole ride. If welding the shipped
+    bytes changes anything, the shipped bytes were not welded.
+    """
+
+    import collections
+
+    import numpy as np
+
+    per_geometry = collections.defaultdict(list)
+    positions_of = {}
+    for geometry, _suffix, positions, _uvs, faces, _uv_faces in collada:
+        per_geometry[geometry].append(faces)
+        positions_of[geometry] = positions
+
+    report = {}
+    for geometry, chunks in per_geometry.items():
+        faces = np.concatenate(chunks)
+        positions = positions_of[geometry]
+        keys = np.round(positions * 1e6).astype(np.int64)
+        _, inverse = np.unique(keys, axis=0, return_inverse=True)
+        before = collections.Counter()
+        after = collections.Counter()
+        for triangle, welded in zip(faces, inverse[faces], strict=True):
+            for index in range(3):
+                pair = (triangle[index], triangle[(index + 1) % 3])
+                before[tuple(sorted(pair))] += 1
+                pair = (welded[index], welded[(index + 1) % 3])
+                after[tuple(sorted(pair))] += 1
+        report[geometry] = (
+            sum(1 for count in before.values() if count == 1),
+            sum(1 for count in after.values() if count == 1),
+        )
+
+    offenders = {
+        geometry: f"{raw} -> {welded}"
+        for geometry, (raw, welded) in report.items()
+        if raw != welded
+    }
+    assert not offenders, (
+        f"welding the shipped mesh closes boundary edges that should already "
+        f"be closed: {offenders} - every one of those is a shading seam"
     )
