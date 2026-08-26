@@ -1496,3 +1496,83 @@ def test_the_storefront_is_lit_like_the_evidence():
         "the frame sat 9.5% below the saturation band every other render "
         "of the same scene is inside"
     )
+
+
+def test_the_boom_clears_the_slew_ring():
+    """Rotating steel must not pass through fixed steel, SWEPT and SECTIONED.
+
+    The straight hub-to-elbow girder pitched 57 degrees and crossed the
+    slew ring band at centreline radii 1.2-1.6 -- 1.7 m inside the solid
+    ring at every azimuth. The first "fix" moved the girder's start point
+    1.2 m along the same wrong line and bought 0.28 m of a 1.99 m
+    problem; a reviewer recomputed it to rubble. The real fix is the knee:
+    a shallow shoulder run OVER the ring, the corner turned outside it.
+
+    This gate does the reviewer's recompute on every build: walk both
+    segments' section envelopes and assert (a) anything inside the ring's
+    radius stays ABOVE the ring band with margin, and (b) the drop
+    segment's inboard face never enters the ring radius inside the band.
+    Swept geometry, not a representative edge -- the same law the hand's
+    ground-clearance gate already carries.
+    """
+
+    ring_r = spec.SLEW_RING_R + 0.04          # teeth stand slightly proud
+    ring_top = spec.MAST_TOP_Z + spec.SLEW_RING_H
+
+    hub = (0.0, spec.HUB_Z)
+    knee = (spec.BOOM_KNEE_R, spec.BOOM_KNEE_Z)
+    elbow = (spec.ELBOW_R, spec.ELBOW_Z)
+
+    def walk(start, end, depth_start, depth_end, samples=120):
+        run = math.hypot(end[0] - start[0], end[1] - start[1])
+        pitch = math.atan2(start[1] - end[1], end[0] - start[0])
+        for index in range(samples + 1):
+            t = index / samples
+            r = start[0] + (end[0] - start[0]) * t
+            z = start[1] + (end[1] - start[1]) * t
+            depth = depth_start + (depth_end - depth_start) * t
+            # The section's lowest and most inboard corners.
+            belly = z - (depth / 2.0) / max(math.cos(pitch), 0.2)
+            inboard = r - (depth / 2.0) * abs(math.sin(pitch))
+            yield r, z, depth, belly, inboard
+
+    # Shoulder: wherever it stands over the ring, its belly must clear.
+    worst = None
+    for r, z, depth, belly, inboard in walk(hub, knee, 1.35, 1.15):
+        if inboard <= ring_r or r <= ring_r:
+            clearance = belly - ring_top
+            if worst is None or clearance < worst:
+                worst = clearance
+    assert worst is not None
+    assert worst > 0.05, (
+        f"the shoulder run's belly comes within {worst:+.3f} m of the slew "
+        "ring's top face -- the boom is back inside its own bearing"
+    )
+
+    # Drop: inside the ring band's height it must stay outside its radius.
+    ring_bottom = spec.MAST_TOP_Z
+    intrusion = None
+    for r, z, depth, belly, inboard in walk(knee, elbow, 1.15, spec.BOOM_ELBOW_DEPTH):
+        if ring_bottom - 0.5 <= z <= ring_top + 0.5:
+            margin = inboard - ring_r
+            if intrusion is None or margin < intrusion:
+                intrusion = margin
+    if intrusion is not None:
+        assert intrusion > 0.05, (
+            f"the drop segment's inboard face comes within {intrusion:+.3f} m "
+            "of the slew ring radius inside the ring band"
+        )
+
+    # And the gate must be able to see the OLD defect: a straight
+    # hub-to-elbow member through the same walk fails by metres, which is
+    # the negative verification built in rather than trusted.
+    straight_worst = None
+    for r, z, depth, belly, inboard in walk(hub, elbow, 2.05, 1.15):
+        if inboard <= ring_r or r <= ring_r:
+            clearance = belly - ring_top
+            if straight_worst is None or clearance < straight_worst:
+                straight_worst = clearance
+    assert straight_worst is not None and straight_worst < -0.5, (
+        "the straight-member counterexample no longer fails this walk; the "
+        "gate has gone blind and proves nothing about the knee"
+    )

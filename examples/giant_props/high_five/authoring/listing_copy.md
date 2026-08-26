@@ -115,6 +115,10 @@ reproducible from source.
 - Four fingers and an opposed thumb, each rooted on a ball-and-socket
   knuckle concentric with its own pivot, so flexing a digit moves no
   surface point at the joint.
+- The fingers are STRAPPED — two black elastic bands binding them into
+  one tense paddle, exactly as the film prop's are, each band fitted to
+  the actual finger surfaces it crosses. When the machine notices you,
+  the fingers strain straighter against the straps.
 - Palmar creases cut at real proportions, a thenar web built where the
   anatomy puts it rather than where it was convenient, metacarpal heads
   that show through the back of the hand and not the front.
@@ -137,6 +141,17 @@ chains, hazard chevrons and a builder's plate. 8,010 kg, 26 posable parts.
   centre of mass, so the car leaves rolling end-over-end with a drag yaw,
   through the engine's own physics — measured live at 6-7.6 rad/s. POWER
   scales the spin along with the speed.
+- THE MACHINE KEEPS SCORE. It watches what it launched until it stops
+  moving, then announces the flight while the palm is still held out:
+  "213 m. 7 rotations. On its wheels." — and if you land on the roof, it
+  waits a beat and adds "The hand pretends not to look." Rotations are
+  measured off the car, not assumed.
+- Speed helps. Arrive faster than the slap and the palm keeps your
+  momentum instead of braking it — hot runs genuinely out-throw slow
+  ones, so the scoreboard is a challenge, not a dice roll.
+- The strike has a SOUND: a rising whoosh into a deep double thump,
+  synthesized from source like everything else here, timed so the boom
+  lands on the contact frame.
 - Launch speed rolled per car at 28–34 m/s, then multiplied by POWER.
 - Elevation comes from WRIST TILT alone; the launch is always along the
   palm normal, so the console reads as a real ballistic control.

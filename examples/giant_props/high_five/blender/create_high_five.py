@@ -61,6 +61,9 @@ E2 = N.copy()
 #: upper arm, hub -> elbow
 A1 = (ELBOW - HUB).normalized()
 A3 = A1.cross(E2).normalized()
+# Horizontal unit vector from the mast axis toward the elbow: the radial
+# direction the knee sits along.
+U_RADIAL = Vector((ELBOW.x - HUB.x, ELBOW.y - HUB.y, 0.0)).normalized()
 #: forearm, elbow -> wrist
 F1 = (WRIST - ELBOW).normalized()
 F3 = F1.cross(E2).normalized()
@@ -893,24 +896,28 @@ def build_arm(materials) -> tuple[list, list]:
             )
         return add_loft(name, rings, rig, uv_scale=(1.4, 1.4))
 
-    # THE ROOT SHOE. The girder used to start AT the hub at full
-    # BOOM_ROOT_DEPTH, which drove its underside up to 1.97 m radially
-    # inside the solid slew ring and 1.07 m below the mast-top plane —
-    # rotating steel through fixed steel at every azimuth, visible from
-    # any low orbit. The girder now starts 1.2 m out at a reduced root and
-    # a forged shoe bridges pin to girder between the existing cheeks.
-    SHOE_ALONG = 1.2
-    SHOE_ROOT_DEPTH = 1.45
+    # THE KNEE BOOM. See spec.BOOM_KNEE_R for why no straight member can
+    # exist here: the shoulder segment runs shallow OVER the slew ring,
+    # a gusseted knee turns the corner outside it, and the drop segment
+    # takes the 78-degree dive to the elbow. The old root shoe was
+    # cosmetic against a path that was wrong.
+    KNEE = HUB + U_RADIAL * spec.BOOM_KNEE_R + UP * (spec.BOOM_KNEE_Z - spec.HUB_Z)
+    S1 = (KNEE - HUB).normalized()
+    S1_3 = S1.cross(E2).normalized()
+    S2 = (ELBOW - KNEE).normalized()
+    S2_3 = S2.cross(E2).normalized()
+    shoulder_len = (KNEE - HUB).length
+    drop_len = (ELBOW - KNEE).length
     objects.append(
         add_loft(
             f"{MOD_ID}_arm_root_shoe",
             [
                 rounded_rect_ring(
-                    HUB + A1 * 0.30, E2, A3,
-                    spec.BOOM_WIDTH * 0.40, 0.58, 0.10),
+                    HUB + S1 * 0.28, E2, S1_3,
+                    spec.BOOM_WIDTH * 0.40, 0.56, 0.10),
                 rounded_rect_ring(
-                    HUB + A1 * SHOE_ALONG, E2, A3,
-                    spec.BOOM_WIDTH / 2.0, SHOE_ROOT_DEPTH / 2.0, 0.10),
+                    HUB + S1 * 0.70, E2, S1_3,
+                    spec.BOOM_WIDTH / 2.0, 1.35 / 2.0, 0.10),
             ],
             rig,
             uv_scale=(1.2, 1.2),
@@ -920,10 +927,42 @@ def build_arm(materials) -> tuple[list, list]:
     )
     objects.append(
         girder(
-            f"{MOD_ID}_upper_arm", HUB + A1 * SHOE_ALONG, A1, A3,
-            spec.UPPER_LENGTH - SHOE_ALONG,
-            SHOE_ROOT_DEPTH, spec.BOOM_ELBOW_DEPTH,
-            spec.BOOM_WIDTH, spec.BOOM_WIDTH * 0.88,
+            f"{MOD_ID}_arm_shoulder", HUB + S1 * 0.70, S1, S1_3,
+            shoulder_len - 0.70,
+            1.35, 1.15,
+            spec.BOOM_WIDTH, spec.BOOM_WIDTH * 0.94,
+        )
+    )
+    # The knee joint: a boxed gusset wrapping the corner, with a bolt ring
+    # on each cheek -- the joint a fabricated dogleg actually has.
+    knee_axis = (S1 + S2).normalized()
+    knee_box = bk.add_box(
+        f"{MOD_ID}_arm_knee",
+        (KNEE.x, KNEE.y, KNEE.z),
+        (spec.BOOM_WIDTH + 0.22, 1.55, 1.55),
+        rig,
+        bevel=0.05,
+        metric_uv=(1.0, 1.0),
+        rotation=(0.0, 0.0, math.radians(spec.REST_DEG)),
+    )
+    objects.append(knee_box)
+    for sign in (-1.0, 1.0):
+        for angle_index in range(8):
+            angle = TWO_PI * angle_index / 8.0
+            radial = (S1 * math.cos(angle) + S1_3 * math.sin(angle)) * 0.55
+            bolt = KNEE + radial + E2 * (sign * (spec.BOOM_WIDTH / 2.0 + 0.115))
+            objects.append(
+                add_bolt(
+                    f"{MOD_ID}_knee_bolt{int(sign)}{angle_index}",
+                    bolt, E2 * sign, 0.055, steel,
+                )
+            )
+    objects.append(
+        girder(
+            f"{MOD_ID}_upper_arm", KNEE, S2, S2_3,
+            drop_len,
+            1.15, spec.BOOM_ELBOW_DEPTH,
+            spec.BOOM_WIDTH * 0.94, spec.BOOM_WIDTH * 0.88,
         )
     )
     objects.append(
@@ -966,10 +1005,10 @@ def build_arm(materials) -> tuple[list, list]:
                     )
 
     splices(
-        f"{MOD_ID}_upper", HUB + A1 * SHOE_ALONG, A1, A3,
-        spec.UPPER_LENGTH - SHOE_ALONG,
-        SHOE_ROOT_DEPTH, spec.BOOM_ELBOW_DEPTH,
-        spec.BOOM_WIDTH, spec.BOOM_WIDTH * 0.88, (0.30, 0.66),
+        f"{MOD_ID}_upper", KNEE, S2, S2_3,
+        drop_len,
+        1.15, spec.BOOM_ELBOW_DEPTH,
+        spec.BOOM_WIDTH * 0.94, spec.BOOM_WIDTH * 0.88, (0.34, 0.70),
     )
     splices(
         f"{MOD_ID}_fore", ELBOW, F1, F3, spec.FORE_LENGTH,
@@ -1408,7 +1447,10 @@ def build_hand_parts(materials) -> dict[str, dict]:
         for point in slab:
             offset = point - centroid
             flat.append((offset.dot(basis_a), offset.dot(basis_b)))
-        hull = _convex_hull_2d(flat)
+        # Chaikin-rounded: the raw hull is a dozen hard corners that
+        # rendered as faceted flat bar. Two passes turn it into the soft
+        # loop a rubber band actually is.
+        hull = _chaikin(_convex_hull_2d(flat), 2)
 
         def hull_ring(proud, along):
             ring = []
@@ -1427,10 +1469,10 @@ def build_hand_parts(materials) -> dict[str, dict]:
         strap = add_loft(
             f"{MOD_ID}_finger_strap{band_index}",
             [
-                hull_ring(0.045, -0.21),
-                hull_ring(0.085, -0.13),
-                hull_ring(0.085, 0.13),
-                hull_ring(0.045, 0.21),
+                hull_ring(0.030, -0.21),
+                hull_ring(0.068, -0.13),
+                hull_ring(0.068, 0.13),
+                hull_ring(0.030, 0.21),
             ],
             rig,
             uv_scale=(0.8, 0.8),
@@ -1440,6 +1482,21 @@ def build_hand_parts(materials) -> dict[str, dict]:
         _place(strap, to_world)
         parts["hand"]["objects"].append(strap)
     return parts
+
+
+def _chaikin(loop, passes):
+    """Corner-cutting for a closed 2D loop: hard hull corners -> rubber."""
+
+    for _ in range(passes):
+        smoothed = []
+        count = len(loop)
+        for index in range(count):
+            ax, ay = loop[index]
+            bx, by = loop[(index + 1) % count]
+            smoothed.append((0.75 * ax + 0.25 * bx, 0.75 * ay + 0.25 * by))
+            smoothed.append((0.25 * ax + 0.75 * bx, 0.25 * ay + 0.75 * by))
+        loop = smoothed
+    return loop
 
 
 def _convex_hull_2d(points):
@@ -2242,6 +2299,12 @@ def main() -> None:
         ("thumb", tuple(thumb + N * 6.0 + UP * 1.5), tuple(thumb - UP * 1.2)),
         ("wrist", tuple(WRIST - U * 2.0 + N * 7.5 + UP * 3.0), tuple(WRIST - U * 1.2)),
         ("pad", (5.0, -9.0, 5.0), (0.0, 0.0, 0.2)),
+        # The machine's BACK: counterweight, hangers, tail beam. Every
+        # other camera faces the boom side, which is how 29 tonnes of
+        # carried plate went entirely unphotographed for a full review
+        # round.
+        ("head_rear", (-22.0, 9.0, 12.5),
+         (spec.MAST_X, spec.MAST_Y, 9.6)),
         # THE SEAM SHOTS, and the side matters more than the obliquity.
         #
         # A two-part mould splits on the SILHOUETTE, so the parting line

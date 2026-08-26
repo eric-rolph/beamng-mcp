@@ -184,7 +184,11 @@ MCP_OFFSET_MM = {
 # closed, but it is filmed at two metres, not from a car. At -9 the little
 # fingertip sits 8.8% outside the palm half-width, which reads as splayed
 # without reading as a spider.
-FINGER_SPLAY_DEG = {"index": 10.0, "middle": 0.0, "ring": -5.0, "little": -7.0}
+# Pulled toward PACKED. The reference's strapped fingers TOUCH; at
+# 10/-5/-7 the straps bridged finger-width air gaps and read as hoops on
+# separated tubes rather than tension on one paddle. A little spread
+# survives so the digits still read as digits.
+FINGER_SPLAY_DEG = {"index": 4.0, "middle": 0.0, "ring": -2.0, "little": -3.0}
 # (MCP, PIP, DIP). These are an OPEN, offered hand, not a relaxed one: the
 # gag is a high five, so the palm has to present flat. The first pass used
 # true relaxed-hand angles (13/19/11 and up) and they sum to 43-60 deg of
@@ -436,6 +440,20 @@ FORE_LENGTH = math.hypot(FORE_RUN, FORE_RISE)
 FORE_PITCH_DEG = math.degrees(math.atan2(FORE_RISE, FORE_RUN))
 ELBOW_BREAK_DEG = UPPER_PITCH_DEG - FORE_PITCH_DEG
 BOOM_ROOT_DEPTH = 2.05     # box-section depth at the shoulder
+# THE KNEE. A straight member from the hub (r 0, z 10.5) to the elbow
+# (r 3.6, z 4.9) pitches 57 degrees and by construction crosses the slew
+# ring band (z 8.00-8.62, r 2.085) at centreline radii 1.2-1.6 -- 1.7 m
+# of rotating steel inside fixed steel at EVERY azimuth, and no root
+# offset can fix a line whose path is wrong (the first "fix" bought
+# 0.28 m of a 1.99 m problem and a reviewer recomputed it to rubble).
+# So the boom is a luffing-derrick dogleg: a shallow shoulder segment
+# from the hub OVER the ring, a knee joint outside it, then the steep
+# drop to the elbow. At (2.85, 9.10) the shoulder run's belly clears the
+# ring top by 0.10-0.22 m through its depth taper and the drop segment's
+# inboard face stays 0.67 m outside the ring. test_the_boom_clears_the
+# _slew_ring holds these numbers.
+BOOM_KNEE_R = 2.85
+BOOM_KNEE_Z = 9.10
 BOOM_ELBOW_DEPTH = 1.62    # both members at the elbow pin
 BOOM_TIP_DEPTH = 1.18      # at the wrist collar
 BOOM_WIDTH = 1.40
@@ -1309,15 +1327,28 @@ EFFECTS = {
     # for the whole follow+hold (1.3 s): a beige dome squatting on the
     # stencil through every after-shot of the mod. Two nodes now bracket
     # the contact height and the swing turns them off 0.3 s after the hit.
+    # THE CLOUD MUST TRAVEL. Switching the emitters off cannot recall
+    # particles already emitted, and BNGP_2's dust ejects at 1 m/s -- so
+    # the 0.3 s burst still parked a beige dome on the pad stencil for the
+    # particle lifetime, dead centre of every after-shot (chase_015-020).
+    # These are census-verified emitters whose particles LEAVE: utah dust
+    # ejects at 4.2 m/s, sand at 3, and gravel is ballistic chunks that
+    # fall instead of hang. Aimed down-road, the wake follows the car out
+    # of frame instead of squatting on the joke.
     "slap_dust": {
-        "emitter": "BNGP_2",
-        "position": [0.0, 0.4, 1.5],
-        "direction": [0.0, 0.65, 0.76],
+        "emitter": "BNGP_utah_dust",
+        "position": [0.0, 0.6, 1.3],
+        "direction": [0.0, 0.80, 0.60],
     },
     "slap_dust2": {
-        "emitter": "BNGP_2",
-        "position": [0.6, -0.4, 0.9],
-        "direction": [0.2, 0.55, 0.81],
+        "emitter": "BNGP_8",
+        "position": [0.6, -0.3, 0.7],
+        "direction": [0.15, 0.76, 0.63],
+    },
+    "slap_grit": {
+        "emitter": "BNGP_16",
+        "position": [0.0, 0.2, 0.5],
+        "direction": [0.0, 0.85, 0.53],
     },
     # Steam off the slew gearbox after a swing — the drive dumping heat.
     "slew_steam": {
@@ -1482,14 +1513,19 @@ BEHAVIOR = {
     # this cap binds at NO console setting today -- it guards future edits
     # to transfer/ease/timing, not the shipped ladder.
     "slap_spin_cap_rps": 9.0,
-    # THE RELEASE FIRES EARLY BY THIS MUCH. Measured live (frames3 track,
-    # 2026-08-26): the palm arrived with the car centre 2.9 m PAST the
-    # strike plane at 26.5 m/s -- 0.11 s late, three-quarters of the slap
-    # zone's depth consumed. The 60 Hz headless stub cannot reproduce it
-    # (its quantization ceiling is ~0.9 m), so it is live-loop cadence:
-    # trigger-entry latency plus update sampling. The stub gate stays
-    # honest either way because the bias only re-centres the error band.
-    "release_bias_seconds": 0.10,
+    # THE RELEASE FIRES EARLY BY THIS MUCH -- and 0.06, not the 0.10
+    # first fitted, because the first fit trusted one measurement taken
+    # with a different detector. The pre-bias lag looked like 0.11 s
+    # (car 2.9 m PAST the plane at 26.5 m/s, speed-jump detector on the
+    # CoM); with the bias in, altitude-detected offsets across 22/40/55
+    # m/s back out a true lag of only ~0.045 s, and at 0.10 the palm led
+    # a 55 m/s car by enough that ordinary run-to-run spread tipped a
+    # session-6 pass into a WHIFF -- the machine beaten by the player it
+    # is explicitly sized never to lose to. 0.06 centres every measured
+    # offset inside +/-1.5 m with 4+ m of whiff margin. The stub cannot
+    # reproduce any of this (its quantization ceiling is ~0.9 m); the
+    # live gate's arrival assertion is the guard.
+    "release_bias_seconds": 0.06,
     # The pad path swings from REST, so its palm arrives at 72/104 of the
     # windup swing's speed -- and the LAUNCH scales the same way, because
     # one physical model covers speed and spin or it covers neither.
@@ -1880,6 +1916,13 @@ end
 -- ===========================================================================
 -- The slap
 -- ===========================================================================
+-- Forward declaration: slapStrikeZone flushes a superseded watch, and the
+-- scorer is defined further down (it needs nothing above this point). A
+-- bare `local function` there would leave THIS reference compiling as a
+-- nil global -- the exact trap documented at the top of this chunk, which
+-- this file then walked into a second time while fixing the scoreboard.
+local finalizeWatch
+
 local function slapStrikeZone(state)
   local mult = powerMult(state)
   local tilt = math.rad(tiltDegrees(state))
@@ -1901,6 +1944,20 @@ local function slapStrikeZone(state)
       local speed = (B.slap_speed_min_mps
         + math.random() * (B.slap_speed_max_mps - B.slap_speed_min_mps))
         * mult * reachScale
+      -- A PALM AT 100+ M/S NEVER BRAKES A CAR. Replace semantics alone
+      -- turned a 55 m/s arrival into a 42 m/s departure, and the moment
+      -- the scoreboard existed that read as the machine answering "your
+      -- speed never mattered" to the one experiment every player runs.
+      -- The launch keeps the car's own momentum along the palm normal
+      -- when that is the larger number: hot runs out-throw slow ones,
+      -- the dial still owns the floor, and the pad/corridor contrast
+      -- survives untouched.
+      local carried, incoming = pcall(function() return vehicle:getVelocity() end)
+      if carried and incoming and finiteVector3(incoming) then
+        local projection = incoming.x * direction.x
+          + incoming.y * direction.y + incoming.z * direction.z
+        if projection > speed then speed = projection end
+      end
       if launchSubject(state, vehicle, direction * speed) then
         -- THE TUMBLE. See the slap_spin_* tunables for the model. The spin
         -- goes through the vehicle's OWN physics (thrusters.applyAccel ->
@@ -1953,19 +2010,8 @@ local function slapStrikeZone(state)
   if slapped > 0 then
     setEffectActive(state, "slap_dust", true)
     setEffectActive(state, "slap_dust2", true)
+    setEffectActive(state, "slap_grit", true)
     setEffectActive(state, "slew_steam", true)
-    -- The thwack, on the prop's own vehicle VM, with the stop parked in
-    -- the clip's silent tail (see VEHICLE_LUA_EXTRA).
-    pcall(function()
-      local propObj = be:getObjectByID(state.propId)
-      if propObj then
-        propObj:queueLuaCommand(string.format(
-          "if extensions.%s_vehicle and extensions.%s_vehicle.playSlap"
-          .. " then extensions.%s_vehicle.playSlap() end",
-          PROP_MODEL, PROP_MODEL, PROP_MODEL))
-      end
-    end)
-    state.behavior.slapSfxOffAt = state.behavior.clock + 1.4
     -- THE SCOREBOARD ARMS. The machine launched something; now it watches
     -- where it lands, because a 200 m tumbling flight that nobody
     -- measures reads as a glitch and one that gets a number reads as a
@@ -1980,6 +2026,21 @@ local function slapStrikeZone(state)
     end
     local watched = watchId and exactVehicle(watchId) or nil
     if watched then
+      -- FLUSH, never eat: if the previous flight is still being watched
+      -- when this slap arms, score it where it is rather than dropping
+      -- it. The unconditional overwrite lost the corridor flight every
+      -- time a pad slap followed it.
+      if state.behavior.watch then
+        local previous = exactVehicle(state.behavior.watch.id)
+        if previous then
+          local prevOk, prevUp = pcall(function()
+            return previous:getDirectionVectorUp()
+          end)
+          finalizeWatch(state, previous, prevOk and prevUp or nil)
+        else
+          state.behavior.watch = nil
+        end
+      end
       local origin = watched:getPosition()
       local up = watched:getDirectionVectorUp()
       state.behavior.watch = {
@@ -2020,6 +2081,9 @@ behavior.init = function(state)
   b.blind = 0
   b.swingFrom = nil
   b.subjectId = nil
+  b.watch = nil
+  b.winceAt = nil
+  b.slapSfxOffAt = nil
   b.faulted = not tunablesPresent(state)
   if b.faulted then return end
   b.powerLevel = b.powerLevel or B.default_power_level
@@ -2134,6 +2198,67 @@ behavior.getStatus = function(state)
   }
 end
 
+-- The thwack is CUED AT SWING ENTRY, not at contact. The clip carries a
+-- 0.25 s whoosh before its impact (make_slap_audio.py IMPACT) and the
+-- stroke takes 0.28 s, so cueing at the release puts the boom on the
+-- contact frame; cued at contact it trailed the palm by a quarter second
+-- and the car was ten metres gone when the boom arrived. A whiff still
+-- swings, so a whiff still whooshes, which is what air sounds like.
+local function cueSlapSound(state)
+  pcall(function()
+    local propObj = be:getObjectByID(state.propId)
+    if propObj then
+      propObj:queueLuaCommand(string.format(
+        "if extensions.%s_vehicle and extensions.%s_vehicle.playSlap"
+        .. " then extensions.%s_vehicle.playSlap() end",
+        PROP_MODEL, PROP_MODEL, PROP_MODEL))
+    end
+  end)
+  state.behavior.slapSfxOffAt = state.behavior.clock + 1.7
+end
+
+-- Score the watched flight NOW, wherever it is. One exit for every path
+-- -- settle, timeout, and supersede -- because the version where only the
+-- settle path scored silently ate the corridor flight whenever a pad slap
+-- armed the next watch: 8 launches, 5 scores, in the very logs meant to
+-- prove the feature.
+finalizeWatch = function(state, flyer, up)
+  local b = state.behavior
+  local w = b.watch
+  b.watch = nil
+  if not w then return end
+  local rest = flyer:getPosition()
+  local dx, dy = rest.x - w.x, rest.y - w.y
+  local metres = math.sqrt(dx * dx + dy * dy)
+  local turns = w.rolled / (2 * math.pi)
+  local attitude = "On its wheels."
+  if up and up.z < -0.5 then
+    attitude = "On the ROOF."
+  elseif up and up.z < 0.6 then
+    attitude = "On its side."
+  end
+  local turnsText
+  if turns < 0.75 then
+    turnsText = "No full rotation."
+  elseif turns < 1.5 then
+    turnsText = "One rotation."
+  else
+    turnsText = string.format("%d rotations.", math.floor(turns + 0.5))
+  end
+  showMessage(
+    string.format("%d m. %s %s", math.floor(metres + 0.5),
+      turnsText, attitude), 4.0)
+  if attitude == "On the ROOF." then
+    b.winceAt = b.clock + 2.5
+  end
+  emitEvent(state, "I", "high_five_scored", {
+    subject_id = w.id,
+    distance_m = math.floor(metres * 10 + 0.5) / 10,
+    rotations = math.floor(turns * 100 + 0.5) / 100,
+    attitude = attitude,
+  })
+end
+
 behavior.update = function(state, dtSim)
   local b = state.behavior
   if b.faulted then return end
@@ -2158,6 +2283,15 @@ behavior.update = function(state, dtSim)
   -- THE SCOREBOARD. The machine watches what it launched until it stops
   -- moving, then says the number out loud while the palm is still held
   -- out. Runs in every phase: the flight outlasts the follow-through.
+  if b.winceAt and b.clock >= b.winceAt then
+    b.winceAt = nil
+    -- The wince, DELAYED. Issued in the same tick as the scoreline it
+    -- comments on, it replaced it -- showMessage shares one UI category
+    -- and same-category messages overwrite, so "On the ROOF." died
+    -- unread at the exact moment it was earned. 2.5 s later is also
+    -- simply better comic timing: score, beat, aside.
+    showMessage("The hand pretends not to look.", 2.4)
+  end
   if b.watch then
     local w = b.watch
     w.elapsed = w.elapsed + dtSim
@@ -2187,41 +2321,24 @@ behavior.update = function(state, dtSim)
       else
         w.settled = 0
       end
-      if w.settled >= B.score_settle_seconds
-          or w.elapsed >= B.score_timeout_seconds then
-        b.watch = nil
-        local rest = flyer:getPosition()
-        local dx, dy = rest.x - w.x, rest.y - w.y
-        local metres = math.sqrt(dx * dx + dy * dy)
-        local turns = w.rolled / (2 * math.pi)
-        local attitude = "On its wheels."
-        if up.z < -0.5 then
-          attitude = "On the ROOF."
-        elseif up.z < 0.6 then
-          attitude = "On its side."
+      -- A RECOVERED CAR IS NOT A LANDING. Pressing recover mid-flight
+      -- teleports the subject; scoring the recovery point produced
+      -- "3 m. 4 rotations." measured to the wrong place. A jump no slap
+      -- can explain drops the watch silently.
+      local here = flyer:getPosition()
+      if w.prevX then
+        local jump = math.sqrt(
+          (here.x - w.prevX) ^ 2 + (here.y - w.prevY) ^ 2)
+        if jump > 40.0 then
+          b.watch = nil
         end
-        local turnsText
-        if turns < 0.75 then
-          turnsText = "No full rotation."
-        elseif turns < 1.5 then
-          turnsText = "One rotation."
-        else
-          turnsText = string.format("%d rotations.", math.floor(turns + 0.5))
+      end
+      if b.watch then
+        w.prevX, w.prevY = here.x, here.y
+        if w.settled >= B.score_settle_seconds
+            or w.elapsed >= B.score_timeout_seconds then
+          finalizeWatch(state, flyer, up)
         end
-        showMessage(
-          string.format("%d m. %s %s", math.floor(metres + 0.5),
-            turnsText, attitude), 4.0)
-        if attitude == "On the ROOF." then
-          -- The wince. The palm is still held out; the machine looks at
-          -- what it did and says the quiet part.
-          showMessage("The hand pretends not to look.", 2.4)
-        end
-        emitEvent(state, "I", "high_five_scored", {
-          subject_id = w.id,
-          distance_m = math.floor(metres * 10 + 0.5) / 10,
-          rotations = math.floor(turns * 100 + 0.5) / 100,
-          attitude = attitude,
-        })
       end
     end
   end
@@ -2310,6 +2427,7 @@ behavior.update = function(state, dtSim)
       b.elapsed = 0
       b.slapped = false
       emitEvent(state, "I", "high_five_pad_swing", {subject_id = b.subjectId})
+      cueSlapSound(state)
     end
 
   elseif b.phase == "alert" then
@@ -2341,6 +2459,7 @@ behavior.update = function(state, dtSim)
       b.elapsed = 0
       b.slapped = false
       emitEvent(state, "I", "high_five_snap_swing", {from_deg = azimuth})
+      cueSlapSound(state)
     elseif t >= 1 then
       b.phase = "cocked"
       b.elapsed = 0
@@ -2387,6 +2506,7 @@ behavior.update = function(state, dtSim)
       b.swingFrom = WINDUP_DEG
       b.elapsed = 0
       b.slapped = false
+      cueSlapSound(state)
       emitEvent(state, "I", "high_five_swinging", {
         tilt_deg = tilt,
         power_mult = math.floor(powerMult(state) * 100) / 100,
@@ -2420,6 +2540,7 @@ behavior.update = function(state, dtSim)
     if b.elapsed >= 0.30 then
       setEffectActive(state, "slap_dust", false)
       setEffectActive(state, "slap_dust2", false)
+      setEffectActive(state, "slap_grit", false)
     end
     if t >= 1 then
       b.phase = "holding"
@@ -2435,6 +2556,7 @@ behavior.update = function(state, dtSim)
       -- Belt-and-braces off; the follow window is the real owner now.
       setEffectActive(state, "slap_dust", false)
       setEffectActive(state, "slap_dust2", false)
+      setEffectActive(state, "slap_grit", false)
     end
 
   elseif b.phase == "returning" then

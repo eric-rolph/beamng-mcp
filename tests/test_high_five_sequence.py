@@ -1269,3 +1269,70 @@ def test_the_spin_axis_follows_the_prop_frame():
             f"model's {wanted:+.3f} -- the tumble is not following the "
             "prop frame, which is backspin-on-a-forward-launch territory"
         )
+
+
+def test_a_hot_run_out_throws_a_slow_one(rig):
+    """The scoreboard invites "go faster, fly farther"; the physics must
+    not answer "your speed never mattered."
+
+    Velocity-replace alone BRAKED a 55 m/s car to the dial's ~42: the palm
+    that overtook it at 100+ m/s slowed it down, and the one experiment
+    every player runs after seeing a distance toast came back inverted.
+    The launch now keeps the car's own momentum along the palm normal when
+    that is the larger number.
+    """
+
+    lua, state, module = rig
+    approach(lua, state, module, speed=52.0)
+    state.clearVelocities()
+    drive(state, module, SUBJECT_ID, 30.0, until=lambda s: s.slapped)
+    launched = state.lastVelocity()
+    assert launched is not None
+    speed = math.sqrt(launched.x ** 2 + launched.y ** 2 + launched.z ** 2)
+    tilt = math.radians(
+        SPEC.BEHAVIOR["default_tilt_index"] * SPEC.BEHAVIOR["tilt_step_deg"])
+    projection = 52.0 * math.cos(tilt)
+    assert speed >= projection - 0.5, (
+        f"a 52 m/s arrival left at {speed:.1f} m/s -- the slap braked the "
+        f"car below its own momentum along the palm ({projection:.1f})"
+    )
+
+
+def test_a_superseded_flight_is_scored_not_eaten(rig):
+    """Every launch gets a number. The first watch implementation was
+    overwritten unconditionally when the next slap armed, and the live
+    logs showed exactly that: 8 launches, 5 scores -- a pad slap ate the
+    corridor flight it followed.
+    """
+
+    import re
+
+    lua, state, module = rig
+    # Flight one: slapped, then kept moving so it can never settle.
+    approach(lua, state, module, speed=25.0)
+    drive(state, module, SUBJECT_ID, 30.0, until=lambda s: s.slapped)
+    state.setMotion(SUBJECT_ID, 30.0)
+    # Flight two: a second car parks on the pad and takes the next slap.
+    OTHER = SUBJECT_ID + 1
+    state.addVehicle(OTHER, "pickup", 0.0, 0.0, 0.5)
+    state.setMotion(OTHER, 0.0)
+    drive(
+        state, module, OTHER,
+        SPEC.BEHAVIOR["cooldown_seconds"] + SPEC.BEHAVIOR["return_seconds"]
+        + SPEC.BEHAVIOR["follow_seconds"] + SPEC.BEHAVIOR["follow_hold_seconds"]
+        + SPEC.BEHAVIOR["pad_alert_seconds"] + 2.5,
+        until=None,
+    )
+    messages = []
+    index = 1
+    while True:
+        entry = state.messages[index]
+        if entry is None:
+            break
+        messages.append(str(entry))
+        index += 1
+    scored = [m for m in messages if re.match(r"^\d+ m\. ", m)]
+    assert scored, (
+        f"the first flight was superseded and never scored; messages: "
+        f"{messages}"
+    )

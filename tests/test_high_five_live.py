@@ -483,12 +483,22 @@ def test_high_five_leads_a_moving_car_and_slaps_it(tmp_path: Path) -> None:
         "trace": trace,
     }
 
+    # The parsed record stream outlives BeamNG's four-file log rotation,
+    # which had already eaten the cited evidence by the time a reviewer
+    # went looking for it.
+    (tmp_path / "runtime_records.json").write_text(
+        json.dumps(records, indent=1), encoding="utf-8"
+    )
+
     for required in (
         "prop_registered",
         "zone_enter",
         "high_five_alerted",
         "high_five_winding",
         "high_five_swinging",
+        # The headline feature ships gated: the machine must SCORE what it
+        # threw. The stub proves the mechanism; this proves it live.
+        "high_five_scored",
     ):
         assert required in events, {"missing": required, **summary}
 
