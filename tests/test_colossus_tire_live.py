@@ -173,9 +173,7 @@ def _fit_axle(points):
     v1mv2 = tuple(v1[i] - v2[i] for i in range(3))
     alpha = v2v2 * sum(v1[i] * v1mv2[i] for i in range(3)) / (2 * nn)
     beta = v1v1 * sum(v2[i] * -v1mv2[i] for i in range(3)) / (2 * nn)
-    centre = tuple(
-        (ax, ay, az)[i] + v1[i] * alpha + v2[i] * beta for i in range(3)
-    )
+    centre = tuple((ax, ay, az)[i] + v1[i] * alpha + v2[i] * beta for i in range(3))
     length = math.sqrt(nn)
     axis = tuple(component / length for component in normal)
     radius = math.dist(centre, (ax, ay, az))
@@ -343,9 +341,7 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
             surface_z = float(surface["surface_z"])
 
             prop = Vehicle(PROP_NAME, MOD_ID, license="COLOSSUS")
-            spawned = bng.vehicles.spawn(
-                prop, (0.0, 0.0, surface_z), (0, 0, 0, 1), False, True
-            )
+            spawned = bng.vehicles.spawn(prop, (0.0, 0.0, surface_z), (0, 0, 0, 1), False, True)
             assert spawned is True
 
             state: dict[str, Any] = {}
@@ -364,7 +360,7 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
             origin = state["origin"]
 
             # ---- CLAIM 1: it stands up, stays round, and does not sink.
-            bng.control.step(300, wait=True)          # five seconds of settling
+            bng.control.step(300, wait=True)  # five seconds of settling
             points = None
             for _ in range(20):
                 points = _marker_points(bng)
@@ -392,9 +388,7 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
             assert lean < SPEC.BEHAVIOR["leaning_dot"], report["settled"]
 
             # ---- CLAIM 2a: the loading dock is solid FROM ABOVE.
-            dock_target = _authored_to_world(
-                origin, (11.5, 0.0, SPEC.DOCK_LANDING_Z + 1.2)
-            )
+            dock_target = _authored_to_world(origin, (11.5, 0.0, SPEC.DOCK_LANDING_Z + 1.2))
             subject.teleport(pos=dock_target, rot_quat=(0, 0, 0, 1), reset=True)
             bng.control.step(180, wait=True)
             on_dock = _subject_probe(bng)
@@ -408,9 +402,7 @@ def test_the_colossus_stands_up_holds_its_floors_and_rolls(tmp_path: Path) -> No
 
             # ---- CLAIM 2b + 3: the cavity floor is solid and the doorway is
             # clear enough to sit in.
-            cabin_target = _authored_to_world(
-                origin, (0.0, 0.0, SPEC.CAVITY_FLOOR_Z + 1.4)
-            )
+            cabin_target = _authored_to_world(origin, (0.0, 0.0, SPEC.CAVITY_FLOOR_Z + 1.4))
             subject.teleport(pos=cabin_target, rot_quat=(0, 0, 0, 1), reset=True)
             bng.control.step(240, wait=True)
             in_cabin = _subject_probe(bng)

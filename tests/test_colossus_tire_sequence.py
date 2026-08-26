@@ -282,8 +282,7 @@ return S
 def rig():
     spec = load_spec()
     runtime_path = (
-        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID
-        / "runtime.lua"
+        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID / "runtime.lua"
     )
     if not runtime_path.is_file():
         pytest.skip("no generated GE runtime")
@@ -348,17 +347,18 @@ def test_the_runtime_finds_the_axle_and_counts_a_revolution(rig):
     """
 
     lua, state, module, spec = rig
-    tick(module, int(spec.BEHAVIOR['settle_seconds'] * 60) + 30)
+    tick(module, int(spec.BEHAVIOR["settle_seconds"] * 60) + 30)
     board(lua, state, module, spec)
-    tick(module, 240)                       # let the countdown run and cut
+    tick(module, 240)  # let the countdown run and cut
     state.clearMessages()
 
     steps = 72
     for index in range(1, steps + 1):
         angle = 2.0 * math.pi * index / steps
         # Roll without slipping: the axle advances r * angle.
-        state.setTire(0.0, spec.OUTER_RADIUS * angle, spec.OUTER_RADIUS,
-                      spec.OUTER_RADIUS, -angle, None)
+        state.setTire(
+            0.0, spec.OUTER_RADIUS * angle, spec.OUTER_RADIUS, spec.OUTER_RADIUS, -angle, None
+        )
         tick(module)
     assert state.said("Revolution 1"), list(state.messages.values())
     assert not state.said("Revolution 2"), "a single turn counted twice"
@@ -373,16 +373,14 @@ def test_release_is_claimed_from_movement_not_from_the_queued_command(rig):
     """
 
     lua, state, module, spec = rig
-    tick(module, int(spec.BEHAVIOR['settle_seconds'] * 60) + 30)
+    tick(module, int(spec.BEHAVIOR["settle_seconds"] * 60) + 30)
     board(lua, state, module, spec)
     tick(module, 240)
 
     assert state.queuedCount() >= 1
     assert "breakBreakGroup" in state.lastQueued()
     assert spec.STRAP_BREAK_GROUP in state.lastQueued()
-    assert state.eventCount("colossus_released") == 0, (
-        "release was claimed before the tire moved"
-    )
+    assert state.eventCount("colossus_released") == 0, "release was claimed before the tire moved"
 
     # Now let it actually roll away.
     state.setTire(0.0, 3.0, spec.OUTER_RADIUS, spec.OUTER_RADIUS, -0.2, None)
@@ -403,7 +401,7 @@ def test_a_strap_that_parts_on_its_own_is_noticed(rig):
     whole boarding beat.
     """
 
-    lua, state, module, spec = rig
+    _lua, state, module, spec = rig
     settle = int(spec.BEHAVIOR["settle_seconds"] * 60) + 30
     tick(module, settle)
     state.clearMessages()
@@ -426,8 +424,9 @@ def _ride(state, module, spec, metres=19.5):
     steps = 39
     for index in range(1, steps + 1):
         centre_y = metres * index / steps
-        state.setTire(0.0, centre_y, spec.OUTER_RADIUS, spec.OUTER_RADIUS,
-                      -centre_y / spec.OUTER_RADIUS, None)
+        state.setTire(
+            0.0, centre_y, spec.OUTER_RADIUS, spec.OUTER_RADIUS, -centre_y / spec.OUTER_RADIUS, None
+        )
         state.moveVehicle(SUBJECT_ID, 0.0, centre_y, spec.CAVITY_FLOOR_Z + 0.5)
         tick(module)
     return metres
@@ -442,7 +441,7 @@ def test_threading_the_port_is_the_payoff(rig):
     """
 
     lua, state, module, spec = rig
-    tick(module, int(spec.BEHAVIOR['settle_seconds'] * 60) + 30)
+    tick(module, int(spec.BEHAVIOR["settle_seconds"] * 60) + 30)
     board(lua, state, module, spec)
     tick(module, 240)
     _ride(state, module, spec)
@@ -469,7 +468,7 @@ def test_going_out_through_the_wall_pays_nothing(rig):
     """
 
     lua, state, module, spec = rig
-    tick(module, int(spec.BEHAVIOR['settle_seconds'] * 60) + 30)
+    tick(module, int(spec.BEHAVIOR["settle_seconds"] * 60) + 30)
     board(lua, state, module, spec)
     tick(module, 240)
     _ride(state, module, spec)
@@ -491,7 +490,7 @@ def test_a_downed_colossus_stays_down(rig):
     """
 
     lua, state, module, spec = rig
-    tick(module, int(spec.BEHAVIOR['settle_seconds'] * 60) + 30)
+    tick(module, int(spec.BEHAVIOR["settle_seconds"] * 60) + 30)
     board(lua, state, module, spec)
     tick(module, 240)
     state.setTire(0.0, 5.0, spec.OUTER_RADIUS, spec.OUTER_RADIUS, -0.4, None)
@@ -502,9 +501,7 @@ def test_a_downed_colossus_stays_down(rig):
     state.clearMessages()
     # Rock it back and forth across the rider threshold for a while.
     for index in range(30):
-        state.moveVehicle(
-            SUBJECT_ID, 0.0, 6.0 + (index % 2) * 40.0, spec.CAVITY_FLOOR_Z + 0.5
-        )
+        state.moveVehicle(SUBJECT_ID, 0.0, 6.0 + (index % 2) * 40.0, spec.CAVITY_FLOOR_Z + 0.5)
         tick(module)
     assert not state.said("Back aboard"), list(state.messages.values())
     assert not state.said("threaded the port"), list(state.messages.values())
@@ -514,7 +511,7 @@ def test_going_over_is_detected(rig):
     """A 28 m tire on a 10 m base is a coin. Falling is honest; silence is not."""
 
     lua, state, module, spec = rig
-    tick(module, int(spec.BEHAVIOR['settle_seconds'] * 60) + 30)
+    tick(module, int(spec.BEHAVIOR["settle_seconds"] * 60) + 30)
     board(lua, state, module, spec)
     tick(module, 240)
     state.setTire(0.0, 5.0, spec.OUTER_RADIUS, spec.OUTER_RADIUS, -0.4, None)
@@ -536,8 +533,7 @@ def test_the_runtime_never_drives_anything(rig):
 
     _, _, _, spec = rig
     runtime = (
-        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID
-        / "runtime.lua"
+        PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / spec.MOD_ID / "runtime.lua"
     )
     text = runtime.read_text(encoding="utf-8")
     for forbidden in (

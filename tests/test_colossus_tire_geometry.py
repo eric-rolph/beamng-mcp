@@ -178,7 +178,7 @@ def test_collision_triangles_face_the_right_way(spec, handoff, nodes):
     liner_keys = ("lin_l", "lin_cl", "lin_c", "lin_cr", "lin_r")
 
     def band_of(identifier):
-        stem = identifier[len(spec.MOD_ID) + 1:].rsplit("_j", 1)[0]
+        stem = identifier[len(spec.MOD_ID) + 1 :].rsplit("_j", 1)[0]
         if stem in crown_keys:
             return "crown"
         if stem in liner_keys:
@@ -195,9 +195,9 @@ def test_collision_triangles_face_the_right_way(spec, handoff, nodes):
             continue
         points = [nodes[identifier] for identifier in triangle["nodes"]]
         normal = _triangle_normal(points)
-        centre = [sum(axis) / 3.0 for axis in zip(*points)]
+        centre = [sum(axis) / 3.0 for axis in zip(*points, strict=False)]
         outward = (centre[0] - axle[0], centre[1] - axle[1], centre[2] - axle[2])
-        dot = sum(a * b for a, b in zip(normal, outward))
+        dot = sum(a * b for a, b in zip(normal, outward, strict=False))
         if band == "crown":
             assert dot > 0, f"crown triangle faces inward: {triangle['nodes']}"
         else:
@@ -283,9 +283,7 @@ def test_the_cage_is_integrable_at_2000hz(spec, handoff, by_id):
         for identifier in beam["nodes"]:
             if by_id[identifier]["fixed"]:
                 continue
-            stiffness[identifier] = stiffness.get(identifier, 0.0) + float(
-                family["beamSpring"]
-            )
+            stiffness[identifier] = stiffness.get(identifier, 0.0) + float(family["beamSpring"])
             damping[identifier] = damping.get(identifier, 0.0) + float(family["beamDamp"])
 
     worst_node, worst, worst_damp = None, 0.0, 0.0
@@ -408,9 +406,7 @@ def _relax(handoff, spec, residual=20.0, cap=250_000):
 
     order = [node["id"] for node in handoff["nodes"]]
     index = {identifier: position for position, identifier in enumerate(order)}
-    points = np.array(
-        [node["source_world_position"] for node in handoff["nodes"]], dtype=float
-    )
+    points = np.array([node["source_world_position"] for node in handoff["nodes"]], dtype=float)
     mass = np.array([float(node["weight"]) for node in handoff["nodes"]])
     free = np.array([not node["fixed"] for node in handoff["nodes"]])
 
@@ -563,7 +559,8 @@ def test_everything_joining_the_tire_to_the_dock_is_in_the_release_group(handoff
 
     assert bridges, "the cage is not connected at all"
     welds = [
-        beam for beam in bridges
+        beam
+        for beam in bridges
         if beam.get("extra", {}).get("breakGroup") != spec.STRAP_BREAK_GROUP
     ]
     assert not welds, (
@@ -621,9 +618,7 @@ def test_the_exported_collada_carries_no_wall_clock(spec):
     twenty other mods' handoff hashes at once.
     """
 
-    dae = (
-        EXAMPLE_ROOT / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.dae"
-    )
+    dae = EXAMPLE_ROOT / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.dae"
     if not dae.is_file():
         pytest.skip("no exported Collada")
     head = dae.read_text(encoding="utf-8", errors="ignore")[:4000]
@@ -635,6 +630,7 @@ def test_the_exported_collada_carries_no_wall_clock(spec):
             "normalise_collada() did not run"
         )
     assert "Blender User" not in head
+
 
 # ---------------------------------------------------------------------------
 # The SHIPPED visual mesh.
@@ -652,8 +648,9 @@ COLLADA_NS = {"c": "http://www.collada.org/2005/11/COLLADASchema"}
 def _collada_streams(path):
     """Yield (material_suffix, positions, uvs, triangle index array) per stream."""
 
-    import numpy as np
     import xml.etree.ElementTree as ET
+
+    import numpy as np
 
     root = ET.parse(path).getroot()
     for geometry in root.findall(".//c:library_geometries/c:geometry", COLLADA_NS):
@@ -661,9 +658,7 @@ def _collada_streams(path):
         sources = {}
         for source in mesh.findall("c:source", COLLADA_NS):
             array = source.find("c:float_array", COLLADA_NS)
-            stride = int(
-                source.find("c:technique_common/c:accessor", COLLADA_NS).get("stride")
-            )
+            stride = int(source.find("c:technique_common/c:accessor", COLLADA_NS).get("stride"))
             values = np.array(array.text.split(), dtype=float)
             sources[source.get("id")] = values.reshape(-1, stride)
         vertices = mesh.find("c:vertices", COLLADA_NS)
@@ -673,23 +668,13 @@ def _collada_streams(path):
         for primitive in mesh.findall("c:triangles", COLLADA_NS):
             inputs = primitive.findall("c:input", COLLADA_NS)
             stride = max(int(entry.get("offset")) for entry in inputs) + 1
-            offsets = {
-                entry.get("semantic"): int(entry.get("offset")) for entry in inputs
-            }
-            uv_input = next(
-                (e for e in inputs if e.get("semantic") == "TEXCOORD"), None
-            )
-            uvs = (
-                sources[uv_input.get("source").lstrip("#")]
-                if uv_input is not None
-                else None
-            )
+            offsets = {entry.get("semantic"): int(entry.get("offset")) for entry in inputs}
+            uv_input = next((e for e in inputs if e.get("semantic") == "TEXCOORD"), None)
+            uvs = sources[uv_input.get("source").lstrip("#")] if uv_input is not None else None
             data = np.array(primitive.find("c:p", COLLADA_NS).text.split(), dtype=int)
             data = data.reshape(-1, stride)
             faces = data[:, offsets["VERTEX"]].reshape(-1, 3)
-            uv_faces = (
-                data[:, offsets["TEXCOORD"]].reshape(-1, 3) if uvs is not None else None
-            )
+            uv_faces = data[:, offsets["TEXCOORD"]].reshape(-1, 3) if uvs is not None else None
             # "<mod_id>_<suffix>-material" -> "<suffix>", which is the key
             # spec.MATERIAL_TILE and the palette are written in.
             material = (primitive.get("material") or "").replace("-material", "")
@@ -699,9 +684,7 @@ def _collada_streams(path):
 
 @pytest.fixture(scope="module")
 def collada(spec):
-    path = (
-        EXAMPLE_ROOT / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.dae"
-    )
+    path = EXAMPLE_ROOT / "mod" / "vehicles" / spec.MOD_ID / f"{spec.MOD_ID}.dae"
     if not path.is_file():
         pytest.skip("no exported Collada")
     pytest.importorskip("numpy")
@@ -826,7 +809,7 @@ def test_shipped_mesh_faces_outward(spec, collada):
             want_out = True
         else:
             reference = centres - axle
-            reference[:, 0] = 0.0               # the radial direction is in y-z
+            reference[:, 0] = 0.0  # the radial direction is in y-z
             want_out = suffix in radial_out
         length = np.linalg.norm(reference, axis=1)
         good = length > 1e-6
@@ -965,7 +948,10 @@ def test_every_moulded_glyph_is_a_solid_wound_outward(collada):
             continue
         parent = list(range(len(positions)))
 
-        def root(node: int) -> int:
+        # Bound as a default so the closure holds THIS component's table
+        # (B023): the function never outlives the iteration, but the binding
+        # makes that fact structural instead of incidental.
+        def root(node: int, parent: list[int] = parent) -> int:
             while parent[node] != node:
                 parent[node] = parent[parent[node]]
                 node = parent[node]
@@ -979,9 +965,7 @@ def test_every_moulded_glyph_is_a_solid_wound_outward(collada):
 
         volumes: dict[int, float] = {}
         points = positions[faces]
-        signed = np.einsum(
-            "ij,ij->i", points[:, 0], np.cross(points[:, 1], points[:, 2])
-        ) / 6.0
+        signed = np.einsum("ij,ij->i", points[:, 0], np.cross(points[:, 1], points[:, 2])) / 6.0
         for face, value in zip(faces, signed, strict=True):
             key = root(int(face[0]))
             volumes[key] = volumes.get(key, 0.0) + float(value)
@@ -1015,13 +999,11 @@ def test_a_car_can_drive_from_the_cavity_floor_to_the_dock(spec, handoff):
 
     import numpy as np
 
-    order, points, free, index = _settled(handoff, spec)
-    triangles = np.array(
-        [[index[node] for node in tri["nodes"]] for tri in handoff["triangles"]]
-    )
+    _order, points, _free, index = _settled(handoff, spec)
+    triangles = np.array([[index[node] for node in tri["nodes"]] for tri in handoff["triangles"]])
     corners = points[triangles]
     normals = np.cross(corners[:, 1] - corners[:, 0], corners[:, 2] - corners[:, 0])
-    up = normals[:, 2] > 0.0                       # a coltri collides one way
+    up = normals[:, 2] > 0.0  # a coltri collides one way
 
     def surface(x: float, y: float) -> float | None:
         best = None
@@ -1075,9 +1057,7 @@ def test_the_verify_render_builds_everything_the_generator_ships():
 
     import re
 
-    generator = (
-        EXAMPLE_ROOT / "blender" / "create_colossus_tire.py"
-    ).read_text(encoding="utf-8")
+    generator = (EXAMPLE_ROOT / "blender" / "create_colossus_tire.py").read_text(encoding="utf-8")
     render = (EXAMPLE_ROOT / "authoring" / "verify_render.py").read_text(encoding="utf-8")
 
     def _builders(text: str, marker: str, prefix: str) -> set[str]:
