@@ -374,6 +374,50 @@ def add_torus(
     return _finish_primitive(obj, name, value, 0.0)
 
 
+def apply_pending_bevels(target: bpy.types.Object) -> None:
+    """Apply the Bevel modifier `_finish_primitive` left pending, IN ORDER.
+
+    Call this on a target BEFORE `cut_openings` when the primitive's edge
+    bevel is wanted but a bevelled opening rim is not. Applied first, the
+    bevel shapes the primitive's own arrises and the boolean then cuts a
+    SHARP hole through the bevelled solid; left pending, the exporter's
+    depsgraph applies the bevel to the boolean's OUTPUT instead — see the
+    KNOWN BUG note on `cut_openings` for what that ships.
+
+    Measured on spin_cycle_washer's body (bevel 0.4, drum bore r 4.35,
+    2026-08-26 re-cut): the out-of-order path chamfered the bore rim below
+    the machine's own floor (z 0.25 -> -0.15), where the rim bevel collided
+    with the box's bottom-edge bevel and emitted a self-overlapping fan —
+    0.083380 m^2 of same-winding coplanar double cover on the front panel,
+    a defect class `planar_folds`' area invariant is blind to by
+    construction (its docstring, blind spot #1). Applying the bevel in
+    order took the overlap and the fold to zero, the body from 882 to 368
+    triangles and its z-min back to 0. Not tunable around:
+    `use_clamp_overlap` measured zero effect and NARROWING the bevel made
+    the overlap worse (0.25 -> 0.210 m^2). Visual cost: the opening loses
+    its rounded lip (mouth radius 4.75 -> the cutter's true 4.35), so the
+    caller must cover or accept the sharp rim — the washer's
+    `porthole_trim` torus (inner edge r 4.28) already overlaps it.
+
+    Raises if a Bevel sits behind a modifier this helper is not applying:
+    applying it then would itself be the out-of-order bug.
+    """
+
+    pending = [m for m in target.modifiers if m.type == "BEVEL"]
+    if not pending:
+        return
+    for modifier in list(target.modifiers):
+        if modifier.type != "BEVEL":
+            raise ValueError(
+                f"{target.name}: Bevel sits behind a pending {modifier.type} modifier; "
+                "applying it out of stack order is the bug this helper exists to avoid"
+            )
+        break
+    bpy.context.view_layer.objects.active = target
+    for modifier in pending:
+        bpy.ops.object.modifier_apply(modifier=modifier.name)
+
+
 def cut_openings(target: bpy.types.Object, cutters: list[bpy.types.Object]) -> None:
     """Boolean-difference cutter volumes out of the target, then delete them.
 
@@ -394,14 +438,18 @@ def cut_openings(target: bpy.types.Object, cutters: list[bpy.types.Object]) -> N
     THIS IS NOT FIXED HERE BECAUSE THE FIX IS NOT COSMETIC. Applying the
     whole stack in order would re-cut the geometry of every shipped mod
     that booleans a bevelled primitive — `catapult_seesaw` (4 deck boards,
-    bevel 0.03), `giant_toaster` (shell, bevel 0.85) and
-    `spin_cycle_washer` (body, bevel 0.4) all do — and each of those is
-    packaged, hashed and in `spin_cycle_washer`'s case installed. Changing
-    them belongs in a round that rebuilds and re-gates them.
+    bevel 0.03) and `giant_toaster` (shell, bevel 0.85) still do — and
+    each of those is packaged, hashed and listed. Changing them belongs in
+    a round that rebuilds and re-gates them. `spin_cycle_washer` (body,
+    bevel 0.4) WAS the third caller until its 2026-08-26 re-cut; the
+    self-overlapping fan its pending bevel shipped is measured in
+    `apply_pending_bevels`' docstring above.
 
-    CALLERS: pass targets with `bevel=0.0` and cut the chamfer into the
-    mesh AFTER the boolean. `football_goal_post`'s `break_arris()` is the
-    worked example.
+    CALLERS, two worked escapes: pass the target with `bevel=0.0` and cut
+    the chamfer into the mesh AFTER the boolean (`football_goal_post`'s
+    `break_arris()`), or keep the bevel and call `apply_pending_bevels`
+    on the target first, accepting a sharp opening rim
+    (`spin_cycle_washer`'s body).
     """
 
     for cutter in cutters:
