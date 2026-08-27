@@ -288,6 +288,14 @@ with stored ZIP members. Before locking a release, compare each `mod/` worktree 
 Git blob (`git hash-object --no-filters` versus `git rev-parse HEAD:<path>`); the builder, CI checkout,
 and installed archive must all consume the same canonical bytes.
 
+`git status` cannot see this class, which is how v1.49.0 shipped a 711-byte divergence: two
+`materials.json` members (plus two live-test sources) had been written CRLF by a session tool, the
+clean filter normalized them at diff time so the worktree looked pristine, and every locally built
+archive embedded bytes no CI checkout could reproduce. The `hash-object --no-filters` sweep over
+`git ls-files` is the only detector; run it over the whole tree, not just `mod/`. v1.49.1 is the
+re-lock from canonical bytes. `examples/giant_props/**` is exempt by design — `.gitattributes`
+stores it byte-for-byte precisely so this filter asymmetry cannot exist there.
+
 ## Namespacing and official Repository policy
 
 Consult current official guidance before preparing a public upload:
@@ -346,13 +354,16 @@ live gates:
 .\.venv\Scripts\python.exe -m pytest -q -s .\tests\test_cannon_car_wash_distribution_live.py
 ```
 
-The v1.13 release lock is 46 members (40 runtime files plus six generated mod_info metadata members), 30,423,845 bytes, SHA-256
-`147f694752193b74e3f33f75120dae5f59c31e65ed5fa90dbb9b606da109fd13`. It is recorded in
-`repository/submission.json` and the exact distribution live test. A runtime-byte or builder-policy
-change requires an intentional metadata update, rebuild, new hash lock, and complete distribution
-rerun. The complete four-cold-start release matrix passed on the v1.11 payload (2026-07-22) and
-refreshed `release_validation`; v1.11.1 changes only the three selector/scenario thumbnail
-JPEGs, revalidated with the static suite and the exact prebuilt-ZIP live gate.
+The current release lock is v1.49.1: 88 members, 74,261,973 bytes, SHA-256
+`12d372e2ca5d7a52996acc7e14da5748478e6d6459462740c612a01682495042`, recorded in
+`repository/submission.json` (the low-VRAM variant is a separate same-namespace archive,
+re-packable byte-for-byte from the committed `mod_low_vram/` tree, deliberately unlocked). A
+runtime-byte or builder-policy change requires an intentional metadata update, rebuild, new hash
+lock, and complete distribution rerun. The complete four-cold-start release matrix passed on the
+v1.11 payload (2026-07-22) and refreshed `release_validation`; v1.11.1 changed only thumbnails.
+v1.49.1 is a byte-canonicalization re-cut (below) revalidated with the static suite; its exact
+prebuilt-ZIP live smoke has not been rerun since the re-cut and is the outstanding gate before a
+public upload.
 
 Ship only content authored here or content with documented redistribution permission. Never copy
 BeamNG proprietary meshes, maps, textures, or JBeam reference files into the repository or mod.
