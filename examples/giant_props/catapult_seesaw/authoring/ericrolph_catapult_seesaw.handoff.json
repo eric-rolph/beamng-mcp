@@ -50,9 +50,9 @@
     "hydraulic_catcher": {
       "beamDamp": 0.0,
       "beamDeform": "FLT_MAX",
-      "beamLimitDamp": 8000.0,
-      "beamLimitDampRebound": 10000.0,
-      "beamLimitSpring": 500000.0,
+      "beamLimitDamp": 80000.0,
+      "beamLimitDampRebound": 80000.0,
+      "beamLimitSpring": 4000000.0,
       "beamLongBound": 20.0,
       "beamShortBound": 20.0,
       "beamSpring": 0.0,
@@ -63,21 +63,21 @@
     "impact_transfer": {
       "beamDamp": 0.0,
       "beamDeform": "FLT_MAX",
-      "beamLimitDamp": 12000.0,
-      "beamLimitDampRebound": 30000.0,
-      "beamLimitSpring": 1000000.0,
+      "beamLimitDamp": 194000.0,
+      "beamLimitDampRebound": 194000.0,
+      "beamLimitSpring": 18400000.0,
       "beamLongBound": 20.0,
       "beamShortBound": 20.0,
       "beamSpring": 0.0,
       "beamStrength": "FLT_MAX",
       "beamType": "|BOUNDED",
-      "boundZone": 0.08,
+      "boundZone": 0.05,
       "dampCutoffHz": 250.0
     },
     "plank_rigid": {
-      "beamDamp": 1200.0,
+      "beamDamp": 2400.0,
       "beamDeform": "FLT_MAX",
-      "beamSpring": 3000000.0,
+      "beamSpring": 12000000.0,
       "beamStrength": "FLT_MAX"
     },
     "rebound_snubber": {
@@ -963,7 +963,7 @@
     {
       "extra": {
         "longBoundRange": 20.0,
-        "shortBoundRange": 7.24106932075761
+        "shortBoundRange": 2.326678140894596
       },
       "nodes": [
         "ericrolph_catapult_seesaw_fling_catcher_anchor_0",
@@ -974,7 +974,7 @@
     {
       "extra": {
         "longBoundRange": 20.0,
-        "shortBoundRange": 7.24106932075761
+        "shortBoundRange": 2.326678140894596
       },
       "nodes": [
         "ericrolph_catapult_seesaw_fling_catcher_anchor_1",
@@ -985,7 +985,7 @@
     {
       "extra": {
         "longBoundRange": 20.0,
-        "shortBoundRange": 7.24106932075761
+        "shortBoundRange": 2.326678140894596
       },
       "nodes": [
         "ericrolph_catapult_seesaw_fling_catcher_anchor_2",
@@ -996,7 +996,7 @@
     {
       "extra": {
         "longBoundRange": 20.0,
-        "shortBoundRange": 7.24106932075761
+        "shortBoundRange": 2.326678140894596
       },
       "nodes": [
         "ericrolph_catapult_seesaw_fling_catcher_anchor_3",
@@ -1007,7 +1007,7 @@
     {
       "extra": {
         "longBoundRange": 20.0,
-        "shortBoundRange": 7.24106932075761
+        "shortBoundRange": 2.326678140894596
       },
       "nodes": [
         "ericrolph_catapult_seesaw_fling_catcher_anchor_4",
@@ -1520,6 +1520,13 @@
     },
     {
       "nodes": [
+        "ericrolph_catapult_seesaw_plank_0_3_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_0"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
         "ericrolph_catapult_seesaw_plank_0_3_top",
         "ericrolph_catapult_seesaw_plank_0_4_bottom"
       ],
@@ -1559,6 +1566,13 @@
         "ericrolph_catapult_seesaw_plank_1_4_top"
       ],
       "spec": "plank_rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_0_3_top",
+        "ericrolph_catapult_seesaw_plank_hinge_0"
+      ],
+      "spec": "hinge"
     },
     {
       "nodes": [
@@ -1618,6 +1632,13 @@
     },
     {
       "nodes": [
+        "ericrolph_catapult_seesaw_plank_0_4_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_1"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
         "ericrolph_catapult_seesaw_plank_0_4_top",
         "ericrolph_catapult_seesaw_plank_0_5_bottom"
       ],
@@ -1662,6 +1683,13 @@
       "nodes": [
         "ericrolph_catapult_seesaw_plank_0_4_top",
         "ericrolph_catapult_seesaw_plank_hinge_0"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_0_4_top",
+        "ericrolph_catapult_seesaw_plank_hinge_1"
       ],
       "spec": "hinge"
     },
@@ -1716,6 +1744,13 @@
     },
     {
       "nodes": [
+        "ericrolph_catapult_seesaw_plank_0_5_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_0"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
         "ericrolph_catapult_seesaw_plank_0_5_top",
         "ericrolph_catapult_seesaw_plank_0_6_bottom"
       ],
@@ -1755,6 +1790,13 @@
         "ericrolph_catapult_seesaw_plank_1_6_top"
       ],
       "spec": "plank_rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_0_5_top",
+        "ericrolph_catapult_seesaw_plank_hinge_0"
+      ],
+      "spec": "hinge"
     },
     {
       "nodes": [
@@ -1808,7 +1850,7 @@
     {
       "extra": {
         "longBoundRange": 20.0,
-        "shortBoundRange": 5.705537780070358
+        "shortBoundRange": 5.746780750011346
       },
       "nodes": [
         "ericrolph_catapult_seesaw_plank_0_6_bottom",
@@ -2440,6 +2482,13 @@
     },
     {
       "nodes": [
+        "ericrolph_catapult_seesaw_plank_1_3_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_1"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
         "ericrolph_catapult_seesaw_plank_1_3_top",
         "ericrolph_catapult_seesaw_plank_1_4_bottom"
       ],
@@ -2479,6 +2528,13 @@
         "ericrolph_catapult_seesaw_plank_2_4_top"
       ],
       "spec": "plank_rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_1_3_top",
+        "ericrolph_catapult_seesaw_plank_hinge_1"
+      ],
+      "spec": "hinge"
     },
     {
       "nodes": [
@@ -2532,7 +2588,21 @@
     {
       "nodes": [
         "ericrolph_catapult_seesaw_plank_1_4_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_0"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_1_4_bottom",
         "ericrolph_catapult_seesaw_plank_hinge_1"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_1_4_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_2"
       ],
       "spec": "hinge"
     },
@@ -2581,7 +2651,21 @@
     {
       "nodes": [
         "ericrolph_catapult_seesaw_plank_1_4_top",
+        "ericrolph_catapult_seesaw_plank_hinge_0"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_1_4_top",
         "ericrolph_catapult_seesaw_plank_hinge_1"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_1_4_top",
+        "ericrolph_catapult_seesaw_plank_hinge_2"
       ],
       "spec": "hinge"
     },
@@ -2636,6 +2720,13 @@
     },
     {
       "nodes": [
+        "ericrolph_catapult_seesaw_plank_1_5_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_1"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
         "ericrolph_catapult_seesaw_plank_1_5_top",
         "ericrolph_catapult_seesaw_plank_1_6_bottom"
       ],
@@ -2675,6 +2766,13 @@
         "ericrolph_catapult_seesaw_plank_2_6_top"
       ],
       "spec": "plank_rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_1_5_top",
+        "ericrolph_catapult_seesaw_plank_hinge_1"
+      ],
+      "spec": "hinge"
     },
     {
       "nodes": [
@@ -2728,7 +2826,7 @@
     {
       "extra": {
         "longBoundRange": 20.0,
-        "shortBoundRange": 5.705537780070358
+        "shortBoundRange": 5.746780750011346
       },
       "nodes": [
         "ericrolph_catapult_seesaw_plank_1_6_bottom",
@@ -3367,6 +3465,13 @@
     },
     {
       "nodes": [
+        "ericrolph_catapult_seesaw_plank_2_3_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_2"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
         "ericrolph_catapult_seesaw_plank_2_3_top",
         "ericrolph_catapult_seesaw_plank_2_4_bottom"
       ],
@@ -3406,6 +3511,13 @@
         "ericrolph_catapult_seesaw_plank_3_4_top"
       ],
       "spec": "plank_rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_2_3_top",
+        "ericrolph_catapult_seesaw_plank_hinge_2"
+      ],
+      "spec": "hinge"
     },
     {
       "nodes": [
@@ -3459,7 +3571,21 @@
     {
       "nodes": [
         "ericrolph_catapult_seesaw_plank_2_4_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_1"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_2_4_bottom",
         "ericrolph_catapult_seesaw_plank_hinge_2"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_2_4_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_3"
       ],
       "spec": "hinge"
     },
@@ -3508,7 +3634,21 @@
     {
       "nodes": [
         "ericrolph_catapult_seesaw_plank_2_4_top",
+        "ericrolph_catapult_seesaw_plank_hinge_1"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_2_4_top",
         "ericrolph_catapult_seesaw_plank_hinge_2"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_2_4_top",
+        "ericrolph_catapult_seesaw_plank_hinge_3"
       ],
       "spec": "hinge"
     },
@@ -3563,6 +3703,13 @@
     },
     {
       "nodes": [
+        "ericrolph_catapult_seesaw_plank_2_5_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_2"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
         "ericrolph_catapult_seesaw_plank_2_5_top",
         "ericrolph_catapult_seesaw_plank_2_6_bottom"
       ],
@@ -3602,6 +3749,13 @@
         "ericrolph_catapult_seesaw_plank_3_6_top"
       ],
       "spec": "plank_rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_2_5_top",
+        "ericrolph_catapult_seesaw_plank_hinge_2"
+      ],
+      "spec": "hinge"
     },
     {
       "nodes": [
@@ -3655,7 +3809,7 @@
     {
       "extra": {
         "longBoundRange": 20.0,
-        "shortBoundRange": 5.705537780070358
+        "shortBoundRange": 5.746780750011346
       },
       "nodes": [
         "ericrolph_catapult_seesaw_plank_2_6_bottom",
@@ -4294,6 +4448,13 @@
     },
     {
       "nodes": [
+        "ericrolph_catapult_seesaw_plank_3_3_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_3"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
         "ericrolph_catapult_seesaw_plank_3_3_top",
         "ericrolph_catapult_seesaw_plank_3_4_bottom"
       ],
@@ -4333,6 +4494,13 @@
         "ericrolph_catapult_seesaw_plank_4_4_top"
       ],
       "spec": "plank_rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_3_3_top",
+        "ericrolph_catapult_seesaw_plank_hinge_3"
+      ],
+      "spec": "hinge"
     },
     {
       "nodes": [
@@ -4386,7 +4554,21 @@
     {
       "nodes": [
         "ericrolph_catapult_seesaw_plank_3_4_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_2"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_3_4_bottom",
         "ericrolph_catapult_seesaw_plank_hinge_3"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_3_4_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_4"
       ],
       "spec": "hinge"
     },
@@ -4435,7 +4617,21 @@
     {
       "nodes": [
         "ericrolph_catapult_seesaw_plank_3_4_top",
+        "ericrolph_catapult_seesaw_plank_hinge_2"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_3_4_top",
         "ericrolph_catapult_seesaw_plank_hinge_3"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_3_4_top",
+        "ericrolph_catapult_seesaw_plank_hinge_4"
       ],
       "spec": "hinge"
     },
@@ -4490,6 +4686,13 @@
     },
     {
       "nodes": [
+        "ericrolph_catapult_seesaw_plank_3_5_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_3"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
         "ericrolph_catapult_seesaw_plank_3_5_top",
         "ericrolph_catapult_seesaw_plank_3_6_bottom"
       ],
@@ -4529,6 +4732,13 @@
         "ericrolph_catapult_seesaw_plank_4_6_top"
       ],
       "spec": "plank_rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_3_5_top",
+        "ericrolph_catapult_seesaw_plank_hinge_3"
+      ],
+      "spec": "hinge"
     },
     {
       "nodes": [
@@ -4582,7 +4792,7 @@
     {
       "extra": {
         "longBoundRange": 20.0,
-        "shortBoundRange": 5.705537780070358
+        "shortBoundRange": 5.746780750011346
       },
       "nodes": [
         "ericrolph_catapult_seesaw_plank_3_6_bottom",
@@ -5039,6 +5249,13 @@
     },
     {
       "nodes": [
+        "ericrolph_catapult_seesaw_plank_4_3_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_4"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
         "ericrolph_catapult_seesaw_plank_4_3_top",
         "ericrolph_catapult_seesaw_plank_4_4_bottom"
       ],
@@ -5053,6 +5270,13 @@
     },
     {
       "nodes": [
+        "ericrolph_catapult_seesaw_plank_4_3_top",
+        "ericrolph_catapult_seesaw_plank_hinge_4"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
         "ericrolph_catapult_seesaw_plank_4_4_bottom",
         "ericrolph_catapult_seesaw_plank_4_4_top"
       ],
@@ -5075,6 +5299,13 @@
     {
       "nodes": [
         "ericrolph_catapult_seesaw_plank_4_4_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_3"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_4_4_bottom",
         "ericrolph_catapult_seesaw_plank_hinge_4"
       ],
       "spec": "hinge"
@@ -5096,6 +5327,13 @@
     {
       "nodes": [
         "ericrolph_catapult_seesaw_plank_4_4_top",
+        "ericrolph_catapult_seesaw_plank_hinge_3"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_4_4_top",
         "ericrolph_catapult_seesaw_plank_hinge_4"
       ],
       "spec": "hinge"
@@ -5123,6 +5361,13 @@
     },
     {
       "nodes": [
+        "ericrolph_catapult_seesaw_plank_4_5_bottom",
+        "ericrolph_catapult_seesaw_plank_hinge_4"
+      ],
+      "spec": "hinge"
+    },
+    {
+      "nodes": [
         "ericrolph_catapult_seesaw_plank_4_5_top",
         "ericrolph_catapult_seesaw_plank_4_6_bottom"
       ],
@@ -5134,6 +5379,13 @@
         "ericrolph_catapult_seesaw_plank_4_6_top"
       ],
       "spec": "plank_rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_catapult_seesaw_plank_4_5_top",
+        "ericrolph_catapult_seesaw_plank_hinge_4"
+      ],
+      "spec": "hinge"
     },
     {
       "nodes": [
@@ -5159,7 +5411,7 @@
     {
       "extra": {
         "longBoundRange": 20.0,
-        "shortBoundRange": 5.705537780070358
+        "shortBoundRange": 5.746780750011346
       },
       "nodes": [
         "ericrolph_catapult_seesaw_plank_4_6_bottom",
@@ -10275,8 +10527,8 @@
         "emitter": "BNGP_2",
         "position": [
           0.0,
-          5.108652422706632,
-          10.151554445662276
+          5.917253119781411,
+          3.6083355177901675
         ]
       }
     },
@@ -10284,8 +10536,8 @@
       "park_zone": {
         "center": [
           0.0,
-          -9.440574360871938,
-          2.6
+          -10.71925043507697,
+          2.870227421661068
         ],
         "dimensions": [
           5.4,
@@ -10300,8 +10552,8 @@
       "camera_distance": 48.0,
       "fling_rise_m": 0.65,
       "fling_up_mps": 2.0,
-      "impact_activation_length": 0.599999999999999,
-      "impact_drop_m": 5.999999999999998,
+      "impact_activation_length": 0.6000000000000003,
+      "impact_drop_m": 5.999999999999999,
       "impact_pivot_nodes": [
         "ericrolph_catapult_seesaw_plank_hinge_2",
         "ericrolph_catapult_seesaw_plank_hinge_2",
@@ -10316,7 +10568,7 @@
         "ericrolph_catapult_seesaw_plank_3_6_bottom",
         "ericrolph_catapult_seesaw_plank_4_6_bottom"
       ],
-      "impact_receiver_rest_phase_deg": 151.67065327139997,
+      "impact_receiver_rest_phase_deg": 173.6706532714,
       "impact_striker_nodes": [
         "ericrolph_catapult_seesaw_weight_striker_0",
         "ericrolph_catapult_seesaw_weight_striker_1",
@@ -10328,7 +10580,7 @@
       "park_radius": 3.0,
       "park_seconds": 3.0,
       "park_speed_max": 0.6,
-      "park_station_y": -9.440574360871938,
+      "park_station_y": -10.71925043507697,
       "plank_car_nodes": [
         "ericrolph_catapult_seesaw_plank_0_0_top",
         "ericrolph_catapult_seesaw_plank_1_0_top",
@@ -10347,9 +10599,9 @@
       "reset_earliest_seconds": 15.0,
       "reset_reminder_seconds": 12.0,
       "reset_retry_seconds": 5.0,
-      "rest_angle_deg": 30.0,
+      "rest_angle_deg": 8.0,
       "spool_radius": 0.32,
-      "weight_center_rest_z": 18.361554445662275,
+      "weight_center_rest_z": 11.818335517790167,
       "weight_nodes": [
         "ericrolph_catapult_seesaw_weight_0_0_0",
         "ericrolph_catapult_seesaw_weight_0_1_0",
@@ -10811,16 +11063,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.200001,
-        11.603843,
-        0.098446
+        13.310863,
+        0.310202
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        -11.603843,
-        0.098446
+        -13.310863,
+        0.310202
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -10831,16 +11083,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.200001,
-        11.778843,
-        0.401554
+        13.392974,
+        0.89446
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        -11.778843,
-        0.401554
+        -13.392974,
+        0.89446
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -10851,16 +11103,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.100001,
-        11.603843,
-        0.098446
+        13.310863,
+        0.310202
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        -11.603843,
-        0.098446
+        -13.310863,
+        0.310202
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -10871,16 +11123,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.100001,
-        11.778843,
-        0.401554
+        13.392974,
+        0.89446
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        -11.778843,
-        0.401554
+        -13.392974,
+        0.89446
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -10891,16 +11143,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1e-06,
-        11.603843,
-        0.098446
+        13.310863,
+        0.310202
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        -11.603843,
-        0.098446
+        -13.310863,
+        0.310202
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -10911,16 +11163,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1e-06,
-        11.778843,
-        0.401554
+        13.392974,
+        0.89446
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        -11.778843,
-        0.401554
+        -13.392974,
+        0.89446
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -10931,16 +11183,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.099999,
-        11.603843,
-        0.098446
+        13.310863,
+        0.310202
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        -11.603843,
-        0.098446
+        -13.310863,
+        0.310202
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -10951,16 +11203,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.099999,
-        11.778843,
-        0.401554
+        13.392974,
+        0.89446
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        -11.778843,
-        0.401554
+        -13.392974,
+        0.89446
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -10971,16 +11223,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.199999,
-        11.603843,
-        0.098446
+        13.310863,
+        0.310202
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        -11.603843,
-        0.098446
+        -13.310863,
+        0.310202
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -10991,16 +11243,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.199999,
-        11.778843,
-        0.401554
+        13.392974,
+        0.89446
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        -11.778843,
-        0.401554
+        -13.392974,
+        0.89446
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11011,16 +11263,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.200001,
-        9.265574,
-        1.448446
+        10.637138,
+        0.685969
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        -9.265574,
-        1.448446
+        -10.637138,
+        0.685969
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11031,16 +11283,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.200001,
-        9.440575,
-        1.751554
+        10.719251,
+        1.270227
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        -9.440575,
-        1.751554
+        -10.719251,
+        1.270227
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11051,16 +11303,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.100001,
-        9.265574,
-        1.448446
+        10.637138,
+        0.685969
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        -9.265574,
-        1.448446
+        -10.637138,
+        0.685969
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11071,16 +11323,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.100001,
-        9.440575,
-        1.751554
+        10.719251,
+        1.270227
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        -9.440575,
-        1.751554
+        -10.719251,
+        1.270227
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11091,16 +11343,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1e-06,
-        9.265574,
-        1.448446
+        10.637138,
+        0.685969
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        -9.265574,
-        1.448446
+        -10.637138,
+        0.685969
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11111,16 +11363,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1e-06,
-        9.440575,
-        1.751554
+        10.719251,
+        1.270227
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        -9.440575,
-        1.751554
+        -10.719251,
+        1.270227
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11131,16 +11383,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.099999,
-        9.265574,
-        1.448446
+        10.637138,
+        0.685969
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        -9.265574,
-        1.448446
+        -10.637138,
+        0.685969
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11151,16 +11403,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.099999,
-        9.440575,
-        1.751554
+        10.719251,
+        1.270227
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        -9.440575,
-        1.751554
+        -10.719251,
+        1.270227
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11171,16 +11423,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.199999,
-        9.265574,
-        1.448446
+        10.637138,
+        0.685969
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        -9.265574,
-        1.448446
+        -10.637138,
+        0.685969
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11191,16 +11443,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.199999,
-        9.440575,
-        1.751554
+        10.719251,
+        1.270227
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        -9.440575,
-        1.751554
+        -10.719251,
+        1.270227
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11211,16 +11463,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.200001,
-        6.147883,
-        3.248446
+        7.072173,
+        1.186992
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        -6.147883,
-        3.248446
+        -7.072173,
+        1.186992
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11231,16 +11483,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.200001,
-        6.322883,
-        3.551554
+        7.154285,
+        1.771251
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        -6.322883,
-        3.551554
+        -7.154285,
+        1.771251
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11251,16 +11503,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.100001,
-        6.147883,
-        3.248446
+        7.072173,
+        1.186992
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        -6.147883,
-        3.248446
+        -7.072173,
+        1.186992
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11271,16 +11523,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.100001,
-        6.322883,
-        3.551554
+        7.154285,
+        1.771251
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        -6.322883,
-        3.551554
+        -7.154285,
+        1.771251
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11291,16 +11543,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1e-06,
-        6.147883,
-        3.248446
+        7.072173,
+        1.186992
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        -6.147883,
-        3.248446
+        -7.072173,
+        1.186992
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11311,16 +11563,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1e-06,
-        6.322883,
-        3.551554
+        7.154285,
+        1.771251
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        -6.322883,
-        3.551554
+        -7.154285,
+        1.771251
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11331,16 +11583,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.099999,
-        6.147883,
-        3.248446
+        7.072173,
+        1.186992
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        -6.147883,
-        3.248446
+        -7.072173,
+        1.186992
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11351,16 +11603,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.099999,
-        6.322883,
-        3.551554
+        7.154285,
+        1.771251
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        -6.322883,
-        3.551554
+        -7.154285,
+        1.771251
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11370,17 +11622,17 @@
       "id": "ericrolph_catapult_seesaw_plank_4_2_bottom",
       "node_material": "|NM_WOOD",
       "position": [
-        -2.2,
-        6.147883,
-        3.248446
+        -2.199999,
+        7.072173,
+        1.186992
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        -6.147883,
-        3.248446
+        -7.072173,
+        1.186992
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11390,17 +11642,17 @@
       "id": "ericrolph_catapult_seesaw_plank_4_2_top",
       "node_material": "|NM_WOOD",
       "position": [
-        -2.2,
-        6.322883,
-        3.551554
+        -2.199999,
+        7.154285,
+        1.771251
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        -6.322883,
-        3.551554
+        -7.154285,
+        1.771251
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11411,16 +11663,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.2,
-        3.030191,
-        5.048446
+        3.507208,
+        1.688016
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        -3.030191,
-        5.048446
+        -3.507208,
+        1.688016
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11431,16 +11683,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.2,
-        3.205191,
-        5.351554
+        3.58932,
+        2.272274
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        -3.205191,
-        5.351554
+        -3.58932,
+        2.272274
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11451,16 +11703,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.1,
-        3.030191,
-        5.048446
+        3.507208,
+        1.688016
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        -3.030191,
-        5.048446
+        -3.507208,
+        1.688016
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11471,16 +11723,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.1,
-        3.205191,
-        5.351554
+        3.58932,
+        2.272274
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        -3.205191,
-        5.351554
+        -3.58932,
+        2.272274
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11491,16 +11743,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         0.0,
-        3.030191,
-        5.048446
+        3.507208,
+        1.688016
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        -3.030191,
-        5.048446
+        -3.507208,
+        1.688016
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11511,16 +11763,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         0.0,
-        3.205191,
-        5.351554
+        3.58932,
+        2.272274
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        -3.205191,
-        5.351554
+        -3.58932,
+        2.272274
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11531,16 +11783,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.1,
-        3.030191,
-        5.048446
+        3.507208,
+        1.688016
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        -3.030191,
-        5.048446
+        -3.507208,
+        1.688016
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11551,16 +11803,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.1,
-        3.205191,
-        5.351554
+        3.58932,
+        2.272274
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        -3.205191,
-        5.351554
+        -3.58932,
+        2.272274
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11571,16 +11823,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.2,
-        3.030192,
-        5.048446
+        3.507208,
+        1.688016
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        -3.030191,
-        5.048446
+        -3.507208,
+        1.688016
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11591,16 +11843,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.2,
-        3.205192,
-        5.351554
+        3.589321,
+        2.272274
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        -3.205191,
-        5.351554
+        -3.58932,
+        2.272274
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11611,16 +11863,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.2,
-        -0.0875,
-        6.848445
+        -0.057757,
+        2.189039
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        0.0875,
-        6.848445
+        0.057757,
+        2.189039
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11631,16 +11883,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.2,
-        0.0875,
-        7.151555
+        0.024355,
+        2.773297
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        -0.0875,
-        7.151555
+        -0.024355,
+        2.773297
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11651,16 +11903,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.1,
-        -0.0875,
-        6.848445
+        -0.057757,
+        2.189039
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        0.0875,
-        6.848445
+        0.057757,
+        2.189039
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11671,16 +11923,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.1,
-        0.0875,
-        7.151555
+        0.024355,
+        2.773297
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        -0.0875,
-        7.151555
+        -0.024355,
+        2.773297
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11691,16 +11943,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -0.0,
-        -0.0875,
-        6.848445
+        -0.057757,
+        2.189039
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        0.0875,
-        6.848445
+        0.057757,
+        2.189039
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11711,16 +11963,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         0.0,
-        0.0875,
-        7.151555
+        0.024355,
+        2.773297
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        -0.0875,
-        7.151555
+        -0.024355,
+        2.773297
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11731,16 +11983,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.1,
-        -0.0875,
-        6.848445
+        -0.057757,
+        2.189039
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        0.0875,
-        6.848445
+        0.057757,
+        2.189039
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11751,16 +12003,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.1,
-        0.0875,
-        7.151555
+        0.024355,
+        2.773297
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        -0.0875,
-        7.151555
+        -0.024355,
+        2.773297
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11771,16 +12023,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.2,
-        -0.0875,
-        6.848445
+        -0.057757,
+        2.189039
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        0.0875,
-        6.848445
+        0.057757,
+        2.189039
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11791,16 +12043,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.2,
-        0.0875,
-        7.151555
+        0.024355,
+        2.773297
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        -0.0875,
-        7.151555
+        -0.024355,
+        2.773297
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11811,16 +12063,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.2,
-        -3.205192,
-        8.648445
+        -3.622722,
+        2.690062
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        3.205191,
-        8.648445
+        3.622722,
+        2.690062
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11831,16 +12083,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.2,
-        -3.030192,
-        8.951554
+        -3.54061,
+        3.27432
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        3.030191,
-        8.951554
+        3.54061,
+        3.27432
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11851,16 +12103,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.1,
-        -3.205191,
-        8.648445
+        -3.622722,
+        2.690062
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        3.205191,
-        8.648445
+        3.622722,
+        2.690062
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11871,16 +12123,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.1,
-        -3.030191,
-        8.951554
+        -3.54061,
+        3.27432
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        3.030191,
-        8.951554
+        3.54061,
+        3.27432
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11891,16 +12143,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -0.0,
-        -3.205191,
-        8.648445
+        -3.622722,
+        2.690062
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        3.205191,
-        8.648445
+        3.622722,
+        2.690062
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11911,16 +12163,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -0.0,
-        -3.030191,
-        8.951554
+        -3.54061,
+        3.27432
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        3.030191,
-        8.951554
+        3.54061,
+        3.27432
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11931,16 +12183,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.1,
-        -3.205191,
-        8.648445
+        -3.622722,
+        2.690062
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        3.205191,
-        8.648445
+        3.622722,
+        2.690062
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11951,16 +12203,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.1,
-        -3.030191,
-        8.951554
+        -3.54061,
+        3.27432
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        3.030191,
-        8.951554
+        3.54061,
+        3.27432
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11971,16 +12223,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.2,
-        -3.205191,
-        8.648445
+        -3.622722,
+        2.690062
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        3.205191,
-        8.648445
+        3.622722,
+        2.690062
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -11991,16 +12243,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.2,
-        -3.030191,
-        8.951554
+        -3.54061,
+        3.27432
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        3.030191,
-        8.951554
+        3.54061,
+        3.27432
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12011,14 +12263,14 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.2,
-        -5.283652,
-        9.848446
+        -5.999365,
+        3.024077
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        5.283652,
-        9.848446
+        5.999365,
+        3.024077
       ],
       "weight": 80.0
     },
@@ -12031,16 +12283,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.2,
-        -5.108653,
-        10.151554
+        -5.917253,
+        3.608335
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        5.108653,
-        10.151554
+        5.917253,
+        3.608335
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12051,14 +12303,14 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.1,
-        -5.283652,
-        9.848446
+        -5.999365,
+        3.024077
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        5.283652,
-        9.848446
+        5.999365,
+        3.024077
       ],
       "weight": 80.0
     },
@@ -12071,16 +12323,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.1,
-        -5.108653,
-        10.151554
+        -5.917253,
+        3.608335
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        5.108653,
-        10.151554
+        5.917253,
+        3.608335
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12090,15 +12342,15 @@
       "id": "ericrolph_catapult_seesaw_plank_2_6_bottom",
       "node_material": "|NM_WOOD",
       "position": [
-        -0.0,
-        -5.283652,
-        9.848446
+        -1e-06,
+        -5.999365,
+        3.024077
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        5.283652,
-        9.848446
+        5.999365,
+        3.024077
       ],
       "weight": 80.0
     },
@@ -12110,17 +12362,17 @@
       "id": "ericrolph_catapult_seesaw_plank_2_6_top",
       "node_material": "|NM_WOOD",
       "position": [
-        -0.0,
-        -5.108653,
-        10.151554
+        -1e-06,
+        -5.917253,
+        3.608335
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        5.108653,
-        10.151554
+        5.917253,
+        3.608335
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12131,14 +12383,14 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.100001,
-        -5.283652,
-        9.848446
+        -5.999365,
+        3.024077
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        5.283652,
-        9.848446
+        5.999365,
+        3.024077
       ],
       "weight": 80.0
     },
@@ -12151,16 +12403,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.100001,
-        -5.108653,
-        10.151554
+        -5.917253,
+        3.608335
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        5.108653,
-        10.151554
+        5.917253,
+        3.608335
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12171,14 +12423,14 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.200001,
-        -5.283652,
-        9.848446
+        -5.999365,
+        3.024077
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        5.283652,
-        9.848446
+        5.999365,
+        3.024077
       ],
       "weight": 80.0
     },
@@ -12191,16 +12443,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.200001,
-        -5.108653,
-        10.151554
+        -5.917253,
+        3.608335
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        5.108653,
-        10.151554
+        5.917253,
+        3.608335
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12210,17 +12462,17 @@
       "id": "ericrolph_catapult_seesaw_plank_0_7_bottom",
       "node_material": "|NM_WOOD",
       "position": [
-        2.2,
-        -6.322883,
-        10.448445
+        2.199999,
+        -7.187687,
+        3.191085
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        6.322883,
-        10.448445
+        7.187687,
+        3.191085
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12230,17 +12482,17 @@
       "id": "ericrolph_catapult_seesaw_plank_0_7_top",
       "node_material": "|NM_WOOD",
       "position": [
-        2.2,
-        -6.147883,
-        10.751554
+        2.199999,
+        -7.105575,
+        3.775343
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        6.147883,
-        10.751554
+        7.105575,
+        3.775343
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12251,16 +12503,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.099999,
-        -6.322883,
-        10.448445
+        -7.187687,
+        3.191085
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        6.322883,
-        10.448445
+        7.187687,
+        3.191085
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12271,16 +12523,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.099999,
-        -6.147883,
-        10.751554
+        -7.105575,
+        3.775343
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        6.147883,
-        10.751554
+        7.105575,
+        3.775343
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12291,16 +12543,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1e-06,
-        -6.322883,
-        10.448445
+        -7.187687,
+        3.191085
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        6.322883,
-        10.448445
+        7.187687,
+        3.191085
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12311,16 +12563,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1e-06,
-        -6.147883,
-        10.751554
+        -7.105575,
+        3.775343
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        6.147883,
-        10.751554
+        7.105575,
+        3.775343
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12331,16 +12583,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.100001,
-        -6.322883,
-        10.448445
+        -7.187687,
+        3.191085
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        6.322883,
-        10.448445
+        7.187687,
+        3.191085
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12351,16 +12603,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.100001,
-        -6.147883,
-        10.751554
+        -7.105575,
+        3.775343
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        6.147883,
-        10.751554
+        7.105575,
+        3.775343
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12371,16 +12623,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.200001,
-        -6.322883,
-        10.448445
+        -7.187687,
+        3.191085
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        6.322883,
-        10.448445
+        7.187687,
+        3.191085
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12391,16 +12643,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.200001,
-        -6.147883,
-        10.751554
+        -7.105575,
+        3.775343
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        6.147883,
-        10.751554
+        7.105575,
+        3.775343
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12411,16 +12663,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.199999,
-        -7.015703,
-        10.848446
+        -7.979901,
+        3.302423
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        7.015703,
-        10.848446
+        7.979901,
+        3.302423
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12431,16 +12683,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.199999,
-        -6.840703,
-        11.151554
+        -7.897789,
+        3.886682
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        6.840703,
-        11.151554
+        7.897789,
+        3.886682
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12451,16 +12703,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.099999,
-        -7.015703,
-        10.848446
+        -7.979901,
+        3.302423
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        7.015703,
-        10.848446
+        7.979901,
+        3.302423
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12471,16 +12723,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.099999,
-        -6.840703,
-        11.151554
+        -7.897789,
+        3.886682
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        6.840703,
-        11.151554
+        7.897789,
+        3.886682
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12491,16 +12743,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1e-06,
-        -7.015703,
-        10.848446
+        -7.979901,
+        3.302423
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        7.015703,
-        10.848446
+        7.979901,
+        3.302423
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12511,16 +12763,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1e-06,
-        -6.840703,
-        11.151554
+        -7.897789,
+        3.886682
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        6.840703,
-        11.151554
+        7.897789,
+        3.886682
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12531,16 +12783,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.100001,
-        -7.015703,
-        10.848446
+        -7.979901,
+        3.302423
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        7.015703,
-        10.848446
+        7.979901,
+        3.302423
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12551,16 +12803,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.100001,
-        -6.840703,
-        11.151554
+        -7.897789,
+        3.886682
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        6.840703,
-        11.151554
+        7.897789,
+        3.886682
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12571,16 +12823,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.200001,
-        -7.015703,
-        10.848446
+        -7.979901,
+        3.302423
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        7.015703,
-        10.848446
+        7.979901,
+        3.302423
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12591,16 +12843,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.200001,
-        -6.840703,
-        11.151554
+        -7.897789,
+        3.886682
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        6.840703,
-        11.151554
+        7.897789,
+        3.886682
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12611,16 +12863,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.199999,
-        -7.448716,
-        11.098446
+        -8.475036,
+        3.37201
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        7.448716,
-        11.098446
+        8.475036,
+        3.37201
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12631,17 +12883,17 @@
       "node_material": "|NM_WOOD",
       "position": [
         2.199999,
-        -7.273716,
-        11.401554
+        -8.392923,
+        3.956268
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        7.273716,
-        11.401554
+        8.392923,
+        3.956268
       ],
       "spawn_envelope": true,
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12652,16 +12904,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.099999,
-        -7.448716,
-        11.098446
+        -8.475036,
+        3.37201
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        7.448716,
-        11.098446
+        8.475036,
+        3.37201
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12672,16 +12924,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         1.099999,
-        -7.273716,
-        11.401554
+        -8.392923,
+        3.956268
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        7.273716,
-        11.401554
+        8.392923,
+        3.956268
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12692,16 +12944,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1e-06,
-        -7.448716,
-        11.098446
+        -8.475036,
+        3.37201
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        7.448716,
-        11.098446
+        8.475036,
+        3.37201
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12712,16 +12964,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1e-06,
-        -7.273716,
-        11.401554
+        -8.392923,
+        3.956268
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        7.273716,
-        11.401554
+        8.392923,
+        3.956268
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12732,16 +12984,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.100001,
-        -7.448716,
-        11.098446
+        -8.475036,
+        3.37201
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        7.448716,
-        11.098446
+        8.475036,
+        3.37201
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12752,16 +13004,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -1.100001,
-        -7.273716,
-        11.401554
+        -8.392923,
+        3.956268
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        7.273716,
-        11.401554
+        8.392923,
+        3.956268
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12772,16 +13024,16 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.200001,
-        -7.448716,
-        11.098446
+        -8.475036,
+        3.37201
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        7.448716,
-        11.098446
+        8.475036,
+        3.37201
       ],
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12792,17 +13044,17 @@
       "node_material": "|NM_WOOD",
       "position": [
         -2.200001,
-        -7.273716,
-        11.401554
+        -8.392923,
+        3.956268
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        7.273716,
-        11.401554
+        8.392923,
+        3.956268
       ],
       "spawn_envelope": true,
-      "weight": 7.0
+      "weight": 40.0
     },
     {
       "collision": true,
@@ -12813,16 +13065,16 @@
       "node_material": "|NM_RUBBER",
       "position": [
         2.199999,
-        -6.946921,
-        12.367579
+        -8.451804,
+        4.974371
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        6.946921,
-        12.367579
+        8.451804,
+        4.974371
       ],
-      "weight": 5.0
+      "weight": 25.0
     },
     {
       "collision": true,
@@ -12833,16 +13085,16 @@
       "node_material": "|NM_RUBBER",
       "position": [
         1.099999,
-        -6.946921,
-        12.367579
+        -8.451804,
+        4.974371
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        6.946921,
-        12.367579
+        8.451804,
+        4.974371
       ],
-      "weight": 5.0
+      "weight": 25.0
     },
     {
       "collision": true,
@@ -12853,16 +13105,16 @@
       "node_material": "|NM_RUBBER",
       "position": [
         -1e-06,
-        -6.946921,
-        12.367579
+        -8.451804,
+        4.974371
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        6.946921,
-        12.367579
+        8.451804,
+        4.974371
       ],
-      "weight": 5.0
+      "weight": 25.0
     },
     {
       "collision": true,
@@ -12873,16 +13125,16 @@
       "node_material": "|NM_RUBBER",
       "position": [
         -1.100001,
-        -6.946921,
-        12.367579
+        -8.451804,
+        4.974371
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        6.946921,
-        12.367579
+        8.451804,
+        4.974371
       ],
-      "weight": 5.0
+      "weight": 25.0
     },
     {
       "collision": true,
@@ -12893,116 +13145,116 @@
       "node_material": "|NM_RUBBER",
       "position": [
         -2.200001,
-        -6.946921,
-        12.367579
+        -8.451804,
+        4.974371
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        6.946921,
-        12.367579
+        8.451804,
+        4.974371
       ],
-      "weight": 5.0
+      "weight": 25.0
     },
     {
       "collision": false,
       "fixed": true,
       "friction": 0.9,
-      "group": "plank",
+      "group": "hinge_pins",
       "id": "ericrolph_catapult_seesaw_plank_hinge_0",
       "node_material": "|NM_METAL",
       "position": [
         2.2,
         -0.0,
-        7.0
+        2.6
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
         0.0,
-        7.0
+        2.6
       ],
-      "weight": 250.0
+      "weight": 25.0
     },
     {
       "collision": false,
       "fixed": true,
       "friction": 0.9,
-      "group": "plank",
+      "group": "hinge_pins",
       "id": "ericrolph_catapult_seesaw_plank_hinge_1",
       "node_material": "|NM_METAL",
       "position": [
         1.1,
         -0.0,
-        7.0
+        2.6
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
         0.0,
-        7.0
+        2.6
       ],
-      "weight": 250.0
+      "weight": 25.0
     },
     {
       "collision": false,
       "fixed": true,
       "friction": 0.9,
-      "group": "plank",
+      "group": "hinge_pins",
       "id": "ericrolph_catapult_seesaw_plank_hinge_2",
       "node_material": "|NM_METAL",
       "position": [
         0.0,
         0.0,
-        7.0
+        2.6
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
         0.0,
-        7.0
+        2.6
       ],
-      "weight": 250.0
+      "weight": 25.0
     },
     {
       "collision": false,
       "fixed": true,
       "friction": 0.9,
-      "group": "plank",
+      "group": "hinge_pins",
       "id": "ericrolph_catapult_seesaw_plank_hinge_3",
       "node_material": "|NM_METAL",
       "position": [
         -1.1,
         0.0,
-        7.0
+        2.6
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
         0.0,
-        7.0
+        2.6
       ],
-      "weight": 250.0
+      "weight": 25.0
     },
     {
       "collision": false,
       "fixed": true,
       "friction": 0.9,
-      "group": "plank",
+      "group": "hinge_pins",
       "id": "ericrolph_catapult_seesaw_plank_hinge_4",
       "node_material": "|NM_METAL",
       "position": [
         -2.2,
         0.0,
-        7.0
+        2.6
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
         0.0,
-        7.0
+        2.6
       ],
-      "weight": 250.0
+      "weight": 25.0
     },
     {
       "collision": true,
@@ -13012,13 +13264,13 @@
       "node_material": "|NM_METAL",
       "position": [
         3.15,
-        -4.108653,
+        -4.917253,
         0.0
       ],
       "self_collision": false,
       "source_world_position": [
         -3.15,
-        4.108653,
+        4.917253,
         0.0
       ],
       "weight": 125.0
@@ -13031,13 +13283,13 @@
       "node_material": "|NM_METAL",
       "position": [
         3.15,
-        -4.108653,
+        -4.917253,
         10.6
       ],
       "self_collision": false,
       "source_world_position": [
         -3.15,
-        4.108653,
+        4.917253,
         10.6
       ],
       "weight": 125.0
@@ -13050,13 +13302,13 @@
       "node_material": "|NM_METAL",
       "position": [
         3.15,
-        -4.108653,
+        -4.917253,
         21.200001
       ],
       "self_collision": false,
       "source_world_position": [
         -3.15,
-        4.108653,
+        4.917253,
         21.200001
       ],
       "spawn_envelope": true,
@@ -13069,14 +13321,14 @@
       "id": "ericrolph_catapult_seesaw_post_l_00_01_00",
       "node_material": "|NM_METAL",
       "position": [
-        3.15,
-        -6.108653,
+        3.149999,
+        -6.917253,
         0.0
       ],
       "self_collision": false,
       "source_world_position": [
         -3.15,
-        6.108653,
+        6.917253,
         0.0
       ],
       "weight": 125.0
@@ -13088,14 +13340,14 @@
       "id": "ericrolph_catapult_seesaw_post_l_00_01_01",
       "node_material": "|NM_METAL",
       "position": [
-        3.15,
-        -6.108653,
+        3.149999,
+        -6.917253,
         10.6
       ],
       "self_collision": false,
       "source_world_position": [
         -3.15,
-        6.108653,
+        6.917253,
         10.6
       ],
       "weight": 125.0
@@ -13107,14 +13359,14 @@
       "id": "ericrolph_catapult_seesaw_post_l_00_01_02",
       "node_material": "|NM_METAL",
       "position": [
-        3.15,
-        -6.108653,
+        3.149999,
+        -6.917253,
         21.200001
       ],
       "self_collision": false,
       "source_world_position": [
         -3.15,
-        6.108653,
+        6.917253,
         21.200001
       ],
       "spawn_envelope": true,
@@ -13128,13 +13380,13 @@
       "node_material": "|NM_METAL",
       "position": [
         2.45,
-        -4.108653,
+        -4.917253,
         0.0
       ],
       "self_collision": false,
       "source_world_position": [
         -2.45,
-        4.108653,
+        4.917253,
         0.0
       ],
       "weight": 125.0
@@ -13147,13 +13399,13 @@
       "node_material": "|NM_METAL",
       "position": [
         2.45,
-        -4.108653,
+        -4.917253,
         10.6
       ],
       "self_collision": false,
       "source_world_position": [
         -2.45,
-        4.108653,
+        4.917253,
         10.6
       ],
       "weight": 125.0
@@ -13166,13 +13418,13 @@
       "node_material": "|NM_METAL",
       "position": [
         2.45,
-        -4.108653,
+        -4.917253,
         21.200001
       ],
       "self_collision": false,
       "source_world_position": [
         -2.45,
-        4.108653,
+        4.917253,
         21.200001
       ],
       "weight": 125.0
@@ -13184,14 +13436,14 @@
       "id": "ericrolph_catapult_seesaw_post_l_01_01_00",
       "node_material": "|NM_METAL",
       "position": [
-        2.45,
-        -6.108653,
+        2.449999,
+        -6.917253,
         0.0
       ],
       "self_collision": false,
       "source_world_position": [
         -2.45,
-        6.108653,
+        6.917253,
         0.0
       ],
       "weight": 125.0
@@ -13203,14 +13455,14 @@
       "id": "ericrolph_catapult_seesaw_post_l_01_01_01",
       "node_material": "|NM_METAL",
       "position": [
-        2.45,
-        -6.108653,
+        2.449999,
+        -6.917253,
         10.6
       ],
       "self_collision": false,
       "source_world_position": [
         -2.45,
-        6.108653,
+        6.917253,
         10.6
       ],
       "weight": 125.0
@@ -13222,14 +13474,14 @@
       "id": "ericrolph_catapult_seesaw_post_l_01_01_02",
       "node_material": "|NM_METAL",
       "position": [
-        2.45,
-        -6.108653,
+        2.449999,
+        -6.917253,
         21.200001
       ],
       "self_collision": false,
       "source_world_position": [
         -2.45,
-        6.108653,
+        6.917253,
         21.200001
       ],
       "weight": 125.0
@@ -13242,13 +13494,13 @@
       "node_material": "|NM_METAL",
       "position": [
         -2.450001,
-        -4.108653,
+        -4.917253,
         0.0
       ],
       "self_collision": false,
       "source_world_position": [
         2.45,
-        4.108653,
+        4.917253,
         0.0
       ],
       "weight": 125.0
@@ -13261,13 +13513,13 @@
       "node_material": "|NM_METAL",
       "position": [
         -2.450001,
-        -4.108653,
+        -4.917253,
         10.6
       ],
       "self_collision": false,
       "source_world_position": [
         2.45,
-        4.108653,
+        4.917253,
         10.6
       ],
       "weight": 125.0
@@ -13280,13 +13532,13 @@
       "node_material": "|NM_METAL",
       "position": [
         -2.450001,
-        -4.108653,
+        -4.917253,
         21.200001
       ],
       "self_collision": false,
       "source_world_position": [
         2.45,
-        4.108653,
+        4.917253,
         21.200001
       ],
       "weight": 125.0
@@ -13299,13 +13551,13 @@
       "node_material": "|NM_METAL",
       "position": [
         -2.450001,
-        -6.108653,
+        -6.917253,
         0.0
       ],
       "self_collision": false,
       "source_world_position": [
         2.45,
-        6.108653,
+        6.917253,
         0.0
       ],
       "weight": 125.0
@@ -13318,13 +13570,13 @@
       "node_material": "|NM_METAL",
       "position": [
         -2.450001,
-        -6.108653,
+        -6.917253,
         10.6
       ],
       "self_collision": false,
       "source_world_position": [
         2.45,
-        6.108653,
+        6.917253,
         10.6
       ],
       "weight": 125.0
@@ -13337,13 +13589,13 @@
       "node_material": "|NM_METAL",
       "position": [
         -2.450001,
-        -6.108653,
+        -6.917253,
         21.200001
       ],
       "self_collision": false,
       "source_world_position": [
         2.45,
-        6.108653,
+        6.917253,
         21.200001
       ],
       "weight": 125.0
@@ -13356,13 +13608,13 @@
       "node_material": "|NM_METAL",
       "position": [
         -3.150001,
-        -4.108652,
+        -4.917253,
         0.0
       ],
       "self_collision": false,
       "source_world_position": [
         3.15,
-        4.108653,
+        4.917253,
         0.0
       ],
       "weight": 125.0
@@ -13375,13 +13627,13 @@
       "node_material": "|NM_METAL",
       "position": [
         -3.150001,
-        -4.108652,
+        -4.917253,
         10.6
       ],
       "self_collision": false,
       "source_world_position": [
         3.15,
-        4.108653,
+        4.917253,
         10.6
       ],
       "weight": 125.0
@@ -13394,13 +13646,13 @@
       "node_material": "|NM_METAL",
       "position": [
         -3.150001,
-        -4.108652,
+        -4.917253,
         21.200001
       ],
       "self_collision": false,
       "source_world_position": [
         3.15,
-        4.108653,
+        4.917253,
         21.200001
       ],
       "spawn_envelope": true,
@@ -13414,13 +13666,13 @@
       "node_material": "|NM_METAL",
       "position": [
         -3.150001,
-        -6.108652,
+        -6.917253,
         0.0
       ],
       "self_collision": false,
       "source_world_position": [
         3.15,
-        6.108653,
+        6.917253,
         0.0
       ],
       "weight": 125.0
@@ -13433,13 +13685,13 @@
       "node_material": "|NM_METAL",
       "position": [
         -3.150001,
-        -6.108652,
+        -6.917253,
         10.6
       ],
       "self_collision": false,
       "source_world_position": [
         3.15,
-        6.108653,
+        6.917253,
         10.6
       ],
       "weight": 125.0
@@ -13452,13 +13704,13 @@
       "node_material": "|NM_METAL",
       "position": [
         -3.150001,
-        -6.108652,
+        -6.917253,
         21.200001
       ],
       "self_collision": false,
       "source_world_position": [
         3.15,
-        6.108653,
+        6.917253,
         21.200001
       ],
       "spawn_envelope": true,
@@ -13473,14 +13725,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         1.275,
-        -3.833652,
-        16.901554
+        -4.642253,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         -1.275,
-        3.833652,
-        16.901554
+        4.642253,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13492,15 +13744,15 @@
       "id": "ericrolph_catapult_seesaw_weight_0_1_0",
       "node_material": "|NM_RUBBER",
       "position": [
-        1.275,
-        -4.471152,
-        16.901554
+        1.274999,
+        -5.279753,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         -1.275,
-        4.471152,
-        16.901554
+        5.279753,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13513,14 +13765,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         1.274999,
-        -5.108653,
-        16.901554
+        -5.917253,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         -1.275,
-        5.108653,
-        16.901554
+        5.917253,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13533,14 +13785,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         1.274999,
-        -5.746152,
-        16.901554
+        -6.554753,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         -1.275,
-        5.746152,
-        16.901554
+        6.554753,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13553,14 +13805,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         1.274999,
-        -6.383652,
-        16.901554
+        -7.192253,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         -1.275,
-        6.383652,
-        16.901554
+        7.192253,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13573,14 +13825,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         0.6375,
-        -3.833652,
-        16.901554
+        -4.642253,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         -0.6375,
-        3.833652,
-        16.901554
+        4.642253,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13593,14 +13845,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         0.6375,
-        -4.471152,
-        16.901554
+        -5.279753,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         -0.6375,
-        4.471152,
-        16.901554
+        5.279753,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13612,15 +13864,15 @@
       "id": "ericrolph_catapult_seesaw_weight_1_2_0",
       "node_material": "|NM_RUBBER",
       "position": [
-        0.6375,
-        -5.108653,
-        16.901554
+        0.637499,
+        -5.917253,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         -0.6375,
-        5.108653,
-        16.901554
+        5.917253,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13632,15 +13884,15 @@
       "id": "ericrolph_catapult_seesaw_weight_1_3_0",
       "node_material": "|NM_RUBBER",
       "position": [
-        0.6375,
-        -5.746152,
-        16.901554
+        0.637499,
+        -6.554753,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         -0.6375,
-        5.746152,
-        16.901554
+        6.554753,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13653,14 +13905,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         0.637499,
-        -6.383652,
-        16.901554
+        -7.192253,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         -0.6375,
-        6.383652,
-        16.901554
+        7.192253,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13673,14 +13925,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         -0.0,
-        -3.833652,
-        16.901554
+        -4.642253,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         0.0,
-        3.833652,
-        16.901554
+        4.642253,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13693,14 +13945,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         -0.0,
-        -4.471152,
-        16.901554
+        -5.279753,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         0.0,
-        4.471152,
-        16.901554
+        5.279753,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13712,15 +13964,15 @@
       "id": "ericrolph_catapult_seesaw_weight_2_2_0",
       "node_material": "|NM_RUBBER",
       "position": [
-        -0.0,
-        -5.108653,
-        16.901554
+        -1e-06,
+        -5.917253,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         0.0,
-        5.108653,
-        16.901554
+        5.917253,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13733,14 +13985,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         -1e-06,
-        -5.746152,
-        16.901554
+        -6.554753,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         0.0,
-        5.746152,
-        16.901554
+        6.554753,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13753,14 +14005,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         -1e-06,
-        -6.383652,
-        16.901554
+        -7.192253,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         0.0,
-        6.383652,
-        16.901554
+        7.192253,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13773,14 +14025,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         -0.6375,
-        -3.833652,
-        16.901554
+        -4.642253,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         0.6375,
-        3.833652,
-        16.901554
+        4.642253,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13793,14 +14045,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         -0.6375,
-        -4.471152,
-        16.901554
+        -5.279753,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         0.6375,
-        4.471152,
-        16.901554
+        5.279753,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13812,15 +14064,15 @@
       "id": "ericrolph_catapult_seesaw_weight_3_2_0",
       "node_material": "|NM_RUBBER",
       "position": [
-        -0.6375,
-        -5.108653,
-        16.901554
+        -0.637501,
+        -5.917253,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         0.6375,
-        5.108653,
-        16.901554
+        5.917253,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13832,15 +14084,15 @@
       "id": "ericrolph_catapult_seesaw_weight_3_3_0",
       "node_material": "|NM_RUBBER",
       "position": [
-        -0.6375,
-        -5.746152,
-        16.901554
+        -0.637501,
+        -6.554753,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         0.6375,
-        5.746152,
-        16.901554
+        6.554753,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13853,14 +14105,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         -0.637501,
-        -6.383652,
-        16.901554
+        -7.192253,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         0.6375,
-        6.383652,
-        16.901554
+        7.192253,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13873,14 +14125,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         -1.275,
-        -3.833652,
-        16.901554
+        -4.642253,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         1.275,
-        3.833652,
-        16.901554
+        4.642253,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13893,14 +14145,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         -1.275,
-        -4.471152,
-        16.901554
+        -5.279753,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         1.275,
-        4.471152,
-        16.901554
+        5.279753,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13913,14 +14165,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         -1.275,
-        -5.108653,
-        16.901554
+        -5.917253,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         1.275,
-        5.108653,
-        16.901554
+        5.917253,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13932,15 +14184,15 @@
       "id": "ericrolph_catapult_seesaw_weight_4_3_0",
       "node_material": "|NM_RUBBER",
       "position": [
-        -1.275,
-        -5.746152,
-        16.901554
+        -1.275001,
+        -6.554753,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         1.275,
-        5.746152,
-        16.901554
+        6.554753,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13953,14 +14205,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         -1.275001,
-        -6.383652,
-        16.901554
+        -7.192253,
+        10.358335
       ],
       "self_collision": true,
       "source_world_position": [
         1.275,
-        6.383652,
-        16.901554
+        7.192253,
+        10.358335
       ],
       "weight": 115.06666666666666
     },
@@ -13973,14 +14225,14 @@
       "node_material": "|NM_METAL",
       "position": [
         1.45,
-        -3.658653,
-        18.361555
+        -4.467253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         -1.45,
-        3.658652,
-        18.361555
+        4.467253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -13993,14 +14245,14 @@
       "node_material": "|NM_METAL",
       "position": [
         1.45,
-        -4.383652,
-        18.361555
+        -5.192253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         -1.45,
-        4.383652,
-        18.361555
+        5.192253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14013,14 +14265,14 @@
       "node_material": "|NM_METAL",
       "position": [
         1.45,
-        -5.108653,
-        18.361555
+        -5.917253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         -1.45,
-        5.108653,
-        18.361555
+        5.917253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14032,15 +14284,15 @@
       "id": "ericrolph_catapult_seesaw_weight_0_3_1",
       "node_material": "|NM_METAL",
       "position": [
-        1.45,
-        -5.833652,
-        18.361555
+        1.449999,
+        -6.642253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         -1.45,
-        5.833652,
-        18.361555
+        6.642253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14053,14 +14305,14 @@
       "node_material": "|NM_METAL",
       "position": [
         1.449999,
-        -6.558652,
-        18.361555
+        -7.367253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         -1.45,
-        6.558652,
-        18.361555
+        7.367253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14073,14 +14325,14 @@
       "node_material": "|NM_METAL",
       "position": [
         0.725,
-        -3.658652,
-        18.361555
+        -4.467253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         -0.725,
-        3.658652,
-        18.361555
+        4.467253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14093,14 +14345,14 @@
       "node_material": "|NM_METAL",
       "position": [
         0.725,
-        -4.383652,
-        18.361555
+        -5.192253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         -0.725,
-        4.383652,
-        18.361555
+        5.192253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14112,15 +14364,15 @@
       "id": "ericrolph_catapult_seesaw_weight_1_2_1",
       "node_material": "|NM_METAL",
       "position": [
-        0.725,
-        -5.108653,
-        18.361555
+        0.724999,
+        -5.917253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         -0.725,
-        5.108653,
-        18.361555
+        5.917253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14133,14 +14385,14 @@
       "node_material": "|NM_METAL",
       "position": [
         0.724999,
-        -5.833652,
-        18.361555
+        -6.642253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         -0.725,
-        5.833652,
-        18.361555
+        6.642253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14153,14 +14405,14 @@
       "node_material": "|NM_METAL",
       "position": [
         0.724999,
-        -6.558652,
-        18.361555
+        -7.367253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         -0.725,
-        6.558652,
-        18.361555
+        7.367253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14173,14 +14425,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -0.0,
-        -3.658652,
-        18.361555
+        -4.467253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        3.658652,
-        18.361555
+        4.467253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14193,14 +14445,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -0.0,
-        -4.383652,
-        18.361555
+        -5.192253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        4.383652,
-        18.361555
+        5.192253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14212,15 +14464,15 @@
       "id": "ericrolph_catapult_seesaw_weight_2_2_1",
       "node_material": "|NM_METAL",
       "position": [
-        -0.0,
-        -5.108653,
-        18.361555
+        -1e-06,
+        -5.917253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        5.108653,
-        18.361555
+        5.917253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14233,14 +14485,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -1e-06,
-        -5.833652,
-        18.361555
+        -6.642253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        5.833652,
-        18.361555
+        6.642253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14253,14 +14505,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -1e-06,
-        -6.558652,
-        18.361555
+        -7.367253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        6.558652,
-        18.361555
+        7.367253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14273,14 +14525,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -0.725,
-        -3.658652,
-        18.361555
+        -4.467253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         0.725,
-        3.658652,
-        18.361555
+        4.467253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14292,15 +14544,15 @@
       "id": "ericrolph_catapult_seesaw_weight_3_1_1",
       "node_material": "|NM_METAL",
       "position": [
-        -0.725,
-        -4.383652,
-        18.361555
+        -0.725001,
+        -5.192253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         0.725,
-        4.383652,
-        18.361555
+        5.192253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14312,15 +14564,15 @@
       "id": "ericrolph_catapult_seesaw_weight_3_2_1",
       "node_material": "|NM_METAL",
       "position": [
-        -0.725,
-        -5.108653,
-        18.361555
+        -0.725001,
+        -5.917253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         0.725,
-        5.108653,
-        18.361555
+        5.917253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14333,14 +14585,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -0.725001,
-        -5.833652,
-        18.361555
+        -6.642253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         0.725,
-        5.833652,
-        18.361555
+        6.642253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14353,14 +14605,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -0.725001,
-        -6.558652,
-        18.361555
+        -7.367253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         0.725,
-        6.558652,
-        18.361555
+        7.367253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14373,14 +14625,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -1.45,
-        -3.658652,
-        18.361555
+        -4.467253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         1.45,
-        3.658652,
-        18.361555
+        4.467253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14392,15 +14644,15 @@
       "id": "ericrolph_catapult_seesaw_weight_4_1_1",
       "node_material": "|NM_METAL",
       "position": [
-        -1.45,
-        -4.383652,
-        18.361555
+        -1.450001,
+        -5.192253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         1.45,
-        4.383652,
-        18.361555
+        5.192253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14413,14 +14665,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -1.450001,
-        -5.108653,
-        18.361555
+        -5.917253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         1.45,
-        5.108653,
-        18.361555
+        5.917253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14433,14 +14685,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -1.450001,
-        -5.833652,
-        18.361555
+        -6.642253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         1.45,
-        5.833652,
-        18.361555
+        6.642253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14453,14 +14705,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -1.450001,
-        -6.558652,
-        18.361555
+        -7.367253,
+        11.818336
       ],
       "self_collision": false,
       "source_world_position": [
         1.45,
-        6.558652,
-        18.361555
+        7.367253,
+        11.818336
       ],
       "weight": 115.06666666666666
     },
@@ -14473,14 +14725,14 @@
       "node_material": "|NM_METAL",
       "position": [
         1.8,
-        -3.308653,
-        19.801554
+        -4.117253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         -1.8,
-        3.308652,
-        19.801554
+        4.117253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14492,15 +14744,15 @@
       "id": "ericrolph_catapult_seesaw_weight_0_1_2",
       "node_material": "|NM_METAL",
       "position": [
-        1.8,
-        -4.208652,
-        19.801554
+        1.799999,
+        -5.017253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         -1.8,
-        4.208652,
-        19.801554
+        5.017253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14513,14 +14765,14 @@
       "node_material": "|NM_METAL",
       "position": [
         1.799999,
-        -5.108653,
-        19.801554
+        -5.917253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         -1.8,
-        5.108653,
-        19.801554
+        5.917253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14533,14 +14785,14 @@
       "node_material": "|NM_METAL",
       "position": [
         1.799999,
-        -6.008652,
-        19.801554
+        -6.817253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         -1.8,
-        6.008652,
-        19.801554
+        6.817253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14553,14 +14805,14 @@
       "node_material": "|NM_METAL",
       "position": [
         1.799999,
-        -6.908652,
-        19.801554
+        -7.717253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         -1.8,
-        6.908652,
-        19.801554
+        7.717253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14573,14 +14825,14 @@
       "node_material": "|NM_METAL",
       "position": [
         0.9,
-        -3.308652,
-        19.801554
+        -4.117253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         -0.9,
-        3.308652,
-        19.801554
+        4.117253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14593,14 +14845,14 @@
       "node_material": "|NM_METAL",
       "position": [
         0.9,
-        -4.208652,
-        19.801554
+        -5.017253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         -0.9,
-        4.208652,
-        19.801554
+        5.017253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14612,15 +14864,15 @@
       "id": "ericrolph_catapult_seesaw_weight_1_2_2",
       "node_material": "|NM_METAL",
       "position": [
-        0.9,
-        -5.108653,
-        19.801554
+        0.899999,
+        -5.917253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         -0.9,
-        5.108653,
-        19.801554
+        5.917253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14633,14 +14885,14 @@
       "node_material": "|NM_METAL",
       "position": [
         0.899999,
-        -6.008652,
-        19.801554
+        -6.817253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         -0.9,
-        6.008652,
-        19.801554
+        6.817253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14653,14 +14905,14 @@
       "node_material": "|NM_METAL",
       "position": [
         0.899999,
-        -6.908652,
-        19.801554
+        -7.717253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         -0.9,
-        6.908652,
-        19.801554
+        7.717253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14673,14 +14925,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -0.0,
-        -3.308652,
-        19.801554
+        -4.117253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        3.308652,
-        19.801554
+        4.117253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14693,14 +14945,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -0.0,
-        -4.208652,
-        19.801554
+        -5.017253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        4.208652,
-        19.801554
+        5.017253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14712,15 +14964,15 @@
       "id": "ericrolph_catapult_seesaw_weight_2_2_2",
       "node_material": "|NM_METAL",
       "position": [
-        -0.0,
-        -5.108653,
-        19.801554
+        -1e-06,
+        -5.917253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        5.108653,
-        19.801554
+        5.917253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14733,14 +14985,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -1e-06,
-        -6.008652,
-        19.801554
+        -6.817253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        6.008652,
-        19.801554
+        6.817253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14753,14 +15005,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -1e-06,
-        -6.908652,
-        19.801554
+        -7.717253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        6.908652,
-        19.801554
+        7.717253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14773,14 +15025,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -0.9,
-        -3.308652,
-        19.801554
+        -4.117253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         0.9,
-        3.308652,
-        19.801554
+        4.117253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14793,14 +15045,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -0.9,
-        -4.208652,
-        19.801554
+        -5.017253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         0.9,
-        4.208652,
-        19.801554
+        5.017253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14812,15 +15064,15 @@
       "id": "ericrolph_catapult_seesaw_weight_3_2_2",
       "node_material": "|NM_METAL",
       "position": [
-        -0.9,
-        -5.108653,
-        19.801554
+        -0.900001,
+        -5.917253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         0.9,
-        5.108653,
-        19.801554
+        5.917253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14833,14 +15085,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -0.900001,
-        -6.008652,
-        19.801554
+        -6.817253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         0.9,
-        6.008652,
-        19.801554
+        6.817253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14853,14 +15105,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -0.900001,
-        -6.908652,
-        19.801554
+        -7.717253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         0.9,
-        6.908652,
-        19.801554
+        7.717253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14873,14 +15125,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -1.8,
-        -3.308652,
-        19.801554
+        -4.117253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         1.8,
-        3.308652,
-        19.801554
+        4.117253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14893,14 +15145,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -1.8,
-        -4.208652,
-        19.801554
+        -5.017253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         1.8,
-        4.208652,
-        19.801554
+        5.017253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14913,14 +15165,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -1.8,
-        -5.108653,
-        19.801554
+        -5.917253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         1.8,
-        5.108653,
-        19.801554
+        5.917253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14932,15 +15184,15 @@
       "id": "ericrolph_catapult_seesaw_weight_4_3_2",
       "node_material": "|NM_METAL",
       "position": [
-        -1.8,
-        -6.008652,
-        19.801554
+        -1.800001,
+        -6.817253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         1.8,
-        6.008652,
-        19.801554
+        6.817253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14953,14 +15205,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -1.800001,
-        -6.908652,
-        19.801554
+        -7.717253,
+        13.258335
       ],
       "self_collision": false,
       "source_world_position": [
         1.8,
-        6.908652,
-        19.801554
+        7.717253,
+        13.258335
       ],
       "weight": 115.06666666666666
     },
@@ -14973,14 +15225,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         2.2,
-        -5.108653,
-        16.151554
+        -5.917253,
+        9.608335
       ],
       "self_collision": true,
       "source_world_position": [
         -2.2,
-        5.108653,
-        16.151554
+        5.917253,
+        9.608335
       ],
       "weight": 80.0
     },
@@ -14993,14 +15245,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         1.1,
-        -5.108653,
-        16.151554
+        -5.917253,
+        9.608335
       ],
       "self_collision": true,
       "source_world_position": [
         -1.1,
-        5.108653,
-        16.151554
+        5.917253,
+        9.608335
       ],
       "weight": 80.0
     },
@@ -15012,15 +15264,15 @@
       "id": "ericrolph_catapult_seesaw_weight_striker_2",
       "node_material": "|NM_RUBBER",
       "position": [
-        -0.0,
-        -5.108653,
-        16.151554
+        -1e-06,
+        -5.917253,
+        9.608335
       ],
       "self_collision": true,
       "source_world_position": [
         0.0,
-        5.108653,
-        16.151554
+        5.917253,
+        9.608335
       ],
       "weight": 80.0
     },
@@ -15033,14 +15285,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         -1.100001,
-        -5.108653,
-        16.151554
+        -5.917253,
+        9.608335
       ],
       "self_collision": true,
       "source_world_position": [
         1.1,
-        5.108653,
-        16.151554
+        5.917253,
+        9.608335
       ],
       "weight": 80.0
     },
@@ -15053,14 +15305,14 @@
       "node_material": "|NM_RUBBER",
       "position": [
         -2.200001,
-        -5.108653,
-        16.151554
+        -5.917253,
+        9.608335
       ],
       "self_collision": true,
       "source_world_position": [
         2.2,
-        5.108653,
-        16.151554
+        5.917253,
+        9.608335
       ],
       "weight": 80.0
     },
@@ -15072,15 +15324,15 @@
       "id": "ericrolph_catapult_seesaw_weight_hook",
       "node_material": "|NM_METAL",
       "position": [
-        -0.0,
-        -5.108653,
-        20.291553
+        -1e-06,
+        -5.917253,
+        13.748336
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        5.108653,
-        20.291553
+        5.917253,
+        13.748336
       ],
       "weight": 40.0
     },
@@ -15091,15 +15343,15 @@
       "id": "ericrolph_catapult_seesaw_latch_l",
       "node_material": "|NM_METAL",
       "position": [
-        0.18,
-        -5.108653,
-        20.541553
+        0.179999,
+        -5.917253,
+        13.998336
       ],
       "self_collision": false,
       "source_world_position": [
         -0.18,
-        5.108653,
-        20.541553
+        5.917253,
+        13.998336
       ],
       "weight": 80.0
     },
@@ -15110,15 +15362,15 @@
       "id": "ericrolph_catapult_seesaw_latch_r",
       "node_material": "|NM_METAL",
       "position": [
-        -0.18,
-        -5.108653,
-        20.541553
+        -0.180001,
+        -5.917253,
+        13.998336
       ],
       "self_collision": false,
       "source_world_position": [
         0.18,
-        5.108653,
-        20.541553
+        5.917253,
+        13.998336
       ],
       "weight": 80.0
     },
@@ -15129,15 +15381,15 @@
       "id": "ericrolph_catapult_seesaw_latch_center",
       "node_material": "|NM_METAL",
       "position": [
-        -0.0,
-        -5.108653,
-        20.291553
+        -1e-06,
+        -5.917253,
+        13.748336
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        5.108653,
-        20.291553
+        5.917253,
+        13.748336
       ],
       "weight": 80.0
     },
@@ -15148,14 +15400,14 @@
       "id": "ericrolph_catapult_seesaw_weight_guide_0",
       "node_material": "|NM_METAL",
       "position": [
-        -0.0,
-        -5.108653,
+        -1e-06,
+        -5.917253,
         0.5
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        5.108653,
+        5.917253,
         0.5
       ],
       "weight": 80.0
@@ -15167,14 +15419,14 @@
       "id": "ericrolph_catapult_seesaw_weight_guide_1",
       "node_material": "|NM_METAL",
       "position": [
-        -0.0,
-        -5.108653,
+        -1e-06,
+        -5.917253,
         8.0
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        5.108653,
+        5.917253,
         8.0
       ],
       "weight": 80.0
@@ -15186,14 +15438,14 @@
       "id": "ericrolph_catapult_seesaw_weight_guide_2",
       "node_material": "|NM_METAL",
       "position": [
-        -0.0,
-        -5.108653,
+        -1e-06,
+        -5.917253,
         14.0
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        5.108653,
+        5.917253,
         14.0
       ],
       "weight": 80.0
@@ -15205,14 +15457,14 @@
       "id": "ericrolph_catapult_seesaw_weight_guide_3",
       "node_material": "|NM_METAL",
       "position": [
-        -0.0,
-        -5.108653,
+        -1e-06,
+        -5.917253,
         18.0
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        5.108653,
+        5.917253,
         18.0
       ],
       "weight": 80.0
@@ -15224,14 +15476,14 @@
       "id": "ericrolph_catapult_seesaw_weight_guide_4",
       "node_material": "|NM_METAL",
       "position": [
-        -0.0,
-        -5.108653,
+        -1e-06,
+        -5.917253,
         21.200001
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        5.108653,
+        5.917253,
         21.200001
       ],
       "weight": 80.0
@@ -15244,13 +15496,13 @@
       "node_material": "|NM_METAL",
       "position": [
         1.799999,
-        -5.108653,
+        -5.917253,
         21.200001
       ],
       "self_collision": false,
       "source_world_position": [
         -1.8,
-        5.108653,
+        5.917253,
         21.200001
       ],
       "weight": 80.0
@@ -15262,14 +15514,14 @@
       "id": "ericrolph_catapult_seesaw_weight_snubber_anchor_1",
       "node_material": "|NM_METAL",
       "position": [
-        0.9,
-        -5.108653,
+        0.899999,
+        -5.917253,
         21.200001
       ],
       "self_collision": false,
       "source_world_position": [
         -0.9,
-        5.108653,
+        5.917253,
         21.200001
       ],
       "weight": 80.0
@@ -15281,14 +15533,14 @@
       "id": "ericrolph_catapult_seesaw_weight_snubber_anchor_3",
       "node_material": "|NM_METAL",
       "position": [
-        -0.9,
-        -5.108653,
+        -0.900001,
+        -5.917253,
         21.200001
       ],
       "self_collision": false,
       "source_world_position": [
         0.9,
-        5.108653,
+        5.917253,
         21.200001
       ],
       "weight": 80.0
@@ -15301,13 +15553,13 @@
       "node_material": "|NM_METAL",
       "position": [
         -1.8,
-        -5.108653,
+        -5.917253,
         21.200001
       ],
       "self_collision": false,
       "source_world_position": [
         1.8,
-        5.108653,
+        5.917253,
         21.200001
       ],
       "weight": 80.0
@@ -15360,14 +15612,14 @@
       "node_material": "|NM_METAL",
       "position": [
         2.200001,
-        11.878843,
-        0.401554
+        13.492974,
+        0.89446
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        -11.878843,
-        0.401554
+        -13.492974,
+        0.89446
       ],
       "weight": 125.0
     },
@@ -15379,14 +15631,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -2.199999,
-        11.878843,
-        0.401554
+        13.492974,
+        0.89446
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        -11.878843,
-        0.401554
+        -13.492974,
+        0.89446
       ],
       "weight": 125.0
     },
@@ -15398,14 +15650,14 @@
       "node_material": "|NM_METAL",
       "position": [
         2.200001,
-        12.028843,
-        0.151554
+        13.642974,
+        0.64446
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        -12.028843,
-        0.151554
+        -13.642974,
+        0.64446
       ],
       "weight": 80.0
     },
@@ -15417,14 +15669,14 @@
       "node_material": "|NM_METAL",
       "position": [
         2.200001,
-        9.265574,
-        0.728446
+        10.67054,
+        0.203634
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        -9.265574,
-        0.728446
+        -10.67054,
+        0.203634
       ],
       "weight": 80.0
     },
@@ -15436,14 +15688,14 @@
       "node_material": "|NM_METAL",
       "position": [
         2.2,
-        -5.283652,
-        9.128446
+        -5.965964,
+        2.541742
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        5.283652,
-        9.128446
+        5.965964,
+        2.541742
       ],
       "weight": 80.0
     },
@@ -15454,14 +15706,14 @@
       "id": "ericrolph_catapult_seesaw_fling_catcher_anchor_0",
       "node_material": "|NM_METAL",
       "position": [
-        2.2,
-        -6.691649,
+        2.199999,
+        -7.641857,
         0.05
       ],
       "self_collision": false,
       "source_world_position": [
         -2.2,
-        6.691649,
+        7.641857,
         0.05
       ],
       "weight": 80.0
@@ -15474,14 +15726,14 @@
       "node_material": "|NM_METAL",
       "position": [
         1.100001,
-        12.028843,
-        0.151554
+        13.642974,
+        0.64446
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        -12.028843,
-        0.151554
+        -13.642974,
+        0.64446
       ],
       "weight": 80.0
     },
@@ -15493,14 +15745,14 @@
       "node_material": "|NM_METAL",
       "position": [
         1.100001,
-        9.265574,
-        0.728446
+        10.67054,
+        0.203634
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        -9.265574,
-        0.728446
+        -10.67054,
+        0.203634
       ],
       "weight": 80.0
     },
@@ -15512,14 +15764,14 @@
       "node_material": "|NM_METAL",
       "position": [
         1.1,
-        -5.283652,
-        9.128446
+        -5.965964,
+        2.541742
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        5.283652,
-        9.128446
+        5.965964,
+        2.541742
       ],
       "weight": 80.0
     },
@@ -15531,13 +15783,13 @@
       "node_material": "|NM_METAL",
       "position": [
         1.099999,
-        -6.691649,
+        -7.641857,
         0.05
       ],
       "self_collision": false,
       "source_world_position": [
         -1.1,
-        6.691649,
+        7.641857,
         0.05
       ],
       "weight": 80.0
@@ -15550,14 +15802,14 @@
       "node_material": "|NM_METAL",
       "position": [
         1e-06,
-        12.028843,
-        0.151554
+        13.642974,
+        0.64446
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        -12.028843,
-        0.151554
+        -13.642974,
+        0.64446
       ],
       "weight": 80.0
     },
@@ -15569,14 +15821,14 @@
       "node_material": "|NM_METAL",
       "position": [
         1e-06,
-        9.265574,
-        0.728446
+        10.67054,
+        0.203634
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        -9.265574,
-        0.728446
+        -10.67054,
+        0.203634
       ],
       "weight": 80.0
     },
@@ -15587,15 +15839,15 @@
       "id": "ericrolph_catapult_seesaw_impact_latch_anchor_2",
       "node_material": "|NM_METAL",
       "position": [
-        -0.0,
-        -5.283652,
-        9.128446
+        -1e-06,
+        -5.965964,
+        2.541742
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        5.283652,
-        9.128446
+        5.965964,
+        2.541742
       ],
       "weight": 80.0
     },
@@ -15607,13 +15859,13 @@
       "node_material": "|NM_METAL",
       "position": [
         -1e-06,
-        -6.691649,
+        -7.641857,
         0.05
       ],
       "self_collision": false,
       "source_world_position": [
         0.0,
-        6.691649,
+        7.641857,
         0.05
       ],
       "weight": 80.0
@@ -15626,14 +15878,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -1.099999,
-        12.028843,
-        0.151554
+        13.642974,
+        0.64446
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        -12.028843,
-        0.151554
+        -13.642974,
+        0.64446
       ],
       "weight": 80.0
     },
@@ -15645,14 +15897,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -1.099999,
-        9.265574,
-        0.728446
+        10.67054,
+        0.203634
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        -9.265574,
-        0.728446
+        -10.67054,
+        0.203634
       ],
       "weight": 80.0
     },
@@ -15664,14 +15916,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -1.100001,
-        -5.283652,
-        9.128446
+        -5.965964,
+        2.541742
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        5.283652,
-        9.128446
+        5.965964,
+        2.541742
       ],
       "weight": 80.0
     },
@@ -15683,13 +15935,13 @@
       "node_material": "|NM_METAL",
       "position": [
         -1.100001,
-        -6.691649,
+        -7.641857,
         0.05
       ],
       "self_collision": false,
       "source_world_position": [
         1.1,
-        6.691649,
+        7.641857,
         0.05
       ],
       "weight": 80.0
@@ -15702,14 +15954,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -2.199999,
-        12.028843,
-        0.151554
+        13.642974,
+        0.64446
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        -12.028843,
-        0.151554
+        -13.642974,
+        0.64446
       ],
       "weight": 80.0
     },
@@ -15721,14 +15973,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -2.199999,
-        9.265574,
-        0.728446
+        10.67054,
+        0.203634
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        -9.265574,
-        0.728446
+        -10.67054,
+        0.203634
       ],
       "weight": 80.0
     },
@@ -15740,14 +15992,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -2.200001,
-        -5.283652,
-        9.128446
+        -5.965964,
+        2.541742
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        5.283652,
-        9.128446
+        5.965964,
+        2.541742
       ],
       "weight": 80.0
     },
@@ -15759,13 +16011,13 @@
       "node_material": "|NM_METAL",
       "position": [
         -2.200001,
-        -6.691649,
+        -7.641857,
         0.05
       ],
       "self_collision": false,
       "source_world_position": [
         2.2,
-        6.691649,
+        7.641857,
         0.05
       ],
       "weight": 80.0
@@ -15778,14 +16030,14 @@
       "node_material": "|NM_METAL",
       "position": [
         2.400001,
-        9.685575,
-        1.338446
+        11.09054,
+        0.813634
       ],
       "self_collision": true,
       "source_world_position": [
         -2.4,
-        -9.685575,
-        1.338446
+        -11.09054,
+        0.813634
       ],
       "weight": 180.0
     },
@@ -15797,14 +16049,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -2.399999,
-        9.685575,
-        1.338446
+        11.09054,
+        0.813634
       ],
       "self_collision": true,
       "source_world_position": [
         2.4,
-        -9.685575,
-        1.338446
+        -11.09054,
+        0.813634
       ],
       "weight": 180.0
     },
@@ -15816,14 +16068,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -2.399999,
-        8.845574,
-        1.338446
+        10.25054,
+        0.813634
       ],
       "self_collision": true,
       "source_world_position": [
         2.4,
-        -8.845574,
-        1.338446
+        -10.25054,
+        0.813634
       ],
       "weight": 180.0
     },
@@ -15835,14 +16087,14 @@
       "node_material": "|NM_METAL",
       "position": [
         2.400001,
-        8.845574,
-        1.338446
+        10.25054,
+        0.813634
       ],
       "self_collision": true,
       "source_world_position": [
         -2.4,
-        -8.845574,
-        1.338446
+        -10.25054,
+        0.813634
       ],
       "weight": 180.0
     },
@@ -15853,15 +16105,15 @@
       "id": "ericrolph_catapult_seesaw_fling_stop_sw",
       "node_material": "|NM_METAL",
       "position": [
-        2.4,
-        -6.271649,
-        2.502238
+        2.399999,
+        -7.221857,
+        0.11668
       ],
       "self_collision": true,
       "source_world_position": [
         -2.4,
-        6.271649,
-        2.502238
+        7.221857,
+        0.11668
       ],
       "weight": 180.0
     },
@@ -15873,14 +16125,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -2.400001,
-        -6.271649,
-        2.502238
+        -7.221857,
+        0.11668
       ],
       "self_collision": true,
       "source_world_position": [
         2.4,
-        6.271649,
-        2.502238
+        7.221857,
+        0.11668
       ],
       "weight": 180.0
     },
@@ -15892,14 +16144,14 @@
       "node_material": "|NM_METAL",
       "position": [
         -2.400001,
-        -7.111649,
-        2.502238
+        -8.061857,
+        0.11668
       ],
       "self_collision": true,
       "source_world_position": [
         2.4,
-        7.111649,
-        2.502238
+        8.061857,
+        0.11668
       ],
       "weight": 180.0
     },
@@ -15911,14 +16163,14 @@
       "node_material": "|NM_METAL",
       "position": [
         2.399999,
-        -7.111649,
-        2.502238
+        -8.061857,
+        0.11668
       ],
       "self_collision": true,
       "source_world_position": [
         -2.4,
-        7.111649,
-        2.502238
+        8.061857,
+        0.11668
       ],
       "weight": 180.0
     }
@@ -16262,10 +16514,10 @@
       "path": "vehicles/ericrolph_catapult_seesaw/ericrolph_catapult_seesaw_cable.dae",
       "pivot_world": [
         0.0,
-        5.108653,
-        20.541553
+        5.917253,
+        13.998336
       ],
-      "sha256": "68df5aaa714ffb78c5c0e746d183c272c5e66a2dfa1e8c01f4c66625832b9199",
+      "sha256": "dff8020a0f2c208786652a9c4192ecbedf1694e4272187eeb3297dfe53f24903",
       "size": 12744
     },
     {
@@ -16278,11 +16530,11 @@
       "path": "vehicles/ericrolph_catapult_seesaw/ericrolph_catapult_seesaw_winch.dae",
       "pivot_world": [
         2.8,
-        5.108653,
+        5.917253,
         1.85
       ],
-      "sha256": "9d10bfd6f87d5152e073b012160274f7a7a5d0c64d9e71e91dddc9d898496a46",
-      "size": 1849061
+      "sha256": "c827facc09d6fa1e6a79db45df0920ef3c33611510c47b0981415e970011ac4e",
+      "size": 1849081
     }
   ],
   "rails": {
@@ -19035,13 +19287,13 @@
         "bounds": {
           "max": [
             2.45,
-            11.772387,
-            12.402578
+            13.390657,
+            4.983418
           ],
           "min": [
             -2.45,
-            -7.51486,
-            0.104167
+            -8.676624,
+            0.410407
           ]
         },
         "materials": [
@@ -19058,14 +19310,14 @@
       "ericrolph_catapult_seesaw_visual": {
         "bounds": {
           "max": [
-            3.424999,
-            17.900196,
+            3.425,
+            17.900583,
             23.35
           ],
           "min": [
             -3.425001,
-            -6.558653,
-            -0.323663
+            -7.367254,
+            -0.215791
           ]
         },
         "materials": [
@@ -19082,19 +19334,18 @@
       "ericrolph_catapult_seesaw_weight_mesh": {
         "bounds": {
           "max": [
-            2.26,
-            -3.308652,
-            20.556553
+            2.2,
+            -4.117253,
+            14.013335
           ],
           "min": [
-            -2.26,
-            -6.908653,
-            16.151554
+            -2.200001,
+            -7.717253,
+            9.608335
           ]
         },
         "materials": [
           "ericrolph_catapult_seesaw_cast_iron",
-          "ericrolph_catapult_seesaw_impact_rubber",
           "ericrolph_catapult_seesaw_paint_white",
           "ericrolph_catapult_seesaw_plate_legend",
           "ericrolph_catapult_seesaw_steel"
@@ -19102,7 +19353,7 @@
       }
     },
     "path": "vehicles/ericrolph_catapult_seesaw/ericrolph_catapult_seesaw_physics_v3.dae",
-    "sha256": "2aa642a97302a488ff6c7b235f2720b5925717f4a2dfb9395fa0dc289490eebf",
-    "size": 10338911
+    "sha256": "e84e0dda83810863340c859b087c507ebb7cf9eef0db759f7b8cda95697c393b",
+    "size": 10552362
   }
 }

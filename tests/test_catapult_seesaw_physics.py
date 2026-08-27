@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import math
 import re
 import zipfile
 from pathlib import Path
@@ -226,10 +227,21 @@ def test_asymmetric_lever_authors_six_metre_drop_and_departure_geometry() -> Non
     assert spec.PLANK_CAR_ARM / spec.PLANK_WEIGHT_ARM >= 1.5
     assert 0.0 < spec.GANTRY_Y < spec.PLANK_WEIGHT_ARM
 
-    # A -32 degree plank is moving tangent to its circular arc, so the car
-    # end's instantaneous departure vector is 58 degrees above horizontal.
+    # v4 (play-test 2026-08-25): the plank PARKS at a drivable grade that
+    # matches the entry ramp, and departure elevation comes from where the
+    # sweep STOPS, not from where the car sits.  At the -16 degree stop the
+    # car end is moving tangent to its arc, 74 degrees above horizontal.
     departure_angle_deg = 90.0 - abs(float(spec.FLING_STOP_ANGLE_DEG))
-    assert 50.0 <= departure_angle_deg <= 65.0
+    assert 70.0 <= departure_angle_deg <= 80.0
+    assert 0.0 < spec.REST_ANGLE_DEG <= 10.0
+
+    # The stop is bounded by geometry, not taste: the weight arm swings
+    # BELOW the pivot, so the fling may not drive the weight end into the
+    # ground.  |stop| <= asin((PIVOT_Z - clearance) / PLANK_WEIGHT_ARM).
+    weight_tip_drop = spec.PLANK_WEIGHT_ARM * math.sin(
+        math.radians(abs(float(spec.FLING_STOP_ANGLE_DEG)))
+    )
+    assert weight_tip_drop <= spec.PIVOT_Z - 0.2
 
 
 def test_five_collinear_hinge_pins_are_preserved_in_handoff_and_jbeam() -> None:
@@ -251,9 +263,16 @@ def test_direct_full_width_impact_bank_matches_the_structural_plank_rib() -> Non
     handoff, part = _load_artifacts()
     impact_spec = handoff["beam_specs"]["impact_transfer"]
     assert impact_spec["beamType"] == "|BOUNDED"
-    assert impact_spec["beamLimitSpring"] == pytest.approx(1_000_000.0)
-    assert impact_spec["beamLimitDamp"] == pytest.approx(12_000.0)
-    assert impact_spec["beamLimitDampRebound"] == pytest.approx(30_000.0)
+    # 1.0e6 x5 = 5 MN/m of contact let the 9,070 kg tup sink 361 mm into a
+    # 250 mm mat (it ended up inside the deck) and re-strike at zeta 0.19;
+    # contact was 75% of the load path's series compliance, so stiffening
+    # the truss could never fix it.  k >= mu*v^2/x^2 with mu 5,212 kg and
+    # v 10.62 m/s gives 9.2e7 for an 80 mm strike, i.e. 18.4 MN/m per beam
+    # across the five-beam bank, damped inside the 80 kg nodes' stability
+    # cap.  The authored numbers live in create_catapult_seesaw.py.
+    assert impact_spec["beamLimitSpring"] == pytest.approx(18_400_000.0)
+    assert impact_spec["beamLimitDamp"] == pytest.approx(194_000.0)
+    assert impact_spec["beamLimitDampRebound"] == pytest.approx(194_000.0)
 
     expected_pairs = {
         frozenset(
@@ -266,8 +285,12 @@ def test_direct_full_width_impact_bank_matches_the_structural_plank_rib() -> Non
     }
     impact_beams = [beam for beam in handoff["beams"] if beam["spec"] == "impact_transfer"]
     assert {frozenset(beam["nodes"]) for beam in impact_beams} == expected_pairs
+    # spawned_length - activation_length from the generator: the striker
+    # parks 5.75 m of beam length above its 80 mm working stroke at the v4
+    # 8-degree rest pose.  Pinned so a geometry change that silently moves
+    # the strike gap cannot ship unnoticed.
     assert all(
-        float(beam["extra"]["shortBoundRange"]) == pytest.approx(5.70553778)
+        float(beam["extra"]["shortBoundRange"]) == pytest.approx(5.74678075)
         for beam in impact_beams
     )
 

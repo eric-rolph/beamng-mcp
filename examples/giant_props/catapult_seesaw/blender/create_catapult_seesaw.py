@@ -51,6 +51,9 @@ PLANK_LENGTH = spec.PLANK_LENGTH
 PLANK_CENTER_Y = spec.PLANK_CENTER_Y
 HW = spec.PLANK_HALF_WIDTH
 THICK = spec.PLANK_THICKNESS
+# Bottom flange of the red under-stringers, relative to the plank
+# centreline: box centred at PIVOT_Z - 0.295 with half-height 0.12.
+STRINGER_BOTTOM_OFFSET = -0.415
 PIVOT_Z = spec.PIVOT_Z
 REST = math.radians(spec.REST_ANGLE_DEG)
 FLING_STOP = math.radians(spec.FLING_STOP_ANGLE_DEG)
@@ -1598,7 +1601,9 @@ def build_parts(materials) -> dict[str, dict[str, object]]:
                     vertices=6,
                 )
             )
-    # Red under-stringers with cross blocking.
+    # Red under-stringers with cross blocking.  Their bottom flange is the
+    # plank cage's LOWER CHORD (see STRINGER_BOTTOM_OFFSET), so this
+    # geometry is structural, not decoration.
     for tag, sx in (("w", -1.25), ("e", 1.25)):
         plank_objects.append(
             bk.add_box(
@@ -1792,9 +1797,14 @@ def build_parts(materials) -> dict[str, dict[str, object]]:
     # 2026-08-13); the faces are only 11 degrees off axis-aligned, so
     # dominant-axis projection is clean.
     bk.add_metric_box_uvs(body, meters_per_tile=(1.7, 1.7))
-    striker_shoe_height = 0.08
-    striker_body_height = spec.WEIGHT_STRIKER_DEPTH - striker_shoe_height
+    # The spreader splits into a plinth-width boss and a full-width strike
+    # bar; the rubber shoe is gone entirely (a 10-ton cast-iron drop weight
+    # does not wear one, and it read as a black lip wider than the casting).
+    striker_body_height = spec.WEIGHT_STRIKER_DEPTH
+    striker_bar_height = 0.26
+    striker_boss_height = striker_body_height - striker_bar_height
     body_bottom_z = wz - spec.WEIGHT_BOTTOM_OFFSET
+    striker_bar_center_z = body_bottom_z - striker_body_height + striker_bar_height / 2.0
     weight_objects = [
         body,
         bk.add_box(
@@ -1805,27 +1815,34 @@ def build_parts(materials) -> dict[str, dict[str, object]]:
             bevel=0.03,
             metric_uv=(1.4, 1.4),
         ),
+        # A CAST SPREADER, NOT A SLAB (play-test 2026-08-25: "the added
+        # block circled in green is strange").
+        #
+        # The five strike nodes have to stay at the full 2*HW, because they
+        # align one-to-one with the plank's heavy impact ribs and any
+        # narrower span would either miss the outer ribs or feed them
+        # diagonally.  So the PHYSICS keeps its 4.4 m span - what changes is
+        # that the visual stops being a 4.4 m plate bolted under a 2.55 m
+        # plinth (0.925 m of unsupported overhang per side, which is exactly
+        # what read as "strange") and becomes the shape a real full-width
+        # spreader actually is: a boss the width of the plinth it grows out
+        # of, a narrow strike bar at the bottom, and cast webs flaring
+        # between them.  Same span, same load path, integral silhouette.
         bk.add_box(
-            f"{MOD_ID}_weight_striker",
-            (0.0, GY, body_bottom_z - striker_body_height / 2.0),
-            (2 * HW, 0.70, striker_body_height),
+            f"{MOD_ID}_weight_striker_boss",
+            (0.0, GY, body_bottom_z - striker_boss_height / 2.0),
+            (2.55, 1.55, striker_boss_height),
             iron,
             bevel=0.04,
             metric_uv=(1.0, 1.0),
         ),
         bk.add_box(
-            f"{MOD_ID}_weight_striker_shoe",
-            (
-                0.0,
-                GY,
-                body_bottom_z
-                - striker_body_height
-                - striker_shoe_height / 2.0,
-            ),
-            (2 * HW + 0.12, 0.82, striker_shoe_height),
-            impact_rubber,
-            bevel=0.02,
-            metric_uv=(0.7, 0.7),
+            f"{MOD_ID}_weight_striker",
+            (0.0, GY, striker_bar_center_z),
+            (2 * HW, 1.05, striker_bar_height),
+            iron,
+            bevel=0.03,
+            metric_uv=(1.0, 1.0),
         ),
         bk.add_box(
             f"{MOD_ID}_weight_cap",
@@ -1997,11 +2014,24 @@ def build_cage() -> bk.CageBuilder:
     cage = bk.CageBuilder(MOD_ID)
     cage.define_beam_spec(
         "plank_rigid",
-        # The 100-node deck is much denser than the stock tilt board; 5 MN/m
-        # crosses BeamNG's stable local-mode limit here.  Three MN/m is the
-        # strongest cold-start-stable value for this topology.
-        beamSpring=3000000.0,
-        beamDamp=1200.0,
+        # STIFFNESS IS CAPPED BY NODE MASS, NOT BY TASTE (play-test
+        # 2026-08-25: "it weirdly flexes like it's made of rubber").
+        #
+        # BeamNG integrates explicitly at dt = 1/2000 s, so a node stays
+        # stable while the TOTAL spring meeting it satisfies roughly
+        # K <= 4m/dt^2 = 1.6e7 * m.  At the old 7 kg deck node that ceiling
+        # is 1.1e8 N/m, and an interior node carries ~13 beams - which is
+        # why 5 MN/m (6.5e7, ratio 0.58) went unstable and the previous
+        # build retreated to 3 MN/m.  The cap moves with MASS.
+        #
+        # A 22 x 4.4 x 0.35 m timber deck is ~34 m^3 of wood: north of 20
+        # tonnes in reality.  The old 7 kg node made the lever absurdly
+        # light AND pinned the stiffness ceiling.  At 40 kg/node the deck
+        # weighs a still-conservative ~3.8 t and the ceiling rises 5.7x, so
+        # 12 MN/m lands at ratio 0.24 - four times stiffer than v3 while
+        # comfortably SAFER than the value that shipped.
+        beamSpring=12000000.0,
+        beamDamp=2400.0,
         beamDeform="FLT_MAX",
         beamStrength="FLT_MAX",
     )
@@ -2035,13 +2065,16 @@ def build_cage() -> bk.CageBuilder:
         beamType="|BOUNDED",
         beamLongBound=20.0,
         beamShortBound=20.0,
-        beamLimitSpring=500000.0,
+        # 5.0e5 x5 needed 551 mm of overtravel and handed 47% of the
+        # energy back (restitution 0.69), so the lever bounced off its own
+        # stop for seconds.  4.0e6 brings that to 195 mm and 6%.
+        beamLimitSpring=4000000.0,
         # A one-metre progressive stroke absorbs the lever's remaining
         # energy without the sharp near-rigid kick of the old 4 MN/m,
         # 25 cm stop. Damping is resolved at each 7 kg plank node, so keep
         # each dashpot below the local explicit-solver stability limit.
-        beamLimitDamp=8000.0,
-        beamLimitDampRebound=10000.0,
+        beamLimitDamp=80000.0,
+        beamLimitDampRebound=80000.0,
         boundZone=0.20,
     )
     cage.define_beam_spec(
@@ -2067,11 +2100,19 @@ def build_cage() -> bk.CageBuilder:
         # into useful lever momentum. Their 25 cm stroke matches the visible
         # rubber mat; the separate one-way overhead
         # snubbers arrest the casting's physical rebound after the impulse.
-        beamLimitSpring=1000000.0,
-        beamLimitDamp=12000.0,
-        beamLimitDampRebound=30000.0,
+        # 1.0e6 x5 = 5 MN/m let the 9,070 kg tup sink 361 mm into a 250 mm
+        # mat - it ended up INSIDE the deck, and at zeta 0.19 it bounced
+        # and re-struck.  Contact was 75% of the whole load path's series
+        # compliance, so stiffening the truss could never fix the feel.
+        # k >= mu*v^2/x^2 with mu 5,212 kg and v 10.62 m/s gives 9.2e7 for
+        # an 80 mm strike.  Stability is a non-issue: these land on 80 kg
+        # nodes whose 4m/dt^2 cap is 1.28e9, and omega*dt only moves
+        # 0.707 -> 0.744.
+        beamLimitSpring=18400000.0,
+        beamLimitDamp=194000.0,
+        beamLimitDampRebound=194000.0,
         dampCutoffHz=250.0,
-        boundZone=0.08,
+        boundZone=0.05,
     )
     cage.define_beam_spec(
         "rebound_snubber",
@@ -2114,7 +2155,17 @@ def build_cage() -> bk.CageBuilder:
         8.0,
         WEIGHT_END_Y,
     )
-    layers = (("bottom", -THICK / 2), ("top", THICK / 2))
+    # TRUSS DEPTH IS THE FREE WIN.  Bending stiffness scales with the
+    # SQUARE of chord separation at zero solver cost, and v3 separated its
+    # two chords by THICK (0.35 m) over a 19.2 m span - a 55:1 slenderness
+    # where real steel trusses run 10:1 to 20:1.  The plank already carries
+    # visible red under-stringers whose bottom flange sits at
+    # STRINGER_BOTTOM_OFFSET below the deck centreline, so putting the
+    # lower chord THERE is both stiffer and more honest than floating it
+    # inside the boards: depth 0.35 -> 0.59 m is 2.8x the bending
+    # stiffness, and the nodes now coincide with real geometry the
+    # flexbody can bind to.
+    layers = (("bottom", STRINGER_BOTTOM_OFFSET), ("top", THICK / 2))
     plank: dict[tuple[int, int, str], str] = {}
     for j, y in enumerate(stations):
         for i, x in enumerate(xs):
@@ -2132,7 +2183,7 @@ def build_cage() -> bk.CageBuilder:
                     weight=(
                         80.0
                         if y == IMPACT_Y and layer == "bottom"
-                        else 7.0
+                        else 40.0
                     ),
                     friction=1.05,
                     node_material="|NM_WOOD",
@@ -2229,7 +2280,11 @@ def build_cage() -> bk.CageBuilder:
             fixed=False,
             collision=True,
             self_collision=False,
-            weight=5.0,
+            # 25 kg, not 5: these hang off the same 12 MN/m plank beams, and
+            # at 5 kg that put them at omega*dt = 1.90 - past the ~1.58 that
+            # was measured UNSTABLE when v3 tried 5 MN/m.  25 kg brings them
+            # to 0.85, safely under the 1.23 v3 actually shipped and ran on.
+            weight=25.0,
             friction=1.1,
             node_material="|NM_RUBBER",
             group="plank",
@@ -2279,11 +2334,41 @@ def build_cage() -> bk.CageBuilder:
             (x, 0.0, PIVOT_Z),
             fixed=True,
             collision=False,
-            weight=250.0,
-            group="plank",
+            # NOT group="plank".  The plank flexbody is skinned to the
+            # `plank` group, so putting five fixed:true nodes in it welded
+            # the visible mesh to the world right at the pivot while the
+            # rest of the deck swung - THAT is the crease in the play-test
+            # photo, not beam softness.  Static FEA of this same network
+            # under the landed 9,070 kg block sags 0.55 degrees, which is
+            # invisible; the photographed kink is 5-8 degrees.  A group no
+            # flexbody names keeps the pins in the physics and out of the
+            # skin.  (The 250 kg was also dead weight - fixed nodes are
+            # never integrated, so 1,250 kg was simply discarded.)
+            weight=25.0,
+            group="hinge_pins",
         )
+        # NON-COLLINEAR SPOKES.  The two original stubs per rail ran
+        # bottom->pin and top->pin, which are exactly antiparallel and
+        # collinear with the pin, so they supplied ONE independent
+        # constraint direction instead of two and left the plank with FOUR
+        # rigid-body zero modes: pitch (wanted) plus lateral slide, yaw,
+        # and translation along its own length.  The free axial direction
+        # is the plank axis itself, so gravity drove ~0.8 m of unresisted
+        # slide off the trunnion every run - the "strange wobble".
+        #
+        # Every pin lies ON the rotation axis, so a beam from a pin to ANY
+        # plank node keeps its length under rotation about that axis:
+        # pitch stays exactly free no matter how many spokes are added.
+        # Fanning them fore/aft and side-to-side is therefore free.
         for layer, _ in layers:
             cage.add_beam(hinge_pin[i], plank[(i, pivot_station, layer)], "hinge")
+            for dj in (-1, 1):
+                cage.add_beam(
+                    hinge_pin[i], plank[(i, pivot_station + dj, layer)], "hinge")
+            for di in (-1, 1):
+                if 0 <= i + di < len(xs):
+                    cage.add_beam(
+                        hinge_pin[i], plank[(i + di, pivot_station, layer)], "hinge")
         if i > 0:
             cage.add_beam(hinge_pin[i - 1], hinge_pin[i], "hinge")
     for i in range(len(xs)):

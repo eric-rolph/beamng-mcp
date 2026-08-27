@@ -41,9 +41,40 @@ PLANK_CENTER_Y = (PLANK_CAR_END_Y + PLANK_WEIGHT_END_Y) / 2.0
 # large SUVs wandered off the collision edge (report 2026-07-23).
 PLANK_HALF_WIDTH = 2.2
 PLANK_THICKNESS = 0.35
-PIVOT_Z = 7.0
-REST_ANGLE_DEG = 30.0  # car end down; the impact normal launches at about 60 degrees
-FLING_STOP_ANGLE_DEG = -32.0
+# PIVOT HEIGHT, REST ANGLE AND THE RAMP ARE ONE SYSTEM (play-test
+# 2026-08-25: "the ramp angle is severe").  v3 raised the pivot to 7.0 m to
+# get its drop height, and then had to rake the plank to 30 degrees just to
+# bring the car end back down to a boardable height.  Shallow rest + high
+# pivot is the worst of both: at 8 degrees and 7.0 m the car tip sat 7.77 m
+# up, the auto-derived ramp became a 50.2 degree wall, and there was still a
+# 2.48 m step from ramp top to plank tip.
+#
+# The pre-v3 build that people liked pivoted at 1.775 m.  2.6 m keeps some
+# of v3's drop while putting the car tip at 0.72 m - a 9.3 degree ramp, which
+# is the gentle approach this thing had before.  The counterweight tower is
+# unaffected (GANTRY_TOP_Z is absolute), so the block actually falls FURTHER.
+PIVOT_Z = 2.6
+# THE PARKED POSE IS NOT THE LAUNCH POSE (play-test 2026-08-25: "the angle
+# is insanely steep").  v3 bought launch elevation by tilting the PARKED
+# plank to 30 degrees - a 58% grade the car can barely hold station on, and
+# which reads as a ski jump rather than a seesaw.  Departure elevation comes
+# from the plank's angle at the moment the car LEAVES, not from where it
+# sits, so the sweep can stay large while the parked pose returns to
+# something drivable: park shallow, stop steeply nose-up.
+#
+#   v3:   +30.0 rest -> -32.0 stop   =  62 deg sweep, undrivable parked pose
+#   now:  + 8.0 rest -> -45.0 stop   =  53 deg sweep, STEEPER departure
+#
+# 8 degrees also matches the entry ramp's own grade, so the car drives on
+# without a step at the joint.
+REST_ANGLE_DEG = 8.0  # car end down, drivable; departure comes from the sweep
+# Bounded by ground clearance, not taste: the weight arm swings BELOW the
+# pivot, so |stop| <= asin((PIVOT_Z - clearance) / PLANK_WEIGHT_ARM).
+# At pivot 2.6 and an 8.5 m weight arm that is about 16 degrees.  Departure
+# elevation is 90 - |stop|, so this still leaves a steep 74 degree throw;
+# what it costs is sweep, and therefore tip speed.  Digging an Acme pit under
+# the weight end is what buys the sweep back - see the note above.
+FLING_STOP_ANGLE_DEG = -16.0
 # Positions on the moving plank are local to its unrotated centerline.  Static
 # scenery and trigger coordinates are authored in world space.  Keeping those
 # frames explicit prevents the 30-degree rest transform from moving the impact
@@ -62,19 +93,14 @@ def _plank_surface_world(local_y: float, angle_rad: float) -> tuple[float, float
     normal_offset = PLANK_THICKNESS / 2
     return (
         local_y * math.cos(angle_rad) - normal_offset * math.sin(angle_rad),
-        PIVOT_Z
-        + local_y * math.sin(angle_rad)
-        + normal_offset * math.cos(angle_rad),
+        PIVOT_Z + local_y * math.sin(angle_rad) + normal_offset * math.cos(angle_rad),
     )
 
 
-GANTRY_Y, SURFACE_REST_AT_WEIGHT = _plank_surface_world(
-    PLANK_IMPACT_STATION_Y, _REST_ANGLE_RAD
-)
-IMPACT_RECEIVER_WORLD_Y = (
-    PLANK_IMPACT_STATION_Y * math.cos(_REST_ANGLE_RAD)
-    - IMPACT_RECEIVER_NORMAL_OFFSET * math.sin(_REST_ANGLE_RAD)
-)
+GANTRY_Y, SURFACE_REST_AT_WEIGHT = _plank_surface_world(PLANK_IMPACT_STATION_Y, _REST_ANGLE_RAD)
+IMPACT_RECEIVER_WORLD_Y = PLANK_IMPACT_STATION_Y * math.cos(
+    _REST_ANGLE_RAD
+) - IMPACT_RECEIVER_NORMAL_OFFSET * math.sin(_REST_ANGLE_RAD)
 IMPACT_RECEIVER_WORLD_Z = (
     PIVOT_Z
     + PLANK_IMPACT_STATION_Y * math.sin(_REST_ANGLE_RAD)
@@ -89,9 +115,7 @@ IMPACT_CONTACT_LENGTH = math.hypot(
 IMPACT_RECEIVER_RAW_REST_PHASE_DEG = math.degrees(
     math.atan2(IMPACT_RECEIVER_WORLD_Z - PIVOT_Z, -IMPACT_RECEIVER_WORLD_Y)
 )
-PARK_STATION_Y, _PARK_SURFACE_Z = _plank_surface_world(
-    PLANK_PARK_STATION_Y, _REST_ANGLE_RAD
-)
+PARK_STATION_Y, _PARK_SURFACE_Z = _plank_surface_world(PLANK_PARK_STATION_Y, _REST_ANGLE_RAD)
 GANTRY_TOP_Z = 21.2
 # 4.4 m run to the low plank tip: about a 9 degree entry ramp.
 RAMP_GROUND_Y = -17.9
@@ -108,10 +132,7 @@ EARTH_GRAVITY = 9.81
 
 
 WEIGHT_REST_CENTER_Z = (
-    SURFACE_REST_AT_WEIGHT
-    + WEIGHT_BOTTOM_OFFSET
-    + WEIGHT_STRIKER_DEPTH
-    + DESIGN_FREE_FALL_DISTANCE
+    SURFACE_REST_AT_WEIGHT + WEIGHT_BOTTOM_OFFSET + WEIGHT_STRIKER_DEPTH + DESIGN_FREE_FALL_DISTANCE
 )
 WEIGHT_BODY_BOTTOM_REST_Z = WEIGHT_REST_CENTER_Z - WEIGHT_BOTTOM_OFFSET
 WEIGHT_BOTTOM_REST_Z = WEIGHT_BODY_BOTTOM_REST_Z - WEIGHT_STRIKER_DEPTH
@@ -324,8 +345,18 @@ TRIGGERS = {
         # then enforced properly in the runtime by measuring the
         # vehicle's own position against park_radius, which no bounding
         # box can distort.
+        # ...and the box must FOLLOW THE DECK IN Z.  This centre was a
+        # hardcoded 2.6, which happened to bracket the car while the plank
+        # parked at 30 degrees and put the deck near the ground.  The
+        # moment the rest angle went shallow the deck rose to 5.67 m, the
+        # box still spanned 0.2..5.0, and the car sat entirely ABOVE the
+        # trigger - so parking on the X armed nothing (play-test
+        # 2026-08-25: "vehicle on the X of the planks don't trigger the
+        # weight to fall").  _PARK_SURFACE_Z was already computed right
+        # here and simply never used.  Derive it, and the zone tracks the
+        # deck at any rest angle.
         "mode": "Overlaps",
-        "center": [0.0, PARK_STATION_Y, 2.6],
+        "center": [0.0, PARK_STATION_Y, _PARK_SURFACE_Z + 1.6],
         "dimensions": [5.4, 7.4, 4.8],
     },
 }
@@ -344,9 +375,7 @@ WEIGHT_NODE_NAMES = [
     f"{MOD_ID}_weight_{ix}_{iy}_{iz}" for iz in range(3) for ix in range(5) for iy in range(5)
 ]
 IMPACT_STRIKER_NODE_NAMES = [f"{MOD_ID}_weight_striker_{index}" for index in range(5)]
-IMPACT_RECEIVER_NODE_NAMES = [
-    f"{MOD_ID}_plank_{index}_6_bottom" for index in range(5)
-]
+IMPACT_RECEIVER_NODE_NAMES = [f"{MOD_ID}_plank_{index}_6_bottom" for index in range(5)]
 # Impact-rib phase is measured around the physical centre hinge. There is no
 # auxiliary receiver linkage or second fixed pivot in the force path.
 IMPACT_PIVOT_NODE_NAMES = [f"{MOD_ID}_plank_hinge_2" for _ in range(5)]
