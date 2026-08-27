@@ -36,6 +36,21 @@ EXAMPLE_ROOT = REPO_ROOT / "examples" / "giant_props" / "colossus_tire"
 TEXTURES = EXAMPLE_ROOT / "textures"
 
 
+@pytest.fixture(autouse=True)
+def _require_generated_textures():
+    """Every test here measures the generated texture set, which is
+    gitignored build output; on a fresh checkout the failures arrive as
+    zero-relief reads and "only 0 textures compared" AssertionErrors that
+    the conftest artifact hook cannot classify. One gate, honestly, for the
+    whole module - including the seam test, which with zero files on disk
+    would otherwise pass vacuously."""
+
+    if not TEXTURES.is_dir():
+        pytest.skip(
+            "generated texture set absent (gitignored); run build.py colossus_tire textures"
+        )
+
+
 @pytest.fixture(scope="module")
 def spec():
     path = EXAMPLE_ROOT / "spec.py"
