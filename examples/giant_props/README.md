@@ -223,6 +223,24 @@ from `lua_kit.py`. Per-mod live play-testing (soft-body tuning for the
 castle/bridge, pendulum amplitude, ride controller feel) is still expected
 before any public upload; see AGENTS.md for the sentinel-profile rules.
 
+## Local play deployment
+
+```powershell
+# Report the REAL play profile (%LOCALAPPDATA%\BeamNG\BeamNG.drive\current\mods)
+# against every mod's release lock, shadow-scan the mods tree by zip CONTENT,
+# and diff the unpacked MCP bridge code. Exits nonzero on any finding.
+.\.venv\Scripts\python.exe .\examples\giant_props\deploy_local.py
+
+# Copy exactly what is stale, re-hash each copy against its lock. Refuses to
+# run while BeamNG is open or while a namespace conflict stands.
+.\.venv\Scripts\python.exe .\examples\giant_props\deploy_local.py --deploy
+```
+
+The play profile is not the sentinel test profile: live gates keep installing
+through the service into the isolated profile, and nothing test-shaped ever
+goes to the real one. The full rules are in AGENTS.md under "Local play
+deployment".
+
 ## Physics notes
 
 - Static contraptions are all-fixed cages (Cannon Car Wash values: 15 MN/m

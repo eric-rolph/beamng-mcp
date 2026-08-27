@@ -438,6 +438,33 @@ reversed — so every substring check on the mod id missed it while BeamNG mount
 `mods/**/*.zip` for members under `vehicles/<mod_id>/` or `lua/ge/extensions/<mod_id>/` instead
 (`tests/test_giant_props_slope_live.py::_namespace_conflicts`), and fail closed.
 
+### Local play deployment: the real profile is synced by lock, not by memory
+
+The end state for every finished mod is a byte-verified copy of its locked dist ZIP at the REAL
+profile's `mods/` root (`%LOCALAPPDATA%\BeamNG\BeamNG.drive\current\mods`) under its stable
+filename. That profile is where the player actually loads mods, and it drifts silently: on
+2026-08-26 three of twenty-four deployed zips (colossus_tire, high_five, hot_potato — exactly the
+most recently iterated mods) were one or more serials behind their locks, and the unpacked MCP
+bridge had been missing the `enabled -> isEnabled` engine-field fix since Cannon Car Wash v1.8
+shipped it. Nothing failed loudly; the player was simply testing last week's build.
+
+`examples/giant_props/deploy_local.py` is the only supported way to close that gap. Bare
+invocation reports per-mod current/stale against each release lock (giant props:
+`dist/ericrolph_<key>.lock.json`; cannon car wash: `repository/submission.json`'s
+`release_artifact.sha256`), runs the content-based namespace shadow scan across every zip below
+`mods/`, and diffs the unpacked bridge code against `src/beamng_mcp/assets/beamng_mod/`; it exits
+nonzero on any finding. `--deploy` copies exactly what is stale and re-hashes every copy against
+the same lock, and it refuses to run while a BeamNG process is alive or while a shadow conflict
+stands. The prohibition three paragraphs up is about TESTS and fixtures; shipping the locked
+release for play is what the real profile is for.
+
+Rules the tool enforces and hand edits must also honor: a dist that disagrees with its own lock is
+a half-finished re-cut — finish it, never ship it; `settings/beamng_mcp.json` in the unpacked
+bridge is machine-local (auth token, port) and is never compared or written; `db.json`, `repo/`,
+`multiplayer/`, and third-party zips (`simhubextras.zip`) are never touched; and
+`cannon_car_wash_lowvram_ericrolph.zip` is an alternate build of the same namespace, so it must
+never sit at the profile root beside the main zip — installing one means removing the other.
+
 ### Sloped-terrain gating
 
 A sloped SPOT does not give you a tilted PROP, so measure the attitude, never assume it. Spawning
@@ -658,7 +685,8 @@ rides the wall clock and every rebuild yields a new sha256. Re-staging `dist/rep
 serials against 24 days since 2026-08-01, so its `member_timestamp` now reads the build clock
 (`2026-08-25T05:09:30`) instead of a synthetic day. **`colossus_tire` is the second** — past serial 49
 after round 5's iteration burst, so its lock likewise cannot be verified by re-cutting from a
-clean checkout. Two practical consequences: a no-op rebuild of
+clean checkout. **`catapult_seesaw` is the third** — serial 83 at the v4 boardability re-cut, its
+lock's `member_timestamp` reading `2026-08-25T21:43:51`. Two practical consequences: a no-op rebuild of
 this mod no longer reproduces its sha256, so its lock cannot be verified by re-cutting; and anyone
 diffing two builds across a day boundary will see `member_timestamp` move for no content reason.
 That is the scheme working as named, not a defect — but it is the point at which hash-stability
