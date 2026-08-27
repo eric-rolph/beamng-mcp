@@ -377,19 +377,18 @@ def test_high_five_leads_a_moving_car_and_slaps_it(tmp_path: Path) -> None:
                 peak_z = max(peak_z, float(sample["z"]))
                 if ground_z is None:
                     ground_z = float(sample["z"])
-                if (arrival_offset is None
-                        and float(sample["z"]) > ground_z + 0.40
-                        and rel[1] > -20.0):
+                if (
+                    arrival_offset is None
+                    and float(sample["z"]) > ground_z + 0.40
+                    and rel[1] > -20.0
+                ):
                     # Back-solve the contact point from the climb, gravity
                     # included: z = vz t - 4.9 t^2, take the small root.
                     vz = max(speed * math.sin(math.radians(14.0)), 1.0)
                     climb = float(sample["z"]) - ground_z
                     disc = vz * vz - 4.0 * 4.9 * climb
-                    climb_t = (
-                        (vz - math.sqrt(disc)) / 9.8 if disc > 0 else climb / vz
-                    )
-                    arrival_offset = rel[1] - climb_t * speed * math.cos(
-                        math.radians(14.0))
+                    climb_t = (vz - math.sqrt(disc)) / 9.8 if disc > 0 else climb / vz
+                    arrival_offset = rel[1] - climb_t * speed * math.cos(math.radians(14.0))
                 # Approach speed is what it was doing while still short of
                 # the strike zone; peak is whatever the slap did to it.
                 if rel[1] < -12.0:
@@ -466,9 +465,7 @@ def test_high_five_leads_a_moving_car_and_slaps_it(tmp_path: Path) -> None:
             seconds_per_call = abs(y1 - y0) / mean_speed / (len(approach_samples) - 1)
 
     summary = {
-        "arrival_offset_m": (
-            round(arrival_offset, 2) if arrival_offset is not None else None
-        ),
+        "arrival_offset_m": (round(arrival_offset, 2) if arrival_offset is not None else None),
         "pad_start_authored": [round(c, 2) for c in pad_start_authored],
         "pad_peak_speed_mps": round(pad_peak_speed, 2),
         "seconds_per_step_call": (round(seconds_per_call, 4) if seconds_per_call else None),
@@ -486,9 +483,7 @@ def test_high_five_leads_a_moving_car_and_slaps_it(tmp_path: Path) -> None:
     # The parsed record stream outlives BeamNG's four-file log rotation,
     # which had already eaten the cited evidence by the time a reviewer
     # went looking for it.
-    (tmp_path / "runtime_records.json").write_text(
-        json.dumps(records, indent=1), encoding="utf-8"
-    )
+    (tmp_path / "runtime_records.json").write_text(json.dumps(records, indent=1), encoding="utf-8")
 
     for required in (
         "prop_registered",
@@ -519,8 +514,7 @@ def test_high_five_leads_a_moving_car_and_slaps_it(tmp_path: Path) -> None:
     # with the bias in place: -0.97 to -2.63 m (early, the car driving
     # into the palm), against +2.9 m late and diverging without it.
     assert arrival_offset is not None, {
-        "detail": "the strike was never localized; the offset gate did not "
-        "engage",
+        "detail": "the strike was never localized; the offset gate did not engage",
         **summary,
     }
     assert abs(arrival_offset) < 3.0, {

@@ -1516,7 +1516,7 @@ def test_the_boom_clears_the_slew_ring():
     ground-clearance gate already carries.
     """
 
-    ring_r = spec.SLEW_RING_R + 0.04          # teeth stand slightly proud
+    ring_r = spec.SLEW_RING_R + 0.04  # teeth stand slightly proud
     ring_top = spec.MAST_TOP_Z + spec.SLEW_RING_H
 
     hub = (0.0, spec.HUB_Z)
@@ -1524,7 +1524,6 @@ def test_the_boom_clears_the_slew_ring():
     elbow = (spec.ELBOW_R, spec.ELBOW_Z)
 
     def walk(start, end, depth_start, depth_end, samples=120):
-        run = math.hypot(end[0] - start[0], end[1] - start[1])
         pitch = math.atan2(start[1] - end[1], end[0] - start[0])
         for index in range(samples + 1):
             t = index / samples
@@ -1538,7 +1537,7 @@ def test_the_boom_clears_the_slew_ring():
 
     # Shoulder: wherever it stands over the ring, its belly must clear.
     worst = None
-    for r, z, depth, belly, inboard in walk(hub, knee, 1.35, 1.15):
+    for r, _z, _depth, belly, inboard in walk(hub, knee, 1.35, 1.15):
         if inboard <= ring_r or r <= ring_r:
             clearance = belly - ring_top
             if worst is None or clearance < worst:
@@ -1552,7 +1551,7 @@ def test_the_boom_clears_the_slew_ring():
     # Drop: inside the ring band's height it must stay outside its radius.
     ring_bottom = spec.MAST_TOP_Z
     intrusion = None
-    for r, z, depth, belly, inboard in walk(knee, elbow, 1.15, spec.BOOM_ELBOW_DEPTH):
+    for _r, z, _depth, _belly, inboard in walk(knee, elbow, 1.15, spec.BOOM_ELBOW_DEPTH):
         if ring_bottom - 0.5 <= z <= ring_top + 0.5:
             margin = inboard - ring_r
             if intrusion is None or margin < intrusion:
@@ -1586,7 +1585,7 @@ def test_the_boom_clears_the_slew_ring():
     # hub-to-elbow member through the same walk fails by metres, which is
     # the negative verification built in rather than trusted.
     straight_worst = None
-    for r, z, depth, belly, inboard in walk(hub, elbow, 2.05, 1.15):
+    for r, _z, _depth, belly, inboard in walk(hub, elbow, 2.05, 1.15):
         if inboard <= ring_r or r <= ring_r:
             clearance = belly - ring_top
             if straight_worst is None or clearance < straight_worst:

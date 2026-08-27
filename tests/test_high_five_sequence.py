@@ -616,8 +616,7 @@ def fresh_rig(yaw_deg=0.0):
         PACK_ROOT / MOD_KEY / "mod" / "lua" / "ge" / "extensions" / SPEC.MOD_ID / "runtime.lua"
     ).read_text(encoding="utf-8")
     module = lua.execute(runtime)
-    state.addVehicle(
-        PROP_ID, SPEC.MOD_ID, 0.0, 0.0, 0.0, 20.0, 30.0, 12.0, yaw_deg)
+    state.addVehicle(PROP_ID, SPEC.MOD_ID, 0.0, 0.0, 0.0, 20.0, 30.0, 12.0, yaw_deg)
     module.registerProp(PROP_ID)
     _ZONES[id(module)] = Zones(lua, state, module)
     return lua, state, module
@@ -954,9 +953,7 @@ def test_a_car_that_only_touches_the_pad_is_slapped(rig):
     # "You are standing ON it." used to fire on the same tick as the swing,
     # so setup and punchline landed inside one 0.28 s beat and were read
     # airborne. The beat is the fix; the immediacy is the requirement.
-    noticed = drive(
-        state, module, SUBJECT_ID, 3.0, until=lambda s: s.phase == "pad_alert"
-    )
+    noticed = drive(state, module, SUBJECT_ID, 3.0, until=lambda s: s.phase == "pad_alert")
     assert noticed is not None, (
         "a car sitting on the painted pad never got noticed; the affordance "
         "and the trigger are still different things"
@@ -965,13 +962,10 @@ def test_a_car_that_only_touches_the_pad_is_slapped(rig):
         f"the pad response took {noticed:.2f} s to start; the machine must "
         "react the moment a wheel is on the paint"
     )
-    swung = drive(
-        state, module, SUBJECT_ID, 2.0, until=lambda s: s.phase == "slapping"
-    )
+    swung = drive(state, module, SUBJECT_ID, 2.0, until=lambda s: s.phase == "slapping")
     assert swung is not None, "the pad alert never released into the swing"
     assert swung < SPEC.BEHAVIOR["pad_alert_seconds"] + 0.15, (
-        f"the pad beat held {swung:.2f} s past the alert; setup then "
-        "punchline, not a stall"
+        f"the pad beat held {swung:.2f} s past the alert; setup then punchline, not a stall"
     )
 
     drive(state, module, SUBJECT_ID, 2.0, until=lambda s: state.lastVelocity() is not None)
@@ -1076,19 +1070,13 @@ def test_the_slap_spins_the_car(rig):
         "zero angular velocity and sails flat like a parcel"
     )
     assert spin["id"] == SUBJECT_ID
-    assert spin["dt"] == pytest.approx(
-        SPEC.BEHAVIOR["slap_contact_seconds"], abs=1e-3
-    )
+    assert spin["dt"] == pytest.approx(SPEC.BEHAVIOR["slap_contact_seconds"], abs=1e-3)
 
     omega = spin["omega"]
-    magnitude = math.sqrt(sum(component ** 2 for component in omega))
+    magnitude = math.sqrt(sum(component**2 for component in omega))
     # Expected: transfer * armRate * mult, capped. Corridor slap swings
     # from WINDUP (-104 deg); power 3 on the shipped ladder is 1.356x.
-    arm_rate = (
-        SPEC.BEHAVIOR["slap_ease"]
-        * math.radians(104.0)
-        / SPEC.BEHAVIOR["slap_seconds"]
-    )
+    arm_rate = SPEC.BEHAVIOR["slap_ease"] * math.radians(104.0) / SPEC.BEHAVIOR["slap_seconds"]
     mult = 1.0 + (3 - 1) * (SPEC.BEHAVIOR["power_multiplier_max"] - 1.0) / (
         SPEC.BEHAVIOR["power_levels"] - 1
     )
@@ -1097,8 +1085,7 @@ def test_the_slap_spins_the_car(rig):
         SPEC.BEHAVIOR["slap_spin_transfer"] * arm_rate * mult,
     )
     assert magnitude == pytest.approx(expected, rel=0.05), (
-        f"spin magnitude {magnitude:.2f} rad/s against the model's "
-        f"{expected:.2f}"
+        f"spin magnitude {magnitude:.2f} rad/s against the model's {expected:.2f}"
     )
     # The axis. The stub prop's default attitude cancels the model
     # alignment (see addVehicle), so world == authored here and the signs
@@ -1132,8 +1119,8 @@ def test_the_spin_scales_with_the_power_dial(rig):
     high = _spin_command(state)
 
     assert low is not None and high is not None
-    low_mag = math.sqrt(sum(c ** 2 for c in low["omega"]))
-    high_mag = math.sqrt(sum(c ** 2 for c in high["omega"]))
+    low_mag = math.sqrt(sum(c**2 for c in low["omega"]))
+    high_mag = math.sqrt(sum(c**2 for c in high["omega"]))
     cap = SPEC.BEHAVIOR["slap_spin_cap_rps"]
     if high_mag < cap - 1e-6:
         assert high_mag > low_mag * 1.5, (
@@ -1154,21 +1141,15 @@ def test_a_pad_slap_spins_less_than_a_full_windup(rig):
     If these come out equal, somebody has hard-coded the windup angle into
     the tumble and the model has become a dial."""
 
-    lua, state, module = rig
+    _lua, state, module = rig
     state.addVehicle(SUBJECT_ID, "pickup", 0.0, 0.0, 0.5)
     state.setMotion(SUBJECT_ID, 0.0)
-    drive(state, module, SUBJECT_ID, 3.0,
-          until=lambda s: _spin_command(state) is not None)
+    drive(state, module, SUBJECT_ID, 3.0, until=lambda s: _spin_command(state) is not None)
     pad = _spin_command(state)
     assert pad is not None, "the pad slap queued no spin"
-    pad_mag = math.sqrt(sum(c ** 2 for c in pad["omega"]))
+    pad_mag = math.sqrt(sum(c**2 for c in pad["omega"]))
 
-    expected_ratio = 72.0 / 104.0
-    arm_rate = (
-        SPEC.BEHAVIOR["slap_ease"]
-        * math.radians(72.0)
-        / SPEC.BEHAVIOR["slap_seconds"]
-    )
+    arm_rate = SPEC.BEHAVIOR["slap_ease"] * math.radians(72.0) / SPEC.BEHAVIOR["slap_seconds"]
     mult = 1.0 + (SPEC.BEHAVIOR["default_power_level"] - 1) * (
         SPEC.BEHAVIOR["power_multiplier_max"] - 1.0
     ) / (SPEC.BEHAVIOR["power_levels"] - 1)
@@ -1200,11 +1181,10 @@ def test_the_machine_reports_the_score(rig):
 
     import re
 
-    lua, state, module = rig
+    _lua, state, module = rig
     state.addVehicle(SUBJECT_ID, "pickup", 0.0, 0.0, 0.5)
     state.setMotion(SUBJECT_ID, 0.0)
-    drive(state, module, SUBJECT_ID, 3.0,
-          until=lambda s: state.lastVelocity() is not None)
+    drive(state, module, SUBJECT_ID, 3.0, until=lambda s: state.lastVelocity() is not None)
     assert state.lastVelocity() is not None
 
     settle = SPEC.BEHAVIOR["score_settle_seconds"] + 0.6
@@ -1219,9 +1199,7 @@ def test_the_machine_reports_the_score(rig):
         messages.append(str(entry))
         index += 1
     scored = [m for m in messages if re.match(r"^\d+ m\. ", m)]
-    assert scored, (
-        f"no scoreboard toast after a settled flight; messages: {messages}"
-    )
+    assert scored, f"no scoreboard toast after a settled flight; messages: {messages}"
     assert "rotation" in scored[-1], scored[-1]
     assert re.search(r"(wheels|side|ROOF)", scored[-1]), scored[-1]
 
@@ -1241,17 +1219,15 @@ def test_the_spin_axis_follows_the_prop_frame():
     vehicleRotation, quats composing left to right).
     """
 
-    lua, state, module = fresh_rig(yaw_deg=90.0)
+    _lua, state, module = fresh_rig(yaw_deg=90.0)
     state.addVehicle(SUBJECT_ID, "pickup", 0.0, 0.0, 0.5)
     state.setMotion(SUBJECT_ID, 0.0)
-    drive(state, module, SUBJECT_ID, 3.0,
-          until=lambda s: _spin_command(state) is not None)
+    drive(state, module, SUBJECT_ID, 3.0, until=lambda s: _spin_command(state) is not None)
     spun = _spin_command(state)
     assert spun is not None, "the rotated prop never queued a spin"
 
     # The authored-frame axis, from the model itself.
-    tilt = math.radians(
-        SPEC.BEHAVIOR["default_tilt_index"] * SPEC.BEHAVIOR["tilt_step_deg"])
+    tilt = math.radians(SPEC.BEHAVIOR["default_tilt_index"] * SPEC.BEHAVIOR["tilt_step_deg"])
     r = (-0.8, 0.0, 1.30)
     d = (0.0, math.cos(tilt), math.sin(tilt))
     axis = (
@@ -1269,7 +1245,7 @@ def test_the_spin_axis_follows_the_prop_frame():
     magnitude = math.sqrt(sum(c * c for c in omega))
     assert magnitude > 1.0
     unit = tuple(c / magnitude for c in omega)
-    for measured, wanted, name in zip(unit, expected_dir, "xyz"):
+    for measured, wanted, name in zip(unit, expected_dir, "xyz", strict=True):
         assert abs(measured - wanted) < 0.05, (
             f"spin axis {name}: {measured:+.3f} against the rotated "
             f"model's {wanted:+.3f} -- the tumble is not following the "
@@ -1294,9 +1270,8 @@ def test_a_hot_run_out_throws_a_slow_one(rig):
     drive(state, module, SUBJECT_ID, 30.0, until=lambda s: s.slapped)
     launched = state.lastVelocity()
     assert launched is not None
-    speed = math.sqrt(launched.x ** 2 + launched.y ** 2 + launched.z ** 2)
-    tilt = math.radians(
-        SPEC.BEHAVIOR["default_tilt_index"] * SPEC.BEHAVIOR["tilt_step_deg"])
+    speed = math.sqrt(launched.x**2 + launched.y**2 + launched.z**2)
+    tilt = math.radians(SPEC.BEHAVIOR["default_tilt_index"] * SPEC.BEHAVIOR["tilt_step_deg"])
     projection = 52.0 * math.cos(tilt)
     assert speed >= projection - 0.5, (
         f"a 52 m/s arrival left at {speed:.1f} m/s -- the slap braked the "
@@ -1323,10 +1298,15 @@ def test_a_superseded_flight_is_scored_not_eaten(rig):
     state.addVehicle(OTHER, "pickup", 0.0, 0.0, 0.5)
     state.setMotion(OTHER, 0.0)
     drive(
-        state, module, OTHER,
-        SPEC.BEHAVIOR["cooldown_seconds"] + SPEC.BEHAVIOR["return_seconds"]
-        + SPEC.BEHAVIOR["follow_seconds"] + SPEC.BEHAVIOR["follow_hold_seconds"]
-        + SPEC.BEHAVIOR["pad_alert_seconds"] + 2.5,
+        state,
+        module,
+        OTHER,
+        SPEC.BEHAVIOR["cooldown_seconds"]
+        + SPEC.BEHAVIOR["return_seconds"]
+        + SPEC.BEHAVIOR["follow_seconds"]
+        + SPEC.BEHAVIOR["follow_hold_seconds"]
+        + SPEC.BEHAVIOR["pad_alert_seconds"]
+        + 2.5,
         until=None,
     )
     messages = []
@@ -1338,10 +1318,7 @@ def test_a_superseded_flight_is_scored_not_eaten(rig):
         messages.append(str(entry))
         index += 1
     scored = [m for m in messages if re.match(r"^\d+ m\. ", m)]
-    assert scored, (
-        f"the first flight was superseded and never scored; messages: "
-        f"{messages}"
-    )
+    assert scored, f"the first flight was superseded and never scored; messages: {messages}"
 
 
 def test_the_wince_follows_the_scoreline_after_a_beat(rig):
@@ -1358,11 +1335,10 @@ def test_the_wince_follows_the_scoreline_after_a_beat(rig):
 
     import re
 
-    lua, state, module = rig
+    _lua, state, module = rig
     state.addVehicle(SUBJECT_ID, "pickup", 0.0, 0.0, 0.5)
     state.setMotion(SUBJECT_ID, 0.0)
-    drive(state, module, SUBJECT_ID, 3.0,
-          until=lambda s: state.lastVelocity() is not None)
+    drive(state, module, SUBJECT_ID, 3.0, until=lambda s: state.lastVelocity() is not None)
     state.setUpVector(SUBJECT_ID, 0.0, 0.0, -1.0)
 
     def messages():
@@ -1376,8 +1352,7 @@ def test_the_wince_follows_the_scoreline_after_a_beat(rig):
             index += 1
         return found
 
-    drive(state, module, SUBJECT_ID,
-          SPEC.BEHAVIOR["score_settle_seconds"] + 0.4, until=None)
+    drive(state, module, SUBJECT_ID, SPEC.BEHAVIOR["score_settle_seconds"] + 0.4, until=None)
     at_score = messages()
     scoreline = [m for m in at_score if re.match(r"^\d+ m\. ", m)]
     assert scoreline and "ROOF" in scoreline[-1], at_score
@@ -1385,6 +1360,4 @@ def test_the_wince_follows_the_scoreline_after_a_beat(rig):
         "the wince fired with the scoreline instead of after it"
     )
     drive(state, module, SUBJECT_ID, 2.6, until=None)
-    assert "The hand pretends not to look." in messages(), (
-        "the wince never arrived after its beat"
-    )
+    assert "The hand pretends not to look." in messages(), "the wince never arrived after its beat"
