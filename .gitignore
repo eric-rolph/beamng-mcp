@@ -38,6 +38,7 @@ examples/giant_props/*/textures_cooked/
 examples/giant_props/*/authoring/review/
 examples/giant_props/*/authoring/listing/
 examples/giant_props/*/authoring/verify/
+examples/giant_props/*/authoring/playtest_eye/
 examples/giant_props/**/__pycache__/
 
 # local diagnostics, not source

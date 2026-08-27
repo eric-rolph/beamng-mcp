@@ -241,6 +241,25 @@ through the service into the isolated profile, and nothing test-shaped ever
 goes to the real one. The full rules are in AGENTS.md under "Local play
 deployment".
 
+## Playtest eye (whole-image aesthetic evidence)
+
+```powershell
+# Boot the sentinel rig, spawn the packaged mod plus a parked scale vehicle,
+# solve orbit/approach/detail cameras off the prop's measured world box, and
+# capture NORMAL-EXPOSURE in-game screenshots (what a player actually sees;
+# renderViews' fixed exposure cannot adjudicate look). Writes frames,
+# manifest.json, and a labeled contact_sheet.jpg to
+# <mod>/authoring/playtest_eye/ (gitignored evidence, like authoring/verify/).
+.\.venv\Scripts\python.exe .\examples\giant_props\playtest_eye.py <mod_key>
+```
+
+The contact sheet is sized for a vision-language reviewer to judge the set as
+a whole; `playtest_eye_rubric.md` is the prompt contract that turns that
+judgment into ranked, measurable findings for the critic loop. Blender
+renders in `authoring/verify/` remain the per-feature instrument; the eye is
+the in-game gestalt instrument — first read, silhouette, scale against the
+parked vehicle, material response under real tonemapping, grounding.
+
 ## Physics notes
 
 - Static contraptions are all-fixed cages (Cannon Car Wash values: 15 MN/m
