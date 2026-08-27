@@ -131,7 +131,7 @@ def _transformed_bounds(root: ET.Element, node_name: str) -> tuple[list[float], 
 
 def test_cannon_car_wash_collada_matches_exported_geometry_manifest() -> None:
     manifest = json.loads(GEOMETRY_PATH.read_text(encoding="utf-8"))
-    root = ET.parse(DAE_PATH).getroot()  # noqa: S314 - parses a repository-owned fixture
+    root = ET.parse(DAE_PATH).getroot()
 
     unit = root.find("c:asset/c:unit", COLLADA_NAMESPACE)
     assert unit is not None
@@ -183,7 +183,7 @@ def test_cannon_car_wash_collada_matches_exported_geometry_manifest() -> None:
 
 def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
     manifest = json.loads(GEOMETRY_PATH.read_text(encoding="utf-8"))
-    root = ET.parse(DAE_PATH).getroot()  # noqa: S314 - parses a repository-owned fixture
+    root = ET.parse(DAE_PATH).getroot()
 
     assert manifest["asset"] == MOD_ID
     assert manifest["coordinate_system"] == "right-handed, meters, Z-up"
@@ -326,7 +326,7 @@ def test_cannon_car_wash_clearance_trigger_and_animation_contract() -> None:
 
 
 def test_cannon_car_wash_phase2_materials_cover_every_collada_slot() -> None:
-    root = ET.parse(DAE_PATH).getroot()  # noqa: S314 - parses a repository-owned fixture
+    root = ET.parse(DAE_PATH).getroot()
     material_names = {
         material.attrib["name"]
         for material in root.findall(".//c:library_materials/c:material", COLLADA_NAMESPACE)
@@ -342,7 +342,7 @@ def test_cannon_car_wash_phase2_materials_cover_every_collada_slot() -> None:
 
 
 def test_selector_runtime_visual_preserves_animations_and_uses_vehicle_materials() -> None:
-    root = ET.parse(SELECTOR_RUNTIME_DAE_PATH).getroot()  # noqa: S314 - owned fixture
+    root = ET.parse(SELECTOR_RUNTIME_DAE_PATH).getroot()
     channels = root.findall(".//c:library_animations//c:channel", COLLADA_NAMESPACE)
     assert len(channels) == 7
     runtime_ambient = root.find(
@@ -468,7 +468,7 @@ def test_cannon_car_wash_vehicle_selector_metadata_and_thumbnails() -> None:
 
 def test_cannon_car_wash_selector_collada_is_a_clean_single_flexbody() -> None:
     handoff = json.loads(SELECTOR_HANDOFF_PATH.read_text(encoding="utf-8"))
-    root = ET.parse(SELECTOR_DAE_PATH).getroot()  # noqa: S314 - repository-owned fixture
+    root = ET.parse(SELECTOR_DAE_PATH).getroot()
     dae_bytes = SELECTOR_DAE_PATH.read_bytes()
 
     assert handoff["schema"] == "ericrolph-cannon-car-wash-selector-handoff-v1"
