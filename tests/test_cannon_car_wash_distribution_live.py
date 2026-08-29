@@ -43,7 +43,11 @@ from tests.test_cannon_car_wash_phase3_live import (
 
 EXAMPLE_ROOT = Path(__file__).parents[1] / "examples" / "cannon_car_wash"
 DISTRIBUTION_ARCHIVE = EXAMPLE_ROOT / "dist" / ZIP_NAME
-EXPECTED_SHA256 = "147f694752193b74e3f33f75120dae5f59c31e65ed5fa90dbb9b606da109fd13"
+# The locked v1.50.0 release hash. This pin last tracked the archive at
+# v1.13.1, so the exact-ZIP smoke had been failing its first assertion for
+# every release since; it must be re-locked with repository/submission.json's
+# release_artifact whenever the archive changes.
+EXPECTED_SHA256 = "479cf9e8369d27c239f53a5343ac89cc596e80dc5871ef580f73d78bf833b328"
 EXPECTED_GAME_VERSION = "0.38.6"
 MOD_ID = "ericrolph_cannon_car_wash"
 SCENARIO_FRAGMENT = f"{MOD_ID}/{MOD_ID}.json"

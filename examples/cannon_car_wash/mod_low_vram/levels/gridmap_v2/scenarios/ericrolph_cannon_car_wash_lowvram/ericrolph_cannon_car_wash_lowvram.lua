@@ -419,16 +419,20 @@ local function setWashSystemsEnabled(enabled, reason, strict)
 
   washSystemsActive = enabled
   washInitialized = true
+  -- v1.50: count the emitters actually declared instead of restating a
+  -- literal. The old table still claimed the pre-v1.37 six sprinklers long
+  -- after the MidWash arch shipped twelve, and this event is release
+  -- evidence. The Low VRAM edition empties EFFECT_SPECS, so it truthfully
+  -- reports no emitters here.
+  local emitterCounts = {}
+  for _, spec in ipairs(EFFECT_SPECS) do
+    emitterCounts[spec.emitter] = (emitterCounts[spec.emitter] or 0) + 1
+  end
   emitEvent("I", enabled and "wash_systems_start" or "wash_systems_stop", {
     reason = reason,
     roller_sequence = "ambient",
     effect_count = #EFFECT_SPECS,
-    emitter_counts = {
-      BNGP_sprinkler = 6,
-      BNGP_waterfallsteam = 6,
-      BNGP_34 = 2,
-      BNGP_2 = 2,
-    },
+    emitter_counts = emitterCounts,
   })
   return true
 end

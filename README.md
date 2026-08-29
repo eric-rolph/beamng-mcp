@@ -253,13 +253,13 @@ handoffs, and telemetry remain outside that tree. The stable release filename is
 The selector cage is grounded from exact Blender-derived datum nodes at Z=0 and contains 79 fixed
 nodes, 329 beams, 144 collision triangles, one multi-material flexbody, and 15,125 kg of mass.
 Its vehicle-local bootstrap registers each placed prop with an on-demand GELua manager. The manager
-adds the animated rollers, six water jets, a ten-node layered mist/steam/dust dryer, and transient
+adds the animated rollers, twelve water jets, a ten-node layered mist/steam/dust dryer, and transient
 wash/repair/launch triggers. Crossing the wash midpoint restores transient vehicle damage with
 an acknowledged full physics reset, then uses the renewed live OOBB to center the vehicle in the
 corridor, align it upright and parallel, and preserve its incoming travel sign before integrity
 proof and prior-freeze-state release. The isolated D-Series proof records 0.036987 m centerline
 error, 0.9997017 corridor-direction dot, and 0.9997559 upright dot. Wash occupancy is
-reference-counted, so the rollers and all sixteen effects remain active
+reference-counted, so the rollers and all twenty-two effects remain active
 until the final vehicle leaves. The runtime accepts arbitrary real vehicles, waits for full containment, holds the vehicle through
 `3... 2... 1... GO!`, and sets its main cluster to 100 m/s along the measured forward axis. It cleans up those transient
 objects and unloads after the last prop is removed. The Gridmap V2 scenario keeps its separate

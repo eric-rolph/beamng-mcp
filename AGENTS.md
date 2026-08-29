@@ -115,7 +115,8 @@ under `telemetry/`.
   static flexbody visual, adds the vehicle-local non-colliding animated visual, an `Overlaps` wash
   trigger, a
   dedicated `Overlaps` repair trigger at the wash midpoint, a `Contains` launch trigger, and
-  sixteen particle nodes. The exact inventory is six `BNGP_sprinkler` water jets, six
+  twenty-two particle nodes. The exact inventory is twelve `BNGP_sprinkler` water jets (the v1.37
+  MidWash arch doubled the original six), six
   `BNGP_waterfallsteam` primary dryer jets, two `BNGP_34` exhaust-steam accents, and two `BNGP_2`
   ambient-dust accents. These objects are transient, namespaced and non-saveable. They follow the
   prop transform; an external reset cancels any held countdown, releases its subject, and rebuilds
@@ -124,8 +125,11 @@ under `telemetry/`.
   prop is gone.
   There is no global `modScript.lua`.
 - The selector-owned runtime accepts arbitrary real vehicles. Wash occupancy is reference-counted:
-  the first real vehicle entering starts the rollers and all sixteen water/dryer layers, and they
-  remain active until the final real vehicle exits or resets. An unexpected subject reset outside
+  the first real vehicle entering starts the rollers and all twenty-two water/dryer layers, and they
+  remain active until the final real vehicle exits or resets. Since v1.46 occupancy also counts the
+  full-tunnel envelope, so the systems stay on portal to portal; the five-second empty-bay off-grace
+  is armed both by the subject-removal path and by the positional sweep, because a recover/teleport
+  exit leaves the wash zone and the envelope in the same frame and would otherwise arm neither. An unexpected subject reset outside
   the acknowledged repair callback sequence removes only that subject; never clear the complete
   occupancy table or stop the wash while another vehicle remains. The scenario lifecycle uses the
   same reference-counted occupancy contract.

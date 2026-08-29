@@ -198,6 +198,10 @@ local HOLD_MAX_ENGAGE_SPEED_MPS = 3.0
 -- Contains-flap from settle wobble and keep the run alive.
 local ESCAPE_MIN_EXIT_SPEED_MPS = 1.0
 local RELEASE_GRACE_SIM_FRAMES = 2
+-- v1.34: hold the wash systems on this long after the bay empties so a
+-- momentary Contains-flap never restarts the ambient clip. Both arm sites
+-- (the subject-removal path and the positional sweep) share this window.
+local WASH_SYSTEMS_OFF_GRACE_SECONDS = 5.0
 
 -- The selector handoff uses a ground-plane reference node. The authored
 -- scenario DAE remains in Blender/world orientation, so its transform is a
@@ -1384,16 +1388,19 @@ local function setWashSystemsEnabled(state, enabled, reason)
     return false
   end
   state.washSystemsActive = enabled
+  -- v1.50: count the emitters actually installed instead of restating a
+  -- literal. The old table still claimed the pre-v1.37 six sprinklers long
+  -- after the MidWash arch shipped twelve, and this event is release
+  -- evidence, so derive it from the specs that built state.effects.
+  local emitterCounts = {}
+  for _, spec in ipairs(state.effectSpecs or {}) do
+    emitterCounts[spec.emitter] = (emitterCounts[spec.emitter] or 0) + 1
+  end
   emitEvent(state, "I", enabled and "wash_systems_start" or "wash_systems_stop", {
     reason = reason,
     roller_sequence = "ambient",
     effect_count = #state.effects,
-    emitter_counts = {
-      BNGP_sprinkler = 6,
-      BNGP_waterfallsteam = 6,
-      BNGP_34 = 2,
-      BNGP_2 = 2,
-    },
+    emitter_counts = emitterCounts,
   })
   return true
 end
@@ -1499,7 +1506,7 @@ local function removeWashSubject(state, vehicleId, reason)
     -- suspension wobble, and toggling playAmbient RESTARTS the clip from
     -- frame one - a visible jerk. Hold the systems on through a grace
     -- window; onPreRender turns them off only if the bay stays empty.
-    state.washSystemsOffGraceSeconds = 5.0
+    state.washSystemsOffGraceSeconds = WASH_SYSTEMS_OFF_GRACE_SECONDS
     state.washSystemsOffReason = reason
   end
 end
@@ -2519,6 +2526,21 @@ local function positionalZoneSweep(state)
   -- shuts them down only after the building is genuinely empty.
   if next(seen.tunnel) and not state.washSystemsActive then
     setWashSystemsEnabled(state, true, "tunnel_enter")
+  end
+  -- v1.50 (recover-vehicle from inside the bay left the wash running
+  -- forever): removeWashSubject only arms the off-grace when the count is
+  -- already zero at that instant, but this sweep synthesizes the zone exit
+  -- BEFORE it refreshes tunnelOccupancy above - so a subject that leaves the
+  -- wash zone and the tunnel envelope in the same frame (teleport, recover,
+  -- despawn) drops the count to zero with nothing left to arm the grace, and
+  -- the per-frame tick only counts an ALREADY-armed window down. The sweep is
+  -- the one place that sees the settled count every frame, so arm it here too.
+  -- Idempotent: re-entry clears the window through the same paths.
+  if state.washSystemsActive
+    and not state.washSystemsOffGraceSeconds
+    and washSubjectCount(state) == 0 then
+    state.washSystemsOffGraceSeconds = WASH_SYSTEMS_OFF_GRACE_SECONDS
+    state.washSystemsOffReason = "bay_empty_sweep"
   end
 end
 

@@ -3,7 +3,7 @@
   "title": "Cannon Car Wash - Low VRAM",
   "internal_name": "ericrolph_cannon_car_wash_lowvram",
   "stable_zip_filename": "cannon_car_wash_lowvram_ericrolph.zip",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "type": "Other",
   "author": "Eric Rolph",
   "tag_line": "The full Cannon Car Wash experience, tuned for 2 GB graphics cards",
@@ -13,7 +13,7 @@
     "Scenarios",
     "Props"
   ],
-  "update_summary": "v1.1.1: exit ramp tire-pop fix (shared with flagship v1.49.0). The 2.6 m exit ramp flap overhung its 1.3 m support collision with a closing air gap underneath, pinch-deflating tires on driven exits at 8+ m/s - the wedge now backs the full plate, so leaving without the cannon keeps all four tires at any speed. Also carries the v1.1.0 opt-in spray toggle: effects stay OFF by default, one orange button on the mini panel turns them on instantly.",
+  "update_summary": "v1.1.2: recover-vehicle shutdown fix (shared with flagship v1.50.0). Using the recovery key (or any teleport) from inside the bay left the brushes and the ambient wash running forever, until the next car arrived: the empty-bay countdown only started when a car left the wash zone, and a recovery leaves the wash zone and the building in the same instant. The bay now checks itself every frame, so the wash always winds down once the last car is gone however it left. Also carries the v1.1.1 exit-ramp tire fix and the v1.1.0 opt-in spray toggle: effects stay OFF by default, one orange button on the mini panel turns them on instantly.",
   "gallery_images": [
     "../repository/images/01_exterior.png",
     "../repository/images/02_wash_active.png"

@@ -17,8 +17,10 @@ beside it and never enter the ZIP.
 - The vehicle selector exposes `ericrolph_cannon_car_wash` as a Props-category model with the same
   behavior in free roam. A vehicle-local bootstrap registers each placed wash with an on-demand
   GELua manager; it accepts arbitrary real vehicles rather than requiring the scenario truck.
-- The first vehicle entering starts the animated rollers and all sixteen particle nodes. Occupancy
-  is reference-counted, so the rollers and effects stay active until the final vehicle exits. The
+- The first vehicle entering starts the animated rollers and all twenty-two particle nodes.
+  Occupancy is reference-counted (and since v1.46 counts the full tunnel envelope, not just the
+  wash zone), so the rollers and effects stay active until the final vehicle exits, whether it
+  drives out or is recovered/teleported away. The
   exit dryer combines
   six `BNGP_waterfallsteam` primary jets with two `BNGP_34` steam and two `BNGP_2` dust accents.
   Crossing the wash midpoint repairs transient physics, flex-mesh, tire, and mechanical damage

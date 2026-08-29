@@ -1690,9 +1690,16 @@ def test_selector_prop_runs_wash_countdown_and_launch_in_clean_freeroam(
     assert len({record["subject_id"] for record in subject_reset_records}) == 2, (
         subject_reset_records
     )
+    # v1.46 widened washSubjectCount to include the full-tunnel envelope, and
+    # each reset fires while its arriving occupant is parked INSIDE the
+    # building - so a record now counts the resetting car itself plus any
+    # earlier arrival: 1 for occupant A alone, 2 once B joins it. (Pre-v1.46
+    # this read 0 and 1, counting only the wash and launch zones.) One extra
+    # subject per arrival is still the contract: a reset removes only its own
+    # subject and never clears the occupancy table.
     assert sorted(int(record["remaining_subject_count"]) for record in subject_reset_records) == [
-        0,
         1,
+        2,
     ], subject_reset_records
     vehicle_reset_aborts = [
         record
