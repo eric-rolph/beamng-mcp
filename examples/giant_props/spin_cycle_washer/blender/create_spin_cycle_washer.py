@@ -169,6 +169,14 @@ def build_visual(materials) -> list:
         vertices=64,
         axis="Y",
     )
+    # Apply the body's 0.4 edge bevel IN ORDER before boring the cavity.
+    # Left pending, the exporter re-bevelled the boolean's OUTPUT: the bore
+    # rim chamfered below the machine's own floor, collided with the
+    # bottom-edge bevel and shipped 0.083380 m^2 of same-winding double
+    # cover on the front panel (proplib KNOWN BUG; measurements in
+    # apply_pending_bevels' docstring). The mouth is now the cutter's true
+    # r 4.35 with a sharp rim; porthole_trim (inner edge r 4.28) covers it.
+    bk.apply_pending_bevels(body)
     bpy.ops.object.select_all(action="DESELECT")
     bk.cut_openings(body, [cavity])
     objects.append(body)

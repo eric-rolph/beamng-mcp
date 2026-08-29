@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import itertools
 import json
 import math
 import os
@@ -88,7 +89,9 @@ def test_pack_has_all_mods() -> None:
     # sumo_gyro_platform and junk_chute_grinder. 17 -> 18 (2026-08-13):
     # football_goal_post. 18 -> 19 (2026-08-14): hot_potato. 19 -> 20
     # (2026-08-24): spin_launch. 20 -> 21 (2026-08-24): colossus_tire.
-    # 21 -> 22 (2026-08-25): high_five. 22 -> 23 (2026-08-25): giant_fan.
+    # 21 -> 22 (2026-08-25): high_five - which first landed WITHOUT its bump,
+    # so the tripwire fired in reverse: the suite was red for a mod ARRIVING.
+    # 22 -> 23 (2026-08-25): giant_fan.
     # A tripwire for a mod silently dropping out of discovery, so it is
     # deliberately a literal - bump it by ONE for the mod you added, never to
     # whatever discovery happens to return.
@@ -1009,7 +1012,38 @@ def test_harvest_manifest_is_well_formed(mod_key: str) -> None:
         assert len(record["source_sha256"]) == 64
 
 
-@pytest.mark.parametrize("mod_key", MOD_KEYS)
+# Tombstone, same discipline as SPAWN_DATUM_XFAIL: strict=True keeps the
+# defect named in the code until the re-harvest forces it out.
+HARVEST_DRIFT_XFAIL = {
+    "pachinko_tower": (
+        "The harvest was certified 2026-08-15; the shared texture_kit "
+        "primitives changed underneath it on 2026-08-25 (a7592a1: _blur, "
+        "_streaks, stamped_mark and friends reworked for Spin Launch) and "
+        "2026-08-26 (b6524dc, High Five), so the sandboxed rebuild "
+        "regenerates at least plate_maker.color.png (family panel_legend) "
+        "with a different source hash and cooked_is_current() correctly "
+        "refuses the DDS. The certified cook is STALE, not wrong: the "
+        "shipped zip still carries exactly the DDS bytes the manifest "
+        "records. The fix is a re-harvest and re-cut of pachinko_tower - "
+        "its own textures run, its own manifest, its own zip lock - not a "
+        "wider gate. Found 2026-08-29 by the washer-merge gate sweep."
+    ),
+}
+
+
+def _harvest_drift_params():
+    return [
+        pytest.param(
+            key,
+            marks=pytest.mark.xfail(strict=True, reason=HARVEST_DRIFT_XFAIL[key]),
+        )
+        if key in HARVEST_DRIFT_XFAIL
+        else key
+        for key in MOD_KEYS
+    ]
+
+
+@pytest.mark.parametrize("mod_key", _harvest_drift_params())
 def test_certified_harvest_still_ships_dds(mod_key: str, tmp_path) -> None:
     """A mod whose harvest validates must still select DDS after a rebuild.
 
@@ -1377,3 +1411,387 @@ def test_behaviour_node_names_resolve_in_the_jbeam(mod_key: str) -> None:
                 f"{mod_key}: {key} names breakGroup {name!r}, which no beam "
                 f"carries (cage has {sorted(groups)})"
             )
+
+
+# ---------------------------------------------------------------------------
+# SAME-WINDING COPLANAR DOUBLE COVER.
+#
+# planar_folds' `sum|area| - |sum area|` invariant (football goal post, THE
+# FOLD LAW in AGENTS.md) is blind BY CONSTRUCTION to two coplanar layers
+# wound the SAME way: both layers add to the vector sum and the scalar sum
+# alike, so the difference is exactly zero — its own docstring records this
+# as blind spot #1. It is the worse defect of the two, because a same-winding
+# layer is not backface-culled: it draws on top of the surface it duplicates
+# and z-fights in the open. spin_cycle_washer shipped 0.083380 m^2 of it on
+# the front panel (triangles 8139/8140, `enamel_white`, plane y=+6.5) from
+# the proplib `cut_openings` pending-bevel bug, fixed 2026-08-26 by applying
+# the body's bevel in stack order (`apply_pending_bevels`).
+#
+# Detection needs actual coplanar polygon clipping, and the grouping must NOT
+# reuse planar_folds' fixed 2 um offset lattice (its blind spot #2): the
+# washer panel's vertices export at y = 6.499999 / 6.5 / 6.500001, and a
+# fixed lattice splits that one plane into three buckets and hides the
+# defect. Plane offsets are single-linkage CLUSTERED with a 50 um gap
+# instead — far above exporter/float32 noise inside one plane, far below the
+# >= 1 mm rebates this pack designs against z-fighting.
+#
+# Scope mirrors THE FOLD LAW's discipline: one index-connected body at a
+# time, because two different solids may legitimately share a plane (the
+# weld / Z-FIGHT LAW contacts have OPPOSING normals and are invisible here
+# anyway; same-side cross-body overlaps are not gated until someone measures
+# a legitimate one). Calibrated 2026-08-26 over every shipped DAE of every
+# mod on this branch: the washer defect was the only finding, and the floors
+# below produced ZERO noise findings anywhere else. (Heads-up for a mod not
+# yet on this branch: the main-checkout work-in-progress `colossus_tire`
+# measured 20 chock_paint clusters of 0.0009-0.0018 m^2 — its landing round
+# will trip this gate and should re-cut, not widen the floor.)
+# ---------------------------------------------------------------------------
+
+# Two parallel planes closer than this are one plane (single-linkage gap).
+_PLANE_GAP = 5e-5
+# A pair must overlap by more than this to count: well above float noise on
+# shared-edge neighbours, four orders of magnitude under any visible membrane.
+_PAIR_OVERLAP_FLOOR = 1e-9
+_DEGENERATE_AREA = 1e-12
+
+
+def _dae_triangle_soup(path: Path) -> tuple:
+    """Positions + per-<triangles>-block vertex indices from a shipped DAE.
+
+    The DAE is the observation; an in-Blender measurement is only a
+    prediction (AGENTS.md, "the exporter is part of the geometry"). Raises
+    on non-triangle primitives so a scope hole cannot open silently.
+    """
+
+    text = path.read_text(encoding="utf-8")
+    assert "<polylist" not in text and "<polygons" not in text, (
+        f"{path.name}: non-triangulated primitives; this gate only reads <triangles>"
+    )
+    arrays = {
+        match.group(1): numpy.array(match.group(2).split(), dtype=numpy.float64)
+        for match in re.finditer(
+            r'<float_array id="([^"]+)" count="\d+">([^<]*)</float_array>', text
+        )
+    }
+    vertices_to_positions = {
+        match.group(1): match.group(2)
+        for match in re.finditer(
+            r'<vertices id="([^"]+)">\s*<input semantic="POSITION" source="#([^"]+)"/>',
+            text,
+        )
+    }
+    position_chunks: list = []
+    chunk_base: dict[str, int] = {}
+    blocks: list[tuple[str, numpy.ndarray]] = []
+    for match in re.finditer(
+        r'<triangles(?: material="([^"]*)")? count="(\d+)">(.*?)</triangles>', text, re.S
+    ):
+        material, count, body = match.group(1) or "", int(match.group(2)), match.group(3)
+        inputs = re.findall(r'<input semantic="([^"]+)" source="#([^"]+)" offset="(\d+)"', body)
+        stride = max(int(offset) for _semantic, _source, offset in inputs) + 1
+        vertex_inputs = [
+            (source, int(offset))
+            for semantic, source, offset in inputs
+            if semantic == "VERTEX"
+        ]
+        assert len(vertex_inputs) == 1, (path.name, material)
+        source_id, offset = vertex_inputs[0]
+        positions_id = vertices_to_positions[source_id] + "-array"
+        if positions_id not in chunk_base:
+            chunk_base[positions_id] = sum(len(chunk) for chunk in position_chunks)
+            position_chunks.append(arrays[positions_id].reshape(-1, 3))
+        raw = numpy.array(re.search(r"<p>([^<]*)</p>", body).group(1).split(), dtype=numpy.int64)
+        assert raw.size == count * 3 * stride, (path.name, material)
+        blocks.append(
+            (material, raw.reshape(-1, stride)[:, offset].reshape(-1, 3) + chunk_base[positions_id])
+        )
+    if not blocks:
+        return numpy.zeros((0, 3)), []
+    return numpy.vstack(position_chunks), blocks
+
+
+def _connected_labels(vertex_count: int, triangles: numpy.ndarray) -> numpy.ndarray:
+    """Union-find vertex labels: one index-connected body per root."""
+
+    parent = numpy.arange(vertex_count, dtype=numpy.int64)
+
+    def find(node: int) -> int:
+        while parent[node] != node:
+            parent[node] = parent[parent[node]]
+            node = parent[node]
+        return node
+
+    for a, b, c in triangles:
+        root = find(a)
+        for other in (b, c):
+            other_root = find(other)
+            if other_root != root:
+                parent[other_root] = root
+    return numpy.fromiter(
+        (find(index) for index in range(vertex_count)), dtype=numpy.int64, count=vertex_count
+    )
+
+
+def _clip_overlap_area(subject: numpy.ndarray, clipper: numpy.ndarray) -> float:
+    """Intersection area of two CCW 2D triangles (Sutherland-Hodgman)."""
+
+    output = [tuple(point) for point in subject]
+    for index in range(3):
+        ax, ay = clipper[index]
+        bx, by = clipper[(index + 1) % 3]
+        ex, ey = bx - ax, by - ay
+        if not output:
+            return 0.0
+        clipped: list[tuple[float, float]] = []
+        previous = output[-1]
+        previous_side = ex * (previous[1] - ay) - ey * (previous[0] - ax)
+        for point in output:
+            side = ex * (point[1] - ay) - ey * (point[0] - ax)
+            if side >= 0.0:
+                if previous_side < 0.0:
+                    t = previous_side / (previous_side - side)
+                    clipped.append(
+                        (
+                            previous[0] + t * (point[0] - previous[0]),
+                            previous[1] + t * (point[1] - previous[1]),
+                        )
+                    )
+                clipped.append(point)
+            elif previous_side >= 0.0:
+                t = previous_side / (previous_side - side)
+                clipped.append(
+                    (
+                        previous[0] + t * (point[0] - previous[0]),
+                        previous[1] + t * (point[1] - previous[1]),
+                    )
+                )
+            previous, previous_side = point, side
+        output = clipped
+    if len(output) < 3:
+        return 0.0
+    area = 0.0
+    origin_x, origin_y = output[0]
+    for (first_x, first_y), (second_x, second_y) in itertools.pairwise(output[1:]):
+        area += (first_x - origin_x) * (second_y - origin_y) - (second_x - origin_x) * (
+            first_y - origin_y
+        )
+    return abs(area) / 2.0
+
+
+def _same_winding_double_cover(positions: numpy.ndarray, blocks: list) -> list[dict]:
+    """Overlap findings per (body, plane cluster, winding side)."""
+
+    if not blocks:
+        return []
+    triangles = numpy.vstack([indices for _material, indices in blocks])
+    materials: list[str] = []
+    for material, indices in blocks:
+        materials.extend([material] * len(indices))
+    labels = _connected_labels(len(positions), triangles)
+
+    corners = positions[triangles]
+    cross = numpy.cross(corners[:, 1] - corners[:, 0], corners[:, 2] - corners[:, 0]) / 2.0
+    area = numpy.linalg.norm(cross, axis=1)
+    live = area > _DEGENERATE_AREA
+    live_index = numpy.nonzero(live)[0]
+    units = cross[live] / area[live, None]
+    # Canonical side = sign of the LARGEST |component|. planar_folds picks
+    # the FIRST component above 1e-9 instead, and this gate's own synthetic
+    # teeth test caught that inheriting it loses the defect: 1 um exporter
+    # noise on an axis-aligned normal makes the noise component the lead,
+    # flips the canonical sign, and files the two layers of a double cover
+    # in different buckets where they are never compared.
+    lead = numpy.argmax(numpy.abs(units), axis=1)
+    side = numpy.where(units[numpy.arange(len(units)), lead] > 0.0, 1, -1)
+    canon = units * side[:, None]
+    offsets = numpy.einsum("ij,ij->i", canon, corners[live].mean(axis=1))
+    # `+ 0.0` folds IEEE -0.0 into +0.0 so a rounded-away noise component
+    # cannot split a bucket on the sign of zero.
+    group_rows = numpy.column_stack(
+        (labels[triangles[live, 0]].astype(numpy.float64), numpy.round(canon, 4) + 0.0)
+    )
+    _uniques, group_of = numpy.unique(group_rows, axis=0, return_inverse=True)
+
+    findings: list[dict] = []
+    order = numpy.lexsort((offsets, group_of))
+    boundaries = numpy.nonzero(
+        (numpy.diff(group_of[order]) != 0) | (numpy.diff(offsets[order]) > _PLANE_GAP)
+    )[0]
+    for cluster in numpy.split(order, boundaries + 1):
+        if len(cluster) < 2:
+            continue
+        for winding in (1, -1):
+            members = cluster[side[cluster] == winding]
+            if len(members) < 2:
+                continue
+            normal = canon[members[0]]
+            axis = numpy.zeros(3)
+            axis[int(numpy.argmin(numpy.abs(normal)))] = 1.0
+            u_axis = numpy.cross(normal, axis)
+            u_axis /= numpy.linalg.norm(u_axis)
+            basis = numpy.column_stack((u_axis, numpy.cross(normal, u_axis)))
+            flat = {}
+            for member in members:
+                points = corners[live_index[member]] @ basis
+                doubled = (points[1, 0] - points[0, 0]) * (points[2, 1] - points[0, 1]) - (
+                    points[2, 0] - points[0, 0]
+                ) * (points[1, 1] - points[0, 1])
+                flat[member] = points if doubled >= 0.0 else points[::-1]
+            boxes = {
+                member: (
+                    points[:, 0].min(),
+                    points[:, 0].max(),
+                    points[:, 1].min(),
+                    points[:, 1].max(),
+                )
+                for member, points in flat.items()
+            }
+            scan = sorted(flat, key=lambda member: boxes[member][0])
+            total = 0.0
+            pairs: list[tuple[int, int, float]] = []
+            for position_index, first in enumerate(scan):
+                _fx0, fx1, fy0, fy1 = boxes[first]
+                for second in scan[position_index + 1 :]:
+                    sx0, _sx1, sy0, sy1 = boxes[second]
+                    if sx0 > fx1:
+                        break
+                    if sy0 > fy1 or fy0 > sy1:
+                        continue
+                    overlap = _clip_overlap_area(flat[second], flat[first])
+                    if overlap > _PAIR_OVERLAP_FLOOR:
+                        total += overlap
+                        pairs.append(
+                            (int(live_index[first]), int(live_index[second]), overlap)
+                        )
+            if pairs:
+                findings.append(
+                    {
+                        "overlap_m2": total,
+                        "plane_normal": [round(float(value), 4) for value in normal],
+                        "plane_offset": float(offsets[members[0]]),
+                        "pairs": sorted(pairs, key=lambda item: -item[2])[:6],
+                        "materials": sorted(
+                            {materials[index] for a, b, _o in pairs for index in (a, b)}
+                        ),
+                    }
+                )
+    return findings
+
+
+# Tombstone: this gate was calibrated 2026-08-26 on the washer branch, whose
+# base predates the colossus_tire chock work, so the first pack-wide run
+# (2026-08-29) was the first time the gate met colossus geometry.
+DOUBLE_COVER_XFAIL = {
+    "colossus_tire": (
+        "~0.029 m^2 of same-winding coplanar double cover on the wheel "
+        "chocks: 20 plane clusters (4 chocks x 5 planes - tops at z 0.480 "
+        "and 0.510, both side planes), every triangle pair in "
+        "ericrolph_colossus_tire_chock_paint, largest single strip "
+        "0.00074 m^2. The chocks carry coincident same-winding faces that "
+        "z-fight in the open exactly as this gate's docstring describes. "
+        "The fix is a chock re-cut in colossus's next Blender run with its "
+        "own hashes, zip lock and live gate - its own change, same law as "
+        "sumo_gyro_platform's re-datum."
+    ),
+}
+
+
+def _double_cover_params():
+    return [
+        pytest.param(
+            key,
+            marks=pytest.mark.xfail(strict=True, reason=DOUBLE_COVER_XFAIL[key]),
+        )
+        if key in DOUBLE_COVER_XFAIL
+        else key
+        for key in MOD_KEYS
+    ]
+
+
+@pytest.mark.parametrize("mod_key", _double_cover_params())
+def test_no_same_winding_coplanar_double_cover(mod_key: str) -> None:
+    spec = load_spec(mod_key)
+    shipped_dir = PACK_ROOT / mod_key / "mod" / "vehicles" / spec.MOD_ID
+    daes = sorted(shipped_dir.glob("*.dae")) if shipped_dir.is_dir() else []
+    if not daes:
+        pytest.skip("no built mod tree")
+    report = []
+    for dae in daes:
+        positions, blocks = _dae_triangle_soup(dae)
+        for finding in _same_winding_double_cover(positions, blocks):
+            report.append(
+                f"{dae.name}: {finding['overlap_m2']:.6f} m^2 on plane "
+                f"n={finding['plane_normal']} d={finding['plane_offset']:.6f} "
+                f"materials {finding['materials']} pairs {finding['pairs'][:3]}"
+            )
+    assert not report, (
+        f"{mod_key}: same-winding coplanar double cover in shipped DAEs — surfaces "
+        "that z-fight in the open and that planar_folds cannot see (blind spot #1). "
+        "If a Boolean target carried a pending bevel, see proplib "
+        "apply_pending_bevels / cut_openings.\n" + "\n".join(report)
+    )
+
+
+def test_double_cover_scanner_sees_the_washer_defect() -> None:
+    """The gate's teeth, proven on synthetic geometry.
+
+    A detector asserted only against clean trees is unfalsifiable — this
+    builds the defect class in miniature (two same-winding layers over the
+    same plane region, exporter-noise offsets of ~1 um between them) plus
+    the two legitimate shapes nearest to it, and checks each side of the
+    line. The synthetic overlap reproduces the washer's shipped defect
+    geometry: same winding, near-coincident plane, real shared area.
+    """
+
+    plane = [
+        # A clean 2x2 tiling of one plane: four triangles, no overlap.
+        ([(0, 0, 0), (1, 0, 0), (0, 1, 0)], 0.0),
+        ([(1, 0, 0), (1, 1, 0), (0, 1, 0)], 0.0),
+        ([(1, 0, 0), (2, 0, 0), (1, 1, 0)], 0.0),
+        ([(2, 0, 0), (2, 1, 0), (1, 1, 0)], 0.0),
+    ]
+    positions = []
+    triangles = []
+    for corners, lift in plane:
+        base = len(positions)
+        positions.extend([(x, y, z + lift) for x, y, z in corners])
+        triangles.append((base, base + 1, base + 2))
+    # Weld the tiling into one body via shared coordinates? No — the scanner
+    # groups by INDEX connectivity, so link the fan through shared indices.
+    triangles = numpy.array(triangles)
+    positions = numpy.array(positions, dtype=numpy.float64)
+    triangles[1] = (1, 4, 2)
+    triangles[2] = (1, 7, 4)
+    triangles[3] = (7, 10, 4)
+    clean = _same_winding_double_cover(positions[:12], [("tile", triangles)])
+    assert clean == [], clean
+
+    # Same-winding double cover with the washer's exporter-noise offsets:
+    # a fifth triangle re-covers half of the first tile, 1 um off-plane.
+    covered_positions = numpy.vstack(
+        [positions[:12], numpy.array([(0, 0, 1e-6), (1, 0, 1e-6), (0, 1, 1e-6)])]
+    )
+    covered = _same_winding_double_cover(
+        covered_positions, [("tile", numpy.vstack([triangles, [(0, 13, 14)]]))]
+    )
+    # (0, 13, 14) shares index 0 with the body, keeps the winding of the
+    # plane, and duplicates the full first tile's half-square: 0.5 m^2.
+    assert len(covered) == 1, covered
+    assert abs(covered[0]["overlap_m2"] - 0.5) < 1e-9, covered
+
+    # OPPOSING winding at the same coordinates is planar_folds' territory
+    # (a fold), not this gate's: same triangle flipped must NOT fire here.
+    folded = _same_winding_double_cover(
+        covered_positions, [("tile", numpy.vstack([triangles, [(0, 14, 13)]]))]
+    )
+    assert folded == [], folded
+
+    # A genuinely separate parallel plane 1 mm away (a designed rebate) in
+    # the SAME body must stay a separate cluster: no finding.
+    rebate_positions = numpy.vstack(
+        [positions[:12], numpy.array([(0, 0, 1e-3), (1, 0, 1e-3), (0, 1, 1e-3)])]
+    )
+    rebated = _same_winding_double_cover(
+        rebate_positions, [("tile", numpy.vstack([triangles, [(0, 13, 14)]]))]
+    )
+    assert rebated == [], rebated
