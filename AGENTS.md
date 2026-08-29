@@ -2585,6 +2585,12 @@ spread, the spread is given. **Do not re-narrow either one without a capture.**
     **Whoever next rebuilds `hot_potato` must correct the source string and
     re-pack in the same pass** — same correction as everywhere else, `0.38.6`
     was the test PROFILE DIRECTORY name and never an engine.
+    **[PAID — verified 2026-08-29.** The current `spec.py` and every one of
+    the shipped `dist/hot_potato_ericrolph.zip`'s 23 members (scanned
+    bytewise via Python `zipfile`, with positive content controls, per the
+    unzip-glob trap rule) carry neither `0.38.6` nor `Confirmed live`
+    anywhere: the rebuild corrected the string and re-packed in the same
+    pass, exactly as ordered.**]**
   - **TRAP 1 — stale worktrees.** `.claude/worktrees/unruffled-turing-15bf66/`
     and `.claude/worktrees/funny-euclid-f97552/` each hold a COMPLETE
     pre-remediation copy of `AGENTS.md`. A grep-based verifier run without
@@ -2592,6 +2598,11 @@ spread, the spread is given. **Do not re-narrow either one without a capture.**
     and will report the round-5 sweep as never done. Exclude `.claude/`,
     `workspace/` and any vendored venv (`.wheel-smoke/`) from every census over
     this repository; `D_lineendings.py` now does.
+    **[2026-08-29:** all four stale worktrees removed in the branch/worktree
+    cleanup. `funny-euclid`'s uncommitted Cannon v1.50.0 WIP (recover-vehicle
+    shutdown fix) was committed to its branch `claude/funny-euclid-f97552`
+    first; the other three were clean and artifact-free. The exclusion
+    discipline stays — session worktrees reappear.**]**
   - **TRAP 2 — the extension set, and a CRLF shebang is not cosmetic.** The
     round-5 line-ending census carried no shell suffix, so
     `sumo_gyro_platform/authoring/mix_call_audio.sh` — pure CRLF, shebang
