@@ -4,6 +4,7 @@
     "flexbodies_extra": [],
     "id": "ericrolph_hot_potato",
     "physics_cage": "ericrolph_hot_potato_cage",
+    "visual_groups": [],
     "visual_mesh": "ericrolph_hot_potato_visual"
   },
   "base_nodes": [
@@ -26,8 +27,8 @@
     "ericrolph_hot_potato_pylon_e_01_01_00",
     "ericrolph_hot_potato_arch_000_1",
     "ericrolph_hot_potato_arch_000_2",
-    "ericrolph_hot_potato_arch_120_1",
-    "ericrolph_hot_potato_arch_120_2"
+    "ericrolph_hot_potato_arch_180_1",
+    "ericrolph_hot_potato_arch_180_2"
   ],
   "beam_specs": {
     "rigid": {
@@ -1399,28 +1400,14 @@
     {
       "nodes": [
         "ericrolph_hot_potato_arch_120_0",
-        "ericrolph_hot_potato_pylon_e_00_00_02"
+        "ericrolph_hot_potato_arch_126_0"
       ],
       "spec": "rigid"
     },
     {
       "nodes": [
         "ericrolph_hot_potato_arch_120_0",
-        "ericrolph_hot_potato_pylon_e_00_01_02"
-      ],
-      "spec": "rigid"
-    },
-    {
-      "nodes": [
-        "ericrolph_hot_potato_arch_120_0",
-        "ericrolph_hot_potato_pylon_e_01_00_02"
-      ],
-      "spec": "rigid"
-    },
-    {
-      "nodes": [
-        "ericrolph_hot_potato_arch_120_0",
-        "ericrolph_hot_potato_pylon_e_01_01_02"
+        "ericrolph_hot_potato_arch_126_1"
       ],
       "spec": "rigid"
     },
@@ -1434,55 +1421,699 @@
     {
       "nodes": [
         "ericrolph_hot_potato_arch_120_1",
+        "ericrolph_hot_potato_arch_126_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_120_1",
+        "ericrolph_hot_potato_arch_126_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_120_2",
+        "ericrolph_hot_potato_arch_126_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_120_2",
+        "ericrolph_hot_potato_arch_126_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_126_0",
+        "ericrolph_hot_potato_arch_126_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_126_0",
+        "ericrolph_hot_potato_arch_126_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_126_0",
+        "ericrolph_hot_potato_arch_132_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_126_0",
+        "ericrolph_hot_potato_arch_132_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_126_1",
+        "ericrolph_hot_potato_arch_126_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_126_1",
+        "ericrolph_hot_potato_arch_132_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_126_1",
+        "ericrolph_hot_potato_arch_132_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_126_2",
+        "ericrolph_hot_potato_arch_132_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_126_2",
+        "ericrolph_hot_potato_arch_132_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_132_0",
+        "ericrolph_hot_potato_arch_132_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_132_0",
+        "ericrolph_hot_potato_arch_132_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_132_0",
+        "ericrolph_hot_potato_arch_138_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_132_0",
+        "ericrolph_hot_potato_arch_138_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_132_1",
+        "ericrolph_hot_potato_arch_132_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_132_1",
+        "ericrolph_hot_potato_arch_138_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_132_1",
+        "ericrolph_hot_potato_arch_138_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_132_2",
+        "ericrolph_hot_potato_arch_138_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_132_2",
+        "ericrolph_hot_potato_arch_138_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_138_0",
+        "ericrolph_hot_potato_arch_138_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_138_0",
+        "ericrolph_hot_potato_arch_138_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_138_0",
+        "ericrolph_hot_potato_arch_144_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_138_0",
+        "ericrolph_hot_potato_arch_144_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_138_1",
+        "ericrolph_hot_potato_arch_138_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_138_1",
+        "ericrolph_hot_potato_arch_144_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_138_1",
+        "ericrolph_hot_potato_arch_144_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_138_2",
+        "ericrolph_hot_potato_arch_144_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_138_2",
+        "ericrolph_hot_potato_arch_144_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_144_0",
+        "ericrolph_hot_potato_arch_144_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_144_0",
+        "ericrolph_hot_potato_arch_144_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_144_0",
+        "ericrolph_hot_potato_arch_150_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_144_0",
+        "ericrolph_hot_potato_arch_150_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_144_1",
+        "ericrolph_hot_potato_arch_144_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_144_1",
+        "ericrolph_hot_potato_arch_150_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_144_1",
+        "ericrolph_hot_potato_arch_150_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_144_2",
+        "ericrolph_hot_potato_arch_150_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_144_2",
+        "ericrolph_hot_potato_arch_150_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_150_0",
+        "ericrolph_hot_potato_arch_150_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_150_0",
+        "ericrolph_hot_potato_arch_150_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_150_0",
+        "ericrolph_hot_potato_arch_156_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_150_0",
+        "ericrolph_hot_potato_arch_156_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_150_1",
+        "ericrolph_hot_potato_arch_150_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_150_1",
+        "ericrolph_hot_potato_arch_156_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_150_1",
+        "ericrolph_hot_potato_arch_156_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_150_2",
+        "ericrolph_hot_potato_arch_156_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_150_2",
+        "ericrolph_hot_potato_arch_156_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_156_0",
+        "ericrolph_hot_potato_arch_156_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_156_0",
+        "ericrolph_hot_potato_arch_156_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_156_0",
+        "ericrolph_hot_potato_arch_162_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_156_0",
+        "ericrolph_hot_potato_arch_162_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_156_1",
+        "ericrolph_hot_potato_arch_156_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_156_1",
+        "ericrolph_hot_potato_arch_162_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_156_1",
+        "ericrolph_hot_potato_arch_162_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_156_2",
+        "ericrolph_hot_potato_arch_162_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_156_2",
+        "ericrolph_hot_potato_arch_162_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_162_0",
+        "ericrolph_hot_potato_arch_162_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_162_0",
+        "ericrolph_hot_potato_arch_162_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_162_0",
+        "ericrolph_hot_potato_arch_168_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_162_0",
+        "ericrolph_hot_potato_arch_168_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_162_1",
+        "ericrolph_hot_potato_arch_162_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_162_1",
+        "ericrolph_hot_potato_arch_168_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_162_1",
+        "ericrolph_hot_potato_arch_168_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_162_2",
+        "ericrolph_hot_potato_arch_168_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_162_2",
+        "ericrolph_hot_potato_arch_168_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_168_0",
+        "ericrolph_hot_potato_arch_168_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_168_0",
+        "ericrolph_hot_potato_arch_168_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_168_0",
+        "ericrolph_hot_potato_arch_174_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_168_0",
+        "ericrolph_hot_potato_arch_174_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_168_1",
+        "ericrolph_hot_potato_arch_168_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_168_1",
+        "ericrolph_hot_potato_arch_174_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_168_1",
+        "ericrolph_hot_potato_arch_174_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_168_2",
+        "ericrolph_hot_potato_arch_174_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_168_2",
+        "ericrolph_hot_potato_arch_174_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_174_0",
+        "ericrolph_hot_potato_arch_174_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_174_0",
+        "ericrolph_hot_potato_arch_174_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_174_0",
+        "ericrolph_hot_potato_arch_180_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_174_0",
+        "ericrolph_hot_potato_arch_180_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_174_1",
+        "ericrolph_hot_potato_arch_174_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_174_1",
+        "ericrolph_hot_potato_arch_180_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_174_1",
+        "ericrolph_hot_potato_arch_180_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_174_2",
+        "ericrolph_hot_potato_arch_180_0"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_174_2",
+        "ericrolph_hot_potato_arch_180_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_180_0",
+        "ericrolph_hot_potato_arch_180_1"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_180_0",
+        "ericrolph_hot_potato_arch_180_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_180_0",
         "ericrolph_hot_potato_pylon_e_00_00_02"
       ],
       "spec": "rigid"
     },
     {
       "nodes": [
-        "ericrolph_hot_potato_arch_120_1",
+        "ericrolph_hot_potato_arch_180_0",
         "ericrolph_hot_potato_pylon_e_00_01_02"
       ],
       "spec": "rigid"
     },
     {
       "nodes": [
-        "ericrolph_hot_potato_arch_120_1",
+        "ericrolph_hot_potato_arch_180_0",
         "ericrolph_hot_potato_pylon_e_01_00_02"
       ],
       "spec": "rigid"
     },
     {
       "nodes": [
-        "ericrolph_hot_potato_arch_120_1",
+        "ericrolph_hot_potato_arch_180_0",
         "ericrolph_hot_potato_pylon_e_01_01_02"
       ],
       "spec": "rigid"
     },
     {
       "nodes": [
-        "ericrolph_hot_potato_arch_120_2",
+        "ericrolph_hot_potato_arch_180_1",
+        "ericrolph_hot_potato_arch_180_2"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_180_1",
         "ericrolph_hot_potato_pylon_e_00_00_02"
       ],
       "spec": "rigid"
     },
     {
       "nodes": [
-        "ericrolph_hot_potato_arch_120_2",
+        "ericrolph_hot_potato_arch_180_1",
         "ericrolph_hot_potato_pylon_e_00_01_02"
       ],
       "spec": "rigid"
     },
     {
       "nodes": [
-        "ericrolph_hot_potato_arch_120_2",
+        "ericrolph_hot_potato_arch_180_1",
         "ericrolph_hot_potato_pylon_e_01_00_02"
       ],
       "spec": "rigid"
     },
     {
       "nodes": [
-        "ericrolph_hot_potato_arch_120_2",
+        "ericrolph_hot_potato_arch_180_1",
+        "ericrolph_hot_potato_pylon_e_01_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_180_2",
+        "ericrolph_hot_potato_pylon_e_00_00_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_180_2",
+        "ericrolph_hot_potato_pylon_e_00_01_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_180_2",
+        "ericrolph_hot_potato_pylon_e_01_00_02"
+      ],
+      "spec": "rigid"
+    },
+    {
+      "nodes": [
+        "ericrolph_hot_potato_arch_180_2",
         "ericrolph_hot_potato_pylon_e_01_01_02"
       ],
       "spec": "rigid"
@@ -2846,11 +3477,11 @@
           0.0,
           1.0
         ],
-        "emitter": "BNGP_34",
+        "emitter": "BNGP_20",
         "position": [
           0.0,
           0.0,
-          6.4
+          6.1
         ]
       }
     },
@@ -2873,7 +3504,9 @@
       "attach_sink": 0.16,
       "attach_wobble": 0.06,
       "audio_enabled": true,
+      "audio_volume": 1.0,
       "beacon_brightness": 2.6,
+      "beacon_enabled": true,
       "beacon_pulse_seconds": 0.11,
       "beacon_radius": 8.0,
       "beacon_ray_range": 26.0,
@@ -2881,33 +3514,89 @@
       "beep_fast_interval": 0.13,
       "beep_pitch_rise": 0.85,
       "beep_slow_interval": 1.55,
+      "blast_push_mps": 9.0,
+      "blast_radius_m": 22.0,
       "bob_amplitude": 0.16,
       "bob_rate": 2.3,
+      "bounce_amplitude_m": 0.35,
+      "bounce_enabled": true,
       "camera_distance": 46.0,
+      "camp_burn_multiplier": 1.0,
+      "camp_speed_kmh": 20.0,
       "carrier_boost_max_mps": 62.0,
       "carrier_boost_mps2": 0.8,
+      "carry_clearance_m": 0.3,
       "crush_dv_mps": 7.5,
       "crush_inward": 0.45,
       "crush_min_z": 0.55,
       "cue_window_seconds": 30.0,
       "detonate_break": true,
       "detonate_crush": true,
+      "detonate_enabled": true,
       "detonate_fire": true,
       "detonate_launch_mps": 16.0,
       "fire_seconds": 6.0,
+      "fireworks_base_z": 53.63,
+      "fireworks_enabled": true,
       "fuse_base_seconds": 60.0,
       "fuse_max_seconds": 75.0,
       "fuse_min_seconds": 45.0,
       "fuse_sigma_seconds": 5.0,
+      "game_mode": "classic",
+      "glow_ramp_enabled": true,
       "grace_seconds": 4.0,
+      "hoard_target_points": 120.0,
       "impact_kmh": 15.0,
       "join_immunity_seconds": 2.0,
+      "mash_enabled": true,
+      "mash_homes": [
+        [
+          -3.0,
+          -3.0,
+          -30.0
+        ],
+        [
+          3.0,
+          -3.0,
+          -30.0
+        ],
+        [
+          -3.0,
+          3.0,
+          -30.0
+        ],
+        [
+          3.0,
+          3.0,
+          -30.0
+        ],
+        [
+          0.0,
+          -4.5,
+          -30.0
+        ],
+        [
+          0.0,
+          4.5,
+          -30.0
+        ]
+      ],
+      "mash_radii": [
+        0.84,
+        0.65,
+        0.74,
+        0.54,
+        0.95,
+        0.46
+      ],
+      "mash_seconds": 7.0,
       "min_players": 1,
       "pad_center": [
         0.0,
         0.0,
         0.0
       ],
+      "pass_knockback_mps": 0.0,
       "pickup_height": 4.0,
       "pickup_radius": 7.5,
       "potato_home": [
@@ -2919,12 +3608,18 @@
       "round_idle_seconds": 5.0,
       "safety_enabled": true,
       "safety_extent_max": 24.0,
+      "show_countdown": false,
+      "silence_gap_seconds": 0.9,
+      "smoke_enabled": true,
       "spin_rate": 0.55,
+      "steam_hiss_enabled": true,
       "tagback_immunity_seconds": 3.5,
       "tagback_min_hold_seconds": 2.0,
       "tagback_separation_m": 0.305,
+      "tick_style": "escalating",
       "touch_margin": 0.35,
-      "transfer_mode": "touch"
+      "transfer_mode": "touch",
+      "wins_to_champion": 3
     }
   },
   "coordinate_system": {
@@ -3307,14 +4002,14 @@
       "id": "ericrolph_hot_potato_pylon_w_00_00_00",
       "node_material": "|NM_METAL",
       "position": [
-        15.9,
-        0.899999,
+        25.000999,
+        2.199998,
         0.0
       ],
       "self_collision": false,
       "source_world_position": [
-        -15.9,
-        -0.9,
+        -25.000999,
+        -2.2,
         0.0
       ],
       "spawn_envelope": true,
@@ -3327,15 +4022,15 @@
       "id": "ericrolph_hot_potato_pylon_w_00_00_01",
       "node_material": "|NM_METAL",
       "position": [
-        15.9,
-        0.899999,
-        2.0
+        25.000999,
+        2.199998,
+        3.0
       ],
       "self_collision": false,
       "source_world_position": [
-        -15.9,
-        -0.9,
-        2.0
+        -25.000999,
+        -2.2,
+        3.0
       ],
       "weight": 125.0
     },
@@ -3346,15 +4041,15 @@
       "id": "ericrolph_hot_potato_pylon_w_00_00_02",
       "node_material": "|NM_METAL",
       "position": [
-        15.9,
-        0.899999,
-        4.0
+        25.000999,
+        2.199998,
+        6.0
       ],
       "self_collision": false,
       "source_world_position": [
-        -15.9,
-        -0.9,
-        4.0
+        -25.000999,
+        -2.2,
+        6.0
       ],
       "spawn_envelope": true,
       "weight": 125.0
@@ -3366,14 +4061,14 @@
       "id": "ericrolph_hot_potato_pylon_w_00_01_00",
       "node_material": "|NM_METAL",
       "position": [
-        15.9,
-        -0.900001,
+        25.000999,
+        -2.200002,
         0.0
       ],
       "self_collision": false,
       "source_world_position": [
-        -15.9,
-        0.9,
+        -25.000999,
+        2.2,
         0.0
       ],
       "spawn_envelope": true,
@@ -3386,15 +4081,15 @@
       "id": "ericrolph_hot_potato_pylon_w_00_01_01",
       "node_material": "|NM_METAL",
       "position": [
-        15.9,
-        -0.900001,
-        2.0
+        25.000999,
+        -2.200002,
+        3.0
       ],
       "self_collision": false,
       "source_world_position": [
-        -15.9,
-        0.9,
-        2.0
+        -25.000999,
+        2.2,
+        3.0
       ],
       "weight": 125.0
     },
@@ -3405,15 +4100,15 @@
       "id": "ericrolph_hot_potato_pylon_w_00_01_02",
       "node_material": "|NM_METAL",
       "position": [
-        15.9,
-        -0.900001,
-        4.0
+        25.000999,
+        -2.200002,
+        6.0
       ],
       "self_collision": false,
       "source_world_position": [
-        -15.9,
-        0.9,
-        4.0
+        -25.000999,
+        2.2,
+        6.0
       ],
       "spawn_envelope": true,
       "weight": 125.0
@@ -3425,14 +4120,14 @@
       "id": "ericrolph_hot_potato_pylon_w_01_00_00",
       "node_material": "|NM_METAL",
       "position": [
-        14.1,
-        0.899999,
+        20.601,
+        2.199998,
         0.0
       ],
       "self_collision": false,
       "source_world_position": [
-        -14.1,
-        -0.9,
+        -20.601,
+        -2.2,
         0.0
       ],
       "weight": 125.0
@@ -3444,15 +4139,15 @@
       "id": "ericrolph_hot_potato_pylon_w_01_00_01",
       "node_material": "|NM_METAL",
       "position": [
-        14.1,
-        0.899999,
-        2.0
+        20.601,
+        2.199998,
+        3.0
       ],
       "self_collision": false,
       "source_world_position": [
-        -14.1,
-        -0.9,
-        2.0
+        -20.601,
+        -2.2,
+        3.0
       ],
       "weight": 125.0
     },
@@ -3463,15 +4158,15 @@
       "id": "ericrolph_hot_potato_pylon_w_01_00_02",
       "node_material": "|NM_METAL",
       "position": [
-        14.1,
-        0.899999,
-        4.0
+        20.601,
+        2.199998,
+        6.0
       ],
       "self_collision": false,
       "source_world_position": [
-        -14.1,
-        -0.9,
-        4.0
+        -20.601,
+        -2.2,
+        6.0
       ],
       "weight": 125.0
     },
@@ -3482,14 +4177,14 @@
       "id": "ericrolph_hot_potato_pylon_w_01_01_00",
       "node_material": "|NM_METAL",
       "position": [
-        14.1,
-        -0.900001,
+        20.601,
+        -2.200002,
         0.0
       ],
       "self_collision": false,
       "source_world_position": [
-        -14.1,
-        0.9,
+        -20.601,
+        2.2,
         0.0
       ],
       "weight": 125.0
@@ -3501,15 +4196,15 @@
       "id": "ericrolph_hot_potato_pylon_w_01_01_01",
       "node_material": "|NM_METAL",
       "position": [
-        14.1,
-        -0.900001,
-        2.0
+        20.601,
+        -2.200002,
+        3.0
       ],
       "self_collision": false,
       "source_world_position": [
-        -14.1,
-        0.9,
-        2.0
+        -20.601,
+        2.2,
+        3.0
       ],
       "weight": 125.0
     },
@@ -3520,15 +4215,15 @@
       "id": "ericrolph_hot_potato_pylon_w_01_01_02",
       "node_material": "|NM_METAL",
       "position": [
-        14.1,
-        -0.900001,
-        4.0
+        20.601,
+        -2.200002,
+        6.0
       ],
       "self_collision": false,
       "source_world_position": [
-        -14.1,
-        0.9,
-        4.0
+        -20.601,
+        2.2,
+        6.0
       ],
       "weight": 125.0
     },
@@ -3539,14 +4234,14 @@
       "id": "ericrolph_hot_potato_pylon_e_00_00_00",
       "node_material": "|NM_METAL",
       "position": [
-        -14.1,
-        0.900001,
+        -20.601,
+        2.200002,
         0.0
       ],
       "self_collision": false,
       "source_world_position": [
-        14.1,
-        -0.9,
+        20.601,
+        -2.2,
         0.0
       ],
       "weight": 125.0
@@ -3558,15 +4253,15 @@
       "id": "ericrolph_hot_potato_pylon_e_00_00_01",
       "node_material": "|NM_METAL",
       "position": [
-        -14.1,
-        0.900001,
-        2.0
+        -20.601,
+        2.200002,
+        3.0
       ],
       "self_collision": false,
       "source_world_position": [
-        14.1,
-        -0.9,
-        2.0
+        20.601,
+        -2.2,
+        3.0
       ],
       "weight": 125.0
     },
@@ -3577,15 +4272,15 @@
       "id": "ericrolph_hot_potato_pylon_e_00_00_02",
       "node_material": "|NM_METAL",
       "position": [
-        -14.1,
-        0.900001,
-        4.0
+        -20.601,
+        2.200002,
+        6.0
       ],
       "self_collision": false,
       "source_world_position": [
-        14.1,
-        -0.9,
-        4.0
+        20.601,
+        -2.2,
+        6.0
       ],
       "weight": 125.0
     },
@@ -3596,14 +4291,14 @@
       "id": "ericrolph_hot_potato_pylon_e_00_01_00",
       "node_material": "|NM_METAL",
       "position": [
-        -14.1,
-        -0.899999,
+        -20.601,
+        -2.199998,
         0.0
       ],
       "self_collision": false,
       "source_world_position": [
-        14.1,
-        0.9,
+        20.601,
+        2.2,
         0.0
       ],
       "weight": 125.0
@@ -3615,15 +4310,15 @@
       "id": "ericrolph_hot_potato_pylon_e_00_01_01",
       "node_material": "|NM_METAL",
       "position": [
-        -14.1,
-        -0.899999,
-        2.0
+        -20.601,
+        -2.199998,
+        3.0
       ],
       "self_collision": false,
       "source_world_position": [
-        14.1,
-        0.9,
-        2.0
+        20.601,
+        2.2,
+        3.0
       ],
       "weight": 125.0
     },
@@ -3634,15 +4329,15 @@
       "id": "ericrolph_hot_potato_pylon_e_00_01_02",
       "node_material": "|NM_METAL",
       "position": [
-        -14.1,
-        -0.899999,
-        4.0
+        -20.601,
+        -2.199998,
+        6.0
       ],
       "self_collision": false,
       "source_world_position": [
-        14.1,
-        0.9,
-        4.0
+        20.601,
+        2.2,
+        6.0
       ],
       "weight": 125.0
     },
@@ -3653,14 +4348,14 @@
       "id": "ericrolph_hot_potato_pylon_e_01_00_00",
       "node_material": "|NM_METAL",
       "position": [
-        -15.9,
-        0.900001,
+        -25.000999,
+        2.200002,
         0.0
       ],
       "self_collision": false,
       "source_world_position": [
-        15.9,
-        -0.9,
+        25.000999,
+        -2.2,
         0.0
       ],
       "spawn_envelope": true,
@@ -3673,15 +4368,15 @@
       "id": "ericrolph_hot_potato_pylon_e_01_00_01",
       "node_material": "|NM_METAL",
       "position": [
-        -15.9,
-        0.900001,
-        2.0
+        -25.000999,
+        2.200002,
+        3.0
       ],
       "self_collision": false,
       "source_world_position": [
-        15.9,
-        -0.9,
-        2.0
+        25.000999,
+        -2.2,
+        3.0
       ],
       "weight": 125.0
     },
@@ -3692,15 +4387,15 @@
       "id": "ericrolph_hot_potato_pylon_e_01_00_02",
       "node_material": "|NM_METAL",
       "position": [
-        -15.9,
-        0.900001,
-        4.0
+        -25.000999,
+        2.200002,
+        6.0
       ],
       "self_collision": false,
       "source_world_position": [
-        15.9,
-        -0.9,
-        4.0
+        25.000999,
+        -2.2,
+        6.0
       ],
       "spawn_envelope": true,
       "weight": 125.0
@@ -3712,14 +4407,14 @@
       "id": "ericrolph_hot_potato_pylon_e_01_01_00",
       "node_material": "|NM_METAL",
       "position": [
-        -15.9,
-        -0.899999,
+        -25.000999,
+        -2.199998,
         0.0
       ],
       "self_collision": false,
       "source_world_position": [
-        15.9,
-        0.9,
+        25.000999,
+        2.2,
         0.0
       ],
       "spawn_envelope": true,
@@ -3732,15 +4427,15 @@
       "id": "ericrolph_hot_potato_pylon_e_01_01_01",
       "node_material": "|NM_METAL",
       "position": [
-        -15.9,
-        -0.899999,
-        2.0
+        -25.000999,
+        -2.199998,
+        3.0
       ],
       "self_collision": false,
       "source_world_position": [
-        15.9,
-        0.9,
-        2.0
+        25.000999,
+        2.2,
+        3.0
       ],
       "weight": 125.0
     },
@@ -3751,15 +4446,15 @@
       "id": "ericrolph_hot_potato_pylon_e_01_01_02",
       "node_material": "|NM_METAL",
       "position": [
-        -15.9,
-        -0.899999,
-        4.0
+        -25.000999,
+        -2.199998,
+        6.0
       ],
       "self_collision": false,
       "source_world_position": [
-        15.9,
-        0.9,
-        4.0
+        25.000999,
+        2.2,
+        6.0
       ],
       "spawn_envelope": true,
       "weight": 125.0
@@ -3771,15 +4466,15 @@
       "id": "ericrolph_hot_potato_arch_000_0",
       "node_material": "|NM_METAL",
       "position": [
-        16.543926,
-        -1e-06,
-        0.31425
+        25.267,
+        -2e-06,
+        0.503173
       ],
       "self_collision": false,
       "source_world_position": [
-        -16.543926,
+        -25.267,
         0.0,
-        0.31425
+        0.503173
       ],
       "weight": 90.0
     },
@@ -3790,15 +4485,15 @@
       "id": "ericrolph_hot_potato_arch_000_1",
       "node_material": "|NM_METAL",
       "position": [
-        14.340537,
-        -1.285001,
-        -0.0
+        21.739006,
+        -2.057502,
+        0.0
       ],
       "self_collision": false,
       "source_world_position": [
-        -14.340537,
-        1.285,
-        -0.0
+        -21.739006,
+        2.0575,
+        0.0
       ],
       "weight": 90.0
     },
@@ -3809,15 +4504,15 @@
       "id": "ericrolph_hot_potato_arch_000_2",
       "node_material": "|NM_METAL",
       "position": [
-        14.340537,
-        1.284999,
-        -0.0
+        21.739006,
+        2.057498,
+        0.0
       ],
       "self_collision": false,
       "source_world_position": [
-        -14.340537,
-        -1.285,
-        -0.0
+        -21.739006,
+        -2.0575,
+        0.0
       ],
       "weight": 90.0
     },
@@ -3828,15 +4523,15 @@
       "id": "ericrolph_hot_potato_arch_006_0",
       "node_material": "|NM_METAL",
       "position": [
-        15.878415,
-        -1e-06,
-        4.043222
+        24.60638,
+        -2e-06,
+        4.284705
       ],
       "self_collision": false,
       "source_world_position": [
-        -15.878415,
+        -24.60638,
         0.0,
-        4.043222
+        4.284705
       ],
       "weight": 90.0
     },
@@ -3847,15 +4542,15 @@
       "id": "ericrolph_hot_potato_arch_006_1",
       "node_material": "|NM_METAL",
       "position": [
-        13.834064,
-        -1.195194,
-        3.717508
+        21.234642,
+        -1.969377,
+        3.768292
       ],
       "self_collision": false,
       "source_world_position": [
-        -13.834064,
-        1.195193,
-        3.717508
+        -21.234642,
+        1.969375,
+        3.768292
       ],
       "weight": 90.0
     },
@@ -3866,15 +4561,15 @@
       "id": "ericrolph_hot_potato_arch_006_2",
       "node_material": "|NM_METAL",
       "position": [
-        13.834064,
-        1.195192,
-        3.717508
+        21.234642,
+        1.969373,
+        3.768292
       ],
       "self_collision": false,
       "source_world_position": [
-        -13.834064,
-        -1.195193,
-        3.717508
+        -21.234642,
+        -1.969375,
+        3.768292
       ],
       "weight": 90.0
     },
@@ -3885,15 +4580,15 @@
       "id": "ericrolph_hot_potato_arch_012_0",
       "node_material": "|NM_METAL",
       "position": [
-        15.126649,
-        -1e-06,
-        7.760048
+        23.875362,
+        -2e-06,
+        8.057279
       ],
       "self_collision": false,
       "source_world_position": [
-        -15.126649,
+        -23.875362,
         0.0,
-        7.760048
+        8.057279
       ],
       "weight": 90.0
     },
@@ -3904,15 +4599,15 @@
       "id": "ericrolph_hot_potato_arch_012_1",
       "node_material": "|NM_METAL",
       "position": [
-        13.267024,
-        -1.090997,
-        7.424473
+        20.700708,
+        -1.857892,
+        7.531122
       ],
       "self_collision": false,
       "source_world_position": [
-        -13.267024,
-        1.090996,
-        7.424473
+        -20.700708,
+        1.85789,
+        7.531122
       ],
       "weight": 90.0
     },
@@ -3923,15 +4618,15 @@
       "id": "ericrolph_hot_potato_arch_012_2",
       "node_material": "|NM_METAL",
       "position": [
-        13.267024,
-        1.090995,
-        7.424473
+        20.700708,
+        1.857888,
+        7.531122
       ],
       "self_collision": false,
       "source_world_position": [
-        -13.267024,
-        -1.090996,
-        7.424473
+        -20.700708,
+        -1.85789,
+        7.531122
       ],
       "weight": 90.0
     },
@@ -3942,15 +4637,15 @@
       "id": "ericrolph_hot_potato_arch_018_0",
       "node_material": "|NM_METAL",
       "position": [
-        14.286087,
-        -1e-06,
-        11.463587
+        23.093815,
+        -2e-06,
+        11.822392
       ],
       "self_collision": false,
       "source_world_position": [
-        -14.286087,
+        -23.093815,
         0.0,
-        11.463587
+        11.822392
       ],
       "weight": 90.0
     },
@@ -3961,15 +4656,15 @@
       "id": "ericrolph_hot_potato_arch_018_1",
       "node_material": "|NM_METAL",
       "position": [
-        12.612237,
-        -0.987251,
-        11.114001
+        20.116611,
+        -1.746655,
+        11.28514
       ],
       "self_collision": false,
       "source_world_position": [
-        -12.612237,
-        0.98725,
-        11.114001
+        -20.116611,
+        1.746653,
+        11.28514
       ],
       "weight": 90.0
     },
@@ -3980,15 +4675,15 @@
       "id": "ericrolph_hot_potato_arch_018_2",
       "node_material": "|NM_METAL",
       "position": [
-        12.612237,
-        0.987249,
-        11.114001
+        20.116611,
+        1.746651,
+        11.28514
       ],
       "self_collision": false,
       "source_world_position": [
-        -12.612237,
-        -0.98725,
-        11.114001
+        -20.116611,
+        -1.746653,
+        11.28514
       ],
       "weight": 90.0
     },
@@ -3999,15 +4694,15 @@
       "id": "ericrolph_hot_potato_arch_024_0",
       "node_material": "|NM_METAL",
       "position": [
-        13.328892,
-        -1e-06,
-        15.145154
+        22.252546,
+        -2e-06,
+        15.578598
       ],
       "self_collision": false,
       "source_world_position": [
-        -13.328892,
+        -22.252546,
         0.0,
-        15.145154
+        15.578598
       ],
       "weight": 90.0
     },
@@ -4018,15 +4713,15 @@
       "id": "ericrolph_hot_potato_arch_024_1",
       "node_material": "|NM_METAL",
       "position": [
-        11.842131,
-        -0.884191,
-        14.777844
+        19.47349,
+        -1.635735,
+        15.027493
       ],
       "self_collision": false,
       "source_world_position": [
-        -11.842131,
-        0.88419,
-        14.777844
+        -19.47349,
+        1.635733,
+        15.027493
       ],
       "weight": 90.0
     },
@@ -4037,15 +4732,15 @@
       "id": "ericrolph_hot_potato_arch_024_2",
       "node_material": "|NM_METAL",
       "position": [
-        11.842131,
-        0.884189,
-        14.777844
+        19.47349,
+        1.635732,
+        15.027493
       ],
       "self_collision": false,
       "source_world_position": [
-        -11.842131,
-        -0.88419,
-        14.777844
+        -19.47349,
+        -1.635733,
+        15.027493
       ],
       "weight": 90.0
     },
@@ -4056,15 +4751,15 @@
       "id": "ericrolph_hot_potato_arch_030_0",
       "node_material": "|NM_METAL",
       "position": [
-        12.21181,
-        -1e-06,
-        18.791948
+        21.339975,
+        -2e-06,
+        19.322411
       ],
       "self_collision": false,
       "source_world_position": [
-        -12.21181,
+        -21.339975,
         0.0,
-        18.791948
+        19.322411
       ],
       "weight": 90.0
     },
@@ -4075,15 +4770,15 @@
       "id": "ericrolph_hot_potato_arch_030_1",
       "node_material": "|NM_METAL",
       "position": [
-        10.914983,
-        -0.782245,
-        18.399576
+        18.759876,
+        -1.525233,
+        18.754881
       ],
       "self_collision": false,
       "source_world_position": [
-        -10.914983,
-        0.782244,
-        18.399576
+        -18.759876,
+        1.525232,
+        18.754881
       ],
       "weight": 90.0
     },
@@ -4094,15 +4789,15 @@
       "id": "ericrolph_hot_potato_arch_030_2",
       "node_material": "|NM_METAL",
       "position": [
-        10.914983,
-        0.782243,
-        18.399576
+        18.759876,
+        1.52523,
+        18.754881
       ],
       "self_collision": false,
       "source_world_position": [
-        -10.914983,
-        -0.782244,
-        18.399576
+        -18.759876,
+        -1.525232,
+        18.754881
       ],
       "weight": 90.0
     },
@@ -4113,15 +4808,15 @@
       "id": "ericrolph_hot_potato_arch_036_0",
       "node_material": "|NM_METAL",
       "position": [
-        10.865368,
-        -1e-06,
-        22.375389
+        20.340693,
+        -2e-06,
+        23.049875
       ],
       "self_collision": false,
       "source_world_position": [
-        -10.865368,
+        -20.340693,
         0.0,
-        22.375389
+        23.049875
       ],
       "weight": 90.0
     },
@@ -4132,15 +4827,15 @@
       "id": "ericrolph_hot_potato_arch_036_1",
       "node_material": "|NM_METAL",
       "position": [
-        9.763589,
-        -0.682261,
-        21.948166
+        17.960884,
+        -1.415294,
+        22.461937
       ],
       "self_collision": false,
       "source_world_position": [
-        -9.763589,
-        0.68226,
-        21.948166
+        -17.960884,
+        1.415293,
+        22.461937
       ],
       "weight": 90.0
     },
@@ -4151,15 +4846,15 @@
       "id": "ericrolph_hot_potato_arch_036_2",
       "node_material": "|NM_METAL",
       "position": [
-        9.763589,
-        0.682259,
-        21.948166
+        17.960884,
+        1.415291,
+        22.461937
       ],
       "self_collision": false,
       "source_world_position": [
-        -9.763589,
-        -0.68226,
-        21.948166
+        -17.960884,
+        -1.415293,
+        22.461937
       ],
       "weight": 90.0
     },
@@ -4170,15 +4865,15 @@
       "id": "ericrolph_hot_potato_arch_042_0",
       "node_material": "|NM_METAL",
       "position": [
-        9.169321,
-        -1e-06,
-        25.834904
+        19.23439,
+        -2e-06,
+        26.753433
       ],
       "self_collision": false,
       "source_world_position": [
-        -9.169321,
+        -19.23439,
         0.0,
-        25.834904
+        26.753433
       ],
       "weight": 90.0
     },
@@ -4189,15 +4884,15 @@
       "id": "ericrolph_hot_potato_arch_042_1",
       "node_material": "|NM_METAL",
       "position": [
-        8.275652,
-        -0.586124,
-        25.353262
+        17.056461,
+        -1.306136,
+        26.141399
       ],
       "self_collision": false,
       "source_world_position": [
-        -8.275652,
-        0.586123,
-        25.353262
+        -17.056461,
+        1.306134,
+        26.141399
       ],
       "weight": 90.0
     },
@@ -4208,15 +4903,15 @@
       "id": "ericrolph_hot_potato_arch_042_2",
       "node_material": "|NM_METAL",
       "position": [
-        8.275652,
-        0.586123,
-        25.353262
+        17.056461,
+        1.306132,
+        26.141399
       ],
       "self_collision": false,
       "source_world_position": [
-        -8.275652,
-        -0.586123,
-        25.353262
+        -17.056461,
+        -1.306134,
+        26.141399
       ],
       "weight": 90.0
     },
@@ -4227,15 +4922,15 @@
       "id": "ericrolph_hot_potato_arch_048_0",
       "node_material": "|NM_METAL",
       "position": [
-        6.917995,
-        -1e-06,
-        29.007692
+        17.992136,
+        -2e-06,
+        30.424765
       ],
       "self_collision": false,
       "source_world_position": [
-        -6.917995,
+        -17.992136,
         0.0,
-        29.007692
+        30.424765
       ],
       "weight": 90.0
     },
@@ -4246,15 +4941,15 @@
       "id": "ericrolph_hot_potato_arch_048_1",
       "node_material": "|NM_METAL",
       "position": [
-        6.262507,
-        -0.498526,
-        28.445625
+        16.01965,
+        -1.1981,
+        29.780083
       ],
       "self_collision": false,
       "source_world_position": [
-        -6.262507,
-        0.498526,
-        28.445625
+        -16.01965,
+        1.198098,
+        29.780083
       ],
       "weight": 90.0
     },
@@ -4265,15 +4960,15 @@
       "id": "ericrolph_hot_potato_arch_048_2",
       "node_material": "|NM_METAL",
       "position": [
-        6.262507,
-        0.498525,
-        28.445625
+        16.01965,
+        1.198097,
+        29.780083
       ],
       "self_collision": false,
       "source_world_position": [
-        -6.262507,
-        -0.498526,
-        28.445625
+        -16.01965,
+        -1.198098,
+        29.780083
       ],
       "weight": 90.0
     },
@@ -4284,15 +4979,15 @@
       "id": "ericrolph_hot_potato_arch_054_0",
       "node_material": "|NM_METAL",
       "position": [
-        3.842197,
-        -0.0,
-        31.464247
+        16.574938,
+        -1e-06,
+        34.0434
       ],
       "self_collision": false,
       "source_world_position": [
-        -3.842197,
+        -16.574938,
         0.0,
-        31.464247
+        34.0434
       ],
       "weight": 90.0
     },
@@ -4303,15 +4998,15 @@
       "id": "ericrolph_hot_potato_arch_054_1",
       "node_material": "|NM_METAL",
       "position": [
-        3.485675,
-        -0.431305,
-        30.80777
+        14.811879,
+        -1.091748,
+        33.359764
       ],
       "self_collision": false,
       "source_world_position": [
-        -3.485675,
-        0.431305,
-        30.80777
+        -14.811879,
+        1.091747,
+        33.359764
       ],
       "weight": 90.0
     },
@@ -4322,15 +5017,15 @@
       "id": "ericrolph_hot_potato_arch_054_2",
       "node_material": "|NM_METAL",
       "position": [
-        3.485675,
-        0.431304,
-        30.80777
+        14.811879,
+        1.091745,
+        33.359764
       ],
       "self_collision": false,
       "source_world_position": [
-        -3.485675,
-        -0.431305,
-        30.80777
+        -14.811879,
+        -1.091747,
+        33.359764
       ],
       "weight": 90.0
     },
@@ -4341,15 +5036,15 @@
       "id": "ericrolph_hot_potato_arch_060_0",
       "node_material": "|NM_METAL",
       "position": [
-        -0.000473,
-        0.0,
-        32.430901
+        14.923841,
+        -1e-06,
+        37.581974
       ],
       "self_collision": false,
       "source_world_position": [
-        0.000473,
+        -14.923841,
         0.0,
-        32.430901
+        37.581974
       ],
       "weight": 90.0
     },
@@ -4360,15 +5055,15 @@
       "id": "ericrolph_hot_potato_arch_060_1",
       "node_material": "|NM_METAL",
       "position": [
-        0.000237,
-        -0.405,
-        31.729418
+        13.379395,
+        -0.988054,
+        36.844795
       ],
       "self_collision": false,
       "source_world_position": [
-        -0.000237,
-        0.405,
-        31.729418
+        -13.379395,
+        0.988053,
+        36.844795
       ],
       "weight": 90.0
     },
@@ -4379,15 +5074,15 @@
       "id": "ericrolph_hot_potato_arch_060_2",
       "node_material": "|NM_METAL",
       "position": [
-        0.000237,
-        0.405,
-        31.729418
+        13.379395,
+        0.988052,
+        36.844795
       ],
       "self_collision": false,
       "source_world_position": [
-        -0.000237,
-        -0.405,
-        31.729418
+        -13.379395,
+        -0.988053,
+        36.844795
       ],
       "weight": 90.0
     },
@@ -4398,15 +5093,15 @@
       "id": "ericrolph_hot_potato_arch_066_0",
       "node_material": "|NM_METAL",
       "position": [
-        -3.842197,
-        0.0,
-        31.464247
+        12.955236,
+        -1e-06,
+        40.98164
       ],
       "self_collision": false,
       "source_world_position": [
-        3.842197,
+        -12.955236,
         0.0,
-        31.464247
+        40.98164
       ],
       "weight": 90.0
     },
@@ -4417,15 +5112,15 @@
       "id": "ericrolph_hot_potato_arch_066_1",
       "node_material": "|NM_METAL",
       "position": [
-        -3.485675,
-        -0.431304,
-        30.80777
+        11.644363,
+        -0.888797,
+        40.174492
       ],
       "self_collision": false,
       "source_world_position": [
-        3.485675,
-        0.431305,
-        30.80777
+        -11.644363,
+        0.888796,
+        40.174492
       ],
       "weight": 90.0
     },
@@ -4436,15 +5131,15 @@
       "id": "ericrolph_hot_potato_arch_066_2",
       "node_material": "|NM_METAL",
       "position": [
-        -3.485675,
-        0.431305,
-        30.80777
+        11.644363,
+        0.888795,
+        40.174492
       ],
       "self_collision": false,
       "source_world_position": [
-        3.485675,
-        -0.431305,
-        30.80777
+        -11.644363,
+        -0.888796,
+        40.174492
       ],
       "weight": 90.0
     },
@@ -4455,15 +5150,15 @@
       "id": "ericrolph_hot_potato_arch_072_0",
       "node_material": "|NM_METAL",
       "position": [
-        -6.917995,
-        1e-06,
-        29.007692
+        10.550483,
+        -1e-06,
+        44.131866
       ],
       "self_collision": false,
       "source_world_position": [
-        6.917995,
+        -10.550483,
         0.0,
-        29.007692
+        44.131866
       ],
       "weight": 90.0
     },
@@ -4474,15 +5169,15 @@
       "id": "ericrolph_hot_potato_arch_072_1",
       "node_material": "|NM_METAL",
       "position": [
-        -6.262507,
-        -0.498525,
-        28.445625
+        9.502091,
+        -0.797355,
+        43.232868
       ],
       "self_collision": false,
       "source_world_position": [
-        6.262507,
-        0.498526,
-        28.445625
+        -9.502091,
+        0.797354,
+        43.232868
       ],
       "weight": 90.0
     },
@@ -4493,15 +5188,15 @@
       "id": "ericrolph_hot_potato_arch_072_2",
       "node_material": "|NM_METAL",
       "position": [
-        -6.262507,
-        0.498526,
-        28.445625
+        9.502091,
+        0.797353,
+        43.232868
       ],
       "self_collision": false,
       "source_world_position": [
-        6.262507,
-        -0.498526,
-        28.445625
+        -9.502091,
+        -0.797354,
+        43.232868
       ],
       "weight": 90.0
     },
@@ -4512,15 +5207,15 @@
       "id": "ericrolph_hot_potato_arch_078_0",
       "node_material": "|NM_METAL",
       "position": [
-        -9.169321,
-        1e-06,
-        25.834904
+        7.579841,
+        -1e-06,
+        46.812584
       ],
       "self_collision": false,
       "source_world_position": [
-        9.169321,
+        -7.579841,
         0.0,
-        25.834904
+        46.812584
       ],
       "weight": 90.0
     },
@@ -4531,15 +5226,15 @@
       "id": "ericrolph_hot_potato_arch_078_1",
       "node_material": "|NM_METAL",
       "position": [
-        -8.275652,
-        -0.586123,
-        25.353262
+        6.83666,
+        -0.720022,
+        45.8111
       ],
       "self_collision": false,
       "source_world_position": [
-        8.275652,
-        0.586123,
-        25.353262
+        -6.83666,
+        0.720021,
+        45.8111
       ],
       "weight": 90.0
     },
@@ -4550,15 +5245,15 @@
       "id": "ericrolph_hot_potato_arch_078_2",
       "node_material": "|NM_METAL",
       "position": [
-        -8.275652,
-        0.586124,
-        25.353262
+        6.83666,
+        0.72002,
+        45.8111
       ],
       "self_collision": false,
       "source_world_position": [
-        8.275652,
-        -0.586123,
-        25.353262
+        -6.83666,
+        -0.720021,
+        45.8111
       ],
       "weight": 90.0
     },
@@ -4569,15 +5264,15 @@
       "id": "ericrolph_hot_potato_arch_084_0",
       "node_material": "|NM_METAL",
       "position": [
-        -10.865368,
-        1e-06,
-        22.375389
+        3.996519,
+        -0.0,
+        48.672298
       ],
       "self_collision": false,
       "source_world_position": [
-        10.865368,
+        -3.996519,
         0.0,
-        22.375389
+        48.672298
       ],
       "weight": 90.0
     },
@@ -4588,15 +5283,15 @@
       "id": "ericrolph_hot_potato_arch_084_1",
       "node_material": "|NM_METAL",
       "position": [
-        -9.763589,
-        -0.682259,
-        21.948166
+        3.610825,
+        -0.666685,
+        47.583885
       ],
       "self_collision": false,
       "source_world_position": [
-        9.763589,
-        0.68226,
-        21.948166
+        -3.610825,
+        0.666685,
+        47.583885
       ],
       "weight": 90.0
     },
@@ -4607,15 +5302,15 @@
       "id": "ericrolph_hot_potato_arch_084_2",
       "node_material": "|NM_METAL",
       "position": [
-        -9.763589,
-        0.682261,
-        21.948166
+        3.610825,
+        0.666684,
+        47.583885
       ],
       "self_collision": false,
       "source_world_position": [
-        9.763589,
-        -0.68226,
-        21.948166
+        -3.610825,
+        -0.666685,
+        47.583885
       ],
       "weight": 90.0
     },
@@ -4626,15 +5321,15 @@
       "id": "ericrolph_hot_potato_arch_090_0",
       "node_material": "|NM_METAL",
       "position": [
-        -12.21181,
-        1e-06,
-        18.791948
+        -0.000747,
+        0.0,
+        49.342434
       ],
       "self_collision": false,
       "source_world_position": [
-        12.21181,
+        0.000747,
         0.0,
-        18.791948
+        49.342434
       ],
       "weight": 90.0
     },
@@ -4645,15 +5340,15 @@
       "id": "ericrolph_hot_potato_arch_090_1",
       "node_material": "|NM_METAL",
       "position": [
-        -10.914983,
-        -0.782243,
-        18.399576
+        0.000373,
+        -0.6475,
+        48.220932
       ],
       "self_collision": false,
       "source_world_position": [
-        10.914983,
-        0.782244,
-        18.399576
+        -0.000373,
+        0.6475,
+        48.220932
       ],
       "weight": 90.0
     },
@@ -4664,15 +5359,15 @@
       "id": "ericrolph_hot_potato_arch_090_2",
       "node_material": "|NM_METAL",
       "position": [
-        -10.914983,
-        0.782245,
-        18.399576
+        0.000373,
+        0.6475,
+        48.220932
       ],
       "self_collision": false,
       "source_world_position": [
-        10.914983,
-        -0.782244,
-        18.399576
+        -0.000373,
+        -0.6475,
+        48.220932
       ],
       "weight": 90.0
     },
@@ -4683,15 +5378,15 @@
       "id": "ericrolph_hot_potato_arch_096_0",
       "node_material": "|NM_METAL",
       "position": [
-        -13.328892,
-        1e-06,
-        15.145154
+        -3.996519,
+        0.0,
+        48.672298
       ],
       "self_collision": false,
       "source_world_position": [
-        13.328892,
+        3.996519,
         0.0,
-        15.145154
+        48.672298
       ],
       "weight": 90.0
     },
@@ -4702,15 +5397,15 @@
       "id": "ericrolph_hot_potato_arch_096_1",
       "node_material": "|NM_METAL",
       "position": [
-        -11.842131,
-        -0.884189,
-        14.777844
+        -3.610825,
+        -0.666684,
+        47.583885
       ],
       "self_collision": false,
       "source_world_position": [
-        11.842131,
-        0.88419,
-        14.777844
+        3.610825,
+        0.666685,
+        47.583885
       ],
       "weight": 90.0
     },
@@ -4721,15 +5416,15 @@
       "id": "ericrolph_hot_potato_arch_096_2",
       "node_material": "|NM_METAL",
       "position": [
-        -11.842131,
-        0.884191,
-        14.777844
+        -3.610825,
+        0.666685,
+        47.583885
       ],
       "self_collision": false,
       "source_world_position": [
-        11.842131,
-        -0.88419,
-        14.777844
+        3.610825,
+        -0.666685,
+        47.583885
       ],
       "weight": 90.0
     },
@@ -4740,15 +5435,15 @@
       "id": "ericrolph_hot_potato_arch_102_0",
       "node_material": "|NM_METAL",
       "position": [
-        -14.286087,
+        -7.579841,
         1e-06,
-        11.463587
+        46.812584
       ],
       "self_collision": false,
       "source_world_position": [
-        14.286087,
+        7.579841,
         0.0,
-        11.463587
+        46.812584
       ],
       "weight": 90.0
     },
@@ -4759,15 +5454,15 @@
       "id": "ericrolph_hot_potato_arch_102_1",
       "node_material": "|NM_METAL",
       "position": [
-        -12.612237,
-        -0.987249,
-        11.114001
+        -6.83666,
+        -0.72002,
+        45.8111
       ],
       "self_collision": false,
       "source_world_position": [
-        12.612237,
-        0.98725,
-        11.114001
+        6.83666,
+        0.720021,
+        45.8111
       ],
       "weight": 90.0
     },
@@ -4778,167 +5473,585 @@
       "id": "ericrolph_hot_potato_arch_102_2",
       "node_material": "|NM_METAL",
       "position": [
-        -12.612237,
-        0.987251,
-        11.114001
+        -6.83666,
+        0.720022,
+        45.8111
       ],
       "self_collision": false,
       "source_world_position": [
-        12.612237,
-        -0.98725,
-        11.114001
+        6.83666,
+        -0.720021,
+        45.8111
       ],
       "weight": 90.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_arch_108_0",
       "node_material": "|NM_METAL",
       "position": [
-        -15.126649,
+        -10.550483,
         1e-06,
-        7.760048
+        44.131866
       ],
       "self_collision": false,
       "source_world_position": [
-        15.126649,
+        10.550483,
         0.0,
-        7.760048
+        44.131866
       ],
       "weight": 90.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_arch_108_1",
       "node_material": "|NM_METAL",
       "position": [
-        -13.267024,
-        -1.090995,
-        7.424473
+        -9.502091,
+        -0.797353,
+        43.232868
       ],
       "self_collision": false,
       "source_world_position": [
-        13.267024,
-        1.090996,
-        7.424473
+        9.502091,
+        0.797354,
+        43.232868
       ],
       "weight": 90.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_arch_108_2",
       "node_material": "|NM_METAL",
       "position": [
-        -13.267024,
-        1.090997,
-        7.424473
+        -9.502091,
+        0.797355,
+        43.232868
       ],
       "self_collision": false,
       "source_world_position": [
-        13.267024,
-        -1.090996,
-        7.424473
+        9.502091,
+        -0.797354,
+        43.232868
       ],
       "weight": 90.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_arch_114_0",
       "node_material": "|NM_METAL",
       "position": [
-        -15.878415,
+        -12.955236,
         1e-06,
-        4.043222
+        40.98164
       ],
       "self_collision": false,
       "source_world_position": [
-        15.878415,
+        12.955236,
         0.0,
-        4.043222
+        40.98164
       ],
       "weight": 90.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_arch_114_1",
       "node_material": "|NM_METAL",
       "position": [
-        -13.834064,
-        -1.195192,
-        3.717508
+        -11.644363,
+        -0.888795,
+        40.174492
       ],
       "self_collision": false,
       "source_world_position": [
-        13.834064,
-        1.195193,
-        3.717508
+        11.644363,
+        0.888796,
+        40.174492
       ],
       "weight": 90.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_arch_114_2",
       "node_material": "|NM_METAL",
       "position": [
-        -13.834064,
-        1.195194,
-        3.717508
+        -11.644363,
+        0.888797,
+        40.174492
       ],
       "self_collision": false,
       "source_world_position": [
-        13.834064,
-        -1.195193,
-        3.717508
+        11.644363,
+        -0.888796,
+        40.174492
       ],
       "weight": 90.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_arch_120_0",
       "node_material": "|NM_METAL",
       "position": [
-        -16.543926,
+        -14.923841,
         1e-06,
-        0.31425
+        37.581974
       ],
       "self_collision": false,
       "source_world_position": [
-        16.543926,
+        14.923841,
         0.0,
-        0.31425
+        37.581974
       ],
       "weight": 90.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_arch_120_1",
       "node_material": "|NM_METAL",
       "position": [
-        -14.340537,
-        -1.284999,
-        -0.0
+        -13.379395,
+        -0.988052,
+        36.844795
       ],
       "self_collision": false,
       "source_world_position": [
-        14.340537,
-        1.285,
-        -0.0
+        13.379395,
+        0.988053,
+        36.844795
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_120_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -13.379395,
+        0.988054,
+        36.844795
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        13.379395,
+        -0.988053,
+        36.844795
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_126_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -16.574938,
+        1e-06,
+        34.0434
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        16.574938,
+        0.0,
+        34.0434
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_126_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -14.811879,
+        -1.091745,
+        33.359764
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        14.811879,
+        1.091747,
+        33.359764
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_126_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -14.811879,
+        1.091748,
+        33.359764
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        14.811879,
+        -1.091747,
+        33.359764
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_132_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -17.992136,
+        2e-06,
+        30.424765
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        17.992136,
+        0.0,
+        30.424765
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_132_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -16.01965,
+        -1.198097,
+        29.780083
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        16.01965,
+        1.198098,
+        29.780083
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_132_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -16.01965,
+        1.1981,
+        29.780083
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        16.01965,
+        -1.198098,
+        29.780083
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_138_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -19.23439,
+        2e-06,
+        26.753433
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        19.23439,
+        0.0,
+        26.753433
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_138_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -17.056461,
+        -1.306132,
+        26.141399
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        17.056461,
+        1.306134,
+        26.141399
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_138_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -17.056461,
+        1.306136,
+        26.141399
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        17.056461,
+        -1.306134,
+        26.141399
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_144_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -20.340693,
+        2e-06,
+        23.049875
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        20.340693,
+        0.0,
+        23.049875
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_144_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -17.960884,
+        -1.415291,
+        22.461937
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        17.960884,
+        1.415293,
+        22.461937
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_144_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -17.960884,
+        1.415294,
+        22.461937
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        17.960884,
+        -1.415293,
+        22.461937
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_150_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -21.339975,
+        2e-06,
+        19.322411
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        21.339975,
+        0.0,
+        19.322411
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_150_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -18.759876,
+        -1.52523,
+        18.754881
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        18.759876,
+        1.525232,
+        18.754881
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_150_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -18.759876,
+        1.525233,
+        18.754881
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        18.759876,
+        -1.525232,
+        18.754881
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_156_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -22.252546,
+        2e-06,
+        15.578598
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        22.252546,
+        0.0,
+        15.578598
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_156_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -19.47349,
+        -1.635732,
+        15.027493
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        19.47349,
+        1.635733,
+        15.027493
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_156_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -19.47349,
+        1.635735,
+        15.027493
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        19.47349,
+        -1.635733,
+        15.027493
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_162_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -23.093815,
+        2e-06,
+        11.822392
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        23.093815,
+        0.0,
+        11.822392
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_162_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -20.116611,
+        -1.746651,
+        11.28514
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        20.116611,
+        1.746653,
+        11.28514
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": false,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_162_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -20.116611,
+        1.746655,
+        11.28514
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        20.116611,
+        -1.746653,
+        11.28514
       ],
       "weight": 90.0
     },
@@ -4946,72 +6059,296 @@
       "collision": true,
       "fixed": true,
       "friction": 0.9,
-      "id": "ericrolph_hot_potato_arch_120_2",
+      "id": "ericrolph_hot_potato_arch_168_0",
       "node_material": "|NM_METAL",
       "position": [
-        -14.340537,
-        1.285001,
-        -0.0
+        -23.875362,
+        2e-06,
+        8.057279
       ],
       "self_collision": false,
       "source_world_position": [
-        14.340537,
-        -1.285,
-        -0.0
+        23.875362,
+        0.0,
+        8.057279
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_168_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -20.700708,
+        -1.857888,
+        7.531122
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        20.700708,
+        1.85789,
+        7.531122
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_168_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -20.700708,
+        1.857892,
+        7.531122
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        20.700708,
+        -1.85789,
+        7.531122
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_174_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -24.60638,
+        2e-06,
+        4.284705
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        24.60638,
+        0.0,
+        4.284705
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_174_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -21.234642,
+        -1.969373,
+        3.768292
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        21.234642,
+        1.969375,
+        3.768292
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_174_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -21.234642,
+        1.969377,
+        3.768292
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        21.234642,
+        -1.969375,
+        3.768292
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_180_0",
+      "node_material": "|NM_METAL",
+      "position": [
+        -25.267,
+        2e-06,
+        0.503173
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        25.267,
+        0.0,
+        0.503173
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_180_1",
+      "node_material": "|NM_METAL",
+      "position": [
+        -21.739006,
+        -2.057498,
+        0.0
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        21.739006,
+        2.0575,
+        0.0
+      ],
+      "weight": 90.0
+    },
+    {
+      "collision": true,
+      "fixed": true,
+      "friction": 0.9,
+      "id": "ericrolph_hot_potato_arch_180_2",
+      "node_material": "|NM_METAL",
+      "position": [
+        -21.739006,
+        2.057502,
+        0.0
+      ],
+      "self_collision": false,
+      "source_world_position": [
+        21.739006,
+        -2.0575,
+        0.0
       ],
       "weight": 90.0
     }
   ],
   "palette": {
-    "ericrolph_hot_potato_arch_cream": {
+    "ericrolph_hot_potato_arch_steel": {
       "color": [
-        0.941,
-        0.925,
-        0.878,
+        0.57,
+        0.58,
+        0.6,
         1.0
       ],
       "double_sided": true,
-      "metallic": 0.08,
+      "material": {
+        "dynamicCubemap": true
+      },
+      "metallic": 1.0,
       "roughness": 0.3,
       "texture": {
-        "family": "painted_metal",
+        "family": "arch_stainless",
+        "normal_strength": 2.6,
         "params": {
           "base": [
-            0.941,
-            0.925,
-            0.878
+            0.57,
+            0.58,
+            0.6
           ],
-          "peel": 0.1,
           "rough": 0.3
         },
+        "size": 2048,
+        "srgb": true
+      }
+    },
+    "ericrolph_hot_potato_copper": {
+      "color": [
+        0.5,
+        0.18,
+        0.09,
+        1.0
+      ],
+      "material": {
+        "dynamicCubemap": true
+      },
+      "metallic": 0.85,
+      "roughness": 0.52,
+      "texture": {
+        "family": "copper",
+        "params": {
+          "base": [
+            0.5,
+            0.18,
+            0.09
+          ],
+          "oxide": [
+            0.064,
+            0.022,
+            0.012
+          ],
+          "polish": 0.85,
+          "rough": 0.52,
+          "verd": [
+            0.12,
+            0.18,
+            0.15
+          ]
+        },
+        "size": 512,
+        "srgb": true
+      }
+    },
+    "ericrolph_hot_potato_mash": {
+      "color": [
+        0.87,
+        0.78,
+        0.52,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.55,
+      "texture": {
+        "family": "mashed_potato",
+        "normal_strength": 2.4,
         "size": 1024
       }
     },
-    "ericrolph_hot_potato_bronze": {
+    "ericrolph_hot_potato_pad_steel": {
       "color": [
-        0.55,
-        0.4,
-        0.2,
+        0.5,
+        0.51,
+        0.53,
         1.0
       ],
-      "metallic": 0.9,
-      "roughness": 0.36,
+      "material": {
+        "dynamicCubemap": true
+      },
+      "metallic": 1.0,
+      "roughness": 0.52,
       "texture": {
-        "family": "copper",
-        "size": 512
+        "family": "honed_steel_disc",
+        "normal_strength": 2.2,
+        "params": {
+          "base": [
+            0.5,
+            0.51,
+            0.53
+          ],
+          "rough": 0.52
+        },
+        "size": 1024,
+        "srgb": true
       }
     },
-    "ericrolph_hot_potato_medallion_stone": {
+    "ericrolph_hot_potato_plinth_concrete": {
       "color": [
-        0.8,
-        0.78,
-        0.74,
+        0.62,
+        0.6,
+        0.57,
         1.0
       ],
       "metallic": 0.0,
       "roughness": 0.82,
       "texture": {
         "family": "concrete",
+        "params": {
+          "fine": 1.0
+        },
         "size": 1024
       }
     },
@@ -5041,6 +6378,90 @@
   "parts": [
     {
       "materials": [
+        "ericrolph_hot_potato_mash"
+      ],
+      "name": "mash_1",
+      "path": "vehicles/ericrolph_hot_potato/ericrolph_hot_potato_mash_1.dae",
+      "pivot_world": [
+        -3.0,
+        -3.0,
+        -30.0
+      ],
+      "sha256": "a7fd46a042f1ea083892202d401dcac20fd5793b5ddc56daaac3fb6d8a40ab59",
+      "size": 1802644
+    },
+    {
+      "materials": [
+        "ericrolph_hot_potato_mash"
+      ],
+      "name": "mash_2",
+      "path": "vehicles/ericrolph_hot_potato/ericrolph_hot_potato_mash_2.dae",
+      "pivot_world": [
+        3.0,
+        -3.0,
+        -30.0
+      ],
+      "sha256": "c7f846e2a35e4bf0ad6b7be48708cd1a0a190707951aab4769b3aabc2ba76ed7",
+      "size": 1804871
+    },
+    {
+      "materials": [
+        "ericrolph_hot_potato_mash"
+      ],
+      "name": "mash_3",
+      "path": "vehicles/ericrolph_hot_potato/ericrolph_hot_potato_mash_3.dae",
+      "pivot_world": [
+        -3.0,
+        3.0,
+        -30.0
+      ],
+      "sha256": "dae073e6b95d8d15d7609ca51bd114c85e9da4e6ef6dadcee4ebe46d1e0762e7",
+      "size": 1804021
+    },
+    {
+      "materials": [
+        "ericrolph_hot_potato_mash"
+      ],
+      "name": "mash_4",
+      "path": "vehicles/ericrolph_hot_potato/ericrolph_hot_potato_mash_4.dae",
+      "pivot_world": [
+        3.0,
+        3.0,
+        -30.0
+      ],
+      "sha256": "aff49585d5b999ec4be2ce64ca0589b70ed7e09e2a4c80cebd0658dd1759e177",
+      "size": 1806164
+    },
+    {
+      "materials": [
+        "ericrolph_hot_potato_mash"
+      ],
+      "name": "mash_5",
+      "path": "vehicles/ericrolph_hot_potato/ericrolph_hot_potato_mash_5.dae",
+      "pivot_world": [
+        0.0,
+        -4.5,
+        -30.0
+      ],
+      "sha256": "8994d95a68c604da3d3bb84d266ea933f5dd552e8571e3adab0290014088116d",
+      "size": 1803962
+    },
+    {
+      "materials": [
+        "ericrolph_hot_potato_mash"
+      ],
+      "name": "mash_6",
+      "path": "vehicles/ericrolph_hot_potato/ericrolph_hot_potato_mash_6.dae",
+      "pivot_world": [
+        0.0,
+        4.5,
+        -30.0
+      ],
+      "sha256": "c05ac1cdf93c7c39f3fb3504970ad827c7271f4efb2f2f6dbecd3cd298cfa71f",
+      "size": 871846
+    },
+    {
+      "materials": [
         "ericrolph_hot_potato_potato"
       ],
       "name": "potato",
@@ -5050,7 +6471,7 @@
         0.0,
         5.6
       ],
-      "sha256": "cb6e71c110b6093f6f36e8e78648c2159c831624fa2db478bc31b99cfdc356a7",
+      "sha256": "db4ee2c9b89b0601658545ddd0e7382d073fcc483bbc0c2d4477ec54bb67ea60",
       "size": 1806986
     }
   ],
@@ -5059,7 +6480,7 @@
     "back": "ericrolph_hot_potato_pad_01_00_00",
     "left": "ericrolph_hot_potato_pad_00_01_00",
     "ref": "ericrolph_hot_potato_pad_01_01_00",
-    "up": "ericrolph_hot_potato_arch_060_0"
+    "up": "ericrolph_hot_potato_arch_090_0"
   },
   "schema": "ericrolph-giant-props-handoff-v1",
   "slidenodes": [],
@@ -5525,120 +6946,121 @@
     {
       "ground_model": "metal",
       "nodes": [
-        "ericrolph_hot_potato_arch_108_0",
-        "ericrolph_hot_potato_arch_108_1",
-        "ericrolph_hot_potato_arch_114_1"
+        "ericrolph_hot_potato_arch_168_0",
+        "ericrolph_hot_potato_arch_168_1",
+        "ericrolph_hot_potato_arch_174_1"
       ]
     },
     {
       "ground_model": "metal",
       "nodes": [
-        "ericrolph_hot_potato_arch_108_0",
-        "ericrolph_hot_potato_arch_114_1",
-        "ericrolph_hot_potato_arch_114_0"
+        "ericrolph_hot_potato_arch_168_0",
+        "ericrolph_hot_potato_arch_174_1",
+        "ericrolph_hot_potato_arch_174_0"
       ]
     },
     {
       "ground_model": "metal",
       "nodes": [
-        "ericrolph_hot_potato_arch_108_1",
-        "ericrolph_hot_potato_arch_108_2",
-        "ericrolph_hot_potato_arch_114_2"
+        "ericrolph_hot_potato_arch_168_1",
+        "ericrolph_hot_potato_arch_168_2",
+        "ericrolph_hot_potato_arch_174_2"
       ]
     },
     {
       "ground_model": "metal",
       "nodes": [
-        "ericrolph_hot_potato_arch_108_1",
-        "ericrolph_hot_potato_arch_114_2",
-        "ericrolph_hot_potato_arch_114_1"
+        "ericrolph_hot_potato_arch_168_1",
+        "ericrolph_hot_potato_arch_174_2",
+        "ericrolph_hot_potato_arch_174_1"
       ]
     },
     {
       "ground_model": "metal",
       "nodes": [
-        "ericrolph_hot_potato_arch_108_2",
-        "ericrolph_hot_potato_arch_108_0",
-        "ericrolph_hot_potato_arch_114_0"
+        "ericrolph_hot_potato_arch_168_2",
+        "ericrolph_hot_potato_arch_168_0",
+        "ericrolph_hot_potato_arch_174_0"
       ]
     },
     {
       "ground_model": "metal",
       "nodes": [
-        "ericrolph_hot_potato_arch_108_2",
-        "ericrolph_hot_potato_arch_114_0",
-        "ericrolph_hot_potato_arch_114_2"
+        "ericrolph_hot_potato_arch_168_2",
+        "ericrolph_hot_potato_arch_174_0",
+        "ericrolph_hot_potato_arch_174_2"
       ]
     },
     {
       "ground_model": "metal",
       "nodes": [
-        "ericrolph_hot_potato_arch_114_0",
-        "ericrolph_hot_potato_arch_114_1",
-        "ericrolph_hot_potato_arch_120_1"
+        "ericrolph_hot_potato_arch_174_0",
+        "ericrolph_hot_potato_arch_174_1",
+        "ericrolph_hot_potato_arch_180_1"
       ]
     },
     {
       "ground_model": "metal",
       "nodes": [
-        "ericrolph_hot_potato_arch_114_0",
-        "ericrolph_hot_potato_arch_120_1",
-        "ericrolph_hot_potato_arch_120_0"
+        "ericrolph_hot_potato_arch_174_0",
+        "ericrolph_hot_potato_arch_180_1",
+        "ericrolph_hot_potato_arch_180_0"
       ]
     },
     {
       "ground_model": "metal",
       "nodes": [
-        "ericrolph_hot_potato_arch_114_1",
-        "ericrolph_hot_potato_arch_114_2",
-        "ericrolph_hot_potato_arch_120_2"
+        "ericrolph_hot_potato_arch_174_1",
+        "ericrolph_hot_potato_arch_174_2",
+        "ericrolph_hot_potato_arch_180_2"
       ]
     },
     {
       "ground_model": "metal",
       "nodes": [
-        "ericrolph_hot_potato_arch_114_1",
-        "ericrolph_hot_potato_arch_120_2",
-        "ericrolph_hot_potato_arch_120_1"
+        "ericrolph_hot_potato_arch_174_1",
+        "ericrolph_hot_potato_arch_180_2",
+        "ericrolph_hot_potato_arch_180_1"
       ]
     },
     {
       "ground_model": "metal",
       "nodes": [
-        "ericrolph_hot_potato_arch_114_2",
-        "ericrolph_hot_potato_arch_114_0",
-        "ericrolph_hot_potato_arch_120_0"
+        "ericrolph_hot_potato_arch_174_2",
+        "ericrolph_hot_potato_arch_174_0",
+        "ericrolph_hot_potato_arch_180_0"
       ]
     },
     {
       "ground_model": "metal",
       "nodes": [
-        "ericrolph_hot_potato_arch_114_2",
-        "ericrolph_hot_potato_arch_120_0",
-        "ericrolph_hot_potato_arch_120_2"
+        "ericrolph_hot_potato_arch_174_2",
+        "ericrolph_hot_potato_arch_180_0",
+        "ericrolph_hot_potato_arch_180_2"
       ]
     }
   ],
   "visual": {
     "bounds": {
       "max": [
-        17.107399,
-        4.2,
-        32.430901
+        26.088198,
+        4.45,
+        49.342434
       ],
       "min": [
-        -17.107399,
-        -4.2,
-        -0.005
+        -26.088198,
+        -4.45,
+        0.0
       ]
     },
     "materials": [
-      "ericrolph_hot_potato_arch_cream",
-      "ericrolph_hot_potato_bronze",
-      "ericrolph_hot_potato_medallion_stone"
+      "ericrolph_hot_potato_arch_steel",
+      "ericrolph_hot_potato_copper",
+      "ericrolph_hot_potato_pad_steel",
+      "ericrolph_hot_potato_plinth_concrete"
     ],
     "path": "vehicles/ericrolph_hot_potato/ericrolph_hot_potato.dae",
-    "sha256": "324a27af8326ed1ecd4d2b75835370c2e35961deecf961b57522cfd324260907",
-    "size": 464099
+    "sha256": "1d905c865e78acedc0e474ed4c775dae6b574a09ee8b0d7c13cff691a45918f5",
+    "size": 623234
   }
 }

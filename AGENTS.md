@@ -687,10 +687,13 @@ in three more. Only 10 of 20 mod trees differed from their shipped zip by runtim
 So when landing a shared-runtime fix: snapshot each shipped zip, restore every member that differs
 for a reason OTHER than the file you meant to change back into `mod/`, re-cut, then prove
 member-by-member that exactly one member moved. `serial.json` bumps only on a real content change,
-so a no-op rebuild is idempotent and reproduces the hash — but ONLY below the timestamp clamp
-(`packaging._serial_timestamp`, serial <= days since 2026-08-01). Above it the member timestamp
-rides the wall clock and every rebuild yields a new sha256. Re-staging `dist/repo_update` or
-`dist/repo_submission` is part of the re-cut; a test pins the catapult one.
+so a no-op rebuild is idempotent and reproduces the hash. Since 2026-08-29 a content bump also
+records `stamped_at` — the cut's wall-clock moment — and members carry THAT date
+(`timestamp_scheme: cut-wallclock@serial-bump`), which restores hash-stability at every serial
+and closes THE STALE-CACHE TRAP below. A `serial.json` without `stamped_at` reproduces the
+legacy serial-days stamp until its next real content change, so pre-scheme locks stay
+verifiable. Re-staging `dist/repo_update` or `dist/repo_submission` is part of the re-cut; a
+test pins the catapult one.
 
 **`high_five` is the first mod to cross that clamp** — it reached serial 25 on 2026-08-25, i.e. 25
 serials against 24 days since 2026-08-01, so its `member_timestamp` now reads the build clock
@@ -1012,6 +1015,17 @@ correction into the node positions). Walking-mode hover highlights confirm the w
 
 - ZIP_EPOCH must postdate any plausible cache mtime on the target machine (stamp next-day noon).
   The game prefers whichever of cache/zip is newer; a stale epoch silently serves old caches.
+- **THE STALE-CACHE TRAP is that law violated at pack scale, and it shipped (2026-08-29).**
+  Giant-props members were stamped `2026-08-01 + serial` days; hot_potato's serial-13 members
+  read 2026-08-14 while the real profile's `.cdae` was cooked 2026-08-25 from v1 — so four days
+  of hash-verified current deploys rendered the v1 gantry against materials v2 no longer shipped
+  (the whole prop on NO MATERIAL orange, filmed by the player). A synthetic date is monotonic
+  against other BUILDS, never against a CACHE, whose mtime is the wall clock. Members now carry
+  the wall-clock moment their serial bumped (`stamped_at` in serial.json, THE STALE-CACHE TRAP
+  in `packaging.py`), and `deploy_local.py --deploy` also purges `temp/vehicles/<mod_id>/` for
+  every zip it updates — the cache is derived state and one re-cook is cheap. Diagnostic
+  signature: mesh AND materials from two different releases at once (here: v1 shapes, v1 cooked
+  DDS still in the cache dir, v2 materials.json), on a profile the lock report calls current.
 - Rebuild the distribution after EVERY tree change including version stamps (2-byte drift fails
   determinism checks). Verify shipped content by CONTENT HASH of zip members, never by dims or
   counts alone.

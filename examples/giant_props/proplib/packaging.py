@@ -74,11 +74,30 @@ APPROVED_ROOTS = {
 # So the rule is monotonic AND NEVER IN THE FUTURE. ``_serial_timestamp``
 # clamps to the build's own wall clock, and ``future_dated_members`` is a hard
 # gate so this can never ship again.
+#
+# THE STALE-CACHE TRAP is the same comparison from the other side (2026-08-29,
+# hot_potato v2). The engine keeps whichever of source/cache is NEWER, so a
+# member stamped in the past loses to any cache the machine cooked later:
+# hot_potato's serial-13 members read 2026-08-14, the player's real profile
+# cooked v1's .cdae on 2026-08-25, and the v2 Gateway Arch never imported —
+# the game rendered the v1 gantry against materials v2 no longer ships
+# (orange NO MATERIAL) for four days of otherwise-current deploys. A
+# synthetic serial-days date is monotonic against other BUILDS but not
+# against a CACHE, whose mtime is the wall clock.
+#
+# So every CONTENT CUT is stamped with the wall-clock moment the serial
+# bumped, recorded in serial.json as ``stamped_at``. That stamp postdates
+# every cache cooked from any earlier cut, stays fixed for no-op rebuilds
+# (which restores byte-reproducibility for mods past the old clamp), and is
+# still clamped under the build clock so the future-date trap stays closed.
+# serial.json files from before this scheme have no ``stamped_at``; they keep
+# the legacy serial-days stamp so their shipped locks remain verifiable, and
+# they migrate the next time their content actually changes.
 SERIAL_BASE = datetime.date(2026, 8, 1)
 
-# How far behind "now" a clamped stamp sits. It only has to be in the past;
-# one minute keeps it comfortably newer than any cache a previous build left
-# behind while staying safely on the correct side of the clock.
+# How far behind "now" a stamp sits when it is derived from the build clock.
+# It only has to be in the past; one minute stays safely on the correct side
+# of clock skew between the build and the engine.
 CLAMP_MARGIN = datetime.timedelta(minutes=1)
 
 EXCLUDED_ROOTS = {"mod_info"}
@@ -115,22 +134,29 @@ def uncooked_texture_members(members: list[str]) -> list[str]:
 
 
 def _serial_timestamp(
-    serial: int, now: datetime.datetime | None = None
+    serial: int,
+    now: datetime.datetime | None = None,
+    stamped_at: str | None = None,
 ) -> tuple[int, int, int, int, int, int]:
     """Monotonic member timestamp that is never in the future.
 
-    Below the clamp the scheme is unchanged, so every mod whose serial has not
-    yet overtaken the calendar keeps the exact bytes it shipped before. Above
-    it the stamp rides the build clock, which is still monotonic across builds
-    (a later build has a later clock) and still newer than any cache a player
-    wrote while running the previous build.
+    With ``stamped_at`` (recorded in serial.json when the serial bumped) the
+    stamp IS that cut's wall-clock moment: newer than any cache cooked from an
+    earlier cut (THE STALE-CACHE TRAP above) and byte-stable across no-op
+    rebuilds. Without it — a serial.json from before the scheme — the legacy
+    serial-days stamp is reproduced so existing locks stay verifiable. Both
+    paths clamp under the build clock so a skewed or hand-edited stamp can
+    never trip THE FUTURE-DATE TRAP.
     """
 
     now = now or datetime.datetime.now()
-    candidate = datetime.datetime.combine(
-        SERIAL_BASE + datetime.timedelta(days=serial), datetime.time()
-    )
     ceiling = now - CLAMP_MARGIN
+    if stamped_at:
+        candidate = datetime.datetime.fromisoformat(stamped_at)
+    else:
+        candidate = datetime.datetime.combine(
+            SERIAL_BASE + datetime.timedelta(days=serial), datetime.time()
+        )
     stamp = min(candidate, ceiling)
     return (stamp.year, stamp.month, stamp.day, stamp.hour, stamp.minute, stamp.second)
 
@@ -194,13 +220,21 @@ def build_distribution(example_root: Path, mod_id: str, zip_basename: str) -> di
         serial_state = {
             "serial": int(serial_state.get("serial", 0)) + 1,
             "content_sha": content_sha,
+            # The cut's wall-clock moment, the member stamp from now on: see
+            # THE STALE-CACHE TRAP above. Recorded once, at the bump, so
+            # re-zipping unchanged content reproduces the exact bytes.
+            "stamped_at": (datetime.datetime.now() - CLAMP_MARGIN).isoformat(
+                timespec="seconds"
+            ),
         }
         serial_path.write_text(
             json.dumps(serial_state, indent=2, sort_keys=True) + chr(10),
             encoding="utf-8",
             newline=chr(10),
         )
-    timestamp = _serial_timestamp(int(serial_state["serial"]))
+    timestamp = _serial_timestamp(
+        int(serial_state["serial"]), stamped_at=serial_state.get("stamped_at")
+    )
 
     with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_STORED) as archive:
         for path in members:
@@ -234,7 +268,11 @@ def build_distribution(example_root: Path, mod_id: str, zip_basename: str) -> di
         "size": len(payload),
         "sha256": hashlib.sha256(payload).hexdigest(),
         "build_serial": int(serial_state["serial"]),
-        "timestamp_scheme": "monotonic-serial-days@2026-08-01-clamped-to-build-clock",
+        "timestamp_scheme": (
+            "cut-wallclock@serial-bump"
+            if serial_state.get("stamped_at")
+            else "monotonic-serial-days@2026-08-01-clamped-to-build-clock"
+        ),
         "member_timestamp": datetime.datetime(*timestamp).isoformat(),
     }
     lock_path = dist_root / f"{mod_id}.lock.json"

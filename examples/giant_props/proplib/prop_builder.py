@@ -1165,6 +1165,27 @@ def build_prop(example_root: Path, spec: Any) -> dict[str, Any]:
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, destination)
 
+    # MOD-ROOT assets (2026-08-29, hot_potato settings panel): some shipped
+    # files must live outside vehicles/<mod_id>/ — BeamNG only discovers a
+    # UI app at ui/modules/apps/<name>/app.json, at the ZIP ROOT, the same
+    # place stock apps live. Same opt-in law as SHIP_ASSETS, but each entry
+    # states its destination explicitly: (source under assets/, dest under
+    # mod root). Byte copies, so an authored LF file ships LF.
+    for asset_rel, dest_rel in getattr(spec, "SHIP_ROOT_ASSETS", ()):
+        source = (example_root / "assets" / asset_rel).resolve()
+        assets_root = (example_root / "assets").resolve()
+        if assets_root not in source.parents:
+            raise ValueError(f"SHIP_ROOT_ASSETS entry escapes assets/: {asset_rel}")
+        if not source.is_file():
+            raise FileNotFoundError(f"SHIP_ROOT_ASSETS entry missing: {source}")
+        destination = (mod_root / dest_rel).resolve()
+        if mod_root.resolve() not in destination.parents:
+            raise ValueError(
+                f"SHIP_ROOT_ASSETS destination escapes the mod root: {dest_rel}"
+            )
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, destination)
+
     runtime_path = mod_root / "lua" / "ge" / "extensions" / mod_id / "runtime.lua"
     runtime_path.parent.mkdir(parents=True, exist_ok=True)
     runtime_source = lua_kit.generate_runtime(mod_id, display_name, handoff, spec)

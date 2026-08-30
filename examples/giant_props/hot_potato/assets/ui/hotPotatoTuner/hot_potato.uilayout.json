@@ -1,0 +1,87 @@
+{
+  "apps": [
+    {
+      "appName": "hotPotatoTuner",
+      "appVersion": 1,
+      "placement": {
+        "bottom": "310px",
+        "height": "300px",
+        "left": "0px",
+        "position": "absolute",
+        "width": "300px"
+      }
+    },
+    {
+      "appName": "damageApp",
+      "placement": {
+        "bottom": "0px",
+        "height": "300px",
+        "left": "0px",
+        "position": "absolute",
+        "width": "168.75px"
+      }
+    },
+    {
+      "appName": "tacho2",
+      "appVersion": 1,
+      "placement": {
+        "bottom": "5px",
+        "height": "300px",
+        "right": "5px",
+        "width": "300px"
+      },
+      "settings": {
+        "noCockpit": true
+      }
+    },
+    {
+      "appName": "simplePowertrainControl",
+      "placement": {
+        "bottom": "0px",
+        "height": "170px",
+        "position": "absolute",
+        "right": "260px",
+        "width": "230px"
+      }
+    },
+    {
+      "appName": "inputHints",
+      "appVersion": 8,
+      "placement": {
+        "height": "600px",
+        "position": "absolute",
+        "right": "0px",
+        "top": "0px",
+        "width": "450px"
+      }
+    },
+    {
+      "appName": "topLeftApps",
+      "appVersion": 2,
+      "placement": {
+        "height": "600px",
+        "left": "0px",
+        "position": "absolute",
+        "top": "0px",
+        "width": "380px"
+      }
+    },
+    {
+      "appName": "topCenterApps",
+      "appVersion": 1,
+      "placement": {
+        "height": "350px",
+        "left": 0,
+        "margin": "auto",
+        "position": "absolute",
+        "right": 0,
+        "top": "100px",
+        "width": "610px"
+      }
+    }
+  ],
+  "description": "Freeroam HUD with the Hot Potato panel already on screen: live round status, scores, and every game option.",
+  "title": "Hot Potato",
+  "type": "freeroam",
+  "version": 1.0
+}

@@ -149,8 +149,13 @@ def build_arch(material) -> bpy.types.Object:
             ring = rings[index]
             vertices.append(tuple(ring[corner]))
             vertices.append(tuple(ring[nxt]))
-            uvs.append((0.0, station["s"] / tile))
-            uvs.append((station["side"] / tile, station["s"] / tile))
+            # U centred on the face midline, so the stainless panel columns
+            # sit symmetric about it the way the prototype's do; V is arc
+            # length, so one tile is exactly four 12 ft panel courses at
+            # quarter scale (ARCH_UV_TILE = 3.6576).
+            half = station["side"] * 0.5 / tile
+            uvs.append((-half, station["s"] / tile))
+            uvs.append((half, station["s"] / tile))
         for index in range(len(stations) - 1):
             a = base + index * 2
             quad = (a, a + 1, a + 3, a + 2)
@@ -270,64 +275,308 @@ def build_materials() -> dict[str, object]:
     return bk.materials_from_palette(spec, EXAMPLE_ROOT / "textures")
 
 
+def add_annulus(
+    name: str,
+    z_top: float,
+    r_inner: float,
+    r_outer: float,
+    depth: float,
+    material,
+    segments: int = 96,
+    uv_tile: float = 1.0,
+) -> bpy.types.Object:
+    """A flat ring: top face plus outer/inner walls, no bottom (buried).
+
+    The v2.1 medallion rings were TORUSES lying on the disc — half-pipes of
+    bronze proud of the surface (v2.2 round: "flat and smooth ... with real
+    copper rings"). A real plaza inlay is a flush annular band; this builds
+    one, sitting ``depth`` into the disc so only the polished top shows.
+    UVs are polar: U follows the mid circumference, V the radial width, so
+    the copper grain runs around the band.
+    """
+
+    vertices: list[tuple[float, float, float]] = []
+    faces: list[tuple[int, ...]] = []
+    uvs: list[tuple[float, float]] = []
+    r_mid = 0.5 * (r_inner + r_outer)
+    # segments + 1 columns: the seam column is DUPLICATED so its U keeps
+    # counting up instead of snapping back to zero and smearing the last
+    # segment's texture backwards across the whole band.
+    for index in range(segments + 1):
+        angle = math.tau * index / segments
+        c, s = math.cos(angle), math.sin(angle)
+        u = (angle * r_mid) / uv_tile
+        for radius, v_coord in ((r_inner, 0.0), (r_outer, (r_outer - r_inner) / uv_tile)):
+            vertices.append((radius * c, radius * s, z_top))
+            uvs.append((u, v_coord))
+        for radius in (r_inner, r_outer):
+            vertices.append((radius * c, radius * s, z_top - depth))
+            uvs.append((u, -depth / uv_tile))
+    for index in range(segments):
+        a = index * 4
+        b = (index + 1) * 4
+        faces.append((a, a + 1, b + 1, b))          # top, wound +Z out
+        faces.append((a + 1, a + 3, b + 3, b + 1))  # outer wall, out
+        faces.append((a + 2, a, b, b + 2))          # inner wall, inward-facing
+    mesh = bpy.data.meshes.new(f"{name}_mesh")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    layer = mesh.uv_layers.new(name="UVMap")
+    for polygon in mesh.polygons:
+        for loop_index in polygon.loop_indices:
+            layer.data[loop_index].uv = uvs[mesh.loops[loop_index].vertex_index]
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    bk.assign_material(obj, material)
+    bpy.ops.object.select_all(action="DESELECT")
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    try:
+        bpy.ops.object.shade_auto_smooth(angle=math.radians(38.0))
+    except Exception:
+        bpy.ops.object.shade_smooth()
+    obj.select_set(False)
+    return obj
+
+
+def add_polar_disc(
+    name: str,
+    z_top: float,
+    radius: float,
+    depth: float,
+    material,
+    segments: int = 128,
+    radial_rings: int = 6,
+    uv_tile: float = 3.0,
+    flare: float = 0.25,
+) -> bpy.types.Object:
+    """A plaza plate with POLAR UVs and a flared (tapered) rim.
+
+    The round-1 critic on the add_cone version: "brush marks run in one
+    straight linear direction across a circular machined plate — a
+    lathed/ground disc brushes circumferentially." The texture family's
+    grain runs along U, so the fix is the MAPPING: U is arc length around
+    the plate (per-vertex, so grain density holds from hub to rim), V is
+    radius — linear streaks become the concentric swirl a ground disc
+    actually carries, converging at the hub the way the real tool mark
+    does. The rim wall flares out ``flare`` at grade: the tapered edge.
+    """
+
+    vertices: list[tuple[float, float, float]] = [(0.0, 0.0, z_top)]
+    uvs: list[tuple[float, float]] = [(0.0, 0.0)]
+    faces: list[tuple[int, ...]] = []
+    cols = segments + 1  # seam column duplicated, same law as the annulus
+    ring_radii = [radius * i / radial_rings for i in range(1, radial_rings + 1)]
+    for r in ring_radii:
+        for s in range(cols):
+            angle = math.tau * s / segments
+            vertices.append((r * math.cos(angle), r * math.sin(angle), z_top))
+            uvs.append(((angle * r) / uv_tile, r / uv_tile))
+    rim = radius + flare
+    for s in range(cols):
+        angle = math.tau * s / segments
+        vertices.append((rim * math.cos(angle), rim * math.sin(angle), z_top - depth))
+        uvs.append(((angle * rim) / uv_tile, (rim + depth) / uv_tile))
+    for s in range(segments):
+        faces.append((0, 1 + s, 2 + s))
+    for ri in range(radial_rings - 1):
+        inner = 1 + ri * cols
+        outer = 1 + (ri + 1) * cols
+        for s in range(segments):
+            faces.append((inner + s, outer + s, outer + s + 1, inner + s + 1))
+    top_edge = 1 + (radial_rings - 1) * cols
+    bottom_edge = 1 + radial_rings * cols
+    for s in range(segments):
+        faces.append((top_edge + s, bottom_edge + s, bottom_edge + s + 1, top_edge + s + 1))
+    mesh = bpy.data.meshes.new(f"{name}_mesh")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    layer = mesh.uv_layers.new(name="UVMap")
+    for polygon in mesh.polygons:
+        for loop_index in polygon.loop_indices:
+            layer.data[loop_index].uv = uvs[mesh.loops[loop_index].vertex_index]
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    bk.assign_material(obj, material)
+    bpy.ops.object.select_all(action="DESELECT")
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    try:
+        bpy.ops.object.shade_auto_smooth(angle=math.radians(38.0))
+    except Exception:
+        bpy.ops.object.shade_smooth()
+    obj.select_set(False)
+    return obj
+
+
+def flatten_horizontal_uvs(obj: bpy.types.Object, meters_per_tile: float) -> None:
+    """Planar-map every near-horizontal face to world XY at metric density.
+
+    The v2.4 footing fix ("the tops look especially bad"): add_cone scales
+    the WHOLE primitive UV map for the side walls — U by the circumference,
+    V by the slant — which is right for the skirt and catastrophic for the
+    cap fans. On the plinths that scaling squashed the top faces ~64:1
+    anisotropic, smearing the fine concrete speckle into herringbone
+    streaks (player screenshot, 2026-08-29). Caps get an isotropic planar
+    XY projection at the same metres-per-tile instead; the side walls keep
+    their circumference mapping untouched.
+    """
+
+    mesh = obj.data
+    layer = mesh.uv_layers.active
+    if layer is None:
+        return
+    for polygon in mesh.polygons:
+        if abs(polygon.normal.z) < 0.6:
+            continue
+        for loop_index in polygon.loop_indices:
+            vertex = mesh.vertices[mesh.loops[loop_index].vertex_index]
+            layer.data[loop_index].uv = (
+                vertex.co.x / meters_per_tile,
+                vertex.co.y / meters_per_tile,
+            )
+
+
 def build_visual(materials) -> list:
-    cream = materials[f"{MOD_ID}_arch_cream"]
-    stone = materials[f"{MOD_ID}_medallion_stone"]
-    bronze = materials[f"{MOD_ID}_bronze"]
+    steel = materials[f"{MOD_ID}_arch_steel"]
+    pad = materials[f"{MOD_ID}_pad_steel"]
+    copper = materials[f"{MOD_ID}_copper"]
+    concrete = materials[f"{MOD_ID}_plinth_concrete"]
 
-    objects = [build_arch(cream)]
+    objects = [build_arch(steel)]
 
-    # The landing medallion: a low stone disc under the apex. It is the
-    # pickup pad, the visual "stand here", and the cage's ground datum.
+    # The landing medallion: a ground-steel plate under the apex with a
+    # tapered rim (wider at grade) and two flush copper inlay bands. It is
+    # the pickup pad, the visual "stand here", and the cage's ground datum.
     objects.append(
-        bk.add_cylinder(
+        add_polar_disc(
             f"{MOD_ID}_medallion",
-            (0.0, 0.0, spec.MEDALLION_TOP_Z / 2),
+            spec.MEDALLION_TOP_Z,
             spec.MEDALLION_RADIUS,
             spec.MEDALLION_TOP_Z,
-            stone,
-            vertices=64,
-            metric_uv=(3.0, 3.0),
+            pad,
+            segments=128,
+            radial_rings=6,
+            uv_tile=3.0,
+            flare=0.25,
         )
     )
-    objects.append(
-        bk.add_torus(
-            f"{MOD_ID}_medallion_ring",
-            (0.0, 0.0, spec.MEDALLION_TOP_Z),
-            spec.MEDALLION_RADIUS - 0.28,
-            0.055,
-            bronze,
-            major_segments=72,
-            minor_segments=8,
-        )
-    )
-    objects.append(
-        bk.add_torus(
-            f"{MOD_ID}_medallion_ring_inner",
-            (0.0, 0.0, spec.MEDALLION_TOP_Z),
-            spec.MEDALLION_RADIUS * 0.42,
-            0.04,
-            bronze,
-            major_segments=56,
-            minor_segments=8,
-        )
-    )
-    for side, sx in (("w", -1.0), ("e", 1.0)):
+    # 6 mm proud of the plate: enough that the band catches its own light
+    # line and never z-fights, flush to the eye and to a tyre.
+    for ring_name, r_inner, r_outer in (
+        ("ring", spec.MEDALLION_RADIUS - 0.65, spec.MEDALLION_RADIUS - 0.35),
+        ("ring_inner", spec.MEDALLION_RADIUS * 0.37, spec.MEDALLION_RADIUS * 0.42),
+    ):
         objects.append(
-            bk.add_cylinder(
-                f"{MOD_ID}_foot_{side}",
-                (sx * L, 0.0, 0.10),
-                spec.ARCH_BASE_SIDE * 0.82,
-                0.20,
-                stone,
-                vertices=48,
-                metric_uv=(2.0, 2.0),
+            add_annulus(
+                f"{MOD_ID}_medallion_{ring_name}",
+                spec.MEDALLION_TOP_Z + 0.006,
+                r_inner,
+                r_outer,
+                0.03,
+                copper,
+                segments=128,
+                uv_tile=1.0,
             )
         )
+
+    # Foundation plinths (v2.2: "the base plates of the arch don't look
+    # great or realistic"). Two stepped triangular pads of fine-cast
+    # concrete, each oriented like the leg cross-section it carries (one
+    # vertex outward, flat face toward the pad) with a shallow chamfer —
+    # the stepped footing the prototype's legs meet the plaza with, in
+    # place of v2.1's stone pucks.
+    stations = arch_stations()
+    # Blender's 3-vertex cone puts vertex 0 at +Y (measured 2026-08-29:
+    # primitive_cone_add vertices print (0, 1, z) first), NOT at +X — the
+    # first cut assumed +X, rotated the west plinth by pi, and shipped both
+    # plinths corner-to-camera: "two stair ramps leaned against the column"
+    # with an open seam at the vertex (round-1 critic). -pi/2 brings vertex
+    # 0 to +X; the west foot adds pi on top of that.
+    for side, station, rotation in (
+        ("w", stations[0], math.pi / 2.0),
+        ("e", stations[-1], -math.pi / 2.0),
+    ):
+        foot_x = station["p"].x
+        # The leg's grade cross-section is circumradius ~2.38 and its axis
+        # leans inboard, so the upper step carries a fatter margin than the
+        # first cut (2.78 left a slit where the tilted skin crossed it) and
+        # the steps overlap in z so no gap can open between them.
+        for step, circum, depth, z_center in (
+            (0, 3.20, 0.30, 0.15),
+            (1, 2.95, 0.32, 0.40),
+        ):
+            plinth = bk.add_cone(
+                f"{MOD_ID}_plinth_{side}_{step}",
+                (foot_x, 0.0, z_center),
+                circum,
+                circum - 0.10,
+                depth,
+                concrete,
+                vertices=3,
+                rotation=(0.0, 0.0, rotation),
+                bevel=0.03,
+                metric_uv=(2.5, 2.5),
+            )
+            # v2.4: re-project the step TOPS (see flatten_horizontal_uvs —
+            # the cone's side-wall UV scaling smeared them into streaks).
+            flatten_horizontal_uvs(plinth, 2.5)
+            objects.append(plinth)
     return objects
 
 
+def sculpt_mash(obj: bpy.types.Object, seed: int) -> None:
+    """Displace a unit sphere into a dollop of mashed potato, in place.
+
+    Same frequency-band discipline as sculpt_potato, tuned for whipped
+    starch instead of tuber: fewer, softer, DEEPER lumps (mash holds folds,
+    not eyes), a vertical squash into a dollop, and a slight soft peak on
+    top like it slid off a serving spoon.
+    """
+
+    rng = random.Random(seed)  # noqa: S311 - shape authoring, not crypto
+    folds = [
+        (
+            Vector((
+                rng.uniform(-1.0, 1.0),
+                rng.uniform(-1.0, 1.0),
+                rng.uniform(-1.0, 1.0),
+            )).normalized() * rng.uniform(0.7, 1.8),
+            rng.uniform(0.0, math.tau),
+            rng.uniform(0.06, 0.16),
+        )
+        for _ in range(7)
+    ]
+    ripple = [
+        (
+            Vector((
+                rng.uniform(-1.0, 1.0),
+                rng.uniform(-1.0, 1.0),
+                rng.uniform(-1.0, 1.0),
+            )).normalized() * rng.uniform(2.2, 3.6),
+            rng.uniform(0.0, math.tau),
+            rng.uniform(0.015, 0.035),
+        )
+        for _ in range(9)
+    ]
+    for vertex in obj.data.vertices:
+        direction = vertex.co.normalized()
+        radius = 1.0
+        for axis, phase, amplitude in folds:
+            radius += amplitude * math.sin(direction.dot(axis) * math.pi + phase)
+        for axis, phase, amplitude in ripple:
+            radius += amplitude * math.sin(direction.dot(axis) * math.pi + phase)
+        # Dollop: squash toward the equator, pull a soft peak at the pole.
+        squash = 1.0 - 0.28 * abs(direction.z)
+        peak = 0.10 * math.exp(-(((1.0 - direction.z) / 0.35) ** 2))
+        vertex.co = direction * (radius * squash + peak)
+
+
 def build_parts(materials) -> dict[str, dict[str, object]]:
+    # v2.3 ("remove the wick, keep the potato smoking"): the swept fuse
+    # cord, its charred tip and the ember sphere are gone — the tuber ships
+    # bare and the runtime's smoke wisp rises off its scorched crown
+    # (SMOKE_RISE in spec.py's behaviour).
     skin = materials[f"{MOD_ID}_potato"]
     potato = bk.add_sphere(
         f"{MOD_ID}_potato_body",
@@ -348,7 +597,44 @@ def build_parts(materials) -> dict[str, dict[str, object]]:
     except Exception:
         bpy.ops.object.shade_smooth()
     potato.select_set(False)
-    return {"potato": {"objects": [potato], "pivot": HOME}}
+
+    parts: dict[str, dict[str, object]] = {
+        "potato": {"objects": [potato], "pivot": HOME}
+    }
+
+    # The mash chunks (v2.4, "spare no expense polygon wise"): six sculpted
+    # dollops parked at their authored homes under the plaza (spec.MASH_HOMES
+    # — shared with the runtime, which flings them out of the detonation and
+    # re-parks them). Dense spheres so the fold sculpt survives close-ups:
+    # the biggest chunk carries the potato's own 96x64 budget.
+    mash = materials[f"{MOD_ID}_mash"]
+    for index, (home, radius) in enumerate(
+        zip(spec.MASH_HOMES, spec.MASH_RADII, strict=True), start=1
+    ):
+        segments = 64 if radius < 0.5 else 96
+        rings = 48 if radius < 0.5 else 64
+        chunk = bk.add_sphere(
+            f"{MOD_ID}_mash_{index}",
+            tuple(home),
+            1.0,
+            mash,
+            segments=segments,
+            rings=rings,
+        )
+        sculpt_mash(chunk, 47_2400 + index)
+        chunk.scale = (radius, radius, radius)
+        bpy.ops.object.select_all(action="DESELECT")
+        chunk.select_set(True)
+        bpy.context.view_layer.objects.active = chunk
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        try:
+            bpy.ops.object.shade_auto_smooth(angle=math.radians(60.0))
+        except Exception:
+            bpy.ops.object.shade_smooth()
+        chunk.select_set(False)
+        parts[f"mash_{index}"] = {"objects": [chunk], "pivot": tuple(home)}
+
+    return parts
 
 
 def build_cage() -> bk.CageBuilder:
@@ -499,8 +785,10 @@ def main() -> None:
     )
     bk.render_thumbnail(
         AUTHORING_ROOT / f"{MOD_ID}_thumbnail.jpg",
-        camera_location=(34.0, -66.0, 24.0),
-        look_at=(0.0, 0.0, 13.5),
+        # Pulled back for the quarter-scale monument (47.6 m tall, 46 m
+        # span — 1.52x the v2.1 arch).
+        camera_location=(52.0, -100.0, 37.0),
+        look_at=(0.0, 0.0, 20.5),
     )
     print(f"HOT_POTATO generator complete: {len(parts)} parts, {len(cage.nodes)} nodes")
 

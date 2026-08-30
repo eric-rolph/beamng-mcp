@@ -211,6 +211,15 @@ def main() -> None:
         if sha256_file(target) != release.lock_sha256:
             raise SystemExit(f"{release.key}: post-copy hash mismatch at {target}")
         print(f"deployed {release.key} ({release.lock_sha256[:12]}…, verified)")
+        # The engine keeps whichever of source/cache is NEWER, and this
+        # machine may have cooked the OLD zip after the new one was built —
+        # hot_potato served a four-day-stale v1 .cdae over a current deploy
+        # exactly that way (2026-08-29). The cache is derived state; deleting
+        # it costs one re-cook on next load and closes the race completely.
+        cache = mods_root.parent / "temp" / "vehicles" / release.mod_id
+        if cache.is_dir():
+            shutil.rmtree(cache)
+            print(f"purged shape/texture cache for {release.key} ({cache})")
     unpacked = mods_root / "unpacked" / "beamng_mcp"
     for rel in bridge_stale:
         if rel.startswith("("):

@@ -376,3 +376,346 @@ extensions.ericrolph__hot__potato_runtime.hotPotatoResetOptions()
 
 A UI app would call the same three functions through `bngApi.engineLua`, which
 is why they are exported as hooks rather than buried in the behaviour.
+
+
+## 12. The v2.1 repair round (2026-08-29) — three shipped bugs and a critic
+
+The player's recording surfaced three defects in one clip, and each turned
+out to be a different LAYER failing:
+
+- **The whole structure rendered as v1's gantry on NO MATERIAL orange.**
+  Not a materials bug — a PACKAGING bug. The deterministic member stamp
+  (2026-08-01 + serial days) was OLDER than the profile's v1 `.cdae` cache,
+  so the engine never imported the v2 arch: v1 shapes, v1 cooked DDS,
+  v2 materials.json, all at once, on a profile `deploy_local.py` called
+  current. The scheme now stamps the wall-clock moment the serial bumped
+  (`stamped_at`), `--deploy` purges the mod's cache dir, and the live gate
+  asserts every shipped material resolves as a real Material object. Full
+  law: THE STALE-CACHE TRAP in `proplib/packaging.py` and AGENTS.md
+  "Packaging and caches".
+- **The fuse tick outlived the mod.** `Engine.Audio.playOnce` of the game's
+  REVERSE BEEP — a looping FMOD event with no stop handle — leaked one
+  immortal beeper per tick (filmed: 0.45–1.1 s spacing against an authored
+  1.55 s interval, still beeping after deletion). §6's own audio law said
+  this path was banned; the generated runtime shipped it anyway. The tick
+  is now audio mechanism v3 in the CARRIER's VM: one shipped 1.3 s
+  beep+sizzle loop (`authoring/make_tick_audio.py`), pitch mapped from the
+  interval options so rate and tone accelerate as one knob, moved between
+  VMs on transfer, and silenced on every exit — including prop deletion,
+  via a new framework hook (`behavior.cleanup`, called first thing in
+  `cleanupInstallation` while the state still names what it owns).
+- **One detonation bricked single player.** `b.out` was never cleared, so
+  the only car could never re-arm the pad (the 2026-08-28 log: four pad
+  crossings post-boom, zero pickups). Eliminations are per-round now
+  (`endRound`), with exploded-node physics quarantine kept separate and
+  cross-round.
+
+A critic pass over the live screenshots then drove a polish round: the
+potato's roof seat was half a car too high (`height * 2.0` — centre plus a
+FULL height — instead of centre + half + belly − sink); the fuse steam was
+a 3 m-particle cumulus (BNGP_34) and is now the game's own 0.8 m tailpipe
+condensation (BNGP_46, chosen from `managedParticleEmitterData.json` by
+measured particle size) rising from a MODELLED charred fuse cord the potato
+finally has; the post-boom potato rides the blast tumbling instead of
+freezing at roof height for eleven seconds; confetti erupts over the winner
+with an 8 s burnout instead of fountaining at the arch until the next
+round; and OPTION_RANGE now actually covers every gameplay number §11
+claims it does. The beacon strobes on the audible beat (loop length over
+the pitch actually sent), so the light cannot accelerate past the sound at
+the pitch clamp.
+
+The multi-vehicle live gate §8 called for exists now:
+`tests/test_hot_potato_live.py` — pad pickup, a real ram transfer, the
+tag-back hold, per-VM tick probes (a three-VM round trip: GE → carrier VM →
+GE echo), detonation with physics agreement, the detonated car re-arming
+the next round, and prop-deletion audio teardown, in ~47 s, with
+normal-exposure screenshots as the visual instrument.
+## 13. The v2.2 hyper-realism round (2026-08-29) — true quarter scale and four critic rounds
+
+The player put the real monument's photographs beside the mod and asked for
+the distance closed: "scaled to 1/4 size ... spare no expense geometry or
+texture wise, we want this hyper-realistic," plus a realistic medallion with
+inlaid copper, an actual TNT-cord fuse, honest base plates, and an in-game
+way to adjust the options. A supplied reference STL was measured first and
+set aside: at 73 units tall with height/half-span 1.89 and an undersized
+cross-section it is LESS accurate than the parametric weighted catenary the
+generator already carries, so the fidelity work went into scale and
+surfacing, not geometry replacement.
+
+**Scale.** Every arch number is now the published foot figure over four:
+centroid half-span 22.801 m (299.2239 ft), apex 47.63 m, section 4.115 m to
+1.295 m (54 ft to 17 ft). 181 stations; the pylon lattice widened to match
+the 4.1 m legs.
+
+**Surfacing.** Four new texture families ship: `arch_stainless` (metallic-1.0
+skin whose albedo is the alloy's F0, panel courses at the prototype's 12 ft
+over four, per-panel normal-map cant for the patchwork-reflection quilt,
+`dynamicCubemap` real reflections), `fuse_cord` (two-hand yarn braid with
+true over/under parity on a swept parallel-transport tube), `ember_coal`
+(hot-dominant emissive map at 15 k nits — the photometric ledger's own curve
+says 800 reads as paint in daylight — plus a warm PointLight riding the fuse
+tip, because vehicle-material emissive casts on nothing), and
+`honed_steel_disc` (~120 concentric grooves per tile for the medallion's
+polar UVs — circles by construction, after machined_steel's isotropic
+blotches sheared into spiral arms under the polar map). The medallion is a
+polar-UV plate with a flared tapered rim and two FLUSH copper annulus
+inlays; the copper's albedo is the game-art copper family (linear 0.50/
+0.18/0.09 → sRGB ~188/117/84) after the textbook F0 measured out as rose on
+the rendered frame. The plinths are two-step triangular fine-cast concrete
+pads — and Blender's 3-vertex cone puts vertex 0 at +Y, not +X, which is
+why the first cut shipped both plinths corner-to-camera.
+
+**The steam lesson, measured twice.** Both early emitters eject at a 1 ms
+period: a thousand puffs a second stack into an opaque column when parked
+and land as separate evenly-spaced blobs per render frame at speed (the
+"marching row"). BNGP_20 (BNG_smoke_white2) is the shipped answer: 50 ms
+period so the puffs overlap into one translucent ribbon, peak particle
+alpha 0.199, 0.7 s life.
+
+**Mod controls in game.** The settings panel is a stock-style UI app shipped
+at the zip root (`ui/modules/apps/hotPotatoTuner/`) via the new
+SHIP_ROOT_ASSETS staging law in prop_builder. It builds its sliders FROM the
+runtime — the new `hotPotatoGetOptionSchema` hook returns OPTION_RANGE — so
+a new option appears in the panel with no app change and no drift;
+`tests/test_hot_potato_ui_app.py` pins the manifest, the staging and every
+hook the JavaScript calls against the shipped runtime.
+
+**The critic series.** Four rounds, thirteen defects raised and closed with
+in-engine evidence, verdict UTTERLY WOWED on round 4. The instrument grew
+with the round: the live gate now takes reading-distance close-ups (fuse,
+copper, plinth) alongside the action set, and the gate's pickup wait was
+made race-proof after the teleport's reset event was measured landing AFTER
+the position sweep had already given the potato away (round_started →
+carrier_lost(subject_reset) → pad_trigger re-pickup inside ~25 ms).
+Non-blocking notes on record: burnished-vs-fresh copper hue is taste, the
+arch's distance mip-flattening is engine-side, and the cord shows mild
+faceting only at 4x forensic zoom.
+
+## 14. The v2.3 round: bare tuber, HUD app, party options (2026-08-29)
+
+The brief: "remove the wick, keep the potato smoking; there's an audio
+glitch where the audio persists after the explosion; move the controls to a
+HUD app; think about options that'd make for a fun hot potato game and add
+them."
+
+**The wick is gone.** The swept fuse cord, its charred tip, the ember
+sphere, three palette materials (`fuse_cord`, `fuse_char`, `fuse_ember`)
+and the ember PointLight are all removed — the tuber ships bare, and the
+BNGP_20 wisp now rises off the scorched crown itself (`SMOKE_RISE` 0.50,
+just inside the 0.58 semi-z silhouette). And the idle potato now SMOKES:
+with the ember lamp retired, the wisp is the "come and take it" invitation,
+gated by the new `smoke_enabled` option. Serial 28 dropped from 40 to 30
+members with the ten orphaned fuse DDS pruned from the harvest.
+
+**The audio persistence, fixed at three layers.** The stop path was the
+pack's only raw-ogg loop being stopped the FMOD-event way, and it was never
+proven by ear. (1) `TICK_STOP` is now unconditional on `S.on` and goes
+mute-stop-cut: `setVolume(id, 0)` first — the one write PROVEN audible on
+this source, since the pitch rise rides the same call — then `stopSFX`,
+then `cutSFX`. (2) The boom phase re-sends the stop every 0.3 s for its
+first 1.2 s: the original single stop crossed the GE→vehicle boundary in
+the same frame the VM was being fed break, crush and fire commands. (3)
+`TICK_START` now uses the stock restart recipe (sounds.lua
+`playSoundSkipAI`: cut before play), so any zombie voice is killed by the
+next start instead of stacking. A fourth guard closes the sound-alike:
+`detonate()` re-stamps the victim's first-seen time past the boom sequence,
+so a wreck burning ON the medallion can no longer re-arm a fresh round —
+and a fresh tick — the instant the round settles. The live gate now probes
+the victim's VM after the boom and the logic suite counts the re-sent
+stops.
+
+**The HUD app.** ui/apps.lua (the game's own scanner) requires
+domElement+directive+appName and files category-less apps under "unknown" —
+which is why the tuner was hard to find in the Add App browser. The app now
+declares `ui.apps.categories.utility`, and it grew a live STATUS face fed
+by the new `hotPotatoGetStats` hook: who is hot ("YOU ARE HOT" throbs when
+it's the player), a fuse bar driven by urgency, pass count, and the wins
+ledger. The tuning drawer (schema-built, unchanged law) folds away behind a
+button so the in-play footprint is small. The numeric countdown is GATED:
+`hotPotatoGetStats` publishes seconds only when `show_countdown` is on —
+the hidden fuse read through the accelerating tick is still the design, and
+urgency ships always because the tick already broadcasts it audibly. The
+live gate asks the scanner itself for the app (`getUIAppsData`).
+
+**The party options** (all clamped in OPTION_RANGE, all live, all in the
+drawer): `camp_burn_multiplier`/`camp_speed_kmh` (dawdle below the speed
+and the shared fuse burns up to 5x faster — the anti-camping pressure),
+`pass_knockback_mps` (the receiver of an impact pass gets shoved along the
+hit axis), `blast_radius_m`/`blast_push_mps` (an area shockwave at
+detonation — bystanders inside the radius get a falloff radial shove;
+uniform cluster adds, so nothing can be damaged by it), `carrier_boost_mps2`
+extended to −6..8 (negative = ball-and-chain handicap: drags a moving
+carrier, floored so it can never reverse one), `audio_volume` (master for
+the tick and the stingers), `smoke_enabled`, `show_countdown`, and
+`wins_to_champion` with a wins ledger that outlives rounds: enough round
+wins and the session crowns CHAMPION OF THE ARCH, doubles the confetti and
+resets the board. Eight new logic tests pin each behaviour.
+
+## 15. The v2.4 round: the return flight, the mash, and the whole show made optional (2026-08-29)
+
+The player's second play session came back with a list: the round restarted
+itself onto another car, the app never appeared in the Add App grid, the
+potato clipped the carrier's roof, the footing tops looked bad — plus a
+wishlist (mash everywhere, name in fireworks, hardcore mode, steam hiss,
+party modes). Serial 30 answers all of it.
+
+**The round-flow fix.** The old boom settle handed the potato to the
+NEAREST car ("STILL IN PLAY!") — which read exactly like "the game restarts
+itself". That path is gone: every round-over route (boom, fizzle, win,
+carrier lost, reset, quarantine) now ends in `beginReturn` — the alien
+return flight. From wherever the round left the tuber it climbs STRAIGHT UP
+to a cruise line, drifts level to the point above its perch, and eases down
+onto it, slow-yawing with a small circling nutation, smoking and hissing
+the whole way. Rounds arm ONLY at the medallion, from idle. Pinned by
+`test_boom_settles_into_a_return_flight_not_a_respawn` (a car parked on the
+medallion mid-flight must NOT arm) and flown live.
+
+**The Add-App mystery, measured.** The v2.3 fix (types/category) was
+necessary but not the whole story: the grid the player scrolls is built by
+`ui_appSelector_general` from a CACHED app list invalidated only by mod
+activate/deactivate/manager-ready — a file drop or Ctrl+R never refreshes
+it, and `getDetails` reads FRESH while `getTiles` reads the CACHE, which is
+precisely the scanner-sees-it/grid-doesn't asymmetry we shipped into. What
+a mod can fix, v2.4 fixes: `category: "Gameplay"` (a real grid group),
+`isAuxiliary: false` (aux apps hide behind a default-off display option),
+`interactive: "required"` (the mouse badge), an authored `app.png` tile
+(without one the grid shows the generic placeholder), and the unrecognised
+`preserveSpace` dropped. The live gate now asserts against BOTH layers: the
+raw scanner AND `ui_appSelector_general.getAppData()` — the cache itself.
+Player instructions: after installing/updating the mod, restart the game or
+toggle the mod in the mod manager once; then Esc → UI Apps → edit layout →
+Add App → Gameplay → "Hot Potato".
+
+**Carry.** `carry_clearance_m` (default 0.30) rides on top of the OOBB
+seat: the box is the UNDEFORMED body, so roof rails and crumpled roofs
+poked through the old flush seat. The bounce (`bounce_enabled`,
+`bounce_amplitude_m`) launches a parabolic hop ON each tick beat — the
+potato jumps its own countdown, higher and faster as the fuse closes, and
+only ever UP from the clearance baseline.
+
+**The glow ramps like metal in a forge.** `glowHeat` drives the carrier
+glow through a blackbody-style lerp — ember red → orange → yellow-white —
+with brightness climbing in step (real incandescence brightens AND whitens
+together; that coupling is what sells "physically hotter"). Gated by
+`glow_ramp_enabled`; `beacon_enabled` is the master light switch.
+
+**Audio v4 (critic round).** The tick loop is re-authored ("tick v2"):
+thock (190 Hz body knock) + 70 Hz sub pulse (survives engine roar) + the
+950 Hz tick with a droop chirp + the TOCK at t=0.65 — a falling minor
+third, the two-note hot-potato song (two notes is the maximum motif that
+survives the 0.6→5.0 transposition span) + dual sizzle bands (the old
+2400–7800 band transposed ABOVE HEARING at panic pitch; the new 700–2000
+band stays present) + ten Poisson crackle snaps. Same file, same loop
+length, zero runtime change. On top: the SILENCE BEAT (escalating style
+stops the tick and douses the beacon `silence_gap_seconds` before the boom
+— the horror cut), the layered detonation (the proven boom one-shot at
+0.85/0.55/1.6, offset), pass dings pitched by closing speed, and the
+champion arpeggio. `tick_style` = escalating / steady / off — steady is
+hardcore: constant pitch, constant volume, urgency pinned to 0 in the HUD
+and the countdown force-hidden, because freezing pitch alone would ship a
+lie through the other channels. The steam hiss is stock one-shots ONLY
+(`Air_Brakes`/`Air_Dryer_Purge` pitched 1.5–1.95, jittered 2.4–5 s,
+positional): the raw-file GE playOnce route stays banned as recorded
+silent in this repo's evidence chain.
+
+**The mash.** Six sculpted dollops (new additive `mashed_potato` texture
+family: whipped-peak lumps, glossy butter pools, russet skin flecks) live
+parked at authored homes 30 m under the plaza (`MASH_HOMES`, shared
+Python↔Lua). Detonation flings them on ballistic arcs from the boom
+anchor; they land at the victim's measured ground line, sit for
+`mash_seconds`, melt back below grade and re-park. Posed parts with no
+cage — they cannot touch physics. The generator serialises 3-lists as
+vec3 literals, so authored homes index as `.x/.y/.z`, never `[1]` — the
+first cut read nil pivots and parked the flight 30 m underground.
+
+**The fireworks.** `crownChampion` (reached by wins in classic or the
+points race in hoarder) writes the champion's name across the sky above
+the arch: a pool of 28 point lights, a 5×7 bitmap font, one shell per
+letter streaking up from the apex and blooming into the glyph (letter
+colours cycle a festival palette, pitch-stepped stingers arpeggiate across
+the name), then a sparkle-rain finale. The player's own crown uses
+`Steam.playerName` (the same property the game's chat seeds nicknames
+from); an AI champion gets its model name. Gated by `fireworks_enabled`;
+lights live in `state.effects` so teardown sweeps them.
+
+**Game modes.** `game_mode`: classic; hoarder (holding EARNS a point a
+second — first to `hoard_target_points` is crowned, a boom halves the
+victim's hoard, the HUD shows the points race); pinball (ANY touch passes,
+knockback floored at 8 m/s — bumper cars).
+
+**The footing fix.** `add_cone` scales the whole primitive UV for the side
+walls (U by circumference, V by slant) — right for the skirt, ~64:1
+anisotropic squash for the cap fans, which smeared the plinth tops into
+herringbone streaks (the player's screenshot). `flatten_horizontal_uvs`
+re-projects near-horizontal faces planar to XY at the same metric density;
+the sides keep their mapping.
+
+**Verification.** 43 logic tests (16 new), UI-app static gate grown to pin
+the browser-manifest fields, and the live gate now also asserts: the
+Add-App backend cache lists the app, the mash flies above grade, and the
+boom hands over to `return` before idle. Two live runs green (cook +
+final all-DDS serial 30).
+
+**The v2.4.1 critic round — "provably invisible mash".** The critic
+pixel-scanned the boom money shot and found zero cream pixels outside the
+flames: the chunks rested with their CENTRE at the ground line (buried to
+the waist — only their shadow smudges showed) and the fountain launched
+fast enough to fly over the boom camera. Serial 31 fixes all three
+causes: chunks rest at ground + 0.45×radius (`mash_radii` now ships to
+the runtime; the generator serialises the 6-list as a plain table, unlike
+the vec3-literal 3-lists), radii up ~35% (0.46–0.95 m — comedy beats
+conservation of potato), the toss slowed to 3.5–7.5 m/s out / 5–9 m/s up
+so the splatter hangs at the blast anchor, and the live gate grew a
+dedicated `hp_mash` screenshot AT the anchor ~3 s post-boom so the gag is
+photographed, not presumed. Re-reviewed on the pixels: "cream body, warm
+butter tint, lumpy sculpted silhouettes — unmistakably mashed potato" —
+VERDICT: SHIP IT, with two non-blocking engine-side notes on file (the
+stock fire emitter's faceted debris triangles read as untextured shards
+against the sky, and one ownerless shadow ellipse in the anchor shot —
+likely the shadow of an out-of-frame chunk under the low sun).
+
+**The v2.4.2 round — ship a whole HUD layout.** The player's follow-up
+screenshot showed them scrolling the HUD LAYOUTS list — where an app can
+never appear (apps live one level deeper, behind a layout's pencil-edit
+-> Add App). Rather than only documenting the deeper path, the mod now
+meets the player on the screen they actually found: measured against
+`ui/appLayouts.lua`, `getAvailableLayouts()` re-scans the virtual
+`/settings/ui_apps/originalLayouts/` on EVERY call (no cache — unlike
+the Add-App grid) and mod zips overlay that VFS root, so serial 32 ships
+`settings/ui_apps/originalLayouts/hot_potato.uilayout.json`: the stock
+Freeroam apps (minus dragRace/forcedInduction) plus the tuner already
+placed on the left edge. Type `freeroam` with filename stem
+`hot_potato` keeps stock Freeroam the type DEFAULT
+(`findDefaultLayoutByType` prefers stem == type), so installing the mod
+never hijacks a HUD uninvited — but one tap of the layout's use button
+maps freeroam -> Hot Potato via the type-layout map until the player
+picks stock Freeroam back. The tuner entry carries `appVersion` because
+that field drives the game's original->user layout merge: without it a
+future mod update never propagates into saved user copies. Pinned
+statically (strict JSON, LF-only, stock-app whitelist, staging law) and
+live (the `ui_appLayouts` backend must list title "Hot Potato", type
+freeroam, tuner present).
+
+**The v2.4.3 round — the blank panel.** The player placed the app and got
+an empty box. Root cause, measured in the 0.38 UI source: `bngApi` is
+ONLY a window global (`ui/lib/int/vueService.js`:
+`window.bngApi = window.bridge.api`) — it was never registered as an
+Angular service, so the panel's DI annotation `['bngApi', ...]` threw
+`Unknown provider: bngApiProvider` at instantiation, $compile died, and
+the mount slot stayed empty. The working third-party precedent
+(jump-button) uses the bare global. Fix: inject only Angular built-ins
+($interval), reach the engine through the global. Three gates so the
+class stays dead: a static pin that every DI token in the directive's
+annotation array is $-prefixed; a single-root-element pin on app.html
+(replace:true throws on multiple roots); and a NODE INSTANTIATION
+HARNESS that evals the real app.js under a faithful shell stub (bngApi
+global-only, DI resolving only Angular built-ins), instantiates the
+factory and runs link() — the pre-fix code fails it with the player's
+exact "Unknown provider: bngApiProvider", verified by negative test.
+A live CEF render probe was attempted first (mount the real directive
+via window.UIAppsServiceShim, report back per the mcp/tools/ui.lua
+executeJS -> sendEngineLua round-trip) and is ON RECORD as not viable:
+in BeamNGpy tech sessions the JS never reports back through ANY bridge
+channel (three runs, silent on both window.beamng.sendEngineLua and
+window.bngApi.engineLua), so CEF-side rendering stays a
+player-verified surface for now.

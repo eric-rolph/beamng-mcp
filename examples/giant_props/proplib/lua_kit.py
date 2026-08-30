@@ -862,6 +862,12 @@ local function rebuildTriggers(state)
 end
 
 local function cleanupInstallation(state, reason)
+  -- Behaviour teardown FIRST, while the state still names what it owns.
+  -- A behaviour can park state in places this sweep cannot see — hot_potato
+  -- runs an audio loop inside the CARRIER's vehicle VM, and deleting the
+  -- prop without telling that VM leaves the loop beeping forever (the
+  -- player's 2026-08-29 recording, and the reason this hook exists).
+  if behavior.cleanup then pcall(behavior.cleanup, state, reason) end
   for _, trigger in pairs(state.triggers) do
     forgetTriggerOwner(trigger)
     deleteSceneObject(trigger)

@@ -1,0 +1,86 @@
+<div class="hot-potato-tuner" style="width:100%; height:100%; display:flex; flex-direction:column; background:rgba(20,22,26,0.88); color:#e8e8e8; font-family:inherit; border-radius:6px; overflow:hidden;">
+  <style>
+    .hot-potato-tuner header { display:flex; align-items:center; justify-content:space-between; padding:6px 10px; background:rgba(255,140,0,0.18); }
+    .hot-potato-tuner header h3 { margin:0; font-size:1em; letter-spacing:0.04em; }
+    .hot-potato-tuner header button { background:#333; color:#eee; border:1px solid #555; border-radius:4px; padding:2px 8px; cursor:pointer; font-size:0.8em; }
+    .hot-potato-tuner header button:hover { background:#444; }
+    .hot-potato-tuner .hpt-status { padding:8px 10px 6px; }
+    .hot-potato-tuner .hpt-banner { font-size:1.02em; font-weight:bold; letter-spacing:0.02em; }
+    .hot-potato-tuner .hpt-banner.hot { color:#ffd08a; }
+    .hot-potato-tuner .hpt-banner.you { color:#ff8c42; animation:hpt-throb 0.9s ease-in-out infinite; }
+    .hot-potato-tuner .hpt-banner.boom { color:#ff5a3c; }
+    @keyframes hpt-throb { 0%,100% { opacity:1; } 50% { opacity:0.55; } }
+    .hot-potato-tuner .hpt-fuse { margin-top:6px; height:7px; border-radius:4px; background:rgba(255,255,255,0.10); overflow:hidden; }
+    .hot-potato-tuner .hpt-fuse-fill { height:100%; border-radius:4px; background:linear-gradient(90deg, #ffb35c, #ff5a3c); transition:width 0.4s linear; }
+    .hot-potato-tuner .hpt-meta { display:flex; justify-content:space-between; margin-top:4px; font-size:0.78em; color:#bfbfbf; }
+    .hot-potato-tuner .hpt-wins { margin-top:2px; font-size:0.78em; color:#ffd08a; }
+    .hot-potato-tuner .hpt-body { flex:1; overflow-y:auto; padding:4px 10px 10px; border-top:1px solid rgba(255,179,92,0.2); }
+    .hot-potato-tuner h4 { margin:10px 0 4px; font-size:0.82em; text-transform:uppercase; letter-spacing:0.08em; color:#ffb35c; border-bottom:1px solid rgba(255,179,92,0.25); padding-bottom:2px; }
+    .hot-potato-tuner .hpt-row { display:flex; align-items:center; gap:6px; margin:3px 0; font-size:0.82em; }
+    .hot-potato-tuner .hpt-row label { flex:0 0 46%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .hot-potato-tuner .hpt-row input[type=range] { flex:1; min-width:0; }
+    .hot-potato-tuner .hpt-row input[type=number] { width:58px; background:#1c1e22; color:#eee; border:1px solid #444; border-radius:3px; padding:1px 3px; font-size:0.95em; }
+    .hot-potato-tuner .hpt-row select { flex:1; background:#1c1e22; color:#eee; border:1px solid #444; border-radius:3px; }
+    .hot-potato-tuner .hpt-missing { padding:12px; font-size:0.85em; color:#f0b0a0; }
+  </style>
+  <header>
+    <h3>&#x1F954; Hot Potato</h3>
+    <span>
+      <button ng-click="toggleTuning()" title="Open or close the tuning drawer">{{ showTuning ? 'Close tuning' : 'Tuning' }}</button>
+      <button ng-if="showTuning" ng-click="refresh()" title="Re-read the current values">Refresh</button>
+      <button ng-if="showTuning" ng-click="reset()" title="Restore every option to its shipped default">Defaults</button>
+      <button ng-if="showTuning" ng-click="hardcore()" title="Steady tick, no escalation, no visual tells - silence is the only warning">Hardcore</button>
+      <button ng-if="showTuning" ng-click="classicCues()" title="Restore the escalating cues">Classic cues</button>
+    </span>
+  </header>
+
+  <div class="hpt-status">
+    <div class="hpt-banner"
+         ng-class="{hot: status.phase === 'live' && !status.isPlayer, you: status.phase === 'live' && status.isPlayer, boom: status.phase === 'boom'}">
+      {{ status.banner }}
+    </div>
+    <div class="hpt-fuse" ng-if="status.phase === 'live'">
+      <div class="hpt-fuse-fill" ng-style="{width: ((1 - status.urgency) * 100) + '%'}"></div>
+    </div>
+    <div class="hpt-meta" ng-if="status.phase === 'live'">
+      <span ng-if="status.countdown !== null">{{ status.countdown }}s on the fuse</span>
+      <span ng-if="status.countdown === null">fuse hidden &mdash; listen to the tick</span>
+      <span>passes: {{ status.transfers }}</span>
+    </div>
+    <div class="hpt-wins" ng-if="status.hoarder && status.scores.length">
+      <span ng-repeat="entry in status.scores">
+        &#x1F954; {{ entry.name }}: {{ entry.points }}<span ng-if="status.hoardTarget">/{{ status.hoardTarget }}</span><span ng-if="!$last">&nbsp;&middot;&nbsp;</span>
+      </span>
+    </div>
+    <div class="hpt-wins" ng-if="status.wins.length">
+      <span ng-repeat="entry in status.wins">
+        &#x1F3C6; {{ entry.name }}: {{ entry.wins }}<span ng-if="status.winsTarget">/{{ status.winsTarget }}</span><span ng-if="!$last">&nbsp;&middot;&nbsp;</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="hpt-missing" ng-if="showTuning && missing">
+    Hot Potato runtime not loaded &mdash; spawn the Hot Potato prop first, then press Refresh.
+  </div>
+  <div class="hpt-body" ng-if="showTuning && !missing">
+    <div ng-repeat="section in sections">
+      <h4>{{ section.title }}</h4>
+      <div class="hpt-row" ng-repeat="control in section.controls">
+        <label title="{{ control.key }}">{{ control.label }}</label>
+        <input ng-if="control.kind === 'number'" type="range"
+               min="{{ control.min }}" max="{{ control.max }}" step="{{ control.step }}"
+               ng-model="control.value" ng-model-options="{ debounce: 150 }"
+               ng-change="apply(control)" />
+        <input ng-if="control.kind === 'number'" type="number"
+               min="{{ control.min }}" max="{{ control.max }}" step="{{ control.step }}"
+               ng-model="control.value" ng-model-options="{ debounce: 400 }"
+               ng-change="apply(control)" />
+        <input ng-if="control.kind === 'bool'" type="checkbox"
+               ng-model="control.value" ng-change="apply(control)" />
+        <select ng-if="control.kind === 'enum'" ng-model="control.value"
+                ng-options="option as option for option in control.values"
+                ng-change="apply(control)"></select>
+      </div>
+    </div>
+  </div>
+</div>

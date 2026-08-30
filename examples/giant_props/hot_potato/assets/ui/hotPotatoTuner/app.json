@@ -1,0 +1,20 @@
+{
+  "author": "ericrolph",
+  "category": "Gameplay",
+  "css": {
+    "height": "300px",
+    "left": "0px",
+    "top": "0px",
+    "width": "300px"
+  },
+  "description": "Hot Potato HUD: live round status (who is hot, fuse urgency, scores and wins toward Champion of the Arch) plus the full tuning panel - game mode, fuse timing, transfer rules, blast, audio, cue style and party options. Changes apply on the next tick and persist.",
+  "directive": "hotPotatoTuner",
+  "domElement": "<hot-potato-tuner></hot-potato-tuner>",
+  "interactive": "required",
+  "isAuxiliary": false,
+  "name": "Hot Potato",
+  "types": [
+    "ui.apps.categories.utility"
+  ],
+  "version": "2.1.0"
+}

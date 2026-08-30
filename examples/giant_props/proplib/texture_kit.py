@@ -2961,7 +2961,8 @@ def toast_crumb(size, rng, base=(0.82, 0.58, 0.22)):
 
 
 def copper(size, rng, base=(0.545, 0.30, 0.195), rough=0.5,
-           oxide=(0.28, 0.16, 0.11), verd=(0.38, 0.46, 0.42)):
+           oxide=(0.28, 0.16, 0.11), verd=(0.38, 0.46, 0.42),
+           polish=0.0):
     """Worn-penny architectural copper (player round 15: the louver fins
     should read as copper metal, "dull worn penny" chosen over shiny).
 
@@ -2993,8 +2994,18 @@ def copper(size, rng, base=(0.545, 0.30, 0.195), rough=0.5,
     dark = np.clip(spots * np.clip((cluster - 0.35) * 1.6, 0.0, 1.0), 0.0, 0.55)
     micro = _fbm(size, rng, base_cells=96, octaves=2)
     patina = np.clip((mottle - 0.72) * 3.0, 0.0, 1.0) * 0.10
-    value = (0.80 + (mottle - 0.5) * 0.42 + (runoff - 0.5) * 0.34
-             + (grain - 0.5) * 0.16 + (micro - 0.5) * 0.10)
+    # ``polish`` (0..1, default 0 = byte-identical legacy) collapses every
+    # weathering channel toward a maintained, buffed surface: the hot_potato
+    # medallion inlay at polish 0 rendered as "mottled gray-brown ... reads
+    # as weathered leather" (v2.2 critic round 1) because the worn-penny
+    # value swings crush a metallic albedo's F0 tint. A metal's colour IS
+    # its reflectance; a polished inlay has to keep it.
+    keep = 1.0 - np.clip(polish, 0.0, 1.0)
+    dark = dark * keep
+    patina = patina * keep
+    value = (0.80 + 0.16 * (1.0 - keep)
+             + ((mottle - 0.5) * 0.42 + (runoff - 0.5) * 0.34
+                + (grain - 0.5) * 0.16 + (micro - 0.5) * 0.10) * (0.25 + 0.75 * keep))
     color = np.empty((size, size, 3))
     for channel, b in enumerate(base):
         color[..., channel] = b * value
@@ -3011,11 +3022,250 @@ def copper(size, rng, base=(0.545, 0.30, 0.195), rough=0.5,
     for channel in range(3):
         color[..., channel] = color[..., channel] * (1 - dark) + oxide[channel] * dark
         color[..., channel] = color[..., channel] * (1 - patina) + verd[channel] * patina
+    relief_keep = 0.25 + 0.75 * keep
     height = ((mottle - 0.5) * 0.08 + (grain - 0.5) * 0.05
-              + (micro - 0.5) * 0.03 - dark * 0.03)
-    roughness = (rough + (runoff - 0.5) * 0.2 + (grain - 0.5) * 0.1
-                 + (micro - 0.5) * 0.08 + dark * 0.15 + (mottle - 0.5) * 0.06)
+              + (micro - 0.5) * 0.03 - dark * 0.03) * relief_keep
+    roughness = (rough + ((runoff - 0.5) * 0.2 + (grain - 0.5) * 0.1
+                 + (micro - 0.5) * 0.08 + dark * 0.15
+                 + (mottle - 0.5) * 0.06) * relief_keep)
     return color.clip(0, 1), height, roughness.clip(0, 1), None
+
+
+def arch_stainless(size, rng, base=(0.57, 0.58, 0.60), rough=0.34,
+                   courses=4.0, columns=3.0, seam_frac=0.0024,
+                   cant=0.7, panel_tone=0.025, panel_rough=0.045):
+    """Field-welded stainless monument skin (Gateway Arch, 2026-08-29).
+
+    What makes the real arch read as the real arch in photographs is not
+    mirror chrome - it is the PANEL QUILT: an orthogonal grid of ground
+    weld seams, and each panel between them very slightly canted and very
+    slightly its own value, so the skin reflects the sky as a patchwork
+    rather than as one sheet. Brushed grain runs ACROSS the panel (the
+    horizontal axis of the face), weathering runs DOWN it.
+
+    One tile is ``courses`` seam courses tall by ``columns`` panel joints
+    wide; the consumer picks the tile size in metres so the courses land
+    at the prototype's 12 ft (0.91 m at quarter scale). ``cant`` tilts
+    each panel's height plane - the patchwork-reflection knob, it only
+    exists in the normal map. Height is in TEXEL units (_height_to_normal
+    differences adjacent texels with dz = 1), so a panel-WIDE tilt needs
+    an amplitude two orders above the usual per-texel grain numbers.
+    1.6 was the first cut and the critic read the sunlit leg as a
+    "near-binary checkerboard" (v2.2 round 1) — the prototype's quilt is
+    a SUBTLE variance in sky reflection. 0.7 (~0.6 degrees at strength
+    2.6) keeps the patchwork and loses the mosaic.
+    ``panel_tone``/``panel_rough`` scatter albedo and roughness per panel.
+
+    The base is a metallic-1.0 albedo, i.e. the Fresnel F0 of the alloy:
+    stainless measures ~0.57 linear, visibly darker than the 0.9-ish of
+    silver or the old painted cream. Brightness comes from reflection.
+    """
+
+    u = _stripes(size, 1.0, axis=1)
+    v = _stripes(size, 1.0, axis=0)
+    cols = max(1, int(round(columns)))
+    rows = max(1, int(round(courses)))
+    cu = np.minimum((u * cols) % 1.0, 1.0 - (u * cols) % 1.0)
+    cv = np.minimum((v * rows) % 1.0, 1.0 - (v * rows) % 1.0)
+    # Distance to the nearest seam, in tile units per axis.
+    seam_u = np.clip(1.0 - cu / (seam_frac * cols * 2.0), 0.0, 1.0)
+    seam_v = np.clip(1.0 - cv / (seam_frac * rows * 2.0), 0.0, 1.0)
+    seam = np.maximum(seam_u, seam_v) ** 1.5
+
+    # Per-panel lottery: index arrays into one seeded grid per property, so
+    # the quilt is deterministic and exactly periodic.
+    iu = np.floor(u * cols).astype(int) % cols
+    iv = np.floor(v * rows).astype(int) % rows
+    cant_u = rng.random((rows, cols)) * 2.0 - 1.0
+    cant_v = rng.random((rows, cols)) * 2.0 - 1.0
+    tone_lot = rng.random((rows, cols)) * 2.0 - 1.0
+    rough_lot = rng.random((rows, cols)) * 2.0 - 1.0
+    fu = (u * cols) % 1.0
+    fv = (v * rows) % 1.0
+    panel_cant_field = (cant_u[iv, iu] * (fu - 0.5)
+                        + cant_v[iv, iu] * (fv - 0.5)) * cant
+    panel_tone_field = tone_lot[iv, iu] * panel_tone
+    panel_rough_field = rough_lot[iv, iu] * panel_rough
+
+    # Brushed grain across the face; two scales, like machined_steel, but
+    # gentler - a monument is grit-ground, not lathe-turned.
+    grain = _streaks(size, rng, max(12, size // 3), length_frac=0.10)
+    micro = _streaks(size, rng, max(12, size // 2), length_frac=0.03)
+    # Weathering runs DOWN the face: V is "along the arch" in the consumer's
+    # UV, so a streak that varies only with U is a streak the rain drew.
+    # (Copper's column-average idiom; no transpose - identical ROWS means
+    # the value rides U and the streak runs V.)
+    runoff = _fbm(size, rng, base_cells=2, octaves=4)
+    runoff = np.tile(runoff.mean(axis=0, keepdims=True), (size, 1))
+    mottle = _fbm(size, rng, base_cells=5, octaves=4)
+    scuff = np.clip((_streaks(size, rng, max(8, size // 6), 0.10) - 0.80)
+                    * 4.0, 0.0, 1.0) ** 2
+
+    tone = (0.5
+            + (grain - 0.5) * 0.10
+            + (micro - 0.5) * 0.05
+            + (mottle - 0.5) * 0.05
+            + (runoff - 0.5) * 0.04
+            + panel_tone_field)
+    color = _colorize(base, tone, 0.05)
+    color *= 1.0 - seam[..., None] * 0.16
+    color += scuff[..., None] * 0.10
+
+    height = (panel_cant_field
+              + (grain - 0.5) * 0.020
+              + (micro - 0.5) * 0.008
+              - seam * 0.060
+              - scuff * 0.010)
+    roughness = (rough
+                 + panel_rough_field
+                 + (grain - 0.5) * 0.10
+                 + (mottle - 0.5) * 0.06
+                 + (runoff - 0.5) * 0.05
+                 + seam * 0.16
+                 - scuff * 0.06)
+    return color.clip(0, 1), height, roughness.clip(0.05, 1), None
+
+
+def ember_coal(size, rng, crust=(0.055, 0.045, 0.040), heat=(1.0, 0.42, 0.10),
+               core_v=0.06):
+    """A burning coal for a sphere-mapped ember (hot potato, 2026-08-29).
+
+    A uniform emissiveFactor rendered as "a circus-peanut candy on a stick"
+    (v2.2 critic round 1): real embers grade from a white-hot burning face
+    through orange cracks to a dark crust. Authored for Blender's UV
+    sphere: V runs pole to pole with 1 at +Z, and the burn face is the top
+    pole (the open-air end of the fuse). The GLOW lives in the emissive
+    map — heat pooled toward the pole and pushed through the cracks
+    between crust plates; the albedo is near-black char so everything the
+    eye gets at 15 k nits is emission shaped by this map.
+    """
+
+    # MEASURED orientation (run 10, 2026-08-29): the engine samples this
+    # map GL-style — image-bottom rows land on the sphere's BOTTOM pole —
+    # so the burn face is authored at the TOP rows (low ramp values) to
+    # come out at +Z on the ember.
+    v = 1.0 - _stripes(size, 1.0, axis=0)
+    plates = _fbm(size, rng, base_cells=6, octaves=4)
+    micro = _value_noise(size, size // 3, rng)
+    # Crack network: the ridges of |fbm - 0.5|, inverted — thin bright
+    # lines between plate lobes.
+    cracks = np.clip(1.0 - np.abs(plates - 0.5) * 6.0, 0.0, 1.0) ** 2.2
+    # Heat gradient: nothing below core_v, rising toward the pole. HOT
+    # DOMINANT (v2.2 critic round 2: the crust-heavy first cut mip-averaged
+    # to a rust marble at the ember's ~8 on-screen pixels — "brightest
+    # ember pixel is dimmer than the potato skin"): the plates themselves
+    # glow dim red everywhere above the small dark cap, the cracks run
+    # white-hot, and only the cord-side cap stays crust.
+    grad = np.clip((v - core_v) / max(1e-6, 1.0 - core_v), 0.0, 1.0) ** 1.1
+    intensity = np.clip(grad * (0.55 + 0.45 * cracks) + grad ** 3 * 0.40, 0.0, 1.0)
+
+    # Blackbody-ish ramp: red arrives first, green with heat, blue only at
+    # the white-hot top. `heat` tints the ceiling.
+    emissive = np.empty((size, size, 3))
+    emissive[..., 0] = heat[0] * intensity ** 0.55
+    emissive[..., 1] = heat[1] * intensity ** 1.35 + 0.5 * intensity ** 3.0
+    emissive[..., 2] = heat[2] * intensity ** 2.2 + 0.35 * intensity ** 4.0
+
+    ash = np.clip((v - 0.75) * 2.5, 0.0, 1.0) * 0.35
+    color = _colorize(crust, 0.4 + plates * 0.3 + micro * 0.2, 0.15)
+    color += ash[..., None] * np.array([0.18, 0.17, 0.16])
+    height = (plates - 0.5) * 0.10 - cracks * 0.05 + (micro - 0.5) * 0.02
+    roughness = 0.85 - cracks * 0.25 + (plates - 0.5) * 0.10
+    return color.clip(0, 1), height, roughness.clip(0.05, 1), None, emissive.clip(0, 1)
+
+
+def honed_steel_disc(size, rng, base=(0.50, 0.51, 0.53), rough=0.50,
+                     grooves=120.0, groove_depth=0.014):
+    """Ground plaza-plate steel for a POLAR-mapped disc (2026-08-29).
+
+    Consumed with the hot_potato medallion's polar UVs: U is angle, V is
+    RADIUS — so a feature that varies only with V is a perfect concentric
+    circle on the plate. The first cut reused machined_steel there and the
+    critic read "six fat spiral arms ... marbled taffy": its isotropic
+    blotches sheared into spirals under the polar map, and its linear
+    grain had nothing circular about it. This family IS the tool mark:
+    ``grooves`` fine rings per tile, each ring with its own smoothed
+    depth, faint azimuthal breaks so the circles read cut rather than
+    printed, and only whisper-level mottle (any low-frequency blob
+    becomes a spiral arm under this mapping - keep them near-invisible).
+    """
+
+    v = _stripes(size, 1.0, axis=0)
+    # Per-ring lottery, smoothed: one column of periodic value noise gives
+    # each groove row its own amplitude without any azimuthal variation.
+    ring_amp = _value_noise(size, 96, rng)[:, :1]
+    ring_amp = 0.35 + 0.65 * ring_amp
+    breaks = _value_noise(size, 20, rng)
+    groove = np.sin(v * grooves * 2.0 * np.pi + (breaks - 0.5) * 1.2)
+    groove = groove * ring_amp * (0.80 + 0.20 * breaks)
+    micro = _value_noise(size, size // 2, rng)
+    mottle = _fbm(size, rng, base_cells=5, octaves=4)
+    scuff = np.clip((_streaks(size, rng, max(8, size // 6), 0.06) - 0.80)
+                    * 4.0, 0.0, 1.0) ** 2
+
+    tone = (0.5
+            + groove * 0.045
+            + (micro - 0.5) * 0.05
+            + (mottle - 0.5) * 0.030)
+    color = _colorize(base, tone, 0.05)
+    color += scuff[..., None] * 0.10
+    height = groove * groove_depth + (micro - 0.5) * 0.006 - scuff * 0.010
+    roughness = (rough
+                 + groove * 0.06
+                 + (micro - 0.5) * 0.06
+                 + (mottle - 0.5) * 0.05
+                 - scuff * 0.05)
+    return color.clip(0, 1), height, roughness.clip(0.05, 1), None
+
+
+def fuse_cord(size, rng, base=(0.145, 0.150, 0.095), gap=(0.045, 0.045, 0.032),
+              rough=0.52, wraps=7.0, pitch=11.0):
+    """Braided pyrotechnic fuse sheath (hot potato, 2026-08-29).
+
+    Real visco/cannon fuse is a black-powder core under a BRAIDED textile
+    sheath, waxed: two families of yarns spiral in opposite hands and the
+    eye reads the diamond crosshatch and the waxy crowns. U wraps the
+    cord's circumference, V runs along it; ``wraps`` yarns cross the
+    circumference and the two hands advance ``pitch`` diamonds per tile
+    of length. The over/under alternation is real: at each crossing the
+    strand whose lattice parity wins sits proud and the other dives.
+    """
+
+    u = _stripes(size, 1.0, axis=1)
+    v = _stripes(size, 1.0, axis=0)
+    a = u * wraps + v * pitch     # right-hand yarns
+    b = u * wraps - v * pitch     # left-hand yarns
+    fa = a % 1.0
+    fb = b % 1.0
+    # Rounded yarn profile: 1 at the crown, 0 in the ditch between yarns.
+    pa = np.sin(np.clip(fa, 0.0, 1.0) * np.pi) ** 1.4
+    pb = np.sin(np.clip(fb, 0.0, 1.0) * np.pi) ** 1.4
+    # Braid parity: at each diamond one hand crosses OVER the other.
+    over_a = (np.floor(a) + np.floor(b)) % 2.0
+    lift_a = pa * (0.62 + 0.38 * over_a)
+    lift_b = pb * (0.62 + 0.38 * (1.0 - over_a))
+    crown = np.maximum(lift_a, lift_b)
+
+    # Fibre micro-grain along each yarn, plus wax blotches and dust.
+    fibre = _value_noise(size, size // 2, rng)
+    wax = _fbm(size, rng, base_cells=4, octaves=4)
+    dust = np.clip((_fbm(size, rng, base_cells=8, octaves=3) - 0.72) * 2.6,
+                   0.0, 1.0) ** 2
+
+    color = np.empty((size, size, 3))
+    for channel in range(3):
+        color[..., channel] = (gap[channel]
+                               + (base[channel] - gap[channel]) * crown)
+    color *= (0.88 + fibre[..., None] * 0.20) * (0.92 + wax[..., None] * 0.14)
+    color += dust[..., None] * np.array([0.10, 0.09, 0.07])
+
+    height = crown * 0.11 + (fibre - 0.5) * 0.010
+    roughness = (rough
+                 - crown * 0.16          # waxed crowns catch the light
+                 + (wax - 0.5) * 0.10
+                 + dust * 0.20
+                 + (fibre - 0.5) * 0.06)
+    return color.clip(0, 1), height, roughness.clip(0.05, 1), None
 
 
 def panel_legend(size, rng, labels=(), title="", aspect=2.0,
@@ -4720,8 +4970,69 @@ def diamond_plate(size, rng, base=(0.42, 0.44, 0.47), cells=32.0, lug_angle=38.0
     return color.clip(0, 1), height, roughness.clip(0.05, 1), None
 
 
+def mashed_potato(size, rng, base=(0.87, 0.78, 0.52), rough=0.58,
+                  butter=0.55, flecks=1.0):
+    """Fluffy mashed potato for the Hot Potato detonation splatter (v2.4).
+
+    Three visual claims, each carried by its own layer: soft-peaked LUMPS
+    (a ridged low-frequency fbm drives both height and shading — mash holds
+    whipped peaks, not pits), BUTTER POOLS (a sparse low-frequency mask
+    that warms the colour toward melted butter and drops roughness hard —
+    the glisten is the roughness map's job, per the palette comment), and
+    RUSSET SKIN FLECKS folded through (sparse dark red-brown flakes, the
+    tell that this was a potato thirty seconds ago).
+
+    Strictly additive family — no existing family's bytes move.
+    """
+
+    # Whipped peaks: fold the fbm so ridges dominate, then soften.
+    body = _fbm(size, rng, base_cells=3, octaves=5)
+    peaks = 1.0 - np.abs(body - 0.5) * 2.0
+    lumps = body * 0.55 + peaks * 0.45
+    fine = _fbm(size, rng, base_cells=9, octaves=3)
+
+    tone = 0.52 + (lumps - 0.5) * 0.5 + (fine - 0.5) * 0.14
+    color = _colorize(base, tone, 0.10)
+
+    # Butter pools: broad, sparse, warm and GLOSSY.
+    pool_field = _fbm(size, rng, base_cells=2, octaves=3)
+    pools = np.clip((pool_field - (1.0 - butter * 0.45)) / 0.18, 0.0, 1.0)
+    butter_color = np.array((0.96, 0.76, 0.30))
+    color = color * (1.0 - pools[..., None] * 0.7) \
+        + butter_color * pools[..., None] * 0.7
+
+    # Skin flecks: sparse dark flakes, slightly elongated.
+    fleck_mask = np.zeros((size, size))
+    count = int(140 * flecks)
+    if count > 0:
+        ys = rng.integers(0, size, count)
+        xs = rng.integers(0, size, count)
+        lens = rng.integers(2, 9, count)
+        wids = rng.integers(1, 4, count)
+        yy, xx = np.mgrid[0:size, 0:size]
+        for y, x, half_len, half_wid in zip(ys, xs, lens, wids, strict=True):
+            dy = np.minimum(np.abs(yy - y), size - np.abs(yy - y))
+            dx = np.minimum(np.abs(xx - x), size - np.abs(xx - x))
+            hit = ((dy / half_len) ** 2 + (dx / half_wid) ** 2) < 1.0
+            fleck_mask = np.maximum(fleck_mask, hit * 1.0)
+    fleck_color = np.array((0.36, 0.22, 0.11))
+    color = color * (1.0 - fleck_mask[..., None] * 0.8) \
+        + fleck_color * fleck_mask[..., None] * 0.8
+
+    height = (lumps - 0.5) * 0.5 + (fine - 0.5) * 0.10 \
+        - pools * 0.06 - fleck_mask * 0.02
+    roughness = (
+        np.full((size, size), rough)
+        + (fine - 0.5) * 0.10
+        - pools * 0.34
+        + fleck_mask * 0.12
+    )
+    return color.clip(0, 1), height, roughness.clip(0.05, 1), None
+
+
 FAMILIES = {
     "foam_latex": foam_latex,
+    "mashed_potato": mashed_potato,
     "nail_keratin": nail_keratin,
     "slap_pad": slap_pad,
     "potato_skin": potato_skin,
@@ -4771,6 +5082,10 @@ FAMILIES = {
     "target_decal": target_decal,
     "stripe_decal": stripe_decal,
     "copper": copper,
+    "arch_stainless": arch_stainless,
+    "fuse_cord": fuse_cord,
+    "ember_coal": ember_coal,
+    "honed_steel_disc": honed_steel_disc,
     "panel_legend": panel_legend,
     "forged_ball": forged_ball,
     "hazard_chevron": hazard_chevron,
