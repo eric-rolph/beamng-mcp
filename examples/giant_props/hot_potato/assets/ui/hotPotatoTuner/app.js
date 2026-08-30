@@ -19,6 +19,18 @@
 // BOX (the 2026-08-29 player report). Working mod apps (jump-button) use
 // the bare global; so do we. Only Angular built-ins ($interval) may be
 // injected here — the static gate pins this.
+// v2.5, two more measured shell laws (the 2026-08-30 player report):
+// - The legacy app shell ships AngularJS 1.5.8 (ui/lib/ext/angular), and
+//   ngModel support for input[type=range] only exists from Angular 1.6 —
+//   under 1.5.8 a range input falls back to the TEXT binding, which writes
+//   the dragged value into the model as a STRING. The paired number input
+//   then throws ngModel:numfmt and its view freezes: the slider moved, the
+//   engine got the value, the box stayed stale. Sliders therefore bind by
+//   hand (the hptSlider directive below) and the model stays a Number.
+// - NO stock legacy app uses a native <select> anywhere in ui/modules/apps:
+//   the game's offscreen CEF never renders the dropdown popup (the player's
+//   "clicking it doesn't drop down any further options"). Enums render as
+//   segmented buttons instead.
 angular.module('beamng.apps').directive('hotPotatoTuner', ['$interval', function ($interval) {
   'use strict';
 
@@ -32,7 +44,8 @@ angular.module('beamng.apps').directive('hotPotatoTuner', ['$interval', function
     { title: 'Fuse', keys: ['fuse_base_seconds', 'fuse_sigma_seconds', 'fuse_min_seconds', 'fuse_max_seconds', 'grace_seconds', 'camp_burn_multiplier', 'camp_speed_kmh', 'show_countdown'] },
     { title: 'Transfer', keys: ['transfer_mode', 'touch_margin', 'radius_m', 'impact_kmh', 'tagback_immunity_seconds', 'tagback_min_hold_seconds', 'tagback_separation_m', 'join_immunity_seconds', 'min_players', 'pass_knockback_mps'] },
     { title: 'Pickup & carry', keys: ['pickup_radius', 'pickup_height', 'carrier_boost_mps2', 'carrier_boost_max_mps', 'carry_clearance_m', 'bounce_enabled', 'bounce_amplitude_m', 'attach_sink', 'attach_wobble'] },
-    { title: 'Audio cues', keys: ['audio_enabled', 'audio_volume', 'tick_style', 'silence_gap_seconds', 'steam_hiss_enabled', 'cue_window_seconds', 'beep_slow_interval', 'beep_fast_interval', 'beep_pitch_rise'] },
+    { title: 'Audio cues', keys: ['audio_enabled', 'audio_volume', 'tick_style', 'silence_gap_seconds', 'steam_hiss_enabled', 'whistle_enabled', 'whistle_volume', 'cue_window_seconds', 'beep_slow_interval', 'beep_fast_interval', 'beep_pitch_rise'] },
+    { title: 'AI drivers', keys: ['ai_enabled', 'ai_aggression', 'ai_speed_kmh'] },
     { title: 'Beacon & glow', keys: ['beacon_enabled', 'glow_ramp_enabled', 'beacon_brightness', 'beacon_radius', 'beacon_ray_range', 'beacon_pulse_seconds', 'beacon_spin_rate'] },
     { title: 'Detonation', keys: ['detonate_enabled', 'detonate_break', 'detonate_crush', 'detonate_fire', 'detonate_launch_mps', 'crush_dv_mps', 'crush_min_z', 'crush_inward', 'blast_radius_m', 'blast_push_mps', 'fire_seconds', 'mash_enabled', 'mash_seconds'] },
     { title: 'Pacing & show', keys: ['round_idle_seconds', 'wins_to_champion', 'fireworks_enabled', 'smoke_enabled', 'spin_rate', 'bob_amplitude', 'bob_rate', 'safety_enabled', 'safety_extent_max'] }
@@ -179,6 +192,13 @@ angular.module('beamng.apps').directive('hotPotatoTuner', ['$interval', function
         bngApi.engineLua(EXT + '.hotPotatoSetOption(' + JSON.stringify(control.key) + ', ' + encoded + ')');
       };
 
+      // Enum controls are segmented buttons (v2.5): the offscreen CEF never
+      // renders a native select popup, so a click picks directly.
+      scope.choose = function (control, option) {
+        control.value = option;
+        scope.apply(control);
+      };
+
       scope.reset = function () {
         bngApi.engineLua(EXT + '.hotPotatoResetOptions()');
         scope.refresh();
@@ -195,6 +215,55 @@ angular.module('beamng.apps').directive('hotPotatoTuner', ['$interval', function
       scope.classicCues = function () { applyPreset(CLASSIC); };
 
       scope.refresh();
+    }
+  };
+}]);
+
+// The slider binding, by hand (v2.5). Angular 1.5.8 has no input[range]
+// ngModel support (added in 1.6): under the text-binding fallback a drag
+// writes a STRING into the model and the paired number input dies on
+// ngModel:numfmt. This directive owns both directions itself — model to
+// element on $watch, element to model as parseFloat on the 'input' event —
+// so the shared control.value is always a Number and the number box tracks
+// the slider live. The engine apply debounces so a drag lands once.
+// Registered as its own statement (no chaining): only Angular built-ins in
+// the DI array, same law as above.
+angular.module('beamng.apps').directive('hptSlider', ['$timeout', function ($timeout) {
+  'use strict';
+  return {
+    restrict: 'A',
+    link: function (scope, element, attrs) {
+      var el = element[0];
+      var control = scope.$eval(attrs.hptSlider);
+      if (!control) { return; }
+      // min/max/step before value, so the browser clamps against the real
+      // range instead of its 0..100 default.
+      el.min = control.min;
+      el.max = control.max;
+      el.step = control.step;
+      el.value = control.value;
+      var pending = null;
+      el.addEventListener('input', function () {
+        var value = parseFloat(el.value);
+        if (isNaN(value)) { return; }
+        scope.$applyAsync(function () {
+          control.value = value;
+          if (pending) { $timeout.cancel(pending); }
+          pending = $timeout(function () {
+            pending = null;
+            scope.apply(control);
+          }, 150);
+        });
+      });
+      // The number box (or a Refresh) moved the model: track it.
+      scope.$watch(function () { return control.value; }, function (value) {
+        if (typeof value === 'number' && value !== parseFloat(el.value)) {
+          el.value = value;
+        }
+      });
+      scope.$on('$destroy', function () {
+        if (pending) { $timeout.cancel(pending); }
+      });
     }
   };
 }]);

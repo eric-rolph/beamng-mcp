@@ -719,3 +719,80 @@ in BeamNGpy tech sessions the JS never reports back through ANY bridge
 channel (three runs, silent on both window.beamng.sendEngineLua and
 window.bngApi.engineLua), so CEF-side rendering stays a
 player-verified surface for now.
+
+**The v2.5 round — dead controls, the acoustic brief, AI drivers, and
+fireworks for every winner (2026-08-30).** The player's panel screenshots
+came back WORKING — and carrying the next four asks.
+
+*The dead dropdowns and the frozen number boxes.* Two more measured shell
+laws. (1) The legacy app shell ships AngularJS 1.5.8
+(`ui/lib/ext/angular`), and ngModel support for `input[type=range]` only
+exists from Angular 1.6: under 1.5.8 the slider fell back to the TEXT
+binding, a drag wrote the value into the model as a STRING, and the
+paired number input threw `ngModel:numfmt` with its view frozen —
+exactly the player's toast (`fuse_base_seconds = 436`) against a box
+stuck at 60. (2) NO stock legacy app uses a native `<select>` anywhere
+in `ui/modules/apps`: the game's offscreen CEF never renders the
+dropdown popup, which is why clicking showed nothing (and why scroll
+over the focused select could still change it). Fixes: a hand-rolled
+`hptSlider` directive that owns both directions (element→model as
+parseFloat on 'input', model→element on $watch, engine apply debounced)
+so the shared value is always a Number; and enums render as segmented
+buttons in the page itself. Both fixes were PROVEN interactively against
+the game's own angular.js 1.5.8 in a browser harness before shipping
+(drag → box tracks + engine receives a Number; enum click → applies and
+highlights), then pinned by `test_controls_obey_the_measured_1_5_8_shell_laws`
+and the widened all-directives DI gate.
+
+*The steam whistle (the acoustic brief).* The potato's own voice is now a
+synthesized aerodynamic orifice whistle riding the pack's only proven
+raw-ogg channel — sources in the carrier's VM, beside the tick.
+`make_whistle_audio.py` bakes two assets: a seamless 2.2 s LOOP
+(2150 Hz fundamental — 2150 × 2.2 s = 4730 exact cycles so the seam is
+phase-clean — with a 27 Hz skin-flap flutter on both frequency and
+amplitude, 2x/3x harmonics plus an inharmonic 2.7x tissue partial, a
+3–7 kHz wet hiss breathing WITH the flutter, a 300–800 Hz boiling
+murmur, and droplet dropouts), and a 2.8 s SPUTTER one-shot (pitch
+gliding 1.0→0.8 as exit velocity falls below resonance, collapsing into
+staccato chirps with growing gaps and falling pitch, a last wet breath,
+a hard-zero landing). Runtime dynamics per the brief's decay curve: the
+loop starts abruptly at peak on pickup, holds steady, and in escalating
+tick style glides DOWN (pitch 1.0 → 0.72 across the cue window — the
+pressure subsiding, the exact counter-gesture to the rising tick), then
+stops for the sputter timed so its dying wheeze lands at the mouth of
+the silence gap. Steady style holds pitch 1.0 and never sputters — the
+hardcore contract extends to the whistle. The sputter source uses
+`AudioDefault3D`, the stock NON-looping description the game's own
+crash/glass one-shots use (measured in gameengine.zip
+`audioProfiles.datablocks.json`), so cut+play fires it once with no
+loop to leak. New options: `whistle_enabled`, `whistle_volume`. The
+fizzle plays the sputter as the cooked holder's death wheeze.
+
+*AI drivers.* "This game is meant to be multiplayer": `ai_enabled` (off
+by default) turns every vehicle that is not the player's into a
+hot-potato player through the stock vehicle AI — the police-pursuit
+machinery, measured at its exports (`lua/vehicle/ai.lua`: M.setMode,
+M.setTargetObjectID — a manually set target overrides the AI's own
+player pick — M.setAggression, M.setSpeedMode/M.setSpeed). The carrier
+CHASES its nearest target (the player included); everyone else FLEES
+the carrier; between rounds they hold position. Roles re-resolve on a
+0.8 s sweep keyed by role strings, so commands cross the GE→vehicle
+boundary only on change; `ai_aggression` and `ai_speed_kmh` ride along.
+The release path is total: option off, prop reset and teardown all hand
+every commanded car back (`ai.setMode('disabled')`); a car that leaves
+the roster parks. Gated end-to-end under lupa (chase/flee/skip-player/
+release).
+
+*Fireworks for any winner.* `celebrate` now calls `beginFireworks` for
+EVERY round win, not only the crowning — the winner's name in the sky
+each round, the champion still earning the long confetti burn. Pinned by
+a first-win-must-not-crown lupa gate.
+
+One framework note for the ledger: BEHAVIOR keys reach the runtime
+through the BLENDER handoff (`create_hot_potato.py` copies spec.BEHAVIOR
+into `behavior.tunables`; lua_kit bakes that into the generated B
+table), so adding an option REQUIRES the Blender stage before
+`build.py prop` — a prop build alone leaves the new keys out of B and
+`tunablesPresent` refuses the whole behaviour with `tunables_missing`.
+The first v2.5 build did exactly that and the whole lupa suite went
+red at once; the Blender re-run fixed all 46 failures.

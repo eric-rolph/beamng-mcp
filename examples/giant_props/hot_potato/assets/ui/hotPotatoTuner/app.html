@@ -20,7 +20,10 @@
     .hot-potato-tuner .hpt-row label { flex:0 0 46%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .hot-potato-tuner .hpt-row input[type=range] { flex:1; min-width:0; }
     .hot-potato-tuner .hpt-row input[type=number] { width:58px; background:#1c1e22; color:#eee; border:1px solid #444; border-radius:3px; padding:1px 3px; font-size:0.95em; }
-    .hot-potato-tuner .hpt-row select { flex:1; background:#1c1e22; color:#eee; border:1px solid #444; border-radius:3px; }
+    .hot-potato-tuner .hpt-enum { flex:1; display:flex; gap:3px; flex-wrap:wrap; }
+    .hot-potato-tuner .hpt-enum button { flex:1; background:#1c1e22; color:#ccc; border:1px solid #444; border-radius:3px; padding:2px 4px; cursor:pointer; font-size:0.95em; }
+    .hot-potato-tuner .hpt-enum button:hover { background:#2a2d33; }
+    .hot-potato-tuner .hpt-enum button.hpt-on { background:rgba(255,140,0,0.35); color:#ffe2c0; border-color:#ffb35c; }
     .hot-potato-tuner .hpt-missing { padding:12px; font-size:0.85em; color:#f0b0a0; }
   </style>
   <header>
@@ -67,19 +70,23 @@
       <h4>{{ section.title }}</h4>
       <div class="hpt-row" ng-repeat="control in section.controls">
         <label title="{{ control.key }}">{{ control.label }}</label>
-        <input ng-if="control.kind === 'number'" type="range"
-               min="{{ control.min }}" max="{{ control.max }}" step="{{ control.step }}"
-               ng-model="control.value" ng-model-options="{ debounce: 150 }"
-               ng-change="apply(control)" />
+        <!-- Angular 1.5.8 has no range ngModel (1.6 feature): hptSlider owns
+             both directions itself so control.value stays a Number and the
+             number box tracks the drag live (the v2.5 player report). -->
+        <input ng-if="control.kind === 'number'" type="range" hpt-slider="control" />
         <input ng-if="control.kind === 'number'" type="number"
                min="{{ control.min }}" max="{{ control.max }}" step="{{ control.step }}"
                ng-model="control.value" ng-model-options="{ debounce: 400 }"
                ng-change="apply(control)" />
         <input ng-if="control.kind === 'bool'" type="checkbox"
                ng-model="control.value" ng-change="apply(control)" />
-        <select ng-if="control.kind === 'enum'" ng-model="control.value"
-                ng-options="option as option for option in control.values"
-                ng-change="apply(control)"></select>
+        <!-- No native select: the offscreen CEF never draws the popup, so
+             enums are segmented buttons (the v2.5 player report). -->
+        <span class="hpt-enum" ng-if="control.kind === 'enum'">
+          <button ng-repeat="option in control.values"
+                  ng-class="{'hpt-on': control.value === option}"
+                  ng-click="choose(control, option)">{{ option }}</button>
+        </span>
       </div>
     </div>
   </div>

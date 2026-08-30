@@ -3501,6 +3501,9 @@
       }
     },
     "tunables": {
+      "ai_aggression": 1.0,
+      "ai_enabled": false,
+      "ai_speed_kmh": 90.0,
       "attach_sink": 0.16,
       "attach_wobble": 0.06,
       "audio_enabled": true,
@@ -3619,6 +3622,8 @@
       "tick_style": "escalating",
       "touch_margin": 0.35,
       "transfer_mode": "touch",
+      "whistle_enabled": true,
+      "whistle_volume": 1.0,
       "wins_to_champion": 3
     }
   },
@@ -6387,7 +6392,7 @@
         -3.0,
         -30.0
       ],
-      "sha256": "a7fd46a042f1ea083892202d401dcac20fd5793b5ddc56daaac3fb6d8a40ab59",
+      "sha256": "c5955520e663c6d951573a4fc517f2aa850ddd96ce5a92122e3e0e88a6e5226e",
       "size": 1802644
     },
     {
@@ -6401,7 +6406,7 @@
         -3.0,
         -30.0
       ],
-      "sha256": "c7f846e2a35e4bf0ad6b7be48708cd1a0a190707951aab4769b3aabc2ba76ed7",
+      "sha256": "67e04a4bd2a9dcc532ef988995e730eca6931f4498f46bb47e5bdeebfde89fa0",
       "size": 1804871
     },
     {
@@ -6415,7 +6420,7 @@
         3.0,
         -30.0
       ],
-      "sha256": "dae073e6b95d8d15d7609ca51bd114c85e9da4e6ef6dadcee4ebe46d1e0762e7",
+      "sha256": "086f19f592cc95762c1ea2e863531cec57c44d95f3a98125d8b6db3ef818674a",
       "size": 1804021
     },
     {
@@ -6429,7 +6434,7 @@
         3.0,
         -30.0
       ],
-      "sha256": "aff49585d5b999ec4be2ce64ca0589b70ed7e09e2a4c80cebd0658dd1759e177",
+      "sha256": "0e07502c8294aa6f325b1befac051606cc8965929c83e699ca6dbfbdff1106ef",
       "size": 1806164
     },
     {
@@ -6443,7 +6448,7 @@
         -4.5,
         -30.0
       ],
-      "sha256": "8994d95a68c604da3d3bb84d266ea933f5dd552e8571e3adab0290014088116d",
+      "sha256": "0033097c306abda6e0174c0245f946100f59e3f7dd9007023c248dc0b5093a16",
       "size": 1803962
     },
     {
@@ -6457,7 +6462,7 @@
         4.5,
         -30.0
       ],
-      "sha256": "c05ac1cdf93c7c39f3fb3504970ad827c7271f4efb2f2f6dbecd3cd298cfa71f",
+      "sha256": "3e2004ed40c4d80867992498a1f11601c337a96d983223723e81ea0eeeb3b405",
       "size": 871846
     },
     {
@@ -6471,7 +6476,7 @@
         0.0,
         5.6
       ],
-      "sha256": "db4ee2c9b89b0601658545ddd0e7382d073fcc483bbc0c2d4477ec54bb67ea60",
+      "sha256": "b312253f189573421266646cfc2e541981c27ddb9a19f99a8d105c6ea9175570",
       "size": 1806986
     }
   ],
@@ -7060,7 +7065,7 @@
       "ericrolph_hot_potato_plinth_concrete"
     ],
     "path": "vehicles/ericrolph_hot_potato/ericrolph_hot_potato.dae",
-    "sha256": "1d905c865e78acedc0e474ed4c775dae6b574a09ee8b0d7c13cff691a45918f5",
-    "size": 623234
+    "sha256": "0270a15d17bb10d53469f273680e821b26874e62cf316b932589696503e1f416",
+    "size": 623228
   }
 }

@@ -107,17 +107,20 @@ def test_the_directive_injects_only_angular_builtins():
     app_js = (MOD_DIR / "assets" / "ui" / "hotPotatoTuner" / "app.js").read_text(
         encoding="utf-8"
     )
-    match = re.search(
-        r"directive\('hotPotatoTuner',\s*\[(.*?)function", app_js, re.S
-    )
-    assert match, "cannot find the directive's DI annotation array"
-    tokens = re.findall(r"['\"]([^'\"]+)['\"]", match.group(1))
-    assert tokens, "the annotation array lost its explicit DI tokens"
-    for token in tokens:
-        assert token.startswith("$"), (
-            f"DI token {token!r} is not an Angular built-in — the Vue shell "
-            "provides no such service and the app will render blank"
-        )
+    # v2.5: EVERY directive in the file (hotPotatoTuner, hptSlider, whatever
+    # comes next) lives under the same law, not just the panel itself.
+    matches = re.findall(r"directive\('(\w+)',\s*\[(.*?)function", app_js, re.S)
+    assert matches, "cannot find any directive DI annotation array"
+    assert {name for name, _ in matches} >= {"hotPotatoTuner", "hptSlider"}
+    for name, annotation in matches:
+        tokens = re.findall(r"['\"]([^'\"]+)['\"]", annotation)
+        assert tokens, f"{name}: the annotation array lost its DI tokens"
+        for token in tokens:
+            assert token.startswith("$"), (
+                f"{name}: DI token {token!r} is not an Angular built-in — "
+                "the Vue shell provides no such service and the app will "
+                "render blank"
+            )
     # And the code still reaches the engine: through the global, not DI.
     assert "bngApi.engineLua" in app_js
 
@@ -255,6 +258,45 @@ def test_shipped_hud_layout_puts_the_app_in_the_layouts_list():
     spec = _spec()
     dests = {dest for _, dest in getattr(spec, "SHIP_ROOT_ASSETS", ())}
     assert "settings/ui_apps/originalLayouts/hot_potato.uilayout.json" in dests
+
+
+def test_controls_obey_the_measured_1_5_8_shell_laws():
+    # v2.5, both measured (the 2026-08-30 player report):
+    # - The legacy app shell ships AngularJS 1.5.8 (ui/lib/ext/angular:
+    #   angular-1.5.8.zip, version.full '1.5.8'), and input[type=range]
+    #   ngModel support only exists from Angular 1.6 — under 1.5.8 the range
+    #   falls back to the TEXT binding, a drag writes a STRING into the
+    #   model, and the paired number input dies on ngModel:numfmt with its
+    #   view frozen. Sliders must bind through the hand-rolled hptSlider
+    #   directive, never ng-model.
+    # - NO stock legacy app uses a native <select> anywhere in
+    #   ui/modules/apps: the game's offscreen CEF never renders the dropdown
+    #   popup. Enums must render as clickable elements in the page itself.
+    # Both fixes were proven interactively against the game's own
+    # angular.js 1.5.8 (drag -> number box tracks + engine gets a Number;
+    # enum click -> applies and highlights) before this gate pinned them.
+    html = (MOD_DIR / "assets" / "ui" / "hotPotatoTuner" / "app.html").read_text(
+        encoding="utf-8"
+    )
+    app_js = (MOD_DIR / "assets" / "ui" / "hotPotatoTuner" / "app.js").read_text(
+        encoding="utf-8"
+    )
+    assert "<select" not in html, (
+        "native select popups do not render in the game's offscreen CEF"
+    )
+    for tag in re.findall(r"<input[^>]*type=\"range\"[^>]*>", html):
+        assert "hpt-slider" in tag, f"a range input bypasses hptSlider: {tag}"
+        assert "ng-model" not in tag, (
+            f"ng-model on a range input is a string-writer under 1.5.8: {tag}"
+        )
+    assert "hpt-slider=\"control\"" in html
+    assert re.search(r"directive\('hptSlider'", app_js), (
+        "the hand-rolled slider binding vanished from app.js"
+    )
+    # The two-way contract the harness proved: element -> model as a Number,
+    # model -> element on watch.
+    assert "parseFloat(el.value)" in app_js
+    assert "control.value = value" in app_js
 
 
 def test_every_hook_the_panel_calls_exists_in_the_shipped_runtime():

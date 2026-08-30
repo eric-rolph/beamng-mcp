@@ -34,7 +34,11 @@ ZIP_BASENAME = "hot_potato_ericrolph.zip"
 # path). v1 ticked a looping stock FMOD event through Engine.Audio.playOnce
 # and leaked one immortal beeper per tick; see the TICK_* block in
 # LUA_BEHAVIOR.
-SHIP_ASSETS = ("sound/ericrolph_hot_potato_tick.ogg",)
+SHIP_ASSETS = (
+    "sound/ericrolph_hot_potato_tick.ogg",
+    "sound/ericrolph_hot_potato_whistle.ogg",
+    "sound/ericrolph_hot_potato_sputter.ogg",
+)
 
 # Files copied from assets/ to the MOD ROOT (not vehicles/<mod_id>/) — the
 # in-game settings panel (v2.2, 2026-08-29). BeamNG discovers UI apps by
@@ -438,6 +442,17 @@ BEHAVIOR = {
     # FMOD events only — the raw-file GE channel is recorded silent in this
     # repo's evidence chain.
     "steam_hiss_enabled": True,
+    # The potato's own voice (v2.5, the acoustic brief): while carried it
+    # WHISTLES — a synthesized aerodynamic orifice whistle (fundamental in
+    # the 1.5–4 kHz band, fluttering skin-flap vibrato over a wet sputtering
+    # hiss; authoring/make_whistle_audio.py) looping in the carrier's VM
+    # beside the tick. In escalating tick style the pitch GLIDES DOWN as the
+    # fuse runs out — the internal pressure subsiding — and the loop breaks
+    # into a baked staccato sputter one-shot that dies into the silence gap;
+    # steady style holds constant pitch (no tell). Its own channel: tick
+    # style "off" does not silence it.
+    "whistle_enabled": True,
+    "whistle_volume": 1.0,
     # Visual escalation toggles (v2.4: "the visual, auditory, light effects
     # should be optional ... even the exploding and color changing").
     "beacon_enabled": True,
@@ -485,6 +500,17 @@ BEHAVIOR = {
     # burst line sits above the quarter-scale apex), not an option.
     "fireworks_enabled": True,
     "fireworks_base_z": round(ARCH_HEIGHT + 6.0, 2),
+    # --- AI drivers (v2.5) -----------------------------------------------
+    # "This game is meant to be multiplayer": with ai_enabled on, every
+    # vehicle that is not the player's plays hot potato through the stock
+    # vehicle AI (the police-pursuit machinery, lua/vehicle/ai.lua): the
+    # carrier CHASES its nearest target to pass the potato on, everyone
+    # else FLEES the carrier, and between rounds they hold position. Off by
+    # default — commandeering every parked car is a party mode, not a
+    # default.
+    "ai_enabled": False,
+    "ai_aggression": 1.0,
+    "ai_speed_kmh": 90.0,
     # --- safety ----------------------------------------------------------
     "safety_enabled": True,
     "safety_extent_max": 24.0,
@@ -528,6 +554,8 @@ local REQUIRED = {
   "beep_pitch_rise", "audio_enabled", "audio_volume",
   "tick_style", "silence_gap_seconds",
   "smoke_enabled", "steam_hiss_enabled",
+  "whistle_enabled", "whistle_volume",
+  "ai_enabled", "ai_aggression", "ai_speed_kmh",
   "beacon_enabled", "glow_ramp_enabled",
   "beacon_pulse_seconds",
   "beacon_brightness", "beacon_radius", "beacon_ray_range",
@@ -578,6 +606,8 @@ local OPTION_RANGE = {
   audio_enabled = "bool", audio_volume = {0, 2},
   tick_style = "enum", silence_gap_seconds = {0, 3},
   smoke_enabled = "bool", steam_hiss_enabled = "bool",
+  whistle_enabled = "bool", whistle_volume = {0, 2},
+  ai_enabled = "bool", ai_aggression = {0.3, 2}, ai_speed_kmh = {20, 200},
   beacon_enabled = "bool", glow_ramp_enabled = "bool",
   bounce_enabled = "bool", bounce_amplitude_m = {0, 1.5},
   carry_clearance_m = {0, 3},
@@ -707,6 +737,79 @@ local TICK_STOP = [[pcall(function()
     pcall(function() obj:setVolume(S.id, 0) end)
     pcall(function() obj:stopSFX(S.id) end)
     pcall(function() obj:cutSFX(S.id) end)
+  end
+end)]]
+
+-- --------------------------------------------------------------------------
+-- The steam whistle (v2.5, the acoustic brief): the potato's own voice while
+-- it is carried, riding the SAME proven channel as the tick — a raw-ogg
+-- source in the carrier's VM. Two baked assets carry the acoustics the brief
+-- specifies (authoring/make_whistle_audio.py): a seamless whistle LOOP
+-- (2.1 kHz fundamental, 27 Hz skin-flap flutter, wet sputtering hiss bed)
+-- whose live pitch write gives the downward glissando as the pressure runs
+-- out, and a one-shot SPUTTER (glissando collapsing into staccato chirps and
+-- wheezes, decaying to true silence) that plays once as the fuse enters its
+-- final seconds and dies into the horror-cut silence gap. The sputter source
+-- uses AudioDefault3D — the stock NON-looping description the game's own
+-- crash and glass one-shots use (gameengine.zip
+-- art/datablocks/audioProfiles.datablocks.json) — so cutSFX+playSFX fires it
+-- once with no loop to leak.
+-- --------------------------------------------------------------------------
+local WHISTLE_OGG = "vehicles/ericrolph_hot_potato/sound/ericrolph_hot_potato_whistle.ogg"
+local SPUTTER_OGG = "vehicles/ericrolph_hot_potato/sound/ericrolph_hot_potato_sputter.ogg"
+local SPUTTER_SECONDS = 2.8
+
+local WHISTLE_START = [[pcall(function()
+  local S = rawget(_G, "ericrolph_hot_potato_whistle")
+  if not S then S = {} rawset(_G, "ericrolph_hot_potato_whistle", S) end
+  if S.id == nil then
+    local ok, id = pcall(function()
+      return obj:createSFXSource(%q, "AudioDefaultLoop3D", "erhp_whistle", 0)
+    end)
+    if ok and id ~= nil then S.id = id end
+  end
+  if S.id ~= nil then
+    pcall(function() obj:setVolumePitch(S.id, %.3f, %.3f) end)
+    if not S.on then
+      S.on = true
+      pcall(function() obj:cutSFX(S.id) end)
+      pcall(function() obj:playSFX(S.id) end)
+    end
+  end
+end)]]
+
+local WHISTLE_SET = [[pcall(function()
+  local S = rawget(_G, "ericrolph_hot_potato_whistle")
+  if S and S.id ~= nil and S.on then
+    pcall(function() obj:setVolumePitch(S.id, %.3f, %.3f) end)
+  end
+end)]]
+
+local WHISTLE_STOP = [[pcall(function()
+  local S = rawget(_G, "ericrolph_hot_potato_whistle")
+  if S and S.id ~= nil then
+    S.on = false
+    pcall(function() obj:setVolume(S.id, 0) end)
+    pcall(function() obj:stopSFX(S.id) end)
+    pcall(function() obj:cutSFX(S.id) end)
+  end
+end)]]
+
+-- One-shot: always cut then play, so a re-trigger restarts cleanly and a
+-- finished instance never blocks the next.
+local SPUTTER_PLAY = [[pcall(function()
+  local S = rawget(_G, "ericrolph_hot_potato_sputter")
+  if not S then S = {} rawset(_G, "ericrolph_hot_potato_sputter", S) end
+  if S.id == nil then
+    local ok, id = pcall(function()
+      return obj:createSFXSource(%q, "AudioDefault3D", "erhp_sputter", 0)
+    end)
+    if ok and id ~= nil then S.id = id end
+  end
+  if S.id ~= nil then
+    pcall(function() obj:setVolumePitch(S.id, %.3f, %.3f) end)
+    pcall(function() obj:cutSFX(S.id) end)
+    pcall(function() obj:playSFX(S.id) end)
   end
 end)]]
 
@@ -937,6 +1040,58 @@ local function driveTick(state, vehicle, volume, pitch)
   b.tickLastSent = {volume, pitch}
   pcall(function()
     vehicle:queueLuaCommand(string.format(TICK_SET, volume, pitch))
+  end)
+end
+
+-- The whistle mirrors the tick's lifecycle exactly: one loop source in the
+-- carrier's VM, moved by id change, throttled writes, belt-and-braces stop.
+local function silenceWhistle(state)
+  local b = state.behavior
+  local id = b.whistleOn
+  b.whistleOn = nil
+  b.whistleLastSent = nil
+  if not id then return end
+  local vehicle = exactVehicle(id)
+  if not vehicle then return end
+  pcall(function() vehicle:queueLuaCommand(WHISTLE_STOP) end)
+end
+
+local function driveWhistle(state, vehicle, volume, pitch)
+  if not (OPT.audio_enabled and OPT.whistle_enabled) then
+    silenceWhistle(state)
+    return
+  end
+  volume = volume * (OPT.audio_volume or 1.0) * (OPT.whistle_volume or 1.0)
+  local b = state.behavior
+  local id = vehicle:getId()
+  if b.whistleOn ~= id then
+    if b.whistleOn then silenceWhistle(state) end
+    b.whistleOn = id
+    b.whistleLastSent = {volume, pitch}
+    pcall(function()
+      vehicle:queueLuaCommand(string.format(WHISTLE_START, WHISTLE_OGG, volume, pitch))
+    end)
+    return
+  end
+  local last = b.whistleLastSent
+  if last
+    and math.abs(last[1] - volume) < 0.02
+    and math.abs(last[2] - pitch) < 0.02 then
+    return
+  end
+  b.whistleLastSent = {volume, pitch}
+  pcall(function()
+    vehicle:queueLuaCommand(string.format(WHISTLE_SET, volume, pitch))
+  end)
+end
+
+-- The staccato finish: fire the baked sputter one-shot in this vehicle's VM.
+local function playSputter(state, vehicle, volume, pitch)
+  if not (OPT.audio_enabled and OPT.whistle_enabled) then return end
+  volume = volume * (OPT.audio_volume or 1.0) * (OPT.whistle_volume or 1.0)
+  pcall(function()
+    vehicle:queueLuaCommand(
+      string.format(SPUTTER_PLAY, SPUTTER_OGG, volume, pitch))
   end)
 end
 
@@ -1343,6 +1498,7 @@ local function parkPotato(state)
   b.carrier = nil
   state.zones.carrier_watch = nil
   silenceTick(state)
+  silenceWhistle(state)
   beaconLit(state, false)
   -- v2.3: the idle potato SMOKES. With the wick and its ember lamp retired,
   -- the wisp curling off the scorched crown is the "come and take it"
@@ -1377,6 +1533,7 @@ local function endRound(state)
   b.phase = "idle"
   b.fuseEnds = nil
   b.silenced = false
+  b.sputtered = false
   b.out = {}
   b.outCount = 0
   b.fieldPeak = 0
@@ -1403,7 +1560,9 @@ local function beginReturn(state, fromPos)
   b.outCount = 0
   b.fieldPeak = 0
   b.pairFrom, b.pairTo, b.pairSeparated = nil, nil, true
+  b.sputtered = false
   silenceTick(state)
+  silenceWhistle(state)
   beaconLit(state, false)
   setEffectActive(state, "blast", false)
   setEffectActive(state, "fuse", OPT.smoke_enabled and true or false)
@@ -1825,6 +1984,10 @@ local function celebrate(state, vehicle)
     b.wins = {}
   else
     b.cheerUntil = b.now + 8.0
+    -- v2.5 ("Champion fireworks should be for any winner"): every round
+    -- winner gets their name written across the sky, not only the
+    -- crowning — the champion still earns the longer confetti burn.
+    beginFireworks(state, championName(state, id))
   end
   setEffectActive(state, "cheer", true)
   playSound(SFX_WIN, 1.0, 1.0)
@@ -1838,6 +2001,10 @@ local function giveTo(state, vehicle, reason, passSpeed)
   b.heldSince = b.now
   b.transfers = (b.transfers or 0) + 1
   b.silenced = false
+  -- A fresh hot window re-excites the steam: the whistle restarts at peak
+  -- for the new carrier (driveWhistle moves the loop by id on the next cue
+  -- tick), and the sputter re-arms.
+  b.sputtered = false
   b.hopStart = nil
   if previous and previous ~= id then
     -- Anti-tag-back: the passer is immune for a window, AND the pair must
@@ -1908,6 +2075,7 @@ local function detonate(state, vehicle)
     b.score[id] = b.score[id] * 0.5
   end
   silenceTick(state)
+  silenceWhistle(state)
   beaconLit(state, false)
   local anchor = carrierPose(state, vehicle)
   b.boomFrom = vec3(anchor.x, anchor.y, anchor.z)
@@ -1923,6 +2091,13 @@ local function detonate(state, vehicle)
     -- screams once, and nothing else happens to the car.
     setEffectActive(state, "fuse", OPT.smoke_enabled and true or false)
     poseEffectAt(state, "fuse", anchor)
+    -- The potato's own death wheeze (v2.5): the baked sputter one-shot in
+    -- the cooked holder's VM, under the FMOD vent pair. In escalating style
+    -- the fuse cue already sputtered moments ago — do not stutter it.
+    if not b.sputtered then
+      b.sputtered = true
+      playSputter(state, vehicle, 1.1, 0.9)
+    end
     playSound(SFX_HISS, 0.9, 1.2, anchor)
     playSound(SFX_HISS_ALT, 1.3, 0.9, anchor)
     announce(state, "COOKED! The potato goes home.", 3.0, "fizzled",
@@ -2192,6 +2367,123 @@ local function applyCarrierBoost(state, carrier, dtSim)
   addSubjectVelocity(state, carrier, direction * (-drag))
 end
 
+-- --------------------------------------------------------------------------
+-- AI drivers (v2.5, "this game is meant to be multiplayer"). With ai_enabled
+-- on, every vehicle that is not the player's becomes a hot-potato player of
+-- its own through the stock vehicle AI — the same machinery police pursuits
+-- ride: the carrier CHASES its nearest target to pass the potato on, every
+-- other car FLEES the carrier, and between rounds they hold position. Roles
+-- re-resolve on a throttled sweep, so a pass flips hunter and hunted
+-- mid-corner. Every command is a queued vehicle-side call to ai.setMode /
+-- ai.setTargetObjectID / ai.setAggression / ai.setSpeedMode / ai.setSpeed —
+-- the exact exported surface of lua/vehicle/ai.lua (measured, 0.38.6:
+-- M.setMode line 6192, M.setTargetObjectID line 6210, and a manually set
+-- target id overrides the AI's own player pick in targetObjectSelector).
+-- --------------------------------------------------------------------------
+local AI_SWEEP_SECONDS = 0.8
+
+local function aiCommand(vehicle, command)
+  pcall(function() vehicle:queueLuaCommand(command) end)
+end
+
+-- Hand every commanded vehicle back to its user. Runs when ai_enabled flips
+-- off, on prop init/reset, and at teardown — the AI must never outlive the
+-- mod that switched it on.
+local function aiRelease(state)
+  local b = state.behavior
+  if not b.aiApplied then return end
+  for id in pairs(b.aiApplied) do
+    local vehicle = exactVehicle(id)
+    if vehicle then
+      aiCommand(vehicle, "pcall(function() ai.setMode('disabled') end)")
+    end
+  end
+  b.aiApplied = nil
+  b.aiTuning = nil
+end
+
+local function stepAI(state)
+  local b = state.behavior
+  if not OPT.ai_enabled then
+    if b.aiApplied then aiRelease(state) end
+    return
+  end
+  if (b.aiNextSweep or 0) > b.now then return end
+  b.aiNextSweep = b.now + AI_SWEEP_SECONDS
+  local playerId = nil
+  pcall(function() playerId = be:getPlayerVehicleID(0) end)
+  b.aiApplied = b.aiApplied or {}
+  -- A tuning change re-arms everyone: aggression and the speed cap ride
+  -- along with the next role command, so clearing the applied map resends.
+  local tuning = string.format("%.2f|%.1f", OPT.ai_aggression, OPT.ai_speed_kmh)
+  if b.aiTuning ~= tuning then
+    b.aiTuning = tuning
+    b.aiApplied = {}
+  end
+  local field = roster(state)
+  local carrierId = b.phase == "live" and b.carrier or nil
+  local speedMps = OPT.ai_speed_kmh / 3.6
+  local present = {}
+  for _, entry in ipairs(field) do
+    local id = entry.id
+    if id ~= playerId then
+      present[id] = true
+      local role
+      if carrierId and id == carrierId then
+        -- The hunter: chase the nearest other car — the player included —
+        -- because touching someone is how the potato moves on.
+        local best, bestDist = nil, nil
+        local okPos, myPos = pcall(function() return entry.vehicle:getPosition() end)
+        if okPos and finiteVector3(myPos) then
+          for _, other in ipairs(field) do
+            if other.id ~= id then
+              local okOther, otherPos = pcall(function() return other.vehicle:getPosition() end)
+              if okOther and finiteVector3(otherPos) then
+                local dist = (otherPos - myPos):length()
+                if not bestDist or dist < bestDist then
+                  best, bestDist = other.id, dist
+                end
+              end
+            end
+          end
+        end
+        role = best and ("chase:" .. best) or "stop"
+      elseif carrierId then
+        role = "flee:" .. carrierId
+      else
+        -- No round running: hold position and look innocent.
+        role = "stop"
+      end
+      if b.aiApplied[id] ~= role then
+        b.aiApplied[id] = role
+        local mode, target = role:match("^(%a+):?(%d*)")
+        if mode == "stop" then
+          aiCommand(entry.vehicle, "pcall(function() ai.setMode('stop') end)")
+        else
+          aiCommand(entry.vehicle, string.format(
+            "pcall(function() ai.setAggression(%.2f)"
+            .. " ai.setSpeedMode('limit') ai.setSpeed(%.1f)"
+            .. " ai.setTargetObjectID(%d) ai.setMode('%s') end)",
+            OPT.ai_aggression, speedMps, tonumber(target), mode))
+        end
+      end
+    end
+  end
+  -- A car that left the field (eliminated, quarantined, despawned) parks; a
+  -- car the player took over gets its controls back.
+  for id in pairs(b.aiApplied) do
+    if not present[id] then
+      local vehicle = exactVehicle(id)
+      if vehicle then
+        aiCommand(vehicle, id == playerId
+          and "pcall(function() ai.setMode('disabled') end)"
+          or "pcall(function() ai.setMode('stop') end)")
+      end
+      b.aiApplied[id] = nil
+    end
+  end
+end
+
 local function updateFuseCues(state, carrier, worldPos, dtReal)
   -- No numeric countdown anywhere, by design: the player reads urgency from
   -- an accelerating, rising tick and a beacon that pulses in step with it.
@@ -2218,6 +2510,28 @@ local function updateFuseCues(state, carrier, worldPos, dtReal)
   local escalating = OPT.tick_style == "escalating"
   local cueU = escalating and urgency or 0.0
   b.cueUrgency = cueU
+
+  -- The steam whistle (v2.5): the potato's own voice while carried, its own
+  -- channel beside the tick. Begins abruptly at peak on pickup (the brief's
+  -- decay curve), holds steady, then — in escalating style — glides DOWN as
+  -- the internal pressure runs out, and finally breaks into the baked
+  -- staccato sputter one-shot timed so its dying wheeze lands exactly at
+  -- the mouth of the silence gap. Steady style holds constant pitch: the
+  -- whistle must not leak the tell the steady tick withholds.
+  if OPT.audio_enabled and OPT.whistle_enabled and b.fuseEnds then
+    if escalating and remaining <= (SPUTTER_SECONDS + OPT.silence_gap_seconds) then
+      if not b.sputtered then
+        b.sputtered = true
+        silenceWhistle(state)
+        playSputter(state, carrier, 0.9, 1.0)
+      end
+    else
+      local wpitch = escalating and (1.0 - 0.28 * cueU) or 1.0
+      driveWhistle(state, carrier, 0.5 + 0.1 * cueU, wpitch)
+    end
+  else
+    silenceWhistle(state)
+  end
 
   -- The horror cut: silence, darkness, then the boom.
   if escalating and b.fuseEnds
@@ -2295,6 +2609,7 @@ local function stepRound(state, dtSim, dtReal)
     if victim and since < 1.2 and (b.nextHush or 0) <= b.now then
       b.nextHush = b.now + 0.3
       pcall(function() victim:queueLuaCommand(TICK_STOP) end)
+      pcall(function() victim:queueLuaCommand(WHISTLE_STOP) end)
     end
     -- The delayed layers of the detonation stack.
     if b.boomStack then
@@ -2440,8 +2755,11 @@ behavior.init = function(state)
   local b = state.behavior
   loadOptions()
   -- A prop reset arrives here with the previous round's state intact:
-  -- silence the carrier's loop BEFORE the wipe below forgets who had it.
+  -- silence the carrier's loops and release the AI BEFORE the wipe below
+  -- forgets who had them.
   silenceTick(state)
+  silenceWhistle(state)
+  aiRelease(state)
   b.phase = "idle"
   b.now = 0
   b.wallLast = nil
@@ -2462,6 +2780,12 @@ behavior.init = function(state)
   b.extents = {}
   b.tickOn = nil
   b.tickLastSent = nil
+  b.whistleOn = nil
+  b.whistleLastSent = nil
+  b.sputtered = false
+  b.aiApplied = nil
+  b.aiTuning = nil
+  b.aiNextSweep = 0
   b.lastDelta = 0
   b.nextHush = 0
   b.silenced = false
@@ -2502,6 +2826,8 @@ end
 -- mid-round leaves the tick beeping forever (the 2026-08-29 recording).
 behavior.cleanup = function(state, reason)
   silenceTick(state)
+  silenceWhistle(state)
+  aiRelease(state)
 end
 
 behavior.onEnter = function(state, zone, vehicle)
@@ -2537,6 +2863,9 @@ behavior.update = function(state, dtSim, dtReal)
   advanceClock(b, dtSim)
   b.spin = (b.spin + (dtSim or 0) * OPT.spin_rate) % (math.pi * 2)
   stepRound(state, dtSim, dtReal)
+  -- The AI sweep runs on the phase stepRound just resolved, so a pass this
+  -- frame flips hunter and hunted on the very next sweep.
+  stepAI(state)
   -- Phase-independent animations (v2.4): the mash splatter outlives the
   -- boom phase, and the champion fireworks play over whatever the round is
   -- doing next.

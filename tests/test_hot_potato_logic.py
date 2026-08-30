@@ -234,6 +234,9 @@ end
 be = {}
 function be:getObjectByID(id) return S.vehicles[id] end
 function be:reloadCollision() end
+-- v2.5: the AI sweep skips the player's own vehicle; tests set S.playerId.
+S.playerId = nil
+function be:getPlayerVehicleID() return S.playerId end
 
 -- misc engine surface ----------------------------------------------------
 Engine = {Platform = {getSystemTimeMS = function() return S.clockMs end}}
@@ -381,11 +384,18 @@ def _physics_commands(state):
 
 
 def _tick_writes(state, vehicle_id):
-    """(volume, pitch) of every tick write sent to `vehicle_id`, in order."""
+    """(volume, pitch) of every TICK write sent to `vehicle_id`, in order.
+
+    v2.5: the whistle rides the same VM with its own setVolumePitch writes
+    (its steady pitch 1.0 is a feature, not an escalation leak), so this
+    filters on the tick's own _G key rather than the write verb alone.
+    """
 
     writes = []
     for entry in state.commands.values():
         if entry.id != vehicle_id:
+            continue
+        if "ericrolph_hot_potato_tick" not in entry.command:
             continue
         found = TICK_WRITE.search(entry.command)
         if found:
@@ -1629,3 +1639,208 @@ def test_teardown_removes_every_scene_object(rig):
     module.onClientEndMission("/levels/gridmap_v2/main")
     leftovers = [n for n in state.scene if n.find("ericrolph_hot_potato_p1") == 0]
     assert not leftovers, f"scene objects survived mission end: {leftovers}"
+
+
+# --------------------------------------------------------------------------
+# v2.5 (2026-08-30): the steam whistle, the AI drivers, and fireworks for
+# any round winner.
+
+
+def _commands_to(state, vehicle_id, needle):
+    return [
+        entry.command
+        for entry in state.commands.values()
+        if entry.id == vehicle_id and needle in entry.command
+    ]
+
+
+def _shrink_fuse(module, seconds=10):
+    """Pin the Gaussian fuse to an exact length (sigma 0, min == max)."""
+
+    assert module.hotPotatoSetOption("fuse_base_seconds", seconds) is True
+    assert module.hotPotatoSetOption("fuse_sigma_seconds", 0) is True
+    assert module.hotPotatoSetOption("fuse_min_seconds", seconds) is True
+    assert module.hotPotatoSetOption("fuse_max_seconds", seconds) is True
+
+
+def test_whistle_rides_the_carrier_and_sputters_before_the_boom(rig):
+    """v2.5, the acoustic brief: the carried potato whistles (a raw-ogg loop
+    in the carrier's VM, the tick's proven channel), the pitch glides DOWN
+    as the pressure runs out, and the loop breaks into the baked staccato
+    sputter one-shot as the fuse enters its final seconds."""
+
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    _shrink_fuse(module, 10)
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    tick(state, module)
+    assert start_round(state, module, 2) == 2
+    state.moveVehicle(2, 60.0, 0.0, 0.0)
+    tick(state, module, seconds=0.2, steps=5)
+
+    starts = _commands_to(state, 2, "ericrolph_hot_potato_whistle")
+    assert starts, "the whistle loop never reached the carrier's VM"
+    assert any("ericrolph_hot_potato_whistle.ogg" in c for c in starts)
+    assert any("AudioDefaultLoop3D" in c for c in starts)
+
+    # The downward glissando: whistle pitch writes strictly below 1.0 while
+    # the tick's own pitch rises - two channels, opposite gestures.
+    pitches = [
+        float(found.group(2))
+        for command in starts
+        for found in [TICK_WRITE.search(command)]
+        if found
+    ]
+    assert pitches and min(pitches) < 0.95, (
+        f"the whistle never glided down: {pitches}"
+    )
+
+    run_until(
+        state,
+        module,
+        lambda: _commands_to(state, 2, "erhp_sputter"),
+        limit_seconds=12.0,
+    )
+    sputters = _commands_to(state, 2, "erhp_sputter")
+    assert any("ericrolph_hot_potato_sputter.ogg" in c for c in sputters)
+    assert any("AudioDefault3D" in c for c in sputters), (
+        "the sputter must ride the stock NON-looping description"
+    )
+    # And the loop was stopped for it: the sputter is the finish, not a
+    # layer over a still-running whistle.
+    stops = [
+        c for c in _commands_to(state, 2, "ericrolph_hot_potato_whistle")
+        if "stopSFX" in c
+    ]
+    assert stops, "the whistle loop was never stopped for the sputter"
+
+
+def test_steady_tick_style_keeps_the_whistle_flat(rig):
+    """Hardcore's contract, extended to the whistle: steady style holds
+    constant pitch and never sputters - no audio tell that the end is
+    near."""
+
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    _shrink_fuse(module, 8)
+    assert module.hotPotatoSetOption("tick_style", "steady") is True
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    tick(state, module)
+    assert start_round(state, module, 2) == 2
+    state.moveVehicle(2, 60.0, 0.0, 0.0)
+    run_until(
+        state,
+        module,
+        lambda: module.getSystemState(PROP_ID).behavior_phase == "boom",
+        limit_seconds=12.0,
+    )
+    whistle_writes = _commands_to(state, 2, "ericrolph_hot_potato_whistle")
+    pitches = {
+        round(float(found.group(2)), 3)
+        for command in whistle_writes
+        for found in [TICK_WRITE.search(command)]
+        if found
+    }
+    assert pitches <= {1.0}, f"steady style leaked a pitch tell: {pitches}"
+    assert not _commands_to(state, 2, "erhp_sputter"), (
+        "steady style must not sputter - silence about the end IS the mode"
+    )
+
+
+def test_whistle_option_gates_the_whole_voice(rig):
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    assert module.hotPotatoSetOption("whistle_enabled", False) is True
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    tick(state, module)
+    assert start_round(state, module, 2) == 2
+    state.moveVehicle(2, 60.0, 0.0, 0.0)
+    tick(state, module, seconds=0.2, steps=10)
+    assert not [
+        c for c in _commands_to(state, 2, "ericrolph_hot_potato_whistle")
+        if "playSFX(" in c
+    ], "whistle_enabled=false still started the loop"
+
+
+def test_ai_drivers_chase_flee_and_release(rig):
+    """v2.5, "this game is meant to be multiplayer": with ai_enabled on, the
+    AI carrier CHASES its nearest target, every other AI car FLEES the
+    carrier, the player is never commanded, and flipping the option off
+    hands every car back to its user."""
+
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    assert module.hotPotatoSetOption("ai_enabled", True) is True
+    state.playerId = 2
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 80.0, 0.0, 0.0)
+    state.addVehicle(4, "etk800", 120.0, 0.0, 0.0)
+    tick(state, module, seconds=0.2, steps=8)
+
+    # Idle phase: the AI cars hold position; the player is untouched.
+    assert any(
+        "ai.setMode('stop')" in c for c in _commands_to(state, 3, "ai.setMode")
+    )
+    assert any(
+        "ai.setMode('stop')" in c for c in _commands_to(state, 4, "ai.setMode")
+    )
+    assert not _commands_to(state, 2, "ai.setMode"), (
+        "the AI sweep commanded the PLAYER'S vehicle"
+    )
+
+    # Vehicle 3 takes the potato: it hunts, 4 flees it, 2 stays untouched.
+    assert start_round(state, module, 3) == 3
+    state.moveVehicle(3, 40.0, 0.0, 0.0)
+    tick(state, module, seconds=0.2, steps=8)
+    hunts = [c for c in _commands_to(state, 3, "ai.setMode") if "'chase'" in c]
+    assert hunts, "the AI carrier never went hunting"
+    assert any("setTargetObjectID(" in c for c in hunts)
+    flees = [c for c in _commands_to(state, 4, "ai.setMode") if "'flee'" in c]
+    assert flees, "the AI field never fled the carrier"
+    assert any("setTargetObjectID(3)" in c for c in flees), (
+        "the fleeing car must flee the CARRIER"
+    )
+    assert not _commands_to(state, 2, "ai.setMode")
+
+    # The release: ai_enabled off returns every commanded car to its user.
+    state.clear()
+    assert module.hotPotatoSetOption("ai_enabled", False) is True
+    tick(state, module, seconds=0.2, steps=8)
+    for vehicle_id in (3, 4):
+        assert any(
+            "ai.setMode('disabled')" in c
+            for c in _commands_to(state, vehicle_id, "ai.setMode")
+        ), f"vehicle {vehicle_id} was never released"
+
+
+def test_fireworks_for_any_round_winner_not_only_the_champion(rig):
+    """v2.5 ("Champion fireworks should be for any winner"): the FIRST round
+    win - far short of wins_to_champion - already writes the winner's name
+    across the sky."""
+
+    _lua, state, module, spec = rig
+    register_prop(state, module)
+    assert int(spec.BEHAVIOR["wins_to_champion"]) > 1, (
+        "this test needs a first win that is NOT the crowning"
+    )
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 300.0, 0.0, 0.0)
+    tick(state, module)
+    assert start_round(state, module, 2) == 2
+    state.removeVehicle(3)
+    module.onVehicleDestroyed(3)
+    run_until(
+        state,
+        module,
+        lambda: any("LAST CAR STANDING" in m for m in state.messages.values()),
+        limit_seconds=20.0,
+    )
+    assert not any("CHAMPION" in m for m in state.messages.values()), (
+        "one win must not crown - the show under test is the ROUND win's"
+    )
+    # Let a few letters burst.
+    tick(state, module, seconds=0.1, steps=60)
+    assert any(name.endswith("fw_px_1") for name in state.scene), (
+        "no firework light pool for a round winner"
+    )
+    assert _poses_of(state, "fw_px_1"), "the winner's fireworks never moved"
