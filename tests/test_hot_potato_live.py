@@ -280,6 +280,8 @@ def test_hot_potato_round_transfer_detonation_and_teardown(tmp_path: Path) -> No
         f"hp_ram_{suffix}",
         f"hp_boom_{suffix}",
         f"hp_mash_{suffix}",
+        f"hp_firework_burst_{suffix}",
+        f"hp_firework_finale_{suffix}",
     ]
     profile_shots = tuple((user / "screenshots" / f"{name}.png") for name in shot_names)
     log_path = user / "beamng.log"
@@ -786,6 +788,49 @@ def test_hot_potato_round_transfer_detonation_and_teardown(tmp_path: Path) -> No
                 calls=200,
                 note="the return flight never settled back to idle",
             )
+
+            # --- the fireworks, fired on purpose and photographed (v2.7) ----
+            # "I don't think the fireworks are working": the v2.4 show was
+            # point lights alone — invisible against open sky. The rework
+            # draws the shell, the glyph stars and the finale rain with the
+            # debug drawer, and ships a test hook (the HUD app's button uses
+            # the same one) so the gate does not have to gamble on round
+            # outcomes to see the sky. The letters burst on a vertical plane
+            # along the authored X axis above the arch apex.
+            fired = _lua_json(
+                bng,
+                f"local ok = extensions[{RUNTIME_EXTENSION!r}]"
+                ".hotPotatoTestFireworks('ERIC'); "
+                "return jsonEncode({ok = ok == true})",
+            )
+            assert fired == {"ok": True}, "the fireworks test hook refused"
+            _step_until(
+                bng,
+                lambda: _stats(bng).get("fw_stage") == "burst",
+                calls=40,
+                note="the test shot never reached a letter burst",
+            )
+            # From the NORTH — the side the player's car is on, which is the
+            # side beginFireworks faces the writing toward (a flat glyph
+            # mirrors from the far side; the r2 shot photographed E as 3).
+            fw_eye = (origin[0], origin[1] + 72.0, origin[2] + 44.0)
+            fw_aim = (origin[0], origin[1], origin[2] + 56.0)
+            _screenshot(bng, fw_eye, fw_aim, shot_names[8])
+            _step_until(
+                bng,
+                lambda: _stats(bng).get("fw_stage") == "finale",
+                calls=80,
+                note="the show never reached its finale",
+            )
+            _screenshot(bng, fw_eye, fw_aim, shot_names[9])
+            # Let the rain die before the next round's pickup below.
+            _step_until(
+                bng,
+                lambda: _stats(bng).get("fw_stage", "") == "",
+                calls=40,
+                note="the finale never burned out",
+            )
+
             rammer.teleport(pos=pad_world, rot_quat=(0, 0, 0, 1), reset=True)
             _step_until(
                 bng,

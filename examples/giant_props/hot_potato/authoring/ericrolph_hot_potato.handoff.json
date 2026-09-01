@@ -3483,6 +3483,162 @@
           0.0,
           6.1
         ]
+      },
+      "mash_steam_1": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_20",
+        "position": [
+          -3.0,
+          -3.0,
+          -30.0
+        ]
+      },
+      "mash_steam_2": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_20",
+        "position": [
+          3.0,
+          -3.0,
+          -30.0
+        ]
+      },
+      "mash_steam_3": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_20",
+        "position": [
+          -3.0,
+          3.0,
+          -30.0
+        ]
+      },
+      "mash_steam_4": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_20",
+        "position": [
+          3.0,
+          3.0,
+          -30.0
+        ]
+      },
+      "mash_steam_5": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_20",
+        "position": [
+          0.0,
+          -4.5,
+          -30.0
+        ]
+      },
+      "mash_steam_6": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_20",
+        "position": [
+          0.0,
+          4.5,
+          -30.0
+        ]
+      },
+      "mash_steam_b1": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_20",
+        "position": [
+          -3.0,
+          -3.0,
+          -30.0
+        ]
+      },
+      "mash_steam_b2": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_20",
+        "position": [
+          3.0,
+          -3.0,
+          -30.0
+        ]
+      },
+      "mash_steam_b3": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_20",
+        "position": [
+          -3.0,
+          3.0,
+          -30.0
+        ]
+      },
+      "mash_steam_b4": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_20",
+        "position": [
+          3.0,
+          3.0,
+          -30.0
+        ]
+      },
+      "mash_steam_b5": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_20",
+        "position": [
+          0.0,
+          -4.5,
+          -30.0
+        ]
+      },
+      "mash_steam_b6": {
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "emitter": "BNGP_20",
+        "position": [
+          0.0,
+          4.5,
+          -30.0
+        ]
       }
     },
     "triggers": {
@@ -3504,6 +3660,11 @@
       "ai_aggression": 1.0,
       "ai_enabled": false,
       "ai_speed_kmh": 90.0,
+      "arena_enabled": true,
+      "arena_halo_enabled": true,
+      "arena_magnet_enabled": true,
+      "arena_magnet_g": 0.6,
+      "arena_radius_m": 91.4,
       "attach_sink": 0.16,
       "attach_wobble": 0.06,
       "audio_enabled": true,
@@ -3533,6 +3694,7 @@
       "crush_inward": 0.45,
       "crush_min_z": 0.55,
       "cue_window_seconds": 30.0,
+      "damage_mode": "normal",
       "detonate_break": true,
       "detonate_crush": true,
       "detonate_enabled": true,
@@ -3622,6 +3784,7 @@
       "tick_style": "escalating",
       "touch_margin": 0.35,
       "transfer_mode": "touch",
+      "transfer_shield_seconds": 3.0,
       "whistle_enabled": true,
       "whistle_volume": 1.0,
       "wins_to_champion": 3
@@ -3678,7 +3841,7 @@
       "weight": 125.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_pad_00_00_01",
@@ -3716,7 +3879,7 @@
       "weight": 125.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_pad_00_01_01",
@@ -3754,7 +3917,7 @@
       "weight": 125.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_pad_00_02_01",
@@ -3792,7 +3955,7 @@
       "weight": 125.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_pad_01_00_01",
@@ -3830,7 +3993,7 @@
       "weight": 125.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_pad_01_01_01",
@@ -3868,7 +4031,7 @@
       "weight": 125.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_pad_01_02_01",
@@ -3906,7 +4069,7 @@
       "weight": 125.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_pad_02_00_01",
@@ -3944,7 +4107,7 @@
       "weight": 125.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_pad_02_01_01",
@@ -3982,7 +4145,7 @@
       "weight": 125.0
     },
     {
-      "collision": true,
+      "collision": false,
       "fixed": true,
       "friction": 0.9,
       "id": "ericrolph_hot_potato_pad_02_02_01",
@@ -6300,9 +6463,9 @@
     },
     "ericrolph_hot_potato_mash": {
       "color": [
-        0.87,
-        0.78,
-        0.52,
+        0.97,
+        0.88,
+        0.7,
         1.0
       ],
       "metallic": 0.0,
@@ -6392,8 +6555,8 @@
         -3.0,
         -30.0
       ],
-      "sha256": "c5955520e663c6d951573a4fc517f2aa850ddd96ce5a92122e3e0e88a6e5226e",
-      "size": 1802644
+      "sha256": "9c7f2d6f9445b603ac1dfa63538758abdf1d400fcb4c83970b13549dee845c90",
+      "size": 2689449
     },
     {
       "materials": [
@@ -6406,8 +6569,8 @@
         -3.0,
         -30.0
       ],
-      "sha256": "67e04a4bd2a9dcc532ef988995e730eca6931f4498f46bb47e5bdeebfde89fa0",
-      "size": 1804871
+      "sha256": "55f10ddac787ad1737eed0de46d62b7081929dd3610abaed4217290cd339cd6a",
+      "size": 2693862
     },
     {
       "materials": [
@@ -6420,8 +6583,8 @@
         3.0,
         -30.0
       ],
-      "sha256": "086f19f592cc95762c1ea2e863531cec57c44d95f3a98125d8b6db3ef818674a",
-      "size": 1804021
+      "sha256": "ee7cc2980fbaa613932ff7302876dcbf1d2fd0c2858a65ce2c8976d50397f9c7",
+      "size": 2691048
     },
     {
       "materials": [
@@ -6434,8 +6597,8 @@
         3.0,
         -30.0
       ],
-      "sha256": "0e07502c8294aa6f325b1befac051606cc8965929c83e699ca6dbfbdff1106ef",
-      "size": 1806164
+      "sha256": "c71f10a961671659d0f97cfb30a135cbe3b2a88961994ca0c83d275ce764dc58",
+      "size": 1807248
     },
     {
       "materials": [
@@ -6448,8 +6611,8 @@
         -4.5,
         -30.0
       ],
-      "sha256": "0033097c306abda6e0174c0245f946100f59e3f7dd9007023c248dc0b5093a16",
-      "size": 1803962
+      "sha256": "31dce141cc068bb1ce769abb64a2c5f0786b3bc7c3f5988a42e6fd525039e85d",
+      "size": 3717596
     },
     {
       "materials": [
@@ -6462,8 +6625,8 @@
         4.5,
         -30.0
       ],
-      "sha256": "3e2004ed40c4d80867992498a1f11601c337a96d983223723e81ea0eeeb3b405",
-      "size": 871846
+      "sha256": "34e6c11eabb71958d8c4d6df3d3613cf48ca7ba20ae883a7bc86040f911d455d",
+      "size": 1808079
     },
     {
       "materials": [
@@ -6476,7 +6639,7 @@
         0.0,
         5.6
       ],
-      "sha256": "b312253f189573421266646cfc2e541981c27ddb9a19f99a8d105c6ea9175570",
+      "sha256": "35b5da6c934ba57fd2b5b0f99fdce9ca7d398e4b3fb832b5b395dbccac4f9796",
       "size": 1806986
     }
   ],
@@ -6500,70 +6663,6 @@
     "ericrolph_hot_potato_pylon_e_01_01_02"
   ],
   "triangles": [
-    {
-      "ground_model": "asphalt",
-      "nodes": [
-        "ericrolph_hot_potato_pad_00_00_01",
-        "ericrolph_hot_potato_pad_01_00_01",
-        "ericrolph_hot_potato_pad_01_01_01"
-      ]
-    },
-    {
-      "ground_model": "asphalt",
-      "nodes": [
-        "ericrolph_hot_potato_pad_00_00_01",
-        "ericrolph_hot_potato_pad_01_01_01",
-        "ericrolph_hot_potato_pad_00_01_01"
-      ]
-    },
-    {
-      "ground_model": "asphalt",
-      "nodes": [
-        "ericrolph_hot_potato_pad_00_01_01",
-        "ericrolph_hot_potato_pad_01_01_01",
-        "ericrolph_hot_potato_pad_01_02_01"
-      ]
-    },
-    {
-      "ground_model": "asphalt",
-      "nodes": [
-        "ericrolph_hot_potato_pad_00_01_01",
-        "ericrolph_hot_potato_pad_01_02_01",
-        "ericrolph_hot_potato_pad_00_02_01"
-      ]
-    },
-    {
-      "ground_model": "asphalt",
-      "nodes": [
-        "ericrolph_hot_potato_pad_01_00_01",
-        "ericrolph_hot_potato_pad_02_00_01",
-        "ericrolph_hot_potato_pad_02_01_01"
-      ]
-    },
-    {
-      "ground_model": "asphalt",
-      "nodes": [
-        "ericrolph_hot_potato_pad_01_00_01",
-        "ericrolph_hot_potato_pad_02_01_01",
-        "ericrolph_hot_potato_pad_01_01_01"
-      ]
-    },
-    {
-      "ground_model": "asphalt",
-      "nodes": [
-        "ericrolph_hot_potato_pad_01_01_01",
-        "ericrolph_hot_potato_pad_02_01_01",
-        "ericrolph_hot_potato_pad_02_02_01"
-      ]
-    },
-    {
-      "ground_model": "asphalt",
-      "nodes": [
-        "ericrolph_hot_potato_pad_01_01_01",
-        "ericrolph_hot_potato_pad_02_02_01",
-        "ericrolph_hot_potato_pad_01_02_01"
-      ]
-    },
     {
       "ground_model": "metal",
       "nodes": [
@@ -7055,7 +7154,7 @@
       "min": [
         -26.088198,
         -4.45,
-        0.0
+        -0.012
       ]
     },
     "materials": [
@@ -7065,7 +7164,7 @@
       "ericrolph_hot_potato_plinth_concrete"
     ],
     "path": "vehicles/ericrolph_hot_potato/ericrolph_hot_potato.dae",
-    "sha256": "0270a15d17bb10d53469f273680e821b26874e62cf316b932589696503e1f416",
-    "size": 623228
+    "sha256": "74b3b71f8d838753096d4e342f6e01a22ac710a72fd32e50755fc9ef30c85c39",
+    "size": 626004
   }
 }

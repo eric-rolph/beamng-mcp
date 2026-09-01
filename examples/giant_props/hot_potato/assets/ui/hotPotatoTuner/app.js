@@ -46,6 +46,8 @@ angular.module('beamng.apps').directive('hotPotatoTuner', ['$interval', function
     { title: 'Pickup & carry', keys: ['pickup_radius', 'pickup_height', 'carrier_boost_mps2', 'carrier_boost_max_mps', 'carry_clearance_m', 'bounce_enabled', 'bounce_amplitude_m', 'attach_sink', 'attach_wobble'] },
     { title: 'Audio cues', keys: ['audio_enabled', 'audio_volume', 'tick_style', 'silence_gap_seconds', 'steam_hiss_enabled', 'whistle_enabled', 'whistle_volume', 'cue_window_seconds', 'beep_slow_interval', 'beep_fast_interval', 'beep_pitch_rise'] },
     { title: 'AI drivers', keys: ['ai_enabled', 'ai_aggression', 'ai_speed_kmh'] },
+    { title: 'Arena', keys: ['arena_enabled', 'arena_radius_m', 'arena_halo_enabled', 'arena_magnet_enabled', 'arena_magnet_g'] },
+    { title: 'Damage', keys: ['damage_mode', 'transfer_shield_seconds'] },
     { title: 'Beacon & glow', keys: ['beacon_enabled', 'glow_ramp_enabled', 'beacon_brightness', 'beacon_radius', 'beacon_ray_range', 'beacon_pulse_seconds', 'beacon_spin_rate'] },
     { title: 'Detonation', keys: ['detonate_enabled', 'detonate_break', 'detonate_crush', 'detonate_fire', 'detonate_launch_mps', 'crush_dv_mps', 'crush_min_z', 'crush_inward', 'blast_radius_m', 'blast_push_mps', 'fire_seconds', 'mash_enabled', 'mash_seconds'] },
     { title: 'Pacing & show', keys: ['round_idle_seconds', 'wins_to_champion', 'fireworks_enabled', 'smoke_enabled', 'spin_rate', 'bob_amplitude', 'bob_rate', 'safety_enabled', 'safety_extent_max'] }
@@ -66,7 +68,7 @@ angular.module('beamng.apps').directive('hotPotatoTuner', ['$interval', function
   function label(key) {
     return key.replace(/_/g, ' ').replace(/\bmps2\b/, 'm/s²')
       .replace(/\bmps\b/, 'm/s').replace(/\bkmh\b/, 'km/h')
-      .replace(/\bm\b$/, 'metres');
+      .replace(/\bm\b$/, 'metres').replace(/\bg\b$/, 'g-force');
   }
 
   // bngApi.engineLua hands the callback whatever the Lua expression
@@ -143,10 +145,17 @@ angular.module('beamng.apps').directive('hotPotatoTuner', ['$interval', function
           status.isPlayer = data.carrier_is_player === true;
           status.gameMode = data.game_mode || 'classic';
           status.hoarder = status.gameMode === 'hoarder';
+          // Hoarder and protect both race held-seconds to the target, so
+          // both show the points board (v2.6).
+          status.holdScore = status.hoarder || status.gameMode === 'protect';
           status.scores = (data.scores && data.scores.length) ? data.scores : [];
           status.hoardTarget = Number(data.hoard_target) || 0;
           if (data.phase === 'live') {
-            if (status.hoarder) {
+            if (status.gameMode === 'protect') {
+              status.banner = status.isPlayer
+                ? 'PROTECT THE POTATO — they are coming!'
+                : ((data.carrier_name || 'someone') + ' has the potato — take it');
+            } else if (status.hoarder) {
               status.banner = status.isPlayer
                 ? 'YOU ARE EARNING — hold on!'
                 : ((data.carrier_name || 'someone') + ' is hoarding');
@@ -213,6 +222,12 @@ angular.module('beamng.apps').directive('hotPotatoTuner', ['$interval', function
       }
       scope.hardcore = function () { applyPreset(HARDCORE); };
       scope.classicCues = function () { applyPreset(CLASSIC); };
+
+      // v2.7: fire a full fireworks pass right now — the party host's (and
+      // the live gate's) proof the sky works, no champion required.
+      scope.testFireworks = function () {
+        bngApi.engineLua(EXT + '.hotPotatoTestFireworks("")');
+      };
 
       scope.refresh();
     }

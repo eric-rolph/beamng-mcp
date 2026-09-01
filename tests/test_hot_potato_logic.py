@@ -264,6 +264,27 @@ S.settings = nil
 function jsonReadFile() return S.settings end
 function jsonWriteFile(_path, payload) S.settings = payload return true end
 
+-- v2.6: the arena halo is immediate-mode debug-drawer geometry redrawn per
+-- frame; the stub records every solid tri so the gates can see the wall
+-- appear with a live round and vanish without one.
+S.halo = {}
+-- v2.7: the fireworks draw their shell, stars and finale rain with the
+-- same immediate-mode drawer (a point light against open sky renders
+-- NOTHING — the whole v2.7 fireworks bug); the stub records every sphere
+-- so the gates can see the sky light up, and stay dark when the option
+-- says so.
+S.stars = {}
+function color(r, g, b, a) return {r = r, g = g, b = b, a = a} end
+function ColorF(r, g, b, a) return {r = r, g = g, b = b, a = a} end
+debugDrawer = {
+  drawTriSolid = function(_self, a, b, c) S.halo[#S.halo + 1] = {a = a, b = b, c = c} end,
+  drawCylinder = function() end,
+  drawSphere = function(_self, position, radius, colorf)
+    S.stars[#S.stars + 1] = {position = position, radius = radius, color = colorf}
+  end,
+  drawLine = function() end,
+}
+
 return S
 """
 
@@ -374,12 +395,17 @@ def _physics_commands(state):
     mechanism v3: createSFXSource/setVolumePitch/playSFX/stopSFX pushed via
     queueLuaCommand), so "no commands at all" stopped being the right
     predicate the day the tick stopped leaking playOnce loop instances.
+
+    v2.6: the damage-armor command PROTECTS a car (setBeamStrength to
+    math.huge, deflateTire patched out) — it mentions "deflate" only to
+    disarm it, so it is excluded the same way the audio writes are.
     """
 
     return [
         entry
         for entry in state.commands.values()
-        if any(verb in entry.command for verb in PHYSICS_VERBS)
+        if "ericrolph_hot_potato_armor" not in entry.command
+        and any(verb in entry.command for verb in PHYSICS_VERBS)
     ]
 
 
@@ -412,11 +438,12 @@ def test_registers_with_trigger_effects_and_the_potato(rig):
     assert system.part_count == 7
     assert system.trigger_count == 1
     assert system.triggers.pad.mode == "Overlaps"
-    # Three declared particle emitters plus the THREE light objects the
+    # Fifteen declared particle emitters (fuse, blast, cheer, and v2.7's
+    # six mash-steam wisp PAIRS) plus the THREE light objects the
     # behaviour makes itself and parks in state.effects for teardown: the
     # round-gated beacons. (v2.3 removed the wick and its ember lamp — the
     # smoke wisp off the crown is the idle invitation now.)
-    assert system.effect_count == 6
+    assert system.effect_count == 18
 
 
 def test_driving_onto_the_pad_picks_the_potato_up(rig):
@@ -1774,7 +1801,9 @@ def test_ai_drivers_chase_flee_and_release(rig):
     state.playerId = 2
     state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
     state.addVehicle(3, "etk800", 80.0, 0.0, 0.0)
-    state.addVehicle(4, "etk800", 120.0, 0.0, 0.0)
+    # Inside the default arena (v2.6): a car beyond 91.4 m is no longer
+    # conscripted at all — that gate has its own test now.
+    state.addVehicle(4, "etk800", -60.0, 0.0, 0.0)
     tick(state, module, seconds=0.2, steps=8)
 
     # Idle phase: the AI cars hold position; the player is untouched.
@@ -1844,3 +1873,430 @@ def test_fireworks_for_any_round_winner_not_only_the_champion(rig):
         "no firework light pool for a round winner"
     )
     assert _poses_of(state, "fw_px_1"), "the winner's fireworks never moved"
+
+
+# --------------------------------------------------------------------------
+# v2.6 (2026-08-30): the arena, protect mode, damage armor, and the halo.
+
+
+def test_the_arena_gates_who_can_receive_the_potato(rig):
+    """v2.6 ("any AI vehicle within the game radius becomes part of the hot
+    potato game"): a car outside the arena circle cannot receive the potato,
+    however close the transfer rules say it is."""
+
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    assert module.hotPotatoSetOption("arena_radius_m", 20) is True
+    assert module.hotPotatoSetOption("transfer_mode", "radius") is True
+    assert module.hotPotatoSetOption("radius_m", 60) is True
+    state.addVehicle(2, "etk800", 0.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 30.0, 0.0, 0.0)  # in pass range, OUT of arena
+    tick(state, module)
+    assert start_round(state, module, 2) == 2
+    tick(state, module, seconds=0.2, steps=10)
+    assert _carrier_of(module) == 2, "a car outside the arena received the potato"
+    # The same car one step inside the circle is a legal receiver at once.
+    state.moveVehicle(3, 12.0, 0.0, 0.0)
+    run_until(state, module, lambda: _carrier_of(module) == 3, limit_seconds=5.0)
+
+
+def test_arena_off_restores_the_open_field(rig):
+    """The circle is an option: with arena_enabled off the same faraway car
+    is a legal receiver again."""
+
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    assert module.hotPotatoSetOption("arena_enabled", False) is True
+    assert module.hotPotatoSetOption("arena_radius_m", 20) is True
+    assert module.hotPotatoSetOption("transfer_mode", "radius") is True
+    assert module.hotPotatoSetOption("radius_m", 60) is True
+    state.addVehicle(2, "etk800", 0.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 30.0, 0.0, 0.0)
+    tick(state, module)
+    # With the circle off the faraway car is a legal receiver the moment
+    # the round arms - the pass can land inside start_round itself.
+    start_round(state, module, 2)
+    run_until(state, module, lambda: _carrier_of(module) == 3, limit_seconds=5.0)
+
+
+def test_arena_conscription_and_containment_herd_the_ai(rig):
+    """v2.6: only cars INSIDE the circle are conscripted, and a conscripted
+    car that strays out is steered straight back at the arch with the
+    raw-coordinate slotTraffic target (ai.lua:5833), refreshed faster than
+    its 0.5 s watchdog, until it is well inside again."""
+
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    assert module.hotPotatoSetOption("ai_enabled", True) is True
+    assert module.hotPotatoSetOption("arena_radius_m", 20) is True
+    # x=12: inside the 20 m arena but OUTSIDE the 7.5 m pickup radius, so
+    # no round arms and the idle role stays under test.
+    state.addVehicle(2, "etk800", 12.0, 0.0, 0.0)  # inside: conscripted
+    state.addVehicle(3, "etk800", 100.0, 0.0, 0.0)  # outside: left alone
+    tick(state, module, seconds=0.2, steps=10)
+    assert _commands_to(state, 2, "ai.setMode"), (
+        "the car inside the arena was never conscripted"
+    )
+    assert not _commands_to(state, 3, "ai."), (
+        "a car outside the arena must never be commandeered"
+    )
+    # The conscripted car strays out: containment takes over.
+    state.clear()
+    state.moveVehicle(2, 40.0, 0.0, 0.0)
+    tick(state, module, seconds=0.2, steps=12)
+    herds = _commands_to(state, 2, "ai.setSlotTrafficTarget")
+    assert len(herds) >= 4, (
+        f"containment must outpace the 0.5 s watchdog, saw {len(herds)} writes"
+    )
+    # Home again, well inside the 80% hysteresis line (16 m) but clear of
+    # the pickup radius: the role comes back and the herding stops.
+    state.moveVehicle(2, 12.0, 0.0, 0.0)
+    tick(state, module, seconds=0.2, steps=10)
+    assert _commands_to(state, 2, "ai.setMode('stop')"), (
+        "a returned car never got its role back"
+    )
+    state.clear()
+    tick(state, module, seconds=0.2, steps=10)
+    assert not _commands_to(state, 2, "ai.setSlotTrafficTarget"), (
+        "containment kept herding a car that is already home"
+    )
+
+
+def test_protect_mode_inverts_the_hunt_and_scores_the_holder(rig):
+    """v2.6, the reverse game: in protect mode the AI mob hunts the carrier,
+    an AI carrier runs for its life, and held seconds score toward the same
+    target the hoarder race uses."""
+
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    state.playerId = 2
+    assert module.hotPotatoSetOption("game_mode", "protect") is True
+    assert module.hotPotatoSetOption("ai_enabled", True) is True
+    state.addVehicle(2, "etk800", 40.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 60.0, 0.0, 0.0)
+    state.addVehicle(4, "etk800", -40.0, 0.0, 0.0)
+    tick(state, module)
+    assert start_round(state, module, 3) == 3
+    state.moveVehicle(3, 60.0, 0.0, 0.0)
+    tick(state, module, seconds=0.2, steps=10)
+    hunts = [c for c in _commands_to(state, 4, "ai.setMode") if "'chase'" in c]
+    assert hunts, "the mob never hunted the carrier"
+    assert any("ai.setTargetObjectID(3)" in c for c in hunts), (
+        "the hunt must target the carrier"
+    )
+    flees = [c for c in _commands_to(state, 3, "ai.setMode") if "'flee'" in c]
+    assert flees, "the AI carrier should flee its pursuers in protect mode"
+    stats = module.hotPotatoGetStats()
+    assert stats.scores and stats.scores[1] is not None, "no protect scoreboard"
+    assert float(stats.scores[1].points) >= 1, "held seconds never scored"
+
+
+def test_ai_role_commands_tune_after_the_mode_switch(rig):
+    """v2.6, measured: ai.setMode -> resetMapAndRoute -> resetAggression /
+    resetParameters (ai.lua:5780), so aggression and the speed cap sent
+    BEFORE setMode are silently wiped by it. The role command must open
+    with setMode. (The v2.5 order shipped exactly that bug.)"""
+
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    assert module.hotPotatoSetOption("ai_enabled", True) is True
+    state.playerId = 2
+    state.addVehicle(2, "etk800", 40.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 60.0, 0.0, 0.0)
+    tick(state, module)
+    assert start_round(state, module, 3) == 3
+    state.moveVehicle(3, 60.0, 0.0, 0.0)
+    tick(state, module, seconds=0.2, steps=10)
+    roles = [
+        c for c in _commands_to(state, 3, "ai.setMode")
+        if "ai.setAggression" in c
+    ]
+    assert roles, "no tuned role command reached the AI carrier"
+    for command in roles:
+        assert command.index("ai.setMode") < command.index("ai.setAggression"), (
+            f"tuning sent before setMode is wiped by it: {command}"
+        )
+
+
+def test_no_damage_mode_armors_the_field_but_never_the_boom(rig):
+    """v2.6 damage options: no_damage armors every participant's beams to
+    math.huge (the jbeam loader's own unbreakable semantic), and the
+    detonation VICTIM has armor stripped before the break commands queue
+    behind it in the same VM."""
+
+    _lua, state, module, spec = rig
+    register_prop(state, module)
+    _shrink_fuse(module, 8)
+    assert module.hotPotatoSetOption("damage_mode", "no_damage") is True
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 40.0, 0.0, 0.0)
+    tick(state, module, seconds=0.2, steps=8)
+    for vehicle_id in (2, 3):
+        armors = _commands_to(state, vehicle_id, "ericrolph_hot_potato_armor")
+        assert any('"full"' in c for c in armors), (
+            f"vehicle {vehicle_id} was never armored"
+        )
+        assert any("setBeamStrength" in c and "math.huge" in c for c in armors)
+    assert start_round(state, module, 2) == 2
+    _detonate_carrier(state, module, spec)
+    ordered = [e.command for e in state.commands.values() if e.id == 2]
+    strip = next(
+        i for i, c in enumerate(ordered)
+        if "ericrolph_hot_potato_armor" in c and '"none"' in c
+    )
+    smash = next(i for i, c in enumerate(ordered) if "breakAllBreakgroups" in c)
+    assert strip < smash, "the boom hit a still-armored car"
+
+
+def test_transfer_shield_armors_the_pair_then_lets_go(rig):
+    """v2.6 ("vehicles transferring the potato are temporarily invincible
+    when they collide"): an impact pass full-armors both cars at once, and
+    the armor sweep hands stock damage back after the window."""
+
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    state.addVehicle(2, "etk800", 0.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 60.0, 0.0, 0.0)
+    tick(state, module)
+    assert start_round(state, module, 2) == 2
+    state.moveVehicle(2, 40.0, 0.0, 0.0)
+    close_in(state, module, 3, 2, 10.0)
+    run_until(state, module, lambda: _carrier_of(module) == 3, limit_seconds=6.0)
+    for vehicle_id in (2, 3):
+        assert any(
+            '"full"' in c
+            for c in _commands_to(state, vehicle_id, "ericrolph_hot_potato_armor")
+        ), f"vehicle {vehicle_id} was not shielded through the pass"
+    state.clear()
+    tick(state, module, seconds=0.2, steps=30)  # 6 s > the 3 s default window
+    for vehicle_id in (2, 3):
+        assert any(
+            '"none"' in c
+            for c in _commands_to(state, vehicle_id, "ericrolph_hot_potato_armor")
+        ), f"vehicle {vehicle_id} kept its shield past the window"
+
+
+def test_the_halo_walls_the_arena_only_while_a_round_runs(rig):
+    """v2.6 ("a see through halo ... when the game starts that goes away
+    when the game ends"): the immediate-mode wall exists on live frames,
+    never between rounds, and the option kills it entirely."""
+
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    state.addVehicle(2, "etk800", 60.0, 0.0, 0.0)
+    tick(state, module, seconds=0.2, steps=5)
+    assert len(state.halo) == 0, "the halo must not exist between rounds"
+    assert start_round(state, module, 2) == 2
+    tick(state, module, seconds=0.2, steps=3)
+    assert len(state.halo) > 0, "no halo while the round is live"
+    assert module.hotPotatoSetOption("arena_halo_enabled", False) is True
+    before = len(state.halo)
+    tick(state, module, seconds=0.2, steps=3)
+    assert len(state.halo) == before, "the halo option did not kill the wall"
+
+
+# --------------------------------------------------------------------------
+# v2.7 (2026-09-01): the arena magnet, the fireworks that actually render,
+# and very light steam off the landed mash.
+# --------------------------------------------------------------------------
+
+MAGNET_G = 6.674e-11
+
+
+def _well_masses(state, vehicle_id):
+    """The mass of every gravity well placed on `vehicle_id`, in order.
+
+    The runtime writes obj:setPlanets({x, y, z, 10, mass}); a clear is
+    setPlanets({}) and parses to nothing here.
+    """
+
+    masses = []
+    for command in _commands_to(state, vehicle_id, "obj:setPlanets({"):
+        found = re.search(r"10, ([0-9.eE+-]+)\}\)", command)
+        if found:
+            masses.append(float(found.group(1)))
+    return masses
+
+
+def test_the_magnet_tethers_a_strayed_member_and_lets_go_inside(rig):
+    """v2.7 ("a magnetic force that pulls vehicles back into the center"):
+    a round member — the PLAYER included, which the AI steering can never
+    touch — who drives out of the ring gets a standing gravity well at the
+    pad (obj:setPlanets, the engine's own attractor), with its mass
+    recomputed from the car's current range so the pull is a constant
+    arena_magnet_g anywhere outside. Bystanders never inside the ring are
+    never touched, and the well lifts once the car is well inside again."""
+
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    assert module.hotPotatoSetOption("arena_radius_m", 20) is True
+    state.playerId = 3
+    state.addVehicle(2, "etk800", 0.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 12.0, 0.0, 0.0)  # inside: a member
+    state.addVehicle(4, "etk800", 200.0, 0.0, 0.0)  # bystander: never inside
+    tick(state, module)
+    assert start_round(state, module, 2) == 2
+    tick(state, module, seconds=0.2, steps=6)  # the sweep drafts 3 inside
+    state.clear()
+    state.moveVehicle(3, 40.0, 0.0, 0.0)
+    tick(state, module, seconds=0.2, steps=12)
+    masses = _well_masses(state, 3)
+    assert len(masses) >= 3, (
+        f"the well must refresh with the 0.5 s sweep, saw {len(masses)} writes"
+    )
+    # Constant-force tether at d = 40 m: mass = g * 9.81 * d^2 / G.
+    expected = 0.6 * 9.81 * 40.0 * 40.0 / MAGNET_G
+    assert abs(masses[-1] - expected) / expected < 0.05, (
+        f"well mass {masses[-1]:g} is not the constant-force tether {expected:g}"
+    )
+    assert not _commands_to(state, 4, "obj:setPlanets"), (
+        "a bystander that was never inside the ring got a gravity well"
+    )
+    # Home again, inside the 90% release line (18 m): the well lifts.
+    state.clear()
+    state.moveVehicle(3, 12.0, 0.0, 0.0)
+    tick(state, module, seconds=0.2, steps=6)
+    assert any(
+        "obj:setPlanets({})" in c for c in _commands_to(state, 3, "setPlanets")
+    ), "the well never lifted after the car came home"
+
+
+def test_the_magnet_obeys_its_toggle_and_its_strength_dial(rig):
+    """The magnet is a HUD option twice over: arena_magnet_enabled places or
+    withholds the well, and arena_magnet_g scales its mass — membership
+    rides the arena, so flipping the magnet on mid-round still catches a
+    car that is already outside."""
+
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    assert module.hotPotatoSetOption("arena_radius_m", 20) is True
+    assert module.hotPotatoSetOption("arena_magnet_enabled", False) is True
+    state.addVehicle(2, "etk800", 0.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 12.0, 0.0, 0.0)
+    tick(state, module)
+    assert start_round(state, module, 2) == 2
+    tick(state, module, seconds=0.2, steps=6)
+    state.moveVehicle(3, 40.0, 0.0, 0.0)
+    tick(state, module, seconds=0.2, steps=8)
+    assert not _commands_to(state, 3, "setPlanets"), (
+        "the magnet placed a well while switched off"
+    )
+    # The car is ALREADY outside when the host flips the magnet on: it was
+    # drafted while inside, so the heavier well lands on it at once.
+    assert module.hotPotatoSetOption("arena_magnet_enabled", True) is True
+    assert module.hotPotatoSetOption("arena_magnet_g", 2.0) is True
+    state.clear()
+    tick(state, module, seconds=0.2, steps=8)
+    masses = _well_masses(state, 3)
+    assert masses, "the mid-round toggle never placed the well"
+    expected = 2.0 * 9.81 * 40.0 * 40.0 / MAGNET_G
+    assert abs(masses[-1] - expected) / expected < 0.05, (
+        f"well mass {masses[-1]:g} ignored the strength dial ({expected:g})"
+    )
+
+
+def test_the_magnet_never_outlives_the_round(rig):
+    """A gravity well is a STANDING physics-side setting, so the boom — and
+    any other exit from the live phase — must lift every well the round
+    placed."""
+
+    _lua, state, module, spec = rig
+    register_prop(state, module)
+    _shrink_fuse(module, 8)
+    assert module.hotPotatoSetOption("arena_radius_m", 20) is True
+    state.addVehicle(2, "etk800", 0.0, 0.0, 0.0)
+    state.addVehicle(3, "etk800", 12.0, 0.0, 0.0)
+    tick(state, module)
+    assert start_round(state, module, 2) == 2
+    tick(state, module, seconds=0.2, steps=6)
+    state.moveVehicle(3, 40.0, 0.0, 0.0)
+    tick(state, module, seconds=0.2, steps=6)
+    assert _well_masses(state, 3), "no well to test the release against"
+    state.clear()
+    _detonate_carrier(state, module, spec)
+    tick(state, module, seconds=0.2, steps=3)
+    assert any(
+        "obj:setPlanets({})" in c for c in _commands_to(state, 3, "setPlanets")
+    ), "the boom left a standing gravity well on a strayed car"
+
+
+def test_fireworks_draw_stars_against_the_sky(rig):
+    """v2.7 ("I don't think the fireworks are working"): the v2.4 show was
+    point lights ALONE, and a point light with no surface near it renders
+    nothing at all against open sky. The show now draws its rising shell,
+    its glyph stars and its finale rain with the debug drawer — and the
+    HUD app's test button fires a full pass through the same hook this
+    gate uses."""
+
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    assert module.hotPotatoTestFireworks("EV") is True
+    tick(state, module, seconds=0.1, steps=3)
+    assert module.hotPotatoGetStats().fw_stage == "launch", (
+        "the test hook never started the show"
+    )
+    assert len(state.stars) > 0, "the rising shell drew nothing"
+    run_until(
+        state,
+        module,
+        lambda: module.hotPotatoGetStats().fw_stage == "burst",
+        limit_seconds=3.0,
+        seconds=0.1,
+    )
+    before = len(state.stars)
+    tick(state, module, seconds=0.1)
+    # E lights 18 glyph pixels; each star is a glow shell plus a white-hot
+    # core, so one burst frame is at least 30 spheres.
+    assert len(state.stars) - before >= 30, (
+        "the burst drew too few stars to read as a letter"
+    )
+
+
+def test_fireworks_stay_dark_when_disabled(rig):
+    """fireworks_enabled=false rules the drawn show and the test button."""
+
+    _lua, state, module, _spec = rig
+    register_prop(state, module)
+    assert module.hotPotatoSetOption("fireworks_enabled", False) is True
+    assert module.hotPotatoTestFireworks("EV") is False
+    tick(state, module, seconds=0.2, steps=10)
+    assert len(state.stars) == 0, "a disabled show still drew stars"
+
+
+def test_mash_steam_rides_the_landed_chunks(rig):
+    """v2.7 ("very light steam to come off the chunks"): each dollop's wisp
+    switches on when its chunk lands, rides the crown while it sits
+    cooking, obeys the smoke toggle, and dies when the chunk melts."""
+
+    _lua, state, module, spec = rig
+    register_prop(state, module)
+    _shrink_fuse(module, 8)
+    state.addVehicle(2, "etk800", 0.0, 0.0, 0.0)
+    tick(state, module)
+    assert start_round(state, module, 2) == 2
+    _detonate_carrier(state, module, spec)
+
+    def _steaming():
+        return [
+            i for i in range(1, 7)
+            if state.scene[f"ericrolph_hot_potato_p1_fx_mash_steam_{i}"].active
+        ]
+
+    run_until(state, module, lambda: len(_steaming()) > 0, limit_seconds=10.0)
+    lit = _steaming()[0]
+    poses = _poses_of(state, f"fx_mash_steam_{lit}")
+    # Near grade, not the authored z -30 park: the harness ground line can
+    # sit a little below zero (spawnMash takes boomFrom.z - 2.0 on the
+    # fizzle path), so "above the plaza's underside" is the honest claim.
+    assert poses and poses[-1][2] > -3.0, (
+        "the steam wisp never rose from its under-plaza park to the chunk"
+    )
+    # The smoke toggle rules the wisps mid-steam…
+    assert module.hotPotatoSetOption("smoke_enabled", False) is True
+    tick(state, module, seconds=0.2, steps=3)
+    assert not _steaming(), "smoke_enabled=false left a chunk steaming"
+    # …and back on, they relight until the melt takes them all.
+    assert module.hotPotatoSetOption("smoke_enabled", True) is True
+    tick(state, module, seconds=0.2, steps=3)
+    assert _steaming(), "the wisps never relit with the toggle"
+    run_until(state, module, lambda: not _steaming(), limit_seconds=30.0)

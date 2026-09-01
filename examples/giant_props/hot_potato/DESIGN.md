@@ -62,9 +62,14 @@ design more than anything above:
 
 ## 2. Where the mod lives
 
-The binding constraint is `AGENTS.md`: **no global `modScript.lua`**. Some
-object must own the GE extension's load/unload lifecycle. That gives two
-legitimate shells, and they should share one core.
+The binding constraint is `AGENTS.md`: gameplay must not be bootstrapped by a
+global `modScript.lua`. Some object must own the GE extension's load/unload
+lifecycle. That gives two legitimate shells, and they should share one core.
+The BeamMP Client package has one narrow exception: its nested
+`scripts/ericrolph_hot_potato/modScript.lua` loads only the custom-event
+transport adapter. The spawned prop still owns gameplay registration, reset,
+and teardown; installing the zip normally therefore retains the original
+single-player lifecycle.
 
 ```
               ┌──────────────────────────────────────────┐
@@ -319,9 +324,13 @@ pack's existing single-subject live tests will not catch a transfer bug.
   that follows a vehicle. `debugDrawer` is debug-only; a decal projection is
   unproven here. The beacon lights (§6) cover "who is it" adequately — treat
   the ring as a later probe, not a v1 requirement.
-- **Multiplayer.** BeamMP sync is out of scope for this framework; the
-  runtime is single-client by construction. Say so in the Repository overview
-  rather than implying it works.
+- **Multiplayer authority.** BeamMP now elects the client that owns the prop's
+  canonical `MPVehicleGE` server ID as authority. That client alone runs the
+  pickup/pass/fuse/scoring state machine and publishes complete snapshots at
+  5 Hz; followers render snapshots and apply vehicle mutations only to cars
+  they own. Joining is fail-closed (`pending`) until the relay assigns a role,
+  so a late or missing relay cannot create two independent rounds. The same
+  zip remains fully local when `MPCoreNetwork.isMPSession()` is false.
 - **Shell B scoring.** Last-car-standing needs an elimination predicate.
   `map.objects[vehId].damage` is available GE-side (traffic respawns at ≥500,
   the game's own code calls >1000 notable and >5000 heavy) and is the obvious
@@ -796,3 +805,193 @@ table), so adding an option REQUIRES the Blender stage before
 `tunablesPresent` refuses the whole behaviour with `tunables_missing`.
 The first v2.5 build did exactly that and the whole lupa suite went
 red at once; the Blender re-run fixed all 46 failures.
+
+
+## v2.6 — the arena round (2026-08-30)
+
+Player brief, in order: the whistle is "annoying now and doesn't sound
+like a potato in a microwave releasing steam"; a ~100-yard arena the AI
+stay inside (on/off, sizable, with a see-through halo while the game
+runs); the reverse "protect the potato" game type; damage options
+(no-damage arena play, degrees, transfer-collision invincibility); and
+the medallion popping tires.
+
+*The whistle re-voice.* The v2.5 voice took "high-frequency and
+piercing" literally — a 2150 Hz sine stack with FM flutter, a smoke
+alarm. Real slit-vent steam is NARROWBAND NOISE, not a tone. The
+re-voice (authoring/make_whistle_audio.py) inverts the mix: a
+falling-tilt 1.2–9 kHz hiss bed is now the primary voice, the "whistle"
+is a soft noise formant near 2.6 kHz, a barely-there tonal ghost (~18 dB
+under the old voice) keeps the runtime's downward glissando legible,
+flutter dropped to ±8% amplitude breathing at 19 Hz, and droplet pops +
+a 150–500 Hz simmer carry the wet body. Level came down twice over: the
+asset peaks at −9 dBFS (was −1.5) and the drive gain fell from
+0.5+0.1·u to 0.30+0.08·u. The sputter one-shot became a wet die-off of
+noise puffs instead of tonal chirps.
+
+*The arena.* `arena_enabled` (on, 91.4 m = 100 yards, `arena_radius_m`
+20–500) draws a horizontal circle around the medallion that every
+consumer reads through one helper family: a car outside cannot receive
+the potato (transfer eligibility), the AI never conscripts an outside
+car ("any AI vehicle within the game radius becomes part of the hot
+potato game" — and only those), and a conscripted car that strays out
+is steered straight back with `ai.setSlotTrafficTarget` — measured as
+the ONE vehicle-AI export taking raw world coordinates with no navgraph
+(ai.lua:5833). Its 0.5 s watchdog brakes the car if the target goes
+stale, so a per-frame heartbeat (0.25 s throttle) refreshes every
+returning car between the 0.8 s role sweeps; an 80%-radius hysteresis
+line stops boundary flip-flop. `arena_halo_enabled` walls the circle
+with translucent immediate-mode `drawTriSolid` quads (both windings, 48
+segments, 7 m, the zone.lua:414-434 fence recipe) on live/boom frames
+only — no scene object exists to leak.
+
+*Protect mode.* `game_mode = "protect"` is the reverse game: held
+seconds score toward `hoard_target_points` exactly like hoarder, but
+the boom costs nothing (hoarder's half-your-hoard punishment stays
+hoarder-only — riding the fuse to the end is protect's whole point).
+The AI role table now keys on DESIRE: hot modes (classic, pinball) run
+carrier-chases/mob-flees; hold modes (hoarder, protect) invert to
+carrier-flees/mob-chases — which also fixed hoarder's AI, whose v2.5
+carrier helpfully chased people to give its points away.
+
+*The AI command-order bug, measured.* `ai.setMode` →
+`resetMapAndRoute` (ai.lua:5780) → `resetAggression`/`resetParameters`:
+the v2.5 role command sent aggression and the speed cap BEFORE setMode,
+which silently wiped them. Role commands now open with setMode; a lupa
+gate pins the order.
+
+*Damage armor.* No invulnerability flag exists anywhere in stock
+BeamNG Lua (searched: traffic "invulnerability" is damage-triggered
+respawn). The real mechanism is the jbeam loader's own unbreakable
+semantic — `beamStrength = math.huge` (stage2.lua:28) — applied live
+per vehicle: `obj:setBeamStrength/setBeamDeform(cid, math.huge)` over
+`v.data.beams`, restored from the authored values that survive the
+override. `damage_mode`: "normal" | "tires_safe" (wheel+pressure-group
+beams armored plus `beamstate.deflateTire` patched out — both halves
+required: the spike-strip path calls the module field, the beam-break
+path a local upvalue) | "no_damage" (everything). One idempotent
+vehicle-side ARMOR_SET command carries all three; a 0.7 s GE sweep
+reconciles roster vs desire. `transfer_shield_seconds` (default 3)
+full-armors BOTH cars of a pass inline at the transfer. The detonation
+victim always has armor stripped first, queued ahead of break/crush/
+fire in the same VM. Armor releases on option change, prop reset and
+teardown.
+
+*The medallion tire-popper.* The pad cage shipped `collision_faces=
+("top",)`: a 6×6 m plane floating 0.05 m above grade with NO side
+faces — its rim a razor step hidden mid-disc (the visual disc is 8.4 m
+and smooth). Fix: the visual plate dropped to a 12 mm flush inlay
+(MEDALLION_TOP_Z 0.05 → 0.012) and the cage pad ships no collision at
+all (cars roll the real plaza ground through the visual); the lattice
+keeps its authored height via PAD_CAGE_TOP_Z so node ids and the
+refnode frame are unchanged. The built jbeam went 68 → 60 collision
+triangles, pad-referencing count now zero.
+
+Two framework laws for the ledger:
+
+- **Lua's 200-local ceiling is real and near.** The generated runtime's
+  main chunk stood at 198 top-level locals before this round; fifteen
+  new `local function`s failed to COMPILE under lupa ("too many local
+  variables") — and LuaJIT shares the cap, so the game would have
+  refused the chunk identically. v2.6 ships as ONE table local (`v26`)
+  with a field per helper; new families must follow that shape.
+- The v2.5 tunables law held: this round ran Blender FIRST and the new
+  keys arrived in B on the first build.
+
+
+## v2.7 — the magnet round (2026-09-01)
+
+Player brief, in order: a magnetic force that pulls vehicles back inside
+the arena when they drive out (on/off in the HUD, strength adjustable);
+ideas for other containment methods; scoreboard THINKING only (no build);
+fluffier mash ("not enough triangles"), with very light steam off the
+chunks; and "I don't think the fireworks are working" — test until a
+critic is utterly wowed.
+
+*The arena magnet.* `obj:setPlanets{x, y, z, radius, mass}` is the
+engine's own gravity well — vehicle-physics-side, per node, every physics
+step (funstuff.lua's explode drives it with mass −3e13·size to REPEL;
+positive mass attracts; beamstate.lua:624-663 wraps the same export with
+timers). A well is a STANDING setting, so unlike the slotTraffic return
+there is no watchdog to feed: the 0.5 s sweep places it when a member
+strays out, refreshes its mass, lifts it at the 90% re-entry line
+(hysteresis against boundary chatter), and `v26.magnetRelease` lifts
+everything on toggle-off, on any exit from the live phase, and at
+init/reset/teardown. Raw planet gravity fades as G·M/d² — weakest exactly
+when a runaway needs it most — so the sweep recomputes `mass =
+arena_magnet_g · 9.81 · d² / G` from each car's CURRENT range: a
+constant-force tether at any distance. Membership rides the ARENA, not
+the magnet toggle (any vehicle, player included, seen inside the ring
+during a live round is drafted for that round; flipping the magnet on
+mid-round still catches a car already outside; bystanders are never
+touched). Options: `arena_magnet_enabled` (on), `arena_magnet_g`
+(0.1–2.5, default 0.6).
+
+*The fireworks were invisible, not broken.* The v2.4 show positioned a
+pool of PointLights at glyph pixels in open sky — and a point light with
+no surface near it renders NOTHING: the state machine ran perfectly while
+the sky stayed empty. The rework draws the show with the debug drawer
+(the halo already proved immediate-mode primitives render in-world):
+every star is a coloured glow shell held near 0.85 alpha around an
+OPAQUE white-hot core at 0.4x (`v26.fwStar`); the launch is a swaying
+shell head with a cooling ember trail; each burst opens with a
+collapsing white flash; glyph stars bloom, twinkle on per-ember phases
+and SAG as they burn, with half-size midpoint stars filling every stroke
+between adjacent lit pixels; the finale rains sixty-plus multi-hue
+embers with segmented fading comet tails. The lights are demoted to what
+they can do: glow on the arch below (first 12 pixels carry dim pool
+lights). Two more live-shot laws: a FLAT GLYPH MIRRORS from the far side
+(the r2 run photographed E as 3), so `fw.flip` faces the whole layout
+toward the player at showtime; and letter scale had to be judged in
+pixels, not intuition — FW_PX walked 1.05 (pinpricks) → 1.6 ("8% of
+frame height") → 2.6 (an 18 m letter) across three live rounds.
+`hotPotatoTestFireworks(name)` fires a full pass on demand — the HUD
+app's "Test fireworks" button and the live gate share it (the hook parks
+the request on v26; the next behaviour frame owns the state and consumes
+it). `fw_stage` ships in both stats channels so cameras can time the
+letters.
+
+*The mash re-sculpt.* The v2.4 chunk count was never the problem — its
+folds were 6–16 cm at game scale, a smooth blob from any real camera
+distance. v2.7 goes after shape AND density: billows roughly twice as
+deep (0.14–0.28), a spoon-swirl ridge climbing the flank (soft-serve),
+mid-band whip peaks, the fine ripple, flatter squash, taller crown, and a
+0.35 radius floor so stacked folds cannot pinch through the centre. The
+sphere budget tiers by chunk: 128×96 / 112×80 / 96×64 — 101,600
+triangles across the six dollops (was ~50k), the hero chunk (24.3k)
+outweighing the potato itself. They render for seconds per boom; the
+budget is the point.
+
+*Steam off the chunks.* Twelve new `mash_steam_*` effects — a PAIR of
+BNGP_20 wisps per chunk (the measured lightest voice in the managed set:
+50 ms period, peak particle alpha 0.199, the potato crown's own wisp;
+one wisp per chunk was "functionally invisible at 85 m", the critic
+round). Ship inactive at the under-plaza homes; stepMash switches each
+pair on when its chunk lands, wavers them across the crown on offset
+phases, obeys `smoke_enabled` mid-steam, and kills them when the chunk
+sinks away. The critic round also lightened the mash albedo ~27% with
+the green pulled out ([0.87,0.78,0.52] "dijon-khaki / crumpled tarps" →
+[0.97,0.88,0.70] butter-cream) and ringed each landing with eight
+deterministic half-sunk splatter droplets, drawn immediate-mode while
+the chunk sits landed.
+
+*Containment alternatives considered* (for the ledger; the magnet + the
+v2.6 AI steering shipped): a static invisible collision wall (a real
+scene object to leak, and a 90 km/h AI face-plant generator); an
+out-of-bounds fuse-burn penalty (invisible punishment, illegible in
+play); speed-capping stray cars via `ai.setSpeed` (AI-only, and fights
+the return steering); teleport-back (reads as a bug, not a rule). The
+gravity well is the only mechanism that is physical, engine-native,
+player-inclusive, strength-adjustable and self-cleaning.
+
+Gates: 7 new lupa tests (tether mass law, dial + mid-round toggle, well
+release on boom, stars against the sky, dark when disabled, steam
+lifecycle, effect census 18); the live gate fires the test hook and
+photographs a burst and the finale over the arch. The player's mandate
+("pair with a subagent critic that must be utterly wowed") ran as two
+adversarial review rounds over real live screenshots: round 1 returned
+NOT WOWED twice with seven ranked fixes (all applied — letter scale,
+star anatomy, stroke fill, flash taming, finale depth, mash albedo,
+steam doubling, splatter); round 2 returned WOWED on both fireworks and
+mash, with a do-not-regress list pinning exactly the combination that
+crossed the line.

@@ -34,6 +34,7 @@
       <button ng-if="showTuning" ng-click="reset()" title="Restore every option to its shipped default">Defaults</button>
       <button ng-if="showTuning" ng-click="hardcore()" title="Steady tick, no escalation, no visual tells - silence is the only warning">Hardcore</button>
       <button ng-if="showTuning" ng-click="classicCues()" title="Restore the escalating cues">Classic cues</button>
+      <button ng-if="showTuning" ng-click="testFireworks()" title="Fire a full fireworks pass over the arch right now">Test fireworks</button>
     </span>
   </header>
 
@@ -50,7 +51,7 @@
       <span ng-if="status.countdown === null">fuse hidden &mdash; listen to the tick</span>
       <span>passes: {{ status.transfers }}</span>
     </div>
-    <div class="hpt-wins" ng-if="status.hoarder && status.scores.length">
+    <div class="hpt-wins" ng-if="status.holdScore && status.scores.length">
       <span ng-repeat="entry in status.scores">
         &#x1F954; {{ entry.name }}: {{ entry.points }}<span ng-if="status.hoardTarget">/{{ status.hoardTarget }}</span><span ng-if="!$last">&nbsp;&middot;&nbsp;</span>
       </span>

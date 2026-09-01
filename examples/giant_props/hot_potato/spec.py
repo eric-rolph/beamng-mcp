@@ -47,6 +47,20 @@ SHIP_ASSETS = (
 # built at runtime from hotPotatoGetOptionSchema, so it never drifts from
 # OPTION_RANGE.
 SHIP_ROOT_ASSETS = (
+    # BeamMP's custom-event bridge. This is the one narrow exception to the
+    # Giant Props "no global modScript" rule: the script loads only a
+    # transport adapter, never the gameplay runtime. The spawned prop still
+    # owns runtime registration, reset, and teardown exactly as it does in
+    # single-player. BeamMP requires a modScript in a Client resource before
+    # AddEventHandler/TriggerServerEvent traffic can reach a downloaded mod.
+    (
+        "beammp/modScript.lua",
+        "scripts/ericrolph_hot_potato/modScript.lua",
+    ),
+    (
+        "beammp/client.lua",
+        "lua/ge/extensions/ericrolphHotPotatoBeamMP.lua",
+    ),
     ("ui/hotPotatoTuner/app.json", "ui/modules/apps/hotPotatoTuner/app.json"),
     ("ui/hotPotatoTuner/app.js", "ui/modules/apps/hotPotatoTuner/app.js"),
     ("ui/hotPotatoTuner/app.html", "ui/modules/apps/hotPotatoTuner/app.html"),
@@ -93,7 +107,17 @@ ARCH_UV_TILE = 3.6576
 ARCH_COLLIDE_MAX_Z = 9.0  # skin the cage only where a car can reach
 
 MEDALLION_RADIUS = 4.2
-MEDALLION_TOP_Z = 0.05
+# The plate is a FLUSH INLAY, not a raised platform (v2.6, player report:
+# "driving over the center metal medallion can pop tires"). The tire-popper
+# was the cage pad's collision plane: a 6x6 m face floating 0.05 m above
+# grade with no side faces, so its rim was a razor step hidden in the middle
+# of an 8.4 m disc that LOOKS smooth. The fix is twofold: the visual plate
+# drops to 12 mm proud (a plaza inlay a tyre never feels), and the cage pad
+# ships NO collision faces at all — cars roll on the real ground straight
+# through the visual. PAD_CAGE_TOP_Z keeps the lattice's authored height so
+# the refnode frame and every node id stay byte-identical.
+MEDALLION_TOP_Z = 0.012
+PAD_CAGE_TOP_Z = 0.05
 PAD_HALF = 3.0  # cage lattice half-extent under the medallion
 PYLON_HALF = 2.2  # quarter-scale legs are 4.1 m wide; the old 0.9 was inside them
 PYLON_TOP_Z = 6.0
@@ -232,7 +256,10 @@ PALETTE = {
             "size": 1024,
             "normal_strength": 2.4,
         },
-        "color": [0.87, 0.78, 0.52, 1.0],
+        # v2.7 critic round: the old [0.87, 0.78, 0.52] read as dijon-khaki
+        # — "crumpled tarps" at mid distance. Lightened ~25% with the green
+        # pulled out of the yellow: pale butter-cream, like actual mash.
+        "color": [0.97, 0.88, 0.70, 1.0],
         "metallic": 0.0,
         "roughness": 0.55,
     },
@@ -335,6 +362,24 @@ EFFECTS = {
     },
 }
 
+# v2.7: very light steam off the landed mash chunks ("perhaps very light
+# steam to come off the chunks?"). TWO BNGP_20 wisps per chunk — the same
+# measured soft, short, see-through puff the potato's crown smoke uses
+# (peak particle alpha 0.199, 50 ms ejection; the lightest steam voice in
+# the managed set). One wisp per chunk was "functionally invisible at
+# 85 m" (v2.7 critic round), so each chunk carries a pair, posed at
+# wavering offsets on the crown for a fuller, living column while staying
+# the light voice the brief asked for. They ship inactive at the chunks'
+# under-plaza homes; stepMash activates and poses them onto a chunk only
+# while it sits landed and steaming, and shuts them off when it melts.
+for _steam_index, _steam_home in enumerate(MASH_HOMES, start=1):
+    for _steam_slot in ("mash_steam_", "mash_steam_b"):
+        EFFECTS[f"{_steam_slot}{_steam_index}"] = {
+            "emitter": "BNGP_20",
+            "position": list(_steam_home),
+            "direction": [0.0, 0.0, 1.0],
+        }
+
 BEHAVIOR = {
     "camera_distance": 46.0,
     # --- the potato ------------------------------------------------------
@@ -362,7 +407,10 @@ BEHAVIOR = {
     # v2.4 game modes: "classic" hot potato; "hoarder" inverts the chase
     # (holding the potato SCORES — first to hoard_target_points is crowned,
     # a detonation halves your hoard); "pinball" passes on ANY touch with a
-    # guaranteed hearty knockback — bumper-car chaos.
+    # guaranteed hearty knockback — bumper-car chaos. v2.6 adds "protect"
+    # (the reverse game: KEEP the potato — held seconds score toward the
+    # same target, the AI mob hunts the carrier, and the boom costs nothing
+    # because holding to the end is the whole point).
     "game_mode": "classic",
     "hoard_target_points": 120.0,
     # --- pickup ----------------------------------------------------------
@@ -511,6 +559,49 @@ BEHAVIOR = {
     "ai_enabled": False,
     "ai_aggression": 1.0,
     "ai_speed_kmh": 90.0,
+    # --- arena (v2.6) ----------------------------------------------------
+    # The game happens INSIDE a circle around the medallion ("create a
+    # radius that the AI stay within... about 100 yards"). Vehicles outside
+    # it are not part of the game: they cannot receive the potato and the
+    # AI never conscripts them; a conscripted AI car that strays out is
+    # steered straight back to the arch (ai.setSlotTrafficTarget — the one
+    # vehicle-AI export that takes raw world coordinates and needs no
+    # navgraph; measured, lua/vehicle/ai.lua:5833, with a 0.5 s watchdog
+    # the runtime refreshes). The halo is a translucent boundary wall drawn
+    # per frame with the debug drawer while a round is live — the same
+    # immediate-mode fence gameplay/sites/zone.lua renders zones with.
+    "arena_enabled": True,
+    "arena_radius_m": 91.4,  # 100 yards
+    "arena_halo_enabled": True,
+    # The arena magnet (v2.7): "a magnetic force that pulls vehicles back
+    # into the center of the game radius if they drive outside". Carried by
+    # the engine's own gravity wells — obj:setPlanets{x,y,z,radius,mass} is
+    # the physics-side attractor funstuff.lua drives (positive mass pulls,
+    # applied per node every physics step, no heartbeat to starve). The
+    # runtime recomputes the well mass from each strayed car's CURRENT
+    # distance so the pull is a constant arena_magnet_g everywhere outside
+    # the ring; raw G*M/d^2 would fade exactly when a runaway needs it
+    # most. Only game members are pulled — any vehicle (the player
+    # included) seen inside the ring during a live round joins for that
+    # round; bystanders beyond the line are never touched.
+    "arena_magnet_enabled": True,
+    "arena_magnet_g": 0.6,
+    # --- damage (v2.6, "to make it more arcade like") --------------------
+    # "normal": stock BeamNG consequences. "tires_safe": tires cannot pop
+    # (wheel and pressure-group beams armored, beamstate.deflateTire
+    # patched out — both halves are needed, the spike-strip path calls the
+    # module field and the beam-break path calls a local upvalue).
+    # "no_damage": every beam armored to math.huge strength and deform —
+    # the exact semantic the jbeam loader gives authored-unbreakable beams
+    # (lua/vehicle/jbeam/stage2.lua:28) — so arena cars bounce instead of
+    # crumple. The detonation VICTIM always has armor stripped first: the
+    # boom must land whatever the mode says.
+    "damage_mode": "normal",
+    # Pass-collision shield ("vehicles transferring the potato are
+    # temporarily invincible when they collide"): both cars in an impact
+    # transfer get full armor for this many seconds, then return to
+    # whatever damage_mode wants. 0 = off.
+    "transfer_shield_seconds": 3.0,
     # --- safety ----------------------------------------------------------
     "safety_enabled": True,
     "safety_extent_max": 24.0,
@@ -556,6 +647,9 @@ local REQUIRED = {
   "smoke_enabled", "steam_hiss_enabled",
   "whistle_enabled", "whistle_volume",
   "ai_enabled", "ai_aggression", "ai_speed_kmh",
+  "arena_enabled", "arena_radius_m", "arena_halo_enabled",
+  "arena_magnet_enabled", "arena_magnet_g",
+  "damage_mode", "transfer_shield_seconds",
   "beacon_enabled", "glow_ramp_enabled",
   "beacon_pulse_seconds",
   "beacon_brightness", "beacon_radius", "beacon_ray_range",
@@ -608,6 +702,10 @@ local OPTION_RANGE = {
   smoke_enabled = "bool", steam_hiss_enabled = "bool",
   whistle_enabled = "bool", whistle_volume = {0, 2},
   ai_enabled = "bool", ai_aggression = {0.3, 2}, ai_speed_kmh = {20, 200},
+  arena_enabled = "bool", arena_radius_m = {20, 500},
+  arena_halo_enabled = "bool",
+  arena_magnet_enabled = "bool", arena_magnet_g = {0.1, 2.5},
+  damage_mode = "enum", transfer_shield_seconds = {0, 10},
   beacon_enabled = "bool", glow_ramp_enabled = "bool",
   bounce_enabled = "bool", bounce_amplitude_m = {0, 1.5},
   carry_clearance_m = {0, 3},
@@ -637,7 +735,8 @@ local OPTION_RANGE = {
 local OPTION_ENUM = {
   transfer_mode = {"touch", "radius"},
   tick_style = {"escalating", "steady", "off"},
-  game_mode = {"classic", "hoarder", "pinball"},
+  game_mode = {"classic", "hoarder", "pinball", "protect"},
+  damage_mode = {"normal", "tires_safe", "no_damage"},
 }
 
 -- ONE-SHOT stock FMOD event paths (grepped out of the shipped Lua tree, not
@@ -1159,6 +1258,253 @@ local function roster(state)
   return found
 end
 
+-- --------------------------------------------------------------------------
+-- v2.6 lives in ONE table local, by necessity: Lua caps a function at 200
+-- local variables and the generated runtime's main chunk stood at 198
+-- before this round — fifteen new `local function`s compiled in lupa (and
+-- would have compiled in LuaJIT) to "too many local variables". A table
+-- field per helper costs zero locals; every future family should follow
+-- this shape rather than spend the last two slots.
+--
+-- The arena: the game happens inside a circle around the medallion.
+-- Distance is horizontal — a car on the arch ramp is as "in" as one on the
+-- plaza — and every consumer (transfer eligibility, AI conscription and
+-- containment, the halo) reads the same helpers so the circle can never
+-- drift between them.
+--
+-- The damage armor ("to make it more arcade like"): one idempotent
+-- vehicle-side command, three modes:
+--   "full"  — every beam's strength AND deform raised to math.huge: the
+--             exact semantic the jbeam loader gives authored-unbreakable
+--             beams (lua/vehicle/jbeam/stage2.lua:28 measured), so the car
+--             bounces instead of crumpling. Also arms the tire patch.
+--   "tires" — only wheel and pressure-group beams armored, plus the
+--             beamstate.deflateTire nop. BOTH halves are required: the
+--             spike-strip path (wheels.lua:321) calls the module field,
+--             the beam-break path (beamstate.lua:822) calls a local
+--             upvalue that only unbreakable wheel beams can dodge.
+--   "none"  — everything restored from v.data's authored values (they
+--             survive the physics-side override untouched) and the
+--             deflateTire patch removed.
+-- No engine invulnerability flag exists anywhere in stock 0.38/0.39 Lua —
+-- this measured beam-armor recipe is the real mechanism. GE-side truth
+-- lives in b.armorApplied ({id -> "full"|"tires"|"none"}); the command is
+-- idempotent, so a resend is always safe.
+-- --------------------------------------------------------------------------
+local v26 = {}
+
+-- BeamMP synchronization lives in one table local because this generated
+-- main chunk is already pressed against Lua's 200-local ceiling. The
+-- downloaded Client resource loads a thin transport adapter; this table
+-- owns only gameplay-mode decisions and canonical vehicle-id translation.
+-- Outside an MP session every helper deliberately reduces to the original
+-- single-client behavior.
+local Sync = {}
+
+Sync.PROTOCOL = 1
+Sync.GAME = "hot_potato"
+Sync.PUBLISH_SECONDS = 0.20
+
+function Sync.network()
+  if extensions and extensions.MPCoreNetwork then
+    return extensions.MPCoreNetwork
+  end
+  return rawget(_G, "MPCoreNetwork")
+end
+
+function Sync.isMPSession()
+  local network = Sync.network()
+  if not network or type(network.isMPSession) ~= "function" then return false end
+  local ok, active = pcall(network.isMPSession)
+  return ok and active == true
+end
+
+function Sync.vehicles()
+  if extensions and extensions.MPVehicleGE then return extensions.MPVehicleGE end
+  return rawget(_G, "MPVehicleGE")
+end
+
+function Sync.sidForGameId(gameId)
+  local api = Sync.vehicles()
+  if not api or type(api.getServerVehicleID) ~= "function" then return nil end
+  local ok, sid = pcall(api.getServerVehicleID, gameId)
+  if ok and type(sid) == "string" and sid:match("^%d+%-%d+$") then return sid end
+  return nil
+end
+
+function Sync.gameIdForSid(sid)
+  if type(sid) ~= "string" or not sid:match("^%d+%-%d+$") then return nil end
+  local api = Sync.vehicles()
+  if not api or type(api.getGameVehicleID) ~= "function" then return nil end
+  local ok, gameId = pcall(api.getGameVehicleID, sid)
+  if ok and integer(gameId) and gameId >= 0 then return gameId end
+  return nil
+end
+
+function Sync.canMutate(vehicle)
+  if not Sync.isMPSession() then return true end
+  if not vehicle then return false end
+  local api = Sync.vehicles()
+  if not api or type(api.isOwn) ~= "function" then return false end
+  local okId, gameId = pcall(function() return vehicle:getId() end)
+  if not okId or not integer(gameId) then return false end
+  local ok, owned = pcall(api.isOwn, gameId)
+  return ok and owned == true
+end
+
+function Sync.transport()
+  if extensions then return extensions.ericrolphHotPotatoBeamMP end
+  return nil
+end
+
+function Sync.isAuthority(state)
+  local mode = state.behavior.sync and state.behavior.sync.mode or "standalone"
+  return mode == "standalone" or mode == "authority"
+end
+
+function Sync.isReplica(state)
+  local mode = state.behavior.sync and state.behavior.sync.mode or "standalone"
+  return mode == "pending" or mode == "follower"
+end
+
+v26.ARMOR_SET = [[pcall(function()
+  local S = rawget(_G, "ericrolph_hot_potato_armor")
+  if not S then S = {} rawset(_G, "ericrolph_hot_potato_armor", S) end
+  local mode = %q
+  if S.mode == mode then return end
+  S.mode = mode
+  if beamstate then
+    if mode == "none" then
+      if S.deflate then beamstate.deflateTire = S.deflate S.deflate = nil end
+    elseif S.deflate == nil and beamstate.deflateTire then
+      S.deflate = beamstate.deflateTire
+      beamstate.deflateTire = function() end
+    end
+  end
+  if not (v and v.data and v.data.beams and obj and obj.setBeamStrength) then
+    return
+  end
+  for _, b in pairs(v.data.beams) do
+    local armored = mode == "full" or (mode == "tires"
+      and (b.wheelID ~= nil or b.pressureGroupId ~= nil))
+    if armored then
+      obj:setBeamStrength(b.cid, math.huge)
+      if mode == "full" and obj.setBeamDeform then
+        obj:setBeamDeform(b.cid, math.huge)
+      end
+    else
+      obj:setBeamStrength(b.cid, b.beamStrength or math.huge)
+      if obj.setBeamDeform then
+        obj:setBeamDeform(b.cid, b.beamDeform or math.huge)
+      end
+    end
+  end
+end)]]
+
+function v26.arenaDistance(state, position)
+  local centre = toWorldPoint(state, B.pad_center)
+  local dx = position.x - centre.x
+  local dy = position.y - centre.y
+  return math.sqrt(dx * dx + dy * dy)
+end
+
+function v26.insideArena(state, position)
+  if not OPT.arena_enabled then return true end
+  return v26.arenaDistance(state, position) <= OPT.arena_radius_m
+end
+
+-- The arena halo: a translucent boundary wall drawn EVERY FRAME with the
+-- debug drawer while a round is running ("a see through halo surrounding
+-- the game arena radius when the game starts that goes away when the game
+-- ends"). Immediate-mode drawTriSolid quads, both windings so the wall
+-- reads from inside and outside — the exact fence recipe the game's own
+-- gameplay/sites/zone.lua:414-434 renders zones with. Immediate mode means
+-- there is no scene object to leak: on any frame this does not run, the
+-- halo simply is not there. 48 segments, 7 m tall, alpha 22/255.
+function v26.drawArenaHalo(state)
+  local b = state.behavior
+  if not (OPT.arena_enabled and OPT.arena_halo_enabled) then return end
+  if b.phase ~= "live" and b.phase ~= "boom" then return end
+  if not debugDrawer then return end
+  pcall(function()
+    local centre = toWorldPoint(state, B.pad_center)
+    local radius = OPT.arena_radius_m
+    local tint = color(255, 150, 60, 22)
+    local step = 2.0 * math.pi / 48
+    for i = 0, 47 do
+      local a0, a1 = i * step, (i + 1) * step
+      local x0, y0 = centre.x + radius * math.cos(a0), centre.y + radius * math.sin(a0)
+      local x1, y1 = centre.x + radius * math.cos(a1), centre.y + radius * math.sin(a1)
+      local lo0 = vec3(x0, y0, centre.z - 1.0)
+      local hi0 = vec3(x0, y0, centre.z + 7.0)
+      local lo1 = vec3(x1, y1, centre.z - 1.0)
+      local hi1 = vec3(x1, y1, centre.z + 7.0)
+      debugDrawer:drawTriSolid(lo0, hi0, hi1, tint)
+      debugDrawer:drawTriSolid(hi1, lo1, lo0, tint)
+      debugDrawer:drawTriSolid(hi0, lo0, hi1, tint)
+      debugDrawer:drawTriSolid(lo1, hi1, lo0, tint)
+    end
+  end)
+end
+
+-- desiredArmor is the ONE place the mode and the transfer shield are
+-- weighed against each other.
+function v26.desiredArmor(state, id)
+  if OPT.damage_mode == "no_damage" then return "full" end
+  local b = state.behavior
+  if b.shield and (b.shield[id] or 0) > b.now then return "full" end
+  if OPT.damage_mode == "tires_safe" then return "tires" end
+  return "none"
+end
+
+function v26.sendArmor(state, vehicle, mode)
+  -- BeamMP synchronizes the owning vehicle outward. Mutating a remote proxy
+  -- here is both redundant and liable to be overwritten by its owner.
+  if not Sync.canMutate(vehicle) then return end
+  local b = state.behavior
+  b.armorApplied = b.armorApplied or {}
+  b.armorApplied[vehicle:getId()] = mode
+  pcall(function()
+    vehicle:queueLuaCommand(string.format(v26.ARMOR_SET, mode))
+  end)
+end
+
+-- Restore stock damage everywhere the mod touched. Runs on prop init/reset
+-- and at teardown — armor must never outlive the mod that applied it.
+function v26.armorRelease(state)
+  local b = state.behavior
+  if not b.armorApplied then return end
+  for id, mode in pairs(b.armorApplied) do
+    if mode ~= "none" then
+      local vehicle = exactVehicle(id)
+      if vehicle and Sync.canMutate(vehicle) then
+        pcall(function()
+          vehicle:queueLuaCommand(string.format(v26.ARMOR_SET, "none"))
+        end)
+      end
+    end
+  end
+  b.armorApplied = nil
+  b.shield = nil
+end
+
+-- The armor sweep (0.7 s): settles damage_mode changes and expired
+-- transfer shields for everyone still on the field.
+function v26.stepArmor(state)
+  local b = state.behavior
+  if (b.armorNext or 0) > b.now then return end
+  b.armorNext = b.now + 0.7
+  b.armorApplied = b.armorApplied or {}
+  for _, entry in ipairs(roster(state)) do
+    local desired = v26.desiredArmor(state, entry.id)
+    local current = b.armorApplied[entry.id]
+    -- nil -> "none" is a car the mod never touched: leave its VM alone.
+    if current ~= desired and not (current == nil and desired == "none") then
+      v26.sendArmor(state, entry.vehicle, desired)
+    end
+  end
+end
+
 local function poseEffectAt(state, name, worldPos)
   local effect = state.effects[name]
   if not effect or not finiteVector3(worldPos) then return end
@@ -1441,13 +1787,28 @@ local function publishStats(state)
   -- field simply vanishes from the table.
   local b = state.behavior
   local remaining = b.fuseEnds and math.max(0, b.fuseEnds - b.now) or -1
+  local sync = b.sync or {
+    mode = "standalone", status = "single-player", revision = 0,
+  }
+  local carrierSid = b.carrierSid
+    or (b.carrier and Sync.sidForGameId(b.carrier))
   b.stats = {
     carrier = b.carrier or -1,
+    carrier_sid = carrierSid or "",
     fuse_remaining = remaining,
     field = b.fieldPeak or 0,
     eliminated = b.outCount or 0,
     transfers = b.transfers or 0,
     mode = OPT.transfer_mode,
+    sync_mode = sync.mode,
+    sync_status = sync.status,
+    sync_arena = sync.arena or "",
+    sync_epoch = sync.epoch or 0,
+    sync_revision = sync.revision or 0,
+    options_writable = Sync.optionsWritable(),
+    -- v2.7: the show's stage, so the live gate can time its cameras
+    -- against the letters.
+    fw_stage = b.fw and b.fw.stage or "",
   }
   -- The HUD payload. The numeric countdown is GATED behind show_countdown
   -- (the hidden fuse is the design; the option is the party-host override),
@@ -1455,10 +1816,18 @@ local function publishStats(state)
   -- not already broadcasting in everyone's ears.
   LAST.phase = b.phase or "idle"
   LAST.carrier = b.carrier or -1
-  LAST.carrier_name = b.carrier and subjectName(state, b.carrier) or ""
+  LAST.carrier_sid = carrierSid or ""
+  LAST.carrier_name = b.carrier and subjectName(state, b.carrier)
+    or Sync.nameForSid(state, carrierSid)
   local okPlayer, playerId = pcall(function() return be:getPlayerVehicleID(0) end)
   LAST.carrier_is_player =
     (okPlayer and b.carrier ~= nil and playerId == b.carrier) or false
+  LAST.sync_mode = sync.mode
+  LAST.sync_status = sync.status
+  LAST.sync_arena = sync.arena or ""
+  LAST.sync_epoch = sync.epoch or 0
+  LAST.sync_revision = sync.revision or 0
+  LAST.options_writable = Sync.optionsWritable()
   LAST.countdown =
     (OPT.show_countdown and b.phase == "live") and remaining or -1
   -- Urgency ships only in escalating style: in "steady" (hardcore) the
@@ -1471,6 +1840,9 @@ local function publishStats(state)
   end
   if OPT.tick_style ~= "escalating" then LAST.countdown = -1 end
   LAST.urgency = urgency
+  -- v2.7: the show's stage, so the live gate (and any curious host) can
+  -- time a camera against the letters.
+  LAST.fw_stage = b.fw and b.fw.stage or ""
   LAST.transfers = b.transfers or 0
   LAST.field = b.fieldPeak or 0
   LAST.mode = OPT.transfer_mode
@@ -1531,6 +1903,8 @@ end
 local function endRound(state)
   local b = state.behavior
   b.phase = "idle"
+  b.carrier = nil
+  b.carrierSid = nil
   b.fuseEnds = nil
   b.silenced = false
   b.sputtered = false
@@ -1539,6 +1913,7 @@ local function endRound(state)
   b.fieldPeak = 0
   b.pairFrom, b.pairTo, b.pairSeparated = nil, nil, true
   parkPotato(state)
+  Sync.publish(state, true)
 end
 
 -- The alien return flight (v2.4: "the hot potato should always travel back
@@ -1553,6 +1928,7 @@ end
 local function beginReturn(state, fromPos)
   local b = state.behavior
   b.carrier = nil
+  b.carrierSid = nil
   state.zones.carrier_watch = nil
   b.fuseEnds = nil
   b.silenced = false
@@ -1581,6 +1957,7 @@ local function beginReturn(state, fromPos)
   b.retUp = 2.2
   b.retCross = clampNumber(horizontal / 22.0, 0.6, 6.0)
   b.retDown = 3.0
+  Sync.publish(state, true)
 end
 
 local function smoothstep(progress)
@@ -1661,7 +2038,11 @@ local FW_FONT = {
 -- Densest glyph is 20 lit pixels (B); 28 lights leaves margin and feeds
 -- the finale sparkle.
 local FW_POOL = 28
-local FW_PX = 1.05
+-- v2.7, sized against the live shots twice: at 1.05 the letters were
+-- pinpricks from the plaza (a 7 m glyph at a 90 m camera); the critic
+-- round called 1.6's 11 m "8% of frame height" and ordered it doubled.
+-- 2.6 writes an 18 m letter — unmissable from anywhere in the arena.
+local FW_PX = 2.6
 local FW_LAUNCH = 0.7
 local FW_BURST = 1.6
 local FW_GAP = 0.3
@@ -1737,14 +2118,18 @@ end
 
 -- Authored-frame position of a glyph pixel: the name marches along the
 -- authored X axis (the arch's span), centred over the apex, on a vertical
--- plane the whole plaza can read.
+-- plane. A flat glyph reads correctly from ONE side only (the v2.7 r2
+-- live shot photographed 'E' as '3' from the south camera), so the whole
+-- layout mirrors through fw.flip — chosen at showtime to face the PLAYER,
+-- whose name it usually is.
 local function fwPixelWorld(state, name, letterIndex, col, row, bloom)
+  local flip = (state.behavior.fw and state.behavior.fw.flip) or 1.0
   local width = #name * 6.0 * FW_PX - FW_PX
   local cx = -width * 0.5 + (letterIndex - 1) * 6.0 * FW_PX + 2.0 * FW_PX
   local cz = B.fireworks_base_z + 3.5 * FW_PX
   local x = cx + (col - 2.0) * FW_PX * bloom
   local z = cz + (4.0 - row) * FW_PX * bloom
-  return toWorldPoint(state, vec3(x, 0.0, z))
+  return toWorldPoint(state, vec3(flip * x, 0.0, z))
 end
 
 local function championName(state, id)
@@ -1766,7 +2151,49 @@ local function beginFireworks(state, name)
   name = tostring(name or ""):upper():gsub("[^%w ]", ""):sub(1, 12)
   if name:gsub(" ", "") == "" then name = "CHAMPION" end
   ensureFireworkPool(state)
-  state.behavior.fw = {name = name, index = 1, stage = "launch", t0 = state.behavior.now}
+  -- Face the writing toward the player: a flat glyph mirrors from the far
+  -- side, so pick the layout's handedness from which side of the authored
+  -- XZ plane the player's car sits on when the show starts.
+  local flip = 1.0
+  local okPlayer, playerId = pcall(function() return be:getPlayerVehicleID(0) end)
+  if okPlayer and playerId then
+    local vehicle = exactVehicle(playerId)
+    local okPos, playerPos = vehicle
+      and pcall(function() return vehicle:getPosition() end)
+    if okPos and finiteVector3(playerPos) then
+      local forward = state.modelRotation * vec3(0, 1, 0)
+      local origin = toWorldPoint(state, vec3(0, 0, 0))
+      local side = (playerPos.x - origin.x) * forward.x
+        + (playerPos.y - origin.y) * forward.y
+      if side < 0 then flip = -1.0 end
+    end
+  end
+  state.behavior.fw = {
+    name = name, index = 1, stage = "launch", t0 = state.behavior.now,
+    flip = flip,
+  }
+end
+
+-- One firework star: a coloured glow shell around a white-hot core, drawn
+-- with the debug drawer so it reads against OPEN SKY. The v2.4 show was
+-- point lights alone — and a point light with no surface near it renders
+-- nothing at all, which is why the player never saw a single letter
+-- (v2.7, "I don't think the fireworks are working"). The lights stay, but
+-- demoted to what they can actually do: throw the bursts' glow onto the
+-- monument below.
+function v26.fwStar(position, radius, red, green, blue, alpha)
+  if not debugDrawer then return end
+  local a = math.min(1.0, math.max(0.0, alpha))
+  -- Critic-tuned anatomy: a coloured shell held near 0.85 alpha with an
+  -- OPAQUE white-hot core at 0.4x — the pale-ring look died here.
+  pcall(function()
+    debugDrawer:drawSphere(
+      vec3(position.x, position.y, position.z), radius,
+      ColorF(red, green, blue, math.min(0.85, a)))
+    debugDrawer:drawSphere(
+      vec3(position.x, position.y, position.z), radius * 0.4,
+      ColorF(1.0, 1.0, 0.96, math.min(1.0, a * 1.8)))
+  end)
 end
 
 local function stepFireworks(state)
@@ -1793,15 +2220,30 @@ local function stepFireworks(state)
         1.0 + 0.5 * (fw.index - 1) / math.max(1, count - 1), 0.9)
       return
     end
-    -- One shell rising from the apex toward the letter centre.
+    -- One shell rising from the apex toward the letter centre: a white-hot
+    -- head swaying like a real mortar shell, an ember trail cooling and
+    -- falling behind it, and the pool light riding the head so the arch
+    -- catches its glow.
     local ease = smoothstep(t / FW_LAUNCH)
     local target = fwPixelWorld(state, name, fw.index, 2, 4, 1.0)
     local apex = toWorldPoint(state, vec3(0.0, 0.0, B.fireworks_base_z - 8.0))
-    fwSetLight(state, 1, vec3(
-      apex.x + (target.x - apex.x) * ease,
+    local head = vec3(
+      apex.x + (target.x - apex.x) * ease
+        + math.sin(t * 9.0 + fw.index) * 0.7 * (1.0 - ease),
       apex.y + (target.y - apex.y) * ease,
-      apex.z + (target.z - apex.z) * ease),
-      {1.0, 0.9, 0.7}, 1.5 + ease * 2.0)
+      apex.z + (target.z - apex.z) * ease)
+    v26.fwStar(head, 0.42, 1.0, 0.95, 0.80, 0.95)
+    for i = 1, 7 do
+      local back = smoothstep(math.max(0.0, t - i * 0.06) / FW_LAUNCH)
+      v26.fwStar(vec3(
+        apex.x + (target.x - apex.x) * back
+          + math.sin((t - i * 0.06) * 9.0 + fw.index) * 0.7 * (1.0 - back),
+        apex.y + (target.y - apex.y) * back,
+        apex.z + (target.z - apex.z) * back - i * 0.16),
+        0.26 - i * 0.022,
+        1.0, 0.62 - i * 0.05, 0.25, 0.75 - i * 0.09)
+    end
+    fwSetLight(state, 1, head, {1.0, 0.9, 0.7}, 1.5 + ease * 2.0)
     return
   end
   if fw.stage == "burst" then
@@ -1817,13 +2259,65 @@ local function stepFireworks(state)
     local fade = 1.0 - t / FW_BURST
     local color = FW_COLORS[(fw.index - 1) % #FW_COLORS + 1]
     local pixels = glyphPixels(letter)
-    for index, pixel in ipairs(pixels) do
-      if index > FW_POOL then break end
-      fwSetLight(state, index,
-        fwPixelWorld(state, name, fw.index, pixel.col, pixel.row, bloom),
-        color, 4.5 * fade * fade)
+    -- The detonation flash: one fat white sphere collapsing over the first
+    -- tenth of a second while the centre light spikes — the "whump" that
+    -- washes the monument in light.
+    local centre = fwPixelWorld(state, name, fw.index, 2, 4, 0.0)
+    if t < 0.12 then
+      local flash = 1.0 - t / 0.12
+      v26.fwStar(centre, 0.6 + 4.2 * flash, 1.0, 0.98, 0.90, flash)
+      -- Critic round: brightness 40 smeared the arch apex into the
+      -- frame's brightest pixels and upstaged the letter. Halved.
+      fwSetLight(state, 1, centre, {1.0, 0.95, 0.85}, 18.0 * flash)
+    else
+      fwSetLight(state, 1, centre, color, 6.0 * fade * fade)
     end
-    for index = #pixels + 1, FW_POOL do
+    -- The stars: one per lit glyph pixel, blooming outward, sagging as
+    -- they burn (real stars fall), each twinkling on its own phase. The
+    -- first dozen also carry pool lights for the ground glow. While the
+    -- bloom is young, radiating streaks connect the centre to every star
+    -- — the chrysanthemum spokes of a real shell. Between every pair of
+    -- adjacent lit pixels a half-size midpoint star fills the stroke
+    -- (critic round: "the E's spine has a hole and its top arm trails
+    -- off" — the dot pitch is halved along every stroke).
+    local droop = 1.8 * math.max(0.0, t - 0.35) ^ 2
+    local spokes = t < 0.45 and (1.0 - t / 0.45) or 0.0
+    local lit = {}
+    for _, pixel in ipairs(pixels) do
+      lit[pixel.col * 16 + pixel.row] = true
+    end
+    for index, pixel in ipairs(pixels) do
+      local world = fwPixelWorld(state, name, fw.index, pixel.col, pixel.row, bloom)
+      local twinkle = 0.72 + 0.28 * math.sin(b.now * 12.0 + index * 2.63)
+      local star = vec3(world.x, world.y, world.z - droop)
+      local radius = (0.95 + 0.35 * bloom) * twinkle
+      local brightness = fade * fade * twinkle
+      v26.fwStar(star, radius,
+        color[1], color[2], color[3], brightness)
+      if lit[(pixel.col + 1) * 16 + pixel.row] then
+        local mid = fwPixelWorld(
+          state, name, fw.index, pixel.col + 0.5, pixel.row, bloom)
+        v26.fwStar(vec3(mid.x, mid.y, mid.z - droop), radius * 0.5,
+          color[1], color[2], color[3], brightness * 0.85)
+      end
+      if lit[pixel.col * 16 + pixel.row + 1] then
+        local mid = fwPixelWorld(
+          state, name, fw.index, pixel.col, pixel.row + 0.5, bloom)
+        v26.fwStar(vec3(mid.x, mid.y, mid.z - droop), radius * 0.5,
+          color[1], color[2], color[3], brightness * 0.85)
+      end
+      if spokes > 0 and debugDrawer then
+        pcall(function()
+          debugDrawer:drawLine(
+            vec3(centre.x, centre.y, centre.z), star,
+            ColorF(color[1], color[2], color[3], 0.55 * spokes))
+        end)
+      end
+      if index <= 12 then
+        fwSetLight(state, index + 1, world, color, 3.0 * fade * fade)
+      end
+    end
+    for index = math.min(#pixels, 12) + 2, FW_POOL do
       fwSetLight(state, index, nil, nil, 0)
     end
     return
@@ -1842,7 +2336,9 @@ local function stepFireworks(state)
     end
     return
   end
-  -- Finale: sparkle rain across the full width of the name.
+  -- Finale: sparkle rain across the full width of the name — falling,
+  -- twinkling embers rather than bare light pips, sinking lower as the
+  -- rain dies, under one warm lamp fading over the apex.
   if t >= FW_FINALE then
     fwDouse(state)
     b.fw = nil
@@ -1850,14 +2346,37 @@ local function stepFireworks(state)
   end
   local fade = 1.0 - t / FW_FINALE
   local width = count * 6.0 * FW_PX
-  for index = 1, FW_POOL do
-    if math.random() < 0.30 then
+  fwSetLight(state, 1,
+    toWorldPoint(state, vec3(0.0, 0.0, B.fireworks_base_z + 3.0)),
+    {1.0, 0.84, 0.45}, 8.0 * fade)
+  -- Critic round: "12 dots is confetti pixels, not rain" — the rain is
+  -- now sixty-plus stars deep with 4.5 m segmented comet tails tapering
+  -- to nothing, and only the first pool-light's worth carry real lights.
+  for index = 2, 72 do
+    if math.random() < 0.8 then
       local color = FW_COLORS[math.random(#FW_COLORS)]
-      fwSetLight(state, index, toWorldPoint(state, vec3(
+      local world = toWorldPoint(state, vec3(
         (math.random() - 0.5) * width,
         (math.random() - 0.5) * 6.0,
-        B.fireworks_base_z + math.random() * 9.0)),
-        color, (1.5 + math.random() * 3.0) * fade)
+        B.fireworks_base_z + math.random() * 9.0 - t * 2.2))
+      v26.fwStar(world, 0.42 + math.random() * 0.30,
+        color[1], color[2], color[3], fade * (0.5 + math.random() * 0.5))
+      if debugDrawer then
+        pcall(function()
+          for segment = 0, 2 do
+            local base = world.z + segment * 1.5
+            debugDrawer:drawLine(
+              vec3(world.x, world.y, base),
+              vec3(world.x, world.y, base + 1.5),
+              ColorF(color[1], color[2], color[3],
+                fade * (0.5 - segment * 0.16)))
+          end
+        end)
+      end
+      if index <= FW_POOL then
+        fwSetLight(state, index, world, color,
+          (1.5 + math.random() * 3.0) * fade)
+      end
     end
   end
 end
@@ -1936,11 +2455,58 @@ local function stepMash(state)
         chunk.pos.z = chunk.pos.z - 0.6 * dt
         if chunk.pos.z < chunk.ground - 2.5 then
           chunk.gone = true
+          if chunk.steam then
+            chunk.steam = nil
+            setEffectActive(state, "mash_steam_" .. i, false)
+            setEffectActive(state, "mash_steam_b" .. i, false)
+          end
           setPartPose(state, "mash_" .. i, vec3(0, 0, 0), quat(0, 0, 0, 1))
         end
       end
       if not chunk.gone then
         live = true
+        -- Very light steam off the dollop (v2.7): a PAIR of wisps switch
+        -- on when the chunk lands, waver across its crown while it sits
+        -- cooking and melts, and die with it (one wisp was functionally
+        -- invisible at play distance — the critic round). Gated by the
+        -- same smoke toggle as the potato's own wisp.
+        local wantSteam = chunk.landed == true and OPT.smoke_enabled == true
+        if wantSteam ~= (chunk.steam == true) then
+          chunk.steam = wantSteam
+          setEffectActive(state, "mash_steam_" .. i, wantSteam)
+          setEffectActive(state, "mash_steam_b" .. i, wantSteam)
+        end
+        if wantSteam then
+          local crown = (B.mash_radii and B.mash_radii[i]) or 0.5
+          local waver = b.now * 0.9 + i * 2.1
+          poseEffectAt(state, "mash_steam_" .. i, vec3(
+            chunk.pos.x + math.sin(waver) * crown * 0.35,
+            chunk.pos.y + math.cos(waver * 0.8) * crown * 0.35,
+            chunk.pos.z + crown * 0.6))
+          poseEffectAt(state, "mash_steam_b" .. i, vec3(
+            chunk.pos.x - math.sin(waver * 1.1) * crown * 0.4,
+            chunk.pos.y - math.cos(waver * 0.7) * crown * 0.4,
+            chunk.pos.z + crown * 0.5))
+        end
+        -- The splatter ring (critic round: "chunks sit on untouched
+        -- clean tile like they were placed by hand"): a deterministic
+        -- ring of half-sunk butter-cream droplets around each landing —
+        -- part of the landing itself, not the smoke toggle.
+        if chunk.landed and debugDrawer then
+          local crown = (B.mash_radii and B.mash_radii[i]) or 0.5
+          pcall(function()
+            for j = 1, 8 do
+              local angle = j * 0.785 + i * 1.31
+              local reach = crown * (1.25 + 0.3 * ((i * 7 + j * 13) % 10) / 10)
+              debugDrawer:drawSphere(vec3(
+                chunk.pos.x + math.cos(angle) * reach,
+                chunk.pos.y + math.sin(angle) * reach,
+                chunk.ground + 0.05),
+                0.10 + 0.16 * ((i * 3 + j * 5) % 10) / 10,
+                ColorF(0.95, 0.89, 0.66, 0.55))
+            end
+          end)
+        end
         local rotation = chunk.landed
           and axisAngle(vec3(0, 0, 1), chunk.angle)
           or axisAngle(chunk.spinAxis, chunk.angle)
@@ -1998,6 +2564,7 @@ local function giveTo(state, vehicle, reason, passSpeed)
   local id = vehicle:getId()
   local previous = b.carrier
   b.carrier = id
+  b.carrierSid = Sync.sidForGameId(id)
   b.heldSince = b.now
   b.transfers = (b.transfers or 0) + 1
   b.silenced = false
@@ -2013,6 +2580,19 @@ local function giveTo(state, vehicle, reason, passSpeed)
     b.pairFrom = previous
     b.pairTo = id
     b.pairSeparated = false
+    -- The transfer shield (v2.6): both cars in a pass get full armor for
+    -- the window ("temporarily invincible when they collide in order to
+    -- transfer ... to make it more arcade like"), then the armor sweep
+    -- settles them back to whatever damage_mode wants. Applied INLINE,
+    -- not on the sweep: the collision is happening right now.
+    if OPT.transfer_shield_seconds > 0 then
+      b.shield = b.shield or {}
+      b.shield[previous] = b.now + OPT.transfer_shield_seconds
+      b.shield[id] = b.now + OPT.transfer_shield_seconds
+      v26.sendArmor(state, vehicle, "full")
+      local passer = exactVehicle(previous)
+      if passer then v26.sendArmor(state, passer, "full") end
+    end
   else
     b.pairFrom, b.pairTo, b.pairSeparated = nil, nil, true
   end
@@ -2046,6 +2626,7 @@ local function giveTo(state, vehicle, reason, passSpeed)
   emitEvent(state, "I", "potato_passed", {
     subject_id = id, previous_id = previous, reason = reason,
   })
+  Sync.publish(state, true)
 end
 
 local function detonate(state, vehicle)
@@ -2096,13 +2677,18 @@ local function detonate(state, vehicle)
     -- the fuse cue already sputtered moments ago — do not stutter it.
     if not b.sputtered then
       b.sputtered = true
-      playSputter(state, vehicle, 1.1, 0.9)
+      playSputter(state, vehicle, 0.9, 0.9)
     end
     playSound(SFX_HISS, 0.9, 1.2, anchor)
     playSound(SFX_HISS_ALT, 1.3, 0.9, anchor)
     announce(state, "COOKED! The potato goes home.", 3.0, "fizzled",
       {subject_id = id})
     emitEvent(state, "I", "potato_fizzled", {subject_id = id})
+    Sync.sendCommand(state, "detonate", {
+      target_sid = Sync.sidForGameId(id),
+      fizzle = true,
+    }, true)
+    Sync.publish(state, true)
     return
   end
   setEffectActive(state, "fuse", false)
@@ -2133,29 +2719,60 @@ local function detonate(state, vehicle)
           if distance > 0.01 and distance < OPT.blast_radius_m then
             local falloff = 1.0 - distance / OPT.blast_radius_m
             axis = axis * (1.0 / distance)
-            addSubjectVelocity(state, entry.vehicle, vec3(
+            local delta = vec3(
               axis.x * OPT.blast_push_mps * falloff,
               axis.y * OPT.blast_push_mps * falloff,
-              OPT.blast_push_mps * falloff * 0.35))
+              OPT.blast_push_mps * falloff * 0.35)
+            local applied = Sync.canMutate(entry.vehicle)
+              and addSubjectVelocity(state, entry.vehicle, delta) == true
+            Sync.sendCommand(state, "impulse", {
+              target_sid = Sync.sidForGameId(entry.id),
+              delta = Sync.vectorTable(delta),
+            }, applied)
           end
         end
       end
     end
   end
+  -- Strip the victim's armor FIRST (v2.6): the boom must land whatever
+  -- damage_mode says, and the break/crush/fire commands queue behind this
+  -- restore in the same vehicle VM, in order. The shield dies with it.
+  if b.shield then b.shield[id] = nil end
+  local armored = b.armorApplied and b.armorApplied[id]
+  if armored and armored ~= "none" then
+    v26.sendArmor(state, vehicle, "none")
+  end
   if OPT.detonate_break then
-    pcall(function() vehicle:queueLuaCommand(BREAK_COMMAND) end)
+    if Sync.canMutate(vehicle) then
+      pcall(function() vehicle:queueLuaCommand(BREAK_COMMAND) end)
+    end
   end
   if OPT.detonate_crush then
     local command = string.format(
       CRUSH_TEMPLATE,
       tostring(OPT.crush_dv_mps), tostring(OPT.crush_min_z),
       tostring(OPT.crush_inward))
-    pcall(function() vehicle:queueLuaCommand(command) end)
+    if Sync.canMutate(vehicle) then
+      pcall(function() vehicle:queueLuaCommand(command) end)
+    end
   end
   if OPT.detonate_fire then
-    pcall(function() vehicle:queueLuaCommand(FIRE_COMMAND) end)
+    if Sync.canMutate(vehicle) then
+      pcall(function() vehicle:queueLuaCommand(FIRE_COMMAND) end)
+    end
   end
+  Sync.sendCommand(state, "detonate", {
+    target_sid = Sync.sidForGameId(id),
+    fizzle = false,
+    break_vehicle = OPT.detonate_break == true,
+    crush_vehicle = OPT.detonate_crush == true,
+    fire_vehicle = OPT.detonate_fire == true,
+    crush_dv_mps = OPT.crush_dv_mps,
+    crush_min_z = OPT.crush_min_z,
+    crush_inward = OPT.crush_inward,
+  }, Sync.canMutate(vehicle))
   announce(state, "BOOM!", 2.5, "detonation", {subject_id = id})
+  Sync.publish(state, true)
 end
 
 local function closingSpeed(first, second)
@@ -2257,7 +2874,10 @@ local function sweepForPass(state, carrier)
     end
     if eligible then
       local position = entry.vehicle:getPosition()
-      if finiteVector3(position) then
+      -- The arena gate (v2.6): a car outside the circle is not part of the
+      -- game and cannot receive the potato — chasing a runner into the
+      -- distance is exactly what the arena exists to end.
+      if finiteVector3(position) and v26.insideArena(state, position) then
         local distance = (position - carrierPosition):length()
         local threshold = touchMode
           and contactRange(state, carrier, entry.vehicle)
@@ -2293,10 +2913,13 @@ local function sweepForPass(state, carrier)
       axis.z = 0
       if axis:length() > 0.01 then
         axis:normalize()
-        addSubjectVelocity(state, best, vec3(
-          axis.x * knock,
-          axis.y * knock,
-          knock * 0.3))
+        local delta = vec3(axis.x * knock, axis.y * knock, knock * 0.3)
+        local applied = Sync.canMutate(best)
+          and addSubjectVelocity(state, best, delta) == true
+        Sync.sendCommand(state, "impulse", {
+          target_sid = Sync.sidForGameId(best:getId()),
+          delta = Sync.vectorTable(delta),
+        }, applied)
       end
     end
     announce(state, "PASSED!", 1.4)
@@ -2349,6 +2972,7 @@ local function applyCarrierBoost(state, carrier, dtSim)
   -- cannot strain a beam, so carrying the potato stays harmless.
   -- NEGATIVE boost (v2.3) is the ball-and-chain handicap: a drag along the
   -- velocity, floored so it can only slow a moving car, never reverse it.
+  if not Sync.canMutate(carrier) then return end
   local boost = OPT.carrier_boost_mps2
   if boost == 0 then return end
   local ok, velocity = pcall(function() return carrier:getVelocity() end)
@@ -2383,6 +3007,7 @@ end
 local AI_SWEEP_SECONDS = 0.8
 
 local function aiCommand(vehicle, command)
+  if not Sync.canMutate(vehicle) then return end
   pcall(function() vehicle:queueLuaCommand(command) end)
 end
 
@@ -2399,7 +3024,20 @@ local function aiRelease(state)
     end
   end
   b.aiApplied = nil
+  b.aiReturning = nil
   b.aiTuning = nil
+end
+
+-- One containment write: steer this car straight back at the arch.
+-- ai.setSlotTrafficTarget is the ONE vehicle-AI export that takes raw world
+-- coordinates and needs no navgraph (measured, ai.lua:5833) — it
+-- self-switches the mode, drives pure pursuit at the point, and brakes on
+-- its own 0.5 s watchdog, which is why v26.stepAiReturn refreshes it.
+function v26.sendReturn(state, vehicle)
+  local centre = toWorldPoint(state, B.pad_center)
+  aiCommand(vehicle, string.format(
+    "pcall(function() ai.setSlotTrafficTarget(%.1f, %.1f, %.1f, %.1f) end)",
+    centre.x, centre.y, centre.z, OPT.ai_speed_kmh / 3.6))
 end
 
 local function stepAI(state)
@@ -2413,6 +3051,7 @@ local function stepAI(state)
   local playerId = nil
   pcall(function() playerId = be:getPlayerVehicleID(0) end)
   b.aiApplied = b.aiApplied or {}
+  b.aiReturning = b.aiReturning or {}
   -- A tuning change re-arms everyone: aggression and the speed cap ride
   -- along with the next role command, so clearing the applied map resends.
   local tuning = string.format("%.2f|%.1f", OPT.ai_aggression, OPT.ai_speed_kmh)
@@ -2423,48 +3062,84 @@ local function stepAI(state)
   local field = roster(state)
   local carrierId = b.phase == "live" and b.carrier or nil
   local speedMps = OPT.ai_speed_kmh / 3.6
+  -- Hold modes invert the desire (v2.6): in hoarder and protect the carrier
+  -- WANTS the potato, so the mob hunts the carrier and the carrier runs. In
+  -- classic and pinball the carrier hunts and everyone else flees.
+  local holdMode = OPT.game_mode == "hoarder" or OPT.game_mode == "protect"
   local present = {}
   for _, entry in ipairs(field) do
     local id = entry.id
     if id ~= playerId then
-      present[id] = true
-      local role
-      if carrierId and id == carrierId then
-        -- The hunter: chase the nearest other car — the player included —
-        -- because touching someone is how the potato moves on.
-        local best, bestDist = nil, nil
-        local okPos, myPos = pcall(function() return entry.vehicle:getPosition() end)
-        if okPos and finiteVector3(myPos) then
-          for _, other in ipairs(field) do
-            if other.id ~= id then
-              local okOther, otherPos = pcall(function() return other.vehicle:getPosition() end)
-              if okOther and finiteVector3(otherPos) then
-                local dist = (otherPos - myPos):length()
-                if not bestDist or dist < bestDist then
-                  best, bestDist = other.id, dist
+      local okPos, myPos = pcall(function() return entry.vehicle:getPosition() end)
+      local havePos = okPos and finiteVector3(myPos)
+      local distance = havePos and v26.arenaDistance(state, myPos) or nil
+      local outNow = OPT.arena_enabled and distance ~= nil
+        and distance > OPT.arena_radius_m
+      if outNow and b.aiApplied[id] == nil then
+        -- Outside the circle and never conscripted: not part of the game
+        -- ("any AI vehicle within the game radius becomes part of the hot
+        -- potato game" — and only those).
+        present[id] = nil
+      else
+        present[id] = true
+        local role
+        if outNow or (b.aiReturning[id] and OPT.arena_enabled
+          and distance ~= nil and distance > OPT.arena_radius_m * 0.8) then
+          -- Containment, with hysteresis: a strayed car returns until it is
+          -- well inside (80% of the radius), not merely on the line —
+          -- otherwise it flip-flops role at the boundary every sweep.
+          role = "return"
+        elseif carrierId and id == carrierId then
+          -- The carrier resolves against its nearest other car — the
+          -- player included: prey to chase in the hot modes, a hunter to
+          -- run from in the hold modes.
+          local best, bestDist = nil, nil
+          if havePos then
+            for _, other in ipairs(field) do
+              if other.id ~= id then
+                local okOther, otherPos = pcall(function() return other.vehicle:getPosition() end)
+                if okOther and finiteVector3(otherPos) then
+                  local dist = (otherPos - myPos):length()
+                  if not bestDist or dist < bestDist then
+                    best, bestDist = other.id, dist
+                  end
                 end
               end
             end
           end
-        end
-        role = best and ("chase:" .. best) or "stop"
-      elseif carrierId then
-        role = "flee:" .. carrierId
-      else
-        -- No round running: hold position and look innocent.
-        role = "stop"
-      end
-      if b.aiApplied[id] ~= role then
-        b.aiApplied[id] = role
-        local mode, target = role:match("^(%a+):?(%d*)")
-        if mode == "stop" then
-          aiCommand(entry.vehicle, "pcall(function() ai.setMode('stop') end)")
+          if not best then
+            role = "stop"
+          else
+            role = (holdMode and "flee:" or "chase:") .. best
+          end
+        elseif carrierId then
+          role = (holdMode and "chase:" or "flee:") .. carrierId
         else
-          aiCommand(entry.vehicle, string.format(
-            "pcall(function() ai.setAggression(%.2f)"
-            .. " ai.setSpeedMode('limit') ai.setSpeed(%.1f)"
-            .. " ai.setTargetObjectID(%d) ai.setMode('%s') end)",
-            OPT.ai_aggression, speedMps, tonumber(target), mode))
+          -- No round running: hold position and look innocent.
+          role = "stop"
+        end
+        if b.aiApplied[id] ~= role then
+          b.aiApplied[id] = role
+          if role == "return" then
+            b.aiReturning[id] = true
+            v26.sendReturn(state, entry.vehicle)
+          else
+            b.aiReturning[id] = nil
+            local mode, target = role:match("^(%a+):?(%d*)")
+            if mode == "stop" then
+              aiCommand(entry.vehicle, "pcall(function() ai.setMode('stop') end)")
+            else
+              -- setMode FIRST (v2.6, measured): setMode -> resetMapAndRoute
+              -- (ai.lua:5780) calls resetAggression/resetParameters, so
+              -- tuning sent before the mode is silently wiped by it. The
+              -- v2.5 order shipped exactly that bug.
+              aiCommand(entry.vehicle, string.format(
+                "pcall(function() ai.setMode('%s')"
+                .. " ai.setTargetObjectID(%d) ai.setAggression(%.2f)"
+                .. " ai.setSpeedMode('limit') ai.setSpeed(%.1f) end)",
+                mode, tonumber(target), OPT.ai_aggression, speedMps))
+            end
+          end
         end
       end
     end
@@ -2480,6 +3155,103 @@ local function stepAI(state)
           or "pcall(function() ai.setMode('stop') end)")
       end
       b.aiApplied[id] = nil
+      b.aiReturning[id] = nil
+    end
+  end
+end
+
+-- The containment heartbeat: runs every frame (throttled inside to 0.25 s)
+-- so the slotTraffic watchdog (0.5 s, ai.lua:5165-5167) never starves
+-- between the 0.8 s role sweeps.
+function v26.stepAiReturn(state)
+  local b = state.behavior
+  if not (OPT.ai_enabled and OPT.arena_enabled and b.aiReturning) then return end
+  if next(b.aiReturning) == nil then return end
+  if (b.aiReturnNext or 0) > b.now then return end
+  b.aiReturnNext = b.now + 0.25
+  for id in pairs(b.aiReturning) do
+    local vehicle = exactVehicle(id)
+    if vehicle then v26.sendReturn(state, vehicle) end
+  end
+end
+
+-- ==========================================================================
+-- The arena magnet (v2.7): the physical rubber band under the AI steering.
+-- obj:setPlanets{x, y, z, radius, mass} is the engine's own gravity well
+-- (vehicle physics side, per node, every physics step — funstuff.lua's
+-- explode drives it with negative mass to repel; positive mass attracts).
+-- A well is a STANDING setting, so unlike the slotTraffic return there is
+-- no watchdog to feed: the 0.5 s sweep only has to place it when a member
+-- strays out, refresh its mass as the range changes, and lift it again.
+-- ==========================================================================
+
+v26.G = 6.674e-11
+
+function v26.sendMagnet(state, vehicle, distance)
+  local centre = toWorldPoint(state, B.pad_center)
+  -- Constant-force tether: mass = a * d^2 / G with a = arena_magnet_g in
+  -- gees at the car's CURRENT range, so the pull never fades with escape
+  -- distance the way raw planet gravity would.
+  local mass = OPT.arena_magnet_g * 9.81 * distance * distance / v26.G
+  aiCommand(vehicle, string.format(
+    "pcall(function() obj:setPlanets({%.1f, %.1f, %.1f, 10, %.5g}) end)",
+    centre.x, centre.y, centre.z, mass))
+end
+
+function v26.magnetClear(state, vehicle)
+  aiCommand(vehicle, "pcall(function() obj:setPlanets({}) end)")
+end
+
+-- Lift every standing well. Runs when the toggle flips off, when the round
+-- leaves the live phase, and on prop init/reset/teardown — a gravity well
+-- must never outlive the game that placed it.
+function v26.magnetRelease(state)
+  local b = state.behavior
+  if not b.magnetApplied then return end
+  for id in pairs(b.magnetApplied) do
+    local vehicle = exactVehicle(id)
+    if vehicle then v26.magnetClear(state, vehicle) end
+  end
+  b.magnetApplied = nil
+end
+
+function v26.stepMagnet(state)
+  local b = state.behavior
+  if not (OPT.arena_enabled and b.phase == "live") then
+    if b.magnetApplied then v26.magnetRelease(state) end
+    -- Membership is per round: a fresh game re-drafts from whoever is
+    -- inside the ring then.
+    if b.phase ~= "live" then b.arenaMembers = nil end
+    return
+  end
+  if (b.magnetNext or 0) > b.now then return end
+  b.magnetNext = b.now + 0.5
+  -- Membership rides the ARENA, not the magnet toggle: a host flipping the
+  -- magnet on mid-round must still catch the car that is already outside.
+  local magnetOn = OPT.arena_magnet_enabled
+  if not magnetOn and b.magnetApplied then v26.magnetRelease(state) end
+  b.arenaMembers = b.arenaMembers or {}
+  b.magnetApplied = b.magnetApplied or {}
+  if b.carrier then b.arenaMembers[b.carrier] = true end
+  for _, entry in ipairs(roster(state)) do
+    local id = entry.id
+    local okPos, position = pcall(function() return entry.vehicle:getPosition() end)
+    if okPos and finiteVector3(position) then
+      local distance = v26.arenaDistance(state, position)
+      if distance <= OPT.arena_radius_m then
+        -- Inside the ring: a member for the rest of the round — the player
+        -- included, which is the difference from the AI-only steering…
+        b.arenaMembers[id] = true
+        -- …and the well lifts once the car is WELL inside (90%), not at
+        -- the line, so the boundary cannot chatter it on and off.
+        if b.magnetApplied[id] and distance <= OPT.arena_radius_m * 0.9 then
+          v26.magnetClear(state, entry.vehicle)
+          b.magnetApplied[id] = nil
+        end
+      elseif magnetOn and b.arenaMembers[id] then
+        v26.sendMagnet(state, entry.vehicle, distance)
+        b.magnetApplied[id] = true
+      end
     end
   end
 end
@@ -2523,11 +3295,14 @@ local function updateFuseCues(state, carrier, worldPos, dtReal)
       if not b.sputtered then
         b.sputtered = true
         silenceWhistle(state)
-        playSputter(state, carrier, 0.9, 1.0)
+        playSputter(state, carrier, 0.75, 1.0)
       end
     else
       local wpitch = escalating and (1.0 - 0.28 * cueU) or 1.0
-      driveWhistle(state, carrier, 0.5 + 0.1 * cueU, wpitch)
+      -- v2.6 tone-down ("the noise is annoying now"): the re-voiced asset
+      -- peaks 7.5 dB lower AND the drive gain dropped from 0.5+0.1u — the
+      -- vent is a texture under the tick, not a siren over it.
+      driveWhistle(state, carrier, 0.30 + 0.08 * cueU, wpitch)
     end
   else
     silenceWhistle(state)
@@ -2628,7 +3403,13 @@ local function stepRound(state, dtSim, dtReal)
     if not b.boomLaunched and since >= 0.12 then
       b.boomLaunched = true
       if victim and not b.fizzle then
-        launchSubject(state, victim, vec3(0, 0, OPT.detonate_launch_mps))
+        local delta = vec3(0, 0, OPT.detonate_launch_mps)
+        local applied = Sync.canMutate(victim)
+          and launchSubject(state, victim, delta) == true
+        Sync.sendCommand(state, "impulse", {
+          target_sid = Sync.sidForGameId(victim:getId()),
+          delta = Sync.vectorTable(delta),
+        }, applied)
       end
     end
     if since < fireDur then
@@ -2709,8 +3490,11 @@ local function stepRound(state, dtSim, dtReal)
   -- Hoarder mode (v2.4): holding the potato IS the game — a point a
   -- second, first to the target takes the crown and the fireworks. The
   -- potato still blows, and the boom halves the victim's hoard, so greed
-  -- has a price.
-  if OPT.game_mode == "hoarder" then
+  -- has a price. Protect mode (v2.6, "the reverse game type") scores the
+  -- same held-seconds race, but the boom costs NOTHING — riding the fuse
+  -- to the very end is the whole point, and the AI mob hunting you is the
+  -- obstacle (detonate() halves hoarder scores only).
+  if OPT.game_mode == "hoarder" or OPT.game_mode == "protect" then
     b.score = b.score or {}
     b.score[b.carrier] = (b.score[b.carrier] or 0) + (b.lastDelta or 0)
     if b.score[b.carrier] >= OPT.hoard_target_points then
@@ -2751,8 +3535,531 @@ local function stepRound(state, dtSim, dtReal)
   end
 end
 
+-- --------------------------------------------------------------------------
+-- BeamMP replica protocol. The owning client keeps the existing state
+-- machine as the authority; followers consume complete, idempotent snapshots
+-- and render them without running pickup/pass/fuse/scoring decisions.
+-- --------------------------------------------------------------------------
+
+function Sync.vectorTable(value)
+  if not finiteVector3(value) then return nil end
+  return {value.x, value.y, value.z}
+end
+
+function Sync.readVector(value)
+  if type(value) ~= "table" then return nil end
+  local x, y, z = tonumber(value[1] or value.x),
+    tonumber(value[2] or value.y), tonumber(value[3] or value.z)
+  if not finiteNumber(x) or not finiteNumber(y) or not finiteNumber(z) then return nil end
+  return vec3(x, y, z)
+end
+
+function Sync.nameForSid(state, sid)
+  if type(sid) ~= "string" then return "" end
+  local b = state.behavior
+  if b.sync and b.sync.namesBySid and b.sync.namesBySid[sid] then
+    return b.sync.namesBySid[sid]
+  end
+  local id = Sync.gameIdForSid(sid)
+  return id and subjectName(state, id) or sid
+end
+
+function Sync.optionsWritable()
+  for _, state in pairs(installations) do
+    local sync = state.behavior.sync
+    if sync and sync.mode ~= "standalone" and sync.mode ~= "authority" then
+      return false
+    end
+  end
+  return true
+end
+
+function Sync.status()
+  local payload = {
+    mode = Sync.isMPSession() and "pending" or "standalone",
+    status = Sync.isMPSession() and "waiting for BeamMP relay" or "single-player",
+    options_writable = Sync.optionsWritable(),
+    arenas = {},
+  }
+  for _, state in pairs(installations) do
+    local sync = state.behavior.sync
+    if sync then
+      local entry = {
+        prop_id = state.propId,
+        arena = sync.arena or "",
+        mode = sync.mode,
+        status = sync.status,
+        epoch = sync.epoch or 0,
+        revision = sync.revision or 0,
+      }
+      payload.arenas[#payload.arenas + 1] = entry
+      if #payload.arenas == 1 then
+        payload.mode = entry.mode
+        payload.status = entry.status
+        payload.arena = entry.arena
+        payload.epoch = entry.epoch
+        payload.revision = entry.revision
+      end
+    end
+  end
+  return payload
+end
+
+function Sync.encodeIdMap(state, source, timed)
+  local payload = {}
+  for id, value in pairs(source or {}) do
+    local sid = Sync.sidForGameId(tonumber(id))
+    if sid then
+      if timed then
+        payload[sid] = math.max(0, (tonumber(value) or state.behavior.now) - state.behavior.now)
+      else
+        payload[sid] = value
+      end
+    end
+  end
+  return payload
+end
+
+function Sync.decodeIdMap(state, source, timed)
+  local restored = {}
+  if type(source) ~= "table" then return restored end
+  for sid, value in pairs(source) do
+    local id = Sync.gameIdForSid(sid)
+    if id then
+      restored[id] = timed
+        and state.behavior.now + math.max(0, tonumber(value) or 0)
+        or value
+    end
+  end
+  return restored
+end
+
+function Sync.optionSnapshot()
+  local payload = {}
+  for key in pairs(OPTION_RANGE) do payload[key] = OPT[key] end
+  return payload
+end
+
+function Sync.applyOptions(payload)
+  if type(payload) ~= "table" then return end
+  for key, value in pairs(payload) do
+    local coerced = coerceOption(key, value)
+    if coerced ~= nil then OPT[key] = coerced end
+  end
+end
+
+function Sync.snapshot(state)
+  local b = state.behavior
+  local remaining = b.fuseEnds and math.max(0, b.fuseEnds - b.now) or nil
+  local names = {}
+  for _, entry in ipairs(roster(state)) do
+    local sid = Sync.sidForGameId(entry.id)
+    if sid then names[sid] = subjectName(state, entry.id) end
+  end
+  local snapshot = {
+    phase = b.phase or "idle",
+    carrier_sid = b.carrier and Sync.sidForGameId(b.carrier) or b.carrierSid,
+    fuse_remaining = remaining,
+    held_elapsed = b.heldSince and math.max(0, b.now - b.heldSince) or 0,
+    transfers = b.transfers or 0,
+    field_peak = b.fieldPeak or 0,
+    out_count = b.outCount or 0,
+    pair_from_sid = b.pairFrom and Sync.sidForGameId(b.pairFrom) or nil,
+    pair_to_sid = b.pairTo and Sync.sidForGameId(b.pairTo) or nil,
+    pair_separated = b.pairSeparated == true,
+    immune = Sync.encodeIdMap(state, b.immune, true),
+    shield = Sync.encodeIdMap(state, b.shield, true),
+    seen = Sync.encodeIdMap(state, b.seen, true),
+    out = Sync.encodeIdMap(state, b.out, false),
+    quarantined = Sync.encodeIdMap(state, b.quarantined, false),
+    wins = Sync.encodeIdMap(state, b.wins, false),
+    score = Sync.encodeIdMap(state, b.score, false),
+    names = names,
+    options = Sync.optionSnapshot(),
+    potato_at = Sync.vectorTable(b.potatoAt),
+    cheer_remaining = b.cheerUntil and math.max(0, b.cheerUntil - b.now) or 0,
+  }
+  if b.phase == "boom" then
+    snapshot.boom = {
+      elapsed = math.max(0, b.now - (b.boomAt or b.now)),
+      fizzle = b.fizzle == true,
+      fire_duration = b.fireDur or OPT.fire_seconds,
+      from = Sync.vectorTable(b.boomFrom),
+    }
+  elseif b.phase == "return" then
+    snapshot.return_flight = {
+      elapsed = math.max(0, b.now - (b.retStart or b.now)),
+      from = Sync.vectorTable(b.retFrom),
+      cruise_z = b.retCruiseZ,
+      up = b.retUp,
+      cross = b.retCross,
+      down = b.retDown,
+    }
+  end
+  return snapshot
+end
+
+function Sync.quietRound(state)
+  local b = state.behavior
+  silenceTick(state)
+  silenceWhistle(state)
+  aiRelease(state)
+  v26.armorRelease(state)
+  v26.magnetRelease(state)
+  b.phase = "idle"
+  b.carrier = nil
+  b.carrierSid = nil
+  b.fuseEnds = nil
+  b.heldSince = nil
+  b.out = {}
+  b.outCount = 0
+  b.fieldPeak = 0
+  b.transfers = 0
+  b.immune = {}
+  b.pairFrom, b.pairTo, b.pairSeparated = nil, nil, true
+  state.zones.carrier_watch = nil
+  setEffectActive(state, "blast", false)
+  beaconLit(state, false)
+  if b.ready then parkPotato(state) end
+end
+
+function Sync.init(state)
+  local b = state.behavior
+  b.sync = {
+    mode = Sync.isMPSession() and "pending" or "standalone",
+    status = Sync.isMPSession() and "waiting for BeamMP relay" or "single-player",
+    arena = Sync.sidForGameId(state.propId),
+    epoch = nil,
+    revision = 0,
+    serverSeq = 0,
+    nextPublish = 0,
+    nextRegister = 0,
+    commandSeq = 0,
+    seenCommands = {},
+    namesBySid = {},
+  }
+  if Sync.isMPSession() then
+    local adapter = Sync.transport()
+    if adapter and type(adapter.registerProp) == "function" then
+      pcall(adapter.registerProp, state.propId)
+    end
+  end
+end
+
+function Sync.unregister(state)
+  local adapter = Sync.transport()
+  if adapter and type(adapter.unregisterProp) == "function" then
+    pcall(adapter.unregisterProp, state.propId)
+  end
+end
+
+function Sync.publish(state, force)
+  local b = state.behavior
+  local sync = b.sync
+  if not sync or sync.mode ~= "authority" then return false end
+  if not force and (sync.nextPublish or 0) > b.now then return false end
+  sync.nextPublish = b.now + Sync.PUBLISH_SECONDS
+  local adapter = Sync.transport()
+  if not adapter or type(adapter.publishState) ~= "function" then return false end
+  local ok, sent = pcall(adapter.publishState, state.propId, Sync.snapshot(state))
+  return ok and sent == true
+end
+
+function Sync.publishAll(force)
+  local sent = false
+  for _, state in pairs(installations) do
+    if Sync.publish(state, force) then sent = true end
+  end
+  return sent
+end
+
+function Sync.sendCommand(state, name, fields, locallyApplied)
+  local b = state.behavior
+  local sync = b.sync
+  if not sync or sync.mode ~= "authority" then return nil end
+  sync.commandSeq = (sync.commandSeq or 0) + 1
+  local eventId = string.format("%s:%s:%d", tostring(sync.arena or state.propId),
+    tostring(sync.epoch or "pending"), sync.commandSeq)
+  local command = {event_id = eventId, name = name}
+  for key, value in pairs(fields or {}) do command[key] = value end
+  if locallyApplied then sync.seenCommands[eventId] = true end
+  local adapter = Sync.transport()
+  if adapter and type(adapter.publishCommand) == "function" then
+    pcall(adapter.publishCommand, state.propId, command)
+  end
+  return eventId
+end
+
+function Sync.findState(arena)
+  for _, state in pairs(installations) do
+    local b = state.behavior
+    if b.sync then
+      b.sync.arena = b.sync.arena or Sync.sidForGameId(state.propId)
+      if b.sync.arena == arena then return state end
+    end
+  end
+  return nil
+end
+
+function Sync.applySnapshot(state, snapshot)
+  if type(snapshot) ~= "table" then return false end
+  local phase = snapshot.phase
+  if phase ~= "idle" and phase ~= "live" and phase ~= "boom" and phase ~= "return" then
+    return false
+  end
+  local b = state.behavior
+  local previousPhase = b.phase
+  Sync.applyOptions(snapshot.options)
+  b.phase = phase
+  b.carrierSid = type(snapshot.carrier_sid) == "string" and snapshot.carrier_sid or nil
+  b.carrier = b.carrierSid and Sync.gameIdForSid(b.carrierSid) or nil
+  local remaining = tonumber(snapshot.fuse_remaining)
+  b.fuseEnds = remaining and remaining >= 0 and b.now + remaining or nil
+  b.heldSince = b.now - math.max(0, tonumber(snapshot.held_elapsed) or 0)
+  b.transfers = math.max(0, tonumber(snapshot.transfers) or 0)
+  b.fieldPeak = math.max(0, tonumber(snapshot.field_peak) or 0)
+  b.outCount = math.max(0, tonumber(snapshot.out_count) or 0)
+  b.immune = Sync.decodeIdMap(state, snapshot.immune, true)
+  b.shield = Sync.decodeIdMap(state, snapshot.shield, true)
+  b.seen = Sync.decodeIdMap(state, snapshot.seen, true)
+  b.out = Sync.decodeIdMap(state, snapshot.out, false)
+  b.quarantined = Sync.decodeIdMap(state, snapshot.quarantined, false)
+  b.wins = Sync.decodeIdMap(state, snapshot.wins, false)
+  b.score = Sync.decodeIdMap(state, snapshot.score, false)
+  b.pairFrom = Sync.gameIdForSid(snapshot.pair_from_sid)
+  b.pairTo = Sync.gameIdForSid(snapshot.pair_to_sid)
+  b.pairSeparated = snapshot.pair_separated == true
+  b.potatoAt = Sync.readVector(snapshot.potato_at) or b.potatoAt
+  b.cheerUntil = b.now + math.max(0, tonumber(snapshot.cheer_remaining) or 0)
+  if b.sync and type(snapshot.names) == "table" then
+    for sid, name in pairs(snapshot.names) do
+      if type(sid) == "string" and type(name) == "string" then
+        b.sync.namesBySid[sid] = name
+        local id = Sync.gameIdForSid(sid)
+        if id then b.names[id] = name end
+      end
+    end
+  end
+  if phase == "live" and b.carrier then
+    state.zones.carrier_watch = {[b.carrier] = true}
+  else
+    state.zones.carrier_watch = nil
+  end
+  if phase == "boom" then
+    local boom = type(snapshot.boom) == "table" and snapshot.boom or {}
+    b.boomAt = b.now - math.max(0, tonumber(boom.elapsed) or 0)
+    b.fizzle = boom.fizzle == true
+    b.fireDur = math.max(0, tonumber(boom.fire_duration) or OPT.fire_seconds)
+    b.boomFrom = Sync.readVector(boom.from) or b.potatoAt
+    if previousPhase ~= "boom" then
+      silenceTick(state)
+      silenceWhistle(state)
+      beaconLit(state, false)
+      if not b.fizzle then
+        poseEffectAt(state, "blast", b.boomFrom or toWorldPoint(state, B.potato_home))
+        setEffectActive(state, "blast", true)
+        playSound(SFX_BOOM, 0.85, 1.0)
+        if OPT.mash_enabled and b.boomFrom then
+          spawnMash(state, b.boomFrom, b.boomFrom.z - 2.0)
+        end
+      end
+    end
+  elseif phase == "return" then
+    local flight = type(snapshot.return_flight) == "table" and snapshot.return_flight or {}
+    b.retStart = b.now - math.max(0, tonumber(flight.elapsed) or 0)
+    b.retFrom = Sync.readVector(flight.from) or b.potatoAt
+    b.retCruiseZ = tonumber(flight.cruise_z) or (b.retFrom and b.retFrom.z + 8.0) or 14.0
+    b.retUp = math.max(0.01, tonumber(flight.up) or 2.2)
+    b.retCross = math.max(0.01, tonumber(flight.cross) or 0.6)
+    b.retDown = math.max(0.01, tonumber(flight.down) or 3.0)
+  elseif previousPhase == "boom" then
+    setEffectActive(state, "blast", false)
+  end
+  if b.sync then b.sync.lastStateAt = b.now end
+  return true
+end
+
+function Sync.applyCommand(state, command)
+  if type(command) ~= "table" or type(command.event_id) ~= "string" then return false end
+  local b = state.behavior
+  local sync = b.sync
+  if not sync or sync.seenCommands[command.event_id] then return false end
+  sync.seenCommands[command.event_id] = true
+  local targetId = Sync.gameIdForSid(command.target_sid)
+  local target = targetId and exactVehicle(targetId) or nil
+  if command.name == "impulse" then
+    local delta = Sync.readVector(command.delta)
+    if target and delta and Sync.canMutate(target) then
+      return addSubjectVelocity(state, target, delta)
+    end
+    return true
+  end
+  if command.name == "detonate" then
+    if not target or not Sync.canMutate(target) or command.fizzle == true then return true end
+    v26.sendArmor(state, target, "none")
+    if command.break_vehicle == true then
+      pcall(function() target:queueLuaCommand(BREAK_COMMAND) end)
+    end
+    if command.crush_vehicle == true then
+      pcall(function() target:queueLuaCommand(string.format(CRUSH_TEMPLATE,
+        tostring(command.crush_dv_mps or OPT.crush_dv_mps),
+        tostring(command.crush_min_z or OPT.crush_min_z),
+        tostring(command.crush_inward or OPT.crush_inward))) end)
+    end
+    if command.fire_vehicle == true then
+      pcall(function() target:queueLuaCommand(FIRE_COMMAND) end)
+    end
+    local launch = tonumber(command.launch_mps) or 0
+    if launch > 0 then launchSubject(state, target, vec3(0, 0, launch)) end
+    return true
+  end
+  return true
+end
+
+function Sync.receive(packet)
+  if type(packet) ~= "table" or packet.v ~= Sync.PROTOCOL
+    or packet.game ~= Sync.GAME or type(packet.arena) ~= "string" then return false end
+  if packet.epoch ~= nil and (not integer(packet.epoch) or packet.epoch < 0) then
+    return false
+  end
+  local state = Sync.findState(packet.arena)
+  if not state then return false end
+  local b, sync = state.behavior, state.behavior.sync
+  local serverSeq = tonumber(packet.seq)
+  if not integer(serverSeq) or serverSeq < 0 then return false end
+  local revision = tonumber(packet.revision) or 0
+  local body = packet.body or packet.payload or {}
+  if type(body) ~= "table" then return false end
+  -- Relay reset/close packets start a new epoch at revision zero, so they
+  -- must be handled before stale-revision and epoch guards.
+  if packet.kind == "closed" or packet.kind == "reject" then
+    Sync.quietRound(state)
+    sync.mode = "pending"
+    sync.status = packet.kind == "reject"
+      and ("BeamMP rejected: " .. tostring(body.reason or "protocol"))
+      or "BeamMP arena closed"
+    sync.epoch = packet.epoch
+    sync.revision = 0
+    sync.serverSeq = serverSeq
+    sync.nextRegister = b.now
+    sync.seenCommands = {}
+    return true
+  end
+  if packet.kind == "role" then
+    if packet.epoch == sync.epoch and serverSeq <= (sync.serverSeq or 0) then
+      return false
+    end
+    sync.arena = packet.arena
+    sync.epoch = packet.epoch
+    sync.revision = revision
+    sync.serverSeq = serverSeq
+    sync.seenCommands = {}
+    local role = body.role
+    if role ~= "authority" and role ~= "follower" then
+      role = body.authority == true and "authority" or "follower"
+    end
+    local prop = exactVehicle(state.propId)
+    if role == "authority" and Sync.canMutate(prop) then
+      sync.mode = "authority"
+      sync.status = "BeamMP authority"
+      Sync.publish(state, true)
+    else
+      sync.mode = "follower"
+      sync.status = "BeamMP synchronized"
+      Sync.quietRound(state)
+      if type(body.state) == "table" then Sync.applySnapshot(state, body.state) end
+    end
+    return true
+  end
+  if packet.epoch ~= nil and sync.epoch ~= nil and packet.epoch ~= sync.epoch then return false end
+  if serverSeq <= (sync.serverSeq or 0) then return false end
+  sync.serverSeq = serverSeq
+  sync.revision = revision
+  if packet.kind == "state" then
+    if sync.mode == "follower" then
+      return Sync.applySnapshot(state,
+        type(body.state) == "table" and body.state or body)
+    end
+    return true
+  end
+  if packet.kind == "command" then return Sync.applyCommand(state, body) end
+  return false
+end
+
+function Sync.transportChanged(info)
+  if type(info) ~= "table" then return false end
+  for _, state in pairs(installations) do
+    local b = state.behavior
+    if b.sync and (tonumber(info.game_id) == state.propId
+      or info.arena == nil or b.sync.arena == nil or info.arena == b.sync.arena) then
+      if info.connected == true then
+        if b.sync.mode == "standalone" then Sync.quietRound(state) end
+        b.sync.mode = "pending"
+        b.sync.status = "waiting for BeamMP relay"
+        b.sync.serverSeq = 0
+        b.sync.arena = info.arena or b.sync.arena or Sync.sidForGameId(state.propId)
+        local adapter = Sync.transport()
+        if adapter and type(adapter.registerProp) == "function" then
+          pcall(adapter.registerProp, state.propId)
+        end
+      else
+        Sync.quietRound(state)
+        loadOptions()
+        b.sync.mode = "standalone"
+        b.sync.status = "single-player"
+        b.sync.epoch = nil
+        b.sync.revision = 0
+        b.sync.serverSeq = 0
+      end
+    end
+  end
+  return true
+end
+
+function Sync.renderReplica(state, dtSim, dtReal)
+  local b = state.behavior
+  if not b.sync or b.sync.mode == "pending" then
+    parkPotato(state)
+    return
+  end
+  if b.phase == "idle" then
+    parkPotato(state)
+    return
+  end
+  if b.phase == "return" then
+    stepReturn(state)
+    return
+  end
+  if b.phase == "boom" then
+    local since = math.max(0, b.now - (b.boomAt or b.now))
+    local anchor = b.boomFrom or b.potatoAt or toWorldPoint(state, B.potato_home)
+    local rate = b.fizzle and 1.2 or OPT.detonate_launch_mps * 0.5
+    local position = vec3(anchor.x, anchor.y, anchor.z + since * rate)
+    posePotato(state, position,
+      axisAngle(vec3(0.4, 0.2, 1.0), since * (b.fizzle and 1.2 or 3.5)))
+    poseEffectAt(state, "fuse", vec3(position.x, position.y, position.z + SMOKE_RISE))
+    return
+  end
+  b.carrier = b.carrier or Sync.gameIdForSid(b.carrierSid)
+  local carrier = b.carrier and exactVehicle(b.carrier) or nil
+  if not carrier then
+    if b.potatoAt then posePotato(state, b.potatoAt, nil) end
+    return
+  end
+  state.zones.carrier_watch = {[b.carrier] = true}
+  local anchor, rotation = carrierPose(state, carrier)
+  b.potatoAt = vec3(anchor.x, anchor.y, anchor.z)
+  posePotato(state, anchor, rotation)
+  poseEffectAt(state, "fuse", vec3(anchor.x, anchor.y, anchor.z + SMOKE_RISE))
+  setEffectActive(state, "fuse", OPT.smoke_enabled and true or false)
+  beaconLit(state, true)
+  updateFuseCues(state, carrier, anchor, dtReal)
+  applyCarrierBoost(state, carrier, dtSim)
+end
+
 behavior.init = function(state)
   local b = state.behavior
+  if b.sync then Sync.unregister(state) end
   loadOptions()
   -- A prop reset arrives here with the previous round's state intact:
   -- silence the carrier's loops and release the AI BEFORE the wipe below
@@ -2760,6 +4067,8 @@ behavior.init = function(state)
   silenceTick(state)
   silenceWhistle(state)
   aiRelease(state)
+  v26.armorRelease(state)
+  v26.magnetRelease(state)
   b.phase = "idle"
   b.now = 0
   b.wallLast = nil
@@ -2767,6 +4076,7 @@ behavior.init = function(state)
   b.beaconAngle = 0
   b.beaconLit = nil
   b.carrier = nil
+  b.carrierSid = nil
   b.fuseEnds = nil
   b.nextBeep = 0
   b.pulseUntil = 0
@@ -2784,8 +4094,16 @@ behavior.init = function(state)
   b.whistleLastSent = nil
   b.sputtered = false
   b.aiApplied = nil
+  b.aiReturning = nil
   b.aiTuning = nil
   b.aiNextSweep = 0
+  b.aiReturnNext = 0
+  b.armorApplied = nil
+  b.shield = nil
+  b.armorNext = 0
+  b.magnetApplied = nil
+  b.arenaMembers = nil
+  b.magnetNext = 0
   b.lastDelta = 0
   b.nextHush = 0
   b.silenced = false
@@ -2808,10 +4126,15 @@ behavior.init = function(state)
   b.pairFrom, b.pairTo, b.pairSeparated = nil, nil, true
   b.ready = tunablesPresent(state)
   if not b.ready then return end
+  Sync.init(state)
   ensureBeacon(state)
   setEffectActive(state, "fuse", false)
   setEffectActive(state, "blast", false)
   setEffectActive(state, "cheer", false)
+  for i = 1, #(B.mash_homes or {}) do
+    setEffectActive(state, "mash_steam_" .. i, false)
+    setEffectActive(state, "mash_steam_b" .. i, false)
+  end
   parkMash(state)
   parkPotato(state)
 end
@@ -2828,13 +4151,17 @@ behavior.cleanup = function(state, reason)
   silenceTick(state)
   silenceWhistle(state)
   aiRelease(state)
+  v26.armorRelease(state)
+  v26.magnetRelease(state)
+  Sync.unregister(state)
 end
 
 behavior.onEnter = function(state, zone, vehicle)
   -- Secondary pickup path. The sweep is authoritative and will usually have
   -- fired first; this is here so a trigger event is never simply ignored.
   local b = state.behavior
-  if not b.ready or zone ~= "pad" or b.phase ~= "idle" then return end
+  if not b.ready or not Sync.isAuthority(state)
+    or zone ~= "pad" or b.phase ~= "idle" then return end
   local field = roster(state)
   if #field < OPT.min_players then return end
   b.fieldPeak = #field
@@ -2849,6 +4176,11 @@ behavior.onSubjectGone = function(state, vehicleId, reason)
   b.seen[vehicleId] = nil
   b.extents[vehicleId] = nil
   if b.carrier ~= vehicleId then return end
+  if not Sync.isAuthority(state) then
+    b.carrier = nil
+    state.zones.carrier_watch = nil
+    return
+  end
   -- The carrier vanished mid-round: the potato flies home and the fuse
   -- stops. Never silently pick a new victim, and never leave it orbiting a
   -- dead id.
@@ -2862,15 +4194,66 @@ behavior.update = function(state, dtSim, dtReal)
   if not b.ready then return end
   advanceClock(b, dtSim)
   b.spin = (b.spin + (dtSim or 0) * OPT.spin_rate) % (math.pi * 2)
-  stepRound(state, dtSim, dtReal)
-  -- The AI sweep runs on the phase stepRound just resolved, so a pass this
-  -- frame flips hunter and hunted on the very next sweep.
-  stepAI(state)
+  local active = Sync.isMPSession()
+  if active and b.sync.mode == "standalone" then
+    Sync.transportChanged({
+      connected = true,
+      game_id = state.propId,
+      arena = Sync.sidForGameId(state.propId),
+      reason = "session_detected",
+    })
+  elseif not active and b.sync.mode ~= "standalone" then
+    Sync.transportChanged({
+      connected = false,
+      game_id = state.propId,
+      arena = b.sync.arena,
+      reason = "session_ended",
+    })
+  end
+  -- Joining MP is fail-closed: until the relay elects the prop owner, no
+  -- client runs local pickup/pass/fuse decisions. Registration is retried
+  -- here as a backstop if the downloaded adapter loaded after this prop.
+  if active and b.sync.mode == "pending"
+    and (b.sync.nextRegister or 0) <= b.now then
+    b.sync.nextRegister = b.now + 2.0
+    local adapter = Sync.transport()
+    if adapter and type(adapter.registerProp) == "function" then
+      pcall(adapter.registerProp, state.propId)
+    end
+  end
+  if Sync.isReplica(state) then
+    Sync.renderReplica(state, dtSim, dtReal)
+  else
+    stepRound(state, dtSim, dtReal)
+    -- The AI sweep runs on the phase stepRound just resolved, so a pass this
+    -- frame flips hunter and hunted on the very next sweep. The containment
+    -- heartbeat runs every frame under it (the slotTraffic watchdog is
+    -- 0.5 s), and the armor sweep settles damage_mode and expired shields.
+    stepAI(state)
+    v26.stepAiReturn(state)
+    v26.stepArmor(state)
+    -- The arena magnet rides under both (v2.7): a standing physics-side
+    -- gravity well per strayed member, so it needs only the 0.5 s sweep.
+    v26.stepMagnet(state)
+  end
+  -- A synchronized follower applies canonical armor only to vehicles owned
+  -- by this client. Pending clients stay entirely inert.
+  if b.sync.mode == "follower" then v26.stepArmor(state) end
+  -- The arena halo is immediate-mode: drawn only on frames a round runs.
+  v26.drawArenaHalo(state)
+  -- The HUD app's show-tester (v2.7): the hook parks the request here
+  -- because only the behaviour frame holds the prop state.
+  if v26.fwTest then
+    local testName = v26.fwTest
+    v26.fwTest = nil
+    beginFireworks(state, testName ~= "" and testName or nil)
+  end
   -- Phase-independent animations (v2.4): the mash splatter outlives the
   -- boom phase, and the champion fireworks play over whatever the round is
   -- doing next.
   stepMash(state)
   stepFireworks(state)
+  Sync.publish(state, false)
   publishStats(state)
 end
 
@@ -2909,8 +4292,24 @@ behavior.hooks = {
   hotPotatoGetStats = function()
     return LAST
   end,
+  hotPotatoGetSyncStatus = function()
+    return Sync.status()
+  end,
+  -- Called only by the downloaded BeamMP transport extension. Keeping the
+  -- hook tiny preserves the prop-owned gameplay lifecycle.
+  hotPotatoBeamMPReceive = function(packet)
+    return Sync.receive(packet)
+  end,
+  hotPotatoBeamMPTransport = function(info)
+    return Sync.transportChanged(info)
+  end,
   hotPotatoSetOption = function(key, value)
     if next(OPT) == nil then loadOptions() end
+    if not Sync.optionsWritable() then
+      log("W", LOG_TAG, "BeamMP follower options are read-only")
+      showMessage("Hot Potato options are controlled by the BeamMP authority.", 3)
+      return false
+    end
     local coerced, reason = coerceOption(key, value)
     if coerced == nil then
       -- LOG_TAG and UI_CATEGORY are the template's own locals. Angle-style
@@ -2925,11 +4324,32 @@ behavior.hooks = {
     OPT[key] = coerced
     saveOptions()
     showMessage("Hot Potato: " .. key .. " = " .. tostring(coerced), 3)
+    Sync.publishAll(true)
+    return true
+  end,
+  -- The show-tester (v2.7): one button in the HUD app fires a full
+  -- fireworks pass without waiting for a champion — how a party host (and
+  -- the live gate) proves the sky works. The request parks on v26 because
+  -- hooks have no prop handle; the next behaviour frame owns the state and
+  -- consumes it.
+  hotPotatoTestFireworks = function(name)
+    if next(OPT) == nil then loadOptions() end
+    if not OPT.fireworks_enabled then
+      showMessage("Hot Potato: fireworks are disabled", 3)
+      return false
+    end
+    v26.fwTest = tostring(name or "")
     return true
   end,
   hotPotatoResetOptions = function()
+    if not Sync.optionsWritable() then
+      log("W", LOG_TAG, "BeamMP follower options are read-only")
+      showMessage("Hot Potato options are controlled by the BeamMP authority.", 3)
+      return false
+    end
     seedOptions()
     saveOptions()
+    Sync.publishAll(true)
     return true
   end,
 }

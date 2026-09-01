@@ -528,24 +528,41 @@ def build_visual(materials) -> list:
 def sculpt_mash(obj: bpy.types.Object, seed: int) -> None:
     """Displace a unit sphere into a dollop of mashed potato, in place.
 
-    Same frequency-band discipline as sculpt_potato, tuned for whipped
-    starch instead of tuber: fewer, softer, DEEPER lumps (mash holds folds,
-    not eyes), a vertical squash into a dollop, and a slight soft peak on
-    top like it slid off a serving spoon.
+    v2.7 (player: "not enough triangles to make it look like fluffy mashed
+    potato"): the v2.4 count was never the real problem — its folds were
+    6-16 cm at game scale, which reads as a smooth blob from any distance a
+    camera actually sits at. This cut goes after SHAPE and pairs with the
+    density bump in build_parts so the silhouette carries it: billows
+    (fewer, roughly twice as deep — whipped starch holds big soft folds), a
+    spoon-swirl ridge climbing the dollop like soft-serve, mid-band whip
+    peaks, the fine ripple, a flatter squash and a taller crown where it
+    slid off the serving spoon.
     """
 
     rng = random.Random(seed)  # noqa: S311 - shape authoring, not crypto
-    folds = [
+    billows = [
         (
             Vector((
                 rng.uniform(-1.0, 1.0),
                 rng.uniform(-1.0, 1.0),
                 rng.uniform(-1.0, 1.0),
-            )).normalized() * rng.uniform(0.7, 1.8),
+            )).normalized() * rng.uniform(0.7, 1.6),
             rng.uniform(0.0, math.tau),
-            rng.uniform(0.06, 0.16),
+            rng.uniform(0.14, 0.28),
         )
-        for _ in range(7)
+        for _ in range(8)
+    ]
+    whip_peaks = [
+        (
+            Vector((
+                rng.uniform(-1.0, 1.0),
+                rng.uniform(-1.0, 1.0),
+                rng.uniform(-1.0, 1.0),
+            )).normalized() * rng.uniform(3.0, 5.0),
+            rng.uniform(0.0, math.tau),
+            rng.uniform(0.05, 0.11),
+        )
+        for _ in range(6)
     ]
     ripple = [
         (
@@ -557,18 +574,30 @@ def sculpt_mash(obj: bpy.types.Object, seed: int) -> None:
             rng.uniform(0.0, math.tau),
             rng.uniform(0.015, 0.035),
         )
-        for _ in range(9)
+        for _ in range(10)
     ]
+    swirl_rate = rng.uniform(2.0, 3.2)
+    swirl_phase = rng.uniform(0.0, math.tau)
     for vertex in obj.data.vertices:
         direction = vertex.co.normalized()
         radius = 1.0
-        for axis, phase, amplitude in folds:
-            radius += amplitude * math.sin(direction.dot(axis) * math.pi + phase)
-        for axis, phase, amplitude in ripple:
-            radius += amplitude * math.sin(direction.dot(axis) * math.pi + phase)
+        for band in (billows, whip_peaks, ripple):
+            for axis, phase, amplitude in band:
+                radius += amplitude * math.sin(
+                    direction.dot(axis) * math.pi + phase
+                )
+        # The spoon swirl: a ridge spiralling up the flank, strongest at
+        # the equator, gone at the poles — the soft-serve gesture.
+        theta = math.atan2(direction.y, direction.x)
+        radius += 0.09 * (1.0 - abs(direction.z)) * math.sin(
+            theta * 2.0 + direction.z * swirl_rate * math.pi + swirl_phase
+        )
+        # Deep folds can theoretically stack destructively; a floor keeps
+        # the shell from ever pinching through its own centre.
+        radius = max(0.35, radius)
         # Dollop: squash toward the equator, pull a soft peak at the pole.
-        squash = 1.0 - 0.28 * abs(direction.z)
-        peak = 0.10 * math.exp(-(((1.0 - direction.z) / 0.35) ** 2))
+        squash = 1.0 - 0.34 * abs(direction.z)
+        peak = 0.18 * math.exp(-(((1.0 - direction.z) / 0.32) ** 2))
         vertex.co = direction * (radius * squash + peak)
 
 
@@ -602,17 +631,23 @@ def build_parts(materials) -> dict[str, dict[str, object]]:
         "potato": {"objects": [potato], "pivot": HOME}
     }
 
-    # The mash chunks (v2.4, "spare no expense polygon wise"): six sculpted
-    # dollops parked at their authored homes under the plaza (spec.MASH_HOMES
-    # — shared with the runtime, which flings them out of the detonation and
-    # re-parks them). Dense spheres so the fold sculpt survives close-ups:
-    # the biggest chunk carries the potato's own 96x64 budget.
+    # The mash chunks (v2.4, "spare no expense polygon wise"; v2.7 doubles
+    # down): six sculpted dollops parked at their authored homes under the
+    # plaza (spec.MASH_HOMES — shared with the runtime, which flings them
+    # out of the detonation and re-parks them). Dense spheres so the deeper
+    # v2.7 fold sculpt survives close-ups — the hero chunk now OUTWEIGHS
+    # the potato's own 96x64 budget, and even the smallest dollop carries
+    # it. They render for seconds per boom; the budget is the point.
     mash = materials[f"{MOD_ID}_mash"]
     for index, (home, radius) in enumerate(
         zip(spec.MASH_HOMES, spec.MASH_RADII, strict=True), start=1
     ):
-        segments = 64 if radius < 0.5 else 96
-        rings = 48 if radius < 0.5 else 64
+        if radius >= 0.9:
+            segments, rings = 128, 96
+        elif radius >= 0.6:
+            segments, rings = 112, 80
+        else:
+            segments, rings = 96, 64
         chunk = bk.add_sphere(
             f"{MOD_ID}_mash_{index}",
             tuple(home),
@@ -641,15 +676,22 @@ def build_cage() -> bk.CageBuilder:
     cage = bk.CageBuilder(MOD_ID)
     stations = arch_stations()
 
+    # NO collision on the pad (v2.6, player report: "driving over the center
+    # metal medallion can pop tires"). The old collision_faces=("top",) plate
+    # was a 6x6 m plane floating 0.05 m above grade with no side faces: its
+    # rim was a razor step hidden mid-disc, and tires that crossed it at
+    # speed burst on the edge. The visual medallion is now a 12 mm flush
+    # inlay (spec.MEDALLION_TOP_Z) that cars roll straight through on the
+    # real plaza ground; the lattice keeps its authored 0.05 m height
+    # (spec.PAD_CAGE_TOP_Z) so every node id and the refnode frame stay
+    # byte-identical.
     medallion = cage.add_box_lattice(
         "pad",
         (-spec.PAD_HALF, -spec.PAD_HALF, 0.0),
-        (spec.PAD_HALF, spec.PAD_HALF, spec.MEDALLION_TOP_Z),
+        (spec.PAD_HALF, spec.PAD_HALF, spec.PAD_CAGE_TOP_Z),
         subdivisions=(2, 2, 1),
         fixed=True,
         collision=False,
-        collision_faces=("top",),
-        face_ground_models={"top": "asphalt"},
     )
 
     pylons = {}
