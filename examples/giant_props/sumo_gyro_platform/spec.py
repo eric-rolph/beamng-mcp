@@ -44,6 +44,10 @@ DISPLAY_NAME = "The Free-Pivot Sumo Gyro-Platform"
 # once put 11 MB of build inputs in a release zip). The scoreboard's webview
 # loads local://local/vehicles/<mod>/scoreboard/screen.html.
 SHIP_ASSETS = ("scoreboard/screen.html",)
+SHIP_ROOT_ASSETS = (
+    ("beammp/modScript.lua", "scripts/ericrolph_sumo_gyro_platform/modScript.lua"),
+    ("beammp/client.lua", "lua/ge/extensions/ericrolphSumoBeamMP.lua"),
+)
 VALUE_DOLLARS = 47000
 ZIP_BASENAME = "sumo_gyro_platform_ericrolph.zip"
 
@@ -1585,6 +1589,144 @@ local function alignQuat(ax, ay, az, bx, by, bz)
   return rhq(vec3(cx / sine, cy / sine, cz / sine), math.atan2(sine, cosine))
 end
 
+-- =====================================================================
+-- BeamMP synchronization boundary.
+--
+-- The server is deliberately a relay, not a second physics engine: only the
+-- prop-owning client runs the match state machine.  Every other client holds
+-- until the server assigns a role, then consumes complete snapshots.  Local
+-- BeamNG object ids are NEVER put on the wire; BeamMP's "pid-vid" id is the
+-- canonical identity shared by every client.
+-- =====================================================================
+local NET_C2S = "ericrolph_games_c2s_v1"
+local NET_VERSION = 1
+local NET_GAME = "sumo"
+local NET_SNAPSHOT_SECONDS = 0.20
+local NET_HELLO_SECONDS = 1.0
+local NET_WARN_SECONDS = 3.0
+
+local function mpSessionActive()
+  local core = extensions and extensions.MPCoreNetwork
+  if not core or type(core.isMPSession) ~= "function" then return false end
+  local ok, active = pcall(core.isMPSession)
+  return ok and active and true or false
+end
+
+local function mpVehicles()
+  local module = extensions and extensions.MPVehicleGE
+  if type(module) ~= "table" then return nil end
+  return module
+end
+
+local function canonicalVehicleId(vehicleId)
+  local module = mpVehicles()
+  if not module or type(module.getServerVehicleID) ~= "function" then return nil end
+  local ok, value = pcall(module.getServerVehicleID, vehicleId)
+  if ok and type(value) == "string" and value:match("^%d+%-%d+$") then
+    return value
+  end
+  return nil
+end
+
+local function localVehicleId(canonical)
+  if type(canonical) ~= "string" or not canonical:match("^%d+%-%d+$") then return nil end
+  local module = mpVehicles()
+  if not module or type(module.getGameVehicleID) ~= "function" then return nil end
+  local ok, value = pcall(module.getGameVehicleID, canonical)
+  if ok and integer(value) and value >= 0 then return value end
+  return nil
+end
+
+local function localOwnsVehicle(vehicleId)
+  local module = mpVehicles()
+  if not module or type(module.isOwn) ~= "function" then return false end
+  local ok, value = pcall(module.isOwn, vehicleId)
+  return ok and value and true or false
+end
+
+local function networkMode(state)
+  local net = state.behavior and state.behavior.net
+  return net and net.mode or "standalone"
+end
+
+local function networkIsAuthority(state)
+  local mode = networkMode(state)
+  return mode == "standalone" or mode == "authority"
+end
+
+local function networkCanMutateVehicle(state, vehicleId)
+  if networkMode(state) == "standalone" then return true end
+  return localOwnsVehicle(vehicleId)
+end
+
+local function networkSend(state, kind, body)
+  local b = state.behavior
+  local net = b and b.net
+  if not net or net.mode == "standalone" or not net.arena then return false end
+  if type(TriggerServerEvent) ~= "function" then return false end
+  net.outSeq = (net.outSeq or 0) + 1
+  local envelope = {
+    v = NET_VERSION,
+    game = NET_GAME,
+    arena = net.arena,
+    kind = kind,
+    epoch = net.epoch or 0,
+    seq = net.outSeq,
+    revision = net.revision or 0,
+    body = body or {},
+  }
+  local ok, encoded = pcall(jsonEncode, envelope)
+  if not ok or type(encoded) ~= "string" then return false end
+  local sent = pcall(TriggerServerEvent, NET_C2S, encoded)
+  return sent and true or false
+end
+
+local function networkEnsureArena(state)
+  local net = state.behavior and state.behavior.net
+  if not net or net.mode == "standalone" then return false end
+  if not net.arena then net.arena = canonicalVehicleId(state.propId) end
+  if not net.arena then return false end
+  net.owner = localOwnsVehicle(state.propId)
+  return true
+end
+
+local function networkSetPending(state)
+  local b = state.behavior
+  b.net = b.net or {}
+  local net = b.net
+  net.mode = "pending"
+  net.arena = canonicalVehicleId(state.propId)
+  net.owner = localOwnsVehicle(state.propId)
+  net.epoch = 0
+  net.outSeq = 0
+  net.inSeq = -1
+  net.revision = 0
+  net.helloT = NET_HELLO_SECONDS
+  net.publishT = 0
+  net.pendingT = 0
+  net.warned = false
+end
+
+local function networkPumpPending(state, dt)
+  local b = state.behavior
+  local net = b.net
+  if not net or net.mode == "standalone" then return end
+  if not networkEnsureArena(state) then return end
+  net.helloT = (net.helloT or 0) + dt
+  net.pendingT = (net.pendingT or 0) + dt
+  if net.mode == "pending" and net.pendingT >= NET_WARN_SECONDS and not net.warned then
+    net.warned = true
+    showMessage("SUMO SYNC WAITING - BeamMP server plugin has not answered.", 4.0)
+  end
+  if net.mode == "pending" and net.helloT >= NET_HELLO_SECONDS then
+    net.helloT = 0
+    networkSend(state, "hello", {owner = net.owner and true or false})
+  elseif net.mode == "follower" and net.helloT >= 5.0 then
+    net.helloT = 0
+    networkSend(state, "heartbeat", {owner = net.owner and true or false})
+  end
+end
+
 -- Spawn mass from the jbeam node weights, the same sum vehicle/input.lua
 -- uses for its own vehicleMass(). Cached per id; anything implausible or
 -- unavailable falls back to the reference car so a missing API degrades the
@@ -2151,15 +2293,21 @@ local function sweepDeck(state, dt)
               and b.slotW.lastId == vehicleId
             if resumeE then
               b.slotE.id = vehicleId
+              b.slotE.canonical = canonicalVehicleId(vehicleId)
               isE = true
               playCall(state, "back", "east", backTakes(state))
             elseif resumeW then
               b.slotW.id = vehicleId
+              b.slotW.canonical = canonicalVehicleId(vehicleId)
               isW = true
               playCall(state, "back", "west", backTakes(state))
             elseif b.slotE == nil or b.slotE.id == nil then
               if b.slotE then b.scoreE = 0 end
-              b.slotE = {id = vehicleId, name = vehName(vehicle)}
+              b.slotE = {
+                id = vehicleId,
+                canonical = canonicalVehicleId(vehicleId),
+                name = vehName(vehicle),
+              }
               isE = true
               b.toastE = b.slotE.name
               playCall(state, "welcome", "east")
@@ -2167,7 +2315,11 @@ local function sweepDeck(state, dt)
                 {corner = "east", subject_id = vehicleId})
             elseif b.slotW == nil or b.slotW.id == nil then
               if b.slotW then b.scoreW = 0 end
-              b.slotW = {id = vehicleId, name = vehName(vehicle)}
+              b.slotW = {
+                id = vehicleId,
+                canonical = canonicalVehicleId(vehicleId),
+                name = vehName(vehicle),
+              }
               isW = true
               b.toastW = b.slotW.name
               playCall(state, "welcome", "west")
@@ -2212,7 +2364,9 @@ local function sweepDeck(state, dt)
               local cap = B.spin_drag_accel * dt
               if dvt > cap then dvt = cap end
               if dvt < -cap then dvt = -cap end
-              addSubjectVelocity(state, vehicle, ex * (tx * dvt) + ey * (ty * dvt))
+              if networkCanMutateVehicle(state, vehicleId) then
+                addSubjectVelocity(state, vehicle, ex * (tx * dvt) + ey * (ty * dvt))
+              end
             end
           end
           if b.fieldTrack then
@@ -2246,6 +2400,55 @@ local function sweepDeck(state, dt)
               b.queuing = b.queuing + 1
             end
           end
+        end
+      end
+    end
+  end
+end
+
+-- Followers never run sweepDeck: doing so would register corners, derive a
+-- second torque solution and eventually score a second match.  They still own
+-- the physics of their own BeamMP vehicles, however, so the collision-invariant
+-- spin field is applied in this narrow pass to OWNED vehicles only.
+local function applyFollowerSpinField(state, dt)
+  local b = state.behavior
+  if networkMode(state) ~= "follower" or b.phase ~= "live"
+    or (b.omega or 0) <= 0 or dt <= 1e-4 then return end
+  local ok, all = pcall(getAllVehicles)
+  if not ok or type(all) ~= "table" or not state.origin then return end
+  local ex = toWorldDir(state, vec3(1, 0, 0))
+  local ey = toWorldDir(state, vec3(0, 1, 0))
+  local ez = toWorldDir(state, vec3(0, 0, 1))
+  b.fieldTrack = b.fieldTrack or {}
+  for _, vehicle in ipairs(all) do
+    local idOk, vehicleId = pcall(function() return vehicle:getId() end)
+    if idOk and eligibleSubject(vehicleId) and localOwnsVehicle(vehicleId) then
+      local position = vehicle:getPosition()
+      if finiteVector3(position) then
+        local delta = position - state.origin
+        local x, y, z = delta:dot(ex), delta:dot(ey), delta:dot(ez)
+        local r = math.sqrt(x * x + y * y)
+        local height = z - deckSurfaceZ(state, x, y)
+        if r <= B.load_radius
+          and height >= B.aboard_below and height <= B.aboard_above then
+          local ft = b.fieldTrack[vehicleId]
+          if ft then
+            local vx = (x - ft.x) / dt
+            local vy = (y - ft.y) / dt
+            local speed = math.sqrt(vx * vx + vy * vy)
+            if r > B.spin_min_r and speed < 60.0 then
+              local tx, ty = -y / r, x / r
+              local vt = vx * tx + vy * ty
+              local dvt = (b.omega * r) - vt
+              local cap = B.spin_drag_accel * dt
+              if dvt > cap then dvt = cap end
+              if dvt < -cap then dvt = -cap end
+              addSubjectVelocity(state, vehicle, ex * (tx * dvt) + ey * (ty * dvt))
+            end
+          end
+          b.fieldTrack[vehicleId] = {x = x, y = y, aboard = true}
+        else
+          b.fieldTrack[vehicleId] = nil
         end
       end
     end
@@ -2698,7 +2901,7 @@ local function updateDecided(state, dt)
     for _, entry in ipairs({{1, b.slotE}, {-1, b.slotW}}) do
       local sign, slot = entry[1], entry[2]
       local vehicle = slot and exactVehicle(slot.id)
-      if vehicle then
+      if vehicle and networkCanMutateVehicle(state, slot.id) then
         local ax = dirx * B.reset_dist + px * (sign * B.reset_gap)
         local ay = diry * B.reset_dist + py * (sign * B.reset_gap)
         local pos = toWorldPoint(state, vec3(ax, ay, 0.6))
@@ -2896,6 +3099,188 @@ local function poseAll(state, dt)
   pushNames(state, dt)
 end
 
+local PHASES = {
+  open = true, countdown = true, live = true, decided = true,
+  relevel = true, fault = true,
+}
+
+local function networkFinite(value, fallback, limit)
+  if type(value) ~= "number" or not finiteNumber(value) then return fallback end
+  if limit and math.abs(value) > limit then return fallback end
+  return value
+end
+
+local function networkSlotSnapshot(slot)
+  if not slot then return nil end
+  local canonical = slot.canonical or canonicalVehicleId(slot.id)
+  local lastCanonical = slot.lastCanonical or canonicalVehicleId(slot.lastId)
+  return {
+    vehicle = canonical,
+    lastVehicle = lastCanonical,
+    name = tostring(slot.name or "CHALLENGER"):sub(1, 48),
+  }
+end
+
+local function networkSnapshot(state)
+  local b = state.behavior
+  return {
+    phase = b.phase,
+    phaseT = b.phaseT or 0,
+    slotE = networkSlotSnapshot(b.slotE),
+    slotW = networkSlotSnapshot(b.slotW),
+    scoreE = b.scoreE or 0,
+    scoreW = b.scoreW or 0,
+    resultE = b.resultE,
+    resultW = b.resultW,
+    setDone = b.setDone,
+    psiX = b.psiX or 0,
+    psiY = b.psiY or 0,
+    velX = b.velX or 0,
+    velY = b.velY or 0,
+    comX = b.comX or 0,
+    comY = b.comY or 0,
+    omega = b.omega or 0,
+    spinAngle = b.spinAngle or 0,
+    driveAngle = b.driveAngle or 0,
+    stageT = b.stageT or 0,
+    roundT = b.roundT or 0,
+    clearT = b.clearT or 0,
+    decidedT = b.decidedT or 0,
+    relevelT = b.relevelT or 0,
+    cdStopT = b.cdStopT,
+    ringLive = b.ringLive and true or false,
+    ringKo = b.ringKo and true or false,
+  }
+end
+
+local function networkApplySlot(raw)
+  if type(raw) ~= "table" then return nil end
+  local canonical = raw.vehicle
+  local lastCanonical = raw.lastVehicle
+  if type(canonical) ~= "string" or not canonical:match("^%d+%-%d+$") then
+    canonical = nil
+  end
+  if type(lastCanonical) ~= "string" or not lastCanonical:match("^%d+%-%d+$") then
+    lastCanonical = nil
+  end
+  local name = type(raw.name) == "string" and raw.name:sub(1, 48) or "CHALLENGER"
+  return {
+    id = canonical and localVehicleId(canonical) or nil,
+    canonical = canonical,
+    lastId = lastCanonical and localVehicleId(lastCanonical) or nil,
+    lastCanonical = lastCanonical,
+    name = name,
+  }
+end
+
+local function teleportOwnedCompetitors(state)
+  local b = state.behavior
+  local dirx, diry = B.ramp_az_cos, B.ramp_az_sin
+  local px, py = -diry, dirx
+  for _, entry in ipairs({{1, b.slotE}, {-1, b.slotW}}) do
+    local sign, slot = entry[1], entry[2]
+    if slot and slot.canonical then slot.id = localVehicleId(slot.canonical) end
+    local vehicle = slot and slot.id and exactVehicle(slot.id)
+    if vehicle and localOwnsVehicle(slot.id) then
+      local ax = dirx * B.reset_dist + px * (sign * B.reset_gap)
+      local ay = diry * B.reset_dist + py * (sign * B.reset_gap)
+      local pos = toWorldPoint(state, vec3(ax, ay, 0.6))
+      local face = toWorldDir(state, vec3(-dirx, -diry, 0))
+      local rot = alignQuat(0, -1, 0, face.x, face.y, face.z)
+      pcall(function() teleportSubject(state, vehicle, pos, rot) end)
+    end
+  end
+end
+
+local function networkApplySnapshot(state, snapshot)
+  if type(snapshot) ~= "table" then return false end
+  local b = state.behavior
+  local previousPhase = b.phase
+  local previousComX, previousComY = b.comX or 0, b.comY or 0
+  if type(snapshot.phase) ~= "string" or not PHASES[snapshot.phase] then return false end
+
+  b.phase = snapshot.phase
+  b.phaseT = networkFinite(snapshot.phaseT, b.phaseT or 0, 3600)
+  b.slotE = networkApplySlot(snapshot.slotE)
+  b.slotW = networkApplySlot(snapshot.slotW)
+  b.scoreE = math.max(0, math.min(B.set_wins,
+    math.floor(networkFinite(snapshot.scoreE, b.scoreE or 0, B.set_wins) + 0.5)))
+  b.scoreW = math.max(0, math.min(B.set_wins,
+    math.floor(networkFinite(snapshot.scoreW, b.scoreW or 0, B.set_wins) + 0.5)))
+  b.resultE = (snapshot.resultE == "win" or snapshot.resultE == "loss")
+    and snapshot.resultE or nil
+  b.resultW = (snapshot.resultW == "win" or snapshot.resultW == "loss")
+    and snapshot.resultW or nil
+  b.setDone = (snapshot.setDone == "east" or snapshot.setDone == "west")
+    and snapshot.setDone or nil
+
+  b.psiX = networkFinite(snapshot.psiX, b.psiX or 0, B.tilt_max_rad)
+  b.psiY = networkFinite(snapshot.psiY, b.psiY or 0, B.tilt_max_rad)
+  b.velX = networkFinite(snapshot.velX, b.velX or 0, B.rate_max * 2)
+  b.velY = networkFinite(snapshot.velY, b.velY or 0, B.rate_max * 2)
+  b.comX = networkFinite(snapshot.comX, b.comX or 0, B.tilt_max_rad)
+  b.comY = networkFinite(snapshot.comY, b.comY or 0, B.tilt_max_rad)
+  b.omega = math.max(0, networkFinite(snapshot.omega, b.omega or 0, B.spin_omega_max))
+  b.spinAngle = networkFinite(snapshot.spinAngle, b.spinAngle or 0, 100000)
+  b.driveAngle = networkFinite(snapshot.driveAngle, b.driveAngle or 0, 100000)
+  -- poseDeck derives drive motion from the spin delta.  A snapshot already
+  -- carries the authoritative drive angle, so make this application a zero
+  -- delta rather than advancing it a second time.
+  b.spinPrev = b.spinAngle
+
+  b.stageT = networkFinite(snapshot.stageT, b.stageT or 0, 3600)
+  b.roundT = networkFinite(snapshot.roundT, b.roundT or 0, 3600)
+  b.clearT = networkFinite(snapshot.clearT, b.clearT or 0, 3600)
+  b.decidedT = networkFinite(snapshot.decidedT, b.decidedT or 0, 3600)
+  b.relevelT = networkFinite(snapshot.relevelT, b.relevelT or 0, 3600)
+  if snapshot.cdStopT == nil then
+    b.cdStopT = nil
+  else
+    b.cdStopT = networkFinite(snapshot.cdStopT, b.cdStopT, 60)
+  end
+  b.ringLive = snapshot.ringLive and true or false
+  b.ringKo = snapshot.ringKo and true or false
+
+  if previousPhase == "decided" and b.phase == "relevel" then
+    teleportOwnedCompetitors(state)
+  end
+  poseAll(state, 0)
+  if math.abs(b.comX - previousComX) > 1e-9
+    or math.abs(b.comY - previousComY) > 1e-9 then
+    -- The host only changes comX/comY on its bounded committed-pose cadence.
+    -- Followers mirror that exact step and pay exactly one local collision
+    -- reload for it; duplicate snapshots never reload.
+    requestCollisionReload(state)
+  end
+  return true
+end
+
+local function networkPublish(state, dt)
+  local net = state.behavior.net
+  if not net or net.mode ~= "authority" then return end
+  net.publishT = (net.publishT or 0) + dt
+  if net.publishT < NET_SNAPSHOT_SECONDS then return end
+  net.publishT = net.publishT - NET_SNAPSHOT_SECONDS
+  net.revision = (net.revision or 0) + 1
+  networkSend(state, "state", {state = networkSnapshot(state)})
+end
+
+local function networkFollowerUpdate(state, dt)
+  networkPumpPending(state, dt)
+  local b = state.behavior
+  for _, slot in pairs({b.slotE, b.slotW}) do
+    if slot and slot.canonical and not exactVehicle(slot.id) then
+      slot.id = localVehicleId(slot.canonical)
+    end
+    if slot and slot.lastCanonical and not exactVehicle(slot.lastId) then
+      slot.lastId = localVehicleId(slot.lastCanonical)
+    end
+  end
+  applyFollowerSpinField(state, dt)
+  Horn.place(state, false)
+  poseAll(state, dt)
+end
+
 -- Every tunable this chunk reads. The framework pcalls behavior.init and
 -- DISCARDS the result, so a handoff that is missing a key (the classic
 -- failure: edit spec.py, rebuild only build.py, never re-run Blender) would
@@ -2951,6 +3336,11 @@ behavior.init = function(state)
     return
   end
   b.broken = false
+  if mpSessionActive() then
+    networkSetPending(state)
+  else
+    b.net = {mode = "standalone", epoch = 0, outSeq = 0, inSeq = -1, revision = 0}
+  end
   b.phase = "open"
   b.phaseT = 0
   b.psiX, b.psiY = 0, 0
@@ -3014,6 +3404,10 @@ end
 -- rate-limited, step-clamped path every other move uses.
 behavior.reset = function(state)
   local b = state.behavior
+  -- BeamMP propagates vehicle resets to every client.  Only the elected prop
+  -- owner may turn that notification into game state; followers wait for its
+  -- next complete snapshot.
+  if mpSessionActive() and not networkIsAuthority(state) then return end
   setEffectActive(state, "valve_vent", false)
   if b.broken then return end
   -- Every field poseAll touches has to be present, not just the pose itself:
@@ -3081,6 +3475,7 @@ behavior.onSubjectGone = function(state, vehicleId, reason)
   if b.track then b.track[vehicleId] = nil end
   if b.watch then b.watch[vehicleId] = nil end
   if b.fieldTrack then b.fieldTrack[vehicleId] = nil end
+  if not networkIsAuthority(state) then return end
   -- A competitor who despawns mid-match forfeits; outside a match their
   -- corner simply opens up for the next challenger.
   if b.slotE and b.slotE.id == vehicleId then
@@ -3091,12 +3486,14 @@ behavior.onSubjectGone = function(state, vehicleId, reason)
     -- corner still remembers whose it was, so the same car coming back is
     -- not mistaken for a new rival.
     b.slotE.lastId = vehicleId
+    b.slotE.lastCanonical = b.slotE.canonical or canonicalVehicleId(vehicleId)
     b.slotE.id = nil
   elseif b.slotW and b.slotW.id == vehicleId then
     if b.phase == "live" or b.phase == "countdown" then
       decideMatch(state, "west", "forfeit")
     end
     b.slotW.lastId = vehicleId
+    b.slotW.lastCanonical = b.slotW.canonical or canonicalVehicleId(vehicleId)
     b.slotW.id = nil
   end
 end
@@ -3104,9 +3501,8 @@ end
 -- The board's one control, mirrored on both faces: RESET wipes corners,
 -- scores and result plates. Everything else about the game is played, not
 -- pressed.
-behavior.onPanelButton = function(state, buttonId)
+local function applyScoreboardReset(state)
   local b = state.behavior
-  if buttonId ~= "btn_reset" and buttonId ~= "btn_reset_ring" then return end
   b.slotE, b.slotW = nil, nil
   b.scoreE, b.scoreW = 0, 0
   b.resultE, b.resultW = nil, nil
@@ -3129,6 +3525,20 @@ behavior.onPanelButton = function(state, buttonId)
   emitEvent(state, "I", "sumo_reset", {})
 end
 
+behavior.onPanelButton = function(state, buttonId)
+  if buttonId ~= "btn_reset" and buttonId ~= "btn_reset_ring" then return end
+  if mpSessionActive() and networkMode(state) ~= "standalone" then
+    if networkEnsureArena(state) then
+      networkSend(state, "intent", {action = "reset"})
+      showMessage("Scoreboard reset requested.", 1.8)
+    else
+      showMessage("SUMO SYNC WAITING - reset was not sent.", 2.6)
+    end
+    return
+  end
+  applyScoreboardReset(state)
+end
+
 behavior.update = function(state, dtSim)
   local b = state.behavior
   if not b.phase then behavior.init(state) end
@@ -3138,6 +3548,17 @@ behavior.update = function(state, dtSim)
   local dt = dtSim or 0
   if dt <= 0 then return end
   if dt > B.dt_max then dt = B.dt_max end
+  if mpSessionActive() and networkMode(state) == "standalone" then
+    networkSetPending(state)
+  elseif not mpSessionActive() and networkMode(state) ~= "standalone" then
+    b.net = {mode = "standalone", epoch = 0, outSeq = 0, inSeq = -1, revision = 0}
+  end
+  if networkMode(state) == "pending" or networkMode(state) == "follower"
+    or networkMode(state) == "paused" then
+    networkFollowerUpdate(state, dt)
+    return
+  end
+  networkPumpPending(state, dt)
   b.phaseT = (b.phaseT or 0) + dt
   -- Frame stamp for the announcer queue's ordering. Phase-independent (it
   -- must survive a setPhase mid-frame) and it only ever has to distinguish
@@ -3257,7 +3678,172 @@ behavior.update = function(state, dtSim)
       round_seconds = b.roundT,
     }
   end
+  networkPublish(state, dt)
 end
+
+local function networkAcceptEnvelope(state, envelope)
+  local net = state.behavior.net
+  if not net or net.mode == "standalone" then return false end
+  if type(envelope) ~= "table" or envelope.v ~= NET_VERSION
+    or envelope.game ~= NET_GAME or envelope.arena ~= net.arena
+    or type(envelope.kind) ~= "string" or not integer(envelope.epoch)
+    or not integer(envelope.seq) or not integer(envelope.revision) then
+    return false
+  end
+  if envelope.epoch < (net.epoch or 0) then return false end
+  if envelope.epoch > (net.epoch or 0) then
+    net.epoch = envelope.epoch
+    net.inSeq = -1
+    net.inRevision = -1
+    if net.mode ~= "pending" then net.mode = "paused" end
+  end
+  if envelope.seq <= (net.inSeq or -1) then return false end
+  net.inSeq = envelope.seq
+  return true
+end
+
+local function networkApplyRole(state, envelope)
+  local b, body = state.behavior, envelope.body
+  body = type(body) == "table" and body or {}
+  local net = b.net
+  local authority = body.authority == true
+    or body.role == "authority" or body.role == "host"
+  -- Even a malformed/misconfigured relay cannot appoint a client that does
+  -- not own the arena vehicle.  This is the physical authority boundary.
+  authority = authority and localOwnsVehicle(state.propId)
+  local prior = net.mode
+  net.mode = authority and "authority" or "follower"
+  net.owner = localOwnsVehicle(state.propId)
+  net.warned = false
+  net.pendingT = 0
+  net.helloT = 0
+  net.publishT = authority and NET_SNAPSHOT_SECONDS or 0
+  if type(body.state) == "table" and not authority then
+    networkApplySnapshot(state, body.state)
+  end
+  if authority and prior ~= "authority"
+    and (b.phase == "live" or b.phase == "countdown" or b.phase == "decided") then
+    -- A host change can never continue a half-observed physics tick.  Preserve
+    -- the board, void the active match and walk the machine home.
+    b.omega = 0
+    b.ringLive, b.ringKo = false, false
+    b.relevelT = 0
+    setPhase(state, "relevel")
+  end
+end
+
+local function networkAwaitRelay(state, envelope)
+  local b, net = state.behavior, state.behavior.net
+  if not net then return end
+  -- `closed` is the relay's reset/delete/disconnect barrier; `reject` means
+  -- this client's epoch/role can no longer be trusted.  Neither is ordinary
+  -- replicated state, so consume it before sequence/revision filtering and
+  -- return to the no-simulation pending posture.  A fresh hello obtains the
+  -- current epoch and role without ever falling back to local authority.
+  silenceCalls(state)
+  net.mode = "pending"
+  net.epoch = integer(envelope.epoch) and envelope.epoch or 0
+  net.inSeq = -1
+  net.inRevision = -1
+  net.revision = 0
+  net.helloT = NET_HELLO_SECONDS
+  net.publishT = 0
+  net.pendingT = 0
+  net.warned = false
+  b.omega = 0
+  b.ringLive, b.ringKo = false, false
+  b.fieldTrack = {}
+  if b.phase == "live" or b.phase == "countdown" or b.phase == "decided" then
+    b.relevelT = 0
+    setPhase(state, "relevel")
+  end
+  poseAll(state, 0)
+end
+
+local function networkReceive(payload)
+  if type(payload) ~= "string" or #payload > 32768 then return end
+  local ok, envelope = pcall(jsonDecode, payload)
+  if not ok or type(envelope) ~= "table" then return end
+  for _, state in pairs(installations) do
+    local net = state.behavior and state.behavior.net
+    if net and net.mode ~= "standalone" then
+      networkEnsureArena(state)
+      local addressed = envelope.v == NET_VERSION and envelope.game == NET_GAME
+        and envelope.arena == net.arena and type(envelope.kind) == "string"
+      if addressed and (envelope.kind == "closed" or envelope.kind == "reject") then
+        networkAwaitRelay(state, envelope)
+      elseif addressed and networkAcceptEnvelope(state, envelope) then
+        local body = type(envelope.body) == "table" and envelope.body or {}
+        if envelope.kind == "role" or envelope.kind == "hello" then
+          networkApplyRole(state, envelope)
+        elseif envelope.kind == "state" or envelope.kind == "snapshot" then
+          if envelope.revision > (net.inRevision or -1) then
+            net.inRevision = envelope.revision
+            if net.mode == "pending" or net.mode == "paused" then net.mode = "follower" end
+            if net.mode ~= "authority" then
+              networkApplySnapshot(state, body.state or body.snapshot or body)
+            end
+          end
+        elseif (envelope.kind == "intent" or envelope.kind == "reset")
+          and net.mode == "authority" then
+          local action = body.action or (type(body.intent) == "table" and body.intent.action)
+          if action == "reset" then
+            applyScoreboardReset(state)
+            net.publishT = NET_SNAPSHOT_SECONDS
+          end
+        elseif envelope.kind == "pause" or envelope.kind == "paused" then
+          net.mode = "paused"
+          b.omega = 0
+          b.ringLive = false
+          poseAll(state, 0)
+        end
+      end
+    end
+  end
+end
+
+local function networkPostJoin()
+  for _, state in pairs(installations) do
+    if mpSessionActive() then networkSetPending(state) end
+  end
+end
+
+local function networkServerLeave()
+  for _, state in pairs(installations) do
+    local b = state.behavior
+    silenceCalls(state)
+    b.net = {mode = "standalone", epoch = 0, outSeq = 0, inSeq = -1, revision = 0}
+    if b.phase == "live" or b.phase == "countdown" or b.phase == "decided" then
+      b.omega = 0
+      b.ringLive, b.ringKo = false, false
+      b.relevelT = 0
+      setPhase(state, "relevel")
+    end
+  end
+end
+
+behavior.getStatus = function(state)
+  local b, net = state.behavior, state.behavior.net or {}
+  return {
+    phase = b.phase,
+    score_e = b.scoreE,
+    score_w = b.scoreW,
+    net_mode = net.mode or "standalone",
+    net_arena = net.arena,
+    net_owner = net.owner and true or false,
+    net_epoch = net.epoch or 0,
+    net_in_seq = net.inSeq or -1,
+    net_out_seq = net.outSeq or 0,
+    net_revision = net.revision or 0,
+    net_in_revision = net.inRevision or -1,
+  }
+end
+
+behavior.hooks = {
+  onEricrolphSumoBeamMPMessage = networkReceive,
+  onEricrolphSumoBeamMPPostJoin = networkPostJoin,
+  onEricrolphSumoBeamMPServerLeave = networkServerLeave,
+}
 """
 
 # ---------------------------------------------------------------------------
