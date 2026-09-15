@@ -7,6 +7,11 @@ uses semantic versioning after the initial alpha series.
 
 ### Added
 
+- Add the GIS maps pack (`examples/gis_maps`): six BeamNG.drive levels whose terrain is
+  built from public data (USGS 3DEP and OpenTopography lidar, USGS NAIP imagery,
+  OpenStreetMap roads) by a deterministic fetch, terrain, level, dist pipeline with
+  per-map handoff evidence, a `gis` dependency extra, static gates in
+  `tests/test_gis_maps_pack.py`, local deploy/install scripts and a release workflow
 - Add an opt-in official-client capability gauntlet that exercises all 57 tools, every MCP
   resource and prompt, Blender-evidenced ramp authoring, grounded in-game placement, map objects,
   triggers, leased native AI, emergency-stop idempotence, retail vision refusal, and mission reset
