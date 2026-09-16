@@ -1,7 +1,7 @@
 """Black Bear Pass and Ingram Basin - authored constants for the generator and the level.
 
 A 12,840 ft shelf road descending from the pass through the Steps and the switchbacks
-above Bridal Veil Falls into Ingram Basin. All above tree line: tundra, talus and rock.
+above Bridal Veil Falls into Ingram Basin. Forest on the Telluride side, tundra and talus above.
 A 4096 m square at 1 m per sample from USGS 3DEP (San Luis / San Juan / Miguel 2020 lidar).
 """
 
@@ -17,6 +17,8 @@ SITE = {
     "epsg": 32613,
     "size_px": 4096,
     "square_size_m": 1.0,
+    "base_tex_px": 4096,  # the de-lit NAIP at its native 1 m per texel
+    "detail_tex_px": 1024,
 }
 
 SOURCES = {
@@ -29,15 +31,42 @@ SOURCES = {
     ],
     "imagery": {"kind": "usgs_naip", "resolution": 1.0},
     "roads": {"kind": "osm_overpass"},
+    # The same 3DEP survey as a point cloud (about 4 returns per m2): its first
+    # returns are the canopy, so the forest is planted from measured tree tops.
+    "pointcloud": {
+        "kind": "usgs_ept",
+        "resource": "CO_SanLuisJuanMiguel_4_2020",
+        "citation": "USGS 3DEP CO_SanLuisJuanMiguel_4_2020 point cloud, public Entwine index",
+    },
 }
 
 TERRAIN = {
-    "materials": ["bb_tundra", "bb_talus", "bb_cliff_rock", "bb_scree_slope"],
+    "materials": [
+        "bb_tundra",
+        "bb_talus",
+        "bb_cliff_rock",
+        "bb_scree_slope",
+        "bb_road_gravel",
+        "bb_forest_floor",
+        "bb_fellfield",
+        "bb_cliff_rock_ew",
+    ],
     "classify": {
+        # The summit plateau above 3,780 m is fell-field scree, not tussock turf: it
+        # is painted talus whatever its slope, so the boulders the lidar found there
+        # are placed and the tundra tile stays on the benches where the turf is.
+        # Slopes greener than an excess-green of 0.06 in the de-lit imagery are turf
+        # or forest, not rock, whatever their angle; closed conifer cover below the
+        # tree line gets a needle-litter floor.
         "rules": [
+            {"min_slope": 45.0, "ew_facing": True, "material": "bb_cliff_rock_ew"},
             {"min_slope": 45.0, "material": "bb_cliff_rock"},
-            {"min_slope": 30.0, "material": "bb_scree_slope"},
-            {"min_slope": 15.0, "material": "bb_talus"},
+            # Closed conifer cover is forest floor whatever its slope or greenness
+            # (the base under the crowns is refilled as duff, so it is not green).
+            {"min_canopy": 0.35, "max_elevation": 3600.0, "material": "bb_forest_floor"},
+            {"min_slope": 30.0, "max_exg": 0.06, "material": "bb_scree_slope"},
+            {"min_elevation": 3780.0, "max_slope": 30.0, "material": "bb_fellfield"},
+            {"min_slope": 15.0, "max_exg": 0.06, "material": "bb_talus"},
         ],
         "default": "bb_tundra",
     },
@@ -45,18 +74,296 @@ TERRAIN = {
 }
 
 PALETTE = {
-    "bb_tundra": {"family": "alpine_tundra", "seed": 501, "size": 1024, "base": [0.46, 0.46, 0.30]},
-    "bb_talus": {"family": "scree", "seed": 502, "size": 1024, "base": [0.48, 0.44, 0.40]},
+    # Grey rubble with olive turf: the family's cushion, ground and straw tones set
+    # the tonal order (cushions darker than the ground between them) and the base
+    # is their mean.
+    "bb_tundra": {"family": "alpine_tundra", "seed": 501, "size": 1024, "base": [0.46, 0.46, 0.34]},
+    # Blocks 0.5-2 m across at a 6 m tile; cliff plates 2-4 m at a 10 m tile: the
+    # shelf-road wall the driver sits 3 m from is massive blocky tuff, not a patio.
+    # The reference photographs: dark grey angular rubble on the slopes, charcoal
+    # cliffs in thin horizontal beds split by vertical joints (the same family turned
+    # a quarter on the east- and west-facing walls), a pale dusty road across it all.
+    "bb_talus": {
+        "family": "talus_blocks",
+        "seed": 502,
+        "size": 1024,
+        "base": [0.42, 0.41, 0.40],
+        "tile_m": 6.0,
+        # The NAIP talus is a pale grey the photographs are not: pulled most of the
+        # way to the dark grey rubble, grain kept.
+        "base_pull": 0.8,
+    },
+    # A 12 m tile of forty log-normal beds (median 0.3 m) so the period up a 150 m
+    # wall is a dozen tiles, not thirty; the photograph of a cliff is mostly its own
+    # shadow, so the tint takes only a quarter of it and keeps the charcoal.
     "bb_cliff_rock": {
-        "family": "rock_strata",
+        "family": "dark_strata",
         "seed": 503,
         "size": 1024,
-        "base": [0.40, 0.36, 0.33],
+        "base": [0.36, 0.35, 0.34],
+        "tile_m": 12.0,
+        "tint_weight": 0.25,
+        "detail_strength": 0.7,  # the wall is the tile, not the base seen from above
     },
-    "bb_scree_slope": {"family": "shale", "seed": 504, "size": 1024, "base": [0.42, 0.40, 0.38]},
+    "bb_cliff_rock_ew": {
+        "family": "dark_strata",
+        "seed": 503,
+        "size": 1024,
+        "base": [0.36, 0.35, 0.34],
+        "tile_m": 12.0,
+        "rotate_deg": 90.0,
+        "tint_weight": 0.25,
+        "detail_strength": 0.7,
+    },
+    "bb_scree_slope": {
+        "family": "shale_plates",
+        "seed": 504,
+        "size": 1024,
+        "base": [0.44, 0.43, 0.42],
+    },
+    # The summit plateau is fell-field: fist-to-head-sized fragments, so the block
+    # pile at a 2.5 m tile, not the 6 m talus of the slopes below.
+    # Grey-brown rubble in the photographs; the plateau's NAIP is cream, so the
+    # tint takes a quarter of it and the road stays lighter than the ground.
+    "bb_fellfield": {
+        "family": "talus_blocks",
+        "seed": 507,
+        "size": 1024,
+        "base": [0.42, 0.41, 0.38],
+        "tile_m": 2.5,
+        "tint_weight": 0.25,
+    },
+    "bb_forest_floor": {
+        "family": "forest_floor",
+        "seed": 506,
+        "size": 1024,
+        "base": [0.32, 0.25, 0.17],
+        "keep_tint": True,  # the imagery under a canopy is the canopy, not the floor
+    },
+    # In every ground photograph the road is a dusty grey-tan ribbon a shade lighter
+    # than the dark scree it crosses, not a white one: under the game's sun a 0.64
+    # gravel read as snow, so the bed and its decal sit at 0.50-0.52 and the
+    # contract holds them a tenth over the ground.
+    "bb_road_gravel": {
+        "family": "gravel_bed",
+        "seed": 505,
+        "size": 1024,
+        "base": [0.52, 0.49, 0.45],
+        "keep_tint": True,
+        "tile_m": 2.0,
+    },
+}
+
+# NAIP quads m_3710702_se / m_3710703_sw were flown 2019-09-09 around 13:30 local
+# (sun about az 200, alt 55); the fit is held to that geometry because the dark north
+# faces of the cliffs would otherwise drag the fitted sun to the horizon.
+IMAGERY = {
+    "delight": True,
+    # 2019-09-09 13:30 MDT at 37.9 N: the sun was at 56 degrees; the fit is pinned to
+    # that, so the cast-shadow mask covers the ground that was actually in shadow.
+    "sun_altitude_range": [55.0, 58.0],
+    "sun_azimuth_hint": 200.0,
+    "sun_azimuth_window": 40.0,
+    "strength": 1.0,
+    "tint_from_imagery": 0.6,
+    # A cliff face turned away from a 50 degree sun needs more than the default 2.2x
+    # to come back to the same material as its lit neighbours.
+    "max_gain": 5.0,
+    # Shadow refill keeps the shadow's own texture at full amplitude (no smear).
+    "shadow_texture_gain": 1.0,
+    # 2019 was a record snow year and the September flight still had snowfields on
+    # the north faces: bright, colourless cells are refilled from the ground around.
+    # Found on the raw and on the de-lit image, refilled until none is left, from
+    # ground at least 10 m clear of the field, carrying that ground's texture.
+    # Seeds are the raw image's bright colourless cells; growth (on the de-lit image,
+    # three rounds) only within 20 m of snow already found.
+    # A seed is bright (0.86), colourless (0.04), smooth (a 5x5 spread under
+    # 0.02) and on ground that descends within 80 degrees of north or lies flat:
+    # in the raw flight the snowfield west of Wrecked Section 1 and the plateau's
+    # pale scree measure the same (0.87, 0.01, 0.01), and only the aspect tells
+    # them apart (the snow on north-west and north-east faces, the scree on a
+    # south-east one).
+    "snow": {
+        "seed_min_lum": 0.86,
+        "min_lum": 0.82,
+        "max_chroma": 0.04,
+        "seed_max_std": 0.02,
+        "aspect_north_deg": 80.0,
+        "any_aspect_contrast": 0.25,  # a patch that far above its ring is snow anywhere
+        "min_contrast": 0.10,  # a seed stands 0.10 above its 60 m neighbourhood
+        "dilate_m": 4.0,
+        "grow_m": 6.0,
+        "edge_contrast": 0.06,  # the field's edges go with the field
+        "max_fraction": 0.02,
+    },
+    # Walls over 45 degrees (the cliff classifier's line) borrow only from lit
+    # walls and are never lifted past their lit median, the cap feathered in from
+    # 40 degrees so it draws no contour through the scree; the knee keeps the pale
+    # plateau off white. Every refilled field (shadow or snow) is brought to the
+    # mean colour and grain of its own 10-30 m ring, and a snowfield across a
+    # forest edge is refilled as forest under the canopy and meadow in the open.
+    "steep_deg": 45.0,
+    "steep_feather_deg": 8.0,
+    "refill_match_ring": True,
+    "refill_by_cover": True,
+    # The game draws the trees: the base under a crown is the ground between the
+    # trunks, refilled from the open ground round the stand at six tenths of its
+    # luminance (duff under conifers), not the near-black crown of the flight.
+    "canopy_refill": 0.6,
+    "steep_cap": True,
+    # The lit median of a wall seen from above is the scree on its ledges: the
+    # walls are capped at 0.15 linear (0.42 sRGB) so the base under the charcoal
+    # tile stays charcoal.
+    "steep_cap_lum": 0.15,
+    "knee_lum": 0.4,
+    # The summit plateau's NAIP is chalk (0.81 sRGB): everything above 3,780 m, rock,
+    # outcrop and refill alike, is brought to the grey-brown of the fell-field
+    # photographs with its grain kept, so no refilled blob stands out of the ground
+    # and the road bed (painted after, at 0.54) reads lighter than the ground.
+    # The tarn under the north cirque is black in the photograph (water at a dark
+    # angle); it is painted the teal Ingram Lake shows.
+    # The tailings ponds in the north-west corner are turquoise in the flight:
+    # flat, bright, green and blue both 0.15 over red; painted the same teal.
+    "lakes": {
+        "rgb": [0.20, 0.33, 0.31],
+        "max_lum": 0.1,
+        "min_area_m2": 400.0,
+        "cyan_excess": 0.15,
+        "cyan_min_lum": 0.35,
+        "cyan_max_slope_deg": 8.0,  # the settled tailings are not level
+    },
+    "base_pull_regions": [
+        {"min_elevation": 3780.0, "target": [0.42, 0.41, 0.38], "weight": 1.0, "window_m": 200.0}
+    ],
+    # Residual sun on the rock layers is equalised per aspect within each layer.
+    "aspect_flatfield": {
+        "layers": [
+            "bb_cliff_rock",
+            "bb_cliff_rock_ew",
+            "bb_scree_slope",
+            "bb_talus",
+            "bb_fellfield",
+            "bb_forest_floor",
+            "bb_tundra",
+        ],
+        "strength": 1.0,
+        # Bins on the sun incidence the de-lighting fitted, not on compass aspect: a
+        # steep north wall and a gentle north slope only share a bin when the sun
+        # lit them alike; twelve bins over the incidence the layer spans, from 4
+        # degrees of slope.
+        "mode": "incidence",
+        "bins": 12,
+        "min_slope_deg": 4.0,
+    },
+    # A closed canopy does not shade with the terrain normal: under it the
+    # correction is held to 30 % of itself.
+    "canopy_gain_damp": 0.3,
+}
+
+# 3DEP is bare earth, so the bumps it keeps are talus boulders and outcrop blocks.
+OBJECTS = {
+    "seed": 200,
+    "detect": {
+        "open_m": 8.0,
+        "min_height_m": 0.8,
+        "min_area_m2": 2.0,
+        "max_area_m2": 60.0,
+        "structure_open_m": 40.0,
+        "structure_min_area_m2": 60.0,
+        "structure_min_height_m": 99.0,
+    },
+    "classify": {"rock_only": True},
+    "max_rocks": 6000,
+    "max_shrubs": 0,
+    "rock_layers": [
+        "bb_tundra",
+        "bb_talus",
+        "bb_cliff_rock",
+        "bb_cliff_rock_ew",
+        "bb_scree_slope",
+        "bb_fellfield",
+    ],
+    "rock_material_by_layer": {
+        "bb_tundra": "rock_talus",
+        "bb_talus": "rock_talus",
+        "bb_cliff_rock": "rock_talus",
+        "bb_scree_slope": "rock_talus",
+        "bb_fellfield": "rock_summit",
+        "bb_cliff_rock_ew": "rock_talus",
+    },
+    # Grey talus on the slopes; the summit ridge outcrops are iron-stained tan.
+    # Lichen on a tenth of the talus faces and a sixteenth of the summit blocks,
+    # in colonies (an even third read as camouflage).
+    "rock_materials": {
+        "rock_talus": {
+            "colour": [0.41, 0.40, 0.39],
+            "strata": 0.25,
+            "z_aspect": [0.4, 0.8],
+            "lichen": 0.10,
+        },
+        # Grey-brown with the iron stain in the bed tones, not an orange face.
+        "rock_summit": {
+            "colour": [0.46, 0.42, 0.37],
+            "strata": 0.45,
+            "z_aspect": [0.35, 0.7],
+            "lichen": 0.06,
+        },
+    },
+    # The fell-field's scattered stones are its scree (grey talus rock); only its
+    # lidar-measured outcrop blocks carry the iron-stained summit rock.
+    "scatter_rock_material": {"bb_fellfield": "rock_talus"},
+    # The 1 m grid keeps boulders; the stones that make talus read as talus are below
+    # it, so they are scattered by density on the rock layers, biased to concave toes.
+    # Blocks every few metres on the fell-field and talus (the photographs), a few
+    # on the tundra benches above 3,500 m (grey rubble with sparse grass).
+    "scatter": {
+        "bb_talus": 200.0,
+        "bb_scree_slope": 40.0,
+        "bb_fellfield": 200.0,
+        "bb_tundra": 8.0,
+    },
+    "scatter_min_elevation": {"bb_tundra": 3500.0},
+    "scatter_size_m": [0.3, 1.2],
+    "scatter_max": 100000,
+    # Scree collects at concave toes: a 40 m window and a 0.5 m threshold see them on
+    # a 1 m grid (a 15 m window never did).
+    "toe_bias": 4.0,
+    "toe_window_m": 40.0,
+    "toe_threshold_m": 0.5,
+    "spawn_clear_m": 8.0,
+    "road_clear_m": 3.0,
+}
+
+# Engelmann spruce / subalpine fir up to a ~3,620 m tree line with a krummholz band
+# below it, aspen only on the low Telluride-side slopes; cover comes from the imagery.
+FOREST = {
+    "seed": 7,
+    # Trees stand where the lidar's canopy height model has a top, at its height.
+    "source": "chm",
+    # Tops from 1.2 m: below 2.5 m and above 3,300 m they are willow carrs and
+    # krummholz mats, which share the mat shape; the meadows read as meadows with them.
+    "min_tree_height_m": 1.2,
+    "mat_max_height_m": 2.5,
+    "mat_min_elevation_m": 3300.0,
+    # Young conifers under 4 m are bushy saplings, not a spire at a tenth scale.
+    "sapling_max_height_m": 4.0,
+    # A bright green top under this is an aspen sucker clump, not a lone stem.
+    "aspen_sapling_max_height_m": 4.5,
+    "treeline_m": 3620.0,
+    "krummholz_band_m": 50.0,
+    "krummholz_keep": 0.55,
+    "broadleaf_max_m": 3250.0,
+    "spacing_m": 5.0,
+    "max_trees": 130000,
+    "max_slope_deg": 42.0,
+    "height_bands": [[0, 3300, 12, 22], [3300, 3560, 8, 15], [3560, 9999, 4, 8]],
+    "jitter_cells": 1.5,
+    "gap_strength": 0.75,
 }
 
 ROADS = {
+    # The gate: the bed reads at least 15 % lighter than the ground either side of it.
+    "bed_lighter_than_ground": 1.10,
     "include": [
         "primary",
         "secondary",
@@ -81,23 +388,119 @@ ROADS = {
         "seed": 900,
         "base": [0.60, 0.55, 0.47],
     },
+    "surface_by_type": {
+        "tertiary": "dirt",
+        "unclassified": "dirt",
+        "residential": "dirt",
+        "service": "dirt",
+        "track": "dirt",
+    },
+    # A 3 m budget over a 32 m window bridges the gullies the road crosses at the
+    # Steps; way 125954590 is a stub that ends at the top of Bridal Veil Falls with a
+    # 22 m drop in one segment, and any segment steeper than 60 % is cut out of a way.
+    # Ways meet in one bed (ends within 6 m of a carved bed take its height);
+    # 701139027 is a 52 m OSM duplicate of the Steps line.
+    "carve": {
+        "profile_window_m": 32.0,
+        "feather_m": 2.0,
+        "max_cut_fill_m": 3.0,
+        "junction_snap_m": 8.0,
+        "bridge_m": 20.0,  # two free ends this close, within 3 m of height, are one road
+        "end_feather_m": 25.0,  # a cut fragment's free end fades over 25 m
+        "max_profile_grade": 0.4,  # a bed still over 40 % after smoothing stays terrain
+    },
+    "exclude_ways": [125954590, 701139027],
+    "max_grade": 0.6,
+    "cliff_cut_min_length_m": 400.0,  # a 300 m stub dangling 50 m short of the road is no road
+    "surfaces": {
+        "dirt": {
+            "terrain_material": "bb_road_gravel",
+            "texture_length_m": 5.0,
+            "decal": {
+                "name": "road_gravel",
+                "family": "gravel_track",
+                "seed": 900,
+                "size": 1024,
+                "base": [0.50, 0.47, 0.43],
+                "edge_fraction": 0.30,  # a soft edge into the ground either side
+            },
+        },
+    },
 }
 
+# Every spawn sits on the pass road and snaps to the carved bed keeping its authored
+# sense of direction. The named places come from the trail review's GPS fixes
+# (trail4runner.com, Black Bear Pass trail review) checked against the OSM way: the
+# summit junction at 3,910 m, the descent into Ingram Basin, the two "Wrecked"
+# obstacles, the Steps themselves (the 20-25 % ledges at 3,390 m) and the first
+# hairpin of the switchbacks on the scree fans below them.
 SPAWNS = [
     {
         "name": "pass_summit",
-        "lat": 37.9006,
-        "lon": -107.7481,
+        "lat": 37.89926,
+        "lon": -107.74308,
         "heading_deg": 300.0,
+        "snap_to_road": True,
         "default": True,
     },
-    {"name": "the_steps", "lat": 37.9145, "lon": -107.7625, "heading_deg": 300.0},
-    {"name": "bridal_veil_top", "lat": 37.9215, "lon": -107.7700, "heading_deg": 320.0},
+    {
+        "name": "ingram_basin",
+        "label": "Ingram Basin descent",
+        "lat": 37.91953,
+        "lon": -107.74695,
+        "heading_deg": 250.0,
+        "snap_to_road": True,
+    },
+    {
+        "name": "wrecked_section_1",
+        "label": "Wrecked Section 1",
+        "lat": 37.921795,
+        "lon": -107.758093,
+        "heading_deg": 250.0,
+        "snap_to_road": True,
+    },
+    {
+        "name": "the_steps",
+        "label": "The Steps",
+        "lat": 37.9223208,
+        "lon": -107.7607468,
+        "heading_deg": 250.0,
+        "snap_to_road": True,
+    },
+    {
+        "name": "switchbacks",
+        "label": "Bridal Veil switchbacks",
+        "lat": 37.92157,
+        "lon": -107.7623,
+        "heading_deg": 200.0,
+        "snap_to_road": True,
+    },
+]
+
+# Named places along the trail, with their published fixes, so the ledger can say
+# where each one falls on the level (or that it lies outside the footprint).
+TRAIL_FEATURES = [
+    {"name": "Black Bear Pass summit", "lat": 37.8992, "lon": -107.7431, "source": "Wikipedia"},
+    {"name": "Ingram Lake", "lat": 37.9117649, "lon": -107.7457121, "source": "trail4runner"},
+    {"name": "Ingram Basin", "lat": 37.918250, "lon": -107.749667, "source": "trail4runner"},
+    {"name": "Wrecked Section 1", "lat": 37.921795, "lon": -107.758093, "source": "trail4runner"},
+    {"name": "Wrecked Section 2", "lat": 37.922093, "lon": -107.759164, "source": "trail4runner"},
+    {"name": "The Steps", "lat": 37.9223208, "lon": -107.7607468, "source": "trail4runner"},
+    {"name": "Point 13510", "lat": 37.9198242, "lon": -107.7403423, "source": "trail4runner"},
+    {"name": "Trico Peak", "lat": 37.90519, "lon": -107.73829, "source": "trail4runner"},
+    {"name": "Telluride Peak", "lat": 37.9247846, "lon": -107.7358058, "source": "trail4runner"},
+    {"name": "Bridal Veil Falls", "lat": 37.9191592, "lon": -107.7875716, "source": "trail4runner"},
+    {
+        "name": "Red Mountain Pass trailhead",
+        "lat": 37.8954414,
+        "lon": -107.7181308,
+        "source": "trail4runner",
+    },
 ]
 
 SKY = {"time": 0.88, "utc_offset": "-6", "year": 2026, "month": 8, "day": 15}
 
-BIOME = "Alpine tundra and talus"
+BIOME = "Subalpine spruce-fir forest, alpine tundra and talus"
 FEATURES = "3,913 m pass, one-way shelf road, the Steps, switchbacks above Bridal Veil Falls"
 SUITABLE_FOR = "Rock crawling, articulation and low-range gearing tests"
 ROADS_TEXT = "Black Bear Pass Road (OSM), Bridal Veil and Imogene tracks"
@@ -105,5 +508,7 @@ ROADS_TEXT = "Black Bear Pass Road (OSM), Bridal Veil and Imogene tracks"
 DESCRIPTION = (
     "Black Bear Pass and Ingram Basin, Colorado, rebuilt from USGS 3DEP 1 m lidar. A 4 km "
     "square at 1 m per sample from the 3,913 m summit down the one-way shelf road, the "
-    "Steps and the switchbacks above Bridal Veil Falls. Entirely above tree line."
+    "Steps and the switchbacks above Bridal Veil Falls. Spruce-fir forest and aspen "
+    "planted from the orthoimagery below the 3,620 m tree line, talus boulders placed "
+    "where the lidar found them, the shelf road carved into the ground."
 )

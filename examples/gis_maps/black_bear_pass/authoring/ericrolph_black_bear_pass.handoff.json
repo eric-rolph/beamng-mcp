@@ -22,41 +22,395 @@
       -107.7380446179883
     ]
   },
-  "roads": {
-    "by_type": {
-      "track": 19,
-      "unclassified": 3
+  "forest": {
+    "by_item": {
+      "ericrolph_black_bear_pass_aspen_00": 1221,
+      "ericrolph_black_bear_pass_aspen_01": 1199,
+      "ericrolph_black_bear_pass_aspen_02": 1268,
+      "ericrolph_black_bear_pass_aspen_sapling_00": 678,
+      "ericrolph_black_bear_pass_aspen_sapling_01": 687,
+      "ericrolph_black_bear_pass_fir_00": 4759,
+      "ericrolph_black_bear_pass_fir_01": 4678,
+      "ericrolph_black_bear_pass_fir_02": 4671,
+      "ericrolph_black_bear_pass_krummholz_00": 3025,
+      "ericrolph_black_bear_pass_krummholz_01": 2997,
+      "ericrolph_black_bear_pass_krummholz_02": 2981,
+      "ericrolph_black_bear_pass_rock_summit_00": 4,
+      "ericrolph_black_bear_pass_rock_summit_02": 124,
+      "ericrolph_black_bear_pass_rock_summit_03": 13,
+      "ericrolph_black_bear_pass_rock_summit_05": 26,
+      "ericrolph_black_bear_pass_rock_summit_06": 8,
+      "ericrolph_black_bear_pass_rock_summit_07": 39,
+      "ericrolph_black_bear_pass_rock_talus_00": 8439,
+      "ericrolph_black_bear_pass_rock_talus_01": 8143,
+      "ericrolph_black_bear_pass_rock_talus_02": 8997,
+      "ericrolph_black_bear_pass_rock_talus_03": 8460,
+      "ericrolph_black_bear_pass_rock_talus_04": 8429,
+      "ericrolph_black_bear_pass_rock_talus_05": 8498,
+      "ericrolph_black_bear_pass_rock_talus_06": 8464,
+      "ericrolph_black_bear_pass_rock_talus_07": 8740,
+      "ericrolph_black_bear_pass_sapling_00": 11199,
+      "ericrolph_black_bear_pass_sapling_01": 11227,
+      "ericrolph_black_bear_pass_spruce_00": 5791,
+      "ericrolph_black_bear_pass_spruce_01": 5933,
+      "ericrolph_black_bear_pass_spruce_02": 5939,
+      "ericrolph_black_bear_pass_spruce_03": 5771,
+      "ericrolph_black_bear_pass_willow_00": 4990,
+      "ericrolph_black_bear_pass_willow_01": 4987,
+      "ericrolph_black_bear_pass_willow_02": 5058
     },
-    "length_m": 20793.6,
-    "roads": 22,
-    "ways_seen": 26
+    "file": "/levels/ericrolph_black_bear_pass/forest/ericrolph_black_bear_pass.forest4.json",
+    "height_p50_m": 3.65,
+    "height_p95_m": 20.15,
+    "instances": 157443,
+    "min_tree_height_m": 1.2,
+    "rocks": 68384,
+    "sha256": "0af81a22b6ca0a037332f71c4ac65f3d85320c4feb84052e899e05cbfbd34432",
+    "shrubs": 0,
+    "source": "lidar canopy",
+    "species": {
+      "aspen": 3688,
+      "aspen_sapling": 1365,
+      "fir": 14108,
+      "krummholz": 9003,
+      "sapling": 22426,
+      "spruce": 23434,
+      "willow": 15035
+    },
+    "tops": 89059,
+    "treeline_m": 3620.0,
+    "trees": 89059,
+    "triangles_if_all_drawn": 33353802
+  },
+  "imagery": {
+    "cast_shadow_fraction": 0.0456,
+    "delight": true,
+    "gain_p05": 0.859,
+    "gain_p95": 2.567,
+    "minnaert_k": 1.347,
+    "refill_grain_ratio": {
+      "p10": 0.979,
+      "p50": 0.999
+    },
+    "snow_fraction": 0.0072,
+    "steep_cap_lum": 0.15,
+    "steep_fraction": 0.116,
+    "sun_altitude_deg": 55.0,
+    "sun_azimuth_deg": 201.0,
+    "sun_fit": {
+      "altitude_deg": 55.0,
+      "azimuth_deg": 201.0,
+      "correlation": 0.4356
+    }
+  },
+  "layer_tints": {
+    "bb_cliff_rock": [
+      0.1603,
+      0.1642,
+      0.1365
+    ],
+    "bb_cliff_rock_ew": [
+      0.1634,
+      0.1689,
+      0.1324
+    ],
+    "bb_fellfield": [
+      0.1558,
+      0.1457,
+      0.1159
+    ],
+    "bb_forest_floor": [
+      0.0866,
+      0.1078,
+      0.063
+    ],
+    "bb_road_gravel": [
+      0.2384,
+      0.218,
+      0.18
+    ],
+    "bb_scree_slope": [
+      0.2021,
+      0.1981,
+      0.1809
+    ],
+    "bb_talus": [
+      0.1753,
+      0.1696,
+      0.1594
+    ],
+    "bb_tundra": [
+      0.138,
+      0.1547,
+      0.0887
+    ]
+  },
+  "road_contrast": {
+    "bb_cliff_rock_ew": {
+      "margin": 0.4106,
+      "ratio": 1.205
+    },
+    "bb_fellfield": {
+      "margin": 0.4062,
+      "ratio": 1.218
+    },
+    "bb_forest_floor": {
+      "margin": 0.362,
+      "ratio": 1.367
+    },
+    "bb_scree_slope": {
+      "margin": 0.4815,
+      "ratio": 1.027
+    },
+    "bb_talus": {
+      "margin": 0.4206,
+      "ratio": 1.176
+    },
+    "bb_tundra": {
+      "margin": 0.372,
+      "ratio": 1.33
+    },
+    "bed": 0.4948,
+    "windows": {
+      "min": 1.072,
+      "p05": 1.11,
+      "p50": 1.269
+    }
+  },
+  "roads": {
+    "by_surface": {
+      "dirt": 13
+    },
+    "by_type": {
+      "track": 12,
+      "unclassified": 1
+    },
+    "length_m": 19094.9,
+    "max_end_grade_change": 0.0778,
+    "max_grade_change": 0.1703,
+    "roads": 13,
+    "ways_seen": 13
   },
   "schema": "ericrolph-beamng-maps-handoff-v1",
   "shipped": {
+    "art/forest/managedItemData.json": {
+      "sha256": "9569a99e119a44ac991bf334420bfd39b1e2b094756a3f4eeb54d40d2146ce0e",
+      "size": 16994
+    },
+    "art/shapes/ericrolph_black_bear_pass/aspen_00.dae": {
+      "sha256": "ffe0b42a30dc5036eeca50c29a822987533cb7fcffed62f365fb9214821059e0",
+      "size": 14087,
+      "triangles": 64
+    },
+    "art/shapes/ericrolph_black_bear_pass/aspen_01.dae": {
+      "sha256": "de824d02dcab958756517479cd2ca66201d105002cc78fda0596c31a9faebf74",
+      "size": 14101,
+      "triangles": 64
+    },
+    "art/shapes/ericrolph_black_bear_pass/aspen_02.dae": {
+      "sha256": "3a64600ec826123506723215d7df11cac450efd85e2691c5e3db51326d4d61f5",
+      "size": 14076,
+      "triangles": 64
+    },
+    "art/shapes/ericrolph_black_bear_pass/aspen_sapling_00.dae": {
+      "sha256": "747c7116242441f7623680a7334b720de61f83090cfaa00d4ce1537d054aab88",
+      "size": 18027,
+      "triangles": 106
+    },
+    "art/shapes/ericrolph_black_bear_pass/aspen_sapling_01.dae": {
+      "sha256": "3b957fb827da72c11b2120a96509d405d79b4a62bb60c0757d8daf71a6b71419",
+      "size": 17997,
+      "triangles": 106
+    },
+    "art/shapes/ericrolph_black_bear_pass/fir_00.dae": {
+      "sha256": "e9f84cc683f23297bb88ad9bde2b6e3f28ebd2e8a4dd57c62bc49c3ce4bcdba7",
+      "size": 17638,
+      "triangles": 68
+    },
+    "art/shapes/ericrolph_black_bear_pass/fir_01.dae": {
+      "sha256": "d85ee39dc405bd98735ef6932c3a217b0e02817eb53451ead429223f135e118b",
+      "size": 17641,
+      "triangles": 68
+    },
+    "art/shapes/ericrolph_black_bear_pass/fir_02.dae": {
+      "sha256": "e67187c696663120bc39d9b5ad7c14caf16e4b0a5c6e1b039679e7811e9f3e1b",
+      "size": 17647,
+      "triangles": 68
+    },
+    "art/shapes/ericrolph_black_bear_pass/krummholz_00.dae": {
+      "sha256": "01349263e3864f7c61eede7dc16c8f8a4aabfbae928f28613fd9e81768c5b87c",
+      "size": 18317,
+      "triangles": 66
+    },
+    "art/shapes/ericrolph_black_bear_pass/krummholz_01.dae": {
+      "sha256": "f6c556be600548e8ef77c182951b7d492046d2e1b25737a31ad242379e88f416",
+      "size": 18322,
+      "triangles": 66
+    },
+    "art/shapes/ericrolph_black_bear_pass/krummholz_02.dae": {
+      "sha256": "cabb1818440301490a4e971ba7c16a2c4fcc1e49e9e3af28c5a4283722756434",
+      "size": 18317,
+      "triangles": 66
+    },
+    "art/shapes/ericrolph_black_bear_pass/main.materials.json": {
+      "sha256": "677e7811490cd72911bf00c434cf6c7ad26d25fcaaa576d999bdefec50176840",
+      "size": 13681
+    },
+    "art/shapes/ericrolph_black_bear_pass/rock_summit_00.dae": {
+      "sha256": "6a5b1d3b450f89b48227914d93c3d7d17170df1013e69b4869e40c8cada5fa3e",
+      "size": 81096,
+      "triangles": 400
+    },
+    "art/shapes/ericrolph_black_bear_pass/rock_summit_01.dae": {
+      "sha256": "fdbd620de1fc7b351c075760a32b26b619cbd7b81dbdbb7f2eb09f6606407ea4",
+      "size": 80553,
+      "triangles": 400
+    },
+    "art/shapes/ericrolph_black_bear_pass/rock_summit_02.dae": {
+      "sha256": "94848c295d8bfe50a151521e4ebfbaa3c361225a6bacb1f3d02bcfba953aa853",
+      "size": 81290,
+      "triangles": 400
+    },
+    "art/shapes/ericrolph_black_bear_pass/rock_summit_03.dae": {
+      "sha256": "ea32f60c3a4264f1e10f3960c4cc98cfe002b18ae1dae5669323fc98b6988e04",
+      "size": 81305,
+      "triangles": 400
+    },
+    "art/shapes/ericrolph_black_bear_pass/rock_summit_04.dae": {
+      "sha256": "3cb37942437f0bf8129a11155b192efbc1a5f768030ec6f207a1d0653d017ba9",
+      "size": 81015,
+      "triangles": 400
+    },
+    "art/shapes/ericrolph_black_bear_pass/rock_summit_05.dae": {
+      "sha256": "3ec8d88532537e159b2b86ce49f8b4c4a2b4337541ddd4ac94917ee855ab601c",
+      "size": 80468,
+      "triangles": 400
+    },
+    "art/shapes/ericrolph_black_bear_pass/rock_summit_06.dae": {
+      "sha256": "676ef4c559b748fb49c4bc11b8efc80746ffa819dea2b4cafd2ee7ec19451aca",
+      "size": 80545,
+      "triangles": 400
+    },
+    "art/shapes/ericrolph_black_bear_pass/rock_summit_07.dae": {
+      "sha256": "2a0eb1677fa99ed2f4bf4f2c9ae31203740de02d988a5018a17e34b3cf10593f",
+      "size": 80649,
+      "triangles": 400
+    },
+    "art/shapes/ericrolph_black_bear_pass/rock_talus_00.dae": {
+      "sha256": "41f77146c820fa6e425f8eb8635370d29e846d86515e92609c4029af79b714b3",
+      "size": 81120,
+      "triangles": 400
+    },
+    "art/shapes/ericrolph_black_bear_pass/rock_talus_01.dae": {
+      "sha256": "5892bc887205690030587f7226773478a45b5fa5c3c788daa2532fccaca1260d",
+      "size": 81171,
+      "triangles": 400
+    },
+    "art/shapes/ericrolph_black_bear_pass/rock_talus_02.dae": {
+      "sha256": "b8bb2944e54e96f6660068c1f2eb419a3800d9e90b83e266cc6ed598bda22b5d",
+      "size": 80532,
+      "triangles": 400
+    },
+    "art/shapes/ericrolph_black_bear_pass/rock_talus_03.dae": {
+      "sha256": "73f09750b3dfbc52867400f05834b1321d0b91e73e7d6eb512dd0fdec3646763",
+      "size": 80437,
+      "triangles": 400
+    },
+    "art/shapes/ericrolph_black_bear_pass/rock_talus_04.dae": {
+      "sha256": "4d12202ef2cc961e379ca400eec89fff24fa2c9b9fb5218bc45a19c09db6c389",
+      "size": 80611,
+      "triangles": 400
+    },
+    "art/shapes/ericrolph_black_bear_pass/rock_talus_05.dae": {
+      "sha256": "0b7d3defe102871072d712148ed5fabe0df1e4a40de01a358738c064f408dc9b",
+      "size": 80275,
+      "triangles": 400
+    },
+    "art/shapes/ericrolph_black_bear_pass/rock_talus_06.dae": {
+      "sha256": "ea59c71f46db2e76113fa2f76aa92e7faa15c59734c8a793e8aff76ed28d04f5",
+      "size": 80960,
+      "triangles": 400
+    },
+    "art/shapes/ericrolph_black_bear_pass/rock_talus_07.dae": {
+      "sha256": "055bfa75c01563072f98cae4d524d5e5c1fa9d8e3f8a1ce1a466441db913e179",
+      "size": 80840,
+      "triangles": 400
+    },
+    "art/shapes/ericrolph_black_bear_pass/sapling_00.dae": {
+      "sha256": "904610fd60af150f8e1bae4605f1c75bace0224dad601215985569a0a93ebfcf",
+      "size": 18014,
+      "triangles": 66
+    },
+    "art/shapes/ericrolph_black_bear_pass/sapling_01.dae": {
+      "sha256": "88f80e5b4b6873a71f610181e5a5a6b155f1bf36300ba154393cd2661cf31fdd",
+      "size": 18031,
+      "triangles": 66
+    },
+    "art/shapes/ericrolph_black_bear_pass/spruce_00.dae": {
+      "sha256": "f366dd35731ef7a0d04b90cafd768d293b13944377277de6a4d7d8aefbc6c8bd",
+      "size": 18094,
+      "triangles": 68
+    },
+    "art/shapes/ericrolph_black_bear_pass/spruce_01.dae": {
+      "sha256": "26d4ee7862d3759bb4e164b4fd91dc269ef625ecfa371c507f118e10a95ca893",
+      "size": 18092,
+      "triangles": 68
+    },
+    "art/shapes/ericrolph_black_bear_pass/spruce_02.dae": {
+      "sha256": "27a5f0e276fd6e5224c217767b74c54460e6a492d6c383dd3ceee87e1719121a",
+      "size": 18080,
+      "triangles": 68
+    },
+    "art/shapes/ericrolph_black_bear_pass/spruce_03.dae": {
+      "sha256": "e77a4964bdc1043d7e5db25286dadd29d6b6dc41e95ec535547bc6ccca34b609",
+      "size": 18107,
+      "triangles": 68
+    },
+    "art/shapes/ericrolph_black_bear_pass/willow_00.dae": {
+      "sha256": "de0227bf2b3172bab6df9698b4e626c4c141c2fa688007bd98c735afc9e48767",
+      "size": 17921,
+      "triangles": 66
+    },
+    "art/shapes/ericrolph_black_bear_pass/willow_01.dae": {
+      "sha256": "d6c21a856482f517592d86b2a69450c6e8ac65e8d123d7a6879f3d27fba8a596",
+      "size": 17915,
+      "triangles": 66
+    },
+    "art/shapes/ericrolph_black_bear_pass/willow_02.dae": {
+      "sha256": "014624e33fe386a745415a0ea4e3cc26dc502d2fdd8bc3a16c8247a4c981b78d",
+      "size": 17926,
+      "triangles": 66
+    },
     "art/terrains/main.materials.json": {
-      "sha256": "5ebc79a667998fe8ee099ddf9b0b5634fc89db18952378d2d6ab56a1f3aae993",
-      "size": 11260
+      "sha256": "12efe497274ae2e403b553c2f4eecadb037b57ccc5a71c978fa6d768ec85419c",
+      "size": 22328
+    },
+    "forest/ericrolph_black_bear_pass.forest4.json": {
+      "sha256": "0af81a22b6ca0a037332f71c4ac65f3d85320c4feb84052e899e05cbfbd34432",
+      "size": 28114137
     },
     "info.json": {
-      "sha256": "49b3cef13607b9cf5c93493c9611b6223399d2c29abbae1a2cbd78924cbf16b1",
-      "size": 1732
+      "sha256": "367d521ad892ebe384e6225182b047cc5696bf7bf0bd68ef88ec3a443d302c90",
+      "size": 2343
     },
     "theTerrain.ter": {
-      "sha256": "26e184fbaaca00a4ae34de87debbbdb639e3b0b9cf29c18fc815f762803e2ac4",
-      "size": 50331705
+      "sha256": "217602a6944a60c54c116d2eda8565263ee909e9aa2b57c2a0c9252c82cacfe0",
+      "size": 50331766
     },
     "theTerrain.terrain.json": {
-      "sha256": "b98f2308c92861f1d6613a9f8dcf71301f96c11c26fd21469b9d8ee6f652675c",
-      "size": 554
+      "sha256": "4c98d72f5796ddfe0baaf3c1c247ef628a0792bcd7e1d5856a760aa14017d8e8",
+      "size": 643
     },
     "theTerrain.terrainheightmap.png": {
-      "sha256": "58f8774e93490ec8fce0217922d89d0cc28354170558343a07d86f3346c3c863",
-      "size": 13880938
+      "sha256": "be3e86b657e4f2c65dd337692653849c885f70c33484681adad6b86c887ab55d",
+      "size": 13908028
     }
   },
   "site": {
+    "base_tex_px": 4096,
     "center_lat": 37.912,
     "center_lon": -107.762,
+    "detail_tex_px": 1024,
     "epsg": 32613,
     "place": "San Juan Mountains, San Miguel / Ouray County, Colorado, USA",
     "size_px": 4096,
@@ -71,47 +425,79 @@
       }
     ],
     "imagery": "USGS/USDA NAIP orthoimagery via The National Map (public domain)",
+    "pointcloud": "USGS 3DEP CO_SanLuisJuanMiguel_4_2020 point cloud, public Entwine index",
     "roads": "OpenStreetMap contributors, ODbL 1.0"
   },
   "spawns": [
     {
       "default": true,
-      "heading_deg": 300.0,
+      "heading_deg": 337.0,
       "label": "Pass Summit",
-      "lat": 37.9006,
+      "lat": 37.89926,
       "level_xy": [
-        1184.92,
-        -1300.42
+        1627.84,
+        -1460.09
       ],
-      "lon": -107.7481,
+      "lon": -107.74308,
       "objectname": "spawn_pass_summit",
-      "z": 1171.44
+      "snapped_to_road": true,
+      "z": 1190.09
     },
     {
       "default": false,
-      "heading_deg": 300.0,
+      "heading_deg": 207.5,
+      "label": "Ingram Basin descent",
+      "lat": 37.91953,
+      "level_xy": [
+        1347.98,
+        797.07
+      ],
+      "lon": -107.74695,
+      "objectname": "spawn_ingram_basin",
+      "snapped_to_road": true,
+      "z": 941.3
+    },
+    {
+      "default": false,
+      "heading_deg": 287.4,
+      "label": "Wrecked Section 1",
+      "lat": 37.921795,
+      "level_xy": [
+        375.58,
+        1077.81
+      ],
+      "lon": -107.758093,
+      "objectname": "spawn_wrecked_section_1",
+      "snapped_to_road": true,
+      "z": 729.63
+    },
+    {
+      "default": false,
+      "heading_deg": 288.8,
       "label": "The Steps",
-      "lat": 37.9145,
+      "lat": 37.9223208,
       "level_xy": [
-        -35.7,
-        279.67
+        145.11,
+        1144.23
       ],
-      "lon": -107.7625,
+      "lon": -107.7607468,
       "objectname": "spawn_the_steps",
-      "z": 902.39
+      "snapped_to_road": true,
+      "z": 668.92
     },
     {
       "default": false,
-      "heading_deg": 320.0,
-      "label": "Bridal Veil Top",
-      "lat": 37.9215,
+      "heading_deg": 241.0,
+      "label": "Bridal Veil switchbacks",
+      "lat": 37.92157,
       "level_xy": [
-        -672.03,
-        1076.13
+        5.47,
+        1063.91
       ],
-      "lon": -107.77,
-      "objectname": "spawn_bridal_veil_top",
-      "z": 252.94
+      "lon": -107.7623,
+      "objectname": "spawn_switchbacks",
+      "snapped_to_road": true,
+      "z": 619.25
     }
   ],
   "terrain": {
@@ -119,7 +505,11 @@
       "bb_tundra",
       "bb_talus",
       "bb_cliff_rock",
-      "bb_scree_slope"
+      "bb_scree_slope",
+      "bb_road_gravel",
+      "bb_forest_floor",
+      "bb_fellfield",
+      "bb_cliff_rock_ew"
     ],
     "max_elevation_m": 4109.67626953125,
     "max_height_m": 1405.0,
@@ -127,6 +517,503 @@
     "size_px": 4096,
     "square_size_m": 1.0,
     "stats": {
+      "aspect_flatfield": {
+        "0": {
+          "after_spread": 1.017,
+          "after_spread_steep": 1.013,
+          "bin_counts": [
+            18065,
+            97154,
+            247971,
+            324039,
+            393175,
+            535988,
+            739630,
+            1065708,
+            1227590,
+            972434,
+            1008580,
+            1061105
+          ],
+          "bin_means_after": [
+            null,
+            null,
+            0.129,
+            0.128,
+            0.127,
+            0.128,
+            0.127,
+            0.128,
+            0.127,
+            0.128,
+            0.128,
+            0.128
+          ],
+          "bin_means_before": [
+            null,
+            null,
+            0.142,
+            0.131,
+            0.114,
+            0.117,
+            0.114,
+            0.117,
+            0.115,
+            0.129,
+            0.146,
+            0.157
+          ],
+          "clipped_fraction": 0.0,
+          "factors": [
+            1.329,
+            1.092,
+            0.83,
+            1.022,
+            1.186,
+            1.111,
+            1.164,
+            1.15,
+            1.261,
+            0.982,
+            0.776,
+            0.749
+          ],
+          "key_range": [
+            0.576,
+            1.0
+          ]
+        },
+        "1": {
+          "after_spread": 1.01,
+          "after_spread_steep": 1.014,
+          "bin_counts": [
+            343,
+            1077,
+            12743,
+            60438,
+            80907,
+            80815,
+            72265,
+            55965,
+            56011,
+            52260,
+            59756,
+            81147
+          ],
+          "bin_means_after": [
+            null,
+            0.251,
+            0.251,
+            0.253,
+            0.253,
+            0.253,
+            0.252,
+            0.254,
+            0.252,
+            0.254,
+            0.252,
+            0.253
+          ],
+          "bin_means_before": [
+            null,
+            0.196,
+            0.226,
+            0.249,
+            0.26,
+            0.247,
+            0.236,
+            0.233,
+            0.223,
+            0.246,
+            0.269,
+            0.301
+          ],
+          "clipped_fraction": 0.0,
+          "factors": [
+            1.33,
+            1.58,
+            1.354,
+            1.066,
+            1.021,
+            1.013,
+            1.027,
+            1.012,
+            1.161,
+            0.861,
+            0.807,
+            0.729
+          ],
+          "key_range": [
+            0.625,
+            0.999
+          ]
+        },
+        "2": {
+          "after_spread": null,
+          "after_spread_steep": 1.006,
+          "bin_counts": [
+            10292,
+            22740,
+            54983,
+            115889,
+            206287,
+            234738,
+            75455,
+            12395,
+            4193,
+            23036,
+            51597,
+            126270
+          ],
+          "bin_means_after": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            0.212,
+            0.186,
+            null,
+            null,
+            0.213
+          ],
+          "bin_means_before": [
+            0.193,
+            0.19,
+            0.186,
+            0.186,
+            0.182,
+            0.174,
+            0.176,
+            0.187,
+            0.211,
+            0.206,
+            0.206,
+            0.205
+          ],
+          "clipped_fraction": 0.0,
+          "factors": [
+            0.962,
+            0.977,
+            1.004,
+            0.997,
+            1.014,
+            1.075,
+            1.06,
+            0.986,
+            0.867,
+            0.906,
+            0.9,
+            0.906
+          ],
+          "key_range": [
+            0.246,
+            0.999
+          ]
+        },
+        "3": {
+          "after_spread": 1.007,
+          "after_spread_steep": 1.025,
+          "bin_counts": [
+            2019,
+            33823,
+            187405,
+            318904,
+            257284,
+            152423,
+            154560,
+            184466,
+            200423,
+            163553,
+            244290,
+            589956
+          ],
+          "bin_means_after": [
+            null,
+            null,
+            null,
+            0.309,
+            0.309,
+            0.311,
+            0.309,
+            0.309,
+            0.31,
+            0.309,
+            0.31,
+            0.309
+          ],
+          "bin_means_before": [
+            null,
+            null,
+            null,
+            0.277,
+            0.281,
+            0.291,
+            0.282,
+            0.293,
+            0.308,
+            0.321,
+            0.338,
+            0.333
+          ],
+          "clipped_fraction": 0.0,
+          "factors": [
+            1.506,
+            1.619,
+            1.241,
+            1.095,
+            1.212,
+            1.191,
+            1.155,
+            1.064,
+            0.927,
+            0.906,
+            0.848,
+            0.821
+          ],
+          "key_range": [
+            0.529,
+            1.0
+          ]
+        },
+        "5": {
+          "after_spread": 1.007,
+          "after_spread_steep": 1.018,
+          "bin_counts": [
+            860,
+            1880,
+            32643,
+            122529,
+            158084,
+            177728,
+            216980,
+            264398,
+            285217,
+            240402,
+            163963,
+            101929
+          ],
+          "bin_means_after": [
+            null,
+            null,
+            null,
+            null,
+            0.078,
+            0.078,
+            0.078,
+            0.078,
+            0.078,
+            0.078,
+            0.078,
+            0.078
+          ],
+          "bin_means_before": [
+            null,
+            null,
+            null,
+            null,
+            0.073,
+            0.067,
+            0.067,
+            0.073,
+            0.077,
+            0.084,
+            0.093,
+            0.101
+          ],
+          "clipped_fraction": 0.0,
+          "factors": [
+            0.633,
+            0.741,
+            0.874,
+            0.959,
+            1.115,
+            1.258,
+            1.196,
+            0.992,
+            1.167,
+            1.033,
+            0.771,
+            0.688
+          ],
+          "key_range": [
+            0.495,
+            1.0
+          ]
+        },
+        "6": {
+          "after_spread": 1.018,
+          "after_spread_steep": null,
+          "bin_counts": [
+            27,
+            1698,
+            37244,
+            72021,
+            100037,
+            155631,
+            209213,
+            296233,
+            310354,
+            302917,
+            227843,
+            193854
+          ],
+          "bin_means_after": [
+            null,
+            0.275,
+            0.278,
+            0.277,
+            0.277,
+            0.277,
+            0.278,
+            0.276,
+            0.277,
+            0.279,
+            0.274,
+            0.278
+          ],
+          "bin_means_before": [
+            null,
+            0.335,
+            0.347,
+            0.336,
+            0.314,
+            0.292,
+            0.276,
+            0.263,
+            0.271,
+            0.277,
+            0.25,
+            0.274
+          ],
+          "clipped_fraction": 0.0,
+          "factors": [
+            1.0,
+            0.837,
+            0.792,
+            0.82,
+            0.878,
+            0.95,
+            1.001,
+            1.069,
+            1.028,
+            0.986,
+            1.138,
+            0.997
+          ],
+          "key_range": [
+            0.658,
+            0.998
+          ]
+        },
+        "7": {
+          "after_spread": null,
+          "after_spread_steep": 1.004,
+          "bin_counts": [
+            5415,
+            10652,
+            20777,
+            38140,
+            71506,
+            118662,
+            117486,
+            143565,
+            155160,
+            140154,
+            107516,
+            69716
+          ],
+          "bin_means_after": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            0.181,
+            0.172,
+            0.205
+          ],
+          "bin_means_before": [
+            0.19,
+            0.192,
+            0.183,
+            0.178,
+            0.176,
+            0.17,
+            0.168,
+            0.17,
+            0.174,
+            0.181,
+            0.191,
+            0.193
+          ],
+          "clipped_fraction": 0.0,
+          "factors": [
+            0.936,
+            0.918,
+            0.967,
+            0.996,
+            1.003,
+            1.043,
+            1.059,
+            1.046,
+            1.019,
+            0.978,
+            0.921,
+            0.918
+          ],
+          "key_range": [
+            0.273,
+            0.978
+          ]
+        },
+        "mode": "incidence"
+      },
+      "base_pull": {
+        "1": {
+          "mean_after": [
+            0.446,
+            0.435,
+            0.416
+          ],
+          "mean_before": [
+            0.55,
+            0.535,
+            0.482
+          ]
+        }
+      },
+      "base_pull_regions": [
+        {
+          "cells": 4609965,
+          "mean_after": [
+            0.421,
+            0.411,
+            0.38
+          ],
+          "mean_before": [
+            0.434,
+            0.422,
+            0.362
+          ],
+          "min_elevation": 3780.0,
+          "window_m": 200.0
+        }
+      ],
+      "canopy": {
+        "canopy_over_2m": 0.1117,
+        "canopy_over_5m": 0.0582,
+        "cells_with_returns": 0.9424,
+        "ground_offset_m": -0.24,
+        "height_max_m": 60.0,
+        "height_p95_m": 20.32
+      },
       "despike_threshold_m": 8.0,
       "footprint": {
         "epsg": 32613,
@@ -135,20 +1022,126 @@
         "west": 255143.0
       },
       "holes_filled": 0,
+      "lake_cells_painted": 30631,
       "layer_fractions": {
-        "bb_cliff_rock": 0.11649328470230103,
-        "bb_scree_slope": 0.39885520935058594,
-        "bb_talus": 0.31254857778549194,
-        "bb_tundra": 0.1721029281616211
+        "bb_cliff_rock": 0.056037962436676025,
+        "bb_cliff_rock_ew": 0.05959022045135498,
+        "bb_fellfield": 0.11867314577102661,
+        "bb_forest_floor": 0.10597807168960571,
+        "bb_road_gravel": 0.004598438739776611,
+        "bb_scree_slope": 0.14835840463638306,
+        "bb_talus": 0.0363161563873291,
+        "bb_tundra": 0.4704475998878479
+      },
+      "layer_mean_srgb": {
+        "bb_cliff_rock": {
+          "cells": 940198,
+          "clipped": 0.0,
+          "luminance": 0.4215,
+          "rgb": [
+            0.43,
+            0.4348,
+            0.3996
+          ]
+        },
+        "bb_cliff_rock_ew": {
+          "cells": 999758,
+          "clipped": 0.0,
+          "luminance": 0.4222,
+          "rgb": [
+            0.4336,
+            0.4408,
+            0.3922
+          ]
+        },
+        "bb_fellfield": {
+          "cells": 2002336,
+          "clipped": 0.0,
+          "luminance": 0.3968,
+          "rgb": [
+            0.422,
+            0.4093,
+            0.3591
+          ]
+        },
+        "bb_forest_floor": {
+          "cells": 1786785,
+          "clipped": 0.0,
+          "luminance": 0.3065,
+          "rgb": [
+            0.3079,
+            0.3485,
+            0.263
+          ]
+        },
+        "bb_scree_slope": {
+          "cells": 2489143,
+          "clipped": 0.0,
+          "luminance": 0.4647,
+          "rgb": [
+            0.4752,
+            0.4696,
+            0.4494
+          ]
+        },
+        "bb_talus": {
+          "cells": 613922,
+          "clipped": 0.0,
+          "luminance": 0.4307,
+          "rgb": [
+            0.4437,
+            0.4331,
+            0.4153
+          ]
+        },
+        "bb_tundra": {
+          "cells": 7945074,
+          "clipped": 0.0,
+          "luminance": 0.3652,
+          "rgb": [
+            0.3798,
+            0.4128,
+            0.3029
+          ]
+        }
       },
       "max_elevation_m": 4109.67626953125,
-      "mean_elevation_m": 3598.5859375,
+      "mean_elevation_m": 3598.57958984375,
       "min_elevation_m": 2720.259765625,
+      "near_black_fraction": 5e-06,
+      "objects": {
+        "berms_removed": 0,
+        "candidates": 13610,
+        "fence_posts_dropped": 0,
+        "kinds": {
+          "linear": 104,
+          "rock": 2163,
+          "shrub": 0
+        },
+        "min_height_m": 0.8,
+        "objects": 2267,
+        "open_m": 8.0,
+        "rejected_cliff": 4836,
+        "removed_volume_m3": 112348.2,
+        "structures_flattened": 0
+      },
       "relief_m": 1389.41650390625,
+      "road_carve": {
+        "bed_cells": 77149,
+        "junctions": 13,
+        "length_m": 19292.8,
+        "max_cut_m": 1.8,
+        "max_fill_m": 1.65,
+        "max_seam_step_m": 0.371,
+        "rejected_steep": 0,
+        "roads": 14
+      },
+      "road_cliff_cuts": 2,
+      "road_corridor_cells_cleared": 2956,
       "size_px": 4096,
-      "slope_mean_deg": 29.676286697387695,
-      "slope_over_30_fraction": 0.5149946808815002,
-      "slope_p95_deg": 55.56067657470703,
+      "slope_mean_deg": 29.619903564453125,
+      "slope_over_30_fraction": 0.5142737030982971,
+      "slope_p95_deg": 55.4854621887207,
       "smooth_sigma_px": 0.0,
       "sources": [
         {
@@ -163,12 +1156,157 @@
     "terrain_block": {
       "maxHeight": 1405.0,
       "position": [
-        -2048.0,
-        -2048.0,
+        -2047.5,
+        -2047.5,
         0
       ],
       "size": 4096,
       "squareSize": 1.0
     }
-  }
+  },
+  "trail_features": [
+    {
+      "elevation_m": 3910.5,
+      "inside": true,
+      "lat": 37.8992,
+      "level_xy": [
+        1620.1,
+        -1468.7
+      ],
+      "lon": -107.7431,
+      "name": "Black Bear Pass summit",
+      "nearest_road_m": 9.4,
+      "source": "Wikipedia"
+    },
+    {
+      "elevation_m": 3653.3,
+      "inside": true,
+      "lat": 37.9117649,
+      "level_xy": [
+        1431.4,
+        -67.5
+      ],
+      "lon": -107.7457121,
+      "name": "Ingram Lake",
+      "nearest_road_m": 26.1,
+      "source": "trail4runner"
+    },
+    {
+      "elevation_m": 3579.5,
+      "inside": true,
+      "lat": 37.91825,
+      "level_xy": [
+        1104.9,
+        662.5
+      ],
+      "lon": -107.749667,
+      "name": "Ingram Basin",
+      "nearest_road_m": 96.2,
+      "source": "trail4runner"
+    },
+    {
+      "elevation_m": 3449.4,
+      "inside": true,
+      "lat": 37.921795,
+      "level_xy": [
+        375.8,
+        1077.8
+      ],
+      "lon": -107.758093,
+      "name": "Wrecked Section 1",
+      "nearest_road_m": 0.2,
+      "source": "trail4runner"
+    },
+    {
+      "elevation_m": 3426.5,
+      "inside": true,
+      "lat": 37.922093,
+      "level_xy": [
+        282.6,
+        1113.7
+      ],
+      "lon": -107.759164,
+      "name": "Wrecked Section 2",
+      "nearest_road_m": 0.5,
+      "source": "trail4runner"
+    },
+    {
+      "elevation_m": 3388.6,
+      "inside": true,
+      "lat": 37.9223208,
+      "level_xy": [
+        144.2,
+        1143.1
+      ],
+      "lon": -107.7607468,
+      "name": "The Steps",
+      "nearest_road_m": 1.5,
+      "source": "trail4runner"
+    },
+    {
+      "elevation_m": 3928.4,
+      "inside": true,
+      "lat": 37.9198242,
+      "level_xy": [
+        1929.9,
+        813.0
+      ],
+      "lon": -107.7403423,
+      "name": "Point 13510",
+      "nearest_road_m": 416.3,
+      "source": "trail4runner"
+    },
+    {
+      "elevation_m": null,
+      "inside": false,
+      "lat": 37.90519,
+      "level_xy": [
+        2062.6,
+        -816.4
+      ],
+      "lon": -107.73829,
+      "name": "Trico Peak",
+      "nearest_road_m": null,
+      "source": "trail4runner"
+    },
+    {
+      "elevation_m": null,
+      "inside": false,
+      "lat": 37.9247846,
+      "level_xy": [
+        2344.9,
+        1351.8
+      ],
+      "lon": -107.7358058,
+      "name": "Telluride Peak",
+      "nearest_road_m": null,
+      "source": "trail4runner"
+    },
+    {
+      "elevation_m": null,
+      "inside": false,
+      "lat": 37.9191592,
+      "level_xy": [
+        -2224.6,
+        862.4
+      ],
+      "lon": -107.7875716,
+      "name": "Bridal Veil Falls",
+      "nearest_road_m": null,
+      "source": "trail4runner"
+    },
+    {
+      "elevation_m": null,
+      "inside": false,
+      "lat": 37.8954414,
+      "level_xy": [
+        3803.7,
+        -1950.2
+      ],
+      "lon": -107.7181308,
+      "name": "Red Mountain Pass trailhead",
+      "nearest_road_m": null,
+      "source": "trail4runner"
+    }
+  ]
 }

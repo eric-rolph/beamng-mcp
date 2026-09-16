@@ -38,6 +38,7 @@ dependencies = [
 # it with scipy and fetches it with requests. Declared, not assumed: its test gates
 # import maplib, so a clean `.[dev]` install must carry them or the suite cannot run.
 gis = [
+  "laspy[lazrs]>=2.5,<3",
   "rasterio>=1.4,<2",
   "requests>=2.31,<3",
   "scipy>=1.12,<2",

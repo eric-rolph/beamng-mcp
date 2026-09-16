@@ -36,6 +36,16 @@ from . import texture_kit
 PID_NAMESPACE = uuid.UUID("6f4a4d3a-9b1e-4a83-9f7e-2c1c4b6b5e11")
 
 GROUNDMODEL_BY_FAMILY = {
+    "cliff_beds": "ROCK",
+    "shale_plates": "GRAVEL",
+    "tussock": "GRASS",
+    "limestone": "ROCK",
+    "talus_blocks": "ROCK",
+    "ejecta": "GRAVEL",
+    "asphalt": "ASPHALT",
+    "asphalt_bed": "ASPHALT",
+    "dirt_track": "DIRT",
+    "gravel_track": "GRAVEL",
     "desert_floor": "DIRT_DUSTY",
     "gravel": "GRAVEL",
     "rock_strata": "ROCK",
@@ -46,6 +56,11 @@ GROUNDMODEL_BY_FAMILY = {
     "volcanic_ash": "SAND",
     "snow": "SNOW",
     "alpine_tundra": "GRASS",
+    "gravel_bed": "GRAVEL",
+    "dirt_bed": "DIRT",
+    "forest_floor": "DIRT",
+    "dark_strata": "ROCK",
+    "rim_rubble": "ROCK",
 }
 
 BASE_TEX_PX = 2048
@@ -211,6 +226,134 @@ def build_roads(
     return roads, stats
 
 
+def build_surface_roads(spec, frame: Frame, osm_path: Path, fp, *, max_step_m: float = 8.0):
+    """DecalRoads with a material per surface (paved / dirt), draped on the carved DEM."""
+
+    from . import roads as road_tools
+
+    polylines = road_tools.road_polylines(spec, fp, osm_path)
+    if spec.ROADS.get("max_grade"):
+        polylines, _cuts = road_tools.drop_cliff_segments(
+            polylines,
+            frame.dem,
+            frame.res,
+            frame.fp.size_m,
+            float(spec.ROADS["max_grade"]),
+            min_length_m=float(spec.ROADS.get("cliff_cut_min_length_m", 100.0)),
+        )
+    carve_cfg = spec.ROADS.get("carve") or {}
+    # The decal stops where the carved bed stops: an unjoined end is trimmed by the
+    # carve's end feather, so no first node steps off the bed onto natural ground.
+    polylines = road_tools.trim_free_ends(
+        polylines,
+        float(carve_cfg.get("end_feather_m", 0.0)),
+        float(carve_cfg.get("junction_snap_m", 8.0)),
+    )
+    surfaces = spec.ROADS["surfaces"]
+    roads: list[dict] = []
+    stats: dict = {
+        "ways_seen": len(polylines),
+        "roads": 0,
+        "length_m": 0.0,
+        "by_type": {},
+        "by_surface": {},
+        "max_grade_change": 0.0,
+        "max_end_grade_change": 0.0,
+    }
+    for road in polylines:
+        cfg = surfaces.get(road["surface"]) or next(iter(surfaces.values()))
+        dense = _resample_polyline(road["points"], max_step_m)
+        width = road["width"]
+        nodes = [
+            [round(x, 3), round(y, 3), round(frame.height_at(x, y), 3), width] for x, y in dense
+        ]
+        length = sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in itertools.pairwise(nodes))
+        if length < 15.0:
+            continue
+        # The largest node-to-node change of grade along the decal: a step at a
+        # free end or a seam shows here as a jump.
+        grades = [
+            (b[2] - a[2]) / max(math.hypot(b[0] - a[0], b[1] - a[1]), 1e-3)
+            for a, b in itertools.pairwise(nodes)
+        ]
+        if len(grades) > 1:
+            changes = [abs(g2 - g1) for g1, g2 in itertools.pairwise(grades)]
+            stats["max_grade_change"] = round(max(stats["max_grade_change"], max(changes)), 4)
+            # The first and last three intervals: a step off the bed at an end.
+            ends = changes[:3] + changes[-3:]
+            stats["max_end_grade_change"] = round(max(stats["max_end_grade_change"], max(ends)), 4)
+        name = f"road_{road['id']}"
+        roads.append(
+            {
+                "name": name,
+                "class": "DecalRoad",
+                "persistentId": pid(spec.MOD_ID, name),
+                "__parent": "roads",
+                "position": nodes[0][:3],
+                "improvedSpline": True,
+                "material": cfg["decal"]["name"],
+                "textureLength": float(cfg.get("texture_length_m", 6.0)),
+                "breakAngle": 3.0,
+                "renderPriority": 10 if road["surface"] == "paved" else 11,
+                "startEndFade": [3, 3],
+                "drivability": 1,
+                "nodes": nodes,
+            }
+        )
+        stats["roads"] += 1
+        stats["length_m"] += length
+        stats["by_type"][road["highway"]] = stats["by_type"].get(road["highway"], 0) + 1
+        stats["by_surface"][road["surface"]] = stats["by_surface"].get(road["surface"], 0) + 1
+    stats["length_m"] = round(stats["length_m"], 1)
+    return roads, stats
+
+
+def snap_to_road(
+    x: float,
+    y: float,
+    polylines: list[dict],
+    frame: Frame,
+    radius_m: float,
+    prefer_heading: float | None = None,
+):
+    """Nearest road-bed point within ``radius_m`` and the heading down the road there.
+
+    Returns (x, y, heading_deg) or None. The heading follows the way's tangent in the
+    descending direction, so a spawn on a pass road looks down the descent.
+    """
+
+    # At a junction several ways are within reach; the longest one is the road the
+    # spawn is named for (the pass road, not the spur to the mine).
+    best = None
+    for road in polylines:
+        dense = _resample_polyline(road["points"], 2.0)
+        nearest = min(range(len(dense)), key=lambda k: math.hypot(dense[k][0] - x, dense[k][1] - y))
+        d = math.hypot(dense[nearest][0] - x, dense[nearest][1] - y)
+        if d > radius_m:
+            continue
+        if best is None or len(dense) > len(best[2]):
+            best = (d, nearest, dense)
+    if best is None:
+        return None
+    _, i, dense = best
+    # The road's 20 m tangent through the point (through, so a spawn at the end of a
+    # way still has one); the author's heading picks the sense along it, else the
+    # sense that descends, so a spawn on a pass road looks down the descent.
+    lo, hi = max(0, i - 10), min(len(dense) - 1, i + 10)
+    if lo == hi:
+        return None
+    (ax, ay), (bx, by) = dense[lo], dense[hi]
+    tangent = math.degrees(math.atan2(bx - ax, by - ay)) % 360.0
+    if prefer_heading is not None:
+        diff = abs((tangent - prefer_heading + 180.0) % 360.0 - 180.0)
+        forward = diff <= 90.0
+    else:
+        forward = frame.height_at(*dense[hi]) <= frame.height_at(*dense[lo])
+    heading = tangent if forward else (tangent + 180.0) % 360.0
+    px, py = dense[i]
+    return float(px), float(py), heading
+
+
 # ---------------------------------------------------------------------------
 # Base textures from orthoimagery and the DEM
 # ---------------------------------------------------------------------------
@@ -252,15 +395,97 @@ def _resize_gray(array: np.ndarray, out_px: int) -> np.ndarray:
     return np.asarray(image)
 
 
+def conditioned_colour(
+    dem: np.ndarray,
+    res: float,
+    fp,
+    naip_dir: Path,
+    imagery_spec: dict | None,
+    canopy_cover=None,
+    canopy_chm=None,
+) -> tuple[np.ndarray, dict]:
+    """The full-resolution orthoimagery, de-lit against the DEM when the spec asks."""
+
+    colour = naip_mosaic(naip_dir, fp, dem.shape[0])
+    stats: dict = {"delight": False}
+    if imagery_spec and imagery_spec.get("delight"):
+        from . import imagery
+
+        sun = imagery.fit_sun(
+            colour,
+            dem,
+            res,
+            altitude_range=tuple(imagery_spec.get("sun_altitude_range", (30.0, 80.0))),
+            azimuth_hint=imagery_spec.get("sun_azimuth_hint"),
+            azimuth_window=float(imagery_spec.get("sun_azimuth_window", 60.0)),
+        )
+        colour, dstats = imagery.delight(
+            colour,
+            dem,
+            res,
+            azimuth_deg=sun["azimuth_deg"],
+            altitude_deg=sun["altitude_deg"],
+            strength=float(imagery_spec.get("strength", 1.0)),
+            max_gain=float(imagery_spec.get("max_gain", 2.2)),
+            shadow_texture_gain=float(imagery_spec.get("shadow_texture_gain", 1.0)),
+            # The damp is a crown's, not a cover fraction's: under a crown (CHM
+            # over 2 m) the gain is held, in the gap between crowns it is not.
+            damp_mask=(canopy_chm > 2.0)
+            if canopy_chm is not None
+            else (canopy_cover > 0.35)
+            if canopy_cover is not None
+            else None,
+            damp=float(imagery_spec.get("canopy_gain_damp", 0.3)),
+            canopy_chm=canopy_chm if imagery_spec.get("canopy_shadow", True) else None,
+            canopy_refill=imagery_spec.get("canopy_refill"),
+            snow=imagery_spec.get("snow"),
+            steep_deg=float(imagery_spec.get("steep_deg", 40.0)),
+            steep_cap=bool(imagery_spec.get("steep_cap", True)),
+            steep_cap_lum=imagery_spec.get("steep_cap_lum"),
+            steep_feather_deg=float(imagery_spec.get("steep_feather_deg", 0.0)),
+            knee_lum=float(imagery_spec.get("knee_lum", 0.55)),
+            cover_mask=(canopy_chm > 2.0)
+            if canopy_chm is not None and imagery_spec.get("refill_by_cover")
+            else (canopy_cover > 0.5)
+            if canopy_cover is not None and imagery_spec.get("refill_by_cover")
+            else None,
+            match_ring=bool(imagery_spec.get("refill_match_ring", False)),
+            shadow_dark_ratio=imagery_spec.get("shadow_dark_ratio"),
+        )
+        stats = {"delight": True, "sun_fit": sun, **dstats}
+    return colour, stats
+
+
 def build_base_set(
-    dem: np.ndarray, res: float, fp, naip_dir: Path, out_dir: Path, prefix: str
+    dem: np.ndarray,
+    res: float,
+    fp,
+    naip_dir: Path,
+    out_dir: Path,
+    prefix: str,
+    *,
+    colour_full: np.ndarray | None = None,
+    base_px: int = BASE_TEX_PX,
 ) -> dict[str, Path]:
-    """t_base_{b,nm,r,h,ao}.png: the satellite-view base every terrain material shares."""
+    """t_base_{b,nm,r,h,ao}.png: the satellite-view base every terrain material shares.
+
+    Written SOUTH-UP (row 0 = the level's south edge), the order the .ter heights are
+    written in: the engine maps a base texture's first image row onto y = 0 of the
+    terrain block, so a north-up image comes out mirrored against the heightmap (the
+    visitor centre on the wrong rim). Every array here is north-up until the write.
+    """
+
+    from PIL import Image
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    colour = naip_mosaic(naip_dir, fp, BASE_TEX_PX)
-    small = _resize_gray(dem, BASE_TEX_PX)
-    base_res = fp.size_m / BASE_TEX_PX
+    if colour_full is None:
+        colour = naip_mosaic(naip_dir, fp, base_px)
+    elif colour_full.shape[0] != base_px:
+        colour = np.asarray(Image.fromarray(colour_full).resize((base_px, base_px), Image.LANCZOS))
+    else:
+        colour = colour_full
+    small = _resize_gray(dem, base_px)
+    base_res = fp.size_m / base_px
     normal = hm.normal_map(small, base_res, strength=1.0)
     ao = hm.ambient_occlusion(small, base_res, radius_px=12)
     lo, hi = float(small.min()), float(small.max())
@@ -276,7 +501,7 @@ def build_base_set(
         ("ao", (ao * 255).round().astype("uint8")),
     ):
         path = out_dir / f"{prefix}_{suffix}.png"
-        hm.write_png8(path, array)
+        hm.write_png8(path, np.ascontiguousarray(array[::-1]))
         paths[suffix] = path
     return paths
 
@@ -290,12 +515,22 @@ def build_previews(
     spawns: list[dict],
     level_root: Path,
     mod_id: str,
+    *,
+    colour_full: np.ndarray | None = None,
 ) -> dict:
     """Preview JPGs: colour orthoimagery lit by a DEM hillshade, whole map and per spawn."""
 
     from PIL import Image
 
-    colour = naip_mosaic(naip_dir, fp, 2048).astype("float32") / 255.0
+    if colour_full is None:
+        colour = naip_mosaic(naip_dir, fp, 2048).astype("float32") / 255.0
+    else:
+        colour = (
+            np.asarray(Image.fromarray(colour_full).resize((2048, 2048), Image.LANCZOS)).astype(
+                "float32"
+            )
+            / 255.0
+        )
     shade = hm.hillshade(_resize_gray(dem, 2048), fp.size_m / 2048, 315.0, 40.0)
     lit = np.clip(colour * (0.55 + 0.6 * shade[..., None]), 0.0, 1.0)
     image = Image.fromarray((lit * 255).round().astype("uint8"))
@@ -330,6 +565,9 @@ def terrain_material(
     base_prefix: str,
     macro_prefix: str,
     footprint_m: float,
+    *,
+    detail_tile_m: float = DETAIL_TILE_M,
+    detail_strength: float = 0.35,
 ) -> dict:
     """One TerrainMaterial in the v1.5 (base + macro + detail) layout of shipped levels.
 
@@ -352,7 +590,7 @@ def terrain_material(
         "detailDistAtten": [1, 1],
         "macroDistances": [0, 10, 100, 3000],
         "macroDistAtten": [0, 1],
-        "baseColorDetailStrength": [0.35, 0.35],
+        "baseColorDetailStrength": [detail_strength, detail_strength],
         "normalDetailStrength": [0.7, 0.3],
         "roughnessDetailStrength": [0.3, 0.3],
         "aoDetailStrength": [1, 1],
@@ -370,10 +608,173 @@ def terrain_material(
         entry[f"{channel}BaseTex"] = f"{tex}/{base_prefix}_{suffix}.png"
         entry[f"{channel}BaseTexSize"] = int(footprint_m)
         entry[f"{channel}DetailTex"] = f"{tex}/t_{internal}_{suffix}.png"
-        entry[f"{channel}DetailTexSize"] = DETAIL_TILE_M
+        entry[f"{channel}DetailTexSize"] = detail_tile_m
         entry[f"{channel}MacroTex"] = f"{tex}/{macro_prefix}_{suffix}.png"
         entry[f"{channel}MacroTexSize"] = MACRO_TILE_M
     return entry
+
+
+def enforce_bed_contrast(
+    colour, layer, materials, surfaces, texel_m: float, factor: float, margin_min: float = 0.55
+):
+    """Where a 100 m stretch of bed is not ``factor`` lighter than the ground within
+    6 m of it (the ground the eye compares the bed with, the band ``road_contrast``
+    measures), the ground within 20 m is darkened by the missing amount, grain kept,
+    down to ``margin_min`` of itself, and what the margin cannot give the bed takes
+    as a floor: bed = max(bed, factor x near ground), per window."""
+
+    names = {cfg.get("terrain_material") for cfg in surfaces.values()} & set(materials)
+    if not names or colour is None:
+        return colour
+    from PIL import Image
+    from scipy import ndimage
+
+    n = colour.shape[0]
+    layer_c = layer
+    if layer.shape[0] != n:
+        layer_c = np.asarray(Image.fromarray(layer.astype("uint8")).resize((n, n), Image.NEAREST))
+    out = colour.astype("float32")
+    bed = np.isin(layer_c, [materials.index(name) for name in names])
+    if not bed.any():
+        return colour
+    near = _near_band(bed, texel_m)
+    margin = ndimage.binary_dilation(bed, iterations=max(2, int(20.0 / texel_m))) & ~bed
+    win = max(3, int(100.0 / texel_m))
+    bed_f = bed.astype("float32")
+    near_f = near.astype("float32")
+
+    def local_mean(lum, weight):
+        return ndimage.uniform_filter(lum * weight, size=win, mode="nearest") / np.maximum(
+            ndimage.uniform_filter(weight, size=win, mode="nearest"), 1e-4
+        )
+
+    lum = out.mean(axis=-1) / 255.0
+    ratio = local_mean(lum, bed_f) / np.maximum(local_mean(lum, near_f), 1e-4)
+    needed = np.clip(ratio / factor, margin_min, 1.0).astype("float32")
+    needed = ndimage.gaussian_filter(needed, max(1.0, 10.0 / texel_m))
+    # Fade the darkening out over the outer 5 m of the margin band.
+    dist = ndimage.distance_transform_edt(~bed) * texel_m
+    fade = np.clip((20.0 - dist) / 5.0, 0.0, 1.0).astype("float32") * margin
+    scale = 1.0 - (1.0 - needed) * fade
+    out = out * scale[..., None]
+    # The floor on the bed: on pale ground (the plateau's fines, a lit fan, the
+    # near-white rim) the darkened margin still leaves the bed short, so the bed
+    # comes up to ``factor`` x the near ground, per window, re-measured after each
+    # pass against the same band ``road_contrast`` reports (the window means are
+    # already 100 m smooth, so the lift needs no blur of its own).
+    for _pass in range(3):
+        lum2 = out.mean(axis=-1) / 255.0
+        lift = np.clip(
+            factor * 1.01 * local_mean(lum2, near_f) / np.maximum(local_mean(lum2, bed_f), 1e-4),
+            1.0,
+            1.4,
+        ).astype("float32")
+        if float(lift.max()) <= 1.005:
+            break
+        out = np.clip(out * np.where(bed, lift, 1.0)[..., None], 0, 255)
+    return np.clip(out, 0, 255).astype("uint8")
+
+
+def _near_band(bed: np.ndarray, texel_m: float) -> np.ndarray:
+    """The ground the eye compares a bed with: 2-8 m off it (the 2 m feather of the
+    bed's paint excluded)."""
+
+    from scipy import ndimage
+
+    outer = ndimage.binary_dilation(bed, iterations=max(2, int(8.0 / texel_m)))
+    inner = ndimage.binary_dilation(bed, iterations=max(1, int(2.0 / texel_m)))
+    return outer & ~inner
+
+
+def road_contrast(colour, layer, materials, surfaces, texel_m: float) -> dict:
+    """Bed luminance over the luminance of each layer within 6 m either side of it:
+    the number that says whether the road reads on the ground at all."""
+
+    names = {cfg.get("terrain_material") for cfg in surfaces.values()} & set(materials)
+    if not names or colour is None:
+        return {}
+    from PIL import Image
+    from scipy import ndimage
+
+    n = colour.shape[0]
+    layer_c = layer
+    if layer.shape[0] != n:
+        layer_c = np.asarray(Image.fromarray(layer.astype("uint8")).resize((n, n), Image.NEAREST))
+    lum = colour.astype("float32").mean(axis=-1) / 255.0
+    bed = np.isin(layer_c, [materials.index(name) for name in names])
+    if not bed.any():
+        return {}
+    near = _near_band(bed, texel_m)
+    bed_lum = float(lum[bed].mean())
+    out = {"bed": round(bed_lum, 4)}
+    # Along the road in 100 m windows: the local bed over the local margin, so a
+    # pale summit is not hidden by a dark valley in the layer mean.
+    win = max(3, int(100.0 / texel_m))
+    bed_f = bed.astype("float32")
+    near_f = near.astype("float32")
+    bed_local = ndimage.uniform_filter(lum * bed_f, size=win, mode="nearest") / np.maximum(
+        ndimage.uniform_filter(bed_f, size=win, mode="nearest"), 1e-4
+    )
+    near_local = ndimage.uniform_filter(lum * near_f, size=win, mode="nearest") / np.maximum(
+        ndimage.uniform_filter(near_f, size=win, mode="nearest"), 1e-4
+    )
+    enough = (ndimage.uniform_filter(near_f, size=win, mode="nearest") > 0.01) & bed
+    ratios = (bed_local / np.maximum(near_local, 1e-4))[enough]
+    if ratios.size:
+        out["windows"] = {
+            "p05": round(float(np.percentile(ratios, 5)), 3),
+            "p50": round(float(np.percentile(ratios, 50)), 3),
+            "min": round(float(ratios.min()), 3),
+        }
+    for index, name in enumerate(materials):
+        if name in names:
+            continue
+        cells = near & (layer_c == index)
+        if cells.sum() < 2000:
+            continue
+        ground = float(lum[cells].mean())
+        out[name] = {"margin": round(ground, 4), "ratio": round(bed_lum / max(ground, 1e-4), 3)}
+    return out
+
+
+def paint_road_beds(
+    colour: np.ndarray, layer: np.ndarray, materials: list[str], palette: dict, surfaces: dict
+) -> np.ndarray:
+    """Paint the base colour under the carved road beds with the bed material's colour.
+
+    The photograph shows cars, paint lines and shadows on the roads; the level shows a
+    road. The bed's own colour (the palette base, in sRGB) with a little grain replaces
+    the imagery there, feathered over two texels, so the decal and the ground agree.
+    """
+
+    names = {cfg.get("terrain_material") for cfg in surfaces.values()} & set(materials)
+    if not names or colour is None:
+        return colour
+    from PIL import Image
+    from scipy import ndimage
+
+    n = colour.shape[0]
+    out = colour.astype("float32")
+    rng = np.random.default_rng(3)
+    grain = None
+    for name in sorted(names):
+        mask = layer == materials.index(name)
+        if not mask.any():
+            continue
+        if mask.shape[0] != n:
+            mask = (
+                np.asarray(
+                    Image.fromarray(mask.astype("uint8") * 255).resize((n, n), Image.BILINEAR)
+                )
+                > 127
+            )
+        weight = ndimage.gaussian_filter(mask.astype("float32"), 1.0)[..., None]
+        if grain is None:
+            grain = rng.uniform(0.9, 1.1, size=(n, n, 1)).astype("float32")
+        # The palette base is already sRGB (the tone contract): paint it as it is.
+        base = np.asarray(palette[name]["base"], dtype="float64") * 255.0
+        out = out * (1.0 - weight) + base.astype("float32")[None, None, :] * grain * weight
+    return np.clip(out, 0, 255).astype("uint8")
 
 
 def build_level(
@@ -384,11 +785,22 @@ def build_level(
     layer: np.ndarray,
     encoded: hm.Encoded,
     terrain_stats: dict,
+    *,
+    detected_objects: list[dict] | None = None,
 ) -> dict:
     mod_id = spec.MOD_ID
     site = spec.SITE
     res = float(site["square_size_m"])
     size = int(site["size_px"])
+    base_px = int(site.get("base_tex_px", BASE_TEX_PX))
+    # One size for the whole detail array: the site's, else the largest tile any
+    # palette entry asks for (the engine stacks the detail maps into one array).
+    palette_sizes = [int(p.get("size", DETAIL_TEX_PX)) for p in spec.PALETTE.values()]
+    detail_px = int(site.get("detail_tex_px", max([DETAIL_TEX_PX, *palette_sizes])))
+    detail_tile_m = float(site.get("detail_tile_m", DETAIL_TILE_M))
+    imagery_spec = getattr(spec, "IMAGERY", None)
+    objects_spec = getattr(spec, "OBJECTS", None)
+    forest_spec = getattr(spec, "FOREST", None)
     level_root = example_root / "mod" / "levels" / mod_id
     if level_root.exists():
         import shutil
@@ -433,7 +845,70 @@ def build_level(
     terrains_dir = level_root / "art" / "terrains"
     base_prefix = "t_base"
     macro_prefix = "t_macro"
-    build_base_set(dem, res, fp, data_root / "naip", terrains_dir, base_prefix)
+    cached = data_root / "terrain" / "colour.png"
+    if cached.is_file() and (data_root / "terrain" / "imagery.json").is_file():
+        from PIL import Image
+
+        Image.MAX_IMAGE_PIXELS = None
+        colour_full = np.asarray(Image.open(cached).convert("RGB"))
+        imagery_stats = json.loads(
+            (data_root / "terrain" / "imagery.json").read_text(encoding="utf-8")
+        )
+    else:
+        colour_full, imagery_stats = conditioned_colour(
+            dem, res, fp, data_root / "naip", imagery_spec
+        )
+    report["imagery"] = imagery_stats
+    colour_full = paint_road_beds(
+        colour_full, layer, materials, spec.PALETTE, getattr(spec, "ROADS", {}).get("surfaces", {})
+    )
+    # The contract is one factor for every surface, or a factor per surface
+    # ({"dirt": 1.06}: the two-tracks pale, the asphalt as dark as asphalt is).
+    bed_factor = getattr(spec, "ROADS", {}).get("bed_lighter_than_ground") or 0.0
+    all_surfaces = getattr(spec, "ROADS", {}).get("surfaces", {})
+    by_surface = (
+        {name: float(f) for name, f in bed_factor.items() if name in all_surfaces}
+        if isinstance(bed_factor, dict)
+        else {name: float(bed_factor) for name in all_surfaces}
+        if float(bed_factor) > 0
+        else {}
+    )
+    margin_min = float(getattr(spec, "ROADS", {}).get("bed_contrast_margin_min", 0.55))
+    for name, factor in by_surface.items():
+        colour_full = enforce_bed_contrast(
+            colour_full,
+            layer,
+            materials,
+            {name: all_surfaces[name]},
+            fp.size_m / colour_full.shape[0],
+            factor,
+            margin_min,
+        )
+    if isinstance(bed_factor, dict):
+        report["road_contrast"] = {
+            name: road_contrast(
+                colour_full,
+                layer,
+                materials,
+                {name: all_surfaces[name]},
+                fp.size_m / colour_full.shape[0],
+            )
+            for name in by_surface
+        }
+    else:
+        report["road_contrast"] = road_contrast(
+            colour_full, layer, materials, all_surfaces, fp.size_m / colour_full.shape[0]
+        )
+    build_base_set(
+        dem,
+        res,
+        fp,
+        data_root / "naip",
+        terrains_dir,
+        base_prefix,
+        colour_full=colour_full,
+        base_px=base_px,
+    )
     texture_kit.build_set(
         terrains_dir,
         macro_prefix,
@@ -442,25 +917,45 @@ def build_level(
         size=MACRO_TEX_PX,
         base_rgb=[0.5, 0.5, 0.5],
     )
+    tint_weight = float(imagery_spec.get("tint_from_imagery", 0.0)) if imagery_spec else 0.0
+    layer_tints = {}
+    if tint_weight > 0:
+        from . import imagery
+
+        layer_tints = imagery.layer_colour_stats(colour_full, layer, materials)
+        report["layer_tints"] = layer_tints
     material_entries = {}
     texture_set_name = f"{mod_id}_TerrainTextureSet"
     material_entries[texture_set_name] = {
         "name": texture_set_name,
         "class": "TerrainMaterialTextureSet",
         "persistentId": pid(mod_id, "texture_set"),
-        "baseTexSize": [BASE_TEX_PX, BASE_TEX_PX],
-        "detailTexSize": [DETAIL_TEX_PX, DETAIL_TEX_PX],
+        "baseTexSize": [base_px, base_px],
+        "detailTexSize": [detail_px, detail_px],
         "macroTexSize": [MACRO_TEX_PX, MACRO_TEX_PX],
     }
     for internal in materials:
         palette = spec.PALETTE[internal]
+        base_rgb = list(palette["base"])
+        layer_weight = float(palette.get("tint_weight", tint_weight))
+        if layer_weight > 0 and internal in layer_tints and not palette.get("keep_tint"):
+            # The palette base is sRGB (the tone contract); the measured layer means
+            # are linear light, so encode them before blending or the tint pulls every
+            # material dark. A palette entry may set its own weight (a cliff whose
+            # photograph is mostly shadow keeps more of its authored charcoal).
+            measured = [max(float(m), 0.0) ** (1.0 / 2.2) for m in layer_tints[internal]]
+            base_rgb = [
+                round(b * (1 - layer_weight) + m * layer_weight, 4)
+                for b, m in zip(base_rgb, measured, strict=True)
+            ]
         texture_kit.build_set(
             terrains_dir,
             f"t_{internal}",
             palette["family"],
             seed=int(palette["seed"]),
-            size=DETAIL_TEX_PX,
-            base_rgb=palette["base"],
+            size=detail_px,
+            rotate_deg=float(palette.get("rotate_deg", 0.0)),
+            base_rgb=base_rgb,
         )
         groundmodel = palette.get("groundmodel") or GROUNDMODEL_BY_FAMILY[palette["family"]]
         entry = terrain_material(
@@ -472,81 +967,394 @@ def build_level(
             base_prefix,
             macro_prefix,
             fp.size_m,
+            detail_tile_m=float(palette.get("tile_m", detail_tile_m)),
+            detail_strength=float(palette.get("detail_strength", 0.35)),
         )
         material_entries[entry["name"]] = entry
     write_json(terrains_dir / "main.materials.json", material_entries)
 
-    # --- road material -----------------------------------------------------------
+    # --- road materials ------------------------------------------------------------
     road_dir = level_root / "art" / "road"
-    road_spec = spec.ROADS["material"]
-    road_name = road_spec["name"]
-    texture_kit.build_set(
-        road_dir,
-        road_name,
-        road_spec["family"],
-        seed=int(road_spec["seed"]),
-        size=512,
-        base_rgb=road_spec["base"],
+    surfaces = spec.ROADS.get("surfaces")
+    road_specs = (
+        {name: cfg["decal"] for name, cfg in surfaces.items()}
+        if surfaces
+        else {"legacy": spec.ROADS["material"]}
     )
-    _feather_road_alpha(road_dir / f"{road_name}_b.png")
-    write_json(
-        road_dir / "main.materials.json",
-        {
-            road_name: {
-                "name": road_name,
-                "class": "Material",
-                "mapTo": road_name,
-                "persistentId": pid(mod_id, f"material:{road_name}"),
-                "Stages": [
-                    {
-                        "baseColorMap": f"{level_url}/art/road/{road_name}_b.png",
-                        "normalMap": f"{level_url}/art/road/{road_name}_nm.png",
-                        "roughnessMap": f"{level_url}/art/road/{road_name}_r.png",
-                        "useAnisotropic": True,
-                    },
-                    {},
-                    {},
-                    {},
-                ],
-                "annotation": "DRIVABLE_ROAD",
-                "materialTag0": "RoadAndPath",
-                "materialTag1": "beamng",
-                "translucent": True,
-                "translucentBlendOp": "LerpAlpha",
-                "translucentZWrite": False,
-                "version": 1.5,
-            }
-        },
-    )
+    road_materials = {}
+    for road_spec in road_specs.values():
+        road_name = road_spec["name"]
+        texture_kit.build_set(
+            road_dir,
+            road_name,
+            road_spec["family"],
+            seed=int(road_spec["seed"]),
+            size=int(road_spec.get("size", 512)),
+            base_rgb=road_spec["base"],
+        )
+        _feather_road_alpha(
+            road_dir / f"{road_name}_b.png",
+            edge_fraction=float(road_spec.get("edge_fraction", 0.18)),
+        )
+        road_materials[road_name] = {
+            "name": road_name,
+            "class": "Material",
+            "mapTo": road_name,
+            "persistentId": pid(mod_id, f"material:{road_name}"),
+            "Stages": [
+                {
+                    "baseColorMap": f"{level_url}/art/road/{road_name}_b.png",
+                    "normalMap": f"{level_url}/art/road/{road_name}_nm.png",
+                    "roughnessMap": f"{level_url}/art/road/{road_name}_r.png",
+                    "useAnisotropic": True,
+                },
+                {},
+                {},
+                {},
+            ],
+            "annotation": "DRIVABLE_ROAD",
+            "materialTag0": "RoadAndPath",
+            "materialTag1": "beamng",
+            "translucent": True,
+            "translucentBlendOp": "LerpAlpha",
+            "translucentZWrite": False,
+            "version": 1.5,
+        }
+    write_json(road_dir / "main.materials.json", road_materials)
 
     # --- spawns ------------------------------------------------------------------
+    road_polylines = []
+    if surfaces:
+        from . import roads as road_tools
+
+        road_polylines = road_tools.road_polylines(spec, fp, data_root / "osm" / "roads.json")
+        if spec.ROADS.get("max_grade"):
+            road_polylines, _cuts = road_tools.drop_cliff_segments(
+                road_polylines,
+                dem,
+                res,
+                fp.size_m,
+                float(spec.ROADS["max_grade"]),
+                min_length_m=float(spec.ROADS.get("cliff_cut_min_length_m", 100.0)),
+            )
+    features = []
+    for entry in getattr(spec, "TRAIL_FEATURES", []) or []:
+        fx, fy = frame.lonlat_to_level(entry["lon"], entry["lat"])
+        inside = frame.inside(fx, fy, margin=0.0)
+        nearest = None
+        if inside and road_polylines:
+            nearest = min(
+                math.hypot(px - fx, py - fy)
+                for road in road_polylines
+                for px, py in _resample_polyline(road["points"], 2.0)
+            )
+        features.append(
+            {
+                "name": entry["name"],
+                "source": entry.get("source", ""),
+                "lat": entry["lat"],
+                "lon": entry["lon"],
+                "level_xy": [round(fx, 1), round(fy, 1)],
+                "inside": bool(inside),
+                "elevation_m": round(frame.height_at(fx, fy) + encoded.min_elevation_m, 1)
+                if inside
+                else None,
+                "nearest_road_m": round(nearest, 1) if nearest is not None else None,
+            }
+        )
+    report["trail_features"] = features
     spawns = []
     for entry in spec.SPAWNS:
         x, y = frame.lonlat_to_level(entry["lon"], entry["lat"])
+        heading = float(entry.get("heading_deg", 0.0))
+        snapped = False
+        if entry.get("snap_to_road") and road_polylines:
+            snap = snap_to_road(
+                x,
+                y,
+                road_polylines,
+                frame,
+                float(entry.get("snap_radius_m", 60.0)),
+                prefer_heading=float(entry["heading_deg"]) if "heading_deg" in entry else None,
+            )
+            if snap is not None:
+                x, y, heading = snap
+                snapped = True
         if not frame.inside(x, y, margin=20.0):
             raise ValueError(f"{mod_id}: spawn {entry['name']} lies outside the footprint")
         spawns.append(
             {
                 "objectname": f"spawn_{entry['name']}",
-                "label": entry["name"].replace("_", " ").title(),
+                "label": entry.get("label") or entry["name"].replace("_", " ").title(),
                 "level_xy": (round(x, 2), round(y, 2)),
                 "z": round(frame.height_at(x, y) + 0.5, 2),
-                "heading_deg": float(entry.get("heading_deg", 0.0)),
+                "heading_deg": round(heading, 1),
                 "default": bool(entry.get("default", False)),
                 "lat": entry["lat"],
                 "lon": entry["lon"],
+                "snapped_to_road": snapped,
             }
         )
     default_spawn = next((s for s in spawns if s["default"]), spawns[0])
+    spawn_clear = [(s["level_xy"][0], s["level_xy"][1]) for s in spawns]
 
     # --- roads -------------------------------------------------------------------
-    roads, road_stats = build_roads(spec, frame, data_root / "osm" / "roads.json")
+    if surfaces:
+        roads, road_stats = build_surface_roads(spec, frame, data_root / "osm" / "roads.json", fp)
+    else:
+        roads, road_stats = build_roads(spec, frame, data_root / "osm" / "roads.json")
+
+    # --- placed objects: rocks, shrubs, the forest ------------------------------------
+    placed: list[dict] = []
+    trees: list[dict] = []
+    forest_stats: dict = {}
+    catalogue: dict = {}
+    if objects_spec or forest_spec:
+        from . import objects as ob
+        from . import scene_objects, vegetation
+
+        rock_materials: set[str] = set()
+        rock_by_layer = (objects_spec or {}).get("rock_material_by_layer", {})
+        size_rules = (objects_spec or {}).get("rock_material_by_size", {})
+        if objects_spec and detected_objects:
+            rock_layers = objects_spec.get("rock_layers")
+            rock_layer_ids = {materials.index(n) for n in rock_layers} if rock_layers else None
+            placed = ob.place_objects(
+                detected_objects,
+                dem,
+                res,
+                fp.size_m,
+                encoded.min_elevation_m,
+                seed=int(objects_spec.get("seed", 1)),
+                max_rocks=int(objects_spec.get("max_rocks", 6000)),
+                max_shrubs=int(objects_spec.get("max_shrubs", 6000)),
+                layer=layer,
+                rock_layers=rock_layer_ids,
+            )
+            default_rock = (
+                next(iter(rock_by_layer.values()), "rock_talus") if rock_by_layer else "rock_talus"
+            )
+            size_cap = (objects_spec or {}).get("max_rock_size_by_layer", {})
+            kept = []
+            for obj in placed:
+                if obj["kind"] == "rock":
+                    r = int(min(max((fp.size_m / 2 - obj["y"]) / res, 0), size - 1))
+                    c = int(min(max((obj["x"] + fp.size_m / 2) / res, 0), size - 1))
+                    under = materials[int(layer[r, c])]
+                    obj["material"] = rock_by_layer.get(under, default_rock)
+                    # A block wider than a layer's threshold is another rock: the
+                    # house-sized blocks on the Moenkopi crest are Kaibab.
+                    for at_least, material in sorted(size_rules.get(under, []), key=lambda r: r[0]):
+                        if max(obj["size"][:2]) >= float(at_least):
+                            obj["material"] = material
+                    # A bump wider than this layer carries as a rock (a hummock on the
+                    # plain) is not placed: the photographs have house-sized blocks only
+                    # on the rim.
+                    if under in size_cap and max(obj["size"][:2]) > float(size_cap[under]):
+                        continue
+                    rock_materials.add(obj["material"])
+                kept.append(obj)
+            placed = kept
+        scatter = (objects_spec or {}).get("scatter")
+        if scatter:
+            densities = {
+                materials.index(name): float(per_ha)
+                for name, per_ha in scatter.items()
+                if name in materials
+            }
+            extra_rocks = ob.scatter_rocks(
+                layer,
+                dem,
+                res,
+                fp.size_m,
+                encoded.min_elevation_m,
+                densities,
+                seed=int(objects_spec.get("seed", 1)) + 5,
+                size_range=tuple(objects_spec.get("scatter_size_m", (0.3, 1.2))),
+                toe_bias=float(objects_spec.get("toe_bias", 1.0)),
+                toe_window_m=float(objects_spec.get("toe_window_m", 15.0)),
+                toe_threshold_m=float(objects_spec.get("toe_threshold_m", 1.5)),
+                max_count=int(objects_spec.get("scatter_max", 20000)),
+                min_elevation_by_layer={
+                    materials.index(name): float(elev)
+                    for name, elev in (objects_spec.get("scatter_min_elevation") or {}).items()
+                    if name in materials
+                },
+            )
+            default_rock = (
+                next(iter(rock_by_layer.values()), "rock_talus") if rock_by_layer else "rock_talus"
+            )
+            # The scattered stones of a layer may be another rock than its lidar
+            # blocks (the summit's outcrop blocks are iron-stained, its scree is
+            # not).
+            scatter_rock = {**rock_by_layer, **objects_spec.get("scatter_rock_material", {})}
+            for obj in extra_rocks:
+                r = int(min(max((fp.size_m / 2 - obj["y"]) / res, 0), size - 1))
+                c = int(min(max((obj["x"] + fp.size_m / 2) / res, 0), size - 1))
+                obj["material"] = scatter_rock.get(materials[int(layer[r, c])], default_rock)
+                rock_materials.add(obj["material"])
+            placed += extra_rocks
+        road_clear_m = float((objects_spec or {}).get("road_clear_m", 0.0))
+        if road_clear_m > 0 and surfaces:
+            from scipy import ndimage
+
+            bed_ids = [
+                materials.index(cfg["terrain_material"])
+                for cfg in surfaces.values()
+                if cfg.get("terrain_material") in materials
+            ]
+            bed = ndimage.binary_dilation(
+                np.isin(layer, bed_ids), iterations=max(1, round(road_clear_m / res))
+            )
+            before = len(placed)
+            placed = [
+                obj
+                for obj in placed
+                if obj["kind"] != "rock"
+                or not bed[
+                    int(min(max((fp.size_m / 2 - obj["y"]) / res, 0), size - 1)),
+                    int(min(max((obj["x"] + fp.size_m / 2) / res, 0), size - 1)),
+                ]
+            ]
+            report["rocks_cleared_from_roads"] = before - len(placed)
+        shrub_from_imagery = (objects_spec or {}).get("shrubs_from_imagery")
+        if shrub_from_imagery:
+            extra = vegetation.shrubs_from_imagery(
+                colour_full,
+                dem,
+                res,
+                fp.size_m,
+                encoded.min_elevation_m,
+                shrub_from_imagery,
+                seed=int(objects_spec.get("seed", 1)) + 3,
+                exclude=placed,
+                layer=layer,
+                allowed_layers={
+                    materials.index(name)
+                    for name in shrub_from_imagery.get("layers", [])
+                    if name in materials
+                },
+                max_slope_deg=shrub_from_imagery.get("max_slope_deg"),
+            )
+            placed += extra
+        cover_colours: dict = {}
+        if forest_spec:
+            cover = vegetation.cover_maps(colour_full, dem, res, forest_spec)
+            cover_colours = {
+                "conifer": cover.get("conifer_colour"),
+                "broadleaf": cover.get("broadleaf_colour"),
+            }
+            road_ids = [
+                materials.index(cfg["terrain_material"])
+                for cfg in (surfaces or {}).values()
+                if cfg.get("terrain_material") in materials
+            ]
+            road_mask = np.isin(layer, road_ids) if surfaces else None
+            spawn_exclusions = [
+                (x, y, float(forest_spec.get("spawn_clear_m", 12.0))) for x, y in spawn_clear
+            ]
+            chm_file = data_root / "terrain" / "chm.npy"
+            if forest_spec.get("source") == "chm" and chm_file.is_file():
+                trees, forest_stats = vegetation.trees_from_chm(
+                    np.load(chm_file),
+                    dem,
+                    colour_full,
+                    res,
+                    fp.size_m,
+                    encoded.min_elevation_m,
+                    forest_spec,
+                    seed=int(forest_spec.get("seed", 7)),
+                    road_mask=road_mask,
+                    exclude_points=spawn_exclusions,
+                )
+            else:
+                trees, forest_stats = vegetation.plant(
+                    cover,
+                    dem,
+                    res,
+                    fp.size_m,
+                    encoded.min_elevation_m,
+                    forest_spec,
+                    seed=int(forest_spec.get("seed", 7)),
+                    road_mask=road_mask,
+                    exclude_points=spawn_exclusions,
+                )
+        # Nothing stands on a spawn.
+        clear_r = float((objects_spec or {}).get("spawn_clear_m", 6.0))
+        placed = [
+            o
+            for o in placed
+            if all(
+                (o["x"] - sx) ** 2 + (o["y"] - sy) ** 2 > clear_r * clear_r
+                for sx, sy in spawn_clear
+            )
+        ]
+        tree_species = {t["species"] for t in trees}
+        shrub_by_layer = (objects_spec or {}).get("shrub_material_by_layer", {})
+        shrub_families = (objects_spec or {}).get("shrub_materials") or {}
+        default_shrub = next(iter(shrub_families), "shrub")
+        shrub_materials: set[str] = set()
+        # Species by size first (a bush the lidar measured at 2 m is a juniper on any
+        # layer), then by layer.
+        height_rules = (objects_spec or {}).get("shrub_material_by_height", [])
+        by_height = sorted(((float(h), name) for h, name in height_rules), reverse=True)
+        for obj in placed:
+            if obj["kind"] != "shrub":
+                continue
+            r = int(min(max((fp.size_m / 2 - obj["y"]) / res, 0), size - 1))
+            c = int(min(max((obj["x"] + fp.size_m / 2) / res, 0), size - 1))
+            obj["material"] = shrub_by_layer.get(materials[int(layer[r, c])], default_shrub)
+            for min_h, name in by_height:
+                if float(obj["size"][2]) >= min_h:
+                    obj["material"] = name
+                    break
+            family = shrub_families.get(obj["material"]) or {}
+            cap = float(family.get("max_width_m", 0.0))
+            if cap > 0 and max(obj["size"][:2]) > cap:
+                obj["size"] = [min(obj["size"][0], cap), min(obj["size"][1], cap), obj["size"][2]]
+            shrub_materials.add(obj["material"])
+        has_shrubs = shrub_materials
+        if not rock_materials and any(o["kind"] == "rock" for o in placed):
+            rock_materials = {"rock_talus"}
+        catalogue = scene_objects.build_shapes(
+            spec,
+            level_root,
+            level_url,
+            lambda key: pid(mod_id, key),
+            tree_species=tree_species,
+            rock_materials=rock_materials,
+            shrub=has_shrubs,
+            cover_colours=cover_colours,
+        )
+        forest_stats = {
+            **forest_stats,
+            **scene_objects.write_forest(
+                spec,
+                level_root,
+                level_url,
+                lambda key: pid(mod_id, key),
+                catalogue,
+                placed_objects=placed,
+                trees=trees,
+                seed=int((objects_spec or forest_spec).get("seed", 5)),
+                dem=dem,
+                res=res,
+                fp_size_m=fp.size_m,
+                min_elevation=encoded.min_elevation_m,
+            ),
+        }
+        forest_stats["rocks"] = sum(1 for o in placed if o["kind"] == "rock")
+        forest_stats["shrubs"] = sum(1 for o in placed if o["kind"] == "shrub")
+    report["forest"] = forest_stats
+    report["shapes"] = catalogue.get("shapes", [])
 
     # --- previews + minimap --------------------------------------------------------
-    previews = build_previews(dem, res, fp, data_root / "naip", frame, spawns, level_root, mod_id)
+    previews = build_previews(
+        dem, res, fp, data_root / "naip", frame, spawns, level_root, mod_id, colour_full=colour_full
+    )
     from PIL import Image
 
-    Image.fromarray(naip_mosaic(data_root / "naip", fp, 1024)).save(
+    Image.fromarray(colour_full).resize((1024, 1024), Image.LANCZOS).save(
         level_root / f"{mod_id}_minimap.png", format="PNG", compress_level=6
     )
 
@@ -585,8 +1393,27 @@ def build_level(
                 "persistentId": pid(mod_id, "roads"),
                 "__parent": "MissionGroup",
             },
-        ],
+        ]
+        + (
+            [
+                {
+                    "name": "forest",
+                    "class": "SimGroup",
+                    "persistentId": pid(mod_id, "forest"),
+                    "__parent": "MissionGroup",
+                }
+            ]
+            if catalogue
+            else []
+        ),
     )
+    if catalogue:
+        from . import scene_objects
+
+        write_items(
+            main / "MissionGroup" / "forest" / "items.level.json",
+            [scene_objects.forest_object(spec, level_url, lambda key: pid(mod_id, key))],
+        )
     write_items(
         main / "MissionGroup" / "Level_objects" / "items.level.json",
         [
@@ -624,7 +1451,11 @@ def build_level(
                 "class": "TerrainBlock",
                 "persistentId": pid(mod_id, "theTerrain"),
                 "__parent": "terrain",
-                "position": [-footprint / 2.0, -footprint / 2.0, 0],
+                # Half a square in from the footprint corner: the game puts sample
+                # (0, 0) at the block's position, the GIS grid holds the ground at each
+                # cell's centre, so this lines the two up and every object, road and
+                # spawn placed from the grid lands on the ground the game draws.
+                "position": [-footprint / 2.0 + res / 2.0, -footprint / 2.0 + res / 2.0, 0],
                 "rotationMatrix": [1, 0, 0, 0, 1, 0, 0, 0, 1],
                 "terrainFile": f"{level_url}/theTerrain.ter",
                 "materialTextureSet": texture_set_name,
@@ -812,7 +1643,7 @@ def build_level(
             "materials": materials,
             "texture_set": texture_set_name,
             "terrain_block": {
-                "position": [-footprint / 2.0, -footprint / 2.0, 0],
+                "position": [-footprint / 2.0 + res / 2.0, -footprint / 2.0 + res / 2.0, 0],
                 "squareSize": res,
                 "maxHeight": encoded.max_height_m,
                 "size": size,

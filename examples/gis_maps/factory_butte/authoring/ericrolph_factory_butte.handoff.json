@@ -22,6 +22,11 @@
       -110.87652342589959
     ]
   },
+  "forest": {},
+  "imagery": {
+    "delight": false
+  },
+  "layer_tints": {},
   "roads": {
     "by_type": {
       "primary": 1,
@@ -35,8 +40,8 @@
   "schema": "ericrolph-beamng-maps-handoff-v1",
   "shipped": {
     "art/terrains/main.materials.json": {
-      "sha256": "3236d7f05c9c32364c2073123fd3d78d7cabe859a7ff251820769f4cf0f90f8b",
-      "size": 11155
+      "sha256": "480f03914c72682d69ba79698b8e2ea9f9ee2de3a4cbad03a6129553e214137a",
+      "size": 11197
     },
     "info.json": {
       "sha256": "6f6111dc04ce926389c8a12b017b9eec741b331d0999dbf0308f6cef3b67c885",
@@ -72,6 +77,7 @@
       }
     ],
     "imagery": "USGS/USDA NAIP orthoimagery via The National Map (public domain)",
+    "pointcloud": null,
     "roads": "OpenStreetMap contributors, ODbL 1.0"
   },
   "spawns": [
@@ -86,6 +92,7 @@
       ],
       "lon": -110.905,
       "objectname": "spawn_butte_base",
+      "snapped_to_road": false,
       "z": 53.13
     },
     {
@@ -99,6 +106,7 @@
       ],
       "lon": -110.895,
       "objectname": "spawn_badlands_south",
+      "snapped_to_road": false,
       "z": 50.05
     },
     {
@@ -112,6 +120,7 @@
       ],
       "lon": -110.918,
       "objectname": "spawn_wash_west",
+      "snapped_to_road": false,
       "z": 74.04
     }
   ],
@@ -164,12 +173,13 @@
     "terrain_block": {
       "maxHeight": 106.0,
       "position": [
-        -2048.0,
-        -2048.0,
+        -2047.5,
+        -2047.5,
         0
       ],
       "size": 4096,
       "squareSize": 1.0
     }
-  }
+  },
+  "trail_features": []
 }

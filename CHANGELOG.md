@@ -12,6 +12,12 @@ uses semantic versioning after the initial alpha series.
   OpenStreetMap roads) by a deterministic fetch, terrain, level, dist pipeline with
   per-map handoff evidence, a `gis` dependency extra, static gates in
   `tests/test_gis_maps_pack.py`, local deploy/install scripts and a release workflow
+- Give the GIS maps pack an art pass on Meteor Crater and Black Bear Pass: orthoimagery
+  de-lit against the DEM, lidar bumps turned into placed boulders and shrubs (wires,
+  fences and buildings flattened), road beds carved and painted per surface, procedural
+  Collada shapes and texture families, a Black Bear Pass forest planted from the USGS
+  3DEP point cloud's canopy height model (`laspy` joins the `gis` extra), review sheets
+  and a critic rubric with the verdicts recorded per map
 - Add an opt-in official-client capability gauntlet that exercises all 57 tools, every MCP
   resource and prompt, Blender-evidenced ramp authoring, grounded in-game placement, map objects,
   triggers, leased native AI, emergency-stop idempotence, retail vision refusal, and mission reset

@@ -22,6 +22,11 @@
       -122.14975462446839
     ]
   },
+  "forest": {},
+  "imagery": {
+    "delight": false
+  },
+  "layer_tints": {},
   "roads": {
     "by_type": {
       "track": 1
@@ -33,8 +38,8 @@
   "schema": "ericrolph-beamng-maps-handoff-v1",
   "shipped": {
     "art/terrains/main.materials.json": {
-      "sha256": "a9e2b7aaa9b5a025bd5864a74e4e347b999c3ad56f7b761cdb4b42e6b5c76d9d",
-      "size": 13840
+      "sha256": "dadd3b93f21d92e6e3b0e7a445e39c6ac51bce4e186b856ca271adb6198265c9",
+      "size": 13892
     },
     "info.json": {
       "sha256": "f0aa592a08abd38ead83ac1e1d6a6cccf99296b5eec781cb0b08afce92fa1b55",
@@ -70,6 +75,7 @@
       }
     ],
     "imagery": "USGS/USDA NAIP orthoimagery via The National Map (public domain)",
+    "pointcloud": null,
     "roads": "OpenStreetMap contributors, ODbL 1.0"
   },
   "spawns": [
@@ -84,6 +90,7 @@
       ],
       "lon": -122.19,
       "objectname": "spawn_pumice_plain",
+      "snapped_to_road": false,
       "z": 205.39
     },
     {
@@ -97,6 +104,7 @@
       ],
       "lon": -122.19,
       "objectname": "spawn_crater_mouth",
+      "snapped_to_road": false,
       "z": 705.59
     },
     {
@@ -110,6 +118,7 @@
       ],
       "lon": -122.215,
       "objectname": "spawn_toutle_hummocks",
+      "snapped_to_road": false,
       "z": 100.42
     }
   ],
@@ -164,12 +173,13 @@
     "terrain_block": {
       "maxHeight": 1547.0,
       "position": [
-        -3072.0,
-        -3072.0,
+        -3071.25,
+        -3071.25,
         0
       ],
       "size": 4096,
       "squareSize": 1.5
     }
-  }
+  },
+  "trail_features": []
 }

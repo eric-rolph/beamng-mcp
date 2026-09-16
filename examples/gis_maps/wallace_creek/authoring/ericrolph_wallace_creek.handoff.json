@@ -22,6 +22,11 @@
       -119.79188316568509
     ]
   },
+  "forest": {},
+  "imagery": {
+    "delight": false
+  },
+  "layer_tints": {},
   "roads": {
     "by_type": {
       "track": 8,
@@ -34,8 +39,8 @@
   "schema": "ericrolph-beamng-maps-handoff-v1",
   "shipped": {
     "art/terrains/main.materials.json": {
-      "sha256": "e61fb0168276cbb988beabd86da73d141e3162edbfae470240c74b38b40c8890",
-      "size": 11202
+      "sha256": "22fbe4de65b64b6a7a0353993a7f746a69773f60d0e11a4019d7b69c5fe1c99c",
+      "size": 11244
     },
     "info.json": {
       "sha256": "8ec22c0baaa26a568fefc4f4e0a991bbaddf0bf60290a1e1e3a79bc9983a8d7c",
@@ -77,6 +82,7 @@
       }
     ],
     "imagery": "USGS/USDA NAIP orthoimagery via The National Map (public domain)",
+    "pointcloud": null,
     "roads": "OpenStreetMap contributors, ODbL 1.0"
   },
   "spawns": [
@@ -91,6 +97,7 @@
       ],
       "lon": -119.8275,
       "objectname": "spawn_wallace_creek_offset",
+      "snapped_to_road": false,
       "z": 100.94
     },
     {
@@ -104,6 +111,7 @@
       ],
       "lon": -119.805,
       "objectname": "spawn_elkhorn_scarp",
+      "snapped_to_road": false,
       "z": 117.98
     },
     {
@@ -117,6 +125,7 @@
       ],
       "lon": -119.83,
       "objectname": "spawn_plain_west",
+      "snapped_to_road": false,
       "z": 65.87
     }
   ],
@@ -176,12 +185,13 @@
     "terrain_block": {
       "maxHeight": 417.0,
       "position": [
-        -2048.0,
-        -2048.0,
+        -2047.5,
+        -2047.5,
         0
       ],
       "size": 4096,
       "squareSize": 1.0
     }
-  }
+  },
+  "trail_features": []
 }

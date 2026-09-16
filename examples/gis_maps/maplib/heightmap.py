@@ -151,6 +151,26 @@ def fill_holes(dem: np.ndarray) -> tuple[np.ndarray, int]:
     return filled.astype("float32"), count
 
 
+def fill_pits(
+    dem: np.ndarray, res: float, close_m: float, depth_m: float
+) -> tuple[np.ndarray, int]:
+    """Fill holes narrower than ``close_m`` and deeper than ``depth_m`` (a drill shaft,
+    a sump, a lidar dropout) to the grey closing's floor; gullies wider than the disc
+    are landform and stay."""
+
+    from scipy import ndimage
+
+    r = max(1, round(close_m / 2.0 / res))
+    yy, xx = np.ogrid[-r : r + 1, -r : r + 1]
+    disc = (xx * xx + yy * yy) <= r * r
+    closed = ndimage.grey_closing(dem, footprint=disc, mode="nearest")
+    pits = (closed - dem) > depth_m
+    count = int(pits.sum())
+    if count:
+        dem = np.where(pits, closed, dem).astype("float32")
+    return dem, count
+
+
 def despike(dem: np.ndarray, res: float, max_step_m: float) -> tuple[np.ndarray, int]:
     """Clamp isolated single-sample spikes (lidar noise returns) to their neighbourhood median."""
 
@@ -162,6 +182,33 @@ def despike(dem: np.ndarray, res: float, max_step_m: float) -> tuple[np.ndarray,
     if count:
         dem = np.where(spikes, median, dem).astype("float32")
     return dem, count
+
+
+def sample_bilinear(dem: np.ndarray, res: float, fp_size_m: float, xs, ys):
+    """Ground height at level (x, y) by bilinear interpolation of the DEM.
+
+    Cell (r, c) holds the ground at the centre of its metre, x = c*res - half + res/2,
+    y = half - r*res - res/2 (rows run south); the terrain block is positioned so the
+    game's own sample grid sits on those centres, so this is the height the game
+    puts under the point, not the nearest cell's.
+    """
+
+    n = dem.shape[0]
+    half = fp_size_m / 2.0
+    col = np.clip((np.asarray(xs, dtype="float64") + half) / res - 0.5, 0.0, n - 1.001)
+    row = np.clip((half - np.asarray(ys, dtype="float64")) / res - 0.5, 0.0, n - 1.001)
+    c0 = col.astype(int)
+    r0 = row.astype(int)
+    fc = col - c0
+    fr = row - r0
+    c1 = np.minimum(c0 + 1, n - 1)
+    r1 = np.minimum(r0 + 1, n - 1)
+    return (
+        dem[r0, c0] * (1 - fc) * (1 - fr)
+        + dem[r0, c1] * fc * (1 - fr)
+        + dem[r1, c0] * (1 - fc) * fr
+        + dem[r1, c1] * fc * fr
+    )
 
 
 def slope_degrees(dem: np.ndarray, res: float) -> np.ndarray:
@@ -205,8 +252,18 @@ def ambient_occlusion(dem: np.ndarray, res: float, radius_px: int = 24) -> np.nd
     return (1.0 - 0.6 * depth).astype("float32")
 
 
-def classify(dem: np.ndarray, res: float, terrain_spec: dict) -> tuple[np.ndarray, dict]:
-    """Paint a u8 layer map from slope/elevation rules; first matching rule wins."""
+def classify(
+    dem: np.ndarray,
+    res: float,
+    terrain_spec: dict,
+    exg: np.ndarray | None = None,
+    canopy: np.ndarray | None = None,
+) -> tuple[np.ndarray, dict]:
+    """Paint a u8 layer map from slope/elevation/greenness rules; first match wins.
+
+    ``exg`` is the excess-green index (2G - R - B, 0..1 units) of the de-lit imagery on
+    the DEM grid; rules may carry ``min_exg`` / ``max_exg`` so turf is not painted rock.
+    """
 
     from scipy import ndimage
 
@@ -214,6 +271,10 @@ def classify(dem: np.ndarray, res: float, terrain_spec: dict) -> tuple[np.ndarra
     rules = terrain_spec["classify"]["rules"]
     default = materials.index(terrain_spec["classify"]["default"])
     slope = ndimage.gaussian_filter(slope_degrees(dem, res), sigma=1.5)
+    gy, gx = np.gradient(ndimage.gaussian_filter(dem.astype("float64"), 2.0), res)
+    # |sin(aspect)|: 1 on a slope facing east or west, 0 facing north or south. A
+    # bedded texture projected top-down runs as ledges on one and stripes on the other.
+    ew = np.abs(gx) / np.maximum(np.hypot(gx, gy), 1e-6)
     lo, hi = float(np.nanmin(dem)), float(np.nanmax(dem))
     frac = (dem - lo) / max(hi - lo, 1e-6)
     layer = np.full(dem.shape, default, dtype="uint8")
@@ -224,6 +285,20 @@ def classify(dem: np.ndarray, res: float, terrain_spec: dict) -> tuple[np.ndarra
             mask &= slope >= float(rule["min_slope"])
         if "max_slope" in rule:
             mask &= slope <= float(rule["max_slope"])
+        if "ew_facing" in rule:
+            mask &= (ew > 0.7) == bool(rule["ew_facing"])
+        if "min_canopy" in rule:
+            mask &= (canopy >= float(rule["min_canopy"])) if canopy is not None else False
+        if "max_canopy" in rule:
+            mask &= (canopy <= float(rule["max_canopy"])) if canopy is not None else True
+        if "min_exg" in rule and exg is not None:
+            mask &= exg >= float(rule["min_exg"])
+        if "max_exg" in rule and exg is not None:
+            mask &= exg <= float(rule["max_exg"])
+        if "min_elevation" in rule:
+            mask &= dem >= float(rule["min_elevation"])
+        if "max_elevation" in rule:
+            mask &= dem <= float(rule["max_elevation"])
         if "min_elevation_frac" in rule:
             mask &= frac >= float(rule["min_elevation_frac"])
         if "max_elevation_frac" in rule:

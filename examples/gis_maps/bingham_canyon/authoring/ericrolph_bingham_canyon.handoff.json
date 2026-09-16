@@ -22,6 +22,11 @@
       -112.11428900634546
     ]
   },
+  "forest": {},
+  "imagery": {
+    "delight": false
+  },
+  "layer_tints": {},
   "roads": {
     "by_type": {
       "service": 139,
@@ -35,8 +40,8 @@
   "schema": "ericrolph-beamng-maps-handoff-v1",
   "shipped": {
     "art/terrains/main.materials.json": {
-      "sha256": "a56f90f7b43414e06c3d909fee7170496a0ed76a606b4eb017548636949fe268",
-      "size": 11298
+      "sha256": "6327ecadd4a4b0dbad6ff782e376ee81f4a17535782336709c4b197041581e0f",
+      "size": 11340
     },
     "info.json": {
       "sha256": "70a0e445d380667fb15ccdc80ac6d360407d1dedbc6dbe7c48e66a9d6fa57951",
@@ -72,6 +77,7 @@
       }
     ],
     "imagery": "USGS/USDA NAIP orthoimagery via The National Map (public domain)",
+    "pointcloud": null,
     "roads": "OpenStreetMap contributors, ODbL 1.0"
   },
   "spawns": [
@@ -86,6 +92,7 @@
       ],
       "lon": -112.128,
       "objectname": "spawn_pit_rim_east",
+      "snapped_to_road": false,
       "z": 826.92
     },
     {
@@ -99,6 +106,7 @@
       ],
       "lon": -112.151,
       "objectname": "spawn_pit_floor",
+      "snapped_to_road": false,
       "z": 77.59
     },
     {
@@ -112,6 +120,7 @@
       ],
       "lon": -112.151,
       "objectname": "spawn_north_terraces",
+      "snapped_to_road": false,
       "z": 738.91
     }
   ],
@@ -164,12 +173,13 @@
     "terrain_block": {
       "maxHeight": 1556.0,
       "position": [
-        -3072.0,
-        -3072.0,
+        -3071.25,
+        -3071.25,
         0
       ],
       "size": 4096,
       "squareSize": 1.5
     }
-  }
+  },
+  "trail_features": []
 }

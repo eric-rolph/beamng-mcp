@@ -51,5 +51,6 @@ examples/giant_props/**/__pycache__/
 examples/gis_maps/*/data/
 examples/gis_maps/*/mod/
 examples/gis_maps/*/textures/
+examples/gis_maps/*/authoring/critic/
 examples/gis_maps/_downloads/
 examples/gis_maps/**/__pycache__/

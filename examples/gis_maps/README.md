@@ -46,6 +46,62 @@ Editor, then lay roads and textures. Each step is a stage of `build.py`:
 4. **dist** (`maplib/packaging.py`): a `ZIP_STORED` archive with only approved BeamNG
    roots, monotonic never-in-the-future member timestamps and a SHA-256 lock.
 
+### The art pass (Meteor Crater and Black Bear Pass)
+
+Two maps carry the full treatment; each piece is a spec block, so any map can opt in.
+
+- **`IMAGERY`** (`maplib/imagery.py`): the orthoimagery is de-lit against the DEM. The
+  baked sun is fitted (hillshade correlation, bounded by the flight's real geometry),
+  slope shading, a cast-shadow horizon test and sky occlusion are modelled, and the
+  illumination is divided out with a Minnaert exponent fitted from the image. Cast
+  shadows borrow the lit neighbourhood's colour and keep only their relative texture;
+  a steep cell borrows only from lit steep cells and is never lifted past their
+  median; the flight's snowfields are found as bright colourless cells (gated by
+  aspect) and refilled the same way, with the ring's grain carried in; every refilled
+  field is matched to its ring's mean colour and grain band by band; where a canopy
+  height model exists, the crowns' cast shadows are refilled and the crowns
+  themselves are repainted as the ground between the trunks. A per-layer flat-field binned on the fitted sun's incidence takes
+  out what the model left, and a palette entry may pull its layer's base colour
+  toward its own base (`base_pull`) or take less of the imagery tint
+  (`tint_weight`). Detail tints blend toward the measured colour under each layer.
+- **`OBJECTS`** (`maplib/objects.py`, `maplib/meshgen.py`): a grey opening lifts every
+  compact bump out of the surface (junipers, boulders, fences, the visitor centre on
+  the crater's highest-hit grid; talus boulders on bare-earth 3DEP). The imagery under
+  a bump decides rock or shrub; wires, fences and walls (long thin blobs of any size)
+  and buildings are flattened and dropped, rows of posts on a straight line too. Rocks
+  and shrubs come back as procedural Collada shapes (no Blender) placed as Forest
+  items, sized to their own footprint and height, with the rock and shrub material
+  chosen by the terrain layer under them (`rock_material_by_layer`,
+  `shrub_material_by_layer`). The terrain block sits half a square in from the
+  footprint corner so the game's height samples land on the GIS cell centres, and
+  every item is seated on the bilinear ground under its final position.
+- **`FOREST`** (`maplib/vegetation.py`, `maplib/pointcloud.py`): with a
+  `SOURCES["pointcloud"]` entry (a USGS 3DEP resource on the public Entwine index)
+  the fetch stage streams the footprint's LAZ nodes through `laspy`, grids the
+  highest and the ground returns at 1 m and deletes the points; the terrain stage
+  turns that into a canopy height model and `FOREST["source"] = "chm"` plants a
+  tree at every measured top with its measured height (species by elevation and
+  imagery). Without a point cloud, tree cover is classified from the imagery and
+  planted on a jittered grid thinned by local cover. Three crossed alpha-tested cards
+  plus top-view whorl tiers on a real trunk, trunk collision.
+- **`ROADS["carve"]`** (`maplib/roads.py`): centrelines get a bounded smoothed grade
+  line and a flat, feathered bed; the bed is painted with a road terrain material
+  (asphalt / dirt / gravel ground model) and decalled per surface.
+- **Textures** (`maplib/texture_kit.py`, `maplib/foliage_textures.py`): periodic
+  Worley cells (each with its own tilted facet) and anisotropic noise give talus
+  blocks, ejecta chunks, fractured cliff plates, bedded ledges with red interbeds and
+  varnish, shale plates, tussocks over bare soil and rutted decals their shapes, with
+  per-channel tints for lichen, soil and rust; 1024 px detail sets. Foliage cards,
+  bark and rock sets are generated the same way. Terrain materials tile in world
+  space, so road beds use isotropic families and the decal carries the ruts.
+- **Review** (`critic_sheets.py`, `critic_rubric.md`): `python
+  examples/gis_maps/critic_sheets.py <key>` renders the sheets a critic looks at
+  (overview under the level sun, driver and drone views from every spawn with all
+  placed objects and the detail textures tiled in the near field, texture swatches,
+  every shape rendered through its own textures, placement map, road profile) into
+  `<map>/authoring/critic/`. The rubric says what "convincing" means per sheet; the
+  critic's verdict per round is recorded in each map's `DESIGN.md`.
+
 ```bash
 pip install -e ".[dev]"                                # rasterio, scipy, requests via the gis extra
 python examples/gis_maps/build.py --list
@@ -154,6 +210,11 @@ the terrain failed to load.
   runs east then north. The exported `terrainheightmap.png` is written north-up like any
   map image. If a manual Import Terrain of the PNG comes out mirrored north-south, flip
   the image vertically; the `.ter` the pack ships is already correct and authoritative.
+  The shipped base texture set (`t_base_*.png`) is written south-up for the same
+  reason: the engine maps an image's first row onto the terrain's y = 0, so a north-up
+  base came out mirrored against the heightmap in-game (the visitor centre on the
+  wrong rim). Every other image the pack writes (previews, thumbnails, the exported
+  heightmap) stays north-up.
 - **Base texture size**: a TerrainMaterial's `*BaseTexSize` is world metres, not pixels
   (a shipped 2048 m level sets 2048 while its texture set declares 2048 pixels). The pack
   sets it to the footprint so the orthoimagery covers the level exactly once.

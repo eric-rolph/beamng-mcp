@@ -134,6 +134,13 @@ def test_spec_materials_and_rules_agree(map_key: str) -> None:
         assert set(rule) - {"material"} <= {
             "min_slope",
             "max_slope",
+            "min_elevation",
+            "max_elevation",
+            "min_exg",
+            "max_exg",
+            "min_canopy",
+            "max_canopy",
+            "ew_facing",
             "min_elevation_frac",
             "max_elevation_frac",
         }
@@ -335,7 +342,9 @@ def test_scene_tree_parents_and_terrain_block(map_key: str) -> None:
     assert len(terrain) == 1
     block = terrain[0]
     footprint = spec.SITE["size_px"] * spec.SITE["square_size_m"]
-    assert block["position"] == [-footprint / 2, -footprint / 2, 0]
+    # Half a square in: the game's sample (0, 0) sits on the GIS grid's first cell centre.
+    res = spec.SITE["square_size_m"]
+    assert block["position"] == [-footprint / 2 + res / 2, -footprint / 2 + res / 2, 0]
     assert block["squareSize"] == spec.SITE["square_size_m"]
     assert block["maxHeight"] == handoff["terrain"]["max_height_m"]
     assert block["terrainFile"] == f"/levels/{spec.MOD_ID}/theTerrain.ter"
@@ -434,7 +443,11 @@ def test_roads_are_inside_and_draped(map_key: str) -> None:
             assert -half <= x <= half and -half <= y <= half
             assert 0.0 <= z <= handoff["terrain"]["max_height_m"]
             assert 2.0 <= width <= 12.0
-    for stage in road_materials[spec.ROADS["material"]["name"]]["Stages"][:1]:
+    # Every road material the level ships (the surface set, or the single default)
+    # has its textures in the mod.
+    used = {road["material"] for road in roads}
+    assert used <= set(road_materials)
+    for stage in [road_materials[name]["Stages"][0] for name in sorted(used)]:
         for value in stage.values():
             if isinstance(value, str) and value.startswith("/levels/"):
                 assert (root / value.split(f"/levels/{spec.MOD_ID}/", 1)[1]).is_file(), value
@@ -656,3 +669,532 @@ def test_install_local_release_download_verifies_and_locks(
             "gis-maps-v1", ["meteor_crater"], repo="o/r", download=fake_download
         )
     assert not (dist / "meteor_crater_ericrolph.zip").exists()
+
+
+# ---------------------------------------------------------------------------
+# Art-pass toolkit gates (no build needed): meshes, shadows, road beds, objects, forest
+# ---------------------------------------------------------------------------
+
+
+def _load_art_modules():
+    load_maplib()
+    from maplib import imagery, meshgen, objects, roads, vegetation
+
+    return imagery, meshgen, objects, roads, vegetation
+
+
+def test_meshgen_writes_collada_beamng_can_read(tmp_path: Path) -> None:
+    """A rock and a spruce: Z-up metres, one geometry per mesh, Colmesh-N collision only."""
+
+    import xml.etree.ElementTree as ET
+
+    _, meshgen, _, _, _ = _load_art_modules()
+    ns = {"c": "http://www.collada.org/2005/11/COLLADASchema"}
+    rock = meshgen.write_dae(
+        tmp_path / "rock.dae", meshgen.rock_meshes(3, (2.0, 1.5, 1.0), material="m_rock"), "rock"
+    )
+    spruce = meshgen.write_dae(
+        tmp_path / "spruce.dae",
+        meshgen.conifer_meshes(
+            4, 12.0, 4.0, card_material="m_cards", bark_material="m_bark", name="spruce"
+        ),
+        "spruce",
+    )
+    assert rock["extent_m"] == [2.0, 1.5, 1.0] and rock["triangles"] > 1000
+    assert spruce["extent_m"][2] == 12.0 and spruce["triangles"] < 120
+    for name in ("rock", "spruce"):
+        root = ET.parse(tmp_path / f"{name}.dae").getroot()
+        assert root.find("c:asset/c:up_axis", ns).text == "Z_UP"
+        assert root.find("c:asset/c:unit", ns).get("meter") == "1"
+        nodes = root.findall("c:library_visual_scenes/c:visual_scene/c:node", ns)
+        names = [n.get("name") for n in nodes]
+        assert "Colmesh-1" in names, names
+        for node in nodes:
+            inst = node.find("c:instance_geometry", ns)
+            has_material = inst.find("c:bind_material", ns) is not None
+            assert has_material != node.get("name").startswith("Colmesh"), node.get("name")
+        for tri in root.findall(".//c:triangles", ns):
+            count = int(tri.get("count"))
+            assert len(tri.find("c:p", ns).text.split()) == count * 9
+
+
+def test_cast_shadows_fall_away_from_the_sun() -> None:
+    imagery, _, _, _, _ = _load_art_modules()
+    n = 400
+    dem = np.zeros((n, n), dtype="float32")
+    dem[190:210, 195:205] = 30.0  # a 30 m wall at the centre
+    for azimuth, expect in ((90, "west"), (0, "south"), (180, "north"), (270, "east")):
+        shadow = imagery.cast_shadows(dem, 1.0, azimuth, 30.0) < 0.5
+        rows, cols = np.nonzero(shadow)
+        assert rows.size, azimuth
+        side = {
+            "west": cols.max() < 195,
+            "east": cols.min() > 204,
+            "south": rows.min() > 209,
+            "north": rows.max() < 190,
+        }[expect]
+        assert side, f"sun az {azimuth}: shadow should fall {expect}"
+        length = (
+            (cols.max() - cols.min()) if expect in ("west", "east") else (rows.max() - rows.min())
+        )
+        assert 40 <= length <= 60, f"30 m wall at 30 deg altitude throws ~52 m, got {length}"
+
+
+def test_road_carve_flattens_the_bed_across_and_along(tmp_path: Path) -> None:
+    _, _, _, roads, _ = _load_art_modules()
+    n, res = 256, 1.0
+    y, x = np.mgrid[0:n, 0:n].astype("float32")
+    dem = 100.0 + 0.3 * x + 0.5 * np.sin(y / 3.0)  # cross-slope east-west, ripples north-south
+    polyline = [
+        {
+            "id": "r",
+            "highway": "track",
+            "surface": "dirt",
+            "width": 4.0,
+            "points": [(0.0, -100.0), (0.0, 100.0)],
+            "name": "",
+        }
+    ]
+    carved, mask, surface, stats = roads.carve(
+        dem, res, n * res, polyline, profile_window_m=20.0, feather_m=2.0, max_cut_fill_m=2.0
+    )
+    assert stats["roads"] == 1 and mask.sum() > 600 and set(np.unique(surface)) <= {0, 2}
+    centre = n // 2
+    bed = carved[40:-40, centre - 1 : centre + 2]
+    assert np.abs(bed[:, 0] - bed[:, 2]).max() < 0.02, "no cross-slope left on the bed"
+    assert (
+        np.std(np.diff(carved[40:-40, centre], 2)) < np.std(np.diff(dem[40:-40, centre], 2)) * 0.5
+    )
+    assert np.array_equal(carved[:, : centre - 6], dem[:, : centre - 6]), (
+        "outside the feather nothing moves"
+    )
+
+
+def test_detect_objects_lifts_a_boulder_and_leaves_the_ground() -> None:
+    _, _, objects, _, _ = _load_art_modules()
+    n, res = 200, 0.5
+    y, x = np.mgrid[0:n, 0:n].astype("float32") * res
+    dem = 10.0 + 0.02 * x
+    # A boulder-shaped bump: steep sides, 3 m across, so the whole of it is narrower
+    # than the 6 m opening (a Gaussian skirt wider than the footprint would survive it).
+    bump = 1.2 * np.exp(-(((x - 50) ** 2 + (y - 50) ** 2) / (2 * 0.8**2)))
+    ground, found, stats = objects.detect_objects(
+        dem + bump, res, open_m=6.0, min_height_m=0.4, min_area_m2=1.0, max_area_m2=80.0
+    )
+    assert stats["objects"] == 1 and 1.0 <= found[0]["peak_m"] <= 1.25
+    assert abs(found[0]["row"] - 100) < 1.5 and abs(found[0]["col"] - 100) < 1.5
+    assert np.abs(ground - dem).max() < 0.06, "the ground under the boulder is the plane again"
+    counts = objects.classify_objects(found, None, n, rock_only=True)
+    assert counts == {"rock": 1, "shrub": 0, "linear": 0}
+    placed = objects.place_objects(found, ground, res, n * res, 10.0)
+    assert len(placed) == 1 and placed[0]["kind"] == "rock" and placed[0]["size"][2] >= 1.0
+
+
+def test_ept_hierarchy_walk_visits_only_overlapping_nodes() -> None:
+    """A fake Entwine index: the walker opens sub-hierarchies and skips distant nodes."""
+
+    load_maplib()
+    from maplib import pointcloud as pc
+
+    root = [0.0, 0.0, 0.0, 1024.0, 1024.0, 1024.0]
+    files = {
+        "0-0-0-0": {"0-0-0-0": 10, "1-0-0-0": 20, "1-1-0-0": 30, "2-0-0-0": -1, "2-3-3-0": 5},
+        "2-0-0-0": {"2-0-0-0": 7, "3-0-0-0": 3, "3-1-1-0": 4},
+    }
+
+    class Session:
+        def get(self, url, timeout=0):
+            key = url.rsplit("/", 1)[-1].replace(".json", "")
+
+            class Response:
+                def raise_for_status(self):
+                    pass
+
+                def json(self):
+                    return files[key]
+
+            return Response()
+
+    nodes = pc.walk_hierarchy(Session(), "fake", root, (10.0, 10.0, 200.0, 200.0))
+    assert "2-3-3-0" not in nodes, "a node in the far corner must not be visited"
+    assert "1-1-0-0" not in nodes
+    assert set(nodes) == {"0-0-0-0", "1-0-0-0", "2-0-0-0", "3-0-0-0", "3-1-1-0"}
+    assert pc.node_bounds_xy(root, "2-3-3-0") == (768.0, 768.0, 1024.0, 1024.0)
+
+
+def test_canopy_tops_and_heights_come_from_the_lidar(tmp_path: Path) -> None:
+    """Synthetic returns: the canopy height model and the tree tops are measured."""
+
+    import numpy as np
+
+    load_maplib()
+    from maplib import pointcloud as pc
+    from maplib import vegetation as veg
+
+    n = 128
+    dem = np.zeros((n, n), dtype="float32") + 3000.0
+    dsm = np.full((n, n), np.nan, dtype="float32")
+    ground = np.full((n, n), np.nan, dtype="float32")
+    counts = np.zeros((n, n), dtype="uint16")
+    yy, xx = np.mgrid[0:n, 0:n]
+    # bare ground everywhere with ground returns 0.4 m above the DEM datum
+    ground[:] = 3000.4
+    counts[:] = 2
+    dsm[:] = 3000.4
+    trees = [(30, 30, 14.0), (30, 60, 9.0), (90, 40, 3.0), (100, 100, 20.0)]
+    for r, c, h in trees:
+        crown = np.clip(h - 0.6 * np.hypot(yy - r, xx - c) * (h / 4.0) ** 0.5, 0, None)
+        dsm = np.maximum(dsm, 3000.4 + crown)
+    grid = tmp_path / "canopy.npz"
+    np.savez(grid, dsm=dsm, ground=ground, counts=counts, ground_counts=counts)
+    chm, stats = pc.canopy_height(grid, dem)
+    assert abs(stats["ground_offset_m"] - 0.4) < 0.05, stats
+    assert abs(float(chm[30, 30]) - 14.0) < 0.6 and abs(float(chm[100, 100]) - 20.0) < 0.6
+    assert float(chm[5, 5]) < 0.1, "bare ground is not canopy"
+    rows, cols, heights = pc.tree_tops(chm, 1.0, min_height_m=2.0)
+    found = {(int(r), int(c)) for r, c in zip(rows, cols, strict=True)}
+    assert found == {(r, c) for r, c, _ in trees}, found
+    assert heights.max() > 19.0
+    planted, pstats = veg.trees_from_chm(
+        chm,
+        dem,
+        None,
+        1.0,
+        float(n),
+        2990.0,
+        {"treeline_m": 9999.0, "min_tree_height_m": 2.0, "max_trees": 100},
+        seed=1,
+    )
+    assert pstats["trees"] == 4 and pstats["source"] == "lidar canopy"
+    assert all(t["species"] in ("spruce", "fir") for t in planted)
+    assert max(t["height_m"] for t in planted) > 19.0
+
+
+def test_vegetation_plants_only_where_the_imagery_is_forest() -> None:
+    _, _, _, _, vegetation = _load_art_modules()
+    n = 256
+    colour = np.full((n, n, 3), 170, dtype="uint8")  # bright bare ground
+    rng = np.random.default_rng(1)
+    patch = rng.integers(20, 60, size=(96, 96, 3), dtype="uint8")
+    patch[..., 1] += 30  # dark, green, textured
+    colour[40:136, 40:136] = patch
+    dem = np.full((n, n), 3000.0, dtype="float32")
+    spec = {"treeline_m": 3600.0, "spacing_m": 4.0, "max_trees": 5000, "krummholz_band_m": 100.0}
+    maps = vegetation.cover_maps(colour, dem, 1.0, spec)
+    assert 0.08 < maps["conifer"].mean() < 0.16
+    trees, stats = vegetation.plant(maps, dem, 1.0, float(n), 3000.0, spec)
+    assert stats["trees"] > 200
+    half = n / 2
+    for t in trees:
+        col = t["x"] + half
+        row = half - t["y"]
+        assert 34 <= col <= 142 and 34 <= row <= 142, "a tree outside the forest patch"
+        assert t["species"] in ("spruce", "fir")
+
+
+# ---------------------------------------------------------------------------
+# Art-pass artefact gates (built maps only)
+# ---------------------------------------------------------------------------
+
+
+def _terrain_height_lookup(map_key: str):
+    """(z_at(x, y), max_height) from the shipped 16-bit heightmap PNG (north-up)."""
+
+    from PIL import Image
+
+    spec = load_spec(map_key)
+    root = require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    max_height = float(handoff["terrain"]["max_height_m"])
+    png = np.asarray(Image.open(root / "theTerrain.terrainheightmap.png"), dtype="float64")
+    size = png.shape[0]
+    res = float(spec.SITE["square_size_m"])
+    half = size * res / 2.0
+
+    def z_at(x: float, y: float) -> float:
+        col = int(min(max((x + half) / res, 0), size - 1))
+        row = int(min(max((half - y) / res, 0), size - 1))
+        return float(png[row, col]) * max_height / 65536.0
+
+    return z_at, half
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_flatfield_leaves_no_residual_sun(map_key: str) -> None:
+    """After the flat-field every listed layer's brightness is within 10 % across its
+    incidence (or aspect) bins: what the de-lighting left of the flight's sun is gone."""
+
+    spec = load_spec(map_key)
+    flatfield = (getattr(spec, "IMAGERY", None) or {}).get("aspect_flatfield")
+    if not flatfield:
+        pytest.skip(f"{map_key}: no flat-field")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    stats = handoff["terrain"]["stats"].get("aspect_flatfield", {})
+    materials = list(spec.TERRAIN["materials"])
+    checked = 0
+    for name in flatfield["layers"]:
+        entry = stats.get(str(materials.index(name)))
+        if not entry:
+            continue  # too small a layer to flat-field
+        checked += 1
+        gentle = entry.get("after_spread")
+        steep = entry.get("after_spread_steep")
+        assert gentle is not None or steep is not None, (map_key, name, entry)
+        # Nothing the flat-field lifted ran to white.
+        assert entry.get("clipped_fraction", 0.0) < 0.002, (map_key, name, entry)
+        assert gentle is None or gentle <= 1.10, (map_key, name, entry)
+        assert steep is None or steep <= 1.15, (map_key, name, entry)
+    assert checked, f"{map_key}: the flat-field ran on none of its layers"
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_road_bed_reads_lighter_than_its_ground(map_key: str) -> None:
+    """Where the spec says the bed is the pale ribbon of the photographs, the painted
+    bed is at least that much lighter than every layer along it."""
+
+    spec = load_spec(map_key)
+    factor = (getattr(spec, "ROADS", None) or {}).get("bed_lighter_than_ground")
+    if not factor:
+        pytest.skip(f"{map_key}: no bed contrast contract")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    # One factor for every surface, or a factor per surface ({"dirt": 1.06}).
+    contracts = (
+        {name: (float(f), handoff["road_contrast"][name]) for name, f in factor.items()}
+        if isinstance(factor, dict)
+        else {"all": (float(factor), handoff["road_contrast"])}
+    )
+    for surface, (want, contrast) in contracts.items():
+        layers = {k: v for k, v in contrast.items() if k not in ("bed", "windows")}
+        assert layers, (surface, contrast)
+        for name, entry in layers.items():
+            # The per-layer ratio is a whole-road aggregate (the road's mean bed over
+            # one layer's mean margin, mixing pale and dark stretches); the 100 m
+            # windows below are the contract. In aggregate the bed is never darker
+            # than any layer it crosses.
+            assert entry["ratio"] >= 1.0, (map_key, surface, name, entry, contrast["bed"])
+        # And along the road: 95 % of the bed's 100 m windows read at least 10 %
+        # lighter than their own margins (a pale summit is not hidden by a dark
+        # valley), or the contract's own factor where that is smaller.
+        windows = contrast.get("windows")
+        assert windows and windows["p05"] >= want * 0.98, (map_key, surface, windows)
+    # And the beds meet at their junctions in one surface: no seam steps.
+    # (The step is read a cell apart on the raster: on a 25 % grade that is 0.25 m
+    # of legitimate rise, so the gate is 0.4 m, not the 0.15 m a flat seam would show.)
+    carved = handoff["terrain"]["stats"].get("road_carve") or {}
+    seam = carved.get("max_seam_step_m")
+    assert seam is not None and seam < 0.4, (map_key, carved)
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_base_colour_has_no_black_holes(map_key: str) -> None:
+    """No in-paint, refill or gain leaves black ground: under a texel in ten thousand of
+    the finished base is near black (the asphalt is dark, never black)."""
+
+    spec = load_spec(map_key)
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    stats = handoff["terrain"]["stats"]
+    if "near_black_fraction" not in stats:
+        pytest.skip(f"{map_key}: no imagery statistics")
+    assert stats["near_black_fraction"] < 1e-4, stats["near_black_fraction"]
+    means = stats.get("layer_mean_srgb", {})
+    for name, entry in means.items():
+        # And no layer of the finished base runs to white either.
+        assert entry.get("clipped", 0.0) < 0.002, (map_key, name, entry)
+    for name, lit in (getattr(spec, "IMAGERY", None) or {}).get("lighter_than", {}).items():
+        # A layer the spec says reads lighter than another (the cream ledges over
+        # the tan plain) does so in the finished base.
+        assert means[name]["luminance"] >= float(lit["factor"]) * means[lit["than"]]["luminance"], (
+            name,
+            means[name],
+            means[lit["than"]],
+        )
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_refills_carry_their_rings_grain(map_key: str) -> None:
+    """Where the spec matches every refilled field to its ring, the fields' 2-8 m grain
+    is at least 80 % of the ring's (a refill is not a smooth oval in a mottled plain)."""
+
+    spec = load_spec(map_key)
+    if not (getattr(spec, "IMAGERY", None) or {}).get("refill_match_ring"):
+        pytest.skip(f"{map_key}: refills are not ring-matched")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    ratio = handoff["imagery"].get("refill_grain_ratio")
+    assert ratio and ratio["p10"] >= 0.8, (map_key, ratio)
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_decal_roads_have_no_node_steps(map_key: str) -> None:
+    """A decal road never steps off the bed at an end (no grade change over 10 %
+    within three nodes of either end), and nowhere changes grade by more than 25 %
+    between two nodes (a kerb at a seam or a pad edge)."""
+
+    spec = load_spec(map_key)
+    if not (getattr(spec, "ROADS", None) or {}).get("surfaces"):
+        pytest.skip(f"{map_key}: legacy single-material roads")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    roads = handoff["roads"]
+    assert "max_end_grade_change" in roads, roads
+    assert roads["max_end_grade_change"] <= 0.10, (map_key, roads["max_end_grade_change"])
+    assert roads["max_grade_change"] <= 0.25, (map_key, roads["max_grade_change"])
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_forest_items_are_declared_draped_and_inside(map_key: str) -> None:
+    spec = load_spec(map_key)
+    root = require_built(map_key)
+    forest_file = root / "forest" / f"{spec.MOD_ID}.forest4.json"
+    has_objects = bool(getattr(spec, "OBJECTS", None) or getattr(spec, "FOREST", None))
+    if not has_objects:
+        assert not forest_file.exists(), (
+            f"{map_key}: no OBJECTS/FOREST in the spec but a forest file shipped"
+        )
+        return
+    assert forest_file.is_file(), f"{map_key}: OBJECTS/FOREST in the spec but no forest file"
+    items = json.loads(
+        (root / "art" / "forest" / "managedItemData.json").read_text(encoding="utf-8")
+    )
+    for name, item in items.items():
+        assert item["class"] == "TSForestItemData" and item["internalName"] == name
+        assert item["shapeFile"].startswith(f"/levels/{spec.MOD_ID}/art/shapes/{spec.MOD_ID}/")
+        assert (root / item["shapeFile"][len(f"/levels/{spec.MOD_ID}/") :]).is_file(), item[
+            "shapeFile"
+        ]
+    z_at, half = _terrain_height_lookup(map_key)
+    lines = [
+        json.loads(line)
+        for line in forest_file.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    assert lines, "an empty forest is a broken detector"
+    worst = 0.0
+    for line in lines:
+        assert set(line) == {"type", "pos", "rotationMatrix", "scale"} and line["type"] in items
+        x, y, z = line["pos"]
+        assert -half <= x <= half and -half <= y <= half
+        assert len(line["rotationMatrix"]) == 9 and 0.2 <= line["scale"] <= 30.0
+        worst = max(worst, abs(z - z_at(x, y)))
+    assert worst < 3.5, f"{map_key}: a placed object floats or sinks {worst:.1f} m off the terrain"
+    forest_objects = [o for _, o in all_items(root / "main") if o.get("class") == "Forest"]
+    assert (
+        len(forest_objects) == 1
+        and forest_objects[0]["dataFile"] == f"/levels/{spec.MOD_ID}/forest/{forest_file.name}"
+    )
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert handoff["forest"]["instances"] == len(lines)
+    assert handoff["shipped"][f"forest/{forest_file.name}"]["sha256"] == sha256_file(forest_file)
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_shapes_parse_and_their_materials_exist(map_key: str) -> None:
+    import xml.etree.ElementTree as ET
+
+    spec = load_spec(map_key)
+    root = require_built(map_key)
+    shapes_dir = root / "art" / "shapes" / spec.MOD_ID
+    if not shapes_dir.is_dir():
+        pytest.skip(f"{map_key}: no shapes in this level")
+    materials = json.loads((shapes_dir / "main.materials.json").read_text(encoding="utf-8"))
+    ns = {"c": "http://www.collada.org/2005/11/COLLADASchema"}
+    daes = sorted(shapes_dir.glob("*.dae"))
+    assert daes
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    for dae in daes:
+        tree_root = ET.parse(dae).getroot()
+        assert tree_root.find("c:asset/c:up_axis", ns).text == "Z_UP"
+        for material in tree_root.findall("c:library_materials/c:material", ns):
+            name = material.get("name")
+            assert name in materials and materials[name]["mapTo"] == name, (dae.name, name)
+            for stage in materials[name]["Stages"]:
+                for key, value in stage.items():
+                    if key.endswith("Map"):
+                        assert (root / value[len(f"/levels/{spec.MOD_ID}/") :]).is_file(), value
+        nodes = tree_root.findall("c:library_visual_scenes/c:visual_scene/c:node", ns)
+        assert any(not n.get("name").startswith("Colmesh") for n in nodes), dae.name
+        shipped = handoff["shipped"][f"art/shapes/{spec.MOD_ID}/{dae.name}"]
+        assert shipped["sha256"] == sha256_file(dae)
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_road_surfaces_are_painted_and_decalled(map_key: str) -> None:
+    spec = load_spec(map_key)
+    root = require_built(map_key)
+    surfaces = spec.ROADS.get("surfaces")
+    if not surfaces:
+        pytest.skip(f"{map_key}: legacy single-material roads")
+    materials = spec.TERRAIN["materials"]
+    raw = (root / "theTerrain.ter").read_bytes()
+    size = struct.unpack_from("<I", raw, 1)[0]
+    layer = np.frombuffer(raw, dtype="uint8", count=size * size, offset=5 + size * size * 2)
+    road_materials = json.loads(
+        (root / "art" / "road" / "main.materials.json").read_text(encoding="utf-8")
+    )
+    decal_names = {
+        o["material"] for _, o in all_items(root / "main") if o.get("class") == "DecalRoad"
+    }
+    for surface, cfg in surfaces.items():
+        index = materials.index(cfg["terrain_material"])
+        painted = int((layer == index).sum())
+        if cfg["decal"]["name"] in decal_names:
+            assert painted > 500, (
+                f"{map_key}: {surface} roads decalled but the bed is not painted ({painted} cells)"
+            )
+        assert cfg["decal"]["name"] in road_materials
+    assert decal_names <= {cfg["decal"]["name"] for cfg in surfaces.values()}
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_imagery_delighting_is_recorded(map_key: str) -> None:
+    spec = load_spec(map_key)
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    imagery_spec = getattr(spec, "IMAGERY", None)
+    recorded = handoff.get("imagery", {})
+    if not (imagery_spec and imagery_spec.get("delight")):
+        assert not recorded.get("delight")
+        return
+    assert recorded["delight"] is True
+    assert recorded["sun_fit"]["correlation"] > 0.3, "the fitted sun does not explain the shading"
+    assert 0.0 <= recorded["cast_shadow_fraction"] < 0.3
+    assert 0.5 <= recorded["minnaert_k"] <= 1.4 and recorded["gain_p95"] <= 4.0
