@@ -1059,12 +1059,11 @@ def test_refills_carry_their_rings_grain(map_key: str) -> None:
 @pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_refills_read_as_their_ground_on_the_shipped_base(map_key: str) -> None:
     """Every large refilled field (cast shadow or snow) measured on the base the game
-    draws sits between 0.85 and 1.25 of its ring's luminance (a tenth over the
-    cliffs' shaded rings), carries at least 0.45 of its ring's under-10 m grain in
-    the worst tenth of fields (a terrain shadow's fine grain is carried in, its
-    structure is its own and softer than a lit talus ring's), and differs from its
-    ring in blue-minus-red by no more than 0.07 (the flat-field cools the lit rings'
-    chroma by bin while a refilled cell keeps the carried tone)."""
+    draws sits between 0.90 and 1.10 of its ring's luminance and within 0.04 of it on
+    both chroma axes (the level stage matches every field to its ring as the last
+    word on the shipped pixels), and carries at least 0.45 of its ring's under-10 m
+    grain in the worst tenth of fields: a terrain shadow's fine grain is carried in
+    from the ring, but its structure is its own and softer than a lit talus ring's."""
 
     spec = load_spec(map_key)
     if not (getattr(spec, "IMAGERY", None) or {}).get("refill_match_ring"):
@@ -1077,9 +1076,12 @@ def test_refills_read_as_their_ground_on_the_shipped_base(map_key: str) -> None:
     )
     check = (handoff.get("imagery") or {}).get("refill_check")
     assert check, (map_key, "no refill_check in the handoff")
-    assert check["lum_ratio_p10"] >= 0.85 and check["lum_ratio_max"] <= 1.25, (map_key, check)
+    assert check["lum_ratio_p10"] >= 0.90 and check["lum_ratio_max"] <= 1.10, (map_key, check)
     assert check["grain_ratio_p10"] >= 0.45, (map_key, check)
-    assert check["br_diff_max_abs"] <= 0.07, (map_key, check)
+    assert check["br_diff_max_abs"] <= 0.04, (map_key, check)
+    # And on the green axis: a refill matched on luminance alone came back as
+    # dusty-rose banding through the tundra and mint patches in the meadows.
+    assert check["exg_diff_max_abs"] <= 0.04, (map_key, check)
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)

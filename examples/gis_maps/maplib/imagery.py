@@ -276,6 +276,11 @@ def delight(
             snow_mask &= np.sqrt(np.maximum(s_sq - s_mean * s_mean, 0.0)) < float(max_std)
             del s_mean, s_sq
         del s_lum
+        if exclude_sources is not None:
+            # A bright line in the flight along a road is the road, not snow.
+            snow_mask &= ~exclude_sources
+        # And a bright straight bar anywhere is a cut, a tailings run or a roof.
+        snow_mask = _drop_straight_bars(snow_mask, res_r)
         snow_mask = ndimage.binary_dilation(
             snow_mask, iterations=max(1, int(float(snow.get("dilate_m", 2.0)) / res_r))
         )
@@ -628,6 +633,7 @@ def delight(
             # is blended, so both came out a third as strong as the ring's.
             result, ratios = _match_bands(result, fields, fill_w, res_r)
             grain_ratios.append(ratios)
+            result = _clamp_to_ring(result, corrected, fields, fill_w)
         if debug_hook is not None:
             debug_hook("refill", result, fields)
         return result, local, fill_w
@@ -1017,6 +1023,106 @@ def _match_bands(
     lut_after = np.concatenate([[1.0], after]).astype("float32")
     cells = labels_in > 0
     return out, lut_after[labels_in[cells]] if cells.any() else empty
+
+
+def _clamp_to_ring(
+    rgb: np.ndarray,
+    lit_rgb: np.ndarray,
+    fields: dict,
+    fill_w: np.ndarray,
+    *,
+    max_lum_dev: float = 0.06,
+    max_chroma_dev: float = 0.02,
+) -> np.ndarray:
+    """Hard-clamp every field's mean to its ring's, after the band match: its mean
+    luminance to within ``max_lum_dev`` and its mean position on both chroma axes
+    (excess green 2G-R-B and blue-minus-red) to within ``max_chroma_dev``.
+
+    The per-channel ratio match runs before the band correction and is bounded, so a
+    field could still land a tenth pale or a tenth green: the refills came back as
+    dusty-rose banding through the tundra and pale lozenges beside the roads. The
+    chroma corrections are luminance-preserving shifts, so the clamp cannot undo the
+    luminance one."""
+
+    from scipy import ndimage
+
+    if not fields["count"]:
+        return rgb
+    index = fields["index"]
+    labels, ring_labels = fields["labels"], fields["ring_labels"]
+    ok = fields["has_ring"]
+    out = rgb
+
+    def means(image, lab):
+        with np.errstate(invalid="ignore", divide="ignore"):
+            return np.stack([ndimage.mean(image[..., ch], lab, index) for ch in range(3)], axis=-1)
+
+    for axis in ("exg", "br"):
+        field = means(out, labels)
+        ring = means(lit_rgb, ring_labels)
+        if axis == "exg":
+            own = 2 * field[:, 1] - field[:, 0] - field[:, 2]
+            theirs = 2 * ring[:, 1] - ring[:, 0] - ring[:, 2]
+        else:
+            own = field[:, 2] - field[:, 0]
+            theirs = ring[:, 2] - ring[:, 0]
+        excess = np.where(ok & np.isfinite(own) & np.isfinite(theirs), own - theirs, 0.0)
+        over = np.clip(np.abs(excess) - max_chroma_dev, 0.0, None) * np.sign(excess)
+        # A luminance-preserving shift along the axis: for excess green, green moves
+        # by -a and red and blue by +a/2 each; for blue-red, blue and red by -+a/2.
+        step = over / (3.0 if axis == "exg" else 1.0)
+        lut = np.concatenate([[0.0], np.clip(step, -0.08, 0.08)]).astype("float32")
+        shift = lut[labels]
+        if axis == "exg":
+            delta = np.stack([shift * 0.5, -shift, shift * 0.5], axis=-1)
+        else:
+            delta = np.stack([shift * 0.5, np.zeros_like(shift), -shift * 0.5], axis=-1)
+        out = out + delta * fill_w[..., None]
+        del field, ring, shift, delta
+    field_l = np.stack([ndimage.mean(out.mean(axis=-1), labels, index)], axis=-1)[:, 0]
+    ring_l = np.stack([ndimage.mean(lit_rgb.mean(axis=-1), ring_labels, index)], axis=-1)[:, 0]
+    with np.errstate(invalid="ignore", divide="ignore"):
+        ratio = np.where(ok & (field_l > 1e-4), field_l / np.maximum(ring_l, 1e-4), 1.0)
+    ratio = np.where(np.isfinite(ratio), ratio, 1.0)
+    want = np.clip(ratio, 1.0 - max_lum_dev, 1.0 + max_lum_dev)
+    gain = np.where(ratio > 1e-4, want / np.maximum(ratio, 1e-4), 1.0)
+    lut_g = np.concatenate([[1.0], np.clip(gain, 0.7, 1.4)]).astype("float32")
+    g = lut_g[labels]
+    return out * (1.0 + (g - 1.0) * fill_w)[..., None]
+
+
+def _drop_straight_bars(
+    mask: np.ndarray, res_m: float, *, min_area_m2: float = 400.0
+) -> np.ndarray:
+    """Drop every component of ``mask`` that is a straight bar: one whose cells fill
+    more than three quarters of their own principal-axis box while that box is over
+    three times as long as it is wide. A snowfield lies in a hollow and has a ragged
+    outline; a cut, a tailings run or a roof line in the flight is a bar."""
+
+    from scipy import ndimage
+
+    labels, count = ndimage.label(mask)
+    if not count:
+        return mask
+    out = mask.copy()
+    min_cells = max(16, int(min_area_m2 / (res_m * res_m)))
+    for sl, k in zip(ndimage.find_objects(labels), range(1, count + 1), strict=False):
+        if sl is None:
+            continue
+        cells = labels[sl] == k
+        area = int(cells.sum())
+        if area < min_cells:
+            continue
+        rr, cc = np.nonzero(cells)
+        pts = np.stack([rr - rr.mean(), cc - cc.mean()], axis=1).astype("float64")
+        cov = pts.T @ pts / max(area, 1)
+        _vals, vecs = np.linalg.eigh(cov)
+        proj = pts @ vecs
+        ext = proj.max(axis=0) - proj.min(axis=0) + 1.0
+        long_e, short_e = float(ext.max()), float(max(ext.min(), 1e-6))
+        if long_e / short_e >= 3.0 and area / (long_e * short_e) > 0.75:
+            out[sl][cells] = False
+    return out
 
 
 def _match_mean(refill_rgb: np.ndarray, lit_rgb: np.ndarray, fields: dict) -> np.ndarray:

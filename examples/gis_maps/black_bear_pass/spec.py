@@ -134,6 +134,12 @@ PALETTE = {
         "tile_m": 12.0,
         "tint_weight": 0.25,
         "detail_strength": 0.7,  # the wall is the tile, not the base seen from above
+        # The flight's cliffs are the palest rock on the level (0.44 against the
+        # talus's 0.42 and the fell-field's 0.38); the photographs have thin-bedded
+        # charcoal tuff as the darkest thing in the frame.
+        "base_pull": 0.75,
+        "base_pull_window_m": 200.0,
+        "base_pull_lum_gate": [0.5, 1.8],
     },
     "bb_cliff_rock_ew": {
         "family": "dark_strata",
@@ -144,6 +150,12 @@ PALETTE = {
         "rotate_deg": 90.0,
         "tint_weight": 0.25,
         "detail_strength": 0.7,
+        # The flight's cliffs are the palest rock on the level (0.44 against the
+        # talus's 0.42 and the fell-field's 0.38); the photographs have thin-bedded
+        # charcoal tuff as the darkest thing in the frame.
+        "base_pull": 0.75,
+        "base_pull_window_m": 200.0,
+        "base_pull_lum_gate": [0.5, 1.8],
     },
     "bb_scree_slope": {
         "family": "shale_plates",
@@ -177,7 +189,7 @@ PALETTE = {
         "family": "forest_floor",
         "seed": 506,
         "size": 1024,
-        "base": [0.32, 0.25, 0.17],
+        "base": [0.28, 0.245, 0.195],
         "keep_tint": True,  # the imagery under a canopy is the canopy, not the floor
     },
     # In every ground photograph the road is a dusty grey-tan ribbon a shade lighter
@@ -370,7 +382,9 @@ OBJECTS = {
         },
         # Grey-brown with the iron stain in the bed tones, not an orange face.
         "rock_summit": {
-            "colour": [0.46, 0.42, 0.37],
+            # Grey-brown, a shade warmer than the talus rock but not tan: the
+            # summit blocks are the same tuff with iron staining, not sandstone.
+            "colour": [0.44, 0.41, 0.38],
             "strata": 0.45,
             "z_aspect": [0.35, 0.7],
             "lichen": 0.06,

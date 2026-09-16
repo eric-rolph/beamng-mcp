@@ -275,14 +275,15 @@ def terrain(spec, example_root: Path) -> dict:
             stats["objects_dropped_in_boxes"] = len(in_boxes)
         # Classify on the de-lit imagery (a shaded crater wall is not a shrub); the
         # conditioned colour is cached for the level stage so both see the same pixels.
-        # The flight's road corridor (6 m either side of every OSM centreline) is
-        # no source for a refill: the beds are repainted later anyway.
+        # The flight's road corridor (12 m either side of every OSM centreline) is
+        # no source for a refill and no seed for snow: the beds are repainted later
+        # anyway, and a switchback stack put the next bed up inside a 6 m ring.
         road_corridor = None
         if hasattr(spec, "ROADS") and (data_root / "osm" / "roads.json").is_file():
             from . import roads as road_tools
 
             lines = road_tools.road_polylines(spec, fp, data_root / "osm" / "roads.json")
-            road_corridor = road_tools.centreline_mask(lines, res, fp.size_m, dem.shape[0], 6.0)
+            road_corridor = road_tools.centreline_mask(lines, res, fp.size_m, dem.shape[0], 12.0)
             del lines
         colour, imagery_stats = level_builder.conditioned_colour(
             dem,
@@ -451,8 +452,12 @@ def terrain(spec, example_root: Path) -> dict:
                     areas = ndimage.sum(dark, labels, np.arange(1, count + 1))
                     dark = labels == (int(np.argmax(areas)) + 1)  # the lot is one piece
                     dark = ndimage.binary_fill_holes(dark)
+                    # A single texel of smoothing: the disc kernels already take the
+                    # sawtooth out, and 2 m of it rounded every straight kerb into
+                    # lobes (the outline's shape index went to 2.1 against a real
+                    # lot's 1.15).
                     dark = (
-                        ndimage.gaussian_filter(dark.astype("float32"), max(1.0, 2.0 / res)) > 0.5
+                        ndimage.gaussian_filter(dark.astype("float32"), max(0.6, 0.8 / res)) > 0.5
                     )
                 if dark.sum() * res * res < float(outline.get("min_area_m2", 200.0)):
                     _log(f"  pad at {pad['center_xy']} skipped: no dark lot in the flight")
@@ -884,9 +889,50 @@ def terrain(spec, example_root: Path) -> dict:
     if pad_outlines and surface_index is not None:
         from scipy import ndimage
 
+        # A painted pad keeps the flight's own grain: the level stage fills its mean
+        # and multiplies this map back over it, so a car park is stall stripes, kerb
+        # islands and patched asphalt rather than 14,000 m2 of even grey. What the
+        # flight has that the level does not (a parked car, a roof) is repainted
+        # from its own ring first, so the grain carries none of it.
+        pad_texture = np.ones((colour.shape[0], colour.shape[1]), dtype="float32")
+        pad_scale = colour.shape[0] / dem.shape[0]
         for entry in pad_outlines:
             pad, inside = entry["pad"], entry["inside"]
             rr0, rr1, cc0, cc1 = entry["rr0"], entry["rr1"], entry["cc0"], entry["cc1"]
+            keep = pad.get("keep_flight_grain") and pad.get("paint", True)
+            if keep and colour is not None:
+                from PIL import Image
+
+                from . import vegetation
+
+                cr0, cr1 = int(rr0 * pad_scale), int(rr1 * pad_scale)
+                ccl0, ccl1 = int(cc0 * pad_scale), int(cc1 * pad_scale)
+                inside_c = (
+                    np.asarray(
+                        Image.fromarray(inside.astype("uint8") * 255).resize(
+                            (ccl1 - ccl0, cr1 - cr0), Image.NEAREST
+                        )
+                    )
+                    > 127
+                )
+                texel = fp.size_m / colour.shape[0]
+                block = colour[cr0:cr1, ccl0:ccl1].astype("float32")
+                lum_b = block.mean(axis=-1) / 255.0
+                med = float(np.median(lum_b[inside_c])) if inside_c.any() else 1.0
+                lo, hi = pad.get("repaint_outside", (0.6, 1.6))
+                odd = inside_c & ((lum_b < lo * med) | (lum_b > hi * med))
+                if odd.any():
+                    full = np.zeros(colour.shape[:2], dtype=bool)
+                    full[cr0:cr1, ccl0:ccl1] = odd
+                    colour = vegetation.erase_dots(colour, full, 6.0, texel)
+                    block = colour[cr0:cr1, ccl0:ccl1].astype("float32")
+                    lum_b = block.mean(axis=-1) / 255.0
+                    del full
+                # The grain is the lot's luminance over its own 6 m mean.
+                low = ndimage.uniform_filter(lum_b, size=max(3, int(6.0 / texel)), mode="nearest")
+                grain = np.clip(lum_b / np.maximum(low, 1e-4), 0.55, 1.6).astype("float32")
+                pad_texture[cr0:cr1, ccl0:ccl1] = np.where(inside_c, grain, 1.0)
+                del block, lum_b, low, grain, odd, inside_c
             pin = pad.get("pin_layer")
             if pin and pin in spec.TERRAIN["materials"]:
                 # The ground round a lot is the plain it was built on, whatever
@@ -940,6 +986,9 @@ def terrain(spec, example_root: Path) -> dict:
                 colour[cr0:cr1, cc0c:cc1c] = np.clip(
                     block * (1 - wc[..., None]) + tone[None, None, :] * wc[..., None], 0, 255
                 ).astype("uint8")
+        if bool((pad_texture != 1.0).any()):
+            np.save(out / "pad_texture.npy", pad_texture)
+        del pad_texture
         if colour is not None:
             from PIL import Image
 

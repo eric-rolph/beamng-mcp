@@ -106,6 +106,9 @@ PALETTE = {
         "tile_m": 3.0,
         "keep_tint": True,  # the authored cream, not the tan of the plain
         "base_pull": 0.8,  # the de-lit wall is the plain's tan; the ledges are cream
+        # Nothing blooms white: the brightest channel rolls off to this instead of
+        # clipping (a sixth of the tile's texels were pinned at 255 in red).
+        "albedo_max": 0.94,
     },
     "mc_talus": {
         "family": "talus_blocks",
@@ -148,6 +151,9 @@ PALETTE = {
         "keep_tint": True,  # the authored cream, not the tan of the plain
         "base_pull": 0.8,  # the de-lit wall is the plain's tan; the ledges are cream
         "rotate_deg": 90.0,
+        # Nothing blooms white: the brightest channel rolls off to this instead of
+        # clipping (a sixth of the tile's texels were pinned at 255 in red).
+        "albedo_max": 0.94,
     },
     # The bed under the decal carries no shoulder (the decal's shoulder stays on
     # the decal, not repeated every 2 m across the pad and the bed margins).
@@ -422,14 +428,16 @@ OBJECTS = {
     # smaller grey-green saltbush and sage of the rim photographs.
     "shrub_materials": {
         "shrub_juniper": {
-            "colour": [0.13, 0.18, 0.11],
-            "light_colour": [0.30, 0.37, 0.19],
+            "colour": [0.13, 0.18, 0.15],
+            "light_colour": [0.3, 0.37, 0.23],
             "height": 1.0,
             "width": 1.3,
         },
         "shrub_sage": {
-            "colour": [0.34, 0.40, 0.28],
-            "light_colour": [0.56, 0.60, 0.42],
+            # Grey-green, not chartreuse: green over blue under 0.06 and red within
+            # a fiftieth of green, the desert sage of the rim photographs.
+            "colour": [0.36, 0.38, 0.33],
+            "light_colour": [0.58, 0.59, 0.52],
             "height": 0.6,
             "width": 0.9,
             "max_width_m": 2.2,  # sage is never a five-metre bush
@@ -486,6 +494,10 @@ ROADS = {
             # degrees (the lot is cut 2.5 m into the flank at its east end, and a
             # 15 degree batter needs the width), and the ground round the lot is
             # pinned to the plain.
+            # The lot keeps the flight's own grain over its painted mean, and
+            # whatever stood in it (a car, a roof) is repainted from its 6 m ring.
+            "keep_flight_grain": True,
+            "repaint_outside": [0.6, 1.6],
             "kerb_m": 30.0,
             "kerb_max_slope_deg": 15.0,
             "pin_layer": "mc_desert_floor",
@@ -598,7 +610,9 @@ SPAWNS = [
     {"name": "crater_floor", "lat": 35.0275, "lon": -111.0225, "heading_deg": 0.0},
     # The flat pad on the outer flank of the south rim (under 8 degrees over 10 m),
     # not the cliff band a car would slide down.
-    {"name": "south_rim", "lat": 35.02174, "lon": -111.02303, "heading_deg": 0.0},
+    # 130 m east of the first pick, off the mine spoil (which the rubble pull
+    # rightly leaves grey) and on warm red-brown crest.
+    {"name": "south_rim", "lat": 35.02169, "lon": -111.02162, "heading_deg": 0.0},
 ]
 
 SKY = {"time": 0.14, "utc_offset": "-7", "year": 2026, "month": 6, "day": 20}

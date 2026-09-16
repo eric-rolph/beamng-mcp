@@ -893,10 +893,10 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
         # Cracks: cells of 0.3-0.5 m (a 6 m tile), their edges displaced by noise
         # and only three in ten drawn, so no paving tessellation shows.
         f1, f2, cid_c = worley(size, 16, rng, jitter=1.0, warp=0.05)
-        # A crack is a line one or two texels wide (4 mm on a 6 m tile), a fifth
-        # darker than the slab, on three edges in ten: the 9-texel band at 12 %
-        # spread into nothing the eye could find.
-        cracks = (1.0 - _smooth((f2 - f1) / 0.0025)) * (_cell_value(cid_c, 61) > 0.7)
+        # A crack is a line three or four texels wide (30 mm on an 8 m tile), two
+        # fifths darker than the slab, on three edges in ten: at a fifth over one
+        # texel it was under threshold at every distance.
+        cracks = (1.0 - _smooth((f2 - f1) / 0.006)) * (_cell_value(cid_c, 61) > 0.7)
         patches = fbm(size, 3, 2, rng) * 0.15
         # Across the road (u): a pale gravel shoulder each side and a darker wear
         # band down the middle of each lane.
@@ -921,7 +921,7 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
             shoulder = np.clip(band, 0, 1) * (0.85 + 0.3 * np.clip(grain + 0.5, 0, 1))
         wear = np.exp(-((x - 0.23) ** 2) / 0.0018) + np.exp(-((x - 0.77) ** 2) / 0.0018)
         wear = np.clip(wear, 0, 1) * np.ones((size, 1))
-        tint = ((1.0 + float(params.get("wear_contrast", 0.1)) * wear) * (1.0 - 0.2 * cracks))[
+        tint = ((1.0 + float(params.get("wear_contrast", 0.1)) * wear) * (1.0 - 0.4 * cracks))[
             ..., None
         ]
         if params.get("shoulder_rgb"):
@@ -933,7 +933,8 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
             tint = tint * np.where(
                 shoulder[..., None] > 0.5, _rgb(1.0, 0.94, 0.86), _rgb(1.0, 1.0, 1.0)
             )
-        h = grain * 0.5 - cracks * 0.9 + patches + shoulder * 0.3
+        # And deep enough that the normal tilts at the lip rather than lying flat.
+        h = grain * 0.5 - cracks * 2.2 + patches + shoulder * 0.3
         return np.clip(h, -1, 1), tint
     if kind in ("ruts", "ruts_gravel"):
         # Across the road (u): two compacted wheel ruts and a raised, rougher centre.
@@ -1035,7 +1036,15 @@ def build_set(
     else:
         level = float(colour.mean())
     colour = colour * (float(base.mean()) / max(level, 1e-4))
-    colour = np.clip(colour, 0.0, 1.0)
+    # A soft knee on the brightest channel instead of a hard clip: the mean-albedo
+    # scaling pinned a sixth of the limestone tile's texels at 255 in red, so the
+    # hard beds had no colour left and the wall went chalk white under the sun.
+    cap = float(params.get("albedo_max", 1.0))
+    knee = cap * 0.8
+    peak = colour.max(axis=-1, keepdims=True)
+    rolled = knee + (peak - knee) / (1.0 + (peak - knee) / max(cap - knee, 1e-4))
+    colour = colour * np.where(peak > knee, rolled / np.maximum(peak, 1e-4), 1.0)
+    colour = np.clip(colour, 0.0, cap)
     colour_u8 = (_srgb(colour) * 255.0).round().astype("uint8")
 
     # Normal from the height field (tangent space, +Y up in texture space).

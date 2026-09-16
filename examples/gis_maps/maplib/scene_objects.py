@@ -492,10 +492,14 @@ def write_forest(
                 # A lidar bump has a measured footprint and height: the variant
                 # nearest that shape.
                 want = (1.0, min(w, h) / longest, z_ext / longest)
-                best = min(
+                # The three nearest by aspect, one of them at random: a strict
+                # minimum left whole variants of a family unplaced (one summit
+                # block in eight never appeared) without reading any truer.
+                near = sorted(
                     variants,
                     key=lambda v: (v["aspect"][1] - want[1]) ** 2 + (v["aspect"][2] - want[2]) ** 2,
-                )
+                )[:3]
+                best = near[int(rng.integers(0, len(near)))]
             else:
                 # A scattered stone has no shape of its own (its triple is the
                 # sampler's near-constant draw, which put 77 % of a level's stones

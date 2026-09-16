@@ -279,6 +279,13 @@ def rock_meshes(
         rel = (flat_p - p.min(axis=0)) / ext
         flat_uv[top, 0] = rel[top, 0] * 2.0
         flat_uv[top, 1] = 0.5 + 0.06 * rel[top, 1]
+    # And the sides take their v from the block's own height, not from the sphere's
+    # latitude: bedding lies in level planes instead of wrapping round the solid and
+    # following its silhouette (which read as turned timber).
+    side = ~top
+    if side.any():
+        ext_z = max(float(p[:, 2].max() - p[:, 2].min()), 1e-6)
+        flat_uv[side, 1] = flat_p[side, 2] / ext_z * 2.0
     visible = Mesh(
         f"{name}_mesh", flat_p, flat_n, flat_uv, flat_faces, material=material, node_name=name
     )

@@ -700,7 +700,7 @@ def enforce_bed_contrast(
     # The margin is judged by its pale side too (the same reference the lift below
     # and road_contrast use): a stippled fell-field whose mean the bed clears by
     # 14 % still hides the bed among its pale fines.
-    pale0 = near_mean0 + 0.67 * np.sqrt(np.maximum(near_sq0 - near_mean0 * near_mean0, 0.0))
+    pale0 = near_mean0 + 0.9 * np.sqrt(np.maximum(near_sq0 - near_mean0 * near_mean0, 0.0))
     bed0 = local_mean(lum, bed_f)
     ratio = np.minimum(bed0 / np.maximum(near_mean0, 1e-4), bed0 / np.maximum(pale0, 1e-4))
     del near_mean0, near_sq0, pale0, bed0
@@ -725,7 +725,7 @@ def enforce_bed_contrast(
         lum2 = out.mean(axis=-1) / 255.0
         near_mean = local_mean(lum2, near_f)
         near_sq = local_mean(lum2 * lum2, near_f)
-        near_pale = near_mean + 0.67 * np.sqrt(np.maximum(near_sq - near_mean * near_mean, 0.0))
+        near_pale = near_mean + 0.9 * np.sqrt(np.maximum(near_sq - near_mean * near_mean, 0.0))
         bed_now = np.maximum(local_mean(lum2, bed_f), 1e-4)
         lift = np.clip(factor * 1.01 * near_pale / bed_now, 1.0, 1.4)
         lift = np.minimum(lift, np.maximum(ceiling / bed_now, 1.0)).astype("float32")
@@ -744,6 +744,109 @@ def _near_band(bed: np.ndarray, texel_m: float) -> np.ndarray:
     outer = ndimage.binary_dilation(bed, iterations=max(2, int(8.0 / texel_m)))
     inner = ndimage.binary_dilation(bed, iterations=max(1, int(2.0 / texel_m)))
     return outer & ~inner
+
+
+def refill_match(
+    colour_u8,
+    refill: np.ndarray,
+    texel_m: float,
+    *,
+    bed: np.ndarray | None = None,
+    min_area_m2: float = 400.0,
+    max_lum_dev: float = 0.05,
+    max_chroma_dev: float = 0.02,
+) -> np.ndarray:
+    """Bring every refilled field on the finished base to its own ring of open ground:
+    its mean luminance to within ``max_lum_dev`` and its mean on both chroma axes
+    (excess green and blue-minus-red) to within ``max_chroma_dev``, feathered 3 m
+    inside its edge.
+
+    The de-lighting matches a field to its ring at the moment it fills it, but every
+    later stage moves the two apart again: the incidence flat-field corrects the lit
+    ring and (rightly) leaves the refilled cells alone, and the layer pulls work on
+    layer means. This is the last word, on the pixels the game draws."""
+
+    from scipy import ndimage
+
+    n = colour_u8.shape[0]
+    if refill.shape[0] != n:
+        from PIL import Image
+
+        refill = np.asarray(Image.fromarray(refill.astype("uint8")).resize((n, n), Image.NEAREST))
+    fields = (refill == 1) | (refill == 2)
+    if not fields.any():
+        return colour_u8
+    forest = (refill == 3) | (refill == 4)
+    ring_ok = (refill == 0) & ~ndimage.binary_dilation(
+        forest, iterations=max(1, int(10.0 / texel_m))
+    )
+    on_bed = None
+    if bed is not None:
+        if bed.shape[0] != n:
+            from PIL import Image
+
+            bed = (
+                np.asarray(Image.fromarray(bed.astype("uint8") * 255).resize((n, n), Image.NEAREST))
+                > 127
+            )
+        ring_ok &= ~ndimage.binary_dilation(bed, iterations=max(1, int(6.0 / texel_m)))
+        # The painted bed keeps the contrast the stage before it just enforced.
+        on_bed = bed
+    del forest
+    labels, count = ndimage.label(fields)
+    if not count:
+        return colour_u8
+    out = colour_u8.astype("float32") / 255.0
+    min_cells = max(16, int(min_area_m2 / (texel_m * texel_m)))
+    pad = int(32.0 / texel_m)
+    for sl, k in zip(ndimage.find_objects(labels), range(1, count + 1), strict=False):
+        if sl is None:
+            continue
+        r0, r1 = max(sl[0].start - pad, 0), min(sl[0].stop + pad, n)
+        c0, c1 = max(sl[1].start - pad, 0), min(sl[1].stop + pad, n)
+        field = labels[r0:r1, c0:c1] == k
+        if int(field.sum()) < min_cells:
+            continue
+        dist = ndimage.distance_transform_edt(~field) * texel_m
+        ring = (dist > 10.0) & (dist <= 30.0) & ring_ok[r0:r1, c0:c1]
+        if int(ring.sum()) < 50:
+            continue
+        inner = ndimage.binary_erosion(field, iterations=max(1, int(6.0 / texel_m)))
+        interior = inner if inner.sum() >= 20 else field
+        block = out[r0:r1, c0:c1]
+        f_mean = block[interior].reshape(-1, 3).mean(axis=0)
+        r_mean = block[ring].reshape(-1, 3).mean(axis=0)
+        # Feathered 3 m inside the field's edge, so the correction has no step at it.
+        inside_d = ndimage.distance_transform_edt(field) * texel_m
+        w = np.clip(inside_d / 3.0, 0.0, 1.0).astype("float32")
+        w = (w * w * (3.0 - 2.0 * w)) * field
+        if on_bed is not None:
+            w = w * ~on_bed[r0:r1, c0:c1]
+        delta = np.zeros(3, dtype="float64")
+        for axis in ("exg", "br"):
+            if axis == "exg":
+                own = 2 * f_mean[1] - f_mean[0] - f_mean[2]
+                theirs = 2 * r_mean[1] - r_mean[0] - r_mean[2]
+            else:
+                own = f_mean[2] - f_mean[0]
+                theirs = r_mean[2] - r_mean[0]
+            excess = float(own - theirs)
+            over = math.copysign(max(abs(excess) - max_chroma_dev, 0.0), excess)
+            if over == 0.0:
+                continue
+            step = over / (3.0 if axis == "exg" else 1.0)
+            step = float(np.clip(step, -0.08, 0.08))
+            if axis == "exg":
+                delta += np.array([step * 0.5, -step, step * 0.5])
+            else:
+                delta += np.array([step * 0.5, 0.0, -step * 0.5])
+        ratio = float(f_mean.mean() / max(float(r_mean.mean()), 1e-4))
+        want = float(np.clip(ratio, 1.0 - max_lum_dev, 1.0 + max_lum_dev))
+        gain = float(np.clip(want / max(ratio, 1e-4), 0.7, 1.4))
+        block += delta.astype("float32")[None, None, :] * w[..., None]
+        out[r0:r1, c0:c1] = block * (1.0 + (gain - 1.0) * w)[..., None]
+        del field, dist, ring, inner, block, w, inside_d
+    return np.clip(out * 255.0, 0, 255).astype("uint8")
 
 
 def refill_check(
@@ -796,6 +899,9 @@ def refill_check(
     rgb = colour_u8.astype("float32") / 255.0
     lum = rgb.mean(axis=-1)
     br = rgb[..., 2] - rgb[..., 0]
+    # The green axis as well: a refill matched on luminance and blue-to-red still
+    # came back a tenth greener than the meadow round it.
+    exg = 2.0 * rgb[..., 1] - rgb[..., 0] - rgb[..., 2]
     fine = lum - ndimage.uniform_filter(lum, size=max(3, int(10.0 / texel_m)), mode="nearest")
     del rgb
     half = n * texel_m / 2.0
@@ -828,6 +934,9 @@ def refill_check(
                 "br_diff": round(
                     float(br[r0:r1, c0:c1][interior].mean() - br[r0:r1, c0:c1][ring].mean()), 3
                 ),
+                "exg_diff": round(
+                    float(exg[r0:r1, c0:c1][interior].mean() - exg[r0:r1, c0:c1][ring].mean()), 3
+                ),
                 "grain_ratio": round(float(f_in.std() / max(f_ring.std(), 1e-4)), 3),
             }
         )
@@ -842,6 +951,7 @@ def refill_check(
         "lum_ratio_p10": round(float(np.percentile(lum_r, 10)), 3),
         "grain_ratio_p10": round(float(np.percentile(grain, 10)), 3),
         "br_diff_max_abs": round(float(np.abs([f["br_diff"] for f in fields]).max()), 3),
+        "exg_diff_max_abs": round(float(np.abs([f["exg_diff"] for f in fields]).max()), 3),
         "largest": fields,
     }
 
@@ -1033,6 +1143,23 @@ def build_level(
     colour_full = paint_road_beds(
         colour_full, layer, materials, spec.PALETTE, getattr(spec, "ROADS", {}).get("surfaces", {})
     )
+    pad_texture_file = data_root / "terrain" / "pad_texture.npy"
+    if pad_texture_file.is_file():
+        # A painted pad takes the flight's own grain back over its mean, so the lot
+        # reads as asphalt with stall stripes rather than one flat fill.
+        grain = np.load(pad_texture_file)
+        if grain.shape[0] != colour_full.shape[0]:
+            from PIL import Image
+
+            grain = np.asarray(
+                Image.fromarray(grain, mode="F").resize(
+                    (colour_full.shape[1], colour_full.shape[0]), Image.BILINEAR
+                )
+            )
+        colour_full = np.clip(colour_full.astype("float32") * grain[..., None], 0, 255).astype(
+            "uint8"
+        )
+        del grain
     # The contract is one factor for every surface, or a factor per surface
     # ({"dirt": 1.06}: the two-tracks pale, the asphalt as dark as asphalt is).
     bed_factor = getattr(spec, "ROADS", {}).get("bed_lighter_than_ground") or 0.0
@@ -1068,12 +1195,12 @@ def build_level(
             for cfg in all_surfaces.values()
             if cfg.get("terrain_material") in materials
         ]
-        check = refill_check(
-            colour_full,
-            np.load(refill_file),
-            fp.size_m / colour_full.shape[0],
-            bed=np.isin(layer, bed_ids) if bed_ids else None,
-        )
+        kinds = np.load(refill_file)
+        bed_mask = np.isin(layer, bed_ids) if bed_ids else None
+        texel = fp.size_m / colour_full.shape[0]
+        colour_full = refill_match(colour_full, kinds, texel, bed=bed_mask)
+        check = refill_check(colour_full, kinds, texel, bed=bed_mask)
+        del kinds
         if isinstance(report.get("imagery"), dict):
             report["imagery"]["refill_check"] = check
     if isinstance(bed_factor, dict):
