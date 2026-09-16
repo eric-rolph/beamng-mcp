@@ -206,6 +206,7 @@ def shrubs_from_imagery(
     layer: np.ndarray | None = None,
     allowed_layers: set[int] | None = None,
     max_slope_deg: float | None = None,
+    unplaced: list | None = None,
 ) -> list[dict]:
     """Dark compact dots in the imagery (junipers, saltbush) that the lidar did not keep.
 
@@ -259,6 +260,7 @@ def shrubs_from_imagery(
     index = np.arange(1, count + 1)
     areas = ndimage.sum(dark, labels, index) * grid_res * grid_res
     centroids = ndimage.center_of_mass(dark, labels, index)
+    placed_labels: set[int] = set()
     lo, hi = float(cfg.get("min_area_m2", 1.0)), float(cfg.get("max_area_m2", 25.0))
     half = fp_size_m / 2.0
     taken = np.zeros(dem.shape, dtype=bool)
@@ -281,6 +283,7 @@ def shrubs_from_imagery(
         if taken[r, c]:
             continue
         taken[max(0, r - 2) : r + 3, max(0, c - 2) : c + 3] = True
+        placed_labels.add(int(i) + 1)
         w = max(0.8, min(math.sqrt(area) * 1.1, 5.0))
         out.append(
             {
@@ -296,7 +299,38 @@ def shrubs_from_imagery(
         )
         if len(out) >= cap:
             break
+    if unplaced is not None:
+        # The dots nothing was placed on (too small, too big, taken, over the cap):
+        # the caller repaints them, or they stay as brown smears with nothing on.
+        keep = np.ones(count + 1, dtype=bool)
+        keep[0] = False
+        for lab in placed_labels:
+            keep[lab] = False
+        unplaced.append(keep[labels])
     return out
+
+
+def erase_dots(colour_u8: np.ndarray, dots: np.ndarray, window_m: float, texel_m: float):
+    """Repaint ``dots`` with the mean colour of the ground within ``window_m`` round
+    them (the dots themselves left out)."""
+
+    from scipy import ndimage
+
+    if not dots.any():
+        return colour_u8
+    win = max(3, int(window_m / texel_m))
+    out = colour_u8.astype("float32")
+    keep = (~dots).astype("float32")
+    den = np.maximum(ndimage.uniform_filter(keep, size=win, mode="nearest"), 1e-3)
+    ring = np.stack(
+        [
+            ndimage.uniform_filter(out[..., ch] * keep, size=win, mode="nearest") / den
+            for ch in range(3)
+        ],
+        axis=-1,
+    )
+    out = np.where(dots[..., None], ring, out)
+    return np.clip(out, 0, 255).astype("uint8")
 
 
 def trees_from_chm(

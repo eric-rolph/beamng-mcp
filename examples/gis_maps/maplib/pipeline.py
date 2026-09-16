@@ -283,13 +283,25 @@ def terrain(spec, example_root: Path) -> dict:
                     )
                     > 127
                 )
+            # The ring's road fragments must not be quilted into a box: every ring
+            # cell within 8 m of an OSM centreline is not a source.
+            road_mask = None
+            if hasattr(spec, "ROADS"):
+                from . import roads as road_tools
+
+                lines = road_tools.road_polylines(spec, fp, data_root / "osm" / "roads.json")
+                road_mask = road_tools.centreline_mask(
+                    lines, fp.size_m / colour.shape[0], fp.size_m, colour.shape[0], 8.0
+                )
             colour = ob.inpaint_boxes(
                 colour,
                 fp.size_m / colour.shape[0],
                 fp.size_m,
                 objects_spec["flatten_boxes"],
                 keep_mask=keep,
+                exclude_mask=road_mask,
             )
+            del road_mask
             del keep
             _log("  base colour in-painted inside the flatten boxes")
         from PIL import Image
@@ -446,6 +458,35 @@ def terrain(spec, example_root: Path) -> dict:
         Image.fromarray(colour).save(out / "colour.png", format="PNG", compress_level=3)
         stats["base_pull"] = pull_stats
         _log(f"  base colour pulled toward the palette on {len(pulls)} layers")
+    chroma = (getattr(spec, "IMAGERY", None) or {}).get("chroma_pull")
+    if chroma and colour is not None:
+        from PIL import Image
+
+        from . import imagery as imagery_tools
+
+        Image.MAX_IMAGE_PIXELS = None
+        layer_at_colour = layer
+        if layer.shape[0] != colour.shape[0]:
+            layer_at_colour = np.asarray(
+                Image.fromarray(layer).resize((colour.shape[0], colour.shape[0]), Image.NEAREST)
+            )
+        ids = [
+            list(spec.TERRAIN["materials"]).index(name)
+            for name in chroma.get("layers", [])
+            if name in spec.TERRAIN["materials"]
+        ]
+        colour, pulled = imagery_tools.pull_chroma(
+            colour,
+            layer_at_colour,
+            ids,
+            float(chroma["target_br"]),
+            float(chroma.get("window_m", 100.0)),
+            fp.size_m / colour.shape[0],
+            tolerance=float(chroma.get("tolerance", 1.05)),
+        )
+        Image.fromarray(colour).save(out / "colour.png", format="PNG", compress_level=3)
+        stats["chroma_pull_cells"] = pulled
+        _log(f"  chroma pulled on {pulled} cells")
     lakes = (getattr(spec, "IMAGERY", None) or {}).get("lakes")
     if lakes and colour is not None:
         from PIL import Image
@@ -556,16 +597,27 @@ def terrain(spec, example_root: Path) -> dict:
                     raw = level_builder.naip_mosaic(data_root / "naip", fp, dem.shape[0])
                 lum = raw[rr0:rr1, cc0:cc1].astype("float32").mean(axis=-1) / 255.0
                 dark = (lum < float(outline.get("max_lum", 0.42))) & inside
-                dark = ndimage.binary_closing(dark, iterations=max(1, int(6.0 / res)))
-                dark = ndimage.binary_opening(dark, iterations=max(1, int(4.0 / res)))
+                # A lot's bays flicker across the threshold: closed over 12 m and
+                # opened over 8 m the outline is the lot's straight edge.
+                dark = ndimage.binary_closing(
+                    dark, iterations=max(1, int(float(outline.get("close_m", 12.0)) / res))
+                )
+                dark = ndimage.binary_opening(
+                    dark, iterations=max(1, int(float(outline.get("open_m", 8.0)) / res))
+                )
                 labels, count = ndimage.label(dark)
                 if count:
                     areas = ndimage.sum(dark, labels, np.arange(1, count + 1))
                     keep_min = float(outline.get("min_area_m2", 200.0)) / (res * res)
                     dark = np.isin(labels, np.nonzero(areas >= keep_min)[0] + 1)
                     dark = ndimage.binary_fill_holes(dark)
-                if dark.sum() * res * res >= float(outline.get("min_area_m2", 200.0)):
-                    inside = dark
+                if dark.sum() * res * res < float(outline.get("min_area_m2", 200.0)):
+                    # The flight shows no lot here: no pad (a rectangle stamped on
+                    # pale ground was a black block).
+                    _log(f"  pad at {pad['center_xy']} skipped: no dark lot in the flight")
+                    del lum, dark
+                    continue
+                inside = dark
                 del lum, dark
             window = dem[rr0:rr1, cc0:cc1]
             if pad.get("flatten", True):
@@ -607,34 +659,41 @@ def terrain(spec, example_root: Path) -> dict:
                 surface_index[rr0:rr1, cc0:cc1],
             )
             if colour is not None:
-                # The colour feather: outside the outline the base blends toward the
-                # pad's authored tone over the same width (the level stage paints the
-                # outline itself).
-                surface_cfg = spec.ROADS["surfaces"].get(pad.get("surface", "paved"), {})
-                material = surface_cfg.get("terrain_material")
-                base = (spec.PALETTE.get(material) or {}).get("base")
-                if base is not None:
-                    scale = colour.shape[0] / dem.shape[0]
-                    cr0, cr1 = int(rr0 * scale), int(rr1 * scale)
-                    cc0c, cc1c = int(cc0 * scale), int(cc1 * scale)
-                    from PIL import Image
+                # A car park has a crisp kerb: a 1.5 m gravel shoulder outside the
+                # outline (the asphalt decal's own shoulder tone), no halo.
+                shoulder_m = float(pad.get("shoulder_m", 1.5))
+                shoulder_rgb = pad.get("shoulder_rgb", [0.60, 0.56, 0.50])
+                scale = colour.shape[0] / dem.shape[0]
+                cr0, cr1 = int(rr0 * scale), int(rr1 * scale)
+                cc0c, cc1c = int(cc0 * scale), int(cc1 * scale)
+                from PIL import Image
 
-                    inside_c = (
-                        np.asarray(
-                            Image.fromarray(inside.astype("uint8") * 255).resize(
-                                (cc1c - cc0c, cr1 - cr0), Image.NEAREST
-                            )
+                inside_c = (
+                    np.asarray(
+                        Image.fromarray(inside.astype("uint8") * 255).resize(
+                            (cc1c - cc0c, cr1 - cr0), Image.NEAREST
                         )
-                        > 127
                     )
-                    dist_c = ndimage.distance_transform_edt(~inside_c) * (res / scale)
-                    wc = np.clip(1.0 - dist_c / feather, 0.0, 1.0).astype("float32")
-                    wc = (wc * wc * (3.0 - 2.0 * wc)) * (~inside_c)
-                    tone = np.asarray(base, dtype="float32") * 255.0
-                    block = colour[cr0:cr1, cc0c:cc1c].astype("float32")
-                    colour[cr0:cr1, cc0c:cc1c] = np.clip(
-                        block * (1 - wc[..., None]) + tone[None, None, :] * wc[..., None], 0, 255
-                    ).astype("uint8")
+                    > 127
+                )
+                dist_c = ndimage.distance_transform_edt(~inside_c) * (res / scale)
+                shoulder = (dist_c > 0) & (dist_c <= shoulder_m)
+                tone = np.asarray(shoulder_rgb, dtype="float32") * 255.0
+                block = colour[cr0:cr1, cc0c:cc1c].astype("float32")
+                grain = (
+                    block.mean(axis=-1, keepdims=True)
+                    / np.maximum(
+                        ndimage.uniform_filter(block.mean(axis=-1), size=9, mode="nearest"), 1.0
+                    )[..., None]
+                )
+                block = np.where(
+                    shoulder[..., None], tone[None, None, :] * np.clip(grain, 0.85, 1.15), block
+                )
+                colour[cr0:cr1, cc0c:cc1c] = np.clip(block, 0, 255).astype("uint8")
+        if colour is not None and pad_notes:
+            from PIL import Image
+
+            Image.fromarray(colour).save(out / "colour.png", format="PNG", compress_level=3)
         stats["pads"] = pad_notes if pad_notes else len(pads)
     if surface_index is not None:
         materials = list(spec.TERRAIN["materials"])

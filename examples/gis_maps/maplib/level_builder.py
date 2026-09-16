@@ -1271,8 +1271,28 @@ def build_level(
                     if name in materials
                 },
                 max_slope_deg=shrub_from_imagery.get("max_slope_deg"),
+                unplaced=(leftover := []),
             )
             placed += extra
+            if shrub_from_imagery.get("erase_unplaced") and leftover:
+                # A dark dot nothing stands on is a brown smear: repainted from the
+                # ground round it.
+                dots = leftover[0]
+                if dots.shape[0] != colour_full.shape[0]:
+                    from PIL import Image
+
+                    dots = (
+                        np.asarray(
+                            Image.fromarray(dots.astype("uint8") * 255).resize(
+                                (colour_full.shape[1], colour_full.shape[0]), Image.NEAREST
+                            )
+                        )
+                        > 127
+                    )
+                colour_full = vegetation.erase_dots(
+                    colour_full, dots, 10.0, fp.size_m / colour_full.shape[0]
+                )
+                report["imagery_dots_erased"] = int(dots.sum())
         cover_colours: dict = {}
         if forest_spec:
             cover = vegetation.cover_maps(colour_full, dem, res, forest_spec)

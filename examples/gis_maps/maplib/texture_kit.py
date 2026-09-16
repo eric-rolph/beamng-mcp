@@ -106,7 +106,7 @@ FAMILIES = {
         "gain": 0.6,
         "feature": "ruts",
         "shade_by_height": 0.15,
-        "rut_tint": 0.26,
+        "rut_tint": 0.35,
     },
     "gravel_track": {
         "freq": 10,
@@ -671,7 +671,11 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
             # Kaibab chunks are cream-grey whatever the soil: an absolute tone.
             base_lin = np.power(np.asarray(params.get("base_rgb", [0.5, 0.5, 0.5]), "float64"), 2.2)
             chunk = np.power(np.asarray(params["chunk_rgb"], "float64"), 2.2) / base_lin
-        rock_rgb = chunk * (block_lum * grade)[..., None]
+        # Fine speckle inside every chunk and a darker line on its down-light edges,
+        # so a chunk is a stone and not a paper cut-out.
+        speckle = 1.0 + 0.03 * fbm(size, 120, 2, rng)
+        edge_line = np.clip((ndimage.maximum_filter(h, size=3, mode="wrap") - h) / 0.15, 0, 1)
+        rock_rgb = chunk * (block_lum * grade * speckle * (1.0 - 0.25 * edge_line))[..., None]
         soil_rgb = _rgb(1.0, 0.82, 0.66) * (0.9 + 0.2 * fbm(size, 8, 2, rng))[..., None]
         rock_rgb = np.where(dusted, rock_rgb * 0.6 + soil_rgb * 0.4, rock_rgb)
         tint = (rock_rgb * body[..., None] + soil_rgb * (1 - body[..., None])) * (
@@ -884,7 +888,7 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
         # Cracks: cells of 0.3-0.5 m (a 6 m tile), their edges displaced by noise
         # and only three in ten drawn, so no paving tessellation shows.
         f1, f2, cid_c = worley(size, 16, rng, jitter=1.0, warp=0.05)
-        cracks = (1.0 - _smooth((f2 - f1) / 0.012)) * (_cell_value(cid_c, 61) > 0.7)
+        cracks = (1.0 - _smooth((f2 - f1) / 0.006)) * (_cell_value(cid_c, 61) > 0.7)
         patches = fbm(size, 3, 2, rng) * 0.15
         # Across the road (u): a pale gravel shoulder each side and a darker wear
         # band down the middle of each lane.
@@ -898,8 +902,10 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
             # The shoulder's inner edge wanders +-0.15 m (a 6 m road) at a 2-4 m
             # wavelength and its tone carries the gravel grain, so it is not a
             # painted line.
+            # 1/f wander at 2-8 m wavelengths (0.1 m on a 6 m road) plus 5 cm jitter:
+            # a gravel edge, not rick-rack.
             wander = (
-                fbm(size, (1, 3), 2, rng)[:, :1] * 0.015 + fbm(size, (1, 14), 2, rng)[:, :1] * 0.02
+                fbm(size, (1, 2), 4, rng)[:, :1] * 0.017 + fbm(size, (1, 40), 1, rng)[:, :1] * 0.008
             )
             xj = x + wander
             band = _smooth((s_out - xj) / 0.01) * _smooth((xj - s_in) / 0.01)
@@ -907,7 +913,9 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
             shoulder = np.clip(band, 0, 1) * (0.85 + 0.3 * np.clip(grain + 0.5, 0, 1))
         wear = np.exp(-((x - 0.23) ** 2) / 0.0018) + np.exp(-((x - 0.77) ** 2) / 0.0018)
         wear = np.clip(wear, 0, 1) * np.ones((size, 1))
-        tint = (1.0 + float(params.get("wear_contrast", 0.1)) * wear)[..., None]
+        tint = ((1.0 + float(params.get("wear_contrast", 0.1)) * wear) * (1.0 - 0.06 * cracks))[
+            ..., None
+        ]
         if params.get("shoulder_rgb"):
             base_lin = np.power(np.asarray(params.get("base_rgb", [0.5, 0.5, 0.5]), "float64"), 2.2)
             ratio = np.power(np.asarray(params["shoulder_rgb"], "float64"), 2.2) / base_lin
@@ -923,7 +931,9 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
         # Across the road (u): two compacted wheel ruts and a raised, rougher centre.
         x = np.linspace(0, 1, size, endpoint=False)[None, :]
         # Flat-bottomed ruts with a real wall (2 % of the width, a hand on a 4 m road).
-        rut = _smooth((0.07 - np.abs(x - 0.30)) / 0.02) + _smooth((0.07 - np.abs(x - 0.70)) / 0.02)
+        rut = _smooth((0.07 - np.abs(x - 0.30)) / 0.008) + _smooth(
+            (0.07 - np.abs(x - 0.70)) / 0.008
+        )
         rut = np.clip(rut, 0, 1)
         crown = 0.45 * np.exp(-((x - 0.5) ** 2) / 0.015)
         # Stones as on the bed: log-uniform 5-60 mm on a 2 m tile, most of them small.
@@ -950,7 +960,9 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
         # A desert two-track has pale, dust-polished ruts and a darker crown of
         # crust; a gravel track's ruts are compacted and darker.
         if kind == "ruts":
-            wheel = (1.0 + float(params.get("rut_tint", 0.12)) * rut) * (1.0 - 0.12 * crown)
+            wheel = (1.0 + float(params.get("rut_tint", 0.12)) * rut) * (1.0 - 0.14 * crown)
+            # Pebble speckle at a readable amplitude, so the track is not a blur.
+            wheel = wheel * (1.0 + 0.15 * fbm(size, 100, 2, rng))
         else:
             wheel = (1.0 - 0.18 * rut) * (1.0 + 0.08 * crown)
         tint = wheel * (0.9 + 0.2 * _cell_value(cid, 19) * pebbles)

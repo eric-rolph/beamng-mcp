@@ -172,6 +172,13 @@ IMAGERY = {
     # never reached: a cell darker than half its 20 m mean and bluer than green
     # is refilled as cast shadow.
     "shadow_dark_ratio": 0.65,
+    # The near-rim ejecta read lilac-grey: on the plain and ejecta layers a 100 m
+    # neighbourhood bluer than the far plain (b/r 0.72) by 5 % is pulled to it.
+    "chroma_pull": {
+        "layers": ["mc_desert_floor", "mc_ejecta_gravel"],
+        "target_br": 0.72,
+        "window_m": 100.0,
+    },
     "sun_altitude_range": [35.0, 80.0],
     "strength": 1.0,
     "tint_from_imagery": 0.6,
@@ -315,6 +322,13 @@ OBJECTS = {
             "inpaint_ring_m": 20.0,
             "why": "berm 7",
         },
+        {
+            "center_xy": [775.0, 442.0],
+            "size_m": 100.0,
+            "open_m": 100.0,
+            "inpaint_ring_m": 20.0,
+            "why": "berm 8",
+        },
         # The drill site: the shaft is filled from the bare earth, but the
         # flattening is under a metre and the photograph can stay (an in-painted
         # 60 m square on the floor was a visible square).
@@ -332,6 +346,7 @@ OBJECTS = {
     # within 30 m of it (a juniper on the pale crest).
     "classify": {"green_threshold": 0.035, "dark_threshold": 0.36, "dark_ratio": 0.7},
     "max_rocks": 7000,
+    "rock_gap_max_m": 0.4,  # seated down to this gap under the base plane, or not placed
     "max_shrubs": 6000,
     # The photographs have house-sized blocks only on the near-rim ejecta: a wider
     # bump on the plain is a hummock and is not placed as a rock.
@@ -413,7 +428,8 @@ OBJECTS = {
         "max_area_m2": 25.0,
         "max": 5000,
         "layers": ["mc_desert_floor", "mc_ejecta_gravel", "mc_rim_rubble"],
-        "max_slope_deg": 20.0,
+        "max_slope_deg": 28.0,  # the crest layer reaches 28 degrees by construction
+        "erase_unplaced": True,  # a dark dot nothing stands on is repainted
     },
     "spawn_clear_m": 8.0,
     "road_clear_m": 3.0,
@@ -432,16 +448,16 @@ ROADS = {
             "center_xy": [5.0, 641.0],
             "size_m": [170.0, 112.0],
             "surface": "paved",
-            "from_imagery": {"max_lum": 0.42, "min_area_m2": 400.0},
+            "from_imagery": {"max_lum": 0.50, "min_area_m2": 400.0},
             "max_grade": 0.03,
             "max_cut_fill_m": 1.5,
             "feather_m": 12.0,
         },
+        # The RV loop is a pale gravel lot in the flight, not asphalt.
         {
             "center_xy": [160.0, 712.0],
             "size_m": [40.0, 25.0],
-            "surface": "paved",
-            "from_imagery": {"max_lum": 0.42, "min_area_m2": 150.0},
+            "surface": "dirt",
             "max_grade": 0.03,
             "max_cut_fill_m": 1.5,
             "feather_m": 12.0,
@@ -516,7 +532,7 @@ ROADS = {
                 "seed": 900,
                 "size": 1024,
                 "base": [0.72, 0.65, 0.54],
-                "edge_fraction": 0.22,
+                "edge_fraction": 0.08,  # a two-track has an edge
             },
         },
     },

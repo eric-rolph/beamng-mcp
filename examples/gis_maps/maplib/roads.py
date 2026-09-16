@@ -522,3 +522,22 @@ def trim_free_ends(
             continue
         out.append({**road, "points": [(float(x), float(y)) for x, y in kept]})
     return out
+
+
+def centreline_mask(
+    polylines: list[dict], res: float, fp_size_m: float, size: int, buffer_m: float
+) -> np.ndarray:
+    """Cells within ``buffer_m`` of any way's centreline, on a ``size`` grid at ``res``."""
+
+    from scipy import ndimage
+
+    mask = np.zeros((size, size), dtype=bool)
+    half = fp_size_m / 2.0
+    for road in polylines:
+        if len(road["points"]) < 2:
+            continue
+        pts = densify(road["points"], max(res, 0.5))
+        cols = np.clip(((pts[:, 0] + half) / res).astype(int), 0, size - 1)
+        rows = np.clip(((half - pts[:, 1]) / res).astype(int), 0, size - 1)
+        mask[rows, cols] = True
+    return ndimage.binary_dilation(mask, iterations=max(1, int(buffer_m / res)))

@@ -24,48 +24,48 @@
   },
   "forest": {
     "by_item": {
-      "ericrolph_meteor_crater_rock_limestone_00": 88,
-      "ericrolph_meteor_crater_rock_limestone_01": 35,
-      "ericrolph_meteor_crater_rock_limestone_02": 314,
-      "ericrolph_meteor_crater_rock_limestone_03": 142,
-      "ericrolph_meteor_crater_rock_limestone_04": 189,
-      "ericrolph_meteor_crater_rock_limestone_05": 66,
-      "ericrolph_meteor_crater_rock_limestone_06": 95,
-      "ericrolph_meteor_crater_rock_limestone_07": 203,
-      "ericrolph_meteor_crater_rock_moenkopi_00": 62,
-      "ericrolph_meteor_crater_rock_moenkopi_01": 26,
-      "ericrolph_meteor_crater_rock_moenkopi_02": 229,
-      "ericrolph_meteor_crater_rock_moenkopi_03": 87,
-      "ericrolph_meteor_crater_rock_moenkopi_04": 86,
-      "ericrolph_meteor_crater_rock_moenkopi_05": 36,
-      "ericrolph_meteor_crater_rock_moenkopi_06": 63,
-      "ericrolph_meteor_crater_rock_moenkopi_07": 126,
-      "ericrolph_meteor_crater_rock_talus_00": 116,
-      "ericrolph_meteor_crater_rock_talus_01": 48,
-      "ericrolph_meteor_crater_rock_talus_02": 113,
-      "ericrolph_meteor_crater_rock_talus_03": 304,
-      "ericrolph_meteor_crater_rock_talus_04": 332,
-      "ericrolph_meteor_crater_rock_talus_05": 41,
-      "ericrolph_meteor_crater_rock_talus_06": 32,
-      "ericrolph_meteor_crater_rock_talus_07": 217,
-      "ericrolph_meteor_crater_shrub_juniper_00": 582,
-      "ericrolph_meteor_crater_shrub_juniper_01": 609,
-      "ericrolph_meteor_crater_shrub_juniper_02": 624,
-      "ericrolph_meteor_crater_shrub_sage_00": 598,
-      "ericrolph_meteor_crater_shrub_sage_01": 564,
-      "ericrolph_meteor_crater_shrub_sage_02": 556
+      "ericrolph_meteor_crater_rock_limestone_00": 107,
+      "ericrolph_meteor_crater_rock_limestone_01": 31,
+      "ericrolph_meteor_crater_rock_limestone_02": 313,
+      "ericrolph_meteor_crater_rock_limestone_03": 149,
+      "ericrolph_meteor_crater_rock_limestone_04": 156,
+      "ericrolph_meteor_crater_rock_limestone_05": 52,
+      "ericrolph_meteor_crater_rock_limestone_06": 102,
+      "ericrolph_meteor_crater_rock_limestone_07": 204,
+      "ericrolph_meteor_crater_rock_moenkopi_00": 55,
+      "ericrolph_meteor_crater_rock_moenkopi_01": 16,
+      "ericrolph_meteor_crater_rock_moenkopi_02": 223,
+      "ericrolph_meteor_crater_rock_moenkopi_03": 89,
+      "ericrolph_meteor_crater_rock_moenkopi_04": 85,
+      "ericrolph_meteor_crater_rock_moenkopi_05": 40,
+      "ericrolph_meteor_crater_rock_moenkopi_06": 68,
+      "ericrolph_meteor_crater_rock_moenkopi_07": 141,
+      "ericrolph_meteor_crater_rock_talus_00": 124,
+      "ericrolph_meteor_crater_rock_talus_01": 51,
+      "ericrolph_meteor_crater_rock_talus_02": 120,
+      "ericrolph_meteor_crater_rock_talus_03": 316,
+      "ericrolph_meteor_crater_rock_talus_04": 329,
+      "ericrolph_meteor_crater_rock_talus_05": 26,
+      "ericrolph_meteor_crater_rock_talus_06": 30,
+      "ericrolph_meteor_crater_rock_talus_07": 203,
+      "ericrolph_meteor_crater_shrub_juniper_00": 624,
+      "ericrolph_meteor_crater_shrub_juniper_01": 649,
+      "ericrolph_meteor_crater_shrub_juniper_02": 633,
+      "ericrolph_meteor_crater_shrub_sage_00": 817,
+      "ericrolph_meteor_crater_shrub_sage_01": 768,
+      "ericrolph_meteor_crater_shrub_sage_02": 790
     },
     "file": "/levels/ericrolph_meteor_crater/forest/ericrolph_meteor_crater.forest4.json",
-    "instances": 6583,
+    "instances": 7311,
     "rock_gap_m": {
-      "max": 2.37,
-      "over_0_5_fraction": 0.003,
+      "max": 0.4,
+      "over_0_5_fraction": 0.0,
       "p95": 0.11
     },
-    "rocks": 3050,
-    "sha256": "3c4b6b5127712af2c1b1e6a3960491e29d05836a7bbccc6acc6f89da4cc9d50b",
-    "shrubs": 3533,
-    "triangles_if_all_drawn": 1248264
+    "rocks": 3036,
+    "sha256": "ce38d9b2ccd3895b15b9c57090d7a149baa725ebbb76b7d0e96eb95348fdc00e",
+    "shrubs": 4281,
+    "triangles_if_all_drawn": 1246248
   },
   "imagery": {
     "cast_shadow_fraction": 0.0024,
@@ -82,19 +82,19 @@
     "sun_fit": {
       "altitude_deg": 54.0,
       "azimuth_deg": 257.0,
-      "correlation": 0.6595
+      "correlation": 0.6596
     }
   },
   "layer_tints": {
     "mc_desert_floor": [
-      0.4951,
-      0.3563,
-      0.2578
+      0.508,
+      0.3543,
+      0.247
     ],
     "mc_ejecta_gravel": [
-      0.4981,
-      0.3823,
-      0.2796
+      0.5188,
+      0.3789,
+      0.2616
     ],
     "mc_limestone_rim": [
       0.5518,
@@ -112,52 +112,48 @@
       0.1795
     ],
     "mc_road_asphalt": [
-      0.1003,
-      0.0932,
-      0.081
+      0.0995,
+      0.0923,
+      0.0801
     ],
     "mc_road_dirt": [
-      0.6514,
-      0.5182,
-      0.3512
+      0.6542,
+      0.5176,
+      0.3484
     ],
     "mc_talus": [
-      0.4406,
-      0.3466,
-      0.2543
+      0.4405,
+      0.3464,
+      0.2541
     ]
   },
   "road_contrast": {
     "dirt": {
-      "bed": 0.7315,
+      "bed": 0.7312,
       "mc_desert_floor": {
-        "margin": 0.6414,
-        "ratio": 1.141
+        "margin": 0.6397,
+        "ratio": 1.143
       },
       "mc_ejecta_gravel": {
-        "margin": 0.6547,
-        "ratio": 1.117
+        "margin": 0.6525,
+        "ratio": 1.121
       },
       "mc_rim_rubble": {
         "margin": 0.5406,
         "ratio": 1.353
       },
-      "mc_road_asphalt": {
-        "margin": 0.3355,
-        "ratio": 2.18
-      },
       "mc_talus": {
-        "margin": 0.6698,
+        "margin": 0.6697,
         "ratio": 1.092
       },
       "windows": {
-        "min": 1.091,
-        "p05": 1.112,
-        "p50": 1.138
+        "min": 1.097,
+        "p05": 1.113,
+        "p50": 1.139
       },
       "windows_vs_pale": {
-        "min": 1.042,
-        "p05": 1.058
+        "min": 1.047,
+        "p05": 1.061
       }
     }
   },
@@ -173,7 +169,7 @@
     },
     "length_m": 9600.2,
     "max_end_grade_change": 0.0812,
-    "max_grade_change": 0.0812,
+    "max_grade_change": 0.0908,
     "roads": 26,
     "ways_seen": 26
   },
@@ -228,112 +224,112 @@
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/rock_moenkopi_00.dae": {
-      "sha256": "35dfbeb7df663c9d3cb2ebc6f9b55dfb41c28dff69f8855d131d2c6a6f06d85a",
-      "size": 80976,
+      "sha256": "6f1b82a9fea0816f581d5933fcf6c4ad47156843d758cd4da6df990aacd8d836",
+      "size": 81466,
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/rock_moenkopi_01.dae": {
-      "sha256": "275e7444332a62ce5d6fcbb510b946884335f3bd4d5651033685b527d7f83f82",
-      "size": 80838,
+      "sha256": "fa01920c3006cac0b68f7d8ed125a54a1fb9a42122e5be75952fd858509f2207",
+      "size": 80749,
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/rock_moenkopi_02.dae": {
-      "sha256": "ea46890892a99681e8784720f39e51a4231542a04bf22d1fd37f7c82732314bb",
-      "size": 80609,
+      "sha256": "1eaee5f354d203fdbfdab897b6328f99eeb9f87d0e5d9db71d79124615b60a8a",
+      "size": 80978,
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/rock_moenkopi_03.dae": {
-      "sha256": "43557e2821c863ef7f67b5743c3411b236b368efc85fc4808077a51fbbbc7cf9",
-      "size": 80671,
+      "sha256": "a55beacb860036298085fece4bb74625fc4f56af7b5718fc4533d7afd9b33d8b",
+      "size": 80667,
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/rock_moenkopi_04.dae": {
-      "sha256": "1fb5159da88dae8f7ba8e284917b996d4f7231bb0fb5334c7f1e51f749f99f03",
-      "size": 81349,
+      "sha256": "e2f6bd5805c38413ff0077f4343ee1a32fa199499d456691c4d68df31c595c84",
+      "size": 80554,
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/rock_moenkopi_05.dae": {
-      "sha256": "c260775ee9938cfe1a6f937d3816229bc8fa218a5ac972132be60c100b93a912",
-      "size": 81041,
+      "sha256": "460115b7dac5e0adc6031d8b37634570679c5b0328de1ebe54e2adcb0fff9932",
+      "size": 81333,
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/rock_moenkopi_06.dae": {
-      "sha256": "86ce205f2e60216bcfb0ccc701587dbe8fffbbf6a2db9a7bef5667b82541bb0e",
-      "size": 80450,
+      "sha256": "6431952ba69ff016f4dc03a670d125bf3ed9ff0ecb29385103ec307269d952de",
+      "size": 80819,
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/rock_moenkopi_07.dae": {
-      "sha256": "5926496817f8b0a5174d5889307d45764167da44cb8a3462a625c62ae7cf1414",
-      "size": 81213,
+      "sha256": "353802fcbc8c918b3ec81fc34902931cfe23cdd6ac41b6167a51759f93f31f6b",
+      "size": 80368,
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/rock_talus_00.dae": {
-      "sha256": "52e2bb8d48810b46a9b26c3fc461d0c9b2cdd3cafe7d1687924c27c7aca5ce94",
-      "size": 81143,
+      "sha256": "3b46a12ca7e27f349b0138f35b159531d6172737ded9dfe13257b7d7105b8b50",
+      "size": 79978,
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/rock_talus_01.dae": {
-      "sha256": "1c004e4d2fe4829c63ddef04e1c768dd043eb191158fbcdae425630332863669",
-      "size": 81104,
+      "sha256": "ac5373a9a283073d9842bb420cd51642e026a2d87d3be31ec6dcc99c068a724c",
+      "size": 81066,
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/rock_talus_02.dae": {
-      "sha256": "d75d96b5e8b63ccc5fa145f3fee8ed34bb1f0e9dafb0637fde8ccd58ebffa0c5",
-      "size": 80739,
+      "sha256": "daa622ce31f344a42a7120930a37dde1f98ecc2f2f6656647a43b43a2438e27e",
+      "size": 80895,
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/rock_talus_03.dae": {
-      "sha256": "6b49ad2f97a03f5935b2807b39447d4df2308e362475e8ab65353bcdf74eedca",
-      "size": 80341,
+      "sha256": "e1419df6f9b1c9d40ce7ee9a6071ddb1d556d0f202feba5a28c7b88805b84c3a",
+      "size": 80593,
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/rock_talus_04.dae": {
-      "sha256": "c231f297dfb324d3e85cd1cc9a993c1b84f3556951f5304528dd01fb5f20ff7b",
-      "size": 80263,
+      "sha256": "8f881368da85e8f60e420e85ce11ec583b7bb747772a7a260648b328183ed571",
+      "size": 80337,
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/rock_talus_05.dae": {
-      "sha256": "c1f705290191454d9ea957ee433619f2a0e41a900fc57a06ac71dcb1ba78e809",
-      "size": 80245,
+      "sha256": "f6195447fb8c4b3e8e5f96c09863a84a893b12b4934c70961ace67f968e2faea",
+      "size": 80357,
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/rock_talus_06.dae": {
-      "sha256": "c84df29590753af8c9f7dbe7f76a54aa6f94118f7f60c9bb1625f75bb0b523ca",
-      "size": 81051,
+      "sha256": "65552188bc979ccc10c8cd5b3ffa28687cf0faae48e7b9dda91a12a3a6a2aa5d",
+      "size": 80559,
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/rock_talus_07.dae": {
-      "sha256": "e764e6560547b862a8ad0ca6b271dc55a119e9aff288e7b692fac0575412a48d",
-      "size": 80645,
+      "sha256": "5ea0a67857693630b5d12ffc40d0c6e4ed9a899509380af480751c121440f0e6",
+      "size": 80593,
       "triangles": 400
     },
     "art/shapes/ericrolph_meteor_crater/shrub_juniper_00.dae": {
-      "sha256": "4f7f5366d4feec7c151f64a3047c8262acfe426a6de19c45193a37be3758b69b",
-      "size": 5177,
+      "sha256": "082e191f9604d3a507598da46f2263ba8ac335acc460b787a506a57344997d8d",
+      "size": 5181,
       "triangles": 8
     },
     "art/shapes/ericrolph_meteor_crater/shrub_juniper_01.dae": {
-      "sha256": "2b16348e3bdf984f035a58a692e13657b36d3a5bf5bec57c5b9941508f4f0dbc",
-      "size": 5169,
+      "sha256": "2921be6e8114884d76f65a56b1cade517db0259ad36655d14d9a312bf0b664da",
+      "size": 5161,
       "triangles": 8
     },
     "art/shapes/ericrolph_meteor_crater/shrub_juniper_02.dae": {
-      "sha256": "167f48165f0fc195fa2015406c7926d911dfa45700a1fff8f75dfc47fccb2dee",
+      "sha256": "806f0f2654d2076fdc2b456adfb00b64ebc2458ee32ecff5b988d5d572849f91",
       "size": 5181,
       "triangles": 8
     },
     "art/shapes/ericrolph_meteor_crater/shrub_sage_00.dae": {
-      "sha256": "d5c22ae0d1ca24853991b34cffb97970d6ae9713ed8da314bb32844272f974d9",
-      "size": 5055,
+      "sha256": "297d25e6167d44dbca7f49b6c0430dc5b779bf74165d58a7cd366521d1b3e109",
+      "size": 5051,
       "triangles": 8
     },
     "art/shapes/ericrolph_meteor_crater/shrub_sage_01.dae": {
-      "sha256": "2eaf55341fa0ccc94d4f3c9443b36788ec813b9b15a250f6764b8ffc8328d091",
-      "size": 5047,
+      "sha256": "b41eec9531758576350c09c1b805f097ab8e00926d35506d9ce29d5143e940b2",
+      "size": 5055,
       "triangles": 8
     },
     "art/shapes/ericrolph_meteor_crater/shrub_sage_02.dae": {
-      "sha256": "90a356f84bbf79b22d9b4748a3a4c0e10ce396ea3f6c98064abb83099f900b44",
+      "sha256": "354c2790e991b6495b976da6de2410e003ec0fdbadb022a1cba625251095672f",
       "size": 5051,
       "triangles": 8
     },
@@ -342,15 +338,15 @@
       "size": 22188
     },
     "forest/ericrolph_meteor_crater.forest4.json": {
-      "sha256": "3c4b6b5127712af2c1b1e6a3960491e29d05836a7bbccc6acc6f89da4cc9d50b",
-      "size": 1184575
+      "sha256": "ce38d9b2ccd3895b15b9c57090d7a149baa725ebbb76b7d0e96eb95348fdc00e",
+      "size": 1307466
     },
     "info.json": {
       "sha256": "662f469e28341d6abe19f341edf54f4f154d7d99d32db17bfaff0cc9e54992d4",
       "size": 2062
     },
     "theTerrain.ter": {
-      "sha256": "183651236c9c1df8b0e118a72305ac8a83933c7aae4cf6966fc51ca4b1219efa",
+      "sha256": "e857913e321b6a2537797e0d5ebdacbf2577f9ae6c299791a7d3d2d6ed67d017",
       "size": 50331779
     },
     "theTerrain.terrain.json": {
@@ -358,8 +354,8 @@
       "size": 652
     },
     "theTerrain.terrainheightmap.png": {
-      "sha256": "cb1cc3c90a60d6778a72b2c3d0c31922d682650bd7849aa28a930fdb2b92a25c",
-      "size": 15901911
+      "sha256": "9b0458ba916af518a55e4a6171b0a7a88e87f8006e36b78e30d3137cced8742e",
+      "size": 15896179
     }
   },
   "site": {
@@ -403,7 +399,7 @@
       "lon": -111.0222,
       "objectname": "spawn_north_rim_visitor_center",
       "snapped_to_road": true,
-      "z": 148.85
+      "z": 148.27
     },
     {
       "default": false,
@@ -453,7 +449,7 @@
     "stats": {
       "aspect_flatfield": {
         "2": {
-          "after_spread": 1.045,
+          "after_spread": 1.046,
           "after_spread_steep": 1.058,
           "bin_counts": [
             1761,
@@ -480,7 +476,7 @@
             0.373,
             0.369,
             0.37,
-            0.375,
+            0.376,
             0.369
           ],
           "bin_means_before": [
@@ -495,7 +491,7 @@
             0.359,
             0.377,
             0.396,
-            0.41
+            0.409
           ],
           "clipped_fraction": 0.0,
           "factors": [
@@ -505,7 +501,7 @@
             1.184,
             1.171,
             1.457,
-            1.275,
+            1.274,
             1.091,
             1.011,
             0.912,
@@ -523,16 +519,16 @@
           "bin_counts": [
             3454,
             52384,
-            99249,
-            131953,
-            182224,
-            162058,
-            120944,
+            99250,
+            131986,
+            182217,
+            162052,
+            120984,
             115845,
-            116385,
-            125151,
-            176471,
-            114510
+            116384,
+            125142,
+            176499,
+            114520
           ],
           "bin_means_after": [
             0.338,
@@ -564,16 +560,16 @@
           ],
           "clipped_fraction": 0.0,
           "factors": [
-            1.248,
+            1.247,
             1.229,
             1.124,
             1.045,
             0.966,
-            1.004,
-            1.007,
-            0.986,
+            1.003,
+            1.008,
+            0.987,
             0.949,
-            0.945,
+            0.944,
             0.963,
             0.989
           ],
@@ -606,7 +602,7 @@
             0.438,
             0.438,
             0.441,
-            0.444,
+            0.443,
             0.444,
             0.445,
             0.442,
@@ -615,7 +611,7 @@
           ],
           "bin_means_before": [
             0.372,
-            0.402,
+            0.401,
             0.414,
             0.432,
             0.439,
@@ -629,11 +625,11 @@
           ],
           "clipped_fraction": 0.0,
           "factors": [
-            1.219,
+            1.218,
             1.097,
             1.07,
             1.021,
-            1.006,
+            1.005,
             0.996,
             0.999,
             0.992,
@@ -648,7 +644,7 @@
           ]
         },
         "7": {
-          "after_spread": 1.033,
+          "after_spread": 1.034,
           "after_spread_steep": 1.052,
           "bin_counts": [
             2144,
@@ -752,6 +748,7 @@
           ]
         }
       },
+      "chroma_pull_cells": 4557272,
       "despike_threshold_m": 4.0,
       "flatten_boxes": [
         {
@@ -866,6 +863,17 @@
         },
         {
           "center_xy": [
+            775.0,
+            442.0
+          ],
+          "lowered_m3": 71.4,
+          "max_lowered_m": 0.43,
+          "open_m": 100.0,
+          "size_m": 100.0,
+          "why": "berm 8"
+        },
+        {
+          "center_xy": [
             -40.0,
             -10.0
           ],
@@ -884,34 +892,34 @@
       },
       "holes_filled": 0,
       "layer_fractions": {
-        "mc_desert_floor": 0.4680153727531433,
-        "mc_ejecta_gravel": 0.23166102170944214,
-        "mc_limestone_rim": 0.06049239635467529,
-        "mc_limestone_rim_ew": 0.06101334095001221,
-        "mc_rim_rubble": 0.08359420299530029,
-        "mc_road_asphalt": 0.005495846271514893,
-        "mc_road_dirt": 0.006544768810272217,
-        "mc_talus": 0.08318305015563965
+        "mc_desert_floor": 0.4679332971572876,
+        "mc_ejecta_gravel": 0.23106688261032104,
+        "mc_limestone_rim": 0.06048941612243652,
+        "mc_limestone_rim_ew": 0.0610126256942749,
+        "mc_rim_rubble": 0.08359390497207642,
+        "mc_road_asphalt": 0.006065428256988525,
+        "mc_road_dirt": 0.006783187389373779,
+        "mc_talus": 0.08305525779724121
       },
       "layer_mean_srgb": {
         "mc_desert_floor": {
-          "cells": 8023733,
-          "clipped": 0.0,
-          "luminance": 0.6314,
+          "cells": 8023424,
+          "clipped": 2e-05,
+          "luminance": 0.6303,
           "rgb": [
-            0.7244,
-            0.6329,
-            0.5371
+            0.7323,
+            0.6312,
+            0.5273
           ]
         },
         "mc_ejecta_gravel": {
-          "cells": 3902019,
-          "clipped": 0.0,
-          "luminance": 0.6443,
+          "cells": 3902239,
+          "clipped": 2e-05,
+          "luminance": 0.6425,
           "rgb": [
-            0.7301,
-            0.6469,
-            0.5558
+            0.7427,
+            0.6445,
+            0.5404
           ]
         },
         "mc_limestone_rim": {
@@ -920,8 +928,8 @@
           "luminance": 0.6847,
           "rgb": [
             0.7616,
-            0.6967,
-            0.5959
+            0.6966,
+            0.5958
           ]
         },
         "mc_limestone_rim_ew": {
@@ -937,26 +945,26 @@
         "mc_rim_rubble": {
           "cells": 1409608,
           "clipped": 0.0,
-          "luminance": 0.5328,
+          "luminance": 0.5327,
           "rgb": [
             0.6302,
-            0.521,
+            0.5209,
             0.4471
           ]
         },
         "mc_talus": {
-          "cells": 1401406,
+          "cells": 1401495,
           "clipped": 0.0,
-          "luminance": 0.6072,
+          "luminance": 0.6071,
           "rgb": [
-            0.6851,
-            0.6128,
-            0.5237
+            0.685,
+            0.6127,
+            0.5235
           ]
         }
       },
       "max_elevation_m": 1750.7005615234375,
-      "mean_elevation_m": 1680.2850341796875,
+      "mean_elevation_m": 1680.2843017578125,
       "min_elevation_m": 1561.7471923828125,
       "near_black_fraction": 0.0,
       "objects": {
@@ -964,9 +972,9 @@
         "candidates": 20146,
         "fence_posts_dropped": 233,
         "kinds": {
-          "linear": 53,
-          "rock": 3515,
-          "shrub": 1175
+          "linear": 50,
+          "rock": 3497,
+          "shrub": 1178
         },
         "min_height_m": 0.45,
         "objects": 4815,
@@ -975,15 +983,15 @@
         "removed_volume_m3": 52047.5,
         "structures_flattened": 0
       },
-      "objects_dropped_in_boxes": 198,
+      "objects_dropped_in_boxes": 216,
       "pads": [
         {
-          "area_m2": 13869.0,
+          "area_m2": 17578.0,
           "center_xy": [
             5.0,
             641.0
           ],
-          "grade": 0.0461,
+          "grade": 0.0572,
           "max_cut_m": 1.5,
           "max_fill_m": 1.5
         },
@@ -1012,9 +1020,9 @@
       },
       "road_corridor_cells_cleared": 1632,
       "size_px": 4096,
-      "slope_mean_deg": 10.631662368774414,
-      "slope_over_30_fraction": 0.10302603244781494,
-      "slope_p95_deg": 36.8193473815918,
+      "slope_mean_deg": 10.62995719909668,
+      "slope_over_30_fraction": 0.10302001237869263,
+      "slope_p95_deg": 36.818817138671875,
       "smooth_sigma_px": 0.0,
       "sources": [
         {

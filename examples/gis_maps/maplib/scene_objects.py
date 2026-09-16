@@ -389,6 +389,9 @@ def write_forest(
         for v in variants:
             tri_by_item[v["item"]] = v["triangles"]
 
+    gap_max = (getattr(spec, "OBJECTS", None) or {}).get("rock_gap_max_m")
+    gap_max = float(gap_max) if gap_max is not None else None
+
     def emit(
         item: str,
         x: float,
@@ -400,7 +403,7 @@ def write_forest(
         tilt: bool = False,
         footprint_m: float = 0.0,
         height_m: float = 0.0,
-    ) -> None:
+    ) -> bool:
         nonlocal triangles
         matrix = _yaw_matrix(yaw)
         if tilt and dem is not None:
@@ -447,6 +450,16 @@ def write_forest(
             # sits half the footprint's drop lower than its centre.
             base_edge = seat - (0.5 * drop if tilted else 0.0)
             gap = base_edge - float(patch.min()) if patch.size else 0.0
+            if gap_max is not None and gap > gap_max:
+                # Seated down until the gap under the base plane is met, within
+                # half its height of the ground at its centre; else not placed.
+                extra = gap - gap_max
+                if seat - extra >= centre - 0.5 * max(height_m, 0.1):
+                    seat -= extra
+                    z = seat - min_elevation
+                    gap = gap_max
+                else:
+                    return False
             gaps.append(max(gap, 0.0))
         lines.append(
             json.dumps(
@@ -461,6 +474,7 @@ def write_forest(
         )
         counts[item] = counts.get(item, 0) + 1
         triangles += tri_by_item.get(item, 0)
+        return True
 
     gaps: list[float] = []
     for obj in placed_objects:

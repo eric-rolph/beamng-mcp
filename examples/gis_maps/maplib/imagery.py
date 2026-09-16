@@ -1228,3 +1228,49 @@ def aspect_flatfield(
             "factors": [round(float(v), 3) for v in factors],
         }
     return linear_to_srgb_u8(out), stats
+
+
+def pull_chroma(
+    colour_u8: np.ndarray,
+    layer: np.ndarray,
+    ids: list[int],
+    target_br: float,
+    window_m: float,
+    texel_m: float,
+    *,
+    tolerance: float = 1.05,
+) -> tuple[np.ndarray, int]:
+    """On the named layers, where the blue-to-red of a ``window_m`` neighbourhood
+    exceeds ``target_br`` by ``tolerance``, scale the chroma so it meets the target,
+    luminance untouched (the near-rim ejecta read lilac-grey where every photograph
+    has it rust-brown). Returns (colour, cells pulled)."""
+
+    from scipy import ndimage
+
+    on = np.isin(layer, ids)
+    if not on.any():
+        return colour_u8, 0
+    lin = srgb_to_linear(colour_u8)
+    win = max(3, int(window_m / texel_m))
+    on_f = on.astype("float32")
+    # The ratio is read in sRGB (the photographs' and the critic's measure).
+    srgb = colour_u8.astype("float32") / 255.0
+    br = srgb[..., 2] / np.maximum(srgb[..., 0], 1e-3)
+    del srgb
+    local = ndimage.uniform_filter(br * on_f, size=win, mode="nearest") / np.maximum(
+        ndimage.uniform_filter(on_f, size=win, mode="nearest"), 1e-3
+    )
+    over = on & (local > tolerance * target_br)
+    if not over.any():
+        return colour_u8, 0
+    # Scale the blue channel's excess over red down to the target ratio (in linear
+    # light the sRGB ratio's scale is raised to 2.2), then put the luminance back.
+    lum = lin.mean(axis=-1, keepdims=True)
+    k = np.where(over, np.clip(target_br / np.maximum(local, 1e-4), 0.5, 1.0) ** 2.2, 1.0)
+    out = lin.copy()
+    out[..., 2] = lin[..., 2] * k
+    out[..., 1] = lin[..., 1] * (0.5 + 0.5 * k)  # green follows blue halfway
+    lum2 = out.mean(axis=-1, keepdims=True)
+    out = out * (lum / np.maximum(lum2, 1e-4))
+    out = np.where(over[..., None], out, lin)
+    return linear_to_srgb_u8(out), int(over.sum())

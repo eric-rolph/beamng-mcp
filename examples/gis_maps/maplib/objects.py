@@ -609,6 +609,7 @@ def inpaint_boxes(
     *,
     ring_m: float = 30.0,
     keep_mask: np.ndarray | None = None,
+    exclude_mask: np.ndarray | None = None,
 ) -> np.ndarray:
     """Repaint the imagery inside the flatten boxes from the ring of ground around them.
 
@@ -673,6 +674,8 @@ def inpaint_boxes(
     rng = np.random.default_rng(11)
     # Ring cells whose whole patch lies in the ring are the sources.
     core = ndimage.binary_erosion(band, iterations=patch_px // 2 + 1)
+    if exclude_mask is not None:
+        core &= ~exclude_mask[rr0:rr1, cc0:cc1]  # no road fragment is a source
     src_r, src_c = np.nonzero(core)
     quilt = np.ones(window.shape[:2], dtype="float32")
     if src_r.size:
@@ -687,6 +690,11 @@ def inpaint_boxes(
         # laid: its high-pass rms must stay under 1.5x the ring's median.
         hp_sq = ndimage.uniform_filter((hp - 1.0) ** 2, size=patch_px, mode="nearest")
         ring_rms = float(np.median(np.sqrt(hp_sq[core])))
+        # A single pale stripe (a track) passes the rms test: a patch whose
+        # high-pass runs over 1.12 or under 0.88 anywhere is not laid either.
+        hp_max = ndimage.maximum_filter(hp, size=patch_px, mode="nearest")
+        hp_min = ndimage.minimum_filter(hp, size=patch_px, mode="nearest")
+        calm = (hp_max <= 1.12) & (hp_min >= 0.88)
         acc = np.zeros(window.shape[:2], dtype="float32")
         wsum = np.zeros(window.shape[:2], dtype="float32")
         ramp = np.linspace(0.0, 1.0, feather_px, endpoint=False)
@@ -706,9 +714,12 @@ def inpaint_boxes(
                 nearest = int(tree.query(centre)[1])
                 arc = tree.query_ball_point((src_r[nearest], src_c[nearest]), arc_px)
                 k = nearest
-                for _try in range(8):
+                for _try in range(12):
                     cand = int(arc[int(rng.integers(0, len(arc)))]) if arc else nearest
-                    if np.sqrt(hp_sq[src_r[cand], src_c[cand]]) <= 1.5 * ring_rms:
+                    if (
+                        np.sqrt(hp_sq[src_r[cand], src_c[cand]]) <= 1.5 * ring_rms
+                        and calm[src_r[cand], src_c[cand]]
+                    ):
                         k = cand
                         break
                 sr, sc = int(src_r[k]) - patch_px // 2, int(src_c[k]) - patch_px // 2
@@ -723,6 +734,10 @@ def inpaint_boxes(
                 acc[r_a:r_b, c_a:c_b] += tile * w2
                 wsum[r_a:r_b, c_a:c_b] += w2
         quilt = np.where(wsum > 1e-3, acc / np.maximum(wsum, 1e-3), 1.0)
+    # The ring keeps its own grain: the feather blends only the low pass, and the
+    # quilted grain inside meets the ring's at the edge (a grainless ring under
+    # the feather was a seam).
+    quilt = np.where(inside, quilt, hp)
     fill = fill * quilt[..., None]
     # The box's mean is the ring's mean, channel by channel (the pyramid's low
     # pass drifts a few per cent from it inside a wide box).
