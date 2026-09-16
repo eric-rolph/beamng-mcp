@@ -215,6 +215,10 @@ the terrain failed to load.
   base came out mirrored against the heightmap in-game (the visitor centre on the
   wrong rim). Every other image the pack writes (previews, thumbnails, the exported
   heightmap) stays north-up.
+- **OSM road extracts are tracked** (`<map>/data/osm/roads.json`, the one piece of
+  fetched data in the tree): the fetch stage keeps an existing extract, so a build is
+  reproducible against the snapshot and the release runner never waits on Overpass.
+  Refetch one with `build.py <key> fetch --force`.
 - **Base texture size**: a TerrainMaterial's `*BaseTexSize` is world metres, not pixels
   (a shipped 2048 m level sets 2048 while its texture set declares 2048 pixels). The pack
   sets it to the footprint so the orthoimagery covers the level exactly once.

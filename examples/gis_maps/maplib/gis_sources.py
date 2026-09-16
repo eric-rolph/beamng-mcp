@@ -579,7 +579,7 @@ def fetch_osm_roads(
     for endpoint in OVERPASS_ENDPOINTS:
         try:
             log(f"  Overpass {endpoint.split('/')[2]} ...")
-            response = _get(endpoint, data={"data": query}, retries=1, timeout=240, log=log)
+            response = _get(endpoint, data={"data": query}, retries=3, timeout=240, log=log)
             payload = response.json()
             if "elements" not in payload:
                 raise RuntimeError("no elements in Overpass response")
