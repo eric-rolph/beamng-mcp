@@ -242,7 +242,13 @@ Each level's `info.json` description carries this attribution.
 The static gates prove the artefacts: header, size, material names, layer indices and
 heightmap rows of the `.ter`; the PNG heightmap is 16-bit and row-consistent with it;
 every scene object parses and its parent exists; every referenced texture ships; the
-ZIP matches its lock. Live behaviour (the level loading in BeamNG, decal roads draping,
-material blending) has not yet been exercised on a game install from this pack; the
-first live run is the next step, per the giant props law that a green static suite is
-not a play-test.
+ZIP matches its lock. On the two art-pass maps they also hold measured contracts on
+the shipped base colour and terrain: the road bed lighter than the pale side of its
+margin per 100 m window, every large refilled field (cast shadow or snow) within a
+band of its ring's luminance and grain on the base the game draws, no clipped or
+near-black cells per layer, the flat-field's residual by aspect, the decal roads' node
+steps and the paved road's steepest 10 m, and a car park's kerb batter. Live behaviour
+(the level loading in BeamNG, decal roads draping, material blending) has been
+exercised on the user's install for the first two releases (the mirrored base and the
+white road were found there); everything since has been judged on the critic sheets
+and the data, so a green static suite is still not a play-test.

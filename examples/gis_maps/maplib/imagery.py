@@ -142,6 +142,8 @@ def delight(
     shadow_dark_ratio: float | None = None,
     canopy_chm: np.ndarray | None = None,
     canopy_refill: float | None = None,
+    exclude_sources: np.ndarray | None = None,
+    debug_hook=None,
 ) -> tuple[np.ndarray, dict]:
     """Return the de-lit RGB8 image plus statistics for the handoff.
 
@@ -358,11 +360,19 @@ def delight(
         # the canopy surface, where the terrain alone is lit and there is no crown.
         canopy_vis = cast_shadows(smooth + np.maximum(chm_r, 0.0), res_r, azimuth_deg, altitude_deg)
         gap_shadow = (canopy_vis < 0.6) & (visibility >= 0.6) & (chm_r < 2.0)
-        shadow_core |= ndimage.binary_dilation(gap_shadow, iterations=max(1, int(1.0 / res_r)))
+        gap_fill = ndimage.binary_dilation(gap_shadow, iterations=max(1, int(1.0 / res_r)))
+        shadow_core |= gap_fill
         canopy_fill = (chm_r >= 2.0) if canopy_refill is not None else None
         del canopy_vis, gap_shadow, chm_r
     else:
         canopy_fill = None
+        gap_fill = None
+    # The penumbra: a cell the gain lifts more than 2.5x within 4 m of a field took
+    # that lift without being in the mask and shipped as a tan halo tracing every
+    # shadow's edge. It is refilled with the field.
+    shadow_core |= (gain > 2.5) & ndimage.binary_dilation(
+        shadow_core, iterations=max(1, int(4.0 / res_r))
+    )
     if shadow_dark_ratio is not None:
         # The reference is the LIT ground of a 60 m window (cells under three
         # quarters of the window mean left out, so a 20 m blob cannot drag its own
@@ -444,6 +454,10 @@ def delight(
         )
         lit_w = 1.0 - fill_w
         clear = ~ndimage.binary_dilation(snow_now, iterations=max(1, int(10.0 / res_r)))
+        if exclude_sources is not None:
+            # The flight's own road corridor is never a source: a snow patch beside
+            # a bed borrowed the white road and shipped a cream lozenge.
+            clear = clear & ~exclude_sources
         source_w = lit_w * clear
         # A steep cell borrows only from lit steep cells and a gentle one from
         # gentle: a shaded cliff comes back as cliff, not as the scree on its ledges.
@@ -452,26 +466,44 @@ def delight(
         # forest on the one side and meadow on the other, not the mean of both.
         steep_f = steep.astype("float32")
         gentle_w = source_w * (1.0 - steep_f)
+        # The tone every refilled cell takes is the lit ground's colour carried in
+        # at a scale that grows with the distance from the nearest lit cell (see
+        # _carry_tone): the ring's own patches run into a field's edge and fade to
+        # the neighbourhood's mean deep inside, continuously. A steep cell borrows
+        # only from lit steep cells and a gentle one from gentle: a shaded cliff
+        # comes back as cliff, not as the scree on its ledges. Under a canopy a
+        # gentle cell borrows from the canopy round it and in the open from open
+        # ground: a snowfield across a forest edge comes back as forest on the one
+        # side and meadow on the other, not the mean of both.
         if cover is None:
-            local = neighbourhood(gentle_w)
+            local = _carry_tone(corrected, gentle_w, res_r)
         elif canopy_fill is not None:
             # The crowns are targets, not sources: every gentle cell borrows from
             # the open ground, and a crown takes it at the duff's darkening.
-            local = neighbourhood(gentle_w * (1.0 - cover.astype("float32")))
-            local = np.where(canopy_fill[..., None], local * float(canopy_refill), local)
+            local = _carry_tone(corrected, gentle_w * (1.0 - cover.astype("float32")), res_r)
+            local = np.where(
+                (canopy_fill & ~snow_now)[..., None], local * float(canopy_refill), local
+            )
         else:
             cover_f = cover.astype("float32")
             local = np.where(
                 cover[..., None],
-                neighbourhood(gentle_w * cover_f),
-                neighbourhood(gentle_w * (1.0 - cover_f)),
+                _carry_tone(corrected, gentle_w * cover_f, res_r),
+                _carry_tone(corrected, gentle_w * (1.0 - cover_f), res_r),
             )
             del cover_f
-        local = np.where(steep[..., None], neighbourhood(source_w * steep_f), local).astype(
-            "float32"
-        )
-        del gentle_w
-        blur = max(16, int(12 / res_r))
+        # The steep population joins the gentle one over a 4 m feather, not at a
+        # hard line (the two came out as butting flat polygons).
+        steep_w = ndimage.gaussian_filter(steep_f, max(1.0, 2.0 / res_r))
+        local = (
+            local * (1.0 - steep_w[..., None])
+            + _carry_tone(corrected, source_w * steep_f, res_r) * steep_w[..., None]
+        ).astype("float32")
+        del steep_w, gentle_w
+        # The shadow's own structure is measured against a 40 m mean (a 12 m one
+        # took the meadow-against-forest and scree-against-turf patches out with
+        # the sun and left every big field one tone).
+        blur = max(16, int(40 / res_r))
         own_l = corrected.mean(axis=-1)
         # The field's own local mean is taken over the field's interior (the mask
         # eroded 3 m): the fill mask carries a dilated rim of lit cells ten times
@@ -499,26 +531,83 @@ def delight(
         # made a checkerboard, a mirrored edge made stripes), by cover where a
         # canopy mask is given.
         own_tex = np.clip(
-            1.0 + shadow_texture_gain * (own_l / np.maximum(own_mean, 1e-4) - 1.0), 0.5, 1.15
+            1.0 + shadow_texture_gain * (own_l / np.maximum(own_mean, 1e-4) - 1.0), 0.5, 1.4
         )
+        # And the shadow's own chroma structure (the trees against the meadow, the
+        # turf against the scree): each channel's share of the luminance against
+        # its 40 m mean over the field's interior, so the sky's cast goes with the
+        # mean and the ground's own colour differences stay, faded to nothing
+        # where the shadow is too dark to have measured any.
+        own_share = corrected / np.maximum(own_l[..., None], 1e-4)
+        core_w = ndimage.binary_erosion(fill_mask, iterations=max(1, int(3.0 / res_r))).astype(
+            "float32"
+        )
+        share_den = np.maximum(ndimage.uniform_filter(core_w, size=blur, mode="nearest"), 1e-3)
+        chroma_tex = np.empty_like(own_share)
+        for ch in range(3):
+            share_mean = (
+                ndimage.uniform_filter(own_share[..., ch] * core_w, size=blur, mode="nearest")
+                / share_den
+            )
+            chroma_tex[..., ch] = np.clip(
+                own_share[..., ch] / np.maximum(share_mean, 1e-3), 0.7, 1.4
+            )
+        del own_share, core_w, share_den
+        confidence = np.clip(own_l / 0.03, 0.0, 1.0)[..., None]
+        chroma_tex = 1.0 + (chroma_tex - 1.0) * confidence
+        chroma_tex = np.where((shadow_core & ~snow_now)[..., None], chroma_tex, 1.0).astype(
+            "float32"
+        )
+        del confidence
         source = source_w > 0.9
-        base_l = ndimage.uniform_filter(own_l, size=blur, mode="nearest")
-        hp = np.clip(own_l / np.maximum(base_l, 1e-4), 0.6, 1.15)
+        # The lit ground's grain for the snow: its luminance against a 12 m mean,
+        # the pale stipple kept (a 1.15 clip had halved it).
+        base_l = ndimage.uniform_filter(own_l, size=max(16, int(12 / res_r)), mode="nearest")
+        hp = np.clip(own_l / np.maximum(base_l, 1e-4), 0.5, 1.6)
         del base_l
+        # A cast shadow's own grain under 2 m is the flight's noise floor, not the
+        # ground's (every big shadow shipped at half its ring's grain): under 2 m
+        # it takes the lit ground's grain carried in from the ring, and keeps its
+        # own structure above that.
+        fine_base = ndimage.gaussian_filter(own_l, max(0.5, 1.0 / res_r))
+        fine_hp = np.clip(own_l / np.maximum(fine_base, 1e-4), 0.6, 1.5)
+        shadow_only = shadow_core & ~snow_now
+        fine_carry = _propagate(fine_hp, source & clear, shadow_only, res_r, rng_seed=9)
+        own_tex = np.where(
+            shadow_only,
+            np.clip(
+                1.0 + shadow_texture_gain * (fine_base / np.maximum(own_mean, 1e-4) - 1.0),
+                0.5,
+                1.4,
+            )
+            * fine_carry,
+            own_tex,
+        ).astype("float32")
+        del fine_base, fine_hp, fine_carry, shadow_only
         if cover is None:
             snow_tex = _propagate(hp, source & clear, snow_now, res_r, rng_seed=5)
         else:
-            snow_tex = _propagate(
-                hp, source & clear & cover, snow_now & cover, res_r, rng_seed=5
-            ) * _propagate(hp, source & clear & ~cover, snow_now & ~cover, res_r, rng_seed=6)
+            # A snowfield is one surface whatever stands in it: its grain is the
+            # open ground's (by cover it came back as a khaki-and-mint camouflage of
+            # crown duff and meadow in 10-20 m blobs).
+            snow_tex = _propagate(hp, source & clear & ~cover, snow_now, res_r, rng_seed=6)
         texture = np.where(snow_now, snow_tex, own_tex)
         del snow_tex
         fields = None
         if match_ring:
-            fields = _ring_fields(shadow_core | snow_now, source, res_r)
+            # The fields matched to their rings are the terrain's shadows and the
+            # snow: a crown's shadow in a gap merges with the terrain shadow round it
+            # into one blob whose busy gap cells stood in for the whole field's
+            # grain, and the terrain shadow shipped at half its ring's.
+            terrain_fill = shadow_core | snow_now
+            if gap_fill is not None:
+                terrain_fill = terrain_fill & ~(gap_fill & ~snow_now)
+            fields = _ring_fields(terrain_fill, source, res_r)
+            del terrain_fill
             texture = _match_amplitude(texture, hp, fields)
         del hp
-        recoloured = local * texture[..., None]
+        recoloured = local * texture[..., None] * chroma_tex
+        del chroma_tex
         # A neighbourhood mean is greyer than the ground it averages: give the
         # refill the saturation the lit ground around it actually has.
         sat_blur = max(64, int(48 / res_r))
@@ -539,10 +628,25 @@ def delight(
             # is blended, so both came out a third as strong as the ring's.
             result, ratios = _match_bands(result, fields, fill_w, res_r)
             grain_ratios.append(ratios)
+        if debug_hook is not None:
+            debug_hook("refill", result, fields)
         return result, local, fill_w
 
     grain_ratios: list[np.ndarray] = []
     out, local_lit, _fill_w = refill(snow_mask)
+
+    def _fill_kinds(snow_now: np.ndarray) -> np.ndarray:
+        # 1 cast shadow of the terrain, 2 snow, 3 a crown's shadow in a gap, 4 a
+        # crown itself: the level stage measures 1 and 2 against open ground.
+        kinds = np.where(shadow_core, 1, 0)
+        if gap_fill is not None:
+            kinds = np.where(gap_fill, 3, kinds)
+        kinds = np.where(snow_now, 2, kinds)
+        if canopy_fill is not None:
+            kinds = np.where(canopy_fill, 4, kinds)
+        return kinds.astype("uint8")
+
+    fill_last = _fill_kinds(snow_mask)
     if snow:
         # The refill can leave white where a field's rim seeded it: detect on the
         # result and refill again until nothing bright and colourless is left.
@@ -574,6 +678,9 @@ def delight(
                 break  # a refill that wants more than the cap is eating ground, not snow
             snow_mask |= still
             out, local_lit, _fill_w = refill(snow_mask)
+            fill_last = _fill_kinds(snow_mask)
+    if debug_hook is not None:
+        debug_hook("after_refills", out, None)
     # No black holes: whatever a refill or a cap left near zero takes a third of
     # the lit neighbourhood instead.
     dark = out.mean(axis=-1) < 0.02
@@ -587,17 +694,26 @@ def delight(
     lit_l = np.maximum(local_lit.mean(axis=-1), 1e-4)
     under = lum_o < 0.25 * lit_l
     out = np.where(under[..., None], local_lit * 0.25, out)
+    if canopy_fill is not None:
+        # A crown refilled from shaded ground was near black: a crown sits at no
+        # less than four tenths of the lit ground round it.
+        crown_dark = canopy_fill & (lum_o < 0.4 * lit_l)
+        out = np.where(crown_dark[..., None], local_lit * 0.4, out)
+        del crown_dark
     del lum_o, under, lit_l
-    # No sky on the walls: a steep cell bluer than the lit ground around it takes
-    # that ground's chroma at its own luminance.
+    # No sky on the walls, nor on a refilled field: a cell bluer than the lit ground
+    # around it takes that ground's chroma at its own luminance (a steep wall, or
+    # a refill whose carry ran from a bluer ring).
     lit_mean = np.maximum(local_lit.mean(axis=-1, keepdims=True), 1e-4)
     lit_ratio = local_lit / lit_mean
     own_br = out[..., 2] / np.maximum(out[..., 0], 1e-4)
     lit_br = lit_ratio[..., 2] / np.maximum(lit_ratio[..., 0], 1e-4)
-    blue = steep & (out[..., 2] > 0.95 * out[..., 0]) & (own_br > 1.05 * lit_br)
+    blue = (steep | (fill_last > 0)) & (out[..., 2] > 0.95 * out[..., 0]) & (own_br > 1.05 * lit_br)
     del own_br, lit_br
     out = np.where(blue[..., None], out.mean(axis=-1, keepdims=True) * lit_ratio, out)
     del lit_mean, lit_ratio, blue
+    if debug_hook is not None:
+        debug_hook("after_floors_blue", out, None)
     cap_lum = None
     if steep_cap:
         # Nothing on a steep face is lifted past what its lit faces measure: the
@@ -637,6 +753,9 @@ def delight(
         "cast_shadow_fraction": round(float((visibility < 0.5).mean()), 4),
         "gain_p05": round(float(np.percentile(gain, 5)), 3),
         "gain_p95": round(float(np.percentile(gain, 95)), 3),
+        # The refilled cells (1 cast shadow, 2 snow), for the level stage to measure
+        # every field against its ring on the shipped base.
+        "_refill_mask": fill_last,
     }
     return linear_to_srgb_u8(out), stats
 
@@ -665,6 +784,78 @@ def layer_colour_stats(
             continue
         out[name] = [round(float(v), 4) for v in lin[mask].mean(axis=0)]
     return out
+
+
+def _carry_tone(
+    corrected: np.ndarray, weight: np.ndarray, res_m: float, *, scale: float = 0.8
+) -> np.ndarray:
+    """The colour of the ``weight`` (lit) cells carried everywhere at a scale that grows
+    with the distance from the nearest lit cell: at the edge of a field the tone is
+    the ring's own 4 m mean, 20 m in it is a 16 m mean, 100 m in a 64 m one. A
+    normalised Gaussian at each of six scales, blended per cell between the two
+    scales round ``scale`` x its distance, so the carry is continuous everywhere:
+    no nearest-cell facets (a big field came back as a mosaic of flat polygons, one
+    per ring cell), no field-wide mean; the ring's 10-50 m structure runs a little
+    way in and fades to the neighbourhood's mean deep inside. A scale with no lit
+    support at a cell hands the cell to the next coarser one."""
+
+    from scipy import ndimage
+
+    sigmas_m = (4.0, 8.0, 16.0, 32.0, 64.0, 128.0)
+    dist = ndimage.distance_transform_edt(weight < 0.5) * res_m
+    want = np.clip(scale * dist, sigmas_m[0], sigmas_m[-1])
+    del dist
+    pos = np.log2(want / sigmas_m[0]).astype("float32")
+    del want
+    lo = np.floor(pos).astype("int8")
+    frac = (pos - lo).astype("float32")
+    del pos
+    out = np.zeros(corrected.shape, dtype="float32")
+    w = weight.astype("float32")
+    for i, s in enumerate(sigmas_m):
+        sig = max(0.5, s / res_m)
+        # The coarse scales are filtered on a grid decimated to an eighth of the
+        # sigma (a 128 m Gaussian on every metre of a 4 km map was the build's
+        # slowest step by far) and brought back bilinearly: the tone at those
+        # scales is smooth by construction.
+        dec = int(min(8, max(1, sig // 8)))
+        den = _gaussian_decimated(w, sig, dec)
+        if i < len(sigmas_m) - 1:
+            # No lit ground within reach at this scale: the next scale takes it.
+            bump = (lo == i) & (den < 0.02)
+            lo[bump] = i + 1
+            frac[bump] = 0.0
+            del bump
+        share = np.where(lo == i, 1.0 - frac, 0.0) + np.where(lo == i - 1, frac, 0.0)
+        share = share.astype("float32")
+        if not share.any():
+            continue
+        inv = share / np.maximum(den, 1e-3)
+        del den
+        for ch in range(3):
+            out[..., ch] += _gaussian_decimated(corrected[..., ch] * w, sig, dec) * inv
+        del inv, share
+    del lo, frac, w
+    return out
+
+
+def _gaussian_decimated(field: np.ndarray, sigma_px: float, dec: int) -> np.ndarray:
+    """``gaussian_filter(field, sigma_px)`` computed on a grid decimated ``dec`` times
+    (box means) and brought back bilinearly; ``dec`` 1 is the plain filter."""
+
+    from scipy import ndimage
+
+    if dec <= 1:
+        return ndimage.gaussian_filter(field, sigma_px)
+    n0, n1 = field.shape
+    p0, p1 = (-n0) % dec, (-n1) % dec
+    padded = np.pad(field, ((0, p0), (0, p1)), mode="edge") if (p0 or p1) else field
+    small = padded.reshape(padded.shape[0] // dec, dec, padded.shape[1] // dec, dec).mean(
+        axis=(1, 3)
+    )
+    small = ndimage.gaussian_filter(small.astype("float32"), sigma_px / dec)
+    back = ndimage.zoom(small, dec, order=1, mode="nearest", grid_mode=True)
+    return back[:n0, :n1].astype("float32")
 
 
 def _propagate(
@@ -765,7 +956,7 @@ def _match_bands(
     rgb: np.ndarray, fields: dict, fill_w: np.ndarray, res_m: float
 ) -> tuple[np.ndarray, np.ndarray]:
     """Scale each field's luminance grain in two bands (under 2 m, 2-8 m) to the rms
-    its ring has in the same band, measured over the field's interior (4 m in from
+    its ring has in the same band, measured over the field's interior (6 m in from
     its edge, so the edge itself is not counted as grain) and applied as a
     multiplicative correction over the feathered fill. Returns (rgb, the 2-8 m
     ratio of every field's interior to its ring measured after the match, one
@@ -778,7 +969,7 @@ def _match_bands(
         return rgb, empty
     index = fields["index"]
     labels, ring_labels = fields["labels"], fields["ring_labels"]
-    interior = ndimage.binary_erosion(labels > 0, iterations=max(1, int(4.0 / res_m)))
+    interior = ndimage.binary_erosion(labels > 0, iterations=max(1, int(6.0 / res_m)))
     labels_in = np.where(interior, labels, 0)
     del interior
     s1, s4 = max(0.5, 1.0 / res_m), max(1.0, 4.0 / res_m)
@@ -801,8 +992,12 @@ def _match_bands(
 
     lum = rgb.mean(axis=-1)
     fine, mid, g4 = bands(lum)
+    # And the 8-32 m band (the ground's patches), against a 16 m smooth.
+    g16 = ndimage.gaussian_filter(lum, max(2.0, 16.0 / res_m))
+    coarse = g4 - g16
+    del g16
     correction = np.zeros(lum.shape, dtype="float32")
-    for band, cap in ((fine, 3.0), (mid, 4.0)):
+    for band, cap in ((fine, 3.0), (mid, 4.0), (coarse, 3.0)):
         gain, _ok = rms_ratio(band)
         lut = np.concatenate([[1.0], np.clip(gain, 1.0, cap)]).astype("float32")
         correction += (lut[labels] - 1.0) * band
@@ -841,7 +1036,10 @@ def _match_mean(refill_rgb: np.ndarray, lit_rgb: np.ndarray, fields: dict) -> np
         ratio = np.where(
             fields["has_ring"] & (field_mean > 1e-4), ring_mean / np.maximum(field_mean, 1e-4), 1.0
         )
-        lut = np.concatenate([[1.0], np.clip(ratio, 0.5, 2.0)]).astype("float32")
+        # A correction on the carry, not the carry itself: the tone runs in from
+        # the ring cell by cell, so a field-wide shift past a quarter would only
+        # push both ends of a field across two grounds toward their average.
+        lut = np.concatenate([[1.0], np.clip(ratio, 0.8, 1.25)]).astype("float32")
         out[..., ch] = out[..., ch] * lut[fields["labels"]]
     return out
 
@@ -859,7 +1057,10 @@ def paint_lakes(
     cyan_min_lum: float = 0.35,
     cyan_max_slope_deg: float | None = None,
     flat_rms_m: float | None = None,
-) -> tuple[np.ndarray, int]:
+    cyan_grow_m: float = 0.0,
+    cyan_edge_m: float = 0.0,
+    exclude: np.ndarray | None = None,
+) -> tuple[np.ndarray, int, np.ndarray]:
     """Flat, near-black blobs in the imagery are water seen at a dark angle: paint them
     the colour the lit lake shows (``rgb``, sRGB), with a little of their own grain.
     With ``cyan_excess`` the flat, bright blobs whose green and blue both stand that
@@ -879,12 +1080,16 @@ def paint_lakes(
         cyan_flat = flat
         if cyan_max_slope_deg is not None:
             cyan_flat = np.degrees(np.arctan(np.hypot(gx, gy))) < cyan_max_slope_deg
-        dark |= (
+        cyan = (
             (srgb[..., 1] > red + cyan_excess)
             & (srgb[..., 2] > red + cyan_excess)
             & (lum > cyan_min_lum)
             & cyan_flat
         )
+        if cyan_grow_m > 0:
+            # The shallow edge that fails the excess is the pond too.
+            cyan = ndimage.binary_dilation(cyan, iterations=max(1, int(cyan_grow_m / res)))
+        dark |= cyan
     del srgb
     if flat_rms_m is not None:
         # A lidar surface flat to the centimetre over a patch this size is water
@@ -896,28 +1101,58 @@ def paint_lakes(
             ndimage.uniform_filter(resid * resid, size=max(3, int(5.0 / res)), mode="nearest")
         )
         still = (local_rms < flat_rms_m) & (np.degrees(np.arctan(np.hypot(gx, gy))) < 1.5)
+        if exclude is not None:
+            # A lidar-flat snowfield is not water.
+            still &= ~exclude
         lab_s, n_s = ndimage.label(still)
         if n_s:
             idx = np.arange(1, n_s + 1)
             area_s = ndimage.sum(still, lab_s, idx) * res * res
-            water = np.nonzero(area_s >= min_area_m2)[0] + 1
+            # And water lies in a hollow: a flat patch whose ground is not under
+            # the ground of its own 5-15 m ring by a hand is a bench or a snow
+            # surface the lidar saw, not a lake.
+            dist_s, (ir, ic) = ndimage.distance_transform_edt(lab_s == 0, return_indices=True)
+            ring_s = (dist_s > 5.0 / res) & (dist_s <= 15.0 / res)
+            ring_lab = np.where(ring_s, lab_s[ir, ic], 0)
+            del dist_s, ir, ic, ring_s
+            with np.errstate(invalid="ignore"):
+                body_z = ndimage.mean(dem.astype("float32"), lab_s, idx)
+                ring_z = ndimage.mean(dem.astype("float32"), ring_lab, idx)
+            hollow = np.isfinite(ring_z) & (body_z <= ring_z - 0.05)
+            del ring_lab
+            water = np.nonzero((area_s >= min_area_m2) & hollow)[0] + 1
             if water.size:
                 dark |= ndimage.binary_dilation(
                     np.isin(lab_s, water), iterations=max(1, int(2.0 / res))
                 )
         del resid, local_rms, still, lab_s
     labels, count = ndimage.label(dark)
+    empty = np.zeros(lum.shape, dtype=bool)
     if not count:
-        return colour_u8, 0
+        return colour_u8, 0, empty
     areas = ndimage.sum(dark, labels, np.arange(1, count + 1)) * res * res
     keep = np.isin(labels, np.nonzero(areas >= min_area_m2)[0] + 1)
     if not keep.any():
-        return colour_u8, 0
+        return colour_u8, 0, empty
     keep = ndimage.binary_dilation(keep, iterations=1)
+    if cyan_excess is not None and cyan_edge_m > 0:
+        # The shallow edge of a pond, within ``cyan_edge_m`` of it and still half
+        # as turquoise as the pond, is the pond too (a mint ring round a teal disc
+        # is neither water nor ground).
+        srgb2 = colour_u8.astype("float32") / 255.0
+        red2 = srgb2[..., 0]
+        edge = (
+            (srgb2[..., 1] > red2 + cyan_excess / 2.0)
+            & (srgb2[..., 2] > red2 + cyan_excess / 2.0)
+            & (lum > cyan_min_lum * 0.8)
+            & ndimage.binary_dilation(keep, iterations=max(1, int(cyan_edge_m / res)))
+        )
+        keep = ndimage.binary_fill_holes(keep | edge)
+        del srgb2, red2, edge
     out = colour_u8.astype("float32")
     grain = np.clip(1.0 + 0.5 * (lum[keep] - lum[keep].mean()), 0.7, 1.3)[:, None]
     out[keep] = np.asarray(rgb, dtype="float32")[None, :] * 255.0 * grain
-    return np.clip(out, 0, 255).astype("uint8"), int(keep.sum())
+    return np.clip(out, 0, 255).astype("uint8"), int(keep.sum()), keep
 
 
 def _knee(rgb_255: np.ndarray, start: float = 0.85 * 255.0) -> np.ndarray:
@@ -931,11 +1166,25 @@ def _knee(rgb_255: np.ndarray, start: float = 0.85 * 255.0) -> np.ndarray:
 
 
 def pull_layers(
-    colour_u8: np.ndarray, layer: np.ndarray, targets: dict[int, tuple[list[float], float]]
+    colour_u8: np.ndarray,
+    layer: np.ndarray,
+    targets: dict[int, tuple[list[float], float]],
+    *,
+    texel_m: float = 1.0,
+    tapers: dict[int, float] | None = None,
+    lum_gate: tuple[float, float] = (0.6, 1.25),
+    windows: dict[int, float] | None = None,
+    max_br: dict[int, float] | None = None,
+    lum_gates: dict[int, tuple[float, float]] | None = None,
 ) -> tuple[np.ndarray, dict]:
     """Scale each listed layer's colour so its mean moves ``weight`` of the way from
     the photographed mean to the palette base (sRGB), texture untouched: a plateau
-    the flight saw as chalk comes to the grey-brown rubble it is, with its grain."""
+    the flight saw as chalk comes to the grey-brown rubble it is, with its grain.
+    A layer with a ``tapers`` entry fades its pull in over that many metres inside
+    its boundary (no tone step on a contour); cells outside ``lum_gate`` times the
+    layer's median luminance (a white spoil field, a black shadow) are left alone."""
+
+    from scipy import ndimage
 
     out = colour_u8.astype("float32")
     stats = {}
@@ -948,7 +1197,54 @@ def pull_layers(
         # An additive shift, not a gain: the cells the flat-field already lifted
         # move by the same amount as the rest and nothing runs to white.
         shift = ((target - mean) * 255.0).astype("float32")
-        out[where] = _knee(out[where] + shift[None, :])
+        w = where.astype("float32")
+        window_m = (windows or {}).get(lid)
+        gain = None
+        if window_m:
+            # Per window, not per layer: one layer-wide shift left a pale corner
+            # pale, so each ``window_m`` window's own mean moves ``weight`` of the
+            # way to the base. The luminance moves as a gain (an additive shift
+            # sized for a chalk window took the brown patches in it to black),
+            # the chroma as a shift.
+            size = max(8, int(float(window_m) / max(texel_m, 1e-6)))
+            den = np.maximum(ndimage.uniform_filter(w, size=size, mode="nearest"), 1e-3)
+            local = np.stack(
+                [
+                    ndimage.uniform_filter(out[..., ch] * w, size=size, mode="nearest") / den
+                    for ch in range(3)
+                ],
+                axis=-1,
+            )
+            base_255 = np.asarray(base, dtype="float32") * 255.0
+            local_lum = np.maximum(local.mean(axis=-1), 1.0)
+            wanted_lum = local_lum * (1.0 - weight) + float(base_255.mean()) * weight
+            gain = np.clip(wanted_lum / local_lum, 0.5, 1.6).astype("float32")
+            chroma_target = base_255 - float(base_255.mean())
+            chroma_local = local - local_lum[..., None]
+            shift = ((chroma_target[None, None, :] - chroma_local) * weight).astype("float32")
+            del den, local, local_lum, wanted_lum, chroma_local
+        taper = (tapers or {}).get(lid)
+        if taper:
+            dist = ndimage.distance_transform_edt(where) * texel_m
+            w = np.clip(dist / float(taper), 0.0, 1.0).astype("float32") * w
+        lum = out.mean(axis=-1) / 255.0
+        med = float(np.median(lum[where]))
+        gate = tuple((lum_gates or {}).get(lid, lum_gate))
+        w = np.where((lum < gate[0] * med) | (lum > gate[1] * med), 0.0, w)
+        br_cap = (max_br or {}).get(lid)
+        if br_cap:
+            # Only what the flight already shows warm is pulled to the rubble's
+            # red: a grey spoil field (blue-to-red 0.9) keeps its grey rather than
+            # turning pink at the same luminance.
+            br = out[..., 2] / np.maximum(out[..., 0], 1e-3)
+            w = np.where(br >= float(br_cap), 0.0, w)
+            del br
+        sel = w > 0
+        if gain is not None:
+            g = (1.0 + (gain[sel] - 1.0) * w[sel])[:, None]
+            out[sel] = _knee(out[sel] * g + shift[sel] * w[sel][:, None])
+        else:
+            out[sel] = _knee(out[sel] + shift[None, :] * w[sel][:, None])
         stats[str(int(lid))] = {
             "mean_before": [round(float(v), 3) for v in mean],
             "mean_after": [round(float(v), 3) for v in target],
@@ -979,7 +1275,10 @@ def pull_regions(
             continue
         target = np.asarray(region["target"], dtype="float64")
         target_lum = float(target.mean())
-        feather = np.clip((dem - lo) / 20.0, 0.0, 1.0) * np.clip((hi - dem) / 20.0, 0.0, 1.0)
+        # The band's edge is feathered over ``elevation_feather_m`` (a 20 m feather
+        # drew the 3,780 m contour as a tone seam through every hollow and knoll).
+        ef = float(region.get("elevation_feather_m", 20.0))
+        feather = np.clip((dem - lo) / ef, 0.0, 1.0) * np.clip((hi - dem) / ef, 0.0, 1.0)
         feather = feather.astype("float32")
         # Windowed luminance: the local mean of the band's own cells.
         lum = out.mean(axis=-1) / 255.0
@@ -1025,8 +1324,20 @@ def aspect_flatfield(
     target: str = "mean",
     max_factor: float = 1.8,
     aspect_pass: float = 0.0,
+    chroma: bool = False,
+    exclude: np.ndarray | None = None,
 ) -> tuple[np.ndarray, dict]:
     """Equalise the mean brightness of a layer across slope aspects.
+
+    ``exclude`` marks cells the de-lighting refilled (cast shadow, snow, crowns):
+    they are already the lit ground's tone, so they neither weigh in a bin's mean
+    nor take its factor (a shadow field on a north slope was lifted a second time
+    by its bin and shipped a fifth brighter than its ring).
+
+    With ``chroma`` each bin's mean channel shares (red, green and blue over the
+    luminance) are brought to the layer's best-lit bins' shares as well, at the
+    luminance the bin already has: the sky's lilac on a slope the sun did not reach
+    is a chroma the flight baked in exactly as it baked the shade.
 
     ``target="lit"`` equalises each layer to the mean of its three best-lit bins
     instead of its all-bin mean, so a rock layer the flight lit comes out as its lit
@@ -1073,6 +1384,8 @@ def aspect_flatfield(
     stats: dict = {"mode": mode}
     for lid in layer_ids:
         member = (layer == lid) & (slope > min_slope_deg)
+        if exclude is not None:
+            member &= ~exclude
         if member.sum() < 1000:
             continue
         if circular:
@@ -1086,6 +1399,8 @@ def aspect_flatfield(
         keyn = np.clip((key - lo_key) / (hi_key - lo_key), 0.0, 1.0)
         bin_index = np.minimum((keyn * bins).astype(int), bins - 1)
         where = layer == lid
+        if exclude is not None:
+            where &= ~exclude
         f_total = np.ones(lum.shape, dtype="float32")
         factors = np.ones(bins)
         means = None
@@ -1179,9 +1494,20 @@ def aspect_flatfield(
                 f = 1.0 + (f - 1.0) * aspect_pass * ramp
                 f_total = np.where(population, f_total * f.astype("float32"), f_total)
             f_total = np.clip(f_total, 1.0 / max_factor, max_factor)
-        lifted = linear[where] * f_total[where][:, None]
-        # A soft knee above 0.7 linear: nothing the flat-field lifts reaches white.
-        l_lum = lifted.mean(axis=-1)
+        chroma_gain = None
+        if chroma:
+            chroma_gain = _chroma_by_bin(
+                linear, f_total, member & ~steep_cells, bin_index, keyn, bins, circular, ramp
+            )
+            f_rgb = f_total[where][:, None] * chroma_gain[where]
+            lifted = linear[where] * f_rgb
+            del f_rgb, chroma_gain
+        else:
+            lifted = linear[where] * f_total[where][:, None]
+        # A soft knee above 0.7 linear on the brightest channel: nothing the
+        # flat-field lifts reaches white in any channel (a knee on the luminance
+        # let a red-heavy ledge clip in red while its mean sat under the knee).
+        l_lum = lifted.max(axis=-1)
         knee = np.where(l_lum > 0.7, (0.7 + (l_lum - 0.7) * 0.15) / np.maximum(l_lum, 1e-4), 1.0)
         out[where] = lifted * knee[:, None].astype("float32")
         after = out.mean(axis=-1)
@@ -1230,6 +1556,59 @@ def aspect_flatfield(
     return linear_to_srgb_u8(out), stats
 
 
+def _chroma_by_bin(
+    linear: np.ndarray,
+    f_total: np.ndarray,
+    population: np.ndarray,
+    bin_index: np.ndarray,
+    keyn: np.ndarray,
+    bins: int,
+    circular: bool,
+    ramp: np.ndarray,
+) -> np.ndarray:
+    """Per-channel gains (n, n, 3) that bring each incidence bin's mean channel shares
+    to the shares of the population's three best-lit bins, interpolated between
+    bins like the luminance factors and normalised so the luminance is unchanged."""
+
+    if population.sum() < 5000:
+        return np.ones(linear.shape, dtype="float32")
+    current = linear * f_total[..., None]
+    lum = np.maximum(current.mean(axis=-1), 1e-4)
+    shares = current / lum[..., None]
+    del current
+    bin_share = np.full((bins, 3), np.nan)
+    bin_lum = np.full(bins, np.nan)
+    for b in range(bins):
+        cells = population & (bin_index == b)
+        if cells.sum() >= 200:
+            bin_share[b] = shares[cells].reshape(-1, 3).mean(axis=0)
+            bin_lum[b] = float(lum[cells].mean())
+    finite = np.isfinite(bin_lum)
+    if finite.sum() < 2:
+        return np.ones(linear.shape, dtype="float32")
+    lit = np.argsort(np.where(finite, bin_lum, -1.0))[-3:]
+    lit = [b for b in lit if finite[b]]
+    target = bin_share[lit].mean(axis=0)
+    gains = np.where(finite[:, None], target[None, :] / np.maximum(bin_share, 1e-3), 1.0)
+    gains = np.clip(gains, 0.85, 1.18)
+    if circular:
+        pos = (keyn * bins - 0.5) % bins
+        lo = np.floor(pos).astype(int) % bins
+        hi = (lo + 1) % bins
+    else:
+        pos = np.clip(keyn * bins - 0.5, 0.0, bins - 1.0)
+        lo = np.floor(pos).astype(int)
+        hi = np.minimum(lo + 1, bins - 1)
+    frac = (pos - np.floor(pos)).astype("float32")[..., None]
+    g = gains[lo] * (1 - frac) + gains[hi] * frac
+    g = 1.0 + (g - 1.0) * ramp[..., None]
+    # The luminance stays the bin's own: the gains are renormalised by the cell's
+    # share-weighted mean.
+    norm = np.maximum((g * shares).mean(axis=-1, keepdims=True), 1e-4)
+    del shares, pos, lo, hi, frac
+    return np.where(population[..., None], g / norm, 1.0).astype("float32")
+
+
 def pull_chroma(
     colour_u8: np.ndarray,
     layer: np.ndarray,
@@ -1239,11 +1618,18 @@ def pull_chroma(
     texel_m: float,
     *,
     tolerance: float = 1.05,
+    near_layer: int | None = None,
+    within_m: float = 120.0,
+    saturation_gain: float = 1.0,
+    lum_gate: tuple[float, float] = (0.6, 1.25),
 ) -> tuple[np.ndarray, int]:
     """On the named layers, where the blue-to-red of a ``window_m`` neighbourhood
     exceeds ``target_br`` by ``tolerance``, scale the chroma so it meets the target,
     luminance untouched (the near-rim ejecta read lilac-grey where every photograph
-    has it rust-brown). Returns (colour, cells pulled)."""
+    has it rust-brown); cells outside ``lum_gate`` times the layers' median luminance
+    (a white spoil field) are left alone. With ``near_layer`` the chroma within
+    ``within_m`` of that layer is raised by ``saturation_gain``, tapered, so the
+    ejecta reads rust beside the rubble. Returns (colour, cells pulled)."""
 
     from scipy import ndimage
 
@@ -1260,17 +1646,42 @@ def pull_chroma(
     local = ndimage.uniform_filter(br * on_f, size=win, mode="nearest") / np.maximum(
         ndimage.uniform_filter(on_f, size=win, mode="nearest"), 1e-3
     )
-    over = on & (local > tolerance * target_br)
-    if not over.any():
-        return colour_u8, 0
-    # Scale the blue channel's excess over red down to the target ratio (in linear
-    # light the sRGB ratio's scale is raised to 2.2), then put the luminance back.
+    lum_s = colour_u8.astype("float32").mean(axis=-1) / 255.0
+    med = float(np.median(lum_s[on]))
+    gated = on & (lum_s >= lum_gate[0] * med) & (lum_s <= lum_gate[1] * med)
+    over = gated & (local > tolerance * target_br)
     lum = lin.mean(axis=-1, keepdims=True)
-    k = np.where(over, np.clip(target_br / np.maximum(local, 1e-4), 0.5, 1.0) ** 2.2, 1.0)
     out = lin.copy()
-    out[..., 2] = lin[..., 2] * k
-    out[..., 1] = lin[..., 1] * (0.5 + 0.5 * k)  # green follows blue halfway
-    lum2 = out.mean(axis=-1, keepdims=True)
-    out = out * (lum / np.maximum(lum2, 1e-4))
-    out = np.where(over[..., None], out, lin)
+    if over.any():
+        # Scale the blue channel's excess over red down to the target ratio (in
+        # linear light the sRGB ratio's scale is raised to 2.2), then put the
+        # luminance back.
+        k = np.where(over, np.clip(target_br / np.maximum(local, 1e-4), 0.5, 1.0) ** 2.2, 1.0)
+        out[..., 2] = lin[..., 2] * k
+        out[..., 1] = lin[..., 1] * (0.5 + 0.5 * k)  # green follows blue halfway
+        lum2 = out.mean(axis=-1, keepdims=True)
+        out = out * (lum / np.maximum(lum2, 1e-4))
+        out = np.where(over[..., None], out, lin)
+    if near_layer is not None and saturation_gain != 1.0:
+        near = layer == near_layer
+        if near.any():
+            dist = ndimage.distance_transform_edt(~near) * texel_m
+            taper = np.clip(1.0 - dist / within_m, 0.0, 1.0) * gated
+            # The gain is a shift of the window's mean chroma, the same for every
+            # cell in it: a per-cell gain sent the tan soil orange and left the
+            # grey Kaibab patches in it grey (an ochre blotch beside mauve ground).
+            lum_o = out.mean(axis=-1, keepdims=True)
+            chroma = out - lum_o
+            g_f = gated.astype("float32")
+            den = np.maximum(ndimage.uniform_filter(g_f, size=win, mode="nearest"), 1e-3)
+            mean_chroma = np.stack(
+                [
+                    ndimage.uniform_filter(chroma[..., ch] * g_f, size=win, mode="nearest") / den
+                    for ch in range(3)
+                ],
+                axis=-1,
+            )
+            shift = mean_chroma * ((saturation_gain - 1.0) * taper)[..., None]
+            out = np.clip(out + shift, 0.0, 1.0)
+            del chroma, g_f, den, mean_chroma, shift
     return linear_to_srgb_u8(out), int(over.sum())

@@ -50,6 +50,7 @@ TERRAIN = {
         "bb_forest_floor",
         "bb_fellfield",
         "bb_cliff_rock_ew",
+        "bb_lake",
     ],
     "classify": {
         # The summit plateau above 3,780 m is fell-field scree, not tussock turf: it
@@ -67,6 +68,9 @@ TERRAIN = {
             {"min_slope": 30.0, "max_exg": 0.06, "material": "bb_scree_slope"},
             {"min_elevation": 3780.0, "max_slope": 30.0, "material": "bb_fellfield"},
             {"min_slope": 15.0, "max_exg": 0.06, "material": "bb_talus"},
+            # Grey ground at any slope (a tarn's shore flat, an outwash flat) is
+            # gravel, not turf: the turf test needs a green hue, so only grey falls here.
+            {"max_exg": 0.06, "material": "bb_talus"},
         ],
         "default": "bb_tundra",
         # Turf is green by hue as well as by excess green: cream scree scores on
@@ -80,7 +84,15 @@ PALETTE = {
     # Grey rubble with olive turf: the family's cushion, ground and straw tones set
     # the tonal order (cushions darker than the ground between them) and the base
     # is their mean.
-    "bb_tundra": {"family": "alpine_tundra", "seed": 501, "size": 1024, "base": [0.46, 0.46, 0.34]},
+    # The flight's tundra is lawn (excess green 0.19); the benches are olive turf on
+    # grey rubble, so the layer is pulled half-way to the base, grain kept.
+    "bb_tundra": {
+        "family": "alpine_tundra",
+        "seed": 501,
+        "size": 1024,
+        "base": [0.46, 0.46, 0.34],
+        "base_pull": 0.7,  # a quarter of the layer was still lawn at 0.5
+    },
     # Blocks 0.5-2 m across at a 6 m tile; cliff plates 2-4 m at a 10 m tile: the
     # shelf-road wall the driver sits 3 m from is massive blocky tuff, not a patio.
     # The reference photographs: dark grey angular rubble on the slopes, charcoal
@@ -93,8 +105,23 @@ PALETTE = {
         "base": [0.42, 0.41, 0.40],
         "tile_m": 6.0,
         # The NAIP talus is a pale grey the photographs are not: pulled most of the
-        # way to the dark grey rubble, grain kept.
+        # way to the dark grey rubble, grain kept, per 200 m window (one layer-wide
+        # shift left the north-east corner's chalk a pale mottle).
         "base_pull": 0.8,
+        "base_pull_window_m": 200.0,
+        # The pale fans are the cells over 1.25x the layer's median that the
+        # default gate spares (it is for a white spoil field): here they are the
+        # point of the pull, so the gate is wide.
+        "base_pull_lum_gate": [0.5, 1.8],
+    },
+    # Still water under the lakes and tarns: its own flat dark tile, no cushions.
+    "bb_lake": {
+        "family": "water",
+        "seed": 509,
+        "size": 512,
+        "base": [0.20, 0.33, 0.31],
+        "keep_tint": True,
+        "tile_m": 8.0,
     },
     # A 12 m tile of forty log-normal beds (median 0.3 m) so the period up a 150 m
     # wall is a dozen tiles, not thirty; the photograph of a cliff is mostly its own
@@ -123,6 +150,11 @@ PALETTE = {
         "seed": 504,
         "size": 1024,
         "base": [0.44, 0.43, 0.42],
+        # The pale NAIP fans (0.55-0.64) are pulled toward the grey rubble too, so the
+        # bed has room under the snow ceiling to read lighter than them.
+        "base_pull": 0.7,
+        "base_pull_window_m": 200.0,
+        "base_pull_lum_gate": [0.5, 1.8],
     },
     # The summit plateau is fell-field: fist-to-head-sized fragments, so the block
     # pile at a 2.5 m tile, not the 6 m talus of the slopes below.
@@ -135,6 +167,11 @@ PALETTE = {
         "base": [0.42, 0.41, 0.38],
         "tile_m": 2.5,
         "tint_weight": 0.25,
+        # The plateau's chalk comes down like the talus and scree: per 200 m window,
+        # the pale fans inside the gate.
+        "base_pull": 0.8,
+        "base_pull_window_m": 200.0,
+        "base_pull_lum_gate": [0.5, 1.8],
     },
     "bb_forest_floor": {
         "family": "forest_floor",
@@ -212,6 +249,10 @@ IMAGERY = {
     "steep_feather_deg": 8.0,
     "refill_match_ring": True,
     "refill_by_cover": True,
+    # The summit's outcrop shadows: the bumps were lowered out of the DEM, so the
+    # horizon test cannot model their shadows; a cell under six tenths of its lit
+    # 60 m ground and bluer than it is refilled as cast shadow.
+    "shadow_dark_ratio": 0.6,
     # The game draws the trees: the base under a crown is the ground between the
     # trunks, refilled from the open ground round the stand at six tenths of its
     # luminance (duff under conifers), not the near-black crown of the flight.
@@ -234,13 +275,28 @@ IMAGERY = {
         "rgb": [0.20, 0.33, 0.31],
         "max_lum": 0.1,
         "min_area_m2": 400.0,
-        "cyan_excess": 0.15,
-        "cyan_min_lum": 0.35,
+        "cyan_excess": 0.08,  # the shallow pond edge is the pond too
+        "cyan_min_lum": 0.30,
+        "cyan_grow_m": 4.0,
         "cyan_max_slope_deg": 8.0,  # the settled tailings are not level
+        "cyan_edge_m": 12.0,  # the shallow edge half as turquoise within 12 m is pond
         "flat_rms_m": 0.02,  # a lidar surface flat to 2 cm over 400 m2 is water
+        "material": "bb_lake",  # water cells take the lake tile and a WaterBlock
     },
+    # The band's edge feathers over 150 m of elevation (3,705-3,855 m): a 20 m
+    # feather drew the contour as a tone seam through every hollow and knoll.
     "base_pull_regions": [
-        {"min_elevation": 3780.0, "target": [0.42, 0.41, 0.38], "weight": 1.0, "window_m": 200.0}
+        {
+            "min_elevation": 3780.0,
+            # Grey-brown fell-field, darker than the first guess: the bed's ceiling
+            # was the binding constraint on the plateau's pale side.
+            "target": [0.39, 0.38, 0.35],
+            "weight": 1.0,
+            "window_m": 200.0,
+            # 150 m of elevation feather left the pull a no-op over most of the
+            # plateau (mean 0.436 to 0.433); 80 m still hides the contour.
+            "elevation_feather_m": 80.0,
+        }
     ],
     # Residual sun on the rock layers is equalised per aspect within each layer.
     "aspect_flatfield": {
@@ -261,6 +317,9 @@ IMAGERY = {
         "mode": "incidence",
         "bins": 12,
         "min_slope_deg": 4.0,
+        # And each bin's chroma to the lit bins': the sky's lilac on the slopes
+        # the sun did not reach goes with the shade.
+        "chroma": True,
     },
     # A closed canopy does not shade with the terrain normal: under it the
     # correction is held to 30 % of itself.
@@ -282,14 +341,15 @@ OBJECTS = {
     "classify": {"rock_only": True},
     "max_rocks": 6000,
     "max_shrubs": 0,
+    # The cliff layers take no lidar bumps: a "boulder" on a wall over 45 degrees
+    # is a ledge or a pinnacle, and hung off its downhill lip as a block.
     "rock_layers": [
         "bb_tundra",
         "bb_talus",
-        "bb_cliff_rock",
-        "bb_cliff_rock_ew",
         "bb_scree_slope",
         "bb_fellfield",
     ],
+    "rock_gap_max_m": 0.4,  # a block is seated down to this gap under its base plane, or not placed
     "rock_material_by_layer": {
         "bb_tundra": "rock_talus",
         "bb_talus": "rock_talus",
@@ -369,8 +429,12 @@ FOREST = {
 }
 
 ROADS = {
-    # The gate: the bed reads at least 15 % lighter than the ground either side of it.
-    "bed_lighter_than_ground": 1.10,  # over the margin's pale side, per 100 m window
+    # The gate: the bed reads 15 % lighter than the pale side of the ground either
+    # side of it, per 100 m window (about a quarter over its mean): a shade lighter
+    # than the scree, visible on the stippled fell-field, never white (the ceiling).
+    "bed_lighter_than_ground": 1.15,
+    "bed_ceiling": 0.62,
+    "bed_contrast_margin_min": 0.92,  # the margin gives at most 8 %, tapered to 20 m
     "include": [
         "primary",
         "secondary",
@@ -420,6 +484,9 @@ ROADS = {
         # kinks to the edges of what it re-averaged (0.03 made it worse), so the
         # profile keeps the terrain's own bench and the limiter is off.
         "max_grade_change": 0.0,
+        # The two steep side tracks whose benches dip: a wider cut/fill budget for
+        # those ways alone, so their grade line can plane the bench.
+        "max_cut_fill_m_by_way": {"247923922": 5.0, "935556275": 5.0},
     },
     "exclude_ways": [125954590, 701139027],
     "max_grade": 0.6,
@@ -434,7 +501,7 @@ ROADS = {
                 "seed": 900,
                 "size": 1024,
                 "base": [0.50, 0.47, 0.43],
-                "edge_fraction": 0.30,  # a soft edge into the ground either side
+                "edge_fraction": 0.10,  # a crisp edge: a soft one vanished in the stipple
             },
         },
     },

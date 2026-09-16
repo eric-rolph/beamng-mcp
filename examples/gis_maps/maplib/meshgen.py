@@ -428,8 +428,11 @@ def conifer_meshes(
     """
 
     rng = np.random.default_rng(seed)
-    lean = {"spruce": 0.02, "fir": 0.015, "krummholz": 0.12, "sapling": 0.03}[kind]
-    crown_base = {"spruce": 0.18, "fir": 0.12, "krummholz": 0.05, "sapling": 0.06}[kind] * height
+    # A willow carr is a krummholz-shaped dome that stands upright.
+    lean = {"spruce": 0.02, "fir": 0.015, "krummholz": 0.12, "sapling": 0.03, "willow": 0.0}[kind]
+    crown_base = {"spruce": 0.18, "fir": 0.12, "krummholz": 0.05, "sapling": 0.06, "willow": 0.05}[
+        kind
+    ] * height
     trunk_r = max(0.06, 0.018 * height) if kind != "sapling" else max(0.05, 0.03 * height)
     parts = []
     repeats = _bark_repeats(height * 0.92, trunk_r)
@@ -442,6 +445,7 @@ def conifer_meshes(
         "fir": (0.25, 0.50, 0.75),
         "krummholz": (0.35, 0.65),
         "sapling": (0.35, 0.65),
+        "willow": (0.35, 0.65),
     }[kind]
     parts_tier = []
     for frac in tiers:

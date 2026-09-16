@@ -107,12 +107,14 @@ def conifer_card(
     rng = np.random.default_rng(seed)
     u, v = _grid(size)
     x = (u - 0.5) * 2.0  # -1..1 across
-    whorls = {"spruce": 9, "fir": 11, "krummholz": 4, "sapling": 6}[kind]
-    fullness = {"spruce": 0.85, "fir": 0.62, "krummholz": 1.0, "sapling": 0.95}[kind]
+    whorls = {"spruce": 9, "fir": 11, "krummholz": 4, "sapling": 6, "willow": 4}[kind]
+    fullness = {"spruce": 0.85, "fir": 0.62, "krummholz": 1.0, "sapling": 0.95, "willow": 1.0}[kind]
     # Silhouette half-width: spruce a full spire with drooping whorls, fir a narrow
     # spire of flat layered tiers, krummholz a wind-flagged mat leaning leeward with
     # its crown on the ground.
-    taper = np.power(np.clip(1.0 - v, 0, 1), {"krummholz": 0.5, "sapling": 0.6}.get(kind, 0.85))
+    taper = np.power(
+        np.clip(1.0 - v, 0, 1), {"krummholz": 0.5, "sapling": 0.6, "willow": 0.5}.get(kind, 0.85)
+    )
     scallop = 0.82 + 0.18 * np.abs(np.sin(v * whorls * np.pi + 0.3))
     if kind == "fir":
         scallop = 0.75 + 0.25 * np.abs(np.sin(v * whorls * np.pi + 0.3)) ** 0.5
@@ -127,6 +129,11 @@ def conifer_card(
         half_width = (
             fullness * np.sqrt(np.clip(1.0 - v**2, 0, 1)) * (0.86 + 0.14 * tk.fbm(size, 10, 2, rng))
         )
+    if kind == "willow":
+        # A carr: a flat-topped dome, upright, its top a ragged run of shoots.
+        half_width = (
+            fullness * np.sqrt(np.clip(1.0 - v**3, 0, 1)) * (0.84 + 0.16 * tk.fbm(size, 14, 2, rng))
+        )
     inside = np.abs(x) < half_width
     # Needle mass: several octaves of tileable noise, thresholded into clumps.
     clumps = tk.fbm(size, 18, 4, rng) * 0.6 + tk.fbm(size, 48, 2, rng) * 0.4
@@ -138,12 +145,20 @@ def conifer_card(
     alpha = np.maximum(alpha, inside * np.clip(1.0 - np.abs(x) / 0.06, 0, 1) * (v < 0.92))
     # Ragged branch tips at the bottom instead of a flat bar.
     ragged = tk.fbm(size, 24, 2, rng) * 0.5 + 0.5
-    hem = np.clip((v - 0.02 - 0.06 * ragged) / (0.08 if kind != "krummholz" else 0.03), 0, 1)
+    hem = np.clip(
+        (v - 0.02 - 0.06 * ragged) / (0.08 if kind not in ("krummholz", "willow") else 0.03), 0, 1
+    )
     alpha = alpha * hem
     # Keep the very base clear above ground level (v < 0 handled by geometry).
     # Colour: dark blue-green mass, lighter yellow-green tips at the outside and top.
     base = _lin(colour)
-    tip = _lin([0.34, 0.46, 0.20]) if kind != "krummholz" else _lin([0.30, 0.40, 0.20])
+    tip = (
+        _lin([0.34, 0.46, 0.20])
+        if kind not in ("krummholz", "willow")
+        else _lin([0.30, 0.40, 0.20])
+        if kind == "krummholz"
+        else _lin([0.52, 0.56, 0.36])
+    )
     edge = np.clip((np.abs(x) / np.maximum(half_width, 1e-3) - 0.55) / 0.45, 0, 1)
     light = 0.35 * edge + 0.25 * np.clip(v - 0.6, 0, 1) / 0.4 + 0.15 * np.clip(clumps, 0, 1)
     light = np.clip(light + 0.08 * tk.fbm(size, 6, 2, rng), 0, 1)
@@ -205,7 +220,7 @@ def conifer_tier_card(
     x, y = (u - 0.5) * 2.0, (v - 0.5) * 2.0
     r = np.sqrt(x * x + y * y)
     theta = np.arctan2(y, x)
-    branches = {"spruce": 7, "fir": 9, "krummholz": 5, "sapling": 6}[kind]
+    branches = {"spruce": 7, "fir": 9, "krummholz": 5, "sapling": 6, "willow": 5}[kind]
     spokes = 0.5 + 0.5 * np.cos(theta * branches + tk.fbm(size, 6, 2, rng) * 2.5)
     needles = tk.fbm(size, 40, 3, rng) * 0.5 + tk.fbm(size, 14, 3, rng) * 0.5
     mass = spokes * 0.45 + needles * 0.6 + (1.0 - r) * 0.45

@@ -44,6 +44,7 @@ GROUNDMODEL_BY_FAMILY = {
     "ejecta": "GRAVEL",
     "asphalt": "ASPHALT",
     "asphalt_bed": "ASPHALT",
+    "water": "MUD",
     "dirt_track": "DIRT",
     "gravel_track": "GRAVEL",
     "desert_floor": "DIRT_DUSTY",
@@ -153,6 +154,26 @@ class Frame:
 # ---------------------------------------------------------------------------
 
 
+def _max_grade_over(nodes: list, window_m: float) -> float:
+    """The largest |rise / run| over any stretch of at least half ``window_m`` and at
+    most ``window_m`` along the polyline of ``[x, y, z, w]`` nodes."""
+    if len(nodes) < 2:
+        return 0.0
+    dist = [0.0]
+    for a, b in itertools.pairwise(nodes):
+        dist.append(dist[-1] + math.hypot(b[0] - a[0], b[1] - a[1]))
+    worst = 0.0
+    j = 0
+    for i in range(len(nodes)):
+        j = max(j, i)
+        while j + 1 < len(nodes) and dist[j + 1] - dist[i] <= window_m:
+            j += 1
+        run = dist[j] - dist[i]
+        if run >= window_m / 2.0:
+            worst = max(worst, abs(nodes[j][2] - nodes[i][2]) / run)
+    return worst
+
+
 def _resample_polyline(
     points: list[tuple[float, float]], max_step: float
 ) -> list[tuple[float, float]]:
@@ -259,6 +280,7 @@ def build_surface_roads(spec, frame: Frame, osm_path: Path, fp, *, max_step_m: f
         "by_surface": {},
         "max_grade_change": 0.0,
         "max_end_grade_change": 0.0,
+        "max_grade_10m": {},
     }
     for road in polylines:
         cfg = surfaces.get(road["surface"]) or next(iter(surfaces.values()))
@@ -282,6 +304,13 @@ def build_surface_roads(spec, frame: Frame, osm_path: Path, fp, *, max_step_m: f
             # The first and last three intervals: a step off the bed at an end.
             ends = changes[:3] + changes[-3:]
             stats["max_end_grade_change"] = round(max(stats["max_end_grade_change"], max(ends)), 4)
+        # The steepest 10 m of the decal, per surface: a road plunging off a pad's
+        # batter or down a rim flank shows here, whatever its node-to-node smoothness.
+        steepest = _max_grade_over(nodes, 10.0)
+        by_surface_grade = stats["max_grade_10m"]
+        by_surface_grade[road["surface"]] = round(
+            max(by_surface_grade.get(road["surface"], 0.0), steepest), 4
+        )
         name = f"road_{road['id']}"
         roads.append(
             {
@@ -411,6 +440,7 @@ def conditioned_colour(
     imagery_spec: dict | None,
     canopy_cover=None,
     canopy_chm=None,
+    source_exclude=None,
 ) -> tuple[np.ndarray, dict]:
     """The full-resolution orthoimagery, de-lit against the DEM when the spec asks."""
 
@@ -459,6 +489,7 @@ def conditioned_colour(
             else None,
             match_ring=bool(imagery_spec.get("refill_match_ring", False)),
             shadow_dark_ratio=imagery_spec.get("shadow_dark_ratio"),
+            exclude_sources=source_exclude,
         )
         stats = {"delight": True, "sun_fit": sun, **dstats}
     return colour, stats
@@ -664,7 +695,15 @@ def enforce_bed_contrast(
         )
 
     lum = out.mean(axis=-1) / 255.0
-    ratio = local_mean(lum, bed_f) / np.maximum(local_mean(lum, near_f), 1e-4)
+    near_mean0 = local_mean(lum, near_f)
+    near_sq0 = local_mean(lum * lum, near_f)
+    # The margin is judged by its pale side too (the same reference the lift below
+    # and road_contrast use): a stippled fell-field whose mean the bed clears by
+    # 14 % still hides the bed among its pale fines.
+    pale0 = near_mean0 + 0.67 * np.sqrt(np.maximum(near_sq0 - near_mean0 * near_mean0, 0.0))
+    bed0 = local_mean(lum, bed_f)
+    ratio = np.minimum(bed0 / np.maximum(near_mean0, 1e-4), bed0 / np.maximum(pale0, 1e-4))
+    del near_mean0, near_sq0, pale0, bed0
     needed = np.clip(ratio / factor, margin_min, 1.0).astype("float32")
     needed = ndimage.gaussian_filter(needed, max(1.0, 10.0 / texel_m))
     # The darkening tapers linearly from the bed's edge to nothing at 20 m (a
@@ -682,7 +721,7 @@ def enforce_bed_contrast(
     # spread, about its upper quartile): a shelf road has an olive bank above and
     # pale scree below, and a bed lighter than their average vanished against the
     # scree. Nothing is lifted past ``ceiling`` (0.60 sRGB: the game's snow line).
-    for _pass in range(3):
+    for _pass in range(5):
         lum2 = out.mean(axis=-1) / 255.0
         near_mean = local_mean(lum2, near_f)
         near_sq = local_mean(lum2 * lum2, near_f)
@@ -705,6 +744,106 @@ def _near_band(bed: np.ndarray, texel_m: float) -> np.ndarray:
     outer = ndimage.binary_dilation(bed, iterations=max(2, int(8.0 / texel_m)))
     inner = ndimage.binary_dilation(bed, iterations=max(1, int(2.0 / texel_m)))
     return outer & ~inner
+
+
+def refill_check(
+    colour_u8,
+    refill: np.ndarray,
+    texel_m: float,
+    *,
+    min_area_m2: float = 1000.0,
+    top: int = 25,
+    bed: np.ndarray | None = None,
+) -> dict | None:
+    """Every refilled field (cast shadow or snow) on the shipped base against its own
+    10-30 m ring of open, unrefilled ground: luminance ratio, blue-minus-red
+    difference and the under-10 m grain ratio (the field's interior 6 m in over the
+    ring), for the ``top`` largest fields over ``min_area_m2``. Measured last, after
+    every pull and the bed paint, on the image the game draws."""
+
+    from PIL import Image
+    from scipy import ndimage
+
+    n = colour_u8.shape[0]
+    if refill.shape[0] != n:
+        refill = np.asarray(Image.fromarray(refill.astype("uint8")).resize((n, n), Image.NEAREST))
+    # The fields are the terrain's cast shadows (1) and the snow (2); a crown's
+    # shadow in a forest gap (3) and the crowns themselves (4) are neither a field
+    # nor open ground for a ring.
+    filled = refill > 0
+    # The ring is the open ground the refill borrowed from: unrefilled, and 10 m
+    # clear of any crown or gap shadow (the forest floor between crowns is
+    # neither the field's reference nor what the refill was matched to).
+    forest = (refill == 3) | (refill == 4)
+    ring_ok = ~filled & ~ndimage.binary_dilation(forest, iterations=max(1, int(10.0 / texel_m)))
+    del forest
+    if bed is not None:
+        # Nor the painted road bed and its 6 m corridor (the ring is ground).
+        if bed.shape[0] != n:
+            bed = (
+                np.asarray(Image.fromarray(bed.astype("uint8") * 255).resize((n, n), Image.NEAREST))
+                > 127
+            )
+        ring_ok &= ~ndimage.binary_dilation(bed, iterations=max(1, int(6.0 / texel_m)))
+    labels, count = ndimage.label((refill == 1) | (refill == 2))
+    if not count:
+        return None
+    index = np.arange(1, count + 1)
+    areas = ndimage.sum(filled.astype("float32"), labels, index) * texel_m * texel_m
+    order = [int(i) for i in np.argsort(-areas)[:top] if areas[i] >= min_area_m2]
+    if not order:
+        return None
+    rgb = colour_u8.astype("float32") / 255.0
+    lum = rgb.mean(axis=-1)
+    br = rgb[..., 2] - rgb[..., 0]
+    fine = lum - ndimage.uniform_filter(lum, size=max(3, int(10.0 / texel_m)), mode="nearest")
+    del rgb
+    half = n * texel_m / 2.0
+    pad = int(32.0 / texel_m)
+    fields = []
+    for i in order:
+        lab = i + 1
+        rows, cols = np.nonzero(labels == lab)
+        r0, r1 = max(rows.min() - pad, 0), min(rows.max() + pad + 1, n)
+        c0, c1 = max(cols.min() - pad, 0), min(cols.max() + pad + 1, n)
+        field = labels[r0:r1, c0:c1] == lab
+        interior = ndimage.binary_erosion(field, iterations=max(1, int(6.0 / texel_m)))
+        if interior.sum() < 20:
+            interior = field
+        dist = ndimage.distance_transform_edt(~field) * texel_m
+        ring = (dist > 10.0) & (dist <= 30.0) & ring_ok[r0:r1, c0:c1]
+        if ring.sum() < 50:
+            continue
+        l_in, l_ring = lum[r0:r1, c0:c1][interior], lum[r0:r1, c0:c1][ring]
+        f_in, f_ring = fine[r0:r1, c0:c1][interior], fine[r0:r1, c0:c1][ring]
+        fields.append(
+            {
+                "area_m2": round(float(areas[i]), 1),
+                "center_xy": [
+                    round(float(cols.mean() * texel_m - half), 1),
+                    round(float(half - rows.mean() * texel_m), 1),
+                ],
+                "kind": "snow" if int(np.median(refill[rows, cols])) == 2 else "shadow",
+                "lum_ratio": round(float(l_in.mean() / max(l_ring.mean(), 1e-4)), 3),
+                "br_diff": round(
+                    float(br[r0:r1, c0:c1][interior].mean() - br[r0:r1, c0:c1][ring].mean()), 3
+                ),
+                "grain_ratio": round(float(f_in.std() / max(f_ring.std(), 1e-4)), 3),
+            }
+        )
+    if not fields:
+        return None
+    lum_r = np.array([f["lum_ratio"] for f in fields])
+    grain = np.array([f["grain_ratio"] for f in fields])
+    return {
+        "fields": len(fields),
+        "lum_ratio_min": round(float(lum_r.min()), 3),
+        "lum_ratio_max": round(float(lum_r.max()), 3),
+        "lum_ratio_p10": round(float(np.percentile(lum_r, 10)), 3),
+        "grain_ratio_p10": round(float(np.percentile(grain, 10)), 3),
+        "br_diff_max_abs": round(float(np.abs([f["br_diff"] for f in fields]).max()), 3),
+        "largest": fields,
+    }
 
 
 def road_contrast(colour, layer, materials, surfaces, texel_m: float) -> dict:
@@ -920,6 +1059,23 @@ def build_level(
             margin_min,
             bed_ceiling,
         )
+    refill_file = data_root / "terrain" / "refill.npy"
+    if refill_file.is_file() and colour_full is not None:
+        # Every refilled field measured on the base the game draws, after every
+        # later stage: the number that says whether a refill reads as its ground.
+        bed_ids = [
+            materials.index(cfg["terrain_material"])
+            for cfg in all_surfaces.values()
+            if cfg.get("terrain_material") in materials
+        ]
+        check = refill_check(
+            colour_full,
+            np.load(refill_file),
+            fp.size_m / colour_full.shape[0],
+            bed=np.isin(layer, bed_ids) if bed_ids else None,
+        )
+        if isinstance(report.get("imagery"), dict):
+            report["imagery"]["refill_check"] = check
     if isinstance(bed_factor, dict):
         report["road_contrast"] = {
             name: road_contrast(
@@ -1414,6 +1570,56 @@ def build_level(
         level_root / f"{mod_id}_minimap.png", format="PNG", compress_level=6
     )
 
+    lakes_file = data_root / "terrain" / "lakes.npy"
+    water_objects = []
+    if lakes_file.is_file():
+        # One WaterBlock per painted body: its surface at the body's lowest ground
+        # plus a hand, its box the body's bounds, four metres deep.
+        from scipy import ndimage
+
+        lake_mask = np.load(lakes_file)
+        labels, _count = ndimage.label(lake_mask)
+        half = fp.size_m / 2.0
+        for k, sl in enumerate(ndimage.find_objects(labels), start=1):
+            if sl is None:
+                continue
+            cells = labels[sl] == k
+            if cells.sum() * res * res < 400.0:
+                continue
+            # The surface a hand over the body's 95th-percentile ground: a lidar-flat
+            # lake is level to the centimetre, a settled pond's cells were cut under
+            # its top by the terrain stage, so every cell is under water.
+            surface = float(np.percentile(dem[sl][cells], 95)) + 0.15 - encoded.min_elevation_m
+            r0, r1 = sl[0].start, sl[0].stop
+            c0, c1 = sl[1].start, sl[1].stop
+            cx = (c0 + c1) / 2.0 * res - half
+            cy = half - (r0 + r1) / 2.0 * res
+            depth = 4.0
+            name = f"lake_{k:02d}"
+            water_objects.append(
+                {
+                    "name": name,
+                    "class": "WaterBlock",
+                    "persistentId": pid(mod_id, name),
+                    "__parent": "water",
+                    "position": [round(cx, 2), round(cy, 2), round(surface - depth / 2.0, 2)],
+                    "rotationMatrix": [1, 0, 0, 0, 1, 0, 0, 0, 1],
+                    "scale": [
+                        round((c1 - c0) * res + 4.0, 1),
+                        round((r1 - r0) * res + 4.0, 1),
+                        depth,
+                    ],
+                    "liquidType": "Water",
+                    "density": 1,
+                    "viscosity": 1,
+                    "baseColor": [0.2, 0.33, 0.31, 1],
+                    "waterFogColor": [0.14, 0.24, 0.23, 1],
+                    "fogDensity": 0.4,
+                    "clarity": 0.3,
+                }
+            )
+    report["water_objects"] = len(water_objects)
+
     # --- scene tree ---------------------------------------------------------------
     main = level_root / "main"
     footprint = float(fp.size_m)
@@ -1450,6 +1656,20 @@ def build_level(
                 "__parent": "MissionGroup",
             },
         ]
+        + (
+            # A water group only where a body was painted: an empty group would be
+            # a folder with nothing in it.
+            [
+                {
+                    "name": "water",
+                    "class": "SimGroup",
+                    "persistentId": pid(mod_id, "water"),
+                    "__parent": "MissionGroup",
+                }
+            ]
+            if water_objects
+            else []
+        )
         + (
             [
                 {
@@ -1648,6 +1868,8 @@ def build_level(
         )
     write_items(main / "MissionGroup" / "PlayerDropPoints" / "items.level.json", spawn_objects)
     write_items(main / "MissionGroup" / "roads" / "items.level.json", roads)
+    if water_objects:
+        write_items(main / "MissionGroup" / "water" / "items.level.json", water_objects)
 
     # --- info.json ---------------------------------------------------------------
     attribution = " ".join(

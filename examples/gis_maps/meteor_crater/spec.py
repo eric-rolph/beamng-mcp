@@ -122,11 +122,18 @@ PALETTE = {
         "size": 1024,
         "base": [0.50, 0.36, 0.29],  # the mix: red blocks, cream pieces, tan dust
         "tile_m": 5.0,
-        "keep_tint": True,
         "detail_strength": 0.55,
-        # The crest's base is the flight's pale cream; pulled halfway to the rubble
-        # mix so the base under the maroon tile agrees with it at the detail fade.
-        "base_pull": 0.5,
+        # The crest's base is the flight's pale cream; pulled three quarters of the
+        # way to the rubble's red (blue-to-red 0.45) so the base under the maroon
+        # tile agrees with it, fading in over 25 m inside the layer's edge (no
+        # step on the contour). Only what the flight shows warm (blue-to-red under
+        # 0.80) is pulled: the grey spoil on the south rim keeps its grey. The
+        # tile's dust follows the local base (no kept tint), so it does not bloom
+        # cream on pale ground.
+        "base_pull": 0.75,
+        "base_pull_max_br": 0.80,
+        "base_pull_target": [0.55, 0.36, 0.25],
+        "base_pull_taper_m": 25.0,
     },
     "mc_limestone_rim_ew": {
         "family": "limestone",
@@ -151,6 +158,7 @@ PALETTE = {
         "size": 1024,
         "base": [0.34, 0.33, 0.31],
         "keep_tint": True,
+        "tile_m": 8.0,  # the decal's texture length: no 2 m mottle across the lot
     },
     # A desert two-track is paler than the plain (the photographs): bed 1.06 x
     # its ground, gated per 100 m window.
@@ -178,6 +186,12 @@ IMAGERY = {
         "layers": ["mc_desert_floor", "mc_ejecta_gravel"],
         "target_br": 0.72,
         "window_m": 100.0,
+        # And the ejecta within 120 m of the crest goes rust: chroma x 1.4, tapered.
+        "near_layer": "mc_rim_rubble",
+        "within_m": 120.0,
+        # As a shift of each 100 m window's mean chroma, so the grey patches and
+        # the soil move together; 1.15, the rubble pull carrying the red.
+        "saturation_gain": 1.15,
     },
     "sun_altitude_range": [35.0, 80.0],
     "strength": 1.0,
@@ -226,8 +240,9 @@ OBJECTS = {
         # away from any cliff is a berm or a wall: it leaves the ground and nothing
         # comes back (a dashed berm across the east ejecta stood as a row of
         # ledge-textured walls).
-        "berm_min_elongation": 3.0,
+        "berm_min_elongation": 2.5,
         "berm_max_width_m": 12.0,
+        "berm_min_height_m": 2.0,
     },
     # The visitor centre and its compound are a hundred metres of built ground that
     # no blob rule tells from a hummock: a 120 m opening inside this box takes it out,
@@ -255,9 +270,12 @@ OBJECTS = {
             ],
             "why": "visitor centre",
         },
+        # Centred so the box and its 30 m ring stay inside the footprint (the
+        # level's north edge is y 1024: a box past it quilted the padding's
+        # reflections into a maze).
         {
-            "center_xy": [100.0, 950.0],
-            "size_m": 300.0,
+            "center_xy": [100.0, 900.0],
+            "size_m": 240.0,
             "use_baseline": True,
             "inpaint_ring_m": 30.0,
             "why": "north compound (sheds, masts, fence rows)",
@@ -268,6 +286,15 @@ OBJECTS = {
             "use_baseline": True,
             "inpaint_ring_m": 20.0,
             "why": "the fence-line sheds east of the rim",
+        },
+        # The compound's west end (a water tank and three sheds) lay outside the
+        # moved box: their own box, the ring clipped to the footprint.
+        {
+            "center_xy": [-55.0, 1000.0],
+            "size_m": 60.0,
+            "use_baseline": True,
+            "inpaint_ring_m": 20.0,
+            "why": "the water tank and sheds at the compound's west end",
         },
         # A dashed berm across the east ejecta (4-6 m tall, 12-35 m segments, in
         # the bare earth too): each segment stands wholly inside a 60 m box and a
@@ -324,10 +351,10 @@ OBJECTS = {
         },
         {
             "center_xy": [775.0, 442.0],
-            "size_m": 100.0,
-            "open_m": 100.0,
+            "size_m": 160.0,
+            "open_m": 60.0,
             "inpaint_ring_m": 20.0,
-            "why": "berm 8",
+            "why": "berm 8 (a 45 x 12 m ridge and two mounds)",
         },
         # The drill site: the shaft is filled from the bare earth, but the
         # flattening is under a metre and the photograph can stay (an in-painted
@@ -337,6 +364,7 @@ OBJECTS = {
             "size_m": 60.0,
             "use_baseline": True,
             "inpaint_ring_m": 0.0,
+            "repaint_extremes": [0.45, 0.85],  # the shed's roof and its shadow go
             "why": "the drill site at the crater centre (a 10 m shaft, a spoil mound, a shed)",
         },
     ],
@@ -448,16 +476,30 @@ ROADS = {
             "center_xy": [5.0, 641.0],
             "size_m": [170.0, 112.0],
             "surface": "paved",
-            "from_imagery": {"max_lum": 0.50, "min_area_m2": 400.0},
+            "from_imagery": {"max_lum": 0.50, "min_area_m2": 400.0, "exclude_green": 0.03},
             "max_grade": 0.03,
-            "max_cut_fill_m": 1.5,
-            "feather_m": 12.0,
+            # The lot is cut into the rim's flank behind a retaining wall the lidar
+            # holds at 4-5 m: a 6 m budget lets the plane hold to the wall's foot
+            # and the kerb batter start from the plane, not from a ramp.
+            "max_cut_fill_m": 6.0,
+            # The kerb: the lidar's retaining wall within 30 m is held under 15
+            # degrees (the lot is cut 2.5 m into the flank at its east end, and a
+            # 15 degree batter needs the width), and the ground round the lot is
+            # pinned to the plain.
+            "kerb_m": 30.0,
+            "kerb_max_slope_deg": 15.0,
+            "pin_layer": "mc_desert_floor",
+            "pin_layer_m": 15.0,
+            # The lot's low edge is 2.5 m of fill on a 6-9 % flank: over 12 m that
+            # batter was a 20 % ramp the access road followed; over 40 m it is 6 %.
+            "feather_m": 40.0,
         },
         # The RV loop is a pale gravel lot in the flight, not asphalt.
         {
             "center_xy": [160.0, 712.0],
             "size_m": [40.0, 25.0],
             "surface": "dirt",
+            "paint": False,  # the flight's own gravel colour, no stamp
             "max_grade": 0.03,
             "max_cut_fill_m": 1.5,
             "feather_m": 12.0,
@@ -498,6 +540,9 @@ ROADS = {
         "track": "dirt",
     },
     "carve": {
+        # The paved road is graded: no node-to-node grade over 11.5 % where the
+        # budget allows (the access road left the lot at 14 % down the rim flank).
+        "max_grade_by_surface": {"paved": 0.115},
         "profile_window_m": 40.0,
         "feather_m": 4.0,
         "max_cut_fill_m": 1.5,
@@ -507,6 +552,9 @@ ROADS = {
     # The two-tracks read pale on the plain and on the near-white rim: the dirt
     # bed is held 6 % lighter than its margins per 100 m window, the margin giving
     # at most a tenth and the bed taking the rest as a floor. Asphalt is dark.
+    # No 10 m of the paved road steeper than 12 %: the access road leaves the lot
+    # down its batter and the rim flank, and a real paved road is graded.
+    "max_grade_10m": {"paved": 0.12},
     "bed_lighter_than_ground": {"dirt": 1.06},
     "bed_contrast_margin_min": 0.98,  # the bed takes the contrast, not a dark corridor
     "bed_ceiling": 0.78,  # a two-track on the near-white rim may go this pale

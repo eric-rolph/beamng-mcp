@@ -993,6 +993,13 @@ def test_road_bed_reads_lighter_than_its_ground(map_key: str) -> None:
         # valley), or the contract's own factor where that is smaller.
         windows = contrast.get("windows")
         assert windows and windows["p05"] >= want * 0.98, (map_key, surface, windows)
+        # And against the margin's pale side, the reference the enforcement uses.
+        pale = contrast.get("windows_vs_pale")
+        assert pale and pale["p05"] >= want * 0.97 and pale["min"] >= want * 0.93, (
+            map_key,
+            surface,
+            pale,
+        )
     # And the beds meet at their junctions in one surface: no seam steps.
     # (The step is read a cell apart on the raster: on a 25 % grade that is 0.25 m
     # of legitimate rise, so the gate is 0.4 m, not the 0.15 m a flat seam would show.)
@@ -1050,6 +1057,32 @@ def test_refills_carry_their_rings_grain(map_key: str) -> None:
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_refills_read_as_their_ground_on_the_shipped_base(map_key: str) -> None:
+    """Every large refilled field (cast shadow or snow) measured on the base the game
+    draws sits between 0.85 and 1.25 of its ring's luminance (a tenth over the
+    cliffs' shaded rings), carries at least 0.45 of its ring's under-10 m grain in
+    the worst tenth of fields (a terrain shadow's fine grain is carried in, its
+    structure is its own and softer than a lit talus ring's), and differs from its
+    ring in blue-minus-red by no more than 0.07 (the flat-field cools the lit rings'
+    chroma by bin while a refilled cell keeps the carried tone)."""
+
+    spec = load_spec(map_key)
+    if not (getattr(spec, "IMAGERY", None) or {}).get("refill_match_ring"):
+        pytest.skip(f"{map_key}: no ring-matched refills")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    check = (handoff.get("imagery") or {}).get("refill_check")
+    assert check, (map_key, "no refill_check in the handoff")
+    assert check["lum_ratio_p10"] >= 0.85 and check["lum_ratio_max"] <= 1.25, (map_key, check)
+    assert check["grain_ratio_p10"] >= 0.45, (map_key, check)
+    assert check["br_diff_max_abs"] <= 0.07, (map_key, check)
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_decal_roads_have_no_node_steps(map_key: str) -> None:
     """A decal road never steps off the bed at an end (no grade change over 10 %
     within three nodes of either end), and nowhere changes grade by more than 25 %
@@ -1068,6 +1101,36 @@ def test_decal_roads_have_no_node_steps(map_key: str) -> None:
     assert "max_end_grade_change" in roads, roads
     assert roads["max_end_grade_change"] <= 0.10, (map_key, roads["max_end_grade_change"])
     assert roads["max_grade_change"] <= 0.25, (map_key, roads["max_grade_change"])
+    # A pad with a kerb rule ships no cut face round it steeper than the rule + 3.
+    for pad in spec.ROADS.get("pads") or []:
+        if not pad.get("kerb_max_slope_deg"):
+            continue
+        note = next(
+            (
+                p
+                for p in handoff["terrain"]["stats"].get("pads", [])
+                if p.get("center_xy") == pad["center_xy"]
+            ),
+            None,
+        )
+        assert note and note.get("kerb_slope_max_deg") is not None, (map_key, pad, note)
+        # The lot adds no cut face: the inner half of the kerb band holds the rule
+        # outright, and the whole band is no steeper on the whole than the flank
+        # the lot is cut into was already (its own wall stays its own wall).
+        cap = float(pad["kerb_max_slope_deg"])
+        # The inner half of the band: the batter at the cap, and the lidar's own
+        # retaining wall smoothed over 4 m, so nothing there stands over cap + 25
+        # (the wall the lidar holds is 5 m tall; smoothed it lies under 40 degrees).
+        assert note["kerb_inner_max_deg"] <= cap + 25.0, (map_key, note)
+        assert note["kerb_slope_p95_deg"] <= max(cap + 3.0, note["kerb_natural_p95_deg"] + 2.0), (
+            map_key,
+            note,
+        )
+        assert note["kerb_slope_max_deg"] <= note["kerb_natural_max_deg"] + 10.0, (map_key, note)
+    # A spec may cap the steepest 10 m of a surface (a paved road graded off a pad).
+    for surface, cap in (spec.ROADS.get("max_grade_10m") or {}).items():
+        steepest = roads["max_grade_10m"].get(surface, 0.0)
+        assert steepest <= cap, (map_key, surface, steepest, cap)
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)

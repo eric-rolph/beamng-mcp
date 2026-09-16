@@ -252,6 +252,67 @@ def ambient_occlusion(dem: np.ndarray, res: float, radius_px: int = 24) -> np.nd
     return (1.0 - 0.6 * depth).astype("float32")
 
 
+def limit_slope(
+    dem: np.ndarray,
+    band: np.ndarray,
+    cap_grade: float,
+    res: float,
+    iterations: int = 120,
+    prefer: np.ndarray | None = None,
+) -> np.ndarray:
+    """Within ``band`` no slope over ``cap_grade`` (rise over run) where the cells
+    round the band allow: the steepest surface under the ground and the gentlest
+    over it that both hold the cap, relaxed from the fixed cells outside the band
+    over the eight neighbours (a cut-only and a fill-only envelope). Without
+    ``prefer`` the two are averaged; with it (metres, positive where the ground
+    stands over the surface the band joins, negative where it lies under) the cut
+    envelope is taken on the cut side and the fill envelope on the fill side,
+    blended over a metre, so a batter always starts at the surface it joins and
+    never in a step when the ground beyond is too steep for the cap."""
+
+    lo = dem.astype("float64").copy()
+    hi = lo.copy()
+    step = cap_grade * res
+    offsets = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+    for _round in range(iterations):
+        lo_c = lo.copy()
+        hi_c = hi.copy()
+        for dr, dc in offsets:
+            d = step * (math.sqrt(2.0) if dr and dc else 1.0)
+            lo_c = np.minimum(lo_c, np.roll(lo, (dr, dc), axis=(0, 1)) + d)
+            hi_c = np.maximum(hi_c, np.roll(hi, (dr, dc), axis=(0, 1)) - d)
+        lo_n = np.where(band, lo_c, lo)
+        hi_n = np.where(band, hi_c, hi)
+        moved = max(float(np.abs(lo_n - lo).max()), float(np.abs(hi_n - hi).max()))
+        lo, hi = lo_n, hi_n
+        if moved < 1e-4:
+            break
+    if prefer is None:
+        limited = 0.5 * (lo + hi)
+    else:
+        k = np.clip(prefer.astype("float64"), -1.0, 1.0) * 0.5 + 0.5
+        limited = lo * k + hi * (1.0 - k)
+    return np.where(band, limited, dem).astype(dem.dtype)
+
+
+def batter(
+    dem: np.ndarray, inside: np.ndarray, band: np.ndarray, cap_grade: float, res: float
+) -> np.ndarray:
+    """Within ``band`` hold the ground within ``cap_grade`` (rise over run) of the
+    nearest ``inside`` cell's height: ground above the cone rising from the pad's
+    edge at the cap is cut to it, ground under the cone descending from it is filled
+    to it, and ground between keeps its own shape. A batter that always starts at
+    the surface it joins, whatever the flank beyond does."""
+
+    from scipy import ndimage
+
+    dist, (ir, ic) = ndimage.distance_transform_edt(~inside, return_indices=True)
+    z_near = dem[ir, ic].astype("float64")
+    reach = cap_grade * dist * res
+    clamped = np.clip(dem.astype("float64"), z_near - reach, z_near + reach)
+    return np.where(band, clamped, dem).astype(dem.dtype)
+
+
 def classify(
     dem: np.ndarray,
     res: float,

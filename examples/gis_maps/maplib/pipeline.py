@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import shutil
 import time
 from pathlib import Path
@@ -139,6 +140,28 @@ def _source_resolution(path: Path) -> float:
         return float(dataset.res[0])
 
 
+def _refilled_cells(terrain_dir: Path, size: int) -> np.ndarray | None:
+    """The cells the de-lighting refilled (any kind), on a ``size`` grid, or None."""
+
+    path = terrain_dir / "refill.npy"
+    if not path.is_file():
+        return None
+    kinds = np.load(path)
+    if kinds.shape[0] != size:
+        from PIL import Image
+
+        kinds = np.asarray(Image.fromarray(kinds).resize((size, size), Image.NEAREST))
+    return kinds > 0
+
+
+def _disc(radius_px: float) -> np.ndarray:
+    """A disc structuring element (a cross kernel iterated makes a diamond)."""
+
+    r = max(1, round(radius_px))
+    yy, xx = np.mgrid[-r : r + 1, -r : r + 1]
+    return (xx * xx + yy * yy) <= r * r + 0.5
+
+
 def terrain(spec, example_root: Path) -> dict:
     """Composite every elevation source onto the level grid; write dem/layer arrays + stats."""
 
@@ -252,6 +275,15 @@ def terrain(spec, example_root: Path) -> dict:
             stats["objects_dropped_in_boxes"] = len(in_boxes)
         # Classify on the de-lit imagery (a shaded crater wall is not a shrub); the
         # conditioned colour is cached for the level stage so both see the same pixels.
+        # The flight's road corridor (6 m either side of every OSM centreline) is
+        # no source for a refill: the beds are repainted later anyway.
+        road_corridor = None
+        if hasattr(spec, "ROADS") and (data_root / "osm" / "roads.json").is_file():
+            from . import roads as road_tools
+
+            lines = road_tools.road_polylines(spec, fp, data_root / "osm" / "roads.json")
+            road_corridor = road_tools.centreline_mask(lines, res, fp.size_m, dem.shape[0], 6.0)
+            del lines
         colour, imagery_stats = level_builder.conditioned_colour(
             dem,
             res,
@@ -260,7 +292,15 @@ def terrain(spec, example_root: Path) -> dict:
             getattr(spec, "IMAGERY", None),
             canopy_cover=canopy_cover,
             canopy_chm=canopy_chm,
+            source_exclude=road_corridor,
         )
+        del road_corridor
+        # The refilled cells (1 cast shadow, 2 snow) ship for the level stage's
+        # check of every field against its ring on the finished base.
+        refill_mask = imagery_stats.pop("_refill_mask", None)
+        if refill_mask is not None:
+            np.save(out / "refill.npy", refill_mask.astype("uint8"))
+            del refill_mask
         if objects_spec.get("flatten_boxes") and colour is not None:
             # The crest and the walls inside a box keep their photograph: only the
             # compound ground is repainted, whatever layer its terrace edges wear.
@@ -302,6 +342,31 @@ def terrain(spec, example_root: Path) -> dict:
                 exclude_mask=road_mask,
             )
             del road_mask
+            for box in objects_spec["flatten_boxes"]:
+                lo_hi = box.get("repaint_extremes")
+                if not lo_hi:
+                    continue
+                # A box that keeps its photograph still loses the roof and its
+                # shadow: cells far outside the box's own tone range are repainted
+                # from the ground within 10 m of them.
+                from . import vegetation
+
+                texel = fp.size_m / colour.shape[0]
+                bx, by = box["center_xy"]
+                bs = float(box.get("size_m", 200.0))
+                hf = fp.size_m / 2.0
+                bc0 = int(max(0, (bx - bs / 2 + hf) / texel))
+                bc1 = int(min(colour.shape[0], (bx + bs / 2 + hf) / texel))
+                br0 = int(max(0, (hf - (by + bs / 2)) / texel))
+                br1 = int(min(colour.shape[0], (hf - (by - bs / 2)) / texel))
+                lum_b = colour.astype("float32").mean(axis=-1) / 255.0
+                extreme = np.zeros(lum_b.shape, dtype=bool)
+                extreme[br0:br1, bc0:bc1] = (lum_b[br0:br1, bc0:bc1] < float(lo_hi[0])) | (
+                    lum_b[br0:br1, bc0:bc1] > float(lo_hi[1])
+                )
+                if extreme.any():
+                    colour = vegetation.erase_dots(colour, extreme, 10.0, texel)
+                del lum_b, extreme
             del keep
             _log("  base colour in-painted inside the flatten boxes")
         from PIL import Image
@@ -327,6 +392,175 @@ def terrain(spec, example_root: Path) -> dict:
 
     # Roads are carved into the terrain before classification so the bed is flat and
     # the banks are real slopes.
+    # Authored pads (a car park, a yard) are outlined and carved BEFORE the roads,
+    # so every road's profile starts on the pad's plane instead of plunging off a
+    # kerb: the lot's own outline from the flight (the dark cells inside the
+    # authored rectangle, the hedge's green cells left out, closed and filled, the
+    # largest piece kept) or the rectangle itself, carved as a fitted plane with its
+    # grade and its cut/fill bounded, feathered into the ground.
+    pad_outlines: list[dict] = []
+    pads = (getattr(spec, "ROADS", None) or {}).get("pads") or []
+    if pads:
+        from scipy import ndimage
+
+        from . import level_builder
+
+        half_fp = fp.size_m / 2.0
+        raw = None
+        pad_notes = []
+        for pad in pads:
+            px, py = pad["center_xy"]
+            sx, sy = pad["size_m"]
+            c0 = int(max(0, (px - sx / 2 + half_fp) / res))
+            c1 = int(min(dem.shape[0], (px + sx / 2 + half_fp) / res))
+            r0 = int(max(0, (half_fp - (py + sy / 2)) / res))
+            r1 = int(min(dem.shape[0], (half_fp - (py - sy / 2)) / res))
+            if r1 <= r0 or c1 <= c0:
+                continue
+            feather = float(pad.get("feather_m", 12.0))
+            kerb_m = float(pad.get("kerb_m", 0.0))
+            pad_px = int(max(feather, kerb_m) / res) + 2
+            rr0, rr1 = max(0, r0 - pad_px), min(dem.shape[0], r1 + pad_px)
+            cc0, cc1 = max(0, c0 - pad_px), min(dem.shape[0], c1 + pad_px)
+            inside = np.zeros((rr1 - rr0, cc1 - cc0), dtype=bool)
+            inside[r0 - rr0 : r1 - rr0, c0 - cc0 : c1 - cc0] = True
+            outline = pad.get("from_imagery")
+            if outline:
+                if raw is None:
+                    raw = level_builder.naip_mosaic(data_root / "naip", fp, dem.shape[0])
+                block = raw[rr0:rr1, cc0:cc1].astype("float32") / 255.0
+                lum = block.mean(axis=-1)
+                dark = (lum < float(outline.get("max_lum", 0.42))) & inside
+                green_cut = outline.get("exclude_green")
+                if green_cut is not None:
+                    # The hedge along the kerb is dark too, and it is not the lot.
+                    exg = 2.0 * block[..., 1] - block[..., 0] - block[..., 2]
+                    dark &= exg <= float(green_cut)
+                    del exg
+                # Disc kernels, then a 2 m smooth: the cross kernel's iterations
+                # closed and opened the lot into a diamond and its kerb into a
+                # sawtooth of 45-degree teeth.
+                dark = ndimage.binary_closing(
+                    dark, structure=_disc(float(outline.get("close_m", 12.0)) / 2.0 / res)
+                )
+                dark = ndimage.binary_opening(
+                    dark, structure=_disc(float(outline.get("open_m", 4.0)) / 2.0 / res)
+                )
+                labels, count = ndimage.label(dark)
+                if count:
+                    areas = ndimage.sum(dark, labels, np.arange(1, count + 1))
+                    dark = labels == (int(np.argmax(areas)) + 1)  # the lot is one piece
+                    dark = ndimage.binary_fill_holes(dark)
+                    dark = (
+                        ndimage.gaussian_filter(dark.astype("float32"), max(1.0, 2.0 / res)) > 0.5
+                    )
+                if dark.sum() * res * res < float(outline.get("min_area_m2", 200.0)):
+                    _log(f"  pad at {pad['center_xy']} skipped: no dark lot in the flight")
+                    del block, lum, dark
+                    continue
+                inside = dark
+                del block, lum, dark
+            window = dem[rr0:rr1, cc0:cc1]
+            if pad.get("flatten", True):
+                rr, cc = np.nonzero(inside)
+                xs, ys = cc * res, rr * res
+                a = np.stack([xs - xs.mean(), ys - ys.mean(), np.ones_like(xs)], axis=1)
+                coef, *_ = np.linalg.lstsq(a, window[rr, cc].astype("float64"), rcond=None)
+                grade = float(np.hypot(coef[0], coef[1]))
+                max_grade = float(pad.get("max_grade", 0.03))
+                if grade > max_grade:
+                    coef[:2] *= max_grade / grade
+                gy_i, gx_i = np.mgrid[0 : window.shape[0], 0 : window.shape[1]]
+                plane = (
+                    coef[0] * (gx_i * res - xs.mean())
+                    + coef[1] * (gy_i * res - ys.mean())
+                    + coef[2]
+                ).astype("float32")
+                budget = float(pad.get("max_cut_fill_m", 1.5))
+                target = np.clip(plane, window - budget, window + budget)
+                dist = ndimage.distance_transform_edt(~inside) * res
+                w = np.clip(1.0 - dist / feather, 0.0, 1.0).astype("float32")
+                w = w * w * (3.0 - 2.0 * w)
+                carved = window * (1 - w) + target * w
+                kerb_slope = float(pad.get("kerb_max_slope_deg", 15.0))
+                kerb_stats = None
+                if kerb_m > 0 and kerb_slope > 0:
+                    # The kerb: the lidar's retaining wall and the batter's toe
+                    # within ``kerb_m`` of the lot are held under ``kerb_slope``
+                    # (the steepest surface under the ground and the gentlest over
+                    # it that hold it, averaged), so nothing round the lot is a
+                    # cut face the classifier paints as talus.
+                    band = (dist > 0) & (dist <= kerb_m)
+                    band[:3, :] = band[-3:, :] = False
+                    band[:, :3] = band[:, -3:] = False
+                    # The lidar's own retaining wall inside the inner band is
+                    # smoothed over 4 m before the batter (a 4 m wall comes down to
+                    # 22 degrees), the smoothing feathered 4 m across the band's
+                    # edges and never touching the lot: a wall the level cannot
+                    # build is not left as a cut face in plain texture by the kerb.
+                    inner_band = (dist > 0) & (dist <= kerb_m / 2.0)
+                    w_s = ndimage.gaussian_filter(inner_band.astype("float32"), max(1.0, 2.0 / res))
+                    w_s = np.where(inside, 0.0, w_s).astype("float32")
+                    smooth_c = ndimage.gaussian_filter(carved, max(1.0, 4.0 / res))
+                    carved = (carved * (1.0 - w_s) + smooth_c * w_s).astype("float32")
+                    del inner_band, w_s, smooth_c
+                    limited = hm.batter(
+                        carved, inside, band, math.tan(math.radians(kerb_slope)), res
+                    )
+                    # The batter holds over the inner half of the band and gives way
+                    # to the carved ground over the outer half, so a flank steeper
+                    # than the cap is not re-graded 30 m out.
+                    give = np.clip((dist - kerb_m / 2.0) / (kerb_m / 2.0), 0.0, 1.0).astype(
+                        "float32"
+                    )
+                    carved = np.where(band, limited * (1.0 - give) + carved * give, carved).astype(
+                        "float32"
+                    )
+                    del limited, give
+                    zone = dist <= kerb_m
+
+                    def _slope_deg(z):
+                        gy_k, gx_k = np.gradient(z.astype("float64"), res)
+                        return np.degrees(np.arctan(np.hypot(gx_k, gy_k)))
+
+                    slope_all = _slope_deg(carved)
+                    inner = (dist > 0) & (dist <= kerb_m / 2.0)
+                    slope_k = slope_all[zone]
+                    inner_k = slope_all[inner]
+                    del slope_all
+                    natural_all = _slope_deg(window)
+                    natural_k = natural_all[zone]
+                    natural_inner = natural_all[inner]
+                    del natural_all, inner
+                    kerb_stats = {
+                        "kerb_slope_max_deg": round(float(slope_k.max()), 1),
+                        "kerb_slope_p95_deg": round(float(np.percentile(slope_k, 95)), 1),
+                        # The inner half of the band, where the limit holds outright.
+                        "kerb_inner_max_deg": round(float(inner_k.max()), 1),
+                        "kerb_natural_inner_max_deg": round(float(natural_inner.max()), 1),
+                        # The ground's own steepness there before the lot was cut.
+                        "kerb_natural_max_deg": round(float(natural_k.max()), 1),
+                        "kerb_natural_p95_deg": round(float(np.percentile(natural_k, 95)), 1),
+                    }
+                    del slope_k, inner_k, natural_k, natural_inner, band, zone
+                dem[rr0:rr1, cc0:cc1] = carved
+                pad_notes.append(
+                    {
+                        "center_xy": [px, py],
+                        "area_m2": round(float(inside.sum() * res * res), 1),
+                        "grade": round(min(grade, max_grade), 4),
+                        "grade_fitted": round(grade, 4),
+                        "max_cut_m": round(float(np.clip(window - target, 0, None).max()), 2),
+                        "max_fill_m": round(float(np.clip(target - window, 0, None).max()), 2),
+                        **(kerb_stats or {}),
+                    }
+                )
+            pad_outlines.append(
+                {"pad": pad, "inside": inside, "rr0": rr0, "rr1": rr1, "cc0": cc0, "cc1": cc1}
+            )
+        stats["pads"] = pad_notes if pad_notes else len(pads)
+        del raw
+
     carve_spec = spec.ROADS.get("carve") if hasattr(spec, "ROADS") else None
     surface_index = None
     if carve_spec:
@@ -417,6 +651,8 @@ def terrain(spec, example_root: Path) -> dict:
             target=str(flatfield.get("target", "mean")),
             max_factor=float(flatfield.get("max_factor", 1.8)),
             aspect_pass=float(flatfield.get("aspect_pass", 0.0)),
+            chroma=bool(flatfield.get("chroma", False)),
+            exclude=_refilled_cells(out, colour.shape[0]),
             sun=(
                 (
                     float(imagery_stats["sun_fit"]["azimuth_deg"]),
@@ -441,6 +677,26 @@ def terrain(spec, example_root: Path) -> dict:
         for name, entry in getattr(spec, "PALETTE", {}).items()
         if entry.get("base_pull") and name in spec.TERRAIN["materials"]
     }
+    pull_tapers = {
+        list(spec.TERRAIN["materials"]).index(name): float(entry["base_pull_taper_m"])
+        for name, entry in getattr(spec, "PALETTE", {}).items()
+        if entry.get("base_pull_taper_m") and name in spec.TERRAIN["materials"]
+    }
+    pull_windows = {
+        list(spec.TERRAIN["materials"]).index(name): float(entry["base_pull_window_m"])
+        for name, entry in getattr(spec, "PALETTE", {}).items()
+        if entry.get("base_pull_window_m") and name in spec.TERRAIN["materials"]
+    }
+    pull_lum_gates = {
+        list(spec.TERRAIN["materials"]).index(name): tuple(entry["base_pull_lum_gate"])
+        for name, entry in getattr(spec, "PALETTE", {}).items()
+        if entry.get("base_pull_lum_gate") and name in spec.TERRAIN["materials"]
+    }
+    pull_max_br = {
+        list(spec.TERRAIN["materials"]).index(name): float(entry["base_pull_max_br"])
+        for name, entry in getattr(spec, "PALETTE", {}).items()
+        if entry.get("base_pull_max_br") and name in spec.TERRAIN["materials"]
+    }
     if pulls and colour is not None:
         from PIL import Image
 
@@ -454,7 +710,16 @@ def terrain(spec, example_root: Path) -> dict:
                     (colour.shape[0], colour.shape[0]), Image.NEAREST
                 )
             )
-        colour, pull_stats = imagery_tools.pull_layers(colour, layer_at_colour, pulls)
+        colour, pull_stats = imagery_tools.pull_layers(
+            colour,
+            layer_at_colour,
+            pulls,
+            texel_m=fp.size_m / colour.shape[0],
+            tapers=pull_tapers,
+            windows=pull_windows,
+            max_br=pull_max_br,
+            lum_gates=pull_lum_gates,
+        )
         Image.fromarray(colour).save(out / "colour.png", format="PNG", compress_level=3)
         stats["base_pull"] = pull_stats
         _log(f"  base colour pulled toward the palette on {len(pulls)} layers")
@@ -475,6 +740,7 @@ def terrain(spec, example_root: Path) -> dict:
             for name in chroma.get("layers", [])
             if name in spec.TERRAIN["materials"]
         ]
+        near = chroma.get("near_layer")
         colour, pulled = imagery_tools.pull_chroma(
             colour,
             layer_at_colour,
@@ -483,6 +749,11 @@ def terrain(spec, example_root: Path) -> dict:
             float(chroma.get("window_m", 100.0)),
             fp.size_m / colour.shape[0],
             tolerance=float(chroma.get("tolerance", 1.05)),
+            near_layer=list(spec.TERRAIN["materials"]).index(near)
+            if near in spec.TERRAIN["materials"]
+            else None,
+            within_m=float(chroma.get("within_m", 120.0)),
+            saturation_gain=float(chroma.get("saturation_gain", 1.0)),
         )
         Image.fromarray(colour).save(out / "colour.png", format="PNG", compress_level=3)
         stats["chroma_pull_cells"] = pulled
@@ -490,6 +761,7 @@ def terrain(spec, example_root: Path) -> dict:
     lakes = (getattr(spec, "IMAGERY", None) or {}).get("lakes")
     if lakes and colour is not None:
         from PIL import Image
+        from scipy import ndimage
 
         from . import imagery as imagery_tools
 
@@ -501,7 +773,19 @@ def terrain(spec, example_root: Path) -> dict:
                     (colour.shape[0], colour.shape[0]), Image.BILINEAR
                 )
             )
-        colour, lake_cells = imagery_tools.paint_lakes(
+        snow_refilled = None
+        if (out / "refill.npy").is_file():
+            # The snow the de-lighting refilled: lidar-flat, but not water.
+            kinds = np.load(out / "refill.npy")
+            if kinds.shape[0] != colour.shape[0]:
+                kinds = np.asarray(
+                    Image.fromarray(kinds).resize((colour.shape[0], colour.shape[0]), Image.NEAREST)
+                )
+            snow_refilled = ndimage.binary_dilation(
+                kinds == 2, iterations=max(1, int(4.0 / (fp.size_m / colour.shape[0])))
+            )
+            del kinds
+        colour, lake_cells, lake_mask = imagery_tools.paint_lakes(
             colour,
             dem_at_colour,
             fp.size_m / colour.shape[0],
@@ -512,8 +796,44 @@ def terrain(spec, example_root: Path) -> dict:
             cyan_min_lum=float(lakes.get("cyan_min_lum", 0.35)),
             cyan_max_slope_deg=lakes.get("cyan_max_slope_deg"),
             flat_rms_m=lakes.get("flat_rms_m"),
+            cyan_grow_m=float(lakes.get("cyan_grow_m", 0.0)),
+            cyan_edge_m=float(lakes.get("cyan_edge_m", 0.0)),
+            exclude=snow_refilled,
         )
         Image.fromarray(colour).save(out / "colour.png", format="PNG", compress_level=3)
+        if lakes.get("material") and lake_mask.any():
+            # Water gets its own layer (a flat dark tile, no cushions on it) and the
+            # mask ships for the level stage's water objects.
+            mask_dem = lake_mask
+            if lake_mask.shape[0] != layer.shape[0]:
+                mask_dem = (
+                    np.asarray(
+                        Image.fromarray(lake_mask.astype("uint8") * 255).resize(
+                            (layer.shape[0], layer.shape[0]), Image.NEAREST
+                        )
+                    )
+                    > 127
+                )
+            layer[mask_dem] = list(spec.TERRAIN["materials"]).index(lakes["material"])
+            # A body whose lidar ground is not flat (settled tailings, a berm's toe)
+            # is cut half a metre under its 90th-percentile ground, so the level's
+            # water surface, set a hand over the body's ground, covers every cell.
+            lab_l, _n_l = ndimage.label(mask_dem)
+            cut = 0
+            for k, sl in enumerate(ndimage.find_objects(lab_l), start=1):
+                if sl is None:
+                    continue
+                cells = lab_l[sl] == k
+                z = dem[sl][cells]
+                top = float(np.percentile(z, 90))
+                if top - float(z.min()) > 0.3:
+                    lowered = np.minimum(z, top - 0.5)
+                    cut += int((lowered < z).sum())
+                    block = dem[sl]
+                    block[cells] = lowered
+            stats["lake_cells_cut"] = cut
+            del lab_l
+            np.save(out / "lakes.npy", mask_dem)
         stats["lake_cells_painted"] = lake_cells
         _log(f"  lakes painted: {lake_cells} cells")
     regions = (getattr(spec, "IMAGERY", None) or {}).get("base_pull_regions")
@@ -561,108 +881,41 @@ def terrain(spec, example_root: Path) -> dict:
             }
         stats["layer_mean_srgb"] = means
         stats["near_black_fraction"] = round(float((colour.max(axis=-1) < 13).mean()), 6)
-    pads = (getattr(spec, "ROADS", None) or {}).get("pads") or []
-    if pads and surface_index is not None:
+    if pad_outlines and surface_index is not None:
         from scipy import ndimage
 
-        from . import level_builder
-
-        # Authored pads (a car park, a yard): the lot's own outline from the flight
-        # (the dark cells inside the authored rectangle, closed and filled) or the
-        # rectangle itself; carved like a bed (a fitted plane, its grade bounded,
-        # cut and fill bounded, feathered ``feather_m`` into the ground) and painted
-        # in the named surface, with the base colour feathered the same width
-        # outside the outline so no 2 m colour step stands round the lot.
-        half_fp = fp.size_m / 2.0
-        raw = None
-        pad_notes = []
-        for pad in pads:
-            px, py = pad["center_xy"]
-            sx, sy = pad["size_m"]
-            c0 = int(max(0, (px - sx / 2 + half_fp) / res))
-            c1 = int(min(dem.shape[0], (px + sx / 2 + half_fp) / res))
-            r0 = int(max(0, (half_fp - (py + sy / 2)) / res))
-            r1 = int(min(dem.shape[0], (half_fp - (py - sy / 2)) / res))
-            if r1 <= r0 or c1 <= c0:
-                continue
-            feather = float(pad.get("feather_m", 12.0))
-            pad_px = int(feather / res) + 2
-            rr0, rr1 = max(0, r0 - pad_px), min(dem.shape[0], r1 + pad_px)
-            cc0, cc1 = max(0, c0 - pad_px), min(dem.shape[0], c1 + pad_px)
-            inside = np.zeros((rr1 - rr0, cc1 - cc0), dtype=bool)
-            inside[r0 - rr0 : r1 - rr0, c0 - cc0 : c1 - cc0] = True
-            outline = pad.get("from_imagery")
-            if outline:
-                if raw is None:
-                    raw = level_builder.naip_mosaic(data_root / "naip", fp, dem.shape[0])
-                lum = raw[rr0:rr1, cc0:cc1].astype("float32").mean(axis=-1) / 255.0
-                dark = (lum < float(outline.get("max_lum", 0.42))) & inside
-                # A lot's bays flicker across the threshold: closed over 12 m and
-                # opened over 8 m the outline is the lot's straight edge.
-                dark = ndimage.binary_closing(
-                    dark, iterations=max(1, int(float(outline.get("close_m", 12.0)) / res))
-                )
-                dark = ndimage.binary_opening(
-                    dark, iterations=max(1, int(float(outline.get("open_m", 8.0)) / res))
-                )
-                labels, count = ndimage.label(dark)
-                if count:
-                    areas = ndimage.sum(dark, labels, np.arange(1, count + 1))
-                    keep_min = float(outline.get("min_area_m2", 200.0)) / (res * res)
-                    dark = np.isin(labels, np.nonzero(areas >= keep_min)[0] + 1)
-                    dark = ndimage.binary_fill_holes(dark)
-                if dark.sum() * res * res < float(outline.get("min_area_m2", 200.0)):
-                    # The flight shows no lot here: no pad (a rectangle stamped on
-                    # pale ground was a black block).
-                    _log(f"  pad at {pad['center_xy']} skipped: no dark lot in the flight")
-                    del lum, dark
-                    continue
-                inside = dark
-                del lum, dark
-            window = dem[rr0:rr1, cc0:cc1]
-            if pad.get("flatten", True):
-                # A plane fitted to the ground under the outline, its grade held
-                # under ``max_grade``, never more than ``max_cut_fill_m`` from the
-                # ground, blended into it over the feather.
-                rr, cc = np.nonzero(inside)
-                xs, ys = cc * res, rr * res
-                a = np.stack([xs - xs.mean(), ys - ys.mean(), np.ones_like(xs)], axis=1)
-                coef, *_ = np.linalg.lstsq(a, window[rr, cc].astype("float64"), rcond=None)
-                grade = float(np.hypot(coef[0], coef[1]))
-                max_grade = float(pad.get("max_grade", 0.03))
-                if grade > max_grade:
-                    coef[:2] *= max_grade / grade
-                gy_i, gx_i = np.mgrid[0 : window.shape[0], 0 : window.shape[1]]
-                plane = (
-                    coef[0] * (gx_i * res - xs.mean())
-                    + coef[1] * (gy_i * res - ys.mean())
-                    + coef[2]
-                ).astype("float32")
-                budget = float(pad.get("max_cut_fill_m", 1.5))
-                target = np.clip(plane, window - budget, window + budget)
-                dist = ndimage.distance_transform_edt(~inside) * res
-                w = np.clip(1.0 - dist / feather, 0.0, 1.0).astype("float32")
-                w = w * w * (3.0 - 2.0 * w)
-                dem[rr0:rr1, cc0:cc1] = window * (1 - w) + target * w
-                pad_notes.append(
-                    {
-                        "center_xy": [px, py],
-                        "area_m2": round(float(inside.sum() * res * res), 1),
-                        "grade": round(grade, 4),
-                        "max_cut_m": round(float(np.clip(window - target, 0, None).max()), 2),
-                        "max_fill_m": round(float(np.clip(target - window, 0, None).max()), 2),
-                    }
-                )
+        for entry in pad_outlines:
+            pad, inside = entry["pad"], entry["inside"]
+            rr0, rr1, cc0, cc1 = entry["rr0"], entry["rr1"], entry["cc0"], entry["cc1"]
+            pin = pad.get("pin_layer")
+            if pin and pin in spec.TERRAIN["materials"]:
+                # The ground round a lot is the plain it was built on, whatever
+                # slope its kerb wears: the layer within ``pin_layer_m`` of the
+                # outline is pinned to it (a cut face painted talus and limestone
+                # was the first thing the default spawn showed).
+                pin_m = float(pad.get("pin_layer_m", 15.0))
+                near_pad = ndimage.distance_transform_edt(~inside) * res <= pin_m
+                near_pad &= ~inside
+                if surface_index is not None:
+                    near_pad &= surface_index[rr0:rr1, cc0:cc1] == 0
+                block_l = layer[rr0:rr1, cc0:cc1]
+                block_l[near_pad] = list(spec.TERRAIN["materials"]).index(pin)
+                del near_pad, block_l
+            if not pad.get("paint", True):
+                continue  # a gravel lot keeps the flight's own colour
             surface_index[rr0:rr1, cc0:cc1] = np.where(
                 inside,
                 1 if pad.get("surface", "paved") == "paved" else 2,
                 surface_index[rr0:rr1, cc0:cc1],
             )
-            if colour is not None:
-                # A car park has a crisp kerb: a 1.5 m gravel shoulder outside the
-                # outline (the asphalt decal's own shoulder tone), no halo.
-                shoulder_m = float(pad.get("shoulder_m", 1.5))
-                shoulder_rgb = pad.get("shoulder_rgb", [0.60, 0.56, 0.50])
+            shoulder_m = float(pad.get("shoulder_m", 1.5))
+            if colour is not None and shoulder_m > 0:
+                # A car park has a crisp kerb: outside it a gravel shoulder in the
+                # dirt bed's own tone, feathered a metre outward.
+                dirt = spec.ROADS["surfaces"].get("dirt", {}).get("terrain_material")
+                shoulder_rgb = pad.get(
+                    "shoulder_rgb", (spec.PALETTE.get(dirt) or {}).get("base", [0.74, 0.67, 0.56])
+                )
                 scale = colour.shape[0] / dem.shape[0]
                 cr0, cr1 = int(rr0 * scale), int(rr1 * scale)
                 cc0c, cc1c = int(cc0 * scale), int(cc1 * scale)
@@ -677,24 +930,20 @@ def terrain(spec, example_root: Path) -> dict:
                     > 127
                 )
                 dist_c = ndimage.distance_transform_edt(~inside_c) * (res / scale)
-                shoulder = (dist_c > 0) & (dist_c <= shoulder_m)
+                wc = np.where(
+                    dist_c <= shoulder_m,
+                    1.0,
+                    np.clip(1.0 - (dist_c - shoulder_m) / 1.0, 0.0, 1.0),
+                ).astype("float32") * (~inside_c)
                 tone = np.asarray(shoulder_rgb, dtype="float32") * 255.0
                 block = colour[cr0:cr1, cc0c:cc1c].astype("float32")
-                grain = (
-                    block.mean(axis=-1, keepdims=True)
-                    / np.maximum(
-                        ndimage.uniform_filter(block.mean(axis=-1), size=9, mode="nearest"), 1.0
-                    )[..., None]
-                )
-                block = np.where(
-                    shoulder[..., None], tone[None, None, :] * np.clip(grain, 0.85, 1.15), block
-                )
-                colour[cr0:cr1, cc0c:cc1c] = np.clip(block, 0, 255).astype("uint8")
-        if colour is not None and pad_notes:
+                colour[cr0:cr1, cc0c:cc1c] = np.clip(
+                    block * (1 - wc[..., None]) + tone[None, None, :] * wc[..., None], 0, 255
+                ).astype("uint8")
+        if colour is not None:
             from PIL import Image
 
             Image.fromarray(colour).save(out / "colour.png", format="PNG", compress_level=3)
-        stats["pads"] = pad_notes if pad_notes else len(pads)
     if surface_index is not None:
         materials = list(spec.TERRAIN["materials"])
         for surface_name, index in (("paved", 1), ("dirt", 2)):

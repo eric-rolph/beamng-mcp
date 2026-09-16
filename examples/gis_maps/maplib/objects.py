@@ -41,6 +41,7 @@ def detect_objects(
     cliff_buffer_m: float = 20.0,
     berm_min_elongation: float | None = None,
     berm_max_width_m: float = 12.0,
+    berm_min_height_m: float | None = None,
 ) -> tuple[np.ndarray, list[dict], dict]:
     """Return (ground, objects, stats): the opened ground surface and every bump it removed.
 
@@ -114,8 +115,7 @@ def detect_objects(
         gentle_here = local_slope is not None and local_slope[int(cy), int(cx)] < 15.0
         if (
             berm_min_elongation is not None
-            and max_height_m > 0
-            and peak > max_height_m
+            and peak > (berm_min_height_m if berm_min_height_m is not None else max_height_m)
             and gentle_here
             and min(h, w) <= berm_max_width_m
             and elongation >= berm_min_elongation
@@ -669,13 +669,26 @@ def inpaint_boxes(
     low = ndimage.gaussian_filter(lum_w, 4.0)
     hp = np.clip(lum_w / np.maximum(low, 1e-3), 0.7, 1.4)
     patch_px = max(4, int(16.0 / res))
-    feather_px = max(2, int(3.0 / res))
+    feather_px = max(2, int(4.0 / res))
     step = patch_px - feather_px
     rng = np.random.default_rng(11)
     # Ring cells whose whole patch lies in the ring are the sources.
     core = ndimage.binary_erosion(band, iterations=patch_px // 2 + 1)
     if exclude_mask is not None:
         core &= ~exclude_mask[rr0:rr1, cc0:cc1]  # no road fragment is a source
+    # No source patch touches the level's edge (a box near the footprint's edge
+    # would otherwise quilt the padding's reflections into itself).
+    guard = np.zeros(core.shape, dtype=bool)
+    m = patch_px // 2 + 1
+    if rr0 == 0:
+        guard[:m, :] = True
+    if rr1 == n:
+        guard[-m:, :] = True
+    if cc0 == 0:
+        guard[:, :m] = True
+    if cc1 == n:
+        guard[:, -m:] = True
+    core &= ~guard
     src_r, src_c = np.nonzero(core)
     quilt = np.ones(window.shape[:2], dtype="float32")
     if src_r.size:
@@ -695,6 +708,32 @@ def inpaint_boxes(
         hp_max = ndimage.maximum_filter(hp, size=patch_px, mode="nearest")
         hp_min = ndimage.minimum_filter(hp, size=patch_px, mode="nearest")
         calm = (hp_max <= 1.12) & (hp_min >= 0.88)
+        # Nor a patch holding a dark dot (a bush, a pole's shadow) over 2 m2: a
+        # juniper quilted four times in a column is a juniper too many (0.8 of the
+        # 30 m mean: 0.72 missed the junipers on the crest's dark ground).
+        around = ndimage.uniform_filter(lum_w, size=max(3, int(30.0 / res)), mode="nearest")
+        dot = ndimage.binary_opening(lum_w < 0.8 * around, iterations=1)
+        calm &= ~ndimage.maximum_filter(dot, size=patch_px, mode="nearest")
+        del around, dot
+        # Nor a patch whose grain runs one way (a track fragment, a fence's shadow,
+        # a row of bays): the structure tensor's coherence over the patch must stay
+        # under 0.5, so nothing oriented is stamped in a row.
+        gy_h = ndimage.gaussian_filter(hp, 1.0, order=(1, 0))
+        gx_h = ndimage.gaussian_filter(hp, 1.0, order=(0, 1))
+        jxx = ndimage.uniform_filter(gx_h * gx_h, size=patch_px, mode="nearest")
+        jyy = ndimage.uniform_filter(gy_h * gy_h, size=patch_px, mode="nearest")
+        jxy = ndimage.uniform_filter(gx_h * gy_h, size=patch_px, mode="nearest")
+        coherence = np.sqrt((jxx - jyy) ** 2 + 4.0 * jxy * jxy) / np.maximum(jxx + jyy, 1e-9)
+        calm &= coherence < 0.5
+        del gy_h, gx_h, jxx, jyy, jxy, coherence
+        good = calm & (np.sqrt(hp_sq) <= 1.5 * ring_rms)
+        good_idx = np.nonzero(good[src_r, src_c])[0]
+        # The nearest good sources, for an arc with none: still the ground beside
+        # that side of the box, never a source drawn from the whole ring (a far
+        # arc's pale plain quilted onto a wall clipped white).
+        good_tree = (
+            cKDTree(np.stack([src_r[good_idx], src_c[good_idx]], axis=1)) if good_idx.size else None
+        )
         acc = np.zeros(window.shape[:2], dtype="float32")
         wsum = np.zeros(window.shape[:2], dtype="float32")
         ramp = np.linspace(0.0, 1.0, feather_px, endpoint=False)
@@ -703,8 +742,17 @@ def inpaint_boxes(
         edge[-feather_px:] = ramp[::-1]
         win2d = edge[:, None] * edge[None, :]
         rows_i, cols_i = np.nonzero(inside)
-        for r_start in range(rows_i.min() - patch_px, rows_i.max() + 1, step):
-            for c_start in range(cols_i.min() - patch_px, cols_i.max() + 1, step):
+        # A source is not cut again within 10 m of a source already laid, and the
+        # patch pitch is jittered +-4 m: patches cut in step from the nearest arc
+        # stamped whatever that arc held in a row every 12 m.
+        used = np.zeros(window.shape[:2], dtype=bool)
+        reuse_px = max(2, int(10.0 / res))
+        jitter_px = max(1, int(4.0 / res))
+        step = max(2, patch_px - feather_px - jitter_px)
+        for r_grid in range(rows_i.min() - patch_px, rows_i.max() + 1, step):
+            for c_grid in range(cols_i.min() - patch_px, cols_i.max() + 1, step):
+                r_start = r_grid + int(rng.integers(-jitter_px, jitter_px + 1))
+                c_start = c_grid + int(rng.integers(-jitter_px, jitter_px + 1))
                 r_a, c_a = max(0, r_start), max(0, c_start)
                 r_b = min(window.shape[0], r_start + patch_px)
                 c_b = min(window.shape[1], c_start + patch_px)
@@ -713,15 +761,24 @@ def inpaint_boxes(
                 centre = ((r_a + r_b) / 2.0, (c_a + c_b) / 2.0)
                 nearest = int(tree.query(centre)[1])
                 arc = tree.query_ball_point((src_r[nearest], src_c[nearest]), arc_px)
-                k = nearest
-                for _try in range(12):
-                    cand = int(arc[int(rng.integers(0, len(arc)))]) if arc else nearest
-                    if (
-                        np.sqrt(hp_sq[src_r[cand], src_c[cand]]) <= 1.5 * ring_rms
-                        and calm[src_r[cand], src_c[cand]]
-                    ):
+                arc = [int(a) for a in arc if good[src_r[a], src_c[a]]]
+                if not arc and good_tree is not None:
+                    near_k = min(20, good_idx.size)
+                    _d, near_i = good_tree.query((src_r[nearest], src_c[nearest]), k=near_k)
+                    arc = [int(good_idx[j]) for j in np.atleast_1d(near_i)]
+                k = None
+                for _try in range(16):
+                    if not arc:
+                        break
+                    cand = arc[int(rng.integers(0, len(arc)))]
+                    if not used[src_r[cand], src_c[cand]]:
                         k = cand
                         break
+                if k is None:
+                    k = arc[int(rng.integers(0, len(arc)))] if arc else nearest
+                ur0, ur1 = max(0, int(src_r[k]) - reuse_px), int(src_r[k]) + reuse_px + 1
+                uc0, uc1 = max(0, int(src_c[k]) - reuse_px), int(src_c[k]) + reuse_px + 1
+                used[ur0:ur1, uc0:uc1] = True
                 sr, sc = int(src_r[k]) - patch_px // 2, int(src_c[k]) - patch_px // 2
                 sr = min(max(sr, 0), window.shape[0] - patch_px)
                 sc = min(max(sc, 0), window.shape[1] - patch_px)

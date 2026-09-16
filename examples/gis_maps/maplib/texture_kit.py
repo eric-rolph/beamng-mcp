@@ -47,7 +47,10 @@ FAMILIES = {
         "ground_rgb": [0.53, 0.51, 0.44],
         "straw_rgb": [0.60, 0.55, 0.36],
         "shade_by_height": 0.25,
+        "cushion_profile": 0.6,  # a soft rim, not a sticker's wall
     },
+    # Still water: a flat dark tile with a faint ripple, for the cells under a lake.
+    "water": {"freq": 3, "octaves": 3, "rough": 0.15, "gain": 0.08, "feature": "none"},
     "macro_clumpy": {"freq": 4, "octaves": 4, "rough": 0.80, "gain": 0.4, "feature": "none"},
     # Texture-pass families (Meteor Crater / Black Bear Pass rework).
     "limestone": {"freq": 3, "octaves": 6, "rough": 0.70, "gain": 1.1, "feature": "ledges"},
@@ -71,7 +74,7 @@ FAMILIES = {
         "rough": 0.84,
         "gain": 0.8,
         "feature": "cobbles",
-        "chunk_rgb": [0.56, 0.52, 0.45],
+        "chunk_rgb": [0.50, 0.47, 0.41],
         "shade_by_height": 0.5,
     },
     # The decal: a 0.4 m tan shoulder inside the soft edge and wheel-track wear at
@@ -333,6 +336,7 @@ def _dome_pile(
     presence_min: float = 0.0,
     heading_field: np.ndarray | None = None,
     ragged: float = 0.0,
+    profile: float = 0.35,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Drop ``count`` domed cushions (log-uniform radius, elliptical at a random heading)
     on a periodic tile; the tallest wins. Heights are 0..1 (the crown of the largest).
@@ -373,7 +377,7 @@ def _dome_pile(
             )
             d2 = d2 / (wobble * wobble)
         crown = (0.55 + 0.45 * (r - lo) / max(hi - lo, 1e-6)) * rng.uniform(0.85, 1.0)
-        z = np.clip(1.0 - d2, 0.0, 1.0) ** 0.35 * crown  # a firm rim, not a blur
+        z = np.clip(1.0 - d2, 0.0, 1.0) ** profile * crown  # 0.35 a firm rim, 0.6 a soft one
         sub = np.ix_(rows, cols)
         better = (d2 < 1.0) & (z > height[sub])
         height[sub] = np.where(better, z, height[sub])
@@ -673,9 +677,9 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
             chunk = np.power(np.asarray(params["chunk_rgb"], "float64"), 2.2) / base_lin
         # Fine speckle inside every chunk and a darker line on its down-light edges,
         # so a chunk is a stone and not a paper cut-out.
-        speckle = 1.0 + 0.03 * fbm(size, 120, 2, rng)
-        edge_line = np.clip((ndimage.maximum_filter(h, size=3, mode="wrap") - h) / 0.15, 0, 1)
-        rock_rgb = chunk * (block_lum * grade * speckle * (1.0 - 0.25 * edge_line))[..., None]
+        speckle = 1.0 + 0.06 * fbm(size, 120, 2, rng)
+        edge_line = np.clip((ndimage.maximum_filter(h, size=5, mode="wrap") - h) / 0.12, 0, 1)
+        rock_rgb = chunk * (block_lum * grade * speckle * (1.0 - 0.45 * edge_line))[..., None]
         soil_rgb = _rgb(1.0, 0.82, 0.66) * (0.9 + 0.2 * fbm(size, 8, 2, rng))[..., None]
         rock_rgb = np.where(dusted, rock_rgb * 0.6 + soil_rgb * 0.4, rock_rgb)
         tint = (rock_rgb * body[..., None] + soil_rgb * (1 - body[..., None])) * (
@@ -790,6 +794,7 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
             presence_min=0.2,
             heading_field=lie,
             ragged=0.2,
+            profile=float(params.get("cushion_profile", 0.35)),
         )
         cushion = np.where(np.isfinite(cushion), cushion, 0.0)
         # The bare ground between the clumps: packed fines with a scatter of grit.
@@ -888,7 +893,10 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
         # Cracks: cells of 0.3-0.5 m (a 6 m tile), their edges displaced by noise
         # and only three in ten drawn, so no paving tessellation shows.
         f1, f2, cid_c = worley(size, 16, rng, jitter=1.0, warp=0.05)
-        cracks = (1.0 - _smooth((f2 - f1) / 0.006)) * (_cell_value(cid_c, 61) > 0.7)
+        # A crack is a line one or two texels wide (4 mm on a 6 m tile), a fifth
+        # darker than the slab, on three edges in ten: the 9-texel band at 12 %
+        # spread into nothing the eye could find.
+        cracks = (1.0 - _smooth((f2 - f1) / 0.0025)) * (_cell_value(cid_c, 61) > 0.7)
         patches = fbm(size, 3, 2, rng) * 0.15
         # Across the road (u): a pale gravel shoulder each side and a darker wear
         # band down the middle of each lane.
@@ -905,7 +913,7 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
             # 1/f wander at 2-8 m wavelengths (0.1 m on a 6 m road) plus 5 cm jitter:
             # a gravel edge, not rick-rack.
             wander = (
-                fbm(size, (1, 2), 4, rng)[:, :1] * 0.017 + fbm(size, (1, 40), 1, rng)[:, :1] * 0.008
+                fbm(size, (1, 3), 3, rng)[:, :1] * 0.03 + fbm(size, (1, 40), 1, rng)[:, :1] * 0.008
             )
             xj = x + wander
             band = _smooth((s_out - xj) / 0.01) * _smooth((xj - s_in) / 0.01)
@@ -913,7 +921,7 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
             shoulder = np.clip(band, 0, 1) * (0.85 + 0.3 * np.clip(grain + 0.5, 0, 1))
         wear = np.exp(-((x - 0.23) ** 2) / 0.0018) + np.exp(-((x - 0.77) ** 2) / 0.0018)
         wear = np.clip(wear, 0, 1) * np.ones((size, 1))
-        tint = ((1.0 + float(params.get("wear_contrast", 0.1)) * wear) * (1.0 - 0.06 * cracks))[
+        tint = ((1.0 + float(params.get("wear_contrast", 0.1)) * wear) * (1.0 - 0.2 * cracks))[
             ..., None
         ]
         if params.get("shoulder_rgb"):

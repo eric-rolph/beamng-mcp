@@ -202,6 +202,8 @@ def carve(
     bridge_m: float = 20.0,
     end_feather_m: float = 10.0,
     max_grade_change: float = 0.0,
+    max_cut_fill_m_by_way: dict | None = None,
+    max_grade_by_surface: dict | None = None,
     max_profile_grade: float = 0.0,
     max_cut_fill_m: float = 2.0,
     crossfall: float = 0.0,
@@ -254,6 +256,7 @@ def carve(
     stats["rejected_steep"] = 0
     # Longest ways first, so a spur meets the main road's bed and not the other way round.
     ordered = sorted(polylines, key=lambda r: -len(densify(r["points"], 4.0)))
+    base_cut_fill_m = max_cut_fill_m
     ramp_m = 30.0
 
     def ramp_to(profile: dict, index: int, z_join: float) -> None:
@@ -304,6 +307,12 @@ def carve(
         seg = np.hypot(*np.diff(dense, axis=0).T)
         length = float(seg.sum())
         along = np.concatenate([[0.0], np.cumsum(seg)])
+        # A way may carry its own cut/fill budget (a steep side track whose bench
+        # dips the map-wide budget cannot plane).
+        way_key = str(road["id"]).split("_")[0]
+        by_way = max_cut_fill_m_by_way or {}
+        budget = by_way.get(way_key, by_way.get(int(way_key) if way_key.isdigit() else way_key))
+        max_cut_fill_m = float(budget) if budget is not None else base_cut_fill_m
         # Bounded along-path smoothing: successively shorter moving averages, each
         # clamped to the cut/fill budget, so the bed follows a smooth grade line where
         # the terrain allows it and never digs a trench or builds a causeway where a
@@ -334,6 +343,24 @@ def carve(
                 for b in bad:
                     touch[max(0, b - window // 2) : b + window // 2 + 1] = True
                 smooth = np.where(touch, again, smooth)
+        cap = float((max_grade_by_surface or {}).get(road.get("surface"), 0.0) or 0.0)
+        if cap > 0 and smooth.size > 2:
+            # No stretch of this surface steeper than ``cap`` where the cut/fill
+            # budget allows: the steepest profile under the smoothed line and the
+            # gentlest over it that both hold the cap (a cut-only and a fill-only
+            # envelope) are averaged, so a paved road graded off a pad's batter or
+            # down a rim flank is a road and not a slide; the budget clip after it
+            # leaves the grade where the terrain gives no room.
+            ds = np.maximum(seg, 1e-6)
+            lo = smooth.copy()
+            hi = smooth.copy()
+            for i in range(1, lo.size):
+                lo[i] = min(lo[i], lo[i - 1] + cap * ds[i - 1])
+                hi[i] = max(hi[i], hi[i - 1] - cap * ds[i - 1])
+            for i in range(lo.size - 2, -1, -1):
+                lo[i] = min(lo[i], lo[i + 1] + cap * ds[i])
+                hi[i] = max(hi[i], hi[i + 1] - cap * ds[i])
+            smooth = np.clip(0.5 * (lo + hi), z - max_cut_fill_m, z + max_cut_fill_m)
         if max_profile_grade > 0:
             # A bed the smoothing could not bring under the grade limit over a metre
             # is a mine track up a cliff, not a road: it stays terrain.

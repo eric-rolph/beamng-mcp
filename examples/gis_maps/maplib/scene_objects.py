@@ -189,9 +189,8 @@ def build_shapes(
             kind="krummholz", base_height=1.5, crown=3.6, colour=(0.14, 0.22, 0.12), n=3
         ),
         "sapling": dict(kind="sapling", base_height=2.5, crown=1.6, colour=(0.12, 0.22, 0.12), n=2),
-        "willow": dict(
-            kind="krummholz", base_height=1.5, crown=3.6, colour=(0.30, 0.42, 0.18), n=3
-        ),
+        # A willow carr is a grey-green dome wider than tall, not a dark conifer mat.
+        "willow": dict(kind="willow", base_height=1.5, crown=3.6, colour=(0.45, 0.50, 0.30), n=3),
         # Mid-August aspen is a medium green, not lime.
         "aspen": dict(base_height=10.0, crown=5.0, colour=(0.38, 0.47, 0.22), n=3),
         # Sucker clumps: a few slender stems in one bushy crown, the aspen card.
@@ -204,10 +203,12 @@ def build_shapes(
         measured = cover_colours.get("broadleaf" if broad else "conifer")
         if measured:
             # Blend the authored card colour 60 % toward the photographed cover so the
-            # crowns sit in the base colour instead of on it.
+            # crowns sit in the base colour instead of on it (a willow only 30 %: the
+            # broadleaf cover the flight measured is the aspen's, darker than a carr).
             boost = 1.0
+            share = 0.3 if species == "willow" else 0.6
             params["colour"] = tuple(
-                round(a * 0.4 + m * 0.6 * boost, 4)
+                round(a * (1.0 - share) + m * share * boost, 4)
                 for a, m in zip(params["colour"], measured, strict=True)
             )
         is_aspen = species in ("aspen", "aspen_sapling")
