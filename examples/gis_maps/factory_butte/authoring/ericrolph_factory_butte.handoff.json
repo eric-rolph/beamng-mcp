@@ -41,8 +41,8 @@
   "schema": "ericrolph-beamng-maps-handoff-v1",
   "shipped": {
     "art/terrains/main.materials.json": {
-      "sha256": "480f03914c72682d69ba79698b8e2ea9f9ee2de3a4cbad03a6129553e214137a",
-      "size": 11197
+      "sha256": "bde6b13aa938acf1f02263590088095279b2bc98eb5ba75dbde6256ae020b344",
+      "size": 11237
     },
     "info.json": {
       "sha256": "6f6111dc04ce926389c8a12b017b9eec741b331d0999dbf0308f6cef3b67c885",
@@ -83,10 +83,21 @@
   },
   "spawns": [
     {
+      "apron": {
+        "across_deg": 20.8,
+        "along_deg": 1.5,
+        "relief_m": 5.98,
+        "roughness_m": 2.96,
+        "size_m": [
+          14.0,
+          7.0
+        ]
+      },
       "default": true,
       "heading_deg": 60.0,
       "label": "Butte Base",
       "lat": 38.38,
+      "level_ground": false,
       "level_xy": [
         -436.48,
         0.45
@@ -97,10 +108,21 @@
       "z": 53.13
     },
     {
+      "apron": {
+        "across_deg": 6.03,
+        "along_deg": 9.46,
+        "relief_m": 3.13,
+        "roughness_m": 1.08,
+        "size_m": [
+          14.0,
+          7.0
+        ]
+      },
       "default": false,
       "heading_deg": 0.0,
       "label": "Badlands South",
       "lat": 38.366,
+      "level_ground": false,
       "level_xy": [
         438.72,
         -1552.03
@@ -111,10 +133,21 @@
       "z": 50.05
     },
     {
+      "apron": {
+        "across_deg": 1.7,
+        "along_deg": 5.12,
+        "relief_m": 1.33,
+        "roughness_m": 0.23,
+        "size_m": [
+          14.0,
+          7.0
+        ]
+      },
       "default": false,
       "heading_deg": 90.0,
       "label": "Wash West",
       "lat": 38.385,
+      "level_ground": false,
       "level_xy": [
         -1572.42,
         554.16

@@ -40,8 +40,8 @@
   "schema": "ericrolph-beamng-maps-handoff-v1",
   "shipped": {
     "art/terrains/main.materials.json": {
-      "sha256": "22fbe4de65b64b6a7a0353993a7f746a69773f60d0e11a4019d7b69c5fe1c99c",
-      "size": 11244
+      "sha256": "b8b543a36917c6ab9e7176c98f21f8aee489591bf8ba780ce2515290dbbcf6f3",
+      "size": 11284
     },
     "info.json": {
       "sha256": "8ec22c0baaa26a568fefc4f4e0a991bbaddf0bf60290a1e1e3a79bc9983a8d7c",
@@ -88,10 +88,21 @@
   },
   "spawns": [
     {
+      "apron": {
+        "across_deg": 19.54,
+        "along_deg": 12.72,
+        "relief_m": 6.74,
+        "roughness_m": 2.1,
+        "size_m": [
+          14.0,
+          7.0
+        ]
+      },
       "default": true,
       "heading_deg": 135.0,
       "label": "Wallace Creek Offset",
       "lat": 35.2717,
+      "level_ground": false,
       "level_xy": [
         -1106.35,
         1108.6
@@ -102,10 +113,21 @@
       "z": 100.94
     },
     {
+      "apron": {
+        "across_deg": 6.46,
+        "along_deg": 11.77,
+        "relief_m": 3.61,
+        "roughness_m": 0.32,
+        "size_m": [
+          14.0,
+          7.0
+        ]
+      },
       "default": false,
       "heading_deg": 315.0,
       "label": "Elkhorn Scarp",
       "lat": 35.255,
+      "level_ground": false,
       "level_xy": [
         888.42,
         -802.35
@@ -116,10 +138,21 @@
       "z": 117.98
     },
     {
+      "apron": {
+        "across_deg": 1.35,
+        "along_deg": 2.72,
+        "relief_m": 0.9,
+        "roughness_m": 0.1,
+        "size_m": [
+          14.0,
+          7.0
+        ]
+      },
       "default": false,
       "heading_deg": 90.0,
       "label": "Plain West",
       "lat": 35.265,
+      "level_ground": false,
       "level_xy": [
         -1355.03,
         371.75

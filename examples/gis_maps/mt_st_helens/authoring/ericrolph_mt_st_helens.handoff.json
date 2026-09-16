@@ -39,8 +39,8 @@
   "schema": "ericrolph-beamng-maps-handoff-v1",
   "shipped": {
     "art/terrains/main.materials.json": {
-      "sha256": "dadd3b93f21d92e6e3b0e7a445e39c6ac51bce4e186b856ca271adb6198265c9",
-      "size": 13892
+      "sha256": "934a63d9c66e8b32f4ea574f95330525131484b5684b1f7d9363037d46fea8d8",
+      "size": 14067
     },
     "info.json": {
       "sha256": "f0aa592a08abd38ead83ac1e1d6a6cccf99296b5eec781cb0b08afce92fa1b55",
@@ -81,10 +81,21 @@
   },
   "spawns": [
     {
+      "apron": {
+        "across_deg": 2.76,
+        "along_deg": 5.17,
+        "relief_m": 1.65,
+        "roughness_m": 0.67,
+        "size_m": [
+          14.0,
+          7.0
+        ]
+      },
       "default": true,
       "heading_deg": 180.0,
       "label": "Pumice Plain",
       "lat": 46.238,
+      "level_ground": false,
       "level_xy": [
         -17.37,
         1778.3
@@ -95,10 +106,21 @@
       "z": 205.39
     },
     {
+      "apron": {
+        "across_deg": 11.29,
+        "along_deg": 9.86,
+        "relief_m": 3.58,
+        "roughness_m": 0.65,
+        "size_m": [
+          14.0,
+          7.0
+        ]
+      },
       "default": false,
       "heading_deg": 180.0,
       "label": "Crater Mouth",
       "lat": 46.215,
+      "level_ground": false,
       "level_xy": [
         8.72,
         -777.25
@@ -109,10 +131,21 @@
       "z": 705.59
     },
     {
+      "apron": {
+        "across_deg": 19.99,
+        "along_deg": 6.41,
+        "relief_m": 4.07,
+        "roughness_m": 0.36,
+        "size_m": [
+          14.0,
+          7.0
+        ]
+      },
       "default": false,
       "heading_deg": 135.0,
       "label": "Toutle Hummocks",
       "lat": 46.245,
+      "level_ground": false,
       "level_xy": [
         -1952.55,
         2536.7

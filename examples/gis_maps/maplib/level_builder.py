@@ -638,19 +638,28 @@ def terrain_material(
     macro_prefix: str,
     footprint_m: float,
     *,
+    square_size_m: float = 1.0,
     detail_tile_m: float = DETAIL_TILE_M,
     detail_strength: float = 0.35,
 ) -> dict:
     """One TerrainMaterial in the v1.5 (base + macro + detail) layout of shipped levels.
 
-    ``*TexSize`` on a material is WORLD metres the map tiles over (Torque's diffuseSize
-    lineage): the shipped Utah2 level is 2048 m across and sets its base size to 2048
-    while its texture set declares the same 2048 as PIXELS. The base map must cover the
-    whole level exactly once, so it is the footprint here; detail and macro tile at
-    their authored periods.
+    ``*TexSize`` on a material is documented as WORLD metres for one tile of the map
+    (Torque's diffuseSize lineage), and the shipped 2048 m level the pack was read
+    against sets its base size to 2048 while its texture set declares 2048 PIXELS. That
+    level is sampled at 1 m, where metres and terrain squares are the same number, and
+    the two readings cannot be told apart. They can here: Meteor Crater is 2048 m across
+    sampled at 0.5 m, was given 2048, and the game drew the orthoimagery tiled two by
+    two (mirrored) over the level - the engine divides the terrain's SAMPLE count by
+    this number, not its world width. So every size is authored in metres and converted
+    to squares: a no-op on the four maps sampled at 1 m, the fix on the two that are not.
     """
 
     persistent = pid(mod_id, f"terrainmaterial:{internal}")
+    squares_per_m = 1.0 / float(square_size_m)
+    base_size = round(footprint_m * squares_per_m)
+    detail_size = round(detail_tile_m * squares_per_m, 6)
+    macro_size = round(MACRO_TILE_M * squares_per_m, 6)
     tex = f"{level_url}/art/terrains"
     entry = {
         "name": f"{internal}-{persistent}",
@@ -678,11 +687,11 @@ def terrain_material(
         ("ao", "ao"),
     ):
         entry[f"{channel}BaseTex"] = f"{tex}/{base_prefix}_{suffix}.png"
-        entry[f"{channel}BaseTexSize"] = int(footprint_m)
+        entry[f"{channel}BaseTexSize"] = base_size
         entry[f"{channel}DetailTex"] = f"{tex}/t_{internal}_{suffix}.png"
-        entry[f"{channel}DetailTexSize"] = detail_tile_m
+        entry[f"{channel}DetailTexSize"] = detail_size
         entry[f"{channel}MacroTex"] = f"{tex}/{macro_prefix}_{suffix}.png"
-        entry[f"{channel}MacroTexSize"] = MACRO_TILE_M
+        entry[f"{channel}MacroTexSize"] = macro_size
     return entry
 
 
@@ -1319,6 +1328,7 @@ def build_level(
             base_prefix,
             macro_prefix,
             fp.size_m,
+            square_size_m=res,
             detail_tile_m=float(palette.get("tile_m", detail_tile_m)),
             detail_strength=float(palette.get("detail_strength", 0.35)),
         )
@@ -1903,7 +1913,11 @@ def build_level(
                 "minimapImage": f"levels/{mod_id}/{mod_id}_minimap.png",
                 "squareSize": res,
                 "maxHeight": encoded.max_height_m,
-                "baseTexSize": BASE_TEX_PX,
+                # The resolution the engine bakes the far-field base map at. It has to
+                # be the resolution of the base maps themselves, or the level draws a
+                # 2048 px bake of a 4096 px orthophoto once the cells go out of detail
+                # range - the whole map, from any ridge.
+                "baseTexSize": base_px,
                 "lightMapSize": 1024,
                 "screenError": 16,
                 "castShadows": True,

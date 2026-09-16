@@ -242,6 +242,28 @@ def test_texture_tiles_wrap() -> None:
     assert wrap <= interior * 1.5
 
 
+def test_terrain_texture_sizes_are_terrain_squares() -> None:
+    """A ``*TexSize`` is divided into the terrain's SAMPLE count, not its world width.
+
+    Meteor Crater is 2048 m across sampled at 0.5 m; given its footprint in metres the
+    game drew the orthoimagery tiled two by two over the level. Sizes are authored in
+    metres and converted here, so a map sampled at 1 m is unchanged.
+    """
+
+    _, _, level_builder, _, _, _ = load_maplib()
+    args = ("m", "rock_x", "rock", "gm", "/levels/m", "t_base", "t_macro")
+    half = level_builder.terrain_material(*args, 2048.0, square_size_m=0.5, detail_tile_m=2.0)
+    one = level_builder.terrain_material(*args, 4096.0, square_size_m=1.0, detail_tile_m=2.0)
+    coarse = level_builder.terrain_material(*args, 6144.0, square_size_m=1.5, detail_tile_m=2.0)
+    for entry in (half, one, coarse):
+        # 4096 samples across, so the base map covers the terrain exactly once.
+        assert entry["baseColorBaseTexSize"] == 4096
+    assert one["baseColorDetailTexSize"] == 2.0 and one["baseColorMacroTexSize"] == 60.0
+    # 4 squares at 0.5 m is the authored 2 m tile; 120 squares is the authored 60 m.
+    assert half["baseColorDetailTexSize"] == 4.0 and half["baseColorMacroTexSize"] == 120.0
+    assert coarse["baseColorMacroTexSize"] == 40.0
+
+
 def test_yaw_matrix_convention() -> None:
     _, _, level_builder, _, _, _ = load_maplib()
     north = level_builder.yaw_matrix(0.0)
@@ -346,6 +368,16 @@ def test_scene_tree_parents_and_terrain_block(map_key: str) -> None:
     res = spec.SITE["square_size_m"]
     assert block["position"] == [-footprint / 2 + res / 2, -footprint / 2 + res / 2, 0]
     assert block["squareSize"] == spec.SITE["square_size_m"]
+    # The far-field bake has to be as big as the base maps it bakes, or the whole level
+    # is drawn from a half-resolution copy of its orthoimagery.
+    texture_set = next(
+        m
+        for m in json.loads(
+            (root / "art" / "terrains" / "main.materials.json").read_text(encoding="utf-8")
+        ).values()
+        if m["class"] == "TerrainMaterialTextureSet"
+    )
+    assert block["baseTexSize"] == texture_set["baseTexSize"][0]
     assert block["maxHeight"] == handoff["terrain"]["max_height_m"]
     assert block["terrainFile"] == f"/levels/{spec.MOD_ID}/theTerrain.ter"
     assert (root / block["minimapImage"].split(f"{spec.MOD_ID}/", 1)[1]).is_file()
@@ -405,6 +437,9 @@ def test_terrain_materials_cover_every_layer(map_key: str) -> None:
     for internal, entry in by_internal.items():
         assert entry["name"] == f"{internal}-{entry['persistentId']}"
         assert entry["groundmodelName"]
+        entry_detail_m = float(
+            spec.PALETTE[internal].get("tile_m", spec.SITE.get("detail_tile_m", 2.0))
+        )
         for key, value in entry.items():
             if key.endswith("Tex"):
                 path = root / value.split(f"/levels/{spec.MOD_ID}/", 1)[1]
@@ -417,8 +452,20 @@ def test_terrain_materials_cover_every_layer(map_key: str) -> None:
                     else "Macro"
                 )
                 assert Image.open(path).size == (expected_px[slot], expected_px[slot]), value
+            # The engine divides the terrain's SAMPLE count by these, not its world
+            # width, so every size is the authored metres expressed in terrain squares.
+            # Meteor Crater proved it: 2048 m sampled at 0.5 m, given 2048, drew the
+            # orthoimagery tiled two by two over the level.
+            squares_per_m = 1.0 / spec.SITE["square_size_m"]
             if key.endswith("BaseTexSize"):
-                assert value == int(footprint), "base texture must cover the footprint exactly once"
+                assert value == spec.SITE["size_px"], (
+                    "base texture must cover the whole terrain exactly once"
+                )
+                assert value == int(footprint * squares_per_m)
+            if key.endswith("DetailTexSize"):
+                assert value == pytest.approx(entry_detail_m * squares_per_m, abs=1e-5), key
+            if key.endswith("MacroTexSize"):
+                assert value == pytest.approx(60.0 * squares_per_m, abs=1e-5), key
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)

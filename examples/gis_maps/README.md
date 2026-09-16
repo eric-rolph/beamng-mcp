@@ -198,6 +198,44 @@ the terrain failed to load.
 - `<map_key>/data/`, `mod/`, `dist/`: downloads, the generated level tree and the ZIP.
   Not tracked (up to 2 GB of public data per map); rebuilt by `build.py`.
 
+## Editing a map in BeamNG's own editors
+
+Nothing here is a private format. Every map is written as the artefacts the shipped
+World Editor tools own, so a level opens with `Ctrl+E` and each tool finds its own data
+already populated - the generator is the first pass, the editors are the second.
+
+| Editor | What the pack ships for it | Where |
+| --- | --- | --- |
+| **Terrain Editor** (sculpt, smooth, flatten) | `theTerrain.ter`, version 9: u16 heights and the u8 layer map for 4096 x 4096 samples, plus the `.terrain.json` companion the engine writes itself | `levels/<mod_id>/theTerrain.ter` |
+| **Terrain Painter** (paint surface materials) | The `.ter`'s layer map, painted by the slope and elevation classifier, over the level's TerrainMaterials - each one a v1.5 base + macro + detail set with its own groundmodel (`DIRT`, `ROCK`, `ASPHALT`, ...), so the tyres already know what they are on | `art/terrains/main.materials.json` |
+| **Terrain Import/Export Heightmap** | A 16-bit greyscale PNG of the same heightmap, at the same 4096 x 4096 | `levels/<mod_id>/theTerrain.terrainheightmap.png` |
+| **Decal Road Editor** | Every road as a `DecalRoad` with `improvedSpline`, per-node width, `material`, `textureLength`, `breakAngle`, `renderPriority`, `startEndFade` and `drivability` - the nodes are the OSM centreline draped on the carved bed | `main/MissionGroup/roads/items.level.json` |
+| **Forest Editor** | A `Forest` object over a `forest4.json` of placed items, each typed by a `TSForestItemData` with `collidable`, `mass`, `radius`, `rigidity` and `snapRotationToTerrain` - so the rocks and trees have collision without a hand pass | `forest/<mod_id>.forest4.json`, `art/forest/managedItemData.json` |
+
+To re-import a heightmap by hand, Terrain Editor's Import needs the numbers the pack
+already knows. They are in each map's handoff under `terrain`:
+
+| Map | Samples | Square size | Height scale (`maxHeight`) | Real elevation the 0..maxHeight band covers |
+| --- | --- | --- | --- | --- |
+| `black_bear_pass` | 4096 | 1.0 m | 1405 m | 2720.3 - 4109.7 m |
+| `meteor_crater` | 4096 | 0.5 m | 192 m | 1561.7 - 1750.7 m |
+| `bingham_canyon` | 4096 | 1.5 m | 1556 m | 1263.8 - 2803.2 m |
+| `factory_butte` | 4096 | 1.0 m | 106 m | 1353.0 - 1456.6 m |
+| `mt_st_helens` | 4096 | 1.5 m | 1547 m | 946.3 - 2476.9 m |
+| `wallace_creek` | 4096 | 1.0 m | 417 m | 593.3 - 1005.1 m |
+
+Two things the pack deliberately does not use:
+
+- **Mesh Road**. A mesh road is for a deck that leaves the ground - a bridge, a banked
+  bowl, a kerbed carriageway. Every road on these maps is a real road surveyed on the
+  real hillside, and the generator carves its bed into the terrain before it lays the
+  decal, so the surface the tyres meet is the terrain itself and the decal only colours
+  it. A mesh road here would float over the bed it was fitted to. Add one in the editor
+  where you want something the ground does not do.
+- **Lane markings**. The Black Bear Pass shelf road and the crater's rim access road
+  carry no paint in the reference photographs, so the asphalt tile has wear bands, a
+  gravel shoulder and cracks, and no centre line.
+
 ## Terrain conventions that are easy to get wrong
 
 - **`.ter` layout (version 9)**: u8 version, u32 size, u16 heights, u8 layer indices,
@@ -219,9 +257,20 @@ the terrain failed to load.
   fetched data in the tree): the fetch stage keeps an existing extract, so a build is
   reproducible against the snapshot and the release runner never waits on Overpass.
   Refetch one with `build.py <key> fetch --force`.
-- **Base texture size**: a TerrainMaterial's `*BaseTexSize` is world metres, not pixels
-  (a shipped 2048 m level sets 2048 while its texture set declares 2048 pixels). The pack
-  sets it to the footprint so the orthoimagery covers the level exactly once.
+- **Base, detail and macro texture sizes**: a TerrainMaterial's `*TexSize` fields are
+  documented as world metres for one tile of the map, and a shipped 2048 m level does set
+  its base size to 2048 while its texture set declares 2048 pixels. That level is sampled
+  at 1 m, where metres and terrain squares are the same number. They are not the same on
+  every map, and the engine uses **squares**: Meteor Crater is 2048 m across sampled at
+  0.5 m, was given 2048, and BeamNG drew the orthoimagery tiled two by two (mirrored)
+  across the level - four craters, one per quadrant, with the real crater's geometry
+  showing through the middle. The pack authors every size in metres and divides by
+  `square_size_m` on the way out, so the base map covers the terrain exactly once and
+  detail and macro keep their authored periods whatever the sampling.
+- **Far-field bake**: `TerrainBlock.baseTexSize` is the resolution, in pixels, the engine
+  bakes the whole-level base map at once the cells fall out of detail range - which is
+  most of the map from any ridge. It has to match the texture set's `baseTexSize`, or a
+  4096 px orthophoto is shown as a 2048 px copy of itself.
 - **Vehicle heading**: vehicles spawn nose toward the spawn marker's -Y, so a compass
   heading of 0 (north) is a 180-degree marker yaw.
 

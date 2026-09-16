@@ -41,8 +41,8 @@
   "schema": "ericrolph-beamng-maps-handoff-v1",
   "shipped": {
     "art/terrains/main.materials.json": {
-      "sha256": "6327ecadd4a4b0dbad6ff782e376ee81f4a17535782336709c4b197041581e0f",
-      "size": 11340
+      "sha256": "ac570c6975d1138e35075ae3a08caefe61ce14c11e40c48d54df9d266cba79a1",
+      "size": 11480
     },
     "info.json": {
       "sha256": "70a0e445d380667fb15ccdc80ac6d360407d1dedbc6dbe7c48e66a9d6fa57951",
@@ -83,10 +83,21 @@
   },
   "spawns": [
     {
+      "apron": {
+        "across_deg": 31.82,
+        "along_deg": 43.41,
+        "relief_m": 14.02,
+        "roughness_m": 4.95,
+        "size_m": [
+          14.0,
+          7.0
+        ]
+      },
       "default": true,
       "heading_deg": 270.0,
       "label": "Pit Rim East",
       "lat": 40.523,
+      "level_ground": false,
       "level_xy": [
         1948.89,
         -25.1
@@ -97,10 +108,21 @@
       "z": 826.92
     },
     {
+      "apron": {
+        "across_deg": 5.33,
+        "along_deg": 5.19,
+        "relief_m": 2.17,
+        "roughness_m": 0.59,
+        "size_m": [
+          14.0,
+          7.0
+        ]
+      },
       "default": false,
       "heading_deg": 90.0,
       "label": "Pit Floor",
       "lat": 40.523,
+      "level_ground": false,
       "level_xy": [
         0.61,
         0.08
@@ -111,10 +133,21 @@
       "z": 77.59
     },
     {
+      "apron": {
+        "across_deg": 57.57,
+        "along_deg": 29.5,
+        "relief_m": 18.06,
+        "roughness_m": 2.68,
+        "size_m": [
+          14.0,
+          7.0
+        ]
+      },
       "default": false,
       "heading_deg": 180.0,
       "label": "North Terraces",
       "lat": 40.545,
+      "level_ground": false,
       "level_xy": [
         32.5,
         2442.16

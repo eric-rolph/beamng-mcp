@@ -541,33 +541,33 @@
       "triangles": 106
     },
     "art/shapes/ericrolph_black_bear_pass/fir_00.dae": {
-      "sha256": "242137702db6911a3a3456f56f7acc564fdd84d282662db090efd2e1938a4081",
-      "size": 17645,
+      "sha256": "0f33334a0d1c4fb9f9e35ce86d6a7088e652bb451325902c2d59c650721959bf",
+      "size": 17633,
       "triangles": 68
     },
     "art/shapes/ericrolph_black_bear_pass/fir_01.dae": {
-      "sha256": "dfe9cf5ea9fddf23779456bd467fc8d16e402b4d22629fa67a0f4e5c1ac26da3",
-      "size": 17640,
+      "sha256": "aae0a9d5fbc91b6a81b96d90d1e6eeabafc432d3308b9007f803b82a7fc22add",
+      "size": 17636,
       "triangles": 68
     },
     "art/shapes/ericrolph_black_bear_pass/fir_02.dae": {
-      "sha256": "c65d01c85950bde2e969830d291c04ef9c82e28de43f1326456ae98ffebee9b1",
-      "size": 17651,
+      "sha256": "ba18311d44ef06b07d2f37e46c72ad7f03d436b5941bbf13880215a654dd0a6a",
+      "size": 17658,
       "triangles": 68
     },
     "art/shapes/ericrolph_black_bear_pass/krummholz_00.dae": {
-      "sha256": "ac0760b0aa1655751ddf24928a4915ba10ea7bd1e024fdf82d8fe8ceb18a41d6",
-      "size": 18318,
+      "sha256": "2e9fe1440c6ddb8dd30a4bdbc849d92ebcfaed8c9022bc7077e01a8883f2cd4c",
+      "size": 18332,
       "triangles": 66
     },
     "art/shapes/ericrolph_black_bear_pass/krummholz_01.dae": {
-      "sha256": "5a200268663a90c47e629411ff43096c6f908e79043907c2c847f1af9d4f7ec3",
-      "size": 18343,
+      "sha256": "08dd35914af80981b234994991a9a065df1214ef9d32d8a99ae6273e3f46c20b",
+      "size": 18348,
       "triangles": 66
     },
     "art/shapes/ericrolph_black_bear_pass/krummholz_02.dae": {
-      "sha256": "da75ce9caa2a260ddf56c69ad8ca44878c2600a980f0428022a9bd0f190092ff",
-      "size": 18335,
+      "sha256": "e9ab3ae406bb1497a978811f29457b6803c15b49398e5309635d8e02879d86bd",
+      "size": 18343,
       "triangles": 66
     },
     "art/shapes/ericrolph_black_bear_pass/main.materials.json": {
@@ -575,133 +575,133 @@
       "size": 13681
     },
     "art/shapes/ericrolph_black_bear_pass/rock_summit_00.dae": {
-      "sha256": "5add1c4ff09d4281cb961c7620e138df0d8d93bffa13eb8e69f00304ffb950e7",
-      "size": 79095,
+      "sha256": "6e1485e4b186ae5bbe6d75bb8f6017e7e3b7eeaaad1cbff96c9b082f33064680",
+      "size": 79942,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_summit_01.dae": {
-      "sha256": "bbfd93a49f1677ad79ba17b8d0bbd6e8b3b1237a69fd1ab65e48375eb64c0502",
-      "size": 79160,
+      "sha256": "04f357d66318ea92a3802cbeeb370e52ff5fbce6d68ebbfc9a9567de8920905b",
+      "size": 78989,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_summit_02.dae": {
-      "sha256": "7b151c7799b3bbeedf75475ad867528b13b6c1a2011a62fc448ae490b2a646a5",
-      "size": 80284,
+      "sha256": "f67e27cc051898b96208921504ba13873ff19249c035895d2cb99c193c0cbad0",
+      "size": 79921,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_summit_03.dae": {
-      "sha256": "e01aa71ef1d4650ebfe4c0fafaf84ffd573e5f4a6f9e52d8f325e876a06bc597",
-      "size": 78948,
+      "sha256": "0d617c1b052fa93f5b55208baf6bb22e5bb373c622b680eb738fdb9ca73f6055",
+      "size": 79120,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_summit_04.dae": {
-      "sha256": "e8e325f64f96a631cf1603877afe569fbca0ae2652eee7542d807a7dc44b23cf",
-      "size": 78847,
+      "sha256": "aa17af1605d5825575bf2c1893e4bea65426f0f6206d19dded58286c15f0599a",
+      "size": 79570,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_summit_05.dae": {
-      "sha256": "33b9a12ca30d068e0cda9834f65b78ae6732756567180d2c0fd780b58ce421e8",
-      "size": 79978,
+      "sha256": "a3b24412a9f0635c70e29645f4a1ec3d609695fee11ecb947be8163ab98ba279",
+      "size": 79701,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_summit_06.dae": {
-      "sha256": "56529b70f3fcb7cca73a39eea2d792d5825608c52dd9ceba827d0702295cbaf1",
-      "size": 79631,
+      "sha256": "750d9e1bc77190a4f5a583cb05f6c069a182c032bcf6848acedf1b17ef53c18d",
+      "size": 78667,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_summit_07.dae": {
-      "sha256": "387aff99bae2cc5843c0e22fcf0b500490c11e15d55c67680481cd97b27fb0d4",
-      "size": 80232,
+      "sha256": "7c0e81a202139b3b0deb6664f8818fad1e345215a29a02ff298e5af97ed8bd16",
+      "size": 79851,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_talus_00.dae": {
-      "sha256": "5660f67ff3ec525135728e58b7e150c0d917a7133c7d3fdb02b82d6c72d08acd",
-      "size": 78915,
+      "sha256": "380c9f332f653070a6da9a8b65dc542cb7ae9cca1df8d8d428498580db0f7d2f",
+      "size": 78832,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_talus_01.dae": {
-      "sha256": "ac927ee7a1e5c6b1f4a2e9465ea6cd7a2e172da15cf71601f5d9b152f90239fd",
-      "size": 78971,
+      "sha256": "010ead90aa4ddbc4e915cc350b96355b282fa0c1f6563d084a95c8a1ffad4ce2",
+      "size": 79092,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_talus_02.dae": {
-      "sha256": "94c1c56a29226af775597755a4c8b9de29d36d8a77f5cfc25a8b98de262cc885",
-      "size": 79612,
+      "sha256": "93a626439a6419f8156999a881ff4e6986ee4a77a8af2c52d395396eba4aa24b",
+      "size": 79696,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_talus_03.dae": {
-      "sha256": "1e0844b1f33e62aaa958016a21a5ed58b7a61187a31a4a88edd12cd316c04794",
-      "size": 80560,
+      "sha256": "d8ef4f8e345b9abdeb132d394e0952fe2db7b53d9f9bb005d784eff71ee612cf",
+      "size": 79153,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_talus_04.dae": {
-      "sha256": "75597016c87f68f1cc7f4044d3d37fa4f4e0925e21686fece12f588be37b0dc3",
-      "size": 78857,
+      "sha256": "55ba014e5d1f68ba2452e5ee32cc6e195f63cdb35d5a257160ba5fc221222b0b",
+      "size": 78802,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_talus_05.dae": {
-      "sha256": "26b4323b8ce4e6c7dea32765e71446059b9845647ff247ad44f76d3383c20825",
-      "size": 79338,
+      "sha256": "27e8c11aa06e054143e665b2f6b5cc81c7c65713328a50502a979686df688a61",
+      "size": 79841,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_talus_06.dae": {
-      "sha256": "138db1650c25b798669f34fdbe821b8ec9108452f7a5a3a86dd4e11ea12e5bce",
-      "size": 79419,
+      "sha256": "df90905aae28599618229a005ab006015de9c649b819d1440190045e1f9c29ab",
+      "size": 80669,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_talus_07.dae": {
-      "sha256": "726b8d631ae0672f23fae0f59568f65886bdbfa9c403ddbfdb13fbcab6fcd939",
-      "size": 79492,
+      "sha256": "550fe0d512f38fff2bd1db2f1609b0bd5c59163511d2d7e80f2d2ba4dd14e03d",
+      "size": 79078,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/sapling_00.dae": {
-      "sha256": "3823c843afff86c38c1fe352f9084eaa03d5d5fc3d3b4c4bfd6aed39901893d2",
-      "size": 18035,
+      "sha256": "43ea477f54878c789f84b1915b9561beabcfe5f94ee8bf99cecfec924bf7b6b4",
+      "size": 18021,
       "triangles": 66
     },
     "art/shapes/ericrolph_black_bear_pass/sapling_01.dae": {
-      "sha256": "48e2d22508f958435e55bf6cb3fceb6d641cb76287b3ed4976bb7b2b9ec1c7df",
-      "size": 18042,
+      "sha256": "3e3b14c52d8b768418ad212f72a1885921b1fb5509b5e2d3e3da69e1b65fc6db",
+      "size": 18031,
       "triangles": 66
     },
     "art/shapes/ericrolph_black_bear_pass/spruce_00.dae": {
-      "sha256": "4744781faea6a15fe1a3760d0ced72099d4854c637c496683fc8f39269ae2c9a",
-      "size": 18083,
+      "sha256": "c623ec6c673fed93a353a435fb1b282298e57cc9407829a1d1169f993d512f16",
+      "size": 18093,
       "triangles": 68
     },
     "art/shapes/ericrolph_black_bear_pass/spruce_01.dae": {
-      "sha256": "56fef30449664f6ec772b94e6a10b0f37de47cd0a3a5001871ed02559adc91ab",
-      "size": 18081,
+      "sha256": "ea5eeeba088f4b89607f9ce5decfc9c1cef24d026f5de6f915535415f7db195e",
+      "size": 18095,
       "triangles": 68
     },
     "art/shapes/ericrolph_black_bear_pass/spruce_02.dae": {
-      "sha256": "8e28d3bfff3a00e083a1d07f801f1de02faa94e4ad6f62709613af93e5b5a3cf",
-      "size": 18109,
+      "sha256": "8d5ceecaf953f928d83a5423aea514d5b6ba18570911004bbef3b44b89e14874",
+      "size": 18087,
       "triangles": 68
     },
     "art/shapes/ericrolph_black_bear_pass/spruce_03.dae": {
-      "sha256": "f34efc04756d96be177aa478c650e5831625cf410bd6783d7df18d3ef08574a6",
-      "size": 18086,
+      "sha256": "431ef8725848d3c0c5bd06ab5104f5445590d96994f2f3605816973388868b2e",
+      "size": 18099,
       "triangles": 68
     },
     "art/shapes/ericrolph_black_bear_pass/willow_00.dae": {
-      "sha256": "ded3ef09219a41154431a5968b1f8792ce3ce7cb05f46383b097935911e3cddc",
-      "size": 17821,
+      "sha256": "f0bb0618d83ccfb0ff584d8054dc323db5b4737973a1eb7c82480f5a604ced0c",
+      "size": 17817,
       "triangles": 66
     },
     "art/shapes/ericrolph_black_bear_pass/willow_01.dae": {
-      "sha256": "f2cabaedc5a402dc0daf60ff53615f72db5c31d5cf6a26d28bd3bbc1eb5457ab",
-      "size": 17853,
+      "sha256": "da083dcf50db6ec66ab78321d6afd2e59b1085c8168f1a5113c26834d625dae9",
+      "size": 17849,
       "triangles": 66
     },
     "art/shapes/ericrolph_black_bear_pass/willow_02.dae": {
-      "sha256": "e1b2f2dfc900b893f85d2a7388e6644448e2fd46db8a01ad6d021525e9b352dd",
+      "sha256": "85b3ac8d87794eea8599c730ba898601d4d8125441cdeefb824f9080e146c070",
       "size": 17817,
       "triangles": 66
     },
     "art/terrains/main.materials.json": {
-      "sha256": "b4c5f3aaf90918e74f19d33f067cbffd56a1af45f75b007c336cd4c0522738f8",
-      "size": 25025
+      "sha256": "271ce7f342966c5bec812cc215635eecda212a8c059c45dc4b7ba2ac4a2b523f",
+      "size": 25115
     },
     "forest/ericrolph_black_bear_pass.forest4.json": {
       "sha256": "618bb843b8f3f86ed9eb645b3f793b217612f0473434f84f29cfd5a12a8b05c5",
