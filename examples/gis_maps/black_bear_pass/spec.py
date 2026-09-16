@@ -458,6 +458,34 @@ ROADS = {
         "service",
         "track",
     ],
+    # The shelf road is 3.2 m wide: a spawn on it has half a metre either side of a
+    # vehicle before the cut bank or the drop, and the pass summit carries a 5 degree
+    # camber. Both ends of the climb get the pull-off they have in life, carved as a
+    # plane under 3 % and feathered 18 m, keeping the ground's own colour (a gravel
+    # turnout, not a painted bed). The pads are carved before the roads, so each
+    # road's profile is fitted through its apron.
+    "pads": [
+        {
+            "center_xy": [1611.0, -1445.0],
+            "size_m": [26.0, 22.0],
+            "surface": "dirt",
+            "paint": False,
+            "max_grade": 0.03,
+            "max_cut_fill_m": 1.5,
+            "feather_m": 18.0,
+            "why": "the pass summit turnout, where the five ways meet at 3,910 m",
+        },
+        {
+            "center_xy": [-1224.0, 1896.0],
+            "size_m": [26.0, 22.0],
+            "surface": "dirt",
+            "paint": False,
+            "max_grade": 0.03,
+            "max_cut_fill_m": 1.5,
+            "feather_m": 18.0,
+            "why": "the foot of the climb under Bridal Veil Falls, at 2,756 m",
+        },
+    ],
     "widths": {
         "primary": 8.0,
         "secondary": 7.0,
@@ -530,11 +558,14 @@ ROADS = {
 SPAWNS = [
     {
         "name": "pass_summit",
-        "lat": 37.89926,
-        "lon": -107.74308,
+        # On the summit turnout, 30 m down the road from the pass itself: the ground
+        # a vehicle line stands on is level there, which the shelf road is not.
+        "lat": 37.899411,
+        "lon": -107.743212,
         "heading_deg": 300.0,
         "snap_to_road": True,
         "default": True,
+        "level_ground": True,  # a carved apron holds the gate below
     },
     {
         "name": "ingram_basin",
@@ -559,6 +590,17 @@ SPAWNS = [
         "lon": -107.7607468,
         "heading_deg": 250.0,
         "snap_to_road": True,
+    },
+    {
+        # The bottom of the mountain road, on the last way before Telluride: the
+        # whole climb ahead of you, 1,150 m of it.
+        "name": "bridal_veil_base",
+        "label": "Foot of the climb (Bridal Veil)",
+        "lat": 37.928730,
+        "lon": -107.776555,
+        "heading_deg": 92.0,  # up the road, not down the valley
+        "snap_to_road": True,
+        "level_ground": True,
     },
     {
         "name": "switchbacks",

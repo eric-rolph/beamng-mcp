@@ -337,6 +337,39 @@ def build_surface_roads(spec, frame: Frame, osm_path: Path, fp, *, max_step_m: f
     return roads, stats
 
 
+def spawn_apron(frame, x: float, y: float, heading_deg: float, length_m=14.0, width_m=7.0) -> dict:
+    """The ground a line of vehicles stands on at a spawn: a ``length_m`` by ``width_m``
+    rectangle at ``heading_deg``, sampled every metre.
+
+    Reports the plane it sits on (the tilt along the heading and across it, in
+    degrees), how far the ground departs from that plane, and its total relief. A
+    shelf road is 3.2 m wide, so a spawn on one can be smooth along the bed and still
+    put a wheel over the edge; this measures what the vehicle actually rests on."""
+
+    th = math.radians(heading_deg)
+    fx, fy = math.sin(th), math.cos(th)
+    px, py = -fy, fx
+    offsets, heights = [], []
+    steps_a = np.arange(-length_m / 2.0, length_m / 2.0 + 0.01, 1.0)
+    steps_b = np.arange(-width_m / 2.0, width_m / 2.0 + 0.01, 1.0)
+    for a in steps_a:
+        for b in steps_b:
+            offsets.append((a, b))
+            heights.append(frame.height_at(x + a * fx + b * px, y + a * fy + b * py))
+    offsets_a = np.asarray(offsets, dtype="float64")
+    z = np.asarray(heights, dtype="float64")
+    design = np.c_[offsets_a, np.ones(len(offsets))]
+    coef, *_ = np.linalg.lstsq(design, z, rcond=None)
+    residual = z - design @ coef
+    return {
+        "along_deg": round(math.degrees(math.atan(abs(float(coef[0])))), 2),
+        "across_deg": round(math.degrees(math.atan(abs(float(coef[1])))), 2),
+        "relief_m": round(float(z.max() - z.min()), 2),
+        "roughness_m": round(float(np.abs(residual).max()), 2),
+        "size_m": [length_m, width_m],
+    }
+
+
 def snap_to_road(
     x: float,
     y: float,
@@ -1412,6 +1445,11 @@ def build_level(
                 "lat": entry["lat"],
                 "lon": entry["lon"],
                 "snapped_to_road": snapped,
+                # A staging spawn (the two ends of a climb) promises level ground;
+                # a spawn at the Steps is on 20 % ledges because that is the place.
+                "level_ground": bool(entry.get("level_ground", False)),
+                # The ground the vehicle line rests on, not just the point under it.
+                "apron": spawn_apron(frame, x, y, heading),
             }
         )
     default_spawn = next((s for s in spawns if s["default"]), spawns[0])

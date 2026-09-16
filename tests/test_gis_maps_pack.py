@@ -1085,6 +1085,34 @@ def test_refills_read_as_their_ground_on_the_shipped_base(map_key: str) -> None:
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_spawns_stand_on_ground_a_vehicle_fits_on(map_key: str) -> None:
+    """A spawn the spec marks ``level_ground`` stands on ground a line of vehicles
+    fits on: a 14 by 7 m rectangle at its heading, tilted no more than 8 degrees
+    across the heading and with the ground within 0.6 m of the plane it sits on.
+
+    Only the staging spawns promise this. A spawn at the Steps is on 20-25 % bedrock
+    ledges because that is what the Steps are, and its apron is reported, not gated."""
+
+    spec = load_spec(map_key)
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    spawns = handoff["level"]["spawns"] if "level" in handoff else handoff["spawns"]
+    if not any("apron" in spawn for spawn in spawns):
+        pytest.skip(f"{map_key}: built before the spawn apron was measured")
+    staged = [spawn for spawn in spawns if spawn.get("level_ground")]
+    if not staged:
+        pytest.skip(f"{map_key}: no spawn declares level_ground")
+    for spawn in staged:
+        apron = spawn["apron"]
+        assert apron["across_deg"] <= 8.0, (map_key, spawn["objectname"], apron)
+        assert apron["roughness_m"] <= 0.6, (map_key, spawn["objectname"], apron)
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_decal_roads_have_no_node_steps(map_key: str) -> None:
     """A decal road never steps off the bed at an end (no grade change over 10 %
     within three nodes of either end), and nowhere changes grade by more than 25 %
