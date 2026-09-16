@@ -69,6 +69,9 @@ TERRAIN = {
             {"min_slope": 15.0, "max_exg": 0.06, "material": "bb_talus"},
         ],
         "default": "bb_tundra",
+        # Turf is green by hue as well as by excess green: cream scree scores on
+        # 2G-R-B because its blue is low, and it is not tundra.
+        "min_green_hue": 0.02,
     },
     "smooth_sigma_px": 0.0,
 }
@@ -185,7 +188,10 @@ IMAGERY = {
     # south-east one).
     "snow": {
         "seed_min_lum": 0.86,
-        "min_lum": 0.82,
+        "min_lum": 0.80,
+        # Old snow in the rim's shade on the plateau: grey (0.72-0.77) in the
+        # flight, colourless and smooth, a fifth above its ring; on any aspect.
+        "relative_seed": {"min_lum": 0.70, "min_contrast": 0.20, "max_chroma": 0.06},
         "max_chroma": 0.04,
         "seed_max_std": 0.02,
         "aspect_north_deg": 80.0,
@@ -194,7 +200,7 @@ IMAGERY = {
         "dilate_m": 4.0,
         "grow_m": 6.0,
         "edge_contrast": 0.06,  # the field's edges go with the field
-        "max_fraction": 0.02,
+        "max_fraction": 0.06,
     },
     # Walls over 45 degrees (the cliff classifier's line) borrow only from lit
     # walls and are never lifted past their lit median, the cap feathered in from
@@ -231,6 +237,7 @@ IMAGERY = {
         "cyan_excess": 0.15,
         "cyan_min_lum": 0.35,
         "cyan_max_slope_deg": 8.0,  # the settled tailings are not level
+        "flat_rms_m": 0.02,  # a lidar surface flat to 2 cm over 400 m2 is water
     },
     "base_pull_regions": [
         {"min_elevation": 3780.0, "target": [0.42, 0.41, 0.38], "weight": 1.0, "window_m": 200.0}
@@ -363,7 +370,7 @@ FOREST = {
 
 ROADS = {
     # The gate: the bed reads at least 15 % lighter than the ground either side of it.
-    "bed_lighter_than_ground": 1.10,
+    "bed_lighter_than_ground": 1.10,  # over the margin's pale side, per 100 m window
     "include": [
         "primary",
         "secondary",
@@ -408,6 +415,11 @@ ROADS = {
         "bridge_m": 20.0,  # two free ends this close, within 3 m of height, are one road
         "end_feather_m": 25.0,  # a cut fragment's free end fades over 25 m
         "max_profile_grade": 0.4,  # a bed still over 40 % after smoothing stays terrain
+        # The two single-node dips on the side tracks are benches the 3 m cut/fill
+        # budget cannot plane: a per-sample grade-change limiter only moved the
+        # kinks to the edges of what it re-averaged (0.03 made it worse), so the
+        # profile keeps the terrain's own bench and the limiter is off.
+        "max_grade_change": 0.0,
     },
     "exclude_ways": [125954590, 701139027],
     "max_grade": 0.6,

@@ -243,6 +243,27 @@ def delight(
                 allowed |= excess > float(any_aspect)
             snow_mask &= allowed
             del gy10, gx10, descent, off_north, flat_here, allowed
+        relative = snow.get("relative_seed")
+        if relative is not None and excess is not None:
+            # Old snow in the shade of a plateau's rim is grey in the flight (0.72
+            # to 0.77), colourless and smooth, and stands a fifth above its ring:
+            # a seed on any aspect at any luminance over ``min_lum``.
+            s_lum2 = srgb.mean(axis=-1)
+            s_mean = ndimage.uniform_filter(s_lum2, size=5, mode="nearest")
+            s_sq = ndimage.uniform_filter(s_lum2 * s_lum2, size=5, mode="nearest")
+            smooth5 = np.sqrt(np.maximum(s_sq - s_mean * s_mean, 0.0)) < float(
+                relative.get("max_std", 0.02)
+            )
+            snow_mask |= (
+                (s_lum2 >= float(relative.get("min_lum", 0.70)))
+                & (excess >= float(relative.get("min_contrast", 0.20)))
+                & (
+                    (srgb.max(axis=-1) - srgb.min(axis=-1))
+                    < float(relative.get("max_chroma", 0.06))
+                )
+                & smooth5
+            )
+            del s_lum2, s_mean, s_sq, smooth5
         del excess
         max_std = snow.get("seed_max_std")
         if max_std is not None:
@@ -343,14 +364,26 @@ def delight(
     else:
         canopy_fill = None
     if shadow_dark_ratio is not None:
+        # The reference is the LIT ground of a 60 m window (cells under three
+        # quarters of the window mean left out, so a 20 m blob cannot drag its own
+        # reference down), and the blue test is relative to that lit ground's
+        # blue-to-red; two passes, the second on the ground the first cleaned.
+        win = max(3, int(60.0 / res_r))
         lum_c = corrected.mean(axis=-1)
-        around = ndimage.uniform_filter(lum_c, size=max(3, int(20.0 / res_r)), mode="nearest")
-        blob = (lum_c < float(shadow_dark_ratio) * around) & (
-            corrected[..., 2] >= corrected[..., 1]
-        )
-        blob = ndimage.binary_opening(blob, iterations=1)
+        blob = np.zeros(lum_c.shape, dtype=bool)
+        for _pass in range(2):
+            around = ndimage.uniform_filter(lum_c, size=win, mode="nearest")
+            lit = ((lum_c >= 0.75 * around) & ~blob).astype("float32")
+            lit_n = np.maximum(ndimage.uniform_filter(lit, size=win, mode="nearest"), 1e-3)
+            lit_mean = ndimage.uniform_filter(lum_c * lit, size=win, mode="nearest") / lit_n
+            b_over_r = corrected[..., 2] / np.maximum(corrected[..., 0], 1e-4)
+            lit_br = ndimage.uniform_filter(b_over_r * lit, size=win, mode="nearest") / lit_n
+            found = (lum_c < float(shadow_dark_ratio) * lit_mean) & (b_over_r > 1.1 * lit_br)
+            found = ndimage.binary_fill_holes(ndimage.binary_opening(found, iterations=1))
+            blob |= found
+            del around, lit, lit_n, lit_mean, b_over_r, lit_br, found
         shadow_core |= ndimage.binary_dilation(blob, iterations=max(1, int(2.0 / res_r)))
-        del lum_c, around, blob
+        del lum_c, blob
 
     def neighbourhood(weight: np.ndarray):
         # Lit neighbourhood colour at growing scales, so a shadow wider than the
@@ -825,6 +858,7 @@ def paint_lakes(
     cyan_excess: float | None = None,
     cyan_min_lum: float = 0.35,
     cyan_max_slope_deg: float | None = None,
+    flat_rms_m: float | None = None,
 ) -> tuple[np.ndarray, int]:
     """Flat, near-black blobs in the imagery are water seen at a dark angle: paint them
     the colour the lit lake shows (``rgb``, sRGB), with a little of their own grain.
@@ -852,6 +886,26 @@ def paint_lakes(
             & cyan_flat
         )
     del srgb
+    if flat_rms_m is not None:
+        # A lidar surface flat to the centimetre over a patch this size is water
+        # whatever colour the flight gave it (a tarn read as green ground): cells
+        # whose 5 m neighbourhood is flat to ``flat_rms_m`` about a 6 m smooth,
+        # in patches of ``min_area_m2``, grown back 2 m at the shore.
+        resid = dem.astype("float32") - ndimage.gaussian_filter(dem.astype("float32"), 6.0 / res)
+        local_rms = np.sqrt(
+            ndimage.uniform_filter(resid * resid, size=max(3, int(5.0 / res)), mode="nearest")
+        )
+        still = (local_rms < flat_rms_m) & (np.degrees(np.arctan(np.hypot(gx, gy))) < 1.5)
+        lab_s, n_s = ndimage.label(still)
+        if n_s:
+            idx = np.arange(1, n_s + 1)
+            area_s = ndimage.sum(still, lab_s, idx) * res * res
+            water = np.nonzero(area_s >= min_area_m2)[0] + 1
+            if water.size:
+                dark |= ndimage.binary_dilation(
+                    np.isin(lab_s, water), iterations=max(1, int(2.0 / res))
+                )
+        del resid, local_rms, still, lab_s
     labels, count = ndimage.label(dark)
     if not count:
         return colour_u8, 0

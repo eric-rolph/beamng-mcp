@@ -978,7 +978,9 @@ def test_road_bed_reads_lighter_than_its_ground(map_key: str) -> None:
         else {"all": (float(factor), handoff["road_contrast"])}
     )
     for surface, (want, contrast) in contracts.items():
-        layers = {k: v for k, v in contrast.items() if k not in ("bed", "windows")}
+        layers = {
+            k: v for k, v in contrast.items() if k not in ("bed", "windows", "windows_vs_pale")
+        }
         assert layers, (surface, contrast)
         for name, entry in layers.items():
             # The per-layer ratio is a whole-road aggregate (the road's mean bed over

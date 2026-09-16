@@ -349,7 +349,15 @@ def snap_to_road(
         forward = diff <= 90.0
     else:
         forward = frame.height_at(*dense[hi]) <= frame.height_at(*dense[lo])
-    heading = tangent if forward else (tangent + 180.0) % 360.0
+    # The heading is the bearing to the bed 15 m down the road in the chosen
+    # sense, not the chord through the point: on a bend the chord looks off the
+    # bed within 20 m.
+    j = min(len(dense) - 1, i + 7) if forward else max(0, i - 7)
+    if j != i:
+        (px0, py0), (px1, py1) = dense[i], dense[j]
+        heading = math.degrees(math.atan2(px1 - px0, py1 - py0)) % 360.0
+    else:
+        heading = tangent if forward else (tangent + 180.0) % 360.0
     px, py = dense[i]
     return float(px), float(py), heading
 
@@ -615,7 +623,14 @@ def terrain_material(
 
 
 def enforce_bed_contrast(
-    colour, layer, materials, surfaces, texel_m: float, factor: float, margin_min: float = 0.55
+    colour,
+    layer,
+    materials,
+    surfaces,
+    texel_m: float,
+    factor: float,
+    margin_min: float = 0.55,
+    ceiling: float = 0.60,
 ):
     """Where a 100 m stretch of bed is not ``factor`` lighter than the ground within
     6 m of it (the ground the eye compares the bed with, the band ``road_contrast``
@@ -652,9 +667,10 @@ def enforce_bed_contrast(
     ratio = local_mean(lum, bed_f) / np.maximum(local_mean(lum, near_f), 1e-4)
     needed = np.clip(ratio / factor, margin_min, 1.0).astype("float32")
     needed = ndimage.gaussian_filter(needed, max(1.0, 10.0 / texel_m))
-    # Fade the darkening out over the outer 5 m of the margin band.
+    # The darkening tapers linearly from the bed's edge to nothing at 20 m (a
+    # plateau of darkening with a step at its outer edge read as a dark corridor).
     dist = ndimage.distance_transform_edt(~bed) * texel_m
-    fade = np.clip((20.0 - dist) / 5.0, 0.0, 1.0).astype("float32") * margin
+    fade = np.clip(1.0 - dist / 20.0, 0.0, 1.0).astype("float32") * margin
     scale = 1.0 - (1.0 - needed) * fade
     out = out * scale[..., None]
     # The floor on the bed: on pale ground (the plateau's fines, a lit fan, the
@@ -662,13 +678,18 @@ def enforce_bed_contrast(
     # comes up to ``factor`` x the near ground, per window, re-measured after each
     # pass against the same band ``road_contrast`` reports (the window means are
     # already 100 m smooth, so the lift needs no blur of its own).
+    # The reference is the margin's pale side (its mean plus two thirds of its
+    # spread, about its upper quartile): a shelf road has an olive bank above and
+    # pale scree below, and a bed lighter than their average vanished against the
+    # scree. Nothing is lifted past ``ceiling`` (0.60 sRGB: the game's snow line).
     for _pass in range(3):
         lum2 = out.mean(axis=-1) / 255.0
-        lift = np.clip(
-            factor * 1.01 * local_mean(lum2, near_f) / np.maximum(local_mean(lum2, bed_f), 1e-4),
-            1.0,
-            1.4,
-        ).astype("float32")
+        near_mean = local_mean(lum2, near_f)
+        near_sq = local_mean(lum2 * lum2, near_f)
+        near_pale = near_mean + 0.67 * np.sqrt(np.maximum(near_sq - near_mean * near_mean, 0.0))
+        bed_now = np.maximum(local_mean(lum2, bed_f), 1e-4)
+        lift = np.clip(factor * 1.01 * near_pale / bed_now, 1.0, 1.4)
+        lift = np.minimum(lift, np.maximum(ceiling / bed_now, 1.0)).astype("float32")
         if float(lift.max()) <= 1.005:
             break
         out = np.clip(out * np.where(bed, lift, 1.0)[..., None], 0, 255)
@@ -725,6 +746,17 @@ def road_contrast(colour, layer, materials, surfaces, texel_m: float) -> dict:
             "p05": round(float(np.percentile(ratios, 5)), 3),
             "p50": round(float(np.percentile(ratios, 50)), 3),
             "min": round(float(ratios.min()), 3),
+        }
+        # And against the margin's pale side (mean plus two thirds of its spread):
+        # a bed the eye loses against pale scree scores under 1 here.
+        near_sq = ndimage.uniform_filter(lum * lum * near_f, size=win, mode="nearest") / np.maximum(
+            ndimage.uniform_filter(near_f, size=win, mode="nearest"), 1e-4
+        )
+        pale = near_local + 0.67 * np.sqrt(np.maximum(near_sq - near_local * near_local, 0.0))
+        pale_ratios = (bed_local / np.maximum(pale, 1e-4))[enough]
+        out["windows_vs_pale"] = {
+            "p05": round(float(np.percentile(pale_ratios, 5)), 3),
+            "min": round(float(pale_ratios.min()), 3),
         }
     for index, name in enumerate(materials):
         if name in names:
@@ -874,6 +906,9 @@ def build_level(
         else {}
     )
     margin_min = float(getattr(spec, "ROADS", {}).get("bed_contrast_margin_min", 0.55))
+    # The bed's ceiling in sRGB: the game's snow line on a grey alpine road (0.60),
+    # higher on a desert plain whose ground already sits at 0.65.
+    bed_ceiling = float(getattr(spec, "ROADS", {}).get("bed_ceiling", 0.60))
     for name, factor in by_surface.items():
         colour_full = enforce_bed_contrast(
             colour_full,
@@ -883,6 +918,7 @@ def build_level(
             fp.size_m / colour_full.shape[0],
             factor,
             margin_min,
+            bed_ceiling,
         )
     if isinstance(bed_factor, dict):
         report["road_contrast"] = {

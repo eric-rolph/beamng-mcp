@@ -270,10 +270,10 @@ def rock_meshes(
     face_n = np.cross(p[faces[:, 1]] - p[faces[:, 0]], p[faces[:, 2]] - p[faces[:, 0]])
     face_n /= np.maximum(np.linalg.norm(face_n, axis=1, keepdims=True), 1e-9)
     flat_n = np.repeat(face_n, 3, axis=0)
-    # The top of a block is a bedding plane: faces within 30 degrees of level take
-    # a planar map inside one bed (u across the block, v held near one row), so
-    # the texture's beds never close into rings on a domed top.
-    top = np.repeat(face_n[:, 2] > math.cos(math.radians(30.0)), 3)
+    # The top of a block is a bedding plane: faces within 60 degrees of level (the
+    # crown and its shoulders) take a planar map inside one bed (u across the
+    # block, v held near one row), so the texture's beds never close into rings.
+    top = np.repeat(face_n[:, 2] > math.cos(math.radians(60.0)), 3)
     if top.any():
         ext = np.maximum(p.max(axis=0) - p.min(axis=0), 1e-6)
         rel = (flat_p - p.min(axis=0)) / ext

@@ -201,6 +201,7 @@ def carve(
     junction_snap_m: float = 0.0,
     bridge_m: float = 20.0,
     end_feather_m: float = 10.0,
+    max_grade_change: float = 0.0,
     max_profile_grade: float = 0.0,
     max_cut_fill_m: float = 2.0,
     crossfall: float = 0.0,
@@ -314,6 +315,25 @@ def carve(
             padded = np.pad(smooth, window, mode="reflect")
             smooth = np.convolve(padded, kernel, mode="same")[window:-window]
             smooth = np.clip(smooth, z - max_cut_fill_m, z + max_cut_fill_m)
+        if max_grade_change > 0 and smooth.size > 4:
+            # No node changes grade by more than ``max_grade_change``: where one
+            # does (a dip the budget clamp left on a steep ramp), the profile is
+            # re-averaged over the long window round it, up to four times.
+            window = max(3, int(profile_window_m / (res * 0.5)))
+            kernel = np.ones(window) / window
+            for _round in range(4):
+                grades = np.diff(smooth) / np.maximum(seg, 1e-6)
+                change = np.abs(np.diff(grades))
+                bad = np.nonzero(change > max_grade_change)[0] + 1
+                if not bad.size:
+                    break
+                padded = np.pad(smooth, window, mode="reflect")
+                again = np.convolve(padded, kernel, mode="same")[window:-window]
+                again = np.clip(again, z - max_cut_fill_m, z + max_cut_fill_m)
+                touch = np.zeros(smooth.shape, dtype=bool)
+                for b in bad:
+                    touch[max(0, b - window // 2) : b + window // 2 + 1] = True
+                smooth = np.where(touch, again, smooth)
         if max_profile_grade > 0:
             # A bed the smoothing could not bring under the grade limit over a metre
             # is a mine track up a cliff, not a road: it stays terrain.

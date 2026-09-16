@@ -67,9 +67,14 @@ def detect_objects(
         local_slope = np.degrees(np.arctan(np.hypot(gx, gy))).astype("float32")
         del smooth, gy, gx
     if cliff_slope_deg > 0:
-        steep = local_slope > cliff_slope_deg
+        # The cliff band is read on a widely opened surface (a 24 m disc): a berm or
+        # a wall is not a cliff, and its own flanks must not put it "within 10 m of
+        # ground over 35 degrees" and keep it.
+        wide = _coarse_opening(opened, 12.0 / res)
+        gy_w, gx_w = np.gradient(ndimage.gaussian_filter(wide, 2.0), res)
+        steep = np.degrees(np.arctan(np.hypot(gx_w, gy_w))) > cliff_slope_deg
         near_cliff = ndimage.binary_dilation(steep, iterations=max(1, int(cliff_buffer_m / res)))
-        del steep
+        del steep, wide, gy_w, gx_w
     # An opening on a convex ridge also shaves the ridge crest: only keep residual where
     # the bump is isolated, i.e. its footprint area is bounded (blob filter below).
     residual = surface - opened
@@ -241,11 +246,23 @@ def classify_objects(
     green_threshold: float = 0.045,
     dark_threshold: float = 0.33,
     rock_only: bool = False,
+    dark_ratio: float | None = None,
 ) -> dict:
-    """Assign ``kind`` (rock, shrub, linear) to each object from shape and imagery colour."""
+    """Assign ``kind`` (rock, shrub, linear) to each object from shape and imagery colour.
+
+    A bump is a shrub when its pixels are green, darker than ``dark_threshold``, or
+    (with ``dark_ratio``) darker than that share of the ground within 30 m of it: a
+    juniper on a pale crest is dark against its ground, not against the map."""
 
     counts = {"rock": 0, "shrub": 0, "linear": 0}
     scale = (colour_u8.shape[0] / grid_size) if colour_u8 is not None else 1.0
+    local = None
+    if dark_ratio is not None and colour_u8 is not None:
+        from scipy import ndimage
+
+        lum = colour_u8.astype("float32").mean(axis=-1) / 255.0
+        local = ndimage.uniform_filter(lum, size=max(3, int(30.0 * scale)), mode="nearest")
+        del lum
     for obj in objects:
         if obj["kind"] == "linear" or obj["elongation"] > 4.0 or obj["compactness"] < 0.28:
             obj["kind"] = "linear"
@@ -268,8 +285,13 @@ def classify_objects(
                 green = 2 * mean[1] - mean[0] - mean[2]
                 dark = mean.mean()
                 obj["colour"] = [round(float(v), 3) for v in mean]
+                relative_dark = local is not None and dark < float(dark_ratio) * float(
+                    local[min(r, local.shape[0] - 1), min(c, local.shape[1] - 1)]
+                )
                 obj["kind"] = (
-                    "shrub" if (green > green_threshold or dark < dark_threshold) else "rock"
+                    "shrub"
+                    if (green > green_threshold or dark < dark_threshold or relative_dark)
+                    else "rock"
                 )
         counts[obj["kind"]] += 1
     return counts
@@ -568,7 +590,9 @@ def drop_box_objects(objects: list[dict], layer: np.ndarray, materials: list[str
     kept, dropped = [], 0
     for o in objects:
         allowed = o.pop("box_layers", None)
-        if allowed is not None:
+        if allowed is not None and o.get("kind") != "shrub":
+            # A bush stays on any layer (the flank between the lot and the crest
+            # has them); a rock off the kept layers was the compound's furniture.
             under = materials[int(layer[int(o["row"]), int(o["col"])])]
             if under not in allowed:
                 dropped += 1
@@ -659,6 +683,10 @@ def inpaint_boxes(
         # side of it, not one amplitude drawn from the whole ring.
         tree = cKDTree(np.stack([src_r, src_c], axis=1))
         arc_px = 60.0 / res
+        # A patch busier than the ring (a track fragment, a bump's shadow) is not
+        # laid: its high-pass rms must stay under 1.5x the ring's median.
+        hp_sq = ndimage.uniform_filter((hp - 1.0) ** 2, size=patch_px, mode="nearest")
+        ring_rms = float(np.median(np.sqrt(hp_sq[core])))
         acc = np.zeros(window.shape[:2], dtype="float32")
         wsum = np.zeros(window.shape[:2], dtype="float32")
         ramp = np.linspace(0.0, 1.0, feather_px, endpoint=False)
@@ -677,7 +705,12 @@ def inpaint_boxes(
                 centre = ((r_a + r_b) / 2.0, (c_a + c_b) / 2.0)
                 nearest = int(tree.query(centre)[1])
                 arc = tree.query_ball_point((src_r[nearest], src_c[nearest]), arc_px)
-                k = int(arc[int(rng.integers(0, len(arc)))]) if arc else nearest
+                k = nearest
+                for _try in range(8):
+                    cand = int(arc[int(rng.integers(0, len(arc)))]) if arc else nearest
+                    if np.sqrt(hp_sq[src_r[cand], src_c[cand]]) <= 1.5 * ring_rms:
+                        k = cand
+                        break
                 sr, sc = int(src_r[k]) - patch_px // 2, int(src_c[k]) - patch_px // 2
                 sr = min(max(sr, 0), window.shape[0] - patch_px)
                 sc = min(max(sc, 0), window.shape[1] - patch_px)
@@ -691,6 +724,11 @@ def inpaint_boxes(
                 wsum[r_a:r_b, c_a:c_b] += w2
         quilt = np.where(wsum > 1e-3, acc / np.maximum(wsum, 1e-3), 1.0)
     fill = fill * quilt[..., None]
+    # The box's mean is the ring's mean, channel by channel (the pyramid's low
+    # pass drifts a few per cent from it inside a wide box).
+    ring_now = fill[band].reshape(-1, 3).mean(axis=0)
+    inside_now = fill[inside].reshape(-1, 3).mean(axis=0)
+    fill = fill * np.clip(ring_now / np.maximum(inside_now, 1e-3), 0.8, 1.25)[None, None, :]
     # Feather the fill over the ring's width at the box sides.
     dist = ndimage.distance_transform_edt(~inside) * res
     w = np.clip(1.0 - dist / ring, 0.0, 1.0).astype("float32")

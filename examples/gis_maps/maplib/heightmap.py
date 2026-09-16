@@ -258,11 +258,15 @@ def classify(
     terrain_spec: dict,
     exg: np.ndarray | None = None,
     canopy: np.ndarray | None = None,
+    green_hue: np.ndarray | None = None,
 ) -> tuple[np.ndarray, dict]:
     """Paint a u8 layer map from slope/elevation/greenness rules; first match wins.
 
     ``exg`` is the excess-green index (2G - R - B, 0..1 units) of the de-lit imagery on
     the DEM grid; rules may carry ``min_exg`` / ``max_exg`` so turf is not painted rock.
+    With ``green_hue`` (G - R) and ``classify.min_green_hue`` a cell only counts as turf
+    when its green also stands over its red: cream scree scores on 2G - R - B because
+    its blue is low, and it is not turf.
     """
 
     from scipy import ndimage
@@ -294,7 +298,11 @@ def classify(
         if "min_exg" in rule and exg is not None:
             mask &= exg >= float(rule["min_exg"])
         if "max_exg" in rule and exg is not None:
-            mask &= exg <= float(rule["max_exg"])
+            turf = exg > float(rule["max_exg"])
+            hue_min = terrain_spec["classify"].get("min_green_hue")
+            if hue_min is not None and green_hue is not None:
+                turf &= green_hue >= float(hue_min)
+            mask &= ~turf
         if "min_elevation" in rule:
             mask &= dem >= float(rule["min_elevation"])
         if "max_elevation" in rule:

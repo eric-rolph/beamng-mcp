@@ -404,14 +404,12 @@ def write_forest(
         nonlocal triangles
         matrix = _yaw_matrix(yaw)
         if tilt and dem is not None:
-            normal = _ground_normal(dem, res, fp_size_m, x, y)
-            slope = math.hypot(normal[0], normal[1])  # tan of the slope angle
-            if slope > math.tan(math.radians(15.0)):
-                matrix = _tilted_matrix(yaw, normal)
-            # Seat the block on the ground under it: upright ones on the highest ground
-            # under their footprint a tenth of their height in, tilted ones (their base
-            # already follows the slope) at the centre 0.15 of their height in, so the
-            # uphill side is buried and the downhill lip touches.
+            # The ground plane under the footprint (its mean height and the normal
+            # of a plane through its edges): a block whose footprint drops more
+            # across it than three tenths of its height is tilted onto that plane,
+            # and every block seats a quarter of its height into the footprint's
+            # mean ground, so the uphill edge is buried and the downhill edge sits
+            # on the ground instead of in the air.
             n = dem.shape[0]
             half = fp_size_m / 2.0
             radius = max(1, round(footprint_m / 2.0 / res))
@@ -420,21 +418,36 @@ def write_forest(
             patch = dem[
                 max(0, row - radius) : row + radius + 1, max(0, col - radius) : col + radius + 1
             ]
+            reach = max(footprint_m / 2.0, res)
+            east = _bilinear(dem, res, fp_size_m, x + reach, y)
+            west = _bilinear(dem, res, fp_size_m, x - reach, y)
+            north = _bilinear(dem, res, fp_size_m, x, y + reach)
+            south = _bilinear(dem, res, fp_size_m, x, y - reach)
+            dzdx = (east - west) / (2.0 * reach)
+            dzdy = (north - south) / (2.0 * reach)
+            normal = (-dzdx, -dzdy, 1.0)
+            slope = math.hypot(dzdx, dzdy)  # tan of the slope over the footprint
+            drop = footprint_m * slope
+            tilted = drop > 0.3 * max(height_m, 0.1) and slope > math.tan(math.radians(8.0))
+            if tilted:
+                matrix = _tilted_matrix(yaw, normal)
             centre = _bilinear(dem, res, fp_size_m, x, y)
-            sink = 0.1 * height_m
-            if slope > math.tan(math.radians(15.0)):
-                # Tilted onto the slope: its base already follows the ground, so it
-                # sits on the ground at its centre.
-                raise_by = 0.0
-                sink = 0.15 * height_m
-            else:
-                # Upright on gentler ground: up to the highest ground under its true
-                # footprint (a boulder does not sink into a hummock), never more than
-                # 0.4 of its height.
-                raise_by = min(max(float(patch.max()) - centre, 0.0), 0.4 * height_m)
-                if radius * res > footprint_m / 2.0 + res:
-                    raise_by = 0.0
-            z = centre + raise_by - min_elevation - sink
+            # The footprint's cells only: a stone under a cell wide is seated on its
+            # own cell, not on the ground a metre either side of it.
+            if radius * res > footprint_m / 2.0 + res / 2.0:
+                patch = np.asarray([[centre]], dtype="float32")
+            mean_ground = float(patch.mean()) if patch.size else centre
+            # Never more than four tenths of its height under the ground at its
+            # centre (a block on a lip would otherwise seat in the cliff below).
+            seat = max(mean_ground - 0.25 * height_m, centre - 0.4 * max(height_m, 0.1))
+            seat = min(seat, centre)
+            z = seat - min_elevation
+            # The base plane's height over the lowest ground under the footprint: a
+            # tilted block's base follows the ground plane, so its downhill edge
+            # sits half the footprint's drop lower than its centre.
+            base_edge = seat - (0.5 * drop if tilted else 0.0)
+            gap = base_edge - float(patch.min()) if patch.size else 0.0
+            gaps.append(max(gap, 0.0))
         lines.append(
             json.dumps(
                 {
@@ -449,6 +462,7 @@ def write_forest(
         counts[item] = counts.get(item, 0) + 1
         triangles += tri_by_item.get(item, 0)
 
+    gaps: list[float] = []
     for obj in placed_objects:
         if obj["kind"] == "rock":
             family = obj.get("material") or next(
@@ -514,10 +528,22 @@ def write_forest(
         "\n".join(lines) + ("\n" if lines else ""), encoding="utf-8", newline="\n"
     )
     write_json(level_root / "art" / "forest" / "managedItemData.json", catalogue["items"])
+    gap_arr = np.asarray(gaps, dtype="float32") if gaps else np.zeros(0, dtype="float32")
     return {
         "instances": len(lines),
         "by_item": counts,
         "triangles_if_all_drawn": int(triangles),
+        # Rock seating: the base plane's height over the lowest ground under the
+        # footprint (0 where the whole footprint touches or is buried).
+        "rock_gap_m": (
+            {
+                "p95": round(float(np.percentile(gap_arr, 95)), 2),
+                "over_0_5_fraction": round(float((gap_arr > 0.5).mean()), 4),
+                "max": round(float(gap_arr.max()), 2),
+            }
+            if gap_arr.size
+            else None
+        ),
         "file": f"{level_url}/forest/{forest_file.name}",
         "sha256": hashlib.sha256(forest_file.read_bytes()).hexdigest(),
     }

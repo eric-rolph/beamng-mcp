@@ -71,7 +71,8 @@ FAMILIES = {
         "rough": 0.84,
         "gain": 0.8,
         "feature": "cobbles",
-        "chunk_rgb": [0.80, 0.76, 0.68],
+        "chunk_rgb": [0.56, 0.52, 0.45],
+        "shade_by_height": 0.5,
     },
     # The decal: a 0.4 m tan shoulder inside the soft edge and wheel-track wear at
     # 18 %; the slab is the base (the tone is set by the median, not a mean the
@@ -84,7 +85,7 @@ FAMILIES = {
         "feature": "asphalt",
         "shoulder_rgb": [0.56, 0.49, 0.39],
         "shoulder_span": [0.03, 0.10],
-        "wear_contrast": 0.18,
+        "wear_contrast": 0.30,
         "tone_by": "median",
     },
     "asphalt_bed": {
@@ -104,8 +105,8 @@ FAMILIES = {
         "rough": 0.88,
         "gain": 0.6,
         "feature": "ruts",
-        "shade_by_height": 0.3,
-        "rut_tint": 0.16,
+        "shade_by_height": 0.15,
+        "rut_tint": 0.26,
     },
     "gravel_track": {
         "freq": 10,
@@ -447,33 +448,40 @@ def _bedded(
             d = np.abs(((u - pos - lean * (yy - edges[b_index]) + wobble + 0.5) % 1.0) - 0.5)
             line = np.maximum(line, np.exp(-((d / width) ** 2)))
         joints[in_band] = line[in_band]
-    # Desert varnish: four to six streaks a tile, 7-20 % of it wide (0.2-0.6 m on
-    # a 3 m tile), soft-edged, each starting under a hard bed's lip and fading out
-    # over a third to two thirds of the tile down the face (hairlines ruled
-    # through the beds read as pencil, not varnish).
+    # Desert varnish: four to six streaks a tile, 5-8 % of it wide (0.15-0.25 m on
+    # a 3 m tile), soft-edged, each starting under a hard bed's lip and fading
+    # linearly to nothing over a quarter to a half of the tile down the face
+    # (hairlines ruled through the beds read as pencil, not varnish), at a
+    # darkening the eye reads on a cream face.
     varnish = np.zeros((size, size))
     hard_ids = [b for b in range(bands) if hard[b]] or [0]
-    soft_edge = 0.7 + 0.3 * fbm(size, (8, 30), 2, rng)
-    for _k in range(int(rng.integers(4, 7))):
-        pos, width = rng.uniform(0, 1), rng.uniform(0.07, 0.2)
-        length, start = rng.uniform(0.33, 0.67), edges[int(rng.choice(hard_ids))]
+    soft_edge = 0.75 + 0.25 * fbm(size, (8, 30), 2, rng)
+    for _k in range(int(rng.integers(5, 8))):
+        pos, width = rng.uniform(0, 1), rng.uniform(0.05, 0.08)
+        length, start = rng.uniform(0.3, 0.5), edges[int(rng.choice(hard_ids))]
         d = np.abs(((u - pos + 0.5) % 1.0) - 0.5) / (width / 2.0)
-        across = np.clip(1.0 - d, 0, 1) ** 0.6 * soft_edge
-        fade = np.clip(1.0 - ((yy - start) % 1.0) / length, 0, 1)
-        varnish = np.maximum(varnish, across * fade * rng.uniform(0.5, 0.8))
+        across = np.clip(1.0 - d, 0, 1) ** 0.5 * soft_edge
+        along = np.clip(((yy - start) % 1.0) / length, 0, 1)
+        fade = np.where(along < 1.0, 1.0 - 0.6 * along, 0.0) * np.clip((1.0 - along) / 0.15, 0, 1)
+        varnish = np.maximum(varnish, across * fade * rng.uniform(0.7, 0.9))
+    from scipy import ndimage as _ndi
+
+    varnish = _ndi.gaussian_filter(varnish, max(1.0, size / 60.0))  # edges blurred 5 cm
     hard_grain = fbm(size, 90, 3, rng) * 0.05 * hard[band_index]
     h = profile * amplitude * (1.0 - 0.7 * missing) + rubble * soft_here * 0.25 + grain + hard_grain
     h -= joints * 0.3
+    # Hard beds cream (capped so nothing blooms white under the sun), soft beds a
+    # step darker: the contrast lives in the soft beds.
     lum = np.where(
-        hard, 0.95 + 0.25 * rng.uniform(0, 1, bands), 0.75 + 0.2 * rng.uniform(0, 1, bands)
+        hard, 0.80 + 0.10 * rng.uniform(0, 1, bands), 0.45 + 0.15 * rng.uniform(0, 1, bands)
     )[band_index]
     # The shadow line under every harder bed: the recessed bed is darkest right under
     # the lip above it.
     from scipy import ndimage
 
     occlusion = np.clip((ndimage.maximum_filter(h, size=9, mode="wrap") - h) / 0.5, 0, 1)
-    lum = lum * (0.96 + 0.08 * _cell_value(cid, 10)) * (1.0 - 0.35 * joints) * (1.0 - varnish)
-    lum = lum * (1.0 - 0.3 * occlusion) * (1.0 - 0.25 * missing * (1.0 - wedge * 0.6))
+    lum = lum * (0.96 + 0.08 * _cell_value(cid, 10)) * (1.0 - 0.35 * joints)
+    lum = lum * (1.0 - 0.3 * occlusion) * (1.0 - 0.12 * missing * (1.0 - wedge * 0.6))
     # Soft beds are warm; half of them are the red-brown siltstone interbeds that
     # stripe the Kaibab in the crater's rim photographs.
     red_bed = (rng.uniform(0, 1, bands) < red_share)[band_index] & soft_here
@@ -483,6 +491,10 @@ def _bedded(
         np.where(soft_here[..., None], _rgb(1.0, 0.94, 0.86), _rgb(1, 1, 1)),
     )
     tint = lum[..., None] * bed_rgb
+    # The varnish is a dark red-brown stain, not a shadow: it takes the face to
+    # a third of its tone at full strength and browns it on the way.
+    stain = _rgb(0.36, 0.28, 0.24)
+    tint = tint * (1.0 - varnish[..., None] * (1.0 - stain))
     return np.clip(h * 2.0 - 1.0, -1, 1), tint
 
 
@@ -638,13 +650,13 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
             d_max = ndimage.maximum(d, own, index)[own]
             h_max = ndimage.maximum(flat, own, index)[own]
             dome = np.sqrt(np.clip(d / np.maximum(d_max, 1.0), 0, 1))
-            return np.where(body, h_max * (0.35 + 0.65 * dome) + 0.2 * (flat - h_max), 0.0)
+            return np.where(body, h_max * (0.1 + 1.3 * dome) + 0.2 * (flat - h_max), 0.0)
 
         big = domed(big_h, bid)
         small = domed(small_h, np.maximum(s_owner, 0))
         h = np.maximum(big, small) + fbm(size, 36, 2, rng) * 0.08
         body = np.clip(big_body + small_body, 0, 1)
-        block_lum = 0.75 + 0.5 * np.where(
+        block_lum = 0.92 + 0.16 * np.where(
             big_body > 0, _cell_value(bid, 75), _cell_value(np.maximum(s_owner, 0), 85)
         )
         # Shadow on the down-light side of every chunk only (the height stepped
@@ -869,8 +881,10 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
         return ridges * 0.6 + fbm(size, 18, 3, rng) * 0.4, None
     if kind == "asphalt":
         grain = fbm(size, 64, 2, rng) * 0.5 + fbm(size, 128, 1, rng) * 0.5
-        f1, f2, _ = worley(size, 5, rng)
-        cracks = 1.0 - _smooth((f2 - f1) / 0.025)
+        # Cracks: cells of 0.3-0.5 m (a 6 m tile), their edges displaced by noise
+        # and only three in ten drawn, so no paving tessellation shows.
+        f1, f2, cid_c = worley(size, 16, rng, jitter=1.0, warp=0.05)
+        cracks = (1.0 - _smooth((f2 - f1) / 0.012)) * (_cell_value(cid_c, 61) > 0.7)
         patches = fbm(size, 3, 2, rng) * 0.15
         # Across the road (u): a pale gravel shoulder each side and a darker wear
         # band down the middle of each lane.
@@ -881,9 +895,16 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
         shoulder = np.zeros((size, size))
         if params.get("shoulder", True):
             s_in, s_out = params.get("shoulder_span", (0.0, 0.07))
-            band = _smooth((s_out - x) / 0.01) * _smooth((x - s_in) / 0.01)
-            band = band + _smooth((x - (1.0 - s_out)) / 0.01) * _smooth(((1.0 - s_in) - x) / 0.01)
-            shoulder = np.clip(band, 0, 1) * np.ones((size, 1))
+            # The shoulder's inner edge wanders +-0.15 m (a 6 m road) at a 2-4 m
+            # wavelength and its tone carries the gravel grain, so it is not a
+            # painted line.
+            wander = (
+                fbm(size, (1, 3), 2, rng)[:, :1] * 0.015 + fbm(size, (1, 14), 2, rng)[:, :1] * 0.02
+            )
+            xj = x + wander
+            band = _smooth((s_out - xj) / 0.01) * _smooth((xj - s_in) / 0.01)
+            band = band + _smooth((xj - (1.0 - s_out)) / 0.01) * _smooth(((1.0 - s_in) - xj) / 0.01)
+            shoulder = np.clip(band, 0, 1) * (0.85 + 0.3 * np.clip(grain + 0.5, 0, 1))
         wear = np.exp(-((x - 0.23) ** 2) / 0.0018) + np.exp(-((x - 0.77) ** 2) / 0.0018)
         wear = np.clip(wear, 0, 1) * np.ones((size, 1))
         tint = (1.0 + float(params.get("wear_contrast", 0.1)) * wear)[..., None]
@@ -929,7 +950,7 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
         # A desert two-track has pale, dust-polished ruts and a darker crown of
         # crust; a gravel track's ruts are compacted and darker.
         if kind == "ruts":
-            wheel = (1.0 + float(params.get("rut_tint", 0.12)) * rut) * (1.0 - 0.06 * crown)
+            wheel = (1.0 + float(params.get("rut_tint", 0.12)) * rut) * (1.0 - 0.12 * crown)
         else:
             wheel = (1.0 - 0.18 * rut) * (1.0 + 0.08 * crown)
         tint = wheel * (0.9 + 0.2 * _cell_value(cid, 19) * pebbles)

@@ -98,7 +98,11 @@ PALETTE = {
         "family": "limestone",
         "seed": 103,
         "size": 1024,
-        "base": [0.78, 0.72, 0.62],
+        # The tile's mean sits under the cream so its hard beds stay under 0.86
+        # (nothing blooms white under the sun); the base colour is still pulled to
+        # the cream the plain is measured against.
+        "base": [0.72, 0.66, 0.56],
+        "base_pull_target": [0.78, 0.72, 0.62],
         "tile_m": 3.0,
         "keep_tint": True,  # the authored cream, not the tan of the plain
         "base_pull": 0.8,  # the de-lit wall is the plain's tan; the ledges are cream
@@ -120,12 +124,19 @@ PALETTE = {
         "tile_m": 5.0,
         "keep_tint": True,
         "detail_strength": 0.55,
+        # The crest's base is the flight's pale cream; pulled halfway to the rubble
+        # mix so the base under the maroon tile agrees with it at the detail fade.
+        "base_pull": 0.5,
     },
     "mc_limestone_rim_ew": {
         "family": "limestone",
         "seed": 103,
         "size": 1024,
-        "base": [0.78, 0.72, 0.62],
+        # The tile's mean sits under the cream so its hard beds stay under 0.86
+        # (nothing blooms white under the sun); the base colour is still pulled to
+        # the cream the plain is measured against.
+        "base": [0.72, 0.66, 0.56],
+        "base_pull_target": [0.78, 0.72, 0.62],
         "tile_m": 3.0,
         "keep_tint": True,  # the authored cream, not the tan of the plain
         "base_pull": 0.8,  # the de-lit wall is the plain's tan; the ledges are cream
@@ -133,11 +144,12 @@ PALETTE = {
     },
     # The bed under the decal carries no shoulder (the decal's shoulder stays on
     # the decal, not repeated every 2 m across the pad and the bed margins).
+    # The photograph's lot is 0.35: a 0.23 pad was the darkest thing on the map.
     "mc_road_asphalt": {
         "family": "asphalt_bed",
         "seed": 105,
         "size": 1024,
-        "base": [0.24, 0.23, 0.22],
+        "base": [0.34, 0.33, 0.31],
         "keep_tint": True,
     },
     # A desert two-track is paler than the plain (the photographs): bed 1.06 x
@@ -159,7 +171,7 @@ IMAGERY = {
     # The flight's cast shadow of the north-west crest, which the horizon model
     # never reached: a cell darker than half its 20 m mean and bluer than green
     # is refilled as cast shadow.
-    "shadow_dark_ratio": 0.5,
+    "shadow_dark_ratio": 0.65,
     "sun_altitude_range": [35.0, 80.0],
     "strength": 1.0,
     "tint_from_imagery": 0.6,
@@ -256,31 +268,52 @@ OBJECTS = {
         # the ring.
         {
             "center_xy": [536.0, 516.0],
-            "size_m": 60.0,
-            "open_m": 60.0,
+            "size_m": 100.0,
+            "open_m": 100.0,
             "inpaint_ring_m": 20.0,
-            "why": "berm segment 1",
+            "why": "berm 1",
         },
         {
             "center_xy": [580.0, 499.0],
-            "size_m": 60.0,
-            "open_m": 60.0,
+            "size_m": 100.0,
+            "open_m": 100.0,
             "inpaint_ring_m": 20.0,
-            "why": "berm segment 2",
+            "why": "berm 2",
         },
         {
             "center_xy": [606.0, 490.0],
-            "size_m": 60.0,
-            "open_m": 60.0,
+            "size_m": 100.0,
+            "open_m": 100.0,
             "inpaint_ring_m": 20.0,
-            "why": "berm segment 3",
+            "why": "berm 3",
+        },
+        {
+            "center_xy": [640.0, 477.0],
+            "size_m": 100.0,
+            "open_m": 100.0,
+            "inpaint_ring_m": 20.0,
+            "why": "berm 4",
         },
         {
             "center_xy": [669.0, 464.0],
-            "size_m": 60.0,
-            "open_m": 60.0,
+            "size_m": 100.0,
+            "open_m": 100.0,
             "inpaint_ring_m": 20.0,
-            "why": "berm segment 4",
+            "why": "berm 5",
+        },
+        {
+            "center_xy": [708.0, 450.0],
+            "size_m": 100.0,
+            "open_m": 100.0,
+            "inpaint_ring_m": 20.0,
+            "why": "berm 6",
+        },
+        {
+            "center_xy": [890.0, 378.0],
+            "size_m": 100.0,
+            "open_m": 100.0,
+            "inpaint_ring_m": 20.0,
+            "why": "berm 7",
         },
         # The drill site: the shaft is filled from the bare earth, but the
         # flattening is under a metre and the photograph can stay (an in-painted
@@ -295,7 +328,9 @@ OBJECTS = {
     ],
     # A fence remnant's posts stand up to 9 m apart.
     "fence_post_gap_m": 9.0,
-    "classify": {"green_threshold": 0.035, "dark_threshold": 0.36},
+    # A bump is a bush when green, dark, or under seven tenths of the ground
+    # within 30 m of it (a juniper on the pale crest).
+    "classify": {"green_threshold": 0.035, "dark_threshold": 0.36, "dark_ratio": 0.7},
     "max_rocks": 7000,
     "max_shrubs": 6000,
     # The photographs have house-sized blocks only on the near-rim ejecta: a wider
@@ -377,8 +412,8 @@ OBJECTS = {
         "min_area_m2": 1.0,
         "max_area_m2": 25.0,
         "max": 5000,
-        "layers": ["mc_desert_floor", "mc_ejecta_gravel"],
-        "max_slope_deg": 12.0,
+        "layers": ["mc_desert_floor", "mc_ejecta_gravel", "mc_rim_rubble"],
+        "max_slope_deg": 20.0,
     },
     "spawn_clear_m": 8.0,
     "road_clear_m": 3.0,
@@ -389,9 +424,28 @@ ROADS = {
     # rectangle, so the default spawn stands on a lot and not on painted plain.
     # The whole visitor-centre lot (its southern angled rows too) and the RV lot
     # the loop encloses.
+    # Each pad takes the lot's own outline from the flight (the dark cells inside
+    # the rectangle), is carved as a plane under 3 % grade within 1.5 m of the
+    # ground, and is feathered 12 m in height and in colour.
     "pads": [
-        {"center_xy": [5.0, 641.0], "size_m": [170.0, 112.0], "surface": "paved"},
-        {"center_xy": [160.0, 712.0], "size_m": [40.0, 25.0], "surface": "paved"},
+        {
+            "center_xy": [5.0, 641.0],
+            "size_m": [170.0, 112.0],
+            "surface": "paved",
+            "from_imagery": {"max_lum": 0.42, "min_area_m2": 400.0},
+            "max_grade": 0.03,
+            "max_cut_fill_m": 1.5,
+            "feather_m": 12.0,
+        },
+        {
+            "center_xy": [160.0, 712.0],
+            "size_m": [40.0, 25.0],
+            "surface": "paved",
+            "from_imagery": {"max_lum": 0.42, "min_area_m2": 150.0},
+            "max_grade": 0.03,
+            "max_cut_fill_m": 1.5,
+            "feather_m": 12.0,
+        },
     ],
     "include": [
         "primary",
@@ -438,7 +492,8 @@ ROADS = {
     # bed is held 6 % lighter than its margins per 100 m window, the margin giving
     # at most a tenth and the bed taking the rest as a floor. Asphalt is dark.
     "bed_lighter_than_ground": {"dirt": 1.06},
-    "bed_contrast_margin_min": 0.9,
+    "bed_contrast_margin_min": 0.98,  # the bed takes the contrast, not a dark corridor
+    "bed_ceiling": 0.78,  # a two-track on the near-white rim may go this pale
     "surfaces": {
         "paved": {
             "terrain_material": "mc_road_asphalt",
@@ -448,7 +503,7 @@ ROADS = {
                 "family": "asphalt",
                 "seed": 901,
                 "size": 1024,
-                "base": [0.22, 0.22, 0.21],
+                "base": [0.30, 0.30, 0.29],
                 "edge_fraction": 0.03,  # an 18 cm soft edge; the shoulder is inside it
             },
         },
