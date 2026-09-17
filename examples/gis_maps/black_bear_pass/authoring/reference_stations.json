@@ -1,0 +1,400 @@
+{
+  "map": "black_bear_pass",
+  "every_m": 250.0,
+  "stations": [
+    {
+      "n": 1,
+      "lat": 37.900025,
+      "lon": -107.738287,
+      "heading_deg": 208.31,
+      "level_xy": [
+        2046.0,
+        -1389.6
+      ],
+      "aerial": "https://www.google.com/maps/@37.900025,-107.738287,300a,35y,208.31h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.900025,-107.738287&heading=208.31&pitch=0&fov=80"
+    },
+    {
+      "n": 2,
+      "lat": 37.89857,
+      "lon": -107.739716,
+      "heading_deg": 159.5,
+      "level_xy": [
+        1915.6,
+        -1547.5
+      ],
+      "aerial": "https://www.google.com/maps/@37.898570,-107.739716,300a,35y,159.50h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.898570,-107.739716&heading=159.50&pitch=0&fov=80"
+    },
+    {
+      "n": 3,
+      "lat": 37.898077,
+      "lon": -107.741005,
+      "heading_deg": 315.98,
+      "level_xy": [
+        1800.6,
+        -1598.9
+      ],
+      "aerial": "https://www.google.com/maps/@37.898077,-107.741005,300a,35y,315.98h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.898077,-107.741005&heading=315.98&pitch=0&fov=80"
+    },
+    {
+      "n": 4,
+      "lat": 37.899411,
+      "lon": -107.743212,
+      "heading_deg": 256.07,
+      "level_xy": [
+        1610.8,
+        -1445.0
+      ],
+      "aerial": "https://www.google.com/maps/@37.899411,-107.743212,300a,35y,256.07h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.899411,-107.743212&heading=256.07&pitch=0&fov=80",
+      "near": "Black Bear Pass summit"
+    },
+    {
+      "n": 5,
+      "lat": 37.900397,
+      "lon": -107.743277,
+      "heading_deg": 28.63,
+      "level_xy": [
+        1608.4,
+        -1335.4
+      ],
+      "aerial": "https://www.google.com/maps/@37.900397,-107.743277,300a,35y,28.63h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.900397,-107.743277&heading=28.63&pitch=0&fov=80",
+      "near": "Black Bear Pass summit"
+    },
+    {
+      "n": 6,
+      "lat": 37.902496,
+      "lon": -107.742624,
+      "heading_deg": 2.8,
+      "level_xy": [
+        1672.6,
+        -1104.2
+      ],
+      "aerial": "https://www.google.com/maps/@37.902496,-107.742624,300a,35y,2.80h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.902496,-107.742624&heading=2.80&pitch=0&fov=80"
+    },
+    {
+      "n": 7,
+      "lat": 37.904683,
+      "lon": -107.74215,
+      "heading_deg": 14.61,
+      "level_xy": [
+        1721.5,
+        -862.7
+      ],
+      "aerial": "https://www.google.com/maps/@37.904683,-107.742150,300a,35y,14.61h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.904683,-107.742150&heading=14.61&pitch=0&fov=80"
+    },
+    {
+      "n": 8,
+      "lat": 37.906857,
+      "lon": -107.742142,
+      "heading_deg": 328.88,
+      "level_xy": [
+        1729.3,
+        -621.4
+      ],
+      "aerial": "https://www.google.com/maps/@37.906857,-107.742142,300a,35y,328.88h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.906857,-107.742142&heading=328.88&pitch=0&fov=80"
+    },
+    {
+      "n": 9,
+      "lat": 37.908444,
+      "lon": -107.743997,
+      "heading_deg": 10.48,
+      "level_xy": [
+        1571.3,
+        -440.6
+      ],
+      "aerial": "https://www.google.com/maps/@37.908444,-107.743997,300a,35y,10.48h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.908444,-107.743997&heading=10.48&pitch=0&fov=80"
+    },
+    {
+      "n": 10,
+      "lat": 37.908457,
+      "lon": -107.742172,
+      "heading_deg": 83.53,
+      "level_xy": [
+        1731.9,
+        -443.8
+      ],
+      "aerial": "https://www.google.com/maps/@37.908457,-107.742172,300a,35y,83.53h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.908457,-107.742172&heading=83.53&pitch=0&fov=80"
+    },
+    {
+      "n": 11,
+      "lat": 37.909329,
+      "lon": -107.739614,
+      "heading_deg": 23.14,
+      "level_xy": [
+        1959.6,
+        -353.6
+      ],
+      "aerial": "https://www.google.com/maps/@37.909329,-107.739614,300a,35y,23.14h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.909329,-107.739614&heading=23.14&pitch=0&fov=80"
+    },
+    {
+      "n": 12,
+      "lat": 37.911367,
+      "lon": -107.74022,
+      "heading_deg": 336.33,
+      "level_xy": [
+        1913.0,
+        -125.8
+      ],
+      "aerial": "https://www.google.com/maps/@37.911367,-107.740220,300a,35y,336.33h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.911367,-107.740220&heading=336.33&pitch=0&fov=80"
+    },
+    {
+      "n": 13,
+      "lat": 37.913333,
+      "lon": -107.741543,
+      "heading_deg": 340.7,
+      "level_xy": [
+        1803.1,
+        95.7
+      ],
+      "aerial": "https://www.google.com/maps/@37.913333,-107.741543,300a,35y,340.70h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.913333,-107.741543&heading=340.70&pitch=0&fov=80"
+    },
+    {
+      "n": 14,
+      "lat": 37.91512,
+      "lon": -107.743091,
+      "heading_deg": 284.87,
+      "level_xy": [
+        1672.9,
+        298.0
+      ],
+      "aerial": "https://www.google.com/maps/@37.915120,-107.743091,300a,35y,284.87h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.915120,-107.743091&heading=284.87&pitch=0&fov=80"
+    },
+    {
+      "n": 15,
+      "lat": 37.916005,
+      "lon": -107.745641,
+      "heading_deg": 343.77,
+      "level_xy": [
+        1451.6,
+        402.9
+      ],
+      "aerial": "https://www.google.com/maps/@37.916005,-107.745641,300a,35y,343.77h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.916005,-107.745641&heading=343.77&pitch=0&fov=80"
+    },
+    {
+      "n": 16,
+      "lat": 37.91818,
+      "lon": -107.745576,
+      "heading_deg": 14.35,
+      "level_xy": [
+        1464.3,
+        644.1
+      ],
+      "aerial": "https://www.google.com/maps/@37.918180,-107.745576,300a,35y,14.35h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.918180,-107.745576&heading=14.35&pitch=0&fov=80"
+    },
+    {
+      "n": 17,
+      "lat": 37.920408,
+      "lon": -107.74535,
+      "heading_deg": 279.86,
+      "level_xy": [
+        1491.5,
+        890.7
+      ],
+      "aerial": "https://www.google.com/maps/@37.920408,-107.745350,300a,35y,279.86h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.920408,-107.745350&heading=279.86&pitch=0&fov=80"
+    },
+    {
+      "n": 18,
+      "lat": 37.919409,
+      "lon": -107.747031,
+      "heading_deg": 272.28,
+      "level_xy": [
+        1340.5,
+        784.2
+      ],
+      "aerial": "https://www.google.com/maps/@37.919409,-107.747031,300a,35y,272.28h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.919409,-107.747031&heading=272.28&pitch=0&fov=80"
+    },
+    {
+      "n": 19,
+      "lat": 37.918979,
+      "lon": -107.748957,
+      "heading_deg": 306.67,
+      "level_xy": [
+        1169.7,
+        741.5
+      ],
+      "aerial": "https://www.google.com/maps/@37.918979,-107.748957,300a,35y,306.67h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.918979,-107.748957&heading=306.67&pitch=0&fov=80",
+      "near": "Ingram Basin"
+    },
+    {
+      "n": 20,
+      "lat": 37.919944,
+      "lon": -107.751368,
+      "heading_deg": 289.88,
+      "level_xy": [
+        960.9,
+        854.9
+      ],
+      "aerial": "https://www.google.com/maps/@37.919944,-107.751368,300a,35y,289.88h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.919944,-107.751368&heading=289.88&pitch=0&fov=80"
+    },
+    {
+      "n": 21,
+      "lat": 37.920119,
+      "lon": -107.753066,
+      "heading_deg": 300.92,
+      "level_xy": [
+        812.2,
+        878.8
+      ],
+      "aerial": "https://www.google.com/maps/@37.920119,-107.753066,300a,35y,300.92h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.920119,-107.753066&heading=300.92&pitch=0&fov=80"
+    },
+    {
+      "n": 22,
+      "lat": 37.920798,
+      "lon": -107.755039,
+      "heading_deg": 296.97,
+      "level_xy": [
+        641.0,
+        959.2
+      ],
+      "aerial": "https://www.google.com/maps/@37.920798,-107.755039,300a,35y,296.97h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.920798,-107.755039&heading=296.97&pitch=0&fov=80"
+    },
+    {
+      "n": 23,
+      "lat": 37.921378,
+      "lon": -107.757189,
+      "heading_deg": 308.8,
+      "level_xy": [
+        453.9,
+        1029.2
+      ],
+      "aerial": "https://www.google.com/maps/@37.921378,-107.757189,300a,35y,308.80h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.921378,-107.757189&heading=308.80&pitch=0&fov=80",
+      "near": "Wrecked Section 1"
+    },
+    {
+      "n": 24,
+      "lat": 37.922312,
+      "lon": -107.760325,
+      "heading_deg": 291.1,
+      "level_xy": [
+        181.2,
+        1141.0
+      ],
+      "aerial": "https://www.google.com/maps/@37.922312,-107.760325,300a,35y,291.10h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.922312,-107.760325&heading=291.10&pitch=0&fov=80",
+      "near": "The Steps"
+    },
+    {
+      "n": 25,
+      "lat": 37.922113,
+      "lon": -107.761837,
+      "heading_deg": 213.81,
+      "level_xy": [
+        47.7,
+        1122.8
+      ],
+      "aerial": "https://www.google.com/maps/@37.922113,-107.761837,300a,35y,213.81h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.922113,-107.761837&heading=213.81&pitch=0&fov=80",
+      "near": "The Steps"
+    },
+    {
+      "n": 26,
+      "lat": 37.9204,
+      "lon": -107.763373,
+      "heading_deg": 227.37,
+      "level_xy": [
+        -93.0,
+        936.7
+      ],
+      "aerial": "https://www.google.com/maps/@37.920400,-107.763373,300a,35y,227.37h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.920400,-107.763373&heading=227.37&pitch=0&fov=80"
+    },
+    {
+      "n": 27,
+      "lat": 37.921212,
+      "lon": -107.763641,
+      "heading_deg": 216.23,
+      "level_xy": [
+        -113.9,
+        1027.6
+      ],
+      "aerial": "https://www.google.com/maps/@37.921212,-107.763641,300a,35y,216.23h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.921212,-107.763641&heading=216.23&pitch=0&fov=80"
+    },
+    {
+      "n": 28,
+      "lat": 37.919661,
+      "lon": -107.76553,
+      "heading_deg": 19.04,
+      "level_xy": [
+        -285.1,
+        860.4
+      ],
+      "aerial": "https://www.google.com/maps/@37.919661,-107.765530,300a,35y,19.04h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.919661,-107.765530&heading=19.04&pitch=0&fov=80"
+    },
+    {
+      "n": 29,
+      "lat": 37.921098,
+      "lon": -107.765004,
+      "heading_deg": 229.59,
+      "level_xy": [
+        -234.1,
+        1018.4
+      ],
+      "aerial": "https://www.google.com/maps/@37.921098,-107.765004,300a,35y,229.59h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.921098,-107.765004&heading=229.59&pitch=0&fov=80"
+    },
+    {
+      "n": 30,
+      "lat": 37.919817,
+      "lon": -107.767381,
+      "heading_deg": 221.25,
+      "level_xy": [
+        -447.3,
+        882.4
+      ],
+      "aerial": "https://www.google.com/maps/@37.919817,-107.767381,300a,35y,221.25h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.919817,-107.767381&heading=221.25&pitch=0&fov=80"
+    },
+    {
+      "n": 31,
+      "lat": 37.921795,
+      "lon": -107.758093,
+      "heading_deg": 250.0,
+      "level_xy": [
+        375.8,
+        1077.8
+      ],
+      "aerial": "https://www.google.com/maps/@37.921795,-107.758093,300a,35y,250.00h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.921795,-107.758093&heading=250.00&pitch=0&fov=80",
+      "spawn": "wrecked_section_1",
+      "near": "Wrecked Section 1"
+    },
+    {
+      "n": 32,
+      "lat": 37.92873,
+      "lon": -107.776555,
+      "heading_deg": 92.0,
+      "level_xy": [
+        -1224.4,
+        1895.7
+      ],
+      "aerial": "https://www.google.com/maps/@37.928730,-107.776555,300a,35y,92.00h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=37.928730,-107.776555&heading=92.00&pitch=0&fov=80",
+      "spawn": "bridal_veil_base",
+      "near": "Foot of the climb (Bridal Veil)"
+    }
+  ]
+}
