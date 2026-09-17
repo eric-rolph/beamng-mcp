@@ -1,0 +1,279 @@
+{
+  "map": "meteor_crater",
+  "every_m": 400.0,
+  "ring_m": 700.0,
+  "stations": [
+    {
+      "n": 1,
+      "lat": 35.033526,
+      "lon": -111.022594,
+      "heading_deg": 179.31,
+      "level_xy": [
+        -7.9,
+        669.2
+      ],
+      "near": "rim 000 deg, on a track",
+      "aerial": "https://www.google.com/maps/@35.033526,-111.022594,300a,35y,179.31h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.033526,-111.022594&heading=179.31&pitch=0&fov=80"
+    },
+    {
+      "n": 2,
+      "lat": 35.03337,
+      "lon": -111.019619,
+      "heading_deg": 201.91,
+      "level_xy": [
+        263.5,
+        651.9
+      ],
+      "near": "rim 022 deg, on a track",
+      "aerial": "https://www.google.com/maps/@35.033370,-111.019619,300a,35y,201.91h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.033370,-111.019619&heading=201.91&pitch=0&fov=80"
+    },
+    {
+      "n": 3,
+      "lat": 35.032507,
+      "lon": -111.017712,
+      "heading_deg": 218.05,
+      "level_xy": [
+        437.4,
+        556.1
+      ],
+      "near": "rim 045 deg, on a track",
+      "aerial": "https://www.google.com/maps/@35.032507,-111.017712,300a,35y,218.05h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.032507,-111.017712&heading=218.05&pitch=0&fov=80"
+    },
+    {
+      "n": 4,
+      "lat": 35.02979,
+      "lon": -111.014134,
+      "heading_deg": 251.47,
+      "level_xy": [
+        763.7,
+        254.8
+      ],
+      "near": "rim 067 deg, on a track",
+      "aerial": "https://www.google.com/maps/@35.029790,-111.014134,300a,35y,251.47h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.029790,-111.014134&heading=251.47&pitch=0&fov=80"
+    },
+    {
+      "n": 5,
+      "lat": 35.027752,
+      "lon": -111.014413,
+      "heading_deg": 267.75,
+      "level_xy": [
+        738.2,
+        28.8
+      ],
+      "near": "rim 090 deg, on a track",
+      "aerial": "https://www.google.com/maps/@35.027752,-111.014413,300a,35y,267.75h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.027752,-111.014413&heading=267.75&pitch=0&fov=80"
+    },
+    {
+      "n": 6,
+      "lat": 35.025668,
+      "lon": -111.014665,
+      "heading_deg": 285.86,
+      "level_xy": [
+        715.2,
+        -202.3
+      ],
+      "near": "rim 112 deg, on a track",
+      "aerial": "https://www.google.com/maps/@35.025668,-111.014665,300a,35y,285.86h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.025668,-111.014665&heading=285.86&pitch=0&fov=80"
+    },
+    {
+      "n": 7,
+      "lat": 35.023029,
+      "lon": -111.017079,
+      "heading_deg": 315.12,
+      "level_xy": [
+        495.0,
+        -495.0
+      ],
+      "near": "rim 135 deg",
+      "aerial": "https://www.google.com/maps/@35.023029,-111.017079,300a,35y,315.12h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.023029,-111.017079&heading=315.12&pitch=0&fov=80"
+    },
+    {
+      "n": 8,
+      "lat": 35.020815,
+      "lon": -111.018872,
+      "heading_deg": 335.98,
+      "level_xy": [
+        331.3,
+        -740.5
+      ],
+      "near": "rim 157 deg, on a track",
+      "aerial": "https://www.google.com/maps/@35.020815,-111.018872,300a,35y,335.98h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.020815,-111.018872&heading=335.98&pitch=0&fov=80"
+    },
+    {
+      "n": 9,
+      "lat": 35.021713,
+      "lon": -111.023318,
+      "heading_deg": 6.56,
+      "level_xy": [
+        -74.2,
+        -640.8
+      ],
+      "near": "rim 180 deg, on a track",
+      "aerial": "https://www.google.com/maps/@35.021713,-111.023318,300a,35y,6.56h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.021713,-111.023318&heading=6.56&pitch=0&fov=80"
+    },
+    {
+      "n": 10,
+      "lat": 35.020966,
+      "lon": -111.025145,
+      "heading_deg": 18.32,
+      "level_xy": [
+        -240.9,
+        -723.6
+      ],
+      "near": "rim 202 deg, on a track",
+      "aerial": "https://www.google.com/maps/@35.020966,-111.025145,300a,35y,18.32h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.020966,-111.025145&heading=18.32&pitch=0&fov=80"
+    },
+    {
+      "n": 11,
+      "lat": 35.023027,
+      "lon": -111.02793,
+      "heading_deg": 44.85,
+      "level_xy": [
+        -495.0,
+        -495.0
+      ],
+      "near": "rim 225 deg",
+      "aerial": "https://www.google.com/maps/@35.023027,-111.027930,300a,35y,44.85h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.023027,-111.027930&heading=44.85&pitch=0&fov=80"
+    },
+    {
+      "n": 12,
+      "lat": 35.025074,
+      "lon": -111.029594,
+      "heading_deg": 67.39,
+      "level_xy": [
+        -646.7,
+        -267.9
+      ],
+      "near": "rim 247 deg",
+      "aerial": "https://www.google.com/maps/@35.025074,-111.029594,300a,35y,67.39h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.025074,-111.029594&heading=67.39&pitch=0&fov=80"
+    },
+    {
+      "n": 13,
+      "lat": 35.02749,
+      "lon": -111.030179,
+      "heading_deg": 89.98,
+      "level_xy": [
+        -700.0,
+        -0.0
+      ],
+      "near": "rim 270 deg",
+      "aerial": "https://www.google.com/maps/@35.027490,-111.030179,300a,35y,89.98h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.027490,-111.030179&heading=89.98&pitch=0&fov=80"
+    },
+    {
+      "n": 14,
+      "lat": 35.029905,
+      "lon": -111.029596,
+      "heading_deg": 112.57,
+      "level_xy": [
+        -646.7,
+        267.9
+      ],
+      "near": "rim 292 deg",
+      "aerial": "https://www.google.com/maps/@35.029905,-111.029596,300a,35y,112.57h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.029905,-111.029596&heading=112.57&pitch=0&fov=80"
+    },
+    {
+      "n": 15,
+      "lat": 35.031749,
+      "lon": -111.027811,
+      "heading_deg": 134.42,
+      "level_xy": [
+        -483.8,
+        472.3
+      ],
+      "near": "rim 315 deg, on a track",
+      "aerial": "https://www.google.com/maps/@35.031749,-111.027811,300a,35y,134.42h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.031749,-111.027811&heading=134.42&pitch=0&fov=80"
+    },
+    {
+      "n": 16,
+      "lat": 35.033323,
+      "lon": -111.025444,
+      "heading_deg": 157.58,
+      "level_xy": [
+        -267.9,
+        646.7
+      ],
+      "near": "rim 337 deg",
+      "aerial": "https://www.google.com/maps/@35.033323,-111.025444,300a,35y,157.58h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.033323,-111.025444&heading=157.58&pitch=0&fov=80"
+    },
+    {
+      "n": 17,
+      "lat": 35.033009,
+      "lon": -111.023062,
+      "heading_deg": 306.71,
+      "level_xy": [
+        -50.6,
+        611.8
+      ],
+      "aerial": "https://www.google.com/maps/@35.033009,-111.023062,300a,35y,306.71h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.033009,-111.023062&heading=306.71&pitch=0&fov=80"
+    },
+    {
+      "n": 18,
+      "lat": 35.035732,
+      "lon": -111.026195,
+      "heading_deg": 270.48,
+      "level_xy": [
+        -336.3,
+        913.9
+      ],
+      "aerial": "https://www.google.com/maps/@35.035732,-111.026195,300a,35y,270.48h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.035732,-111.026195&heading=270.48&pitch=0&fov=80"
+    },
+    {
+      "n": 19,
+      "lat": 35.035906,
+      "lon": -111.030865,
+      "heading_deg": 312.04,
+      "level_xy": [
+        -762.3,
+        933.4
+      ],
+      "aerial": "https://www.google.com/maps/@35.035906,-111.030865,300a,35y,312.04h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.035906,-111.030865&heading=312.04&pitch=0&fov=80"
+    },
+    {
+      "n": 20,
+      "lat": 35.0275,
+      "lon": -111.0225,
+      "heading_deg": 0.0,
+      "level_xy": [
+        0.5,
+        0.9
+      ],
+      "aerial": "https://www.google.com/maps/@35.027500,-111.022500,300a,35y,0.00h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.027500,-111.022500&heading=0.00&pitch=0&fov=80",
+      "spawn": "crater_floor",
+      "near": "crater_floor"
+    },
+    {
+      "n": 21,
+      "lat": 35.02169,
+      "lon": -111.02162,
+      "heading_deg": 0.0,
+      "level_xy": [
+        80.7,
+        -643.4
+      ],
+      "aerial": "https://www.google.com/maps/@35.021690,-111.021620,300a,35y,0.00h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.021690,-111.021620&heading=0.00&pitch=0&fov=80",
+      "spawn": "south_rim",
+      "near": "south_rim"
+    }
+  ]
+}

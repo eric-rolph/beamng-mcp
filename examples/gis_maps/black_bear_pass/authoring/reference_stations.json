@@ -1,6 +1,7 @@
 {
   "map": "black_bear_pass",
   "every_m": 250.0,
+  "ring_m": null,
   "stations": [
     {
       "n": 1,

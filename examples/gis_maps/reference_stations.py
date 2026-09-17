@@ -135,11 +135,83 @@ def pano_url(lat, lon, heading, pitch=0, fov=80) -> str:
     )
 
 
+DRIVABLE = ("track", "service", "tertiary", "unclassified", "residential", "secondary")
+
+
+def latlon(fp, x: float, y: float) -> tuple[float, float]:
+    """Back out of the footprint's projection into WGS84."""
+
+    from rasterio.warp import transform
+
+    lons, lats = transform(f"EPSG:{fp.epsg}", "EPSG:4326", [x], [y])
+    return (lats[0], lons[0])
+
+
+def drivable_nodes(map_key: str) -> list[tuple[float, float]]:
+    data = json.loads((PACK_ROOT / map_key / "data" / "osm" / "roads.json").read_text())
+    out = []
+    for w in data["elements"]:
+        if w.get("type") != "way" or not w.get("geometry"):
+            continue
+        if (w.get("tags", {}).get("highway") or "") not in DRIVABLE:
+            continue
+        out.extend((float(g["lat"]), float(g["lon"])) for g in w["geometry"])
+    return out
+
+
+def ring_stations(fp, map_key: str, radius_m: float, count: int, snap_m: float) -> list[dict]:
+    """Stations evenly spaced round a circle about the footprint centre, each looking in.
+
+    A crater is not a route: what a person judges is the bowl seen from the rim, so the
+    heading is the bearing to the centre rather than a road's tangent. Each station is
+    pulled onto the nearest drivable node within `snap_m` where there is one, so it
+    stands on a track a vehicle can reach instead of hanging over the wall.
+    """
+
+    cx, cy = fp.center
+    clat, clon = latlon(fp, cx, cy)
+    nodes = drivable_nodes(map_key)
+    stations = []
+    for k in range(count):
+        theta = math.radians(360.0 * k / count)
+        lat, lon = latlon(fp, cx + radius_m * math.sin(theta), cy + radius_m * math.cos(theta))
+        snapped = ""
+        if nodes:
+            near = min(nodes, key=lambda n: haversine_m((lat, lon), n))
+            if haversine_m((lat, lon), near) <= snap_m:
+                lat, lon = near
+                snapped = "on a track"
+        if not inside(fp, lat, lon):
+            continue
+        heading = bearing_deg((lat, lon), (clat, clon))
+        stations.append(
+            {
+                "n": len(stations) + 1,
+                "lat": round(lat, 6),
+                "lon": round(lon, 6),
+                "heading_deg": round(heading, 2),
+                "level_xy": level_xy(fp, lat, lon),
+                "near": f"rim {360 * k // count:03d} deg" + (f", {snapped}" if snapped else ""),
+                "aerial": aerial_url(lat, lon, heading),
+                "pano": pano_url(lat, lon, heading),
+            }
+        )
+    return stations
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("map_key")
     ap.add_argument("--every", type=float, default=250.0, help="metres between stations")
     ap.add_argument("--route-name", default=None, help="substring of the OSM way name")
+    ap.add_argument(
+        "--ring",
+        type=float,
+        default=None,
+        help="metres: also ring the footprint centre at this radius, every station looking in",
+    )
+    ap.add_argument("--ring-count", type=int, default=16, help="stations round the ring")
+    ap.add_argument("--snap", type=float, default=120.0, help="pull a ring station onto a track")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
@@ -163,7 +235,9 @@ def main() -> None:
     if head:
         pts = oriented(pts, float(head["lat"]), float(head["lon"]))
 
-    stations = []
+    stations = (
+        ring_stations(fp, args.map_key, args.ring, args.ring_count, args.snap) if args.ring else []
+    )
     carried = args.every  # emit one at the very start
     for i in range(len(pts) - 1):
         carried += haversine_m(pts[i], pts[i + 1])
@@ -227,6 +301,7 @@ def main() -> None:
         if (
             near
             and "spawn" not in st
+            and "near" not in st
             and haversine_m((st["lat"], st["lon"]), (near["lat"], near["lon"])) < 150
         ):
             st["near"] = near["name"]
@@ -238,7 +313,15 @@ def main() -> None:
     )
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(
-        json.dumps({"map": args.map_key, "every_m": args.every, "stations": stations}, indent=2)
+        json.dumps(
+            {
+                "map": args.map_key,
+                "every_m": args.every,
+                "ring_m": args.ring,
+                "stations": stations,
+            },
+            indent=2,
+        )
         + "\n",
         encoding="utf-8",
     )
@@ -249,16 +332,31 @@ def main() -> None:
             f"  {st['n']:>2}  {st['lat']:.5f},{st['lon']:.5f}  "
             f"hdg {st['heading_deg']:>6.1f}  xy {st['level_xy']}{tag}"
         )
-    write_markdown(out.with_suffix(".md"), args.map_key, spec, stations, args.every)
+    write_markdown(
+        out.with_suffix(".md"), args.map_key, spec, stations, args.every, args.ring, args.snap
+    )
     print(f"  -> {out.with_suffix('.md')}")
 
 
-HEADER = """# {title} - reference stations
-
+HOW_ROUTE = """\
 Camera stations along the route, every {every:g} m, with the heading taken from the road's
 own tangent so "looking down the road" means the same thing in both pictures. Station 1 is
-the top of the climb and the numbering follows the drive. `level xy` is where a render of
-our own map should put the camera: the footprint's centre is the origin, +x east, +y north.
+the top of the climb and the numbering follows the drive."""
+
+HOW_RING = """\
+Camera stations on a {ring:g} m ring about the level's centre, each one looking in, then
+the approach road every {every:g} m with the heading from its own tangent. A crater is not a
+route: what a person judges is the bowl seen from the rim, so the ring comes first and every
+ring station is pulled onto a track where one runs within {snap:g} m of it."""
+
+HEADER = """# {title} - reference stations
+
+{how}
+
+`level xy` is where a render of our own map should put the camera: the footprint's centre
+is the origin, +x east, +y north. Regenerate this sheet with:
+
+    python examples/gis_maps/reference_stations.py {argv}
 
 **How this is used.** A station is handed over, both links are opened, and what the eye
 finds wrong with ours becomes a row in the must-do list with the generator change that
@@ -286,7 +384,9 @@ in the tree - the rule the critic ledger already uses.
 """
 
 
-def write_markdown(path: Path, map_key: str, spec, stations, every: float) -> None:
+def write_markdown(
+    path: Path, map_key: str, spec, stations, every: float, ring=None, snap: float = 120.0
+) -> None:
     rows = []
     for st in stations:
         where = st.get("near", "")
@@ -298,8 +398,14 @@ def write_markdown(path: Path, map_key: str, spec, stations, every: float) -> No
             f"[3D]({st['aerial']}) | [pano]({st['pano']}) |"
         )
     title = getattr(spec, "DISPLAY_NAME", map_key)
+    how = (
+        HOW_RING.format(ring=ring, every=every, snap=snap)
+        if ring
+        else HOW_ROUTE.format(every=every)
+    )
+    argv = " ".join(a if " " not in a else f'"{a}"' for a in sys.argv[1:])
     path.write_text(
-        HEADER.format(title=title, every=every) + "\n".join(rows) + "\n" + MUSTDO,
+        HEADER.format(title=title, how=how, argv=argv) + "\n".join(rows) + "\n" + MUSTDO,
         encoding="utf-8",
     )
 
