@@ -1,7 +1,7 @@
 """Barringer Meteor Crater - authored constants shared by the generator and the level.
 
-A 1.2 km impact bowl 170 m deep, sitting in a 2048 m square at 0.5 m per sample so the
-NCALM 0.25 m lidar survives as terrain: the upturned rim strata, the talus aprons inside
+A 1.2 km impact bowl 170 m deep, sitting in a 2048 m square at 1 m per sample, with the
+NCALM 0.25 m lidar area-averaged onto it: the upturned rim strata, the talus aprons inside
 the bowl, and the low ejecta swells across the desert floor. Nothing man-made is inside
 the level except the rim access road and the visitor-center car park.
 """
@@ -16,8 +16,17 @@ SITE = {
     "center_lat": 35.0275,
     "center_lon": -111.0225,
     "epsg": 32612,  # WGS 84 / UTM zone 12N
-    "size_px": 4096,  # heightmap edge in samples (power of two)
-    "square_size_m": 0.5,  # metres per sample -> 2048 m footprint
+    # 1 m per sample, not the 0.5 m the lidar would carry, and the reason is the
+    # engine rather than the data: a TerrainMaterial's *BaseTexSize is read as world
+    # metres in one place and as terrain squares in another, and the two readings only
+    # agree when a map is sampled at 1 m. At 0.5 m the game drew this level's
+    # orthoimagery tiled two by two whichever number it was given. The four maps
+    # sampled at 1 m have never tiled, so this one joins them: metres and squares are
+    # the same number here, and the base map covers the level once under either
+    # reading. The photograph keeps its own resolution - base_tex_px stays 4096, so
+    # the flight is still 0.5 m per texel over the 2048 m square.
+    "size_px": 2048,  # heightmap edge in samples (power of two)
+    "square_size_m": 1.0,  # metres per sample -> 2048 m footprint
     "base_tex_px": 4096,  # the de-lit orthoimagery at 0.5 m per texel
     "detail_tex_px": 1024,
 }

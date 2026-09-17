@@ -9,7 +9,7 @@ every file the game reads is generated, never hand-edited.
 
 | Map key | Level | Footprint | Sample | Elevation sources | The bit |
 | --- | --- | --- | --- | --- | --- |
-| `meteor_crater` | Barringer Meteor Crater | 2048 m | 0.5 m | NCALM 0.25 m lidar (OpenTopography) over USGS 3DEP 1 m | A 1.2 km, 170 m deep impact bowl: rim strata, talus aprons, ejecta ripples. Perimeter runs, scree climbs, rim drops. |
+| `meteor_crater` | Barringer Meteor Crater | 2048 m | 1 m | NCALM 0.25 m lidar (OpenTopography) over USGS 3DEP 1 m | A 1.2 km, 170 m deep impact bowl: rim strata, talus aprons, ejecta ripples. Perimeter runs, scree climbs, rim drops. |
 | `wallace_creek` | Carrizo Plain - Wallace Creek | 4096 m | 1 m | B4 0.5 m lidar (OpenTopography) over USGS 3DEP 1 m | The San Andreas surface trace: the 130 m offset channel, sag ponds, pressure ridges, scarps. Trophy-truck country. |
 | `factory_butte` | Factory Butte Badlands | 4096 m | 1 m | Utah statewide 1 m lidar via USGS 3DEP | Mancos Shale rills, clay fins and mud-wash flats. Natural half-pipes and spine transfers. |
 | `mt_st_helens` | Mount St. Helens Pumice Plain | 6144 m | 1.5 m | USGS 3DEP 1 m (2018 lidar) | The 1980 crater headwall, the lava dome, braided ash canyons down to Spirit Lake. |
@@ -218,7 +218,7 @@ already knows. They are in each map's handoff under `terrain`:
 | Map | Samples | Square size | Height scale (`maxHeight`) | Real elevation the 0..maxHeight band covers |
 | --- | --- | --- | --- | --- |
 | `black_bear_pass` | 4096 | 1.0 m | 1405 m | 2720.3 - 4109.7 m |
-| `meteor_crater` | 4096 | 0.5 m | 192 m | 1561.7 - 1750.7 m |
+| `meteor_crater` | 2048 | 1.0 m | 192 m | 1561.8 - 1750.4 m |
 | `bingham_canyon` | 4096 | 1.5 m | 1556 m | 1263.8 - 2803.2 m |
 | `factory_butte` | 4096 | 1.0 m | 106 m | 1353.0 - 1456.6 m |
 | `mt_st_helens` | 4096 | 1.5 m | 1547 m | 946.3 - 2476.9 m |
@@ -267,6 +267,15 @@ Two things the pack deliberately does not use:
   showing through the middle. The pack authors every size in metres and divides by
   `square_size_m` on the way out, so the base map covers the terrain exactly once and
   detail and macro keep their authored periods whatever the sampling.
+- **Sample at 1 m unless you have a reason not to.** The conversion above did not settle
+  it: the level still tiled with the sample count in the field. The two readings of
+  `*BaseTexSize` - world metres and terrain squares - are only distinguishable on a map
+  whose sampling is not 1 m, and every map the pack samples at 1 m has drawn its
+  orthoimagery once. Meteor Crater now samples at 1 m as well, so metres and squares are
+  the same number and the field means the same thing either way. Sub-metre sampling is
+  not worth a level that draws its photograph four times; the photograph keeps its own
+  resolution regardless, since `base_tex_px` is independent of the sample count (4096 px
+  over 2048 m is still 0.5 m per texel).
 - **Far-field bake**: `TerrainBlock.baseTexSize` is the resolution, in pixels, the engine
   bakes the whole-level base map at once the cells fall out of detail range - which is
   most of the map from any ridge. It has to match the texture set's `baseTexSize`, or a
