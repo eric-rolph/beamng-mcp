@@ -439,6 +439,14 @@ OBJECTS = {
         "bb_tundra": 8.0,
     },
     "scatter_min_elevation": {"bb_tundra": 3500.0},
+    # Rounds 1-17 were judged on a build that shipped 0.28-1.32 here, because the
+    # per-axis jitter was applied after the draw and took the longest axis outside this
+    # range at both ends. The generator now keeps it, so 1.2 is real for the first time.
+    # The top is deliberately NOT widened to the 1.32 that was actually shipping: it is
+    # 1.76 % of stones shrinking 3.2 % on average, and 46 of the 100,000 shrinking 8 %,
+    # which no rendered sheet resolves - so the approved look does not tell us the author
+    # meant 1.32, and writing it in would record a jitter artefact as intent. If round 18
+    # looks at a sheet and wants the old top back, 1.32 is the number it was.
     "scatter_size_m": [0.3, 1.2],
     "scatter_max": 100000,
     # Scree collects at concave toes: a 40 m window and a 0.5 m threshold see them on

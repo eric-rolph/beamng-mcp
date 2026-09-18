@@ -2146,6 +2146,54 @@ def test_a_field_that_survives_the_erosion_reports_its_bed_share_and_population(
     assert 0 < field["interior_texels"] < int((refill == 1).sum()), field
 
 
+def test_a_failing_refill_gate_names_the_field_and_why_it_could_not_be_lifted() -> None:
+    """The aggregate gates fail on a percentile or a minimum, which says a value and not
+    a place. ``_field_at`` is what turns that back into a field, and it has to carry the
+    three keys that say whether the field was liftable at all - otherwise the next reader
+    re-runs the build to learn what the handoff already recorded."""
+
+    fields = [
+        {
+            "lum_ratio": 0.9,
+            "area_m2": 4000.0,
+            "center_xy": [0.0, 0.0],
+            "kind": "shadow",
+            "bed_fraction": 0.0,
+            "interior_eroded": True,
+            "interior_texels": 900,
+        },
+        {
+            "lum_ratio": 0.459,
+            "area_m2": 2973.0,
+            "center_xy": [-35.3, 670.3],
+            "kind": "shadow",
+            "bed_fraction": None,
+            "interior_eroded": False,
+            "interior_texels": 11892,
+        },
+        {
+            "lum_ratio": 1.047,
+            "area_m2": 1200.0,
+            "center_xy": [10.0, 10.0],
+            "kind": "snow",
+            "bed_fraction": 0.1,
+            "interior_eroded": True,
+            "interior_texels": 300,
+        },
+    ]
+
+    darkest = _field_at(fields, "lum_ratio")
+    assert darkest["lum_ratio"] == 0.459 and darkest["center_xy"] == [-35.3, 670.3]
+    # The whole point: the reason travels with the value.
+    assert darkest["interior_eroded"] is False and darkest["bed_fraction"] is None
+    assert _field_at(fields, "lum_ratio", palest=True)["lum_ratio"] == 1.047
+    # Small enough that pytest does not abbreviate it, which the `largest` list was not.
+    assert len(repr(darkest)) < 200, repr(darkest)
+    # An emptied population is the road-bed exclusion's own failure to report, not a
+    # ValueError out of `min` standing in front of it.
+    assert _field_at([], "lum_ratio") == {}
+
+
 def test_ring_matching_can_rescue_a_field_at_half_its_ring() -> None:
     """The full ``match_ring`` sequence lifts a field at 0.46 of its ring past the 0.75
     floor, so the contract is reachable from the worst measured starting point.
@@ -2213,6 +2261,69 @@ def test_base_colour_stats_measures_each_layer() -> None:
     assert stats["layer_mean_srgb"]["ledge"]["cells"] == 256
     # Nothing was handed in as the pre-clamp array, so nothing claims to describe one.
     assert "clipped_before_ceiling" not in stats["layer_mean_srgb"]["ledge"]
+
+
+def test_the_delighting_contract_number_can_actually_fail() -> None:
+    """The negative control for `under_gain_floor_untouched`.
+
+    It reads zero on every correct build, which is precisely the shape of the gate this
+    pack has just spent a day repairing: a number that is true, looks live, and cannot
+    move. So drive it. A late writer that darkens cells the refill never touched is the
+    regression it exists for - the mirror of the one `53807cb` fixed at the bright end -
+    and the count must find it. Its companion is driven the same way: a carry that finds
+    its donors and borrows nothing worth having.
+    """
+
+    load_maplib()
+    from maplib import imagery
+
+    rng = np.random.default_rng(7)
+    n = 256
+    y, x = np.mgrid[0:n, 0:n].astype("float32")
+    dem = 120.0 * np.exp(-((y - 100) ** 2) / (2 * 20.0**2)) + 40.0 * np.sin(x / 30.0)
+    dem = (dem + rng.normal(0, 0.4, dem.shape)).astype("float32")
+    shade = np.clip(imagery.cast_shadows(dem, 2.0, 180.0, 25.0), 0.05, 1.0)
+    ground = np.clip(0.55 + 0.05 * rng.normal(0, 1, (n, n, 1)), 0.1, 0.9) * np.array(
+        [1.0, 0.94, 0.82]
+    )
+    colour = (np.clip(ground * shade[..., None], 0, 1) ** (1 / 2.2) * 255).astype("uint8")
+    kw = dict(
+        azimuth_deg=180.0,
+        altitude_deg=25.0,
+        strength=1.0,
+        max_gain=4.5,
+        steep_deg=32.0,
+        steep_feather_deg=8.0,
+        steep_cap=True,
+    )
+
+    _out, clean = imagery.delight(colour, dem, 2.0, **kw)
+    assert clean["composed_ratio"]["under_gain_floor_untouched"] == 0.0
+    assert clean["composed_ratio"]["p50"] is not None
+
+    real_clamp = imagery.clamp_highlights
+    try:
+
+        def crushing_clamp(out, ceiling):
+            out = out.copy()
+            out[n // 2 :, :] *= 0.02  # a writer outside every clip in the stage
+            return real_clamp(out, ceiling)
+
+        imagery.clamp_highlights = crushing_clamp
+        _out, broken = imagery.delight(colour, dem, 2.0, **kw)
+    finally:
+        imagery.clamp_highlights = real_clamp
+    assert broken["composed_ratio"]["under_gain_floor_untouched"] > 0.01, broken
+
+    real_carry = imagery._carry_tone
+    try:
+        imagery._carry_tone = lambda corrected, weight, res_m, **kw2: (
+            real_carry(corrected, weight, res_m, **kw2) * 0.02
+        )
+        _out, dark = imagery.delight(colour, dem, 2.0, **kw)
+    finally:
+        imagery._carry_tone = real_carry
+    assert dark["refill_carry_ratio"]["under_0_1"] > 0.5, dark
 
 
 def test_the_clamp_does_not_erase_the_number_that_caught_it() -> None:
@@ -2315,6 +2426,72 @@ CEILING_BASELINE = {
 # It is wider than any difference measured between two builds of this pack and far
 # narrower than the step that put fb_caprock where it is.
 CEILING_SLACK = 0.005
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_the_delighting_stays_inside_the_contract_its_clips_give(map_key: str) -> None:
+    """A cell the refill never touched ships at no less than 0.45 of what was photographed.
+
+    Every reducing step in `delight` is clipped, and until now nothing measured their
+    product or the one input none of the clips can bound. `gain_p05` is the ILLUMINATION
+    gain - the model's intent, not the result - so a cell can ship at a fiftieth of its
+    source with every recorded number comfortably inside its own bound. That is how
+    bingham_canyon shipped 5,534 crushed texels on `bc_bench_face` while its handoff read
+    `gain_p05` 0.651 and `cast_shadow_fraction` 0.1620, both unremarkable.
+
+    The bound needs no population behind it, which is why it is an equality and not a
+    tuned threshold. An untouched cell is `source * gain`, then the knee and the steep
+    cap - and both of those are one-sided pulls toward their own reference, so a cell
+    that has been through either ends at or above `min(knee_lum, cap_lum)`. A cell
+    shipping DARKER than that has been through neither, leaving the gain as its only
+    writer, and the gain is clipped at 0.45. So an untouched dark cell under 0.45 of its
+    source means some writer is outside the contract every clip in there is meant to
+    give, which is a defect rather than a tuning question.
+
+    This is NOT a gate that cannot fail. `under_gain_floor_untouched` is zero if and only
+    if no writer escapes the gain floor on an unrefilled cell; a late stage that darkens
+    one - exactly the shape `53807cb` had to fix at the other end of the range - moves it
+    off zero. The suite's own unit test drives it off zero to prove it.
+
+    `refill_carry_ratio` is the companion and is asserted PRESENT rather than bounded.
+    The carry normalises by the donor weight it found, so its arithmetic says the donors
+    were there and never what they were worth: a field ringed by ground this stage has
+    itself left dark refills to dark, and the anti-black floors then write a quarter of
+    that same dark tone. Its threshold belongs to the first round that reports it, set
+    from the population the way CEILING_BASELINE was, not invented here.
+
+    Skips on the SPEC, not on the handoff, so a de-lit map that records nothing FAILS.
+    """
+
+    spec = load_spec(map_key)
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    imagery_spec = getattr(spec, "IMAGERY", None) or {}
+    if not imagery_spec.get("delight"):
+        pytest.skip(f"{map_key}: the base is not de-lit, so no de-lighting to bound")
+    stats = handoff.get("imagery") or {}
+    composed = stats.get("composed_ratio")
+    assert composed is not None, (
+        map_key,
+        "built before the de-lighting's end-to-end effect was recorded - rebuild; until "
+        "then nothing on this tree bounds what the stage did between its clips",
+    )
+    assert composed.get("under_gain_floor_untouched") == 0.0, (
+        map_key,
+        "cells the refill never touched shipped under 0.45 of what the flight "
+        "photographed, which no clip in the de-lighting allows - a writer is outside "
+        "the contract",
+        composed,
+    )
+    assert stats.get("refill_carry_ratio") is not None or stats.get("snow_fraction") == 0.0, (
+        map_key,
+        "the refill borrowed a tone and did not record what it was worth",
+        stats.get("refill_carry_ratio"),
+    )
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
@@ -2431,6 +2608,40 @@ def _assert_the_bed_exclusion_left_a_population(map_key: str, check: dict) -> No
     )
 
 
+def _field_at(fields: list[dict], key: str, *, palest: bool = False) -> dict:
+    """The one field an aggregate refill gate is really failing on, rendered small.
+
+    Every assertion below used to hand pytest the whole measured population - up to 25
+    fields of eleven keys - and pytest abbreviates a long repr with ``...`` at exactly
+    the depth the numbers live at. Run 51's annotation reported ``0.459`` and then
+    elided every field's ``lum_ratio``, so the failure named a value without naming
+    which field carried it. ``refill_check`` already records why a field may be
+    unliftable - ``bed_fraction``, ``interior_eroded``, ``interior_texels`` - and none
+    of it survived the truncation either. Seven keys of one field fit where the list
+    did not.
+
+    Pass the population the aggregate was computed over, which is the fields left after
+    the road-bed exclusion: naming a dropped field as the cause of a number it was not
+    counted in is worse than naming none.
+    """
+
+    if not fields:
+        return {}
+    field = (max if palest else min)(fields, key=lambda e: e[key])
+    return {
+        k: field.get(k)
+        for k in (
+            "lum_ratio",
+            "area_m2",
+            "center_xy",
+            "kind",
+            "bed_fraction",
+            "interior_eroded",
+            "interior_texels",
+        )
+    }
+
+
 @pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_refills_read_as_their_ground_on_the_shipped_base(map_key: str) -> None:
     """Every large refilled field (cast shadow or snow) measured on the base the game
@@ -2452,7 +2663,15 @@ def test_refills_read_as_their_ground_on_the_shipped_base(map_key: str) -> None:
     check = (handoff.get("imagery") or {}).get("refill_check")
     assert check, (map_key, "no refill_check in the handoff")
     _assert_the_bed_exclusion_left_a_population(map_key, check)
-    assert check["lum_ratio_p10"] >= 0.90 and check["lum_ratio_max"] <= 1.10, (map_key, check)
+    measured = [e for e in check["largest"] if not e.get("on_road_bed")]
+    assert check["lum_ratio_p10"] >= 0.90 and check["lum_ratio_max"] <= 1.10, (
+        map_key,
+        {k: v for k, v in check.items() if k != "largest"},
+        "darkest",
+        _field_at(measured, "lum_ratio"),
+        "palest",
+        _field_at(measured, "lum_ratio", palest=True),
+    )
     assert check["grain_ratio_p10"] >= 0.45, (map_key, check)
     assert check["br_diff_max_abs"] <= 0.04, (map_key, check)
     # And on the green axis: a refill matched on luminance alone came back as
@@ -2495,7 +2714,13 @@ def test_no_refilled_field_reads_as_a_blotch(map_key: str) -> None:
     _assert_the_bed_exclusion_left_a_population(map_key, check)
     measured = [e for e in check["largest"] if not e.get("on_road_bed")]
     worst = min((e["lum_ratio"] for e in measured), default=1.0)
-    assert worst >= 0.75, (map_key, "a refilled field reads as a blotch", worst, measured)
+    assert worst >= 0.75, (
+        map_key,
+        "a refilled field reads as a blotch",
+        worst,
+        _field_at(measured, "lum_ratio"),
+        f"of {len(measured)} measured fields",
+    )
     # And the other side, which this gate was missing while the tight one above had it
     # (0.90 AND 1.10). A refill brighter than its ground is the same defect seen from
     # the other end, and it is the one `refill_match`'s 1.4 gain clip exists to prevent
@@ -2508,7 +2733,8 @@ def test_no_refilled_field_reads_as_a_blotch(map_key: str) -> None:
         map_key,
         "a refill reads paler than its ground",
         palest,
-        measured,
+        _field_at(measured, "lum_ratio", palest=True),
+        f"of {len(measured)} measured fields",
     )
     for axis in ("br_diff", "exg_diff"):
         off = max((abs(e[axis]) for e in measured), default=0.0)

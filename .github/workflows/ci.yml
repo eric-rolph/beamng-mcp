@@ -2,7 +2,14 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # `claude/gis-maps-pack` is here because the maps pack is developed on it over
+    # weeks and merged into repeatedly, so its head needs checking on its own
+    # account. Today that only happens as a side effect of PR #89 being open: a
+    # `pull_request` run checks that PR's head, which IS this branch. #89 exists to
+    # be closed rather than merged, and the day it closes the branch would lose its
+    # coverage with nothing to say so. A branch that is merged into should not
+    # depend on a pull request nobody intends to merge.
+    branches: [main, claude/gis-maps-pack]
   pull_request:
   workflow_dispatch:
 
