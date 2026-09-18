@@ -34,12 +34,21 @@ permissions:
 # Every run ends in `gh release upload <tag> --clobber` against the SAME release, and
 # nothing else serialises them. Two runs in flight together interleave their assets, so
 # the release can finish holding ZIPs from one commit and a SHA256SUMS.txt from another
-# with no field saying so. Every push to this branch starts a full six-map rebuild, and
-# at 340 minutes a job easily outlives the next push. A push during a build is a
-# supersede rather than a second release, so the older run is cancelled, not raced.
+# with no field saying so.
+#
+# The group is deliberately repository-wide and carries no ref: what it serialises is
+# one release, which every branch publishes to, because the release steps below have no
+# `if:` and TAG falls through to gis-maps-v1 on any push. Adding ${{ github.ref }} here
+# would let two branches clobber one release at once, which is the failure above.
+#
+# cancel-in-progress is false BECAUSE the group is repository-wide. Cancelling would
+# mean a push to any branch killing a six-map build on another, and this branch is
+# worked by several people at once. Queueing wastes a doomed build's runner time;
+# cancelling destroys a good one. GitHub holds a single pending run per group and a
+# newer push supersedes the pending one, so the queue does not grow past one.
 concurrency:
   group: gis-maps-release
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build-and-release:
