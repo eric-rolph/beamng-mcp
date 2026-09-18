@@ -3462,22 +3462,61 @@ on the shipped `fc4db59` base to 0.05629 four imagery commits later while its me
 *fell* - a widening distribution, which reads as a regression rather than as a gate newly
 reporting. The clamp makes the release publishable; it does not explain that.
 
-**And the sting in the tail: the fix also made the gate unfailable.** `clamp_highlights` holds the
-brightest channel at 0.95 linear. sRGB-encoded that is 249.311, so u8 249; reaching 250 needs
-0.95163 linear, which the clamp forbids. Since the clamp now runs last, immediately before the array
-`base_colour_stats` measures, `clipped` is exactly 0.00000 for every layer of every map with an
-IMAGERY spec, whatever happened upstream. Measured on the shipped Factory Butte base: `fb_caprock`
-0.05631 before, 0.00000 after, max channel 249. **`test_base_colour_has_no_black_holes` now reads
-as a live gate and cannot fail.** `shipped_ceiling_fraction` does not close the gap either, because
-it is whole-base while the defect is per-layer - `fb_caprock` is 5.6% over the ceiling and 0.13% of
-the base.
+**And the sting in the tail: the fix also retired one of that test's assertions.** So this
+section is two defects fixed and a third created in fixing them, which is the honest shape of it.
+The rest is the third one and its repair.
 
-So this section describes two defects fixed and a third created in fixing them, which is the honest
-shape of it. **The general rule: a clamp placed immediately before a threshold test does not satisfy
-the test, it retires it.** When a fix moves an enforcement to just before the measurement, ask what
-the measurement can still report. The repair is to measure the pre-clamp array -
-`clipped_before_ceiling` per layer - and to set its floor from the population rather than restoring
-a hard 0.002, which would re-red three maps over a defect the clamp has made invisible in game.
+Scope it precisely, because an earlier draft of this section overstated it. What the clamp retires
+is the `clipped` assertion, not `test_base_colour_has_no_black_holes` as a whole. The other
+assertions in that test are still live: `near_black_fraction` measures the dark end, which a
+highlight clamp cannot move, and `lighter_than` compares layer luminances, which the clamp shifts
+by at most 0.0011 (`fb_caprock`; every other layer rounds to 0.0000). The two refill gates are
+untouched - `refill_check` runs on `colour_full`, before the base is resized or clamped at all.
+When counting which red gates went vacuous, count failures of the `clipped` assertion alone.
+
+And that one assertion is not deleted, it is re-aimed. `< 0.002` was unfailable, so it now reads
+`== 0.0`, which is not a tightening: under the contract the only reachable value is zero, and the
+loose form could not have failed for any other reason. At exactly zero it fails for one reason,
+the one that can recur - a stage writing the base after the clamp, which is the defect `53807cb`
+existed to fix and which `refill_match` and `_enforce_beds` caused once already. **A vacuous
+threshold is often worth re-aiming rather than removing: ask what the clamp guarantees, assert
+that exactly, and the assertion starts guarding the guarantee instead of the symptom.**
+
+`53807cb` ends the level stage with a highlight clamp on the base, because `delight`'s
+own ceiling is not the last word: `refill_match`, `_enforce_beds` and the LANCZOS resize
+all write after it. The clamp is right, and what ships is correct. But 0.95 linear
+encodes to 249 and `base_colour_stats` counts 250, so after it `clipped` is **exactly
+zero for every layer of every map with an IMAGERY spec**, whatever the pipeline did
+upstream - and `test_base_colour_has_no_black_holes` asserts `clipped < 0.002`. The
+assertion reads as live and cannot fail. The whole-base `shipped_ceiling_fraction` the
+same commit records is a far weaker instrument than the per-layer number it replaced:
+fb_caprock is 5.6% over the ceiling and 0.13% of its base, so no plausible whole-base
+threshold sees it. `clipped_before_ceiling` keeps the per-layer share, measured on the
+array the clamp read.
+
+**When a fix works by rewriting what a gate measures, move the gate, not just the array.**
+Otherwise the suite goes green on the fix and stays green through the regression.
+
+The population, measured on run 33's shipped bases (which predate the clamp, so they are
+the unclamped arrays the number describes) - 22 layers over five maps:
+
+| band | layers |
+| --- | --- |
+| 0.0563 | `fb_caprock` |
+| 0.0027 - 0.0066 | `bc_scrub_hillside` 0.00660, `mc_limestone_rim_ew` 0.00431, `bc_haul_gravel` 0.00373, `mc_road_dirt` 0.00352, `bc_waste_rock` 0.00266 |
+| under 0.002 | the remaining 16 |
+
+Whole-base: bingham_canyon 0.00225, factory_butte 0.00132, meteor_crater 0.00045,
+mt_st_helens 0.00002, wallace_creek 0.00000.
+
+**The gate is the population, not an absolute.** 0.002 was the contract written for an
+unclamped base and six of those 22 layers are already above it, so restoring it hard
+re-reds three maps over a blow-out the clamp has made invisible in game. Each layer is
+instead held to its own run 33 figure plus 0.005 (`CEILING_BASELINE` and `CEILING_SLACK`
+in the suite), which catches a layer that *starts* blowing out - the failure that
+actually happened to `fb_caprock` - without failing the ones that always did. A layer
+with no baseline, black_bear_pass's and any new material, is asserted present only.
+Same shape as the refill floor: take the number from the population, never invent it.
 
 ### Pack conventions that are ours, not the engine's
 
