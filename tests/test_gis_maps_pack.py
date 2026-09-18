@@ -1365,6 +1365,44 @@ def test_road_bed_reads_lighter_than_its_ground(map_key: str) -> None:
     assert seam is not None and seam < 0.4, (map_key, carved)
 
 
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_the_photograph_is_measured_before_it_is_conditioned(map_key: str) -> None:
+    """Every de-lit map records the source mosaic's own luminance spread and chroma,
+    so what the conditioning did can be read as a ratio rather than an absolute.
+
+    A shipped base's spread on its own cannot be judged. Factory Butte's is 0.152
+    against Meteor Crater's 0.242 at a third of the chroma, and that is equally
+    consistent with a flat pale basin photographed near noon and with de-lighting
+    having flattened it - the handoff carried only the output, so two sessions read
+    the same number to opposite conclusions. ``imagery.source`` is the other end.
+
+    This asserts the measurement exists and is well formed, not a floor on the ratio.
+    The floor comes from the population once a six-map build has produced one; a
+    number picked before that is taste. What it does gate is the failure this pack
+    keeps repeating - a statistic that goes silently absent for some maps and reports
+    as not-applicable - which is why it asserts on every de-lit map rather than
+    skipping where the key is missing.
+    """
+
+    spec = load_spec(map_key)
+    if not (getattr(spec, "IMAGERY", None) or {}).get("delight"):
+        pytest.skip(f"{map_key}: the base is not de-lit, so there is nothing to compare")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    imagery = handoff.get("imagery") or {}
+    source = imagery.get("source")
+    assert source, f"{map_key}: de-lit but the handoff carries no source-mosaic statistics"
+    for key in ("lum_p05", "lum_p50", "lum_p95", "lum_spread", "chroma_mean", "px"):
+        assert key in source, (map_key, "missing", key, sorted(source))
+    assert 0.0 < source["lum_spread"] < 1.0, (map_key, source)
+    assert source["lum_p05"] <= source["lum_p50"] <= source["lum_p95"], (map_key, source)
+    assert 0.0 <= source["chroma_mean"] <= 1.0, (map_key, source)
+
+
 def test_base_colour_stats_measures_each_layer() -> None:
     """The base's gate numbers: a near-black fraction over the whole image and a clipped
     fraction per layer, with a layer map resized to the colour rather than assumed equal.
