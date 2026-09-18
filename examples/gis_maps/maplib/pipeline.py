@@ -362,6 +362,25 @@ def terrain(spec, example_root: Path) -> dict:
             source_exclude=road_corridor,
         )
         del road_corridor
+        # Say what the conditioning did, in the build log, because that is the only
+        # place a session can read it. The numbers live in the handoff, the handoff
+        # ships as a release asset, and a run that goes red at the gates never
+        # publishes one - so exactly when someone needs to know why a base blew out,
+        # the measurement is locked inside an Actions artifact, which cannot be
+        # downloaded from here at all. One line costs nothing and answers the first
+        # question every time: did the sun fit pin on its bound, how far did the gain
+        # run, and did the highlight ceiling have to catch anything.
+        _sun = imagery_stats.get("sun_fit") or {}
+        _log(
+            "  imagery: sun {} deg az {} corr {} | gain {} to {} | over the ceiling {}".format(
+                _sun.get("altitude_deg"),
+                _sun.get("azimuth_deg"),
+                _sun.get("correlation"),
+                imagery_stats.get("gain_p05"),
+                imagery_stats.get("gain_p95"),
+                imagery_stats.get("highlight_ceiling_fraction"),
+            )
+        )
         # The refilled cells (1 cast shadow, 2 snow) ship for the level stage's
         # check of every field against its ring on the finished base.
         refill_mask = imagery_stats.pop("_refill_mask", None)
