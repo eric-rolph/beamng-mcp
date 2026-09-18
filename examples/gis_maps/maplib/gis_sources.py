@@ -566,13 +566,42 @@ def fetch_osm_roads(
 ) -> Path:
     """Every ``highway`` way (with geometry) inside the footprint, as raw Overpass JSON."""
 
+    return _fetch_overpass(fp, out_path, '["highway"]', "ways", margin_m, force, log)
+
+
+def fetch_osm_buildings(
+    fp: Footprint,
+    out_path: Path,
+    *,
+    margin_m: float = 100.0,
+    force: bool = False,
+    log: Log = _log_default,
+) -> Path:
+    """Every ``building`` way (with geometry) inside the footprint, as raw Overpass JSON.
+
+    Outlines only. Every height, roof shape and roof colour the generator uses is
+    measured from the lidar surface and the orthophoto, not read from a tag.
+    """
+
+    return _fetch_overpass(fp, out_path, '["building"]', "footprints", margin_m, force, log)
+
+
+def _fetch_overpass(
+    fp: Footprint,
+    out_path: Path,
+    selector: str,
+    noun: str,
+    margin_m: float,
+    force: bool,
+    log: Log,
+) -> Path:
     if not force and out_path.is_file() and out_path.stat().st_size > 0:
         return out_path
     out_path.parent.mkdir(parents=True, exist_ok=True)
     south, west, north, east = fp.wgs84_bbox(margin_m)
     query = (
         "[out:json][timeout:180];"
-        f'(way["highway"]({south:.6f},{west:.6f},{north:.6f},{east:.6f}););'
+        f"(way{selector}({south:.6f},{west:.6f},{north:.6f},{east:.6f}););"
         "out geom;"
     )
     last: Exception | None = None
@@ -587,7 +616,7 @@ def fetch_osm_roads(
             payload["_endpoint"] = endpoint
             payload["_license"] = "OpenStreetMap contributors, ODbL 1.0"
             out_path.write_text(json.dumps(payload), encoding="utf-8", newline="\n")
-            log(f"  {len(payload['elements'])} ways")
+            log(f"  {len(payload['elements'])} {noun}")
             return out_path
         except Exception as exc:
             last = exc

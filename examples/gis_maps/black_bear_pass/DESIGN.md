@@ -185,9 +185,10 @@ closed when every finding is a spec or parameter change in the tree.
 
 | Decision | Value | Why |
 | --- | --- | --- |
-| Footprint | 4096 m, centred 37.912 N 107.762 W | Summit in the south-east, Bridal Veil Falls in the north-west, Telluride kept out |
-| Samples | 4096 @ 1 m | Native 3DEP spacing |
-| Base colour | 4096 px de-lit NAIP, 1 m/texel | The photograph at its own resolution under the detail sets |
+| Footprint | 8192 m, centred 37.9220 N 107.7765 W | The whole box canyon: the pass summit 1,240 m inside the south edge, Bridal Veil Falls and Pandora in the middle, Telluride end to end, Tomboy and Savage Basin, Marshall Basin and Mendota Peak inside the north edge |
+| Samples | 8192 @ 1 m | Four times the ground at the same metre. The shelf road is 3.2 m wide and does not survive a coarser grid, so the sample was the one thing not for trading |
+| Base colour | 8192 px de-lit NAIP, 1 m/texel | The photograph at its own resolution over four times the ground; the base set goes from 67 MB to about 270 MB |
+| Buildings | OSM outlines, lidar heights, fitted roofs | Telluride, Pandora and the Tomboy and Savage Basin workings are inside the level now. A town painted on bare ground reads worse than no town, so they are modelled |
 | Materials | tundra, talus blocks (15-30 deg), scree slope (30-45 deg), cliff rock (>45 deg), gravel road bed | Slope-painted plus the carved beds |
 | Forest and rocks | spruce, fir, krummholz, aspen at the lidar's tree tops and heights; talus boulders from lidar bumps | Forest items with trunk / full collision |
 | Spawns | pass summit (default), Ingram Basin descent, Wrecked Section 1, the Steps, Bridal Veil switchbacks | The trail review's named places, every one on the pass road |

@@ -2,7 +2,19 @@
 
 A 12,840 ft shelf road descending from the pass through the Steps and the switchbacks
 above Bridal Veil Falls into Ingram Basin. Forest on the Telluride side, tundra and talus above.
-A 4096 m square at 1 m per sample from USGS 3DEP (San Luis / San Juan / Miguel 2020 lidar).
+An 8192 m square at 1 m per sample from USGS 3DEP (San Luis / San Juan / Miguel 2020 lidar).
+
+The square used to be 4096 m and stopped 150 m past Bridal Veil Falls, so the climb ended
+at a wall of nothing. It now carries the whole box canyon: down the valley over Pandora
+into Telluride, up the far side to Tomboy and Savage Basin, and south to Trico Peak and
+the Red Mountain Pass approach. Terrain sizes must be powers of two, so four times the
+area is 8192 samples and the metre per sample is kept - the shelf road is 3.2 m wide and
+does not survive a coarser grid.
+
+Telluride used to be held outside the west edge because the pack modelled no buildings
+and a town drawn as bare ground with a street grid painted on it reads worse than no
+town. It models them now, from OSM footprints at lidar-measured heights, so the town
+is in.
 """
 
 MOD_ID = "ericrolph_black_bear_pass"
@@ -12,12 +24,14 @@ AUTHOR = "ericrolph"
 
 SITE = {
     "place": "San Juan Mountains, San Miguel / Ouray County, Colorado, USA",
-    "center_lat": 37.912,
-    "center_lon": -107.762,
+    "center_lat": 37.9220,
+    "center_lon": -107.7765,
     "epsg": 32613,
-    "size_px": 4096,
+    "size_px": 8192,
     "square_size_m": 1.0,
-    "base_tex_px": 4096,  # the de-lit NAIP at its native 1 m per texel
+    # 8192 px over 8192 m keeps the de-lit NAIP at its native 1 m per texel over
+    # four times the ground. The base set goes from 67 MB to about 270 MB.
+    "base_tex_px": 8192,
     "detail_tex_px": 1024,
 }
 
@@ -31,6 +45,9 @@ SOURCES = {
     ],
     "imagery": {"kind": "usgs_naip", "resolution": 1.0},
     "roads": {"kind": "osm_overpass"},
+    # Outlines only. Every height, roof shape and roof colour is measured off the
+    # lidar surface and the orthophoto inside the outline.
+    "buildings": {"kind": "osm_overpass"},
     # The same 3DEP survey as a point cloud (about 4 returns per m2): its first
     # returns are the canopy, so the forest is planted from measured tree tops.
     "pointcloud": {
@@ -415,6 +432,28 @@ OBJECTS = {
     "road_clear_m": 3.0,
 }
 
+
+# Telluride, Pandora and the Tomboy and Savage Basin workings stand inside the level, so
+# the buildings are modelled rather than left as painted ground. OSM gives the outline;
+# the 3DEP point cloud gives the height and the roof shape; the de-lit orthophoto gives
+# the roof colour. See maplib/buildings.py.
+BUILDINGS = {
+    "seed": 41,
+    # Under 12 m2 is a bin store or a mapping artefact; under 2.2 m of measured height
+    # is a slab, a footprint mapped over a building that has gone, or a lidar gap.
+    "min_area_m2": 12.0,
+    "min_height_m": 2.2,
+    # Telluride's tallest is the courthouse cupola at about 20 m; 40 m catches the mill
+    # headframes without letting a lidar spike through.
+    "max_height_m": 40.0,
+    # A 4 m facade tile puts a window every four metres of frontage with its sill at
+    # 0.6 m; a 2 m roof tile puts a standing seam every 0.45 m.
+    "wall_tile_m": 4.0,
+    "roof_tile_m": 2.0,
+    "facade_px": 1024,
+    "roof_px": 512,
+}
+
 # Engelmann spruce / subalpine fir up to a ~3,620 m tree line with a krummholz band
 # below it, aspen only on the low Telluride-side slopes; cover comes from the imagery.
 FOREST = {
@@ -466,7 +505,10 @@ ROADS = {
     # road's profile is fitted through its apron.
     "pads": [
         {
-            "center_xy": [1611.0, -1445.0],
+            # Pinned to the ground, not to the level: the footprint has moved once
+            # already and the turnout has not.
+            "lat": 37.899411,
+            "lon": -107.743212,
             "size_m": [26.0, 22.0],
             "surface": "dirt",
             "paint": False,
@@ -476,7 +518,8 @@ ROADS = {
             "why": "the pass summit turnout, where the five ways meet at 3,910 m",
         },
         {
-            "center_xy": [-1224.0, 1896.0],
+            "lat": 37.928730,
+            "lon": -107.776555,
             "size_m": [26.0, 22.0],
             "surface": "dirt",
             "paint": False,

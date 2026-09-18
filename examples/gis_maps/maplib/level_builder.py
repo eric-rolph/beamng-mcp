@@ -1471,6 +1471,31 @@ def build_level(
     else:
         roads, road_stats = build_roads(spec, frame, data_root / "osm" / "roads.json")
 
+    # --- buildings ---------------------------------------------------------------
+    # Before anything is scattered: the mask a roof makes is what keeps a boulder and
+    # a spruce off it.
+    built: dict = {"items": [], "materials": {}, "mask": None, "stats": {"count": 0}}
+    if getattr(spec, "BUILDINGS", None):
+        from . import buildings as bd
+
+        canopy_file = data_root / "pointcloud" / "canopy.npz"
+        if canopy_file.is_file():
+            with np.load(canopy_file) as npz:
+                built = bd.build(
+                    spec,
+                    fp,
+                    level_root,
+                    level_url,
+                    lambda key: pid(mod_id, key),
+                    dem=dem,
+                    dsm=npz["dsm"],
+                    ground=npz["ground"],
+                    base_rgb=colour_full,
+                    res=res,
+                    data_root=data_root,
+                    log=print,
+                )
+
     # --- placed objects: rocks, shrubs, the forest ------------------------------------
     placed: list[dict] = []
     trees: list[dict] = []
@@ -1676,6 +1701,23 @@ def build_level(
                 for sx, sy in spawn_clear
             )
         ]
+        # Nothing stands on a building either: to the bump detector a roof is a
+        # boulder, and to the canopy height model it is a nine metre tree.
+        if built.get("mask") is not None:
+            bmask = built["mask"]
+            edge = bmask.shape[0] - 1
+
+            def _on_building(x: float, y: float) -> bool:
+                r = int(min(max((fp.size_m / 2 - y) / res, 0), edge))
+                c = int(min(max((x + fp.size_m / 2) / res, 0), edge))
+                return bool(bmask[r, c])
+
+            before_objects, before_trees = len(placed), len(trees)
+            placed = [o for o in placed if not _on_building(o["x"], o["y"])]
+            trees = [t for t in trees if not _on_building(t["x"], t["y"])]
+            built["stats"]["removed_objects"] = before_objects - len(placed)
+            built["stats"]["removed_trees"] = before_trees - len(trees)
+
         tree_species = {t["species"] for t in trees}
         shrub_by_layer = (objects_spec or {}).get("shrub_material_by_layer", {})
         shrub_families = (objects_spec or {}).get("shrub_materials") or {}
@@ -1734,6 +1776,7 @@ def build_level(
         forest_stats["shrubs"] = sum(1 for o in placed if o["kind"] == "shrub")
     report["forest"] = forest_stats
     report["shapes"] = catalogue.get("shapes", [])
+    report["buildings"] = built["stats"]
 
     # --- previews + minimap --------------------------------------------------------
     previews = build_previews(
@@ -1856,8 +1899,22 @@ def build_level(
             ]
             if catalogue
             else []
+        )
+        + (
+            [
+                {
+                    "name": "buildings",
+                    "class": "SimGroup",
+                    "persistentId": pid(mod_id, "buildings"),
+                    "__parent": "MissionGroup",
+                }
+            ]
+            if built["items"]
+            else []
         ),
     )
+    if built["items"]:
+        write_items(main / "MissionGroup" / "buildings" / "items.level.json", built["items"])
     if catalogue:
         from . import scene_objects
 

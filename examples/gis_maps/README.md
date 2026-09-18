@@ -13,7 +13,7 @@ every file the game reads is generated, never hand-edited.
 | `wallace_creek` | Carrizo Plain - Wallace Creek | 4096 m | 1 m | B4 0.5 m lidar (OpenTopography) over USGS 3DEP 1 m | The San Andreas surface trace: the 130 m offset channel, sag ponds, pressure ridges, scarps. Trophy-truck country. |
 | `factory_butte` | Factory Butte Badlands | 4096 m | 1 m | Utah statewide 1 m lidar via USGS 3DEP | Mancos Shale rills, clay fins and mud-wash flats. Natural half-pipes and spine transfers. |
 | `mt_st_helens` | Mount St. Helens Pumice Plain | 6144 m | 1.5 m | USGS 3DEP 1 m (2018 lidar) | The 1980 crater headwall, the lava dome, braided ash canyons down to Spirit Lake. |
-| `black_bear_pass` | Black Bear Pass | 4096 m | 1 m | USGS 3DEP 1 m (2020 lidar) | 3,913 m summit, one-way shelf road, the Steps, switchbacks above Bridal Veil Falls. |
+| `black_bear_pass` | Black Bear Pass | 8192 m | 1 m | USGS 3DEP 1 m (2020 lidar) | 3,913 m summit, one-way shelf road, the Steps, switchbacks above Bridal Veil Falls, then the whole box canyon over Pandora into Telluride and up the far wall to Tomboy and Savage Basin. Buildings modelled from OSM outlines at lidar heights. |
 | `bingham_canyon` | Bingham Canyon Mine | 6144 m | 1.5 m | USGS 3DEP 1 m (2023 lidar) | An inverted mountain: 15 m benches spiralling 1.2 km down, linked by continuous haul roads. |
 
 None of the six has a building, a tree or a guardrail to model. That is the point: the
@@ -109,6 +109,37 @@ python examples/gis_maps/build.py meteor_crater all        # fetch -> terrain ->
 python examples/gis_maps/build.py --all all                # every map
 python -m pytest -q tests/test_gis_maps_pack.py   # static gates
 ```
+
+### Buildings (Black Bear Pass)
+
+Black Bear Pass grew to the whole box canyon, which put Telluride, Pandora and the
+Tomboy and Savage Basin workings inside the level. A town drawn as bare ground with a
+street grid painted on it reads worse than no town, so `maplib/buildings.py` models
+them - and holds them to the same rule as the ground, that nothing is invented:
+
+| what | where it comes from |
+| --- | --- |
+| Outline | OSM `building` ways (ODbL), projected onto the level grid |
+| Eaves and ridge height | The 3DEP point cloud's highest-hit surface minus its classified ground, inside that outline: the low quartile is the eaves, the 90th percentile the ridge |
+| Roof shape | Fitted to the same returns. Level means flat; a rise to a line means gabled; a fall away at both ends means hipped. The ridge runs along the outline's own long axis, from a min-area rectangle |
+| Roof colour | The median of the de-lit orthophoto inside the outline, snapped to the nearest of eight roofing colours, so a red barn stays red without a hundred slightly different greys |
+| Walls | Procedural, in the family OSM's `building` and `building:material` tags name - clapboard, board-and-batten, corrugated steel, brick or coursed rubble - in a colour picked by a hash of the OSM id |
+
+Nothing is traced from a photograph of a facade. A wall is a texture family the way a
+talus block is: a 4 m tile with a window on it at the height windows are, which is what
+a street reads as from the pass.
+
+Two consequences the rest of the pipeline has to know about, and does. To the bump
+detector a roof is a boulder; to the canopy height model it is a nine metre tree. Both
+take the building mask as an exclusion, and the ledger records how many objects and
+trees it took off the roofs.
+
+The terrain needs no healing under a building: 3DEP's 1 m raster is a bare-earth DTM
+with no buildings in it. Nor does the photograph: the roof it recorded is exactly where
+the roof mesh goes.
+
+Buildings ship as one Collada shape per 512 m tile, placed as a `TSStatic` with
+`Visible Mesh Final` collision, so the town culls by tile and you can drive into a wall.
 
 ## Getting the maps into your game
 
@@ -206,9 +237,9 @@ already populated - the generator is the first pass, the editors are the second.
 
 | Editor | What the pack ships for it | Where |
 | --- | --- | --- |
-| **Terrain Editor** (sculpt, smooth, flatten) | `theTerrain.ter`, version 9: u16 heights and the u8 layer map for 4096 x 4096 samples, plus the `.terrain.json` companion the engine writes itself | `levels/<mod_id>/theTerrain.ter` |
+| **Terrain Editor** (sculpt, smooth, flatten) | `theTerrain.ter`, version 9: u16 heights and the u8 layer map for the level's own sample count (4096 x 4096, 8192 x 8192 on Black Bear Pass, 2048 x 2048 on Meteor Crater), plus the `.terrain.json` companion the engine writes itself | `levels/<mod_id>/theTerrain.ter` |
 | **Terrain Painter** (paint surface materials) | The `.ter`'s layer map, painted by the slope and elevation classifier, over the level's TerrainMaterials - each one a v1.5 base + macro + detail set with its own groundmodel (`DIRT`, `ROCK`, `ASPHALT`, ...), so the tyres already know what they are on | `art/terrains/main.materials.json` |
-| **Terrain Import/Export Heightmap** | A 16-bit greyscale PNG of the same heightmap, at the same 4096 x 4096 | `levels/<mod_id>/theTerrain.terrainheightmap.png` |
+| **Terrain Import/Export Heightmap** | A 16-bit greyscale PNG of the same heightmap, at the same sample count | `levels/<mod_id>/theTerrain.terrainheightmap.png` |
 | **Decal Road Editor** | Every road as a `DecalRoad` with `improvedSpline`, per-node width, `material`, `textureLength`, `breakAngle`, `renderPriority`, `startEndFade` and `drivability` - the nodes are the OSM centreline draped on the carved bed | `main/MissionGroup/roads/items.level.json` |
 | **Forest Editor** | A `Forest` object over a `forest4.json` of placed items, each typed by a `TSForestItemData` with `collidable`, `mass`, `radius`, `rigidity` and `snapRotationToTerrain` - so the rocks and trees have collision without a hand pass | `forest/<mod_id>.forest4.json`, `art/forest/managedItemData.json` |
 
@@ -217,7 +248,7 @@ already knows. They are in each map's handoff under `terrain`:
 
 | Map | Samples | Square size | Height scale (`maxHeight`) | Real elevation the 0..maxHeight band covers |
 | --- | --- | --- | --- | --- |
-| `black_bear_pass` | 4096 | 1.0 m | 1405 m | 2720.3 - 4109.7 m |
+| `black_bear_pass` | 8192 | 1.0 m | (rebuilding) | (rebuilding) |
 | `meteor_crater` | 2048 | 1.0 m | 192 m | 1561.8 - 1750.4 m |
 | `bingham_canyon` | 4096 | 1.5 m | 1556 m | 1263.8 - 2803.2 m |
 | `factory_butte` | 4096 | 1.0 m | 106 m | 1353.0 - 1456.6 m |

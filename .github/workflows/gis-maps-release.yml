@@ -33,7 +33,9 @@ permissions:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    # Black Bear Pass is 8192 samples over 8192 m: its point cloud alone is about
+    # 470 M returns to read, and the six maps together took 26 minutes before it grew.
+    timeout-minutes: 340
     steps:
       - uses: actions/checkout@v7
         with:

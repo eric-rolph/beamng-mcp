@@ -1340,3 +1340,95 @@ def test_imagery_delighting_is_recorded(map_key: str) -> None:
     assert recorded["sun_fit"]["correlation"] > 0.3, "the fitted sun does not explain the shading"
     assert 0.0 <= recorded["cast_shadow_fraction"] < 0.3
     assert 0.5 <= recorded["minnaert_k"] <= 1.4 and recorded["gain_p95"] <= 4.0
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_buildings_are_measured_not_invented(map_key: str) -> None:
+    """Every shipped building stands at a height the lidar returned, on its own ground.
+
+    The outline is OSM's and nothing else is: the ridge came from the point cloud's
+    highest hit inside that outline, so the ledger's spread has to look like a town's
+    and not like a constant. A building is also the one thing in this pack that must
+    not have a boulder or a spruce on top of it, so the mask that excludes them is
+    gated here too.
+    """
+
+    spec = load_spec(map_key)
+    if not getattr(spec, "BUILDINGS", None):
+        pytest.skip(f"{map_key}: no buildings in this level")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    stats = handoff["level"]["buildings"]
+    assert stats["count"] > 0, stats
+    cfg = spec.BUILDINGS
+    # Measured, so the spread is a town's: the median under the tallest, and nothing
+    # outside the window the spec allows.
+    assert cfg["min_height_m"] <= stats["ridge_p50_m"] <= stats["ridge_p95_m"], stats
+    assert stats["ridge_p95_m"] <= stats["ridge_max_m"] <= cfg["max_height_m"], stats
+    assert stats["ridge_p50_m"] < stats["ridge_max_m"] - 1.0, ("no spread: a constant?", stats)
+    # Outlines the lidar found nothing standing on are dropped, not drawn at a guess.
+    assert stats["count"] + stats["dropped_no_lidar"] == stats["outlines"], stats
+    # Roofs are fitted, so more than one kind must come out of the fit.
+    assert len(stats["roof_kinds"]) >= 2, stats
+    assert sum(stats["roof_kinds"].values()) == stats["count"], stats
+    assert sum(stats["roof_colours"].values()) == stats["count"], stats
+    assert sum(stats["wall_families"].values()) == stats["count"], stats
+    # The mask covers the footprints it was built from, and it took objects off them.
+    assert stats["mask_cells"] > stats["count"] * 10, stats
+    assert stats["removed_trees"] >= 0 and stats["removed_objects"] >= 0, stats
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_building_tiles_parse_and_stand_on_the_terrain(map_key: str) -> None:
+    """Each tile DAE is Z-up, hashed in the handoff, and its statics sit on the level."""
+
+    import xml.etree.ElementTree as ET
+
+    spec = load_spec(map_key)
+    if not getattr(spec, "BUILDINGS", None):
+        pytest.skip(f"{map_key}: no buildings in this level")
+    root = require_built(map_key)
+    shapes_dir = root / "art" / "shapes" / f"{spec.MOD_ID}_buildings"
+    assert shapes_dir.is_dir(), shapes_dir
+    materials = json.loads((shapes_dir / "main.materials.json").read_text(encoding="utf-8"))
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    ns = {"c": "http://www.collada.org/2005/11/COLLADASchema"}
+    daes = sorted(shapes_dir.glob("*.dae"))
+    assert daes
+    for dae in daes:
+        tree_root = ET.parse(dae).getroot()
+        assert tree_root.find("c:asset/c:up_axis", ns).text == "Z_UP"
+        for material in tree_root.findall("c:library_materials/c:material", ns):
+            name = material.get("name")
+            assert name in materials and materials[name]["mapTo"] == name, (dae.name, name)
+            for stage in materials[name]["Stages"]:
+                for key, value in stage.items():
+                    if key.endswith("Map"):
+                        assert (root / value[len(f"/levels/{spec.MOD_ID}/") :]).is_file(), value
+        shipped = handoff["shipped"][f"art/shapes/{spec.MOD_ID}_buildings/{dae.name}"]
+        assert shipped["sha256"] == sha256_file(dae)
+
+    # items.level.json is line-delimited JSON, one object per line.
+    items = [
+        json.loads(line)
+        for line in (root / "main" / "MissionGroup" / "buildings" / "items.level.json")
+        .read_text(encoding="utf-8")
+        .splitlines()
+        if line.strip()
+    ]
+    half = spec.SITE["size_px"] * spec.SITE["square_size_m"] / 2.0
+    assert len(items) == len(daes), (len(items), len(daes))
+    for item in items:
+        assert item["class"] == "TSStatic", item
+        x, y, _z = item["position"]
+        assert abs(x) <= half and abs(y) <= half, item
+        assert (root / item["shapeName"][len(f"/levels/{spec.MOD_ID}/") :]).is_file(), item
+        assert item["collisionType"] == "Visible Mesh Final", item

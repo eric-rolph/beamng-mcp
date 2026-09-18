@@ -491,3 +491,165 @@ def rock_set(
         "nm": _save_rgb(out_dir / f"{name}_nm.png", _normal_from_height(height, 0.06), srgb=False),
         "r": _save_gray(out_dir / f"{name}_r.png", rough),
     }
+
+
+def facade_set(
+    out_dir: Path,
+    name: str,
+    seed: int,
+    size: int = 1024,
+    *,
+    family: str = "clapboard",
+    colour=(0.55, 0.52, 0.47),
+) -> dict[str, Path]:
+    """A 4 m square of wall: boards, battens, corrugation, brick or rubble, with a window.
+
+    The tile is 4 m across and the wall UVs run a tile every 4 m of perimeter and every
+    4 m of height, so one window lands on each 4 m of frontage with its sill 0.6 m up
+    and its head at 2.2 m. That is a window every four metres at the height windows
+    are, which is what a street reads as from the pass; it is not a survey of anyone's
+    house.
+    """
+
+    rng = np.random.default_rng(seed)
+    u, v = _grid(size)
+    base = _lin(colour)
+    grain = tk.fbm(size, 24, 5, rng)
+    height = np.zeros((size, size), dtype="float32")
+    tone = np.ones((size, size), dtype="float32")
+
+    if family in ("clapboard", "board"):
+        # 200 mm laps across a 4 m tile is 20 courses; board-and-batten runs the other
+        # way, 300 mm boards with a 50 mm batten proud of every joint.
+        if family == "clapboard":
+            phase = v * 20.0
+            lap = phase - np.floor(phase)
+            height = (0.25 + 0.75 * lap).astype("float32")
+            height -= 0.55 * _smoothstep_band(lap, 0.0, 0.06)
+            board_id = np.floor(phase).astype("int64")
+        else:
+            phase = u * 13.0
+            lap = phase - np.floor(phase)
+            board_id = np.floor(phase).astype("int64")
+            height = 0.2 + 0.1 * np.cos(2 * np.pi * lap)
+            batten = _smoothstep_band(lap, 0.0, 0.085)
+            height = height + 0.8 * batten
+        tone = 0.90 + 0.20 * tk._cell_value(board_id % 97, 11)
+        # Sawn timber: fine lengthwise grain, and a weathered wash down the wall.
+        grain_axis = tk.fbm(size, 80, 3, rng) if family == "clapboard" else tk.fbm(size, 3, 3, rng)
+        tone *= 0.96 + 0.08 * grain_axis
+        rough = 0.72 + 0.16 * grain
+    elif family == "steel":
+        # Corrugated sheet: a 76 mm pitch is 52 ribs across 4 m, with a lap seam every
+        # 0.9 m and rust creeping up from the bottom edge.
+        rib = np.cos(2 * np.pi * u * 52.0)
+        height = (0.5 + 0.5 * rib).astype("float32")
+        seam = _smoothstep_band(u * 4.4 - np.floor(u * 4.4), 0.0, 0.03)
+        height = height * (1.0 - 0.5 * seam) + 0.6 * seam
+        rust = np.clip(tk.fbm(size, 6, 4, rng) * 1.4 + (0.72 - v) * 1.6, 0.0, 1.0) ** 2
+        base = (
+            base[None, None, :] * (1 - rust[..., None]) + _lin((0.36, 0.17, 0.10)) * rust[..., None]
+        )
+        tone = 0.95 + 0.10 * grain
+        rough = 0.35 + 0.45 * rust
+    elif family == "brick":
+        # 215 x 65 with a 10 mm joint: 17.8 bricks across and 47 courses up a 4 m tile.
+        course = v * 47.0
+        row = np.floor(course).astype("int64")
+        stagger = 0.5 * (row % 2)
+        along = u * 17.8 + stagger
+        col = np.floor(along).astype("int64")
+        joint = np.maximum(
+            _smoothstep_band(course - row, 0.0, 0.13), _smoothstep_band(along - col, 0.0, 0.05)
+        )
+        height = (1.0 - joint).astype("float32")
+        tone = 0.86 + 0.28 * tk._cell_value((row * 131 + col) % 211, 5)
+        tone = tone * (1 - joint) + 1.35 * joint  # lime mortar is paler than the brick
+        rough = 0.78 + 0.14 * grain
+    else:  # stone: coursed rubble, the blocks themselves from a stretched Worley cell
+        f1, f2, cid = tk.worley(size, 11, rng, jitter=0.85)
+        joint = 1.0 - tk._smooth((f2 - f1) / 0.02)
+        height = (1.0 - joint).astype("float32")
+        tone = 0.82 + 0.34 * tk._cell_value(cid, 13)
+        tone = tone * (1 - joint) + 1.25 * joint
+        rough = 0.82 + 0.12 * grain
+
+    rgb = (base[None, None, :] if base.ndim == 1 else base) * tone[..., None]
+
+    # One window per tile: sill 0.6 m, head 2.2 m, 1.2 m wide, with a frame and a
+    # reveal. Glass is dark and smooth; the frame stands proud.
+    wx0, wx1 = 0.35, 0.65
+    wy0, wy1 = 0.15, 0.55
+    inside = (u > wx0) & (u < wx1) & (v > wy0) & (v < wy1)
+    frame = (
+        (u > wx0 - 0.022) & (u < wx1 + 0.022) & (v > wy0 - 0.022) & (v < wy1 + 0.022)
+    ) & ~inside
+    mullion = inside & (np.abs(u - 0.5) < 0.008)
+    transom = inside & (np.abs(v - (wy0 + wy1) / 2) < 0.008)
+    glass = inside & ~mullion & ~transom
+    # Glass carries the sky it would reflect, darker at the bottom of the pane.
+    sky = _lin((0.24, 0.29, 0.36))[None, None, :] * (0.45 + 0.9 * (v[..., None] - wy0))
+    rgb = np.where(glass[..., None], sky, rgb)
+    rgb = np.where((frame | mullion | transom)[..., None], _lin((0.74, 0.73, 0.70)), rgb)
+    height = np.where(glass, 0.15, height)
+    height = np.where(frame | mullion | transom, 1.0, height)
+    rough = np.where(glass, 0.08, rough)
+    rough = np.where(frame | mullion | transom, 0.45, rough)
+
+    normal = _normal_from_height(height.astype("float32"), 0.8)
+    return {
+        "b": _save_rgb(out_dir / f"{name}_b.png", np.clip(rgb, 0.0, 1.0)),
+        "nm": _save_rgb(out_dir / f"{name}_nm.png", normal, srgb=False),
+        "r": _save_gray(out_dir / f"{name}_r.png", np.clip(rough, 0.0, 1.0)),
+    }
+
+
+def roof_set(
+    out_dir: Path, name: str, seed: int, size: int = 512, *, colour=(0.62, 0.63, 0.64)
+) -> dict[str, Path]:
+    """Standing-seam metal on a 2 m tile: what nearly every roof in the San Juans is.
+
+    Seams every 0.45 m, screw lines across, and the panels each a shade off one
+    another the way a roof replaced in pieces is.
+    """
+
+    rng = np.random.default_rng(seed)
+    u, v = _grid(size)
+    base = _lin(colour)
+    pitch = 2.0 / 0.45  # seams across a 2 m tile
+    phase = u * pitch
+    panel = np.floor(phase).astype("int64")
+    seam = _smoothstep_band(phase - panel, 0.0, 0.045)
+    height = (0.15 + 0.85 * seam).astype("float32")
+    # Screws every 0.6 m down the seam, and the shallow oil-canning of a long panel.
+    screw_phase = v * (2.0 / 0.6)
+    screws = seam * _smoothstep_band(screw_phase - np.floor(screw_phase), 0.0, 0.07)
+    height += 0.45 * screws
+    height += 0.06 * np.cos(2 * np.pi * (phase - panel) - np.pi) * tk.fbm(size, 3, 2, rng)
+    tone = 0.88 + 0.24 * tk._cell_value(panel % 89, 17)
+    weather = tk.fbm(size, 9, 4, rng)
+    tone *= 0.92 + 0.16 * weather
+    # The seam itself is a fold of the same sheet standing 25 mm proud: it reads as a
+    # dark line at any distance because it is always in its own shadow on one side.
+    tone *= 1.0 - 0.45 * seam
+    # Dirt runs down the pitch and collects against the seams.
+    streak = np.clip(tk.fbm(size, 4, 3, rng) * 0.5 + 0.5, 0.0, 1.0) * v
+    tone *= 1.0 - 0.18 * streak * (0.4 + 0.6 * seam)
+    # A little rust in the laps, more where the noise pools.
+    rust = np.clip(weather * 1.3 - 0.55, 0.0, 1.0) ** 2 * (0.4 + 0.6 * seam)
+    rgb = base[None, None, :] * tone[..., None]
+    rgb = rgb * (1 - rust[..., None]) + _lin((0.34, 0.16, 0.09)) * rust[..., None]
+    rough = np.clip(0.30 + 0.35 * weather + 0.35 * rust, 0.0, 1.0)
+    normal = _normal_from_height(height, 1.1)
+    return {
+        "b": _save_rgb(out_dir / f"{name}_b.png", np.clip(rgb, 0.0, 1.0)),
+        "nm": _save_rgb(out_dir / f"{name}_nm.png", normal, srgb=False),
+        "r": _save_gray(out_dir / f"{name}_r.png", rough),
+    }
+
+
+def _smoothstep_band(x: np.ndarray, lo: float, hi: float) -> np.ndarray:
+    """1 inside a band that wraps at 0, falling off smoothly at its edge."""
+
+    d = np.minimum(np.abs(x - lo), np.abs(x - 1.0 - lo))
+    return np.clip(1.0 - d / max(hi - lo, 1e-6), 0.0, 1.0) ** 2

@@ -122,6 +122,11 @@ def fetch(spec, example_root: Path, *, force: bool = False) -> dict:
             fp, data_root / "osm" / "roads.json", force=force, log=_log
         )
         manifest["roads"] = {"kind": roads["kind"], "files": [path.name]}
+    if spec.SOURCES.get("buildings"):
+        path = gis_sources.fetch_osm_buildings(
+            fp, data_root / "osm" / "buildings.json", force=force, log=_log
+        )
+        manifest["buildings"] = {"kind": "osm_overpass", "files": [path.name]}
     (data_root / "fetch.manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n"
     )
@@ -160,6 +165,23 @@ def _disc(radius_px: float) -> np.ndarray:
     r = max(1, round(radius_px))
     yy, xx = np.mgrid[-r : r + 1, -r : r + 1]
     return (xx * xx + yy * yy) <= r * r + 0.5
+
+
+def pad_center_xy(fp, pad) -> tuple[float, float]:
+    """Where a pad sits on the level, in metres from the footprint's centre.
+
+    A pad pinned by ``center_xy`` moves with the footprint; one pinned by ``lat``
+    and ``lon`` stays on the ground it was measured from, which is what a turnout
+    at a named place wants when the level around it grows.
+    """
+
+    if pad.get("lat") is not None and pad.get("lon") is not None:
+        from rasterio.warp import transform
+
+        xs, ys = transform("EPSG:4326", f"EPSG:{fp.epsg}", [float(pad["lon"])], [float(pad["lat"])])
+        cx, cy = fp.center
+        return (xs[0] - cx, ys[0] - cy)
+    return (float(pad["center_xy"][0]), float(pad["center_xy"][1]))
 
 
 def terrain(spec, example_root: Path) -> dict:
@@ -410,7 +432,7 @@ def terrain(spec, example_root: Path) -> dict:
         raw = None
         pad_notes = []
         for pad in pads:
-            px, py = pad["center_xy"]
+            px, py = pad_center_xy(fp, pad)
             sx, sy = pad["size_m"]
             c0 = int(max(0, (px - sx / 2 + half_fp) / res))
             c1 = int(min(dem.shape[0], (px + sx / 2 + half_fp) / res))
@@ -1085,11 +1107,18 @@ def level(spec, example_root: Path) -> dict:
         f"forest/{spec.MOD_ID}.forest4.json",
         "art/forest/managedItemData.json",
         f"art/shapes/{spec.MOD_ID}/main.materials.json",
+        f"art/shapes/{spec.MOD_ID}_buildings/main.materials.json",
     ):
         path = level_root / name
         if not path.is_file():
             continue
         shipped[name] = {"sha256": sha256_file(path), "size": path.stat().st_size}
+    buildings_dir = level_root / "art" / "shapes" / f"{spec.MOD_ID}_buildings"
+    for path in sorted(buildings_dir.glob("*.dae")) if buildings_dir.is_dir() else []:
+        shipped[f"art/shapes/{spec.MOD_ID}_buildings/{path.name}"] = {
+            "sha256": sha256_file(path),
+            "size": path.stat().st_size,
+        }
     for summary in report.get("shapes", []):
         path = level_root / "art" / "shapes" / spec.MOD_ID / summary["file"]
         shipped[f"art/shapes/{spec.MOD_ID}/{summary['file']}"] = {

@@ -55,6 +55,7 @@ examples/gis_maps/*/data/*
 !examples/gis_maps/*/data/osm/
 examples/gis_maps/*/data/osm/*
 !examples/gis_maps/*/data/osm/roads.json
+!examples/gis_maps/*/data/osm/buildings.json
 examples/gis_maps/*/mod/
 examples/gis_maps/*/textures/
 examples/gis_maps/*/authoring/critic/
