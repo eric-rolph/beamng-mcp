@@ -392,6 +392,7 @@ def rock_set(
     *,
     colour=(0.52, 0.46, 0.40),
     strata: float = 0.4,
+    beds_per_tile: int = 7,
     lichen_cover: float = 0.3,
 ) -> dict[str, Path]:
     """Weathered rock: fractures, lichen blotches, optional bedding strata.
@@ -409,7 +410,16 @@ def rock_set(
     pits = tk._smooth(1.0 - pits_f1 / 0.3) * (tk._cell_value(pits_id, 9) > 0.7)
     # Each facet its own tone, +-6 %: a block is several faces, not one skin.
     facet = 0.94 + 0.12 * tk._cell_value(cid, 7)
-    bed_phase = v * 7 + 0.15 * tk.fbm(size, 2, 3, rng)
+    # ``beds_per_tile`` is how many beds fit in one tile HEIGHT, so the caller sets it
+    # from the bed thickness the map declares and the metres a tile covers. It was
+    # hardcoded at 7, which on a 3 m tile draws a bed every 0.43 m whatever the spec
+    # asked for - 5.6x too fine on Black Bear Pass's 2.4 m beds and 7.5x on Meteor
+    # Crater's 3.2 m. Bedding that fine reads as grain rather than as layers, which is
+    # half of why these walls do not look like sedimentary rock.
+    #
+    # It must stay a whole number: v repeats every 1.0 across a tile, so a fractional
+    # count puts a visible discontinuity at every tile boundary up the wall.
+    bed_phase = v * max(1, int(beds_per_tile)) + 0.15 * tk.fbm(size, 2, 3, rng)
     # Bedding as bands with edges (a soft sine never read as strata): the tone
     # steps 10-20 % from bed to bed at ``strata`` 0.45 and the relief follows it.
     bands = np.tanh(2.5 * np.sin(bed_phase * 2 * np.pi))

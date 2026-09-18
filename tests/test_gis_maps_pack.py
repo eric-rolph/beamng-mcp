@@ -3068,6 +3068,49 @@ def test_the_seating_limit_and_the_drape_bound_are_the_numbers_the_stage_reports
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_the_texture_draws_the_bedding_the_spec_asked_for(map_key: str) -> None:
+    """The cliff texture's bedding pitch used to answer to nothing at all.
+
+    `rock_set` counted 7 beds per tile HEIGHT, hardcoded, while the face's v runs
+    `z / tile_m` - so every map drew a bed every `tile_m / 7` metres whatever its spec
+    said. black_bear_pass asked for 2.4 m beds and got 0.43 m, 5.6x too fine; meteor
+    crater asked for 3.2 m and got the same 0.43 m, 7.5x too fine. Bedding that fine
+    reads as grain, not as layers, which is half of why these walls did not look like
+    sedimentary rock - and the other half was that the geometry could not carry them
+    either.
+
+    The count has to stay a whole number or the tile seams at every boundary up the
+    wall, so the drawn bed is not always exactly the declared one. This bounds the
+    ratio rather than demanding equality: a factor of two either way passes every map
+    in the pack today (1.25, 0.94, 0.83, 1.11) and the hardcoded 7 fails all of them at
+    0.13 to 0.18. It is a regression gate on the link existing, not a tightening.
+    """
+
+    spec = load_spec(map_key)
+    if not (getattr(spec, "CLIFFS", None) or {}):
+        pytest.skip(f"{map_key}: declares no CLIFFS")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    cliffs = handoff.get("cliffs") or {}
+    drawn = cliffs.get("texture_bed_m")
+    if drawn is None:
+        pytest.skip(f"{map_key}: no cliff bands were modelled")
+    asked = float(spec.CLIFFS.get("bed_m", 2.2))
+    ratio = float(drawn) / asked
+    assert 0.5 <= ratio <= 2.0, (
+        map_key,
+        f"the texture draws a bed every {drawn} m against the {asked} m the spec "
+        f"declares ({ratio:.2f}x), so the bedding answers to something other than "
+        "bed_m",
+        cliffs.get("texture_beds_per_tile"),
+    )
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_a_seated_block_is_never_buried_deeper_than_the_stage_declares(map_key: str) -> None:
     """The seating rules are written in fractions of an object's height. The drape gate
     bounds absolute metres. Those are different units, so neither can police the other,

@@ -517,6 +517,19 @@ def build(
         "cliff_rock": {"colour": [0.46, 0.44, 0.42], "strata": 0.6, "lichen": 0.15}
     }
     materials_json: dict = {}
+    # The texture's bedding is the SAME bedding the spec declares, at last. `rock_set`
+    # counts beds per tile HEIGHT and the face's v runs z / tile_m, so one bed is
+    # `tile_m / beds_per_tile` metres of wall. It was fixed at 7 and answered to nothing:
+    # every map in the pack was drawing beds 3x to 7.5x finer than it asked for, which
+    # reads as grain rather than as strata.
+    #
+    # Rounded to a whole number because v wraps every tile and a fractional count seams
+    # at every tile boundary, so the bed the wall actually gets is not always the bed
+    # the spec named - `texture_bed_m` below reports what was drawn, not what was asked
+    # for. That distinction is the one this stage keeps getting wrong.
+    tile_m_cfg = max(0.25, float(cfg["tile_m"]))
+    beds_per_tile = max(1, round(tile_m_cfg / max(float(cfg["bed_m"]), 1e-6)))
+    texture_bed_m = tile_m_cfg / beds_per_tile
     for family in sorted(families):
         params = families[family]
         full = f"{mod_id}_{family}"
@@ -527,9 +540,13 @@ def build(
             # a different level on every build. See maplib/stable_seed.py.
             seed + 500 + (stable_hash(family) % 500),
             colour=tuple(params.get("colour", (0.46, 0.44, 0.42))),
-            # The mesh carries the beds now, so the tile's own strata are the partings
-            # inside a bed rather than the bedding itself: authored per material.
+            # `strata` is the AMPLITUDE of the bedding; `beds_per_tile` is its pitch.
+            # The old comment here said the mesh carried the beds so the tile's strata
+            # were only the partings inside one. That was false wherever the lattice is
+            # too coarse to resolve `bed_m` - see `samples_per_bed_*` below - and on
+            # those maps the wall got neither the geometric bedding nor the texture's.
             strata=float(params.get("strata", 0.6)),
+            beds_per_tile=beds_per_tile,
             lichen_cover=float(params.get("lichen", 0.15)),
         )
         materials_json[full] = {
@@ -654,6 +671,10 @@ def build(
         # `face_step_m`. When these differ the mesh is coarser than the budget thinks,
         # and a map whose lattice is already one DEM cell cannot be helped by a bigger
         # triangle budget - only by finer elevation data.
+        # What the TEXTURE draws a bed at, beside the `bed_m` the spec asked for. The
+        # two differ by the whole-number rounding that keeps the tile seamless.
+        "texture_bed_m": round(float(texture_bed_m), 3),
+        "texture_beds_per_tile": int(beds_per_tile),
         "face_step_lattice_m": round(float(lattice_step_m), 3),
         "face_step_is_one_dem_cell": bool(round(step_m / res) <= 1),
         "wall_slope_p50_deg": round(float(np.median(wall_slope)), 1),
