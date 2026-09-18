@@ -17,6 +17,10 @@ SITE = {
     "epsg": 32612,
     "size_px": 4096,
     "square_size_m": 1.0,
+    # 4096 px over 4096 m is 1 m per texel, matching NAIP's own
+    # resolution. Without this the module default of 2048 threw away three quarters of
+    # the photograph the fetch stage had already downloaded.
+    "base_tex_px": 4096,
 }
 
 SOURCES = {
@@ -52,6 +56,29 @@ PALETTE = {
     "fb_shale_slope": {"family": "shale", "seed": 302, "size": 1024, "base": [0.50, 0.48, 0.45]},
     "fb_clay_fin": {"family": "shale", "seed": 303, "size": 1024, "base": [0.44, 0.42, 0.40]},
     "fb_caprock": {"family": "rock_strata", "seed": 304, "size": 1024, "base": [0.52, 0.44, 0.36]},
+}
+
+IMAGERY = {
+    # First pass: the de-lighting is turned on, nothing is tuned. Every value below is
+    # bounded by something already measured in this tree; the site-specific work
+    # (chroma pulls, flat-fields, refills) belongs in a critic round with sheets to
+    # look at, against the reference stations.
+    "delight": True,
+    # NAIP flies within a couple of hours of solar noon in the growing season. At
+    # 38.38 N that puts the sun between 55 and 78 degrees up, and the azimuth within
+    # 50 degrees of due south.
+    "sun_altitude_range": [55.0, 78.0],
+    "sun_azimuth_hint": 180.0,
+    "sun_azimuth_window": 50.0,
+    "strength": 1.0,
+    "tint_from_imagery": 0.6,
+    # Slope mean 8.0, p95 32.1 deg. The fins and caprock lips are short but sheer, so
+    # a little over the 2.2 default; the cap follows the caprock rule at 38 degrees so
+    # a shaded fin borrows only from lit fins.
+    "max_gain": 2.5,
+    "steep_deg": 38.0,
+    "steep_feather_deg": 8.0,
+    "steep_cap": True,
 }
 
 ROADS = {

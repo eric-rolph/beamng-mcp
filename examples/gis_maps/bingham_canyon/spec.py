@@ -17,6 +17,10 @@ SITE = {
     "epsg": 32612,
     "size_px": 4096,
     "square_size_m": 1.5,  # 6144 m footprint
+    # 8192 px over 6144 m is 0.75 m per texel. Without this the module default of 2048
+    # left the ground at 3 m per texel, where a 15 m bench is five texels wide. Drop to
+    # 4096 (1.5 m per texel, still double) if the release job cannot carry the bytes.
+    "base_tex_px": 8192,
 }
 
 SOURCES = {
@@ -27,7 +31,7 @@ SOURCES = {
             "citation": "UT_2023SaltLakeCo_C24 lidar via USGS 3DEP",
         },
     ],
-    "imagery": {"kind": "usgs_naip", "resolution": 1.5},
+    "imagery": {"kind": "usgs_naip", "resolution": 1.0},
     "roads": {"kind": "osm_overpass"},
 }
 
@@ -59,6 +63,31 @@ PALETTE = {
         "size": 1024,
         "base": [0.50, 0.47, 0.34],
     },
+}
+
+IMAGERY = {
+    # First pass: the de-lighting is turned on, nothing is tuned. Every value below is
+    # bounded by something already measured in this tree; the site-specific work
+    # (chroma pulls, flat-fields, refills) belongs in a critic round with sheets to
+    # look at, against the reference stations.
+    "delight": True,
+    # NAIP flies within a couple of hours of solar noon in the growing season. At
+    # 40.52 N that puts the sun between 52 and 74 degrees up, and the azimuth within
+    # 50 degrees of due south.
+    "sun_altitude_range": [52.0, 74.0],
+    "sun_azimuth_hint": 180.0,
+    "sun_azimuth_window": 50.0,
+    "strength": 1.0,
+    "tint_from_imagery": 0.6,
+    # The steepest of the four: slope mean 25.2, p95 49.3 deg, 46 % over 30. A pit this
+    # deep casts its own south wall into shadow in the flight, and that shadow is real
+    # DEM geometry, so the horizon test models it - but the wall still needs a large
+    # gain to come back to the same rock as the lit benches. The cap follows this map's
+    # own bench-face rule at 32 degrees, so a shaded bench borrows only from lit ones.
+    "max_gain": 4.5,
+    "steep_deg": 32.0,
+    "steep_feather_deg": 8.0,
+    "steep_cap": True,
 }
 
 ROADS = {

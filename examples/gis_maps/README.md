@@ -46,9 +46,12 @@ Editor, then lay roads and textures. Each step is a stage of `build.py`:
 4. **dist** (`maplib/packaging.py`): a `ZIP_STORED` archive with only approved BeamNG
    roots, monotonic never-in-the-future member timestamps and a SHA-256 lock.
 
-### The art pass (Meteor Crater and Black Bear Pass)
+### The art pass
 
-Two maps carry the full treatment; each piece is a spec block, so any map can opt in.
+Every map de-lights its orthoimagery. Two carry the full treatment - objects, forest,
+carved beds and their own tuned colour - and the other four carry a first-pass
+`IMAGERY` block that turns the illumination model on with nothing site-specific fitted
+yet. Each piece is a spec block, so any map can opt in to any of it.
 
 - **`IMAGERY`** (`maplib/imagery.py`): the orthoimagery is de-lit against the DEM. The
   baked sun is fitted (hillshade correlation, bounded by the flight's real geometry),
@@ -331,7 +334,7 @@ Each level's `info.json` description carries this attribution.
 The static gates prove the artefacts: header, size, material names, layer indices and
 heightmap rows of the `.ter`; the PNG heightmap is 16-bit and row-consistent with it;
 every scene object parses and its parent exists; every referenced texture ships; the
-ZIP matches its lock. On the two art-pass maps they also hold measured contracts on
+ZIP matches its lock. Wherever a map de-lights, they also hold measured contracts on
 the shipped base colour and terrain: the road bed lighter than the pale side of its
 margin per 100 m window, every large refilled field (cast shadow or snow) within a
 band of its ring's luminance and grain on the base the game draws, no clipped or

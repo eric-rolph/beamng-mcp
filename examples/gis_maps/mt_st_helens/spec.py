@@ -17,6 +17,10 @@ SITE = {
     "epsg": 32610,
     "size_px": 4096,
     "square_size_m": 1.5,  # 6144 m footprint
+    # 8192 px over 6144 m is 0.75 m per texel. Without this the module default of 2048
+    # left the ground at 3 m per texel - flat colour from the driver's seat. Drop to
+    # 4096 (1.5 m per texel, still double) if the release job cannot carry the bytes.
+    "base_tex_px": 8192,
 }
 
 SOURCES = {
@@ -29,7 +33,7 @@ SOURCES = {
             ),
         },
     ],
-    "imagery": {"kind": "usgs_naip", "resolution": 1.5},
+    "imagery": {"kind": "usgs_naip", "resolution": 1.0},
     "roads": {"kind": "osm_overpass"},
 }
 
@@ -69,6 +73,35 @@ PALETTE = {
     },
     "sh_debris_slope": {"family": "scree", "seed": 404, "size": 1024, "base": [0.36, 0.34, 0.33]},
     "sh_snow_ice": {"family": "snow", "seed": 405, "size": 1024, "base": [0.88, 0.90, 0.93]},
+}
+
+IMAGERY = {
+    # First pass: the de-lighting is turned on, nothing is tuned. Every value below is
+    # bounded by something already measured in this tree; the site-specific work
+    # (the snowfields, chroma pulls, flat-fields) belongs in a critic round with sheets
+    # to look at, against the reference stations.
+    "delight": True,
+    # NAIP flies within a couple of hours of solar noon in the growing season. At
+    # 46.22 N that puts the sun between 45 and 68 degrees up, and the azimuth within
+    # 50 degrees of due south.
+    "sun_altitude_range": [45.0, 68.0],
+    "sun_azimuth_hint": 180.0,
+    "sun_azimuth_window": 50.0,
+    "strength": 1.0,
+    "tint_from_imagery": 0.6,
+    # Slope mean 22.8, p95 43.5 deg, 31.9 % over 30: the crater headwall and the
+    # canyon walls are turned right away from the flight's sun and need more than the
+    # 2.2 default to come back to the same ash as their lit neighbours. The cap follows
+    # this map's own crater-wall rule at 34 degrees.
+    "max_gain": 4.0,
+    "steep_deg": 34.0,
+    "steep_feather_deg": 8.0,
+    "steep_cap": True,
+    # NOT YET MODELLED: the flight's snowfields on the north faces and in the crater
+    # are bright colourless cells that will survive the de-lighting as permanent white
+    # ground under an August sky. Black Bear Pass solves this with an IMAGERY["snow"]
+    # block; that block is site-tuned and wants a build to fit against, so it is the
+    # first finding this map's critic round should close.
 }
 
 ROADS = {

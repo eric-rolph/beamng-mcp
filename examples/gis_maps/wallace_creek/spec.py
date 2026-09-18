@@ -85,6 +85,25 @@ PALETTE = {
     "wc_dry_pond": {"family": "clay_pan", "seed": 204, "size": 1024, "base": [0.68, 0.62, 0.52]},
 }
 
+IMAGERY = {
+    # First pass: the de-lighting is turned on, nothing is tuned. Every value below is
+    # bounded by something already measured in this tree; the site-specific work
+    # (chroma pulls, flat-fields, refills) belongs in a critic round with sheets to
+    # look at, against the reference stations.
+    "delight": True,
+    # NAIP flies within a couple of hours of solar noon in the growing season. At
+    # 35.26 N that puts the sun between 60 and 80 degrees up, and the azimuth within
+    # 50 degrees of due south.
+    "sun_altitude_range": [60.0, 80.0],
+    "sun_azimuth_hint": 180.0,
+    "sun_azimuth_window": 50.0,
+    "strength": 1.0,
+    "tint_from_imagery": 0.6,
+    # The gentlest map in the pack: slope mean 7.5, p95 27.7 deg, 3.8 % over 30. The
+    # default gain is enough; nothing here is turned far enough from the sun to need
+    # the cliff treatment.
+}
+
 ROADS = {
     "include": [
         "primary",
