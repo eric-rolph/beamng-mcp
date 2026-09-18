@@ -19,9 +19,61 @@ from __future__ import annotations
 import datetime
 import hashlib
 import json
+import os
+import subprocess
 import zipfile
 from pathlib import Path
 from typing import Any
+
+
+def build_provenance() -> dict[str, Any]:
+    """Which commit and which build produced this ZIP.
+
+    A published release binds nothing to the build that made it. Each map ships its own
+    lock with that ZIP's digest, size and member count, and every one of those checks
+    passes on a release assembled from two runs at different commits, because each map
+    is internally consistent with itself. The only commit statement anywhere is the
+    release body, written by whichever run uploaded last. Recording it per map makes a
+    mixed release detectable outright, by the maps disagreeing, instead of inferred from
+    upload timing.
+
+    Under Actions the two values come from the runner. Locally the commit comes from git
+    and ``source_dirty`` says whether the tree matched it, because a lock claiming a
+    commit it was not built from is worse than one claiming nothing.
+    """
+    run_id = os.environ.get("GITHUB_RUN_ID")
+    commit = os.environ.get("GITHUB_SHA")
+    dirty: bool | None = False if commit else None
+    if not commit:
+        try:
+            root = Path(__file__).resolve().parents[3]
+            commit = subprocess.run(  # noqa: S603 - fixed program, static arguments
+                ["git", "-C", str(root), "rev-parse", "HEAD"],  # noqa: S607
+                capture_output=True,
+                text=True,
+                timeout=15,
+                check=True,
+            ).stdout.strip()
+            dirty = bool(
+                subprocess.run(  # noqa: S603 - fixed program, static arguments
+                    ["git", "-C", str(root), "status", "--porcelain"],  # noqa: S607
+                    capture_output=True,
+                    text=True,
+                    timeout=15,
+                    check=True,
+                ).stdout.strip()
+            )
+        except (OSError, subprocess.SubprocessError):
+            commit, dirty = None, None
+    return {
+        "source_commit": commit or None,
+        "source_dirty": dirty,
+        "build_run_id": int(run_id) if run_id and run_id.isdigit() else None,
+        "build_run_number": (
+            int(n) if (n := os.environ.get("GITHUB_RUN_NUMBER", "")).isdigit() else None
+        ),
+    }
+
 
 APPROVED_ROOTS = {
     "vehicles",
@@ -137,6 +189,7 @@ def build_distribution(example_root: Path, mod_id: str, zip_basename: str) -> di
         "build_serial": int(serial_state["serial"]),
         "timestamp_scheme": "monotonic-serial-days@2026-08-01-clamped-to-build-clock",
         "member_timestamp": datetime.datetime(*timestamp).isoformat(),
+        **build_provenance(),
     }
     lock_path = dist_root / f"{mod_id}.lock.json"
     lock_path.write_text(
