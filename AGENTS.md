@@ -3271,36 +3271,45 @@ class of defect a play-test would otherwise have to find.
   `*BaseTexSize` values — that names the real rule in one screenshot. Run it before
   anything in this pack goes sub-metre again.
 
-### The de-lighting holds the whole base texture, and that is the memory ceiling
+### The de-lighting is the memory ceiling, and `base_tex_px` is NOT the knob
 
-`imagery.py` conditions the base colour over the entire array at once - the sun fit, the
-cast-shadow refills, the per-layer flat-field and the base pulls all read and write the
-whole picture. So the build's working set scales with `base_tex_px` squared, NOT with the
-terrain's sample count, and it is the photograph rather than the ground that decides
-whether a map can be built at all.
+`imagery.py` conditions the base colour over the whole array at once, so the build's
+working set scales with the LEVEL's sample count. `base_tex_px` only sets the size the
+finished texture is written at: `conditioned_colour` works at the level's own
+resolution, and dropping 8192 to 4096 changed nothing when the build was being killed.
+That was a wrong guess made from a parameter name, and it cost two runs. Measure the
+phases before blaming one.
 
-Measured on a 15 GB box: Black Bear Pass at 8192 samples with an 8192 px base was
-**OOM-killed (exit 137)**, having climbed from 2.5 GB during compositing to over 11 GB
-once it reached the de-lighting. The same map with a 4096 px base builds. A silent
-`Killed` in the log with no traceback, or a background stage that simply stops writing
-output, is this and not a network fault - check for exit 137 before blaming anything
-else.
+The signature is **exit 137** with a bare `Killed` and no traceback - a stage that just
+stops writing output is this, not a network fault.
 
-Two consequences:
+Set `GIS_MAPS_MEM=1` and `imagery.py` prints RSS at each phase. On Black Bear Pass at
+8192 samples that reads:
 
-- **Raising `size_px` is cheap; raising `base_tex_px` is not.** A 16384-sample DEM is
-  1.07 GB in float32 and fine. A 16384 px base texture would want tens of gigabytes
-  through the de-lighting. Grow the ground first and let the photograph lag.
-- Elevation in float32 holds a millimetre at terrestrial magnitudes, so a float64 DEM
-  copy is 537 MB at 8192 squared bought for nothing - and `scipy.ndimage` allocates its
-  own copy alongside whatever it is handed.
+    [mem]   1.66 GB  fit_sun
+    [mem]   1.79 GB  delight
+    [mem]   2.29 GB  cast_shadows      <- first call
+    [mem]   7.20 GB  cast_shadows      <- second call, then killed
 
-The fix that removes the ceiling is to run the de-lighting in overlapping tiles, which
-is not a small change: the sun fit is global, the flat-field bins over a whole layer,
-and the refills read 100-200 m neighbourhoods, so each of those needs either a global
-pre-pass over a decimated copy or a margin wide enough to be exact. Until that exists,
-`base_tex_px` is capped by the machine, and the cap belongs in the spec with a comment
-saying so.
+Two things it showed:
+
+- **`cast_shadows` held six copies of a padded, rotated grid.** It pads by 21 % and
+  rotates so the sun runs along +x; at 8192 samples that grid is 11,632 squared, 541 MB
+  a copy, and the plain array form kept `padded`, `rotated`, `ray`, `suffix_max`,
+  `horizon`, `ray + 0.05`, `lit` and `back` alive together. Every row is independent
+  once rotated, so it now runs in row blocks and frees as it goes: **measured 1.83 GB
+  peak at 8192 samples, down from about 4 GB, and bit-identical to the whole-array form
+  on every case tested.**
+- **`delight` itself is the remaining ceiling.** Between its two `cast_shadows` calls it
+  adds about 5 GB: `smooth`, `shade`, `visibility`, `openness`, `sky`, `illum`, plus
+  `colour_u8.astype("float32") / 255.0`, which is 805 MB and a temporary of the same
+  size. The illumination model runs at the level's full resolution even though
+  illumination is low-frequency; computing it on a decimated grid and upsampling is the
+  fix, and `_gaussian_decimated` in the same file is already the pattern for it.
+
+Elevation in float32 holds a millimetre at terrestrial magnitudes, so a float64 DEM copy
+is 537 MB at 8192 squared bought for nothing - and `scipy.ndimage` allocates its own copy
+alongside whatever it is handed.
 
 ### Pack conventions that are ours, not the engine's
 

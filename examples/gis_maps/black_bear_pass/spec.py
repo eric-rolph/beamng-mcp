@@ -29,12 +29,13 @@ SITE = {
     "epsg": 32613,
     "size_px": 8192,
     "square_size_m": 1.0,
-    # 4096 px over 8192 m is 2 m per texel, the same as Bingham Canyon and Mt St
-    # Helens. 8192 px would hold the de-lit NAIP at its own 1 m, but the de-lighting
-    # works on the whole base at once and an 8192 px pass was OOM-killed at about
-    # 15 GB on a 15 GB box (exit 137). Until imagery.py works in overlapping tiles
-    # rather than over the whole array, the photograph pays for the ground.
-    "base_tex_px": 4096,
+    # 8192 px over 8192 m keeps the de-lit NAIP at its native 1 m per texel. This is
+    # NOT what the de-lighting's memory scales with: it conditions the colour at the
+    # LEVEL's resolution and base_tex_px only sets the size the finished texture is
+    # written at, so dropping it to 4096 saved nothing when the build was being
+    # OOM-killed. What did was cast_shadows, which held six copies of an 11,632 px
+    # rotated grid at once and now works in row blocks.
+    "base_tex_px": 8192,
     "detail_tex_px": 1024,
 }
 

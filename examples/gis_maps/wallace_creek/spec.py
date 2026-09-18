@@ -3,7 +3,8 @@
 The San Andreas Fault's textbook surface trace: the 130 m offset channel at Wallace
 Creek, sag ponds, pressure ridges and linear scarps along the Elkhorn Scarp. A 16,384 m
 square at 1 m per sample, with the B4 0.5 m bare-earth lidar composited over the 3DEP
-baseline wherever the B4 swath covers the level.
+baseline wherever the B4 swath covers the level. The base colour is 8192 px, 2 m per
+texel: the ground keeps its metre and the photograph pays for the reach.
 
 The square used to be 4096 m round the offset channel alone, which is the geology and
 none of the place. It now runs 16.4 km along the plain: Soda Lake and its north shore,
@@ -31,9 +32,13 @@ SITE = {
     "epsg": 32611,  # WGS 84 / UTM zone 11N
     "size_px": 16384,
     "square_size_m": 1.0,  # 16,384 m footprint
-    # 16,384 px holds the de-lit NAIP at its own 1 m per texel, and is the largest
-    # single base texture a GPU will take.
-    "base_tex_px": 16384,
+    # The terrain is 16,384 samples at 1 m - a float32 DEM of that size is 1.07 GB and
+    # builds comfortably. The base texture is the expensive one: imagery.py de-lights
+    # the whole array at once, so the working set goes as base_tex_px squared, and an
+    # 8192 px base over 16,384 m is 2 m per texel. A 16,384 px base would hold the NAIP
+    # at its own metre and is what this wants once the de-lighting works in overlapping
+    # tiles; today it would be OOM-killed the way Black Bear Pass was (exit 137).
+    "base_tex_px": 8192,
 }
 
 SOURCES = {

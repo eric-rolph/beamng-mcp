@@ -17,6 +17,29 @@ import numpy as np
 from . import heightmap as hm
 
 
+def _rss_gb() -> float:
+    """Resident set in GB, for the phase log below."""
+
+    try:
+        with open("/proc/self/status", encoding="utf-8") as fh:
+            for line in fh:
+                if line.startswith("VmRSS:"):
+                    return int(line.split()[1]) / 1048576.0
+    except OSError:
+        pass
+    return 0.0
+
+
+def _mem(tag: str) -> None:
+    """One line per phase when GIS_MAPS_MEM is set: the de-lighting is the pack's
+    memory ceiling and this is how its phases are told apart."""
+
+    import os
+
+    if os.environ.get("GIS_MAPS_MEM"):
+        print(f"    [mem] {_rss_gb():6.2f} GB  {tag}", flush=True)
+
+
 def srgb_to_linear(rgb_u8: np.ndarray) -> np.ndarray:
     c = rgb_u8.astype("float32") / 255.0
     return np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
@@ -38,6 +61,7 @@ def fit_sun(
     azimuth_window: float = 60.0,
 ) -> dict:
     """Grid-search the sun (azimuth, altitude) whose hillshade best correlates with luminance."""
+    _mem("fit_sun")
 
     from scipy import ndimage
 
@@ -88,6 +112,7 @@ def cast_shadows(
     The DEM is rotated so the sun shines along +columns, a running maximum of
     ``h + x * tan(alt) * res`` decides occlusion in O(N^2), then the mask rotates back.
     """
+    _mem("cast_shadows")
 
     from scipy import ndimage
 
@@ -101,19 +126,32 @@ def cast_shadows(
     # az - 90 brings that direction onto +x (az 90 -> no rotation, az 0 -> -90).
     angle = azimuth_deg - 90.0
     rotated = ndimage.rotate(padded, angle, reshape=False, order=1, mode="nearest")
+    del padded
     k = math.tan(math.radians(altitude_deg)) * res
     m = rotated.shape[1]
     x = np.arange(m, dtype="float32") * k
     # Looking toward the sun means occluders sit at LARGER x. A point x' > x blocks x when
     # h' > h + (x' - x) * tan(alt) * res, i.e. when h' - x'k > h - xk: compare each sample
     # with the suffix maximum of ``h - xk`` over everything sunward of it.
-    ray = rotated - x[None, :]
-    suffix_max = np.flip(np.maximum.accumulate(np.flip(ray, axis=1), axis=1), axis=1)
-    horizon = np.concatenate(
-        [suffix_max[:, 1:], np.full((rotated.shape[0], 1), -np.inf, dtype="float32")], axis=1
-    )
-    lit = (horizon <= ray + 0.05).astype("float32")
+    #
+    # Every row is independent once the grid is rotated, so this runs in row blocks. Whole
+    # -array temporaries are what put this function at 7 GB on an 8192 sample level and got
+    # the build OOM-killed: the rotated grid is padded to 11,632 squared, which is 541 MB
+    # a copy, and the plain form holds six or seven of them at once.
+    lit = np.empty(rotated.shape, dtype="float32")
+    rows = max(1, (1 << 24) // max(1, m))
+    for r0 in range(0, rotated.shape[0], rows):
+        r1 = min(r0 + rows, rotated.shape[0])
+        ray = rotated[r0:r1] - x[None, :]
+        suffix_max = np.flip(np.maximum.accumulate(np.flip(ray, axis=1), axis=1), axis=1)
+        block = lit[r0:r1]
+        # The horizon of column j is the suffix maximum from j+1 onward; the last column
+        # has nothing sunward of it and is always lit.
+        block[:, :-1] = suffix_max[:, 1:] <= ray[:, :-1] + 0.05
+        block[:, -1] = 1.0
+    del rotated
     back = ndimage.rotate(lit, -angle, reshape=False, order=1, mode="nearest")
+    del lit
     out = back[pad : pad + n, pad : pad + n]
     return np.clip(ndimage.gaussian_filter(out, 1.0), 0.0, 1.0)
 
@@ -166,6 +204,7 @@ def delight(
     them at that share of its luminance: the game draws the trees, and the base
     under them is the ground between the trunks, not the crown tops.
     """
+    _mem("delight")
 
     from scipy import ndimage
 
@@ -770,6 +809,7 @@ def layer_colour_stats(
     colour_u8: np.ndarray, layer: np.ndarray, materials: list[str]
 ) -> dict[str, list[float]]:
     """Mean linear RGB of the imagery under each terrain layer (for detail-tint matching)."""
+    _mem("layer_colour_stats")
 
     if colour_u8.shape[0] != layer.shape[0]:
         from PIL import Image
@@ -1171,6 +1211,7 @@ def paint_lakes(
     the colour the lit lake shows (``rgb``, sRGB), with a little of their own grain.
     With ``cyan_excess`` the flat, bright blobs whose green and blue both stand that
     far above red (a tailings pond in the flight's turquoise) are painted the same."""
+    _mem("paint_lakes")
 
     from scipy import ndimage
 
@@ -1289,6 +1330,7 @@ def pull_layers(
     A layer with a ``tapers`` entry fades its pull in over that many metres inside
     its boundary (no tone step on a contour); cells outside ``lum_gate`` times the
     layer's median luminance (a white spoil field, a black shadow) are left alone."""
+    _mem("pull_layers")
 
     from scipy import ndimage
 
@@ -1366,6 +1408,7 @@ def pull_regions(
     because the band's far side is dark), the band's mean colour to the target's
     colour, the grain kept. The summit plateau the flight saw as chalk (rock, refill
     and outcrop together) comes to the tone its photographs show."""
+    _mem("pull_regions")
 
     from scipy import ndimage
 
@@ -1463,6 +1506,7 @@ def aspect_flatfield(
     Bins are interpolated around the circle so no seam appears between them, and the
     factor fades in over the first ten degrees of slope so flats stay as they were.
     """
+    _mem("aspect_flatfield")
 
     from scipy import ndimage
 
@@ -1736,6 +1780,7 @@ def pull_chroma(
     (a white spoil field) are left alone. With ``near_layer`` the chroma within
     ``within_m`` of that layer is raised by ``saturation_gain``, tapered, so the
     ejecta reads rust beside the rubble. Returns (colour, cells pulled)."""
+    _mem("pull_chroma")
 
     from scipy import ndimage
 
