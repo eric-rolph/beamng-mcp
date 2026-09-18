@@ -1116,6 +1116,26 @@ def refill_check(
         c0, c1 = max(cols.min() - pad, 0), min(cols.max() + pad + 1, n)
         field = labels[r0:r1, c0:c1] == lab
         interior = ndimage.binary_erosion(field, iterations=max(1, int(6.0 / texel_m)))
+        # And the painted bed is not part of the field, for the same reason it is not
+        # part of the ring. `refill_match` already refuses to correct a bed cell inside
+        # a field - it zeroes its feather there, so the bed keeps the contrast the stage
+        # before it just enforced - while this measured those same cells as if they were
+        # ground. Whichever way the bed sits against the shadow, the match cannot move
+        # those texels by design, so counting them here asks for something no fix can
+        # deliver: the ratio barely moves however hard the ground around them is lifted,
+        # and the gate reads that as the match having failed. Measured on the shipped
+        # Meteor Crater level, the 2,973 m2 field this gate reports at (-35.3, 670.3) is
+        # 84.4% road bed, on a level that is 1.16% road bed overall. It is a shadow on a
+        # road, not an unlifted field.
+        bed_share = 0.0
+        if bed is not None:
+            not_bed = ~bed[r0:r1, c0:c1]
+            bed_share = float((interior & ~not_bed).sum()) / max(int(interior.sum()), 1)
+            # Below 20 cells the remainder is noise, so the field keeps its old reading
+            # and `bed_fraction` says why it is the one it is.
+            if (interior & not_bed).sum() >= 20:
+                interior = interior & not_bed
+            del not_bed
         if interior.sum() < 20:
             interior = field
         dist = ndimage.distance_transform_edt(~field) * texel_m
@@ -1140,6 +1160,8 @@ def refill_check(
                     float(exg[r0:r1, c0:c1][interior].mean() - exg[r0:r1, c0:c1][ring].mean()), 3
                 ),
                 "grain_ratio": round(float(f_in.std() / max(f_ring.std(), 1e-4)), 3),
+                # How much of the field is road the match is not allowed to touch.
+                "bed_fraction": round(bed_share, 3),
             }
         )
     if not fields:
