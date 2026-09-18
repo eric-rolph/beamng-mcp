@@ -11,12 +11,14 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
 import re
 import shutil
 import struct
 import sys
 import zipfile
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 import pytest
@@ -762,6 +764,19 @@ def test_distribution_zip_matches_lock(map_key: str) -> None:
         assert f"levels/{spec.MOD_ID}/theTerrain.ter" in members
         assert all(info.compress_type == zipfile.ZIP_STORED for info in archive.infolist())
         assert packaging.future_dated_members(archive) == []
+    # And the lock says which build made it. Every other field here is a property of
+    # the ZIP alone, so they all pass on a release assembled from two runs at two
+    # commits: each map is internally consistent with itself. These two are the only
+    # fields that can disagree between maps, which is what makes a mixed release
+    # detectable rather than inferred.
+    assert "source_commit" in lock, (
+        f"{map_key}: the lock names no commit, so nothing binds this ZIP to a build"
+    )
+    assert re.fullmatch(r"[0-9a-f]{40}", lock["source_commit"] or ""), lock["source_commit"]
+    # A runner checks out the commit it names, so a CI lock is never dirty. A local
+    # build may be, and says so rather than claiming a commit it was not built from.
+    if lock.get("build_run_id") is not None:
+        assert lock["source_dirty"] is False, lock
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
@@ -2190,3 +2205,42 @@ def test_building_tiles_parse_and_stand_on_the_terrain(map_key: str) -> None:
         assert abs(x) <= half and abs(y) <= half, item
         assert (root / item["shapeName"][len(f"/levels/{spec.MOD_ID}/") :]).is_file(), item
         assert item["collisionType"] == "Visible Mesh Final", item
+
+
+def test_the_lock_records_the_commit_and_run_that_built_it() -> None:
+    """A per-map lock proves the ZIP, not the release.
+
+    `sha256`, `size` and `members` are all properties of the ZIP in front of them, so a
+    release assembled from two runs at two commits passes every one of them: each map is
+    internally consistent with itself, and the only commit statement anywhere is the
+    release body, written by whichever run happened to upload last. The commit and run
+    are the only fields that can disagree BETWEEN maps.
+    """
+    _, _, _, packaging, _, _ = load_maplib()
+    env = {
+        "GITHUB_SHA": "0" * 39 + "a",
+        "GITHUB_RUN_ID": "35389688806",
+        "GITHUB_RUN_NUMBER": "55",
+    }
+    with mock.patch.dict(os.environ, env, clear=False):
+        under_actions = packaging.build_provenance()
+    assert under_actions == {
+        "source_commit": "0" * 39 + "a",
+        # Nothing to be dirty about: the runner checks out the commit it names.
+        "source_dirty": False,
+        "build_run_id": 35389688806,
+        "build_run_number": 55,
+    }
+
+    # Off a runner the run fields are absent rather than invented, and the commit comes
+    # from git with `source_dirty` beside it - a lock naming a commit it was not built
+    # from is worse than one naming none.
+    bare = {k: "" for k in env}
+    with mock.patch.dict(os.environ, bare, clear=False):
+        for key in env:
+            os.environ.pop(key, None)
+        local = packaging.build_provenance()
+    assert local["build_run_id"] is None and local["build_run_number"] is None
+    assert local["source_commit"] is None or re.fullmatch(r"[0-9a-f]{40}", local["source_commit"])
+    assert local["source_dirty"] in (True, False, None)
+    assert (local["source_commit"] is None) == (local["source_dirty"] is None)
