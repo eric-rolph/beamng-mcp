@@ -3303,9 +3303,51 @@ Two things it showed:
 - **`delight` itself is the remaining ceiling.** Between its two `cast_shadows` calls it
   adds about 5 GB: `smooth`, `shade`, `visibility`, `openness`, `sky`, `illum`, plus
   `colour_u8.astype("float32") / 255.0`, which is 805 MB and a temporary of the same
-  size. The illumination model runs at the level's full resolution even though
-  illumination is low-frequency; computing it on a decimated grid and upsampling is the
-  fix, and `_gaussian_decimated` in the same file is already the pattern for it.
+  size.
+
+  **Decimating the illumination model is NOT the fix, though this section used to say
+  it was.** Two sessions went at it on that advice. The one term that genuinely is
+  low-frequency is the openness the AO estimate measures - a box mean over a 40 m
+  radius, which holds nothing finer by construction - and taking even that one on a
+  coarser grid does not survive measurement. Against the full-resolution result on
+  1,500 m of relief, a grid twice as coarse brought back bilinearly moves the finished
+  AO by **0.18 at the 99th percentile** (max 0.43), and four times as coarse by 0.32
+  (max 0.60). The reason is structural rather than a tuning problem: `depth` is divided
+  by only `radius_px * res * 0.35`, about 14 m at radius 40, so a few metres of error
+  in the mean is a large part of the output, and the bilinear re-expansion adds its own
+  error exactly at the steep features the de-lighting cares about. `shade` and
+  `visibility` are worse candidates still - a terrain normal and a cast-shadow edge are
+  the per-cell signal the de-lighting exists to remove, so decimating them would smooth
+  away the thing being corrected. The rejection is recorded in
+  `heightmap.ambient_occlusion`'s own docstring so it is not re-derived from here.
+
+  **The ceiling is `refill`, not the illumination model.** Sampling RSS every 20 ms and
+  charging each sample to the phase it lands in puts the peak at 2048 samples in the
+  snow re-seeding rounds - `refill(snow_mask)` and `_fill_kinds` - at **1.05 GB of a
+  1.05 GB peak**, while the whole illumination prologue tops out at 0.55 GB. `refill`
+  rebuilds the ring fields and the neighbourhood weights over the whole array, and the
+  snow path calls it up to three times. Any fix that gets 8192 samples to build has to
+  come from there. Two sessions measured this independently and agree.
+
+  **The two array-accounting fixes are real, keep the result bit-identical, and are not
+  enough on their own** - measured 4.18 GB to 3.94 GB at 4096 samples, about 6 %, which
+  does not lift the ceiling. Worth having, not worth mistaking for the answer:
+
+  - **The colour conversions.** `np.where(cond, a, b)` evaluates BOTH arms over the
+    whole array before it picks, so the obvious spelling of `srgb_to_linear` holds four
+    to six full RGB float32 temporaries at once - 805 MB each at 8192 samples. Applying
+    the transfer curve in place, and computing separately only the few cells below the
+    knee, is the same numbers in one buffer.
+  - **Lifetimes.** `shade`, `sky` and `openness` were each left bound for the remaining
+    600 lines of the frame after their last real read - 268 MB apiece at 8192 samples,
+    on top of the temporaries. Freeing them at that read is the rest of it. Watch
+    `shade` in particular: it looks finished early but is read again about 550 lines
+    down as `shade > 0.5`, so what survives is the one-byte mask, not the float array.
+
+  And keep the DEM in float32 on the way through: `ambient_occlusion` used to take
+  `dem.astype("float64")` and hand it to `uniform_filter`, which allocates its own
+  output beside it - two 537 MB arrays at 8192 squared for a field float32 holds to a
+  millimetre. The float32 form agrees with the old one to 8e-06.
 
 Elevation in float32 holds a millimetre at terrestrial magnitudes, so a float64 DEM copy
 is 537 MB at 8192 squared bought for nothing - and `scipy.ndimage` allocates its own copy

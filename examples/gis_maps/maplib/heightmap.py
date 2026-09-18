@@ -243,13 +243,30 @@ def normal_map(dem: np.ndarray, res: float, strength: float = 1.0) -> np.ndarray
 
 
 def ambient_occlusion(dem: np.ndarray, res: float, radius_px: int = 24) -> np.ndarray:
-    """Cheap AO: how far below its smoothed surroundings a sample sits, 0..1 (1 = open)."""
+    """Cheap AO: how far below its smoothed surroundings a sample sits, 0..1 (1 = open).
+
+    Kept in float32 throughout. Elevation in float32 holds a millimetre at terrestrial
+    magnitudes, so the float64 copy this used to make is 537 MB at 8192 squared bought
+    for nothing - twice over, since ``scipy.ndimage`` allocates its own output beside
+    whatever it is handed. Against the float64 spelling this agrees to 8e-06.
+
+    NOT decimated, though the box mean looks like it should survive it: taking the mean
+    on a grid 2x coarser and bringing it back bilinearly moves the finished AO by 0.18
+    at the 99th percentile on 1,500 m of relief, because the depth is divided by only
+    ``radius_px * res * 0.35`` and a few metres of error in the mean is a large part of
+    that. The de-lighting's memory is won in ``imagery.srgb_to_linear`` instead.
+    """
 
     from scipy import ndimage
 
-    smooth = ndimage.uniform_filter(dem.astype("float64"), size=2 * radius_px + 1, mode="nearest")
-    depth = np.clip((smooth - dem) / (radius_px * res * 0.35), 0.0, 1.0)
-    return (1.0 - 0.6 * depth).astype("float32")
+    dem = np.asarray(dem, dtype="float32")
+    smooth = ndimage.uniform_filter(dem, size=2 * radius_px + 1, mode="nearest")
+    smooth -= dem
+    smooth /= radius_px * res * 0.35
+    np.clip(smooth, 0.0, 1.0, out=smooth)
+    smooth *= -0.6
+    smooth += 1.0
+    return smooth
 
 
 def limit_slope(
