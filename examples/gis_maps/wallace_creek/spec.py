@@ -27,18 +27,18 @@ SITE = {
     # Balanced over the landmarks rather than over the offset channel: the tightest of
     # them (Elkhorn Road's south end, and the Temblor crest above Wallace Creek) each
     # keep 790 m of margin, and Wallace Creek itself 2.6 km.
-    "center_lat": 35.2215,
-    "center_lon": -119.8310,
+    "center_lat": 35.262,
+    "center_lon": -119.815,
     "epsg": 32611,  # WGS 84 / UTM zone 11N
-    "size_px": 16384,
-    "square_size_m": 1.0,  # 16,384 m footprint
-    # The terrain is 16,384 samples at 1 m - a float32 DEM of that size is 1.07 GB and
-    # builds comfortably. The base texture is the expensive one: imagery.py de-lights
-    # the whole array at once, so the working set goes as base_tex_px squared, and an
-    # 8192 px base over 16,384 m is 2 m per texel. A 16,384 px base would hold the NAIP
-    # at its own metre and is what this wants once the de-lighting works in overlapping
-    # tiles; today it would be OOM-killed the way Black Bear Pass was (exit 137).
-    "base_tex_px": 8192,
+    # WANTED: 16384 at 1 m, the 16.4 km square that holds Soda Lake, the Goodwin
+    # Education Center, Elkhorn Road, Wallace Creek and the Temblor crest. BLOCKED: the
+    # de-lighting holds the level in memory and 8192 samples is already OOM-killed on a
+    # 15 GB box, so 16384 is four times an amount that does not fit. Back to the square
+    # round the offset channel until imagery.py runs its illumination model on a
+    # decimated grid; see AGENTS.md, "The de-lighting is the memory ceiling".
+    "size_px": 4096,
+    "square_size_m": 1.0,  # 4096 m footprint
+    "base_tex_px": 4096,
 }
 
 SOURCES = {

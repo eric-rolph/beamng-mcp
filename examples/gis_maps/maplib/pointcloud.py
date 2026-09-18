@@ -225,6 +225,49 @@ def fetch_canopy(
     return meta
 
 
+def _regrid_canopy(dsm, ground, counts, shape):
+    """Put a canopy grid on the DEM's grid when the two were gridded at different steps.
+
+    The cloud is gridded once at fetch time and the level's sample count can change
+    afterwards, so the two need not agree. Block-reducing by an integer factor is exact
+    for what each array means: the surface takes the block MAXIMUM, because a tree top
+    is the highest return over the ground it shades and averaging would shave it; the
+    ground takes the block MINIMUM, because bare earth under a canopy is the lowest
+    return; counts add. Anything else falls back to an area resample.
+    """
+
+    import numpy as np
+
+    n, m = dsm.shape[0], shape[0]
+    if n % m == 0:
+        f = n // m
+        blocks = (m, f, m, f)
+        import warnings
+
+        with warnings.catch_warnings():
+            # A block with no return at all is legitimate over water and rock faces;
+            # nanmax of nothing is NaN, which is exactly what the caller wants.
+            warnings.simplefilter("ignore", RuntimeWarning)
+            dsm = np.nanmax(dsm.reshape(blocks).transpose(0, 2, 1, 3).reshape(m, m, f * f), -1)
+            ground = np.nanmin(
+                ground.reshape(blocks).transpose(0, 2, 1, 3).reshape(m, m, f * f), -1
+            )
+        counts = counts.reshape(blocks).sum(axis=(1, 3), dtype="int64")
+        return (
+            dsm.astype("float32"),
+            ground.astype("float32"),
+            np.minimum(counts, 65535).astype("uint16"),
+        )
+    from PIL import Image
+
+    def _rs(a, mode):
+        return np.asarray(
+            Image.fromarray(a.astype("float32"), mode="F").resize((m, m), Image.BOX)
+        ).astype("float32")
+
+    return _rs(dsm, "F"), _rs(ground, "F"), _rs(counts.astype("float32"), "F").astype("uint16")
+
+
 def canopy_height(grid_file: Path, dem: np.ndarray, *, max_height_m: float = 60.0):
     """Canopy height model on the DEM grid from the gridded returns.
 
@@ -240,7 +283,7 @@ def canopy_height(grid_file: Path, dem: np.ndarray, *, max_height_m: float = 60.
     ground = data["ground"].astype("float32")
     counts = data["counts"]
     if dsm.shape != dem.shape:
-        raise ValueError(f"canopy grid {dsm.shape} does not match the DEM {dem.shape}")
+        dsm, ground, counts = _regrid_canopy(dsm, ground, counts, dem.shape)
     has_ground = np.isfinite(ground)
     offset = float(np.nanmedian((ground - dem)[has_ground])) if has_ground.any() else 0.0
     base = np.where(has_ground, ground, dem + offset)

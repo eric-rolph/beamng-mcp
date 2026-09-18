@@ -411,6 +411,13 @@ def delight(
     else:
         canopy_fill = None
         gap_fill = None
+    # Everything above is past its last use, and each of these is 268 MB at 8192
+    # samples with `srgb` at 805 MB. Holding them to the end of a 650-line function is
+    # most of what put this stage over the OOM killer's line: the names stay bound to
+    # the frame long after the arrays stop being read.
+    del openness, illum, dem_r, smooth, lum
+    if "srgb" in dir():
+        del srgb
     # The penumbra: a cell the gain lifts more than 2.5x within 4 m of a field took
     # that lift without being in the mask and shipped as a tan halo tracing every
     # shadow's edge. It is refilled with the field.

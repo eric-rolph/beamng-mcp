@@ -1163,6 +1163,7 @@ def level(spec, example_root: Path) -> dict:
         "imagery": report.get("imagery", {}),
         "layer_tints": report.get("layer_tints", {}),
         "forest": report.get("forest", {}),
+        "buildings": report.get("buildings", {}),
         "trail_features": report.get("trail_features", []),
         "road_contrast": report.get("road_contrast", {}),
         "shipped": shipped,

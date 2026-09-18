@@ -1362,7 +1362,7 @@ def test_buildings_are_measured_not_invented(map_key: str) -> None:
             encoding="utf-8"
         )
     )
-    stats = handoff["level"]["buildings"]
+    stats = handoff["buildings"]
     assert stats["count"] > 0, stats
     cfg = spec.BUILDINGS
     # Measured, so the spread is a town's: the median under the tallest, and nothing

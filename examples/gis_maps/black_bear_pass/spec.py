@@ -27,15 +27,20 @@ SITE = {
     "center_lat": 37.9220,
     "center_lon": -107.7765,
     "epsg": 32613,
-    "size_px": 8192,
-    "square_size_m": 1.0,
-    # 8192 px over 8192 m keeps the de-lit NAIP at its native 1 m per texel. This is
-    # NOT what the de-lighting's memory scales with: it conditions the colour at the
-    # LEVEL's resolution and base_tex_px only sets the size the finished texture is
-    # written at, so dropping it to 4096 saved nothing when the build was being
-    # OOM-killed. What did was cast_shadows, which held six copies of an 11,632 px
-    # rotated grid at once and now works in row blocks.
-    "base_tex_px": 8192,
+    # 4096 at 2 m, not 8192 at 1 m. The metre is what this map wants - the shelf road
+    # is 3.2 m wide - but the de-lighting holds the whole level in memory and 8192
+    # samples is OOM-killed (exit 137) on a 15 GB box even after cast_shadows was cut
+    # from 4 GB to 1.8 and delight's spent arrays were freed. 4096 is the array size
+    # every map that builds today uses. The metre comes back when the illumination
+    # model runs on a decimated grid; see AGENTS.md, "The de-lighting is the memory
+    # ceiling".
+    "size_px": 4096,
+    "square_size_m": 2.0,
+    # 4096 px over 8192 m is 2 m per texel, matching the grid. base_tex_px is NOT what
+    # the de-lighting's memory scales with - it conditions the colour at the LEVEL's
+    # resolution and this only sets the size the finished texture is written at - so
+    # raising it back is free of memory once the level's own sample count comes down.
+    "base_tex_px": 4096,
     "detail_tex_px": 1024,
 }
 

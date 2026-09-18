@@ -142,6 +142,13 @@ def load_footprints(path: Path, fp, *, min_area_m2: float = 12.0) -> list[dict]:
             continue
         if all(abs(x) > half or abs(y) > half for x, y in ring):
             continue
+        # An outline straddling the edge with its CENTRE outside would put its tile's
+        # TSStatic origin outside the level, where the engine has no ground for it.
+        # (Not cx/cy - those hold the footprint centre every ring is projected against.)
+        mid_x = sum(px for px, _ in ring) / len(ring)
+        mid_y = sum(py for _, py in ring) / len(ring)
+        if abs(mid_x) > half or abs(mid_y) > half:
+            continue
         out.append({"id": int(way["id"]), "tags": tags, "ring": ring, "area_m2": area})
     out.sort(key=lambda b: -b["area_m2"])
     return out
@@ -315,6 +322,7 @@ def measure(
     *,
     min_height_m: float = 2.2,
     max_height_m: float = 40.0,
+    roof_band_m: float = 3.0,
 ) -> dict | None:
     """Eaves, ridge, roof kind and ridge azimuth, read off the lidar surface.
 
@@ -335,21 +343,30 @@ def measure(
     h = h[np.isfinite(h)]
     if h.size < 4:
         return None
-    ridge = float(np.percentile(h, 90))
+    # A roof is the dominant surface inside its own outline. A crown overhanging it is
+    # a handful of returns several metres above, and a gap between two wings a handful
+    # below - and a straight p90 takes the crown. Trim to the returns within a band of
+    # the median first: in Telluride, where the cottages stand under big spruce, the
+    # untrimmed median ridge came out at 16.8 m for a town of six to nine metre houses.
+    median = float(np.median(h))
+    body = h[np.abs(h - median) <= roof_band_m]
+    if body.size < max(4, int(0.25 * h.size)):
+        body = h  # no dominant surface: take what there is rather than invent one
+    ridge = float(np.percentile(body, 90))
     if not (min_height_m <= ridge <= max_height_m):
         return None
 
     rect = min_area_rect(building["ring"])
     # Eaves: the low quartile of the roof surface. A roof's lowest quarter is its
     # eaves course whatever shape the rest of it is.
-    eaves = float(np.percentile(h, 25))
+    eaves = float(np.percentile(body, 25))
     rise = max(0.0, ridge - eaves)
     # Where the outline is not a rectangle a fitted ridge is a guess, so those take a
     # flat roof with a parapet, which is what a flat-roofed main street has anyway.
     rectangularity = building["area_m2"] / (4.0 * rect["half"][0] * rect["half"][1])
     if rise < 0.8 or rectangularity < 0.82:
         kind = "flat"
-        eaves = float(np.percentile(h, 60))
+        eaves = float(np.percentile(body, 60))
         rise = 0.0
     else:
         # Hipped or gabled: walk the long axis and see whether the surface falls away
@@ -759,6 +776,16 @@ def build(
     from .scene_objects import _bilinear, _material
 
     cfg = getattr(spec, "BUILDINGS", {}) or {}
+    # The cloud is gridded once at fetch time and the level's sample count can differ.
+    # Without this the outlines were rasterised with the LEVEL's geometry into the
+    # CLOUD's array: every height came from a quarter of the map at half scale, which
+    # is how a town of six to nine metre cottages measured a 17 m median ridge.
+    if dsm.shape != dem.shape:
+        from .pointcloud import _regrid_canopy
+
+        counts = np.ones(dsm.shape, dtype="uint16")
+        dsm, ground, _counts = _regrid_canopy(dsm, ground, counts, dem.shape)
+        log(f"  canopy grid regridded {counts.shape[0]} -> {dem.shape[0]} for the outlines")
     path = data_root / "osm" / "buildings.json"
     if not cfg or not path.is_file():
         return {"items": [], "materials": {}, "mask": None, "stats": {"count": 0}}
@@ -819,6 +846,7 @@ def build(
     tiles: dict[tuple[int, int], list] = {}
     kept: list[dict] = []
     dropped = {"no_lidar": 0, "too_short": 0}
+    reasons: dict[str, int] = {}
     for outline in outlines:
         measured = measure(
             outline,
@@ -829,9 +857,13 @@ def build(
             half,
             min_height_m=float(cfg.get("min_height_m", 2.2)),
             max_height_m=float(cfg.get("max_height_m", 40.0)),
+            roof_band_m=float(cfg.get("roof_band_m", 3.0)),
         )
         if measured is None:
             dropped["no_lidar"] += 1
+            hit = rasterize_ring(outline["ring"], res, half, n)
+            why = "too_few_cells" if hit is None or hit[0].size < 4 else "height_out_of_range"
+            reasons[why] = reasons.get(why, 0) + 1
             continue
         hit = rasterize_ring(outline["ring"], res, half, n)
         if hit is not None:
@@ -900,6 +932,8 @@ def build(
         "outlines": len(outlines),
         "count": len(kept),
         "dropped_no_lidar": dropped["no_lidar"],
+        "dropped_why": dict(sorted(reasons.items())),
+        "roof_band_m": float(cfg.get("roof_band_m", 3.0)),
         "tiles": len(tiles),
         "triangles": int(triangles),
         "roof_kinds": dict(sorted(kinds.items())),
