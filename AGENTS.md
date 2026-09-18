@@ -3237,7 +3237,14 @@ time.** Close a run of work like this:
    republishes `gis-maps-v1`; that release is the delivery channel, because a whole ZIP
    is 90-250 MB and the session file limit is 30 MiB.
 4. Hand over the one command that installs it, and say what to look for:
-   `python examples/gis_maps/install_local.py --release gis-maps-v1 --maps <keys>`
+   `python examples/gis_maps/install_local.py --release gis-maps-v1 --maps <keys>`, then
+   `python examples/gis_maps/deploy_local.py --verify --maps <keys>`, which quotes the
+   profile's `beamng.log` lines for each level's namespace and exits nonzero when the
+   engine never mounted the zip. `--remove --confirm` is the uninstall.
+   An assistant can run all of this itself, but only from the machine that plays the
+   game: the MCP server is loopback-only (`allowed_hosts` in `mcp_adapter.py`), and
+   `mod_install` cannot carry these ZIPs - it installs from the text-file workspace,
+   whose default per-file cap is 2 MiB against a level ZIP of 90-250 MB.
 5. Small artefacts (a calibration level, a preview render) go straight to the user as
    files - `_calibration/build_texcal.py` is 58 KB and answers a question no gate can.
 
