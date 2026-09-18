@@ -146,10 +146,50 @@ ROADS = {
     },
 }
 
+# The apron the gate measures is a 14 by 7 m rectangle at the heading: no more than 8
+# degrees across it and 0.6 m off the plane it sits on. Nothing here promised that, so
+# the gate skipped, and the published build stood the default spawn on a 20.8 degree
+# face with 2.96 m of roughness - a car slides off it before anyone drives. They promise
+# it now, so a later build cannot quietly walk one back onto a slope.
+#
+# These badlands are incised, not raised: the rills are cut BELOW the plain, so the
+# nearest level ground to a bad spawn is usually the plateau on top, where the horizon
+# is dead flat and there is nothing to look at. Both picks below are level AND have
+# landform in front of them, measured as the 90th percentile elevation angle along the
+# heading out to 700 m.
 SPAWNS = [
-    {"name": "butte_base", "lat": 38.380, "lon": -110.905, "heading_deg": 60.0, "default": True},
-    {"name": "badlands_south", "lat": 38.366, "lon": -110.895, "heading_deg": 0.0},
-    {"name": "wash_west", "lat": 38.385, "lon": -110.918, "heading_deg": 90.0},
+    # 70 m south, still down in the cut but out on the wash floor (1402.8 m, the 10th
+    # percentile of the ground around here) instead of the narrow spot the old pick sat
+    # in, which had 25 degrees of wall on every heading. 1.77 across, 2.68 along, 0.25 m
+    # rough, with the ridge line 9.7 degrees up at the 90th percentile out to 700 m. The
+    # old heading of 60 looked out over the flats; 15 puts the wash and its skyline in
+    # frame. The level ground nearest the old pick is the plateau on top, 19 m up, where
+    # the horizon is dead flat and there is nothing to see - passing the gate is not the
+    # same as being somewhere worth starting.
+    {
+        "name": "butte_base",
+        "lat": 38.379370,
+        "lon": -110.904887,
+        "heading_deg": 15.0,
+        "default": True,
+        "level_ground": True,
+    },
+    # 11 m north-east, off the rill flank: 2.08 across, 2.38 along, 0.25 m rough.
+    {
+        "name": "badlands_south",
+        "lat": 38.366072,
+        "lon": -110.894908,
+        "heading_deg": 0.0,
+        "level_ground": True,
+    },
+    # Already on the mud flat: 1.70 across, 0.23 m rough.
+    {
+        "name": "wash_west",
+        "lat": 38.385,
+        "lon": -110.918,
+        "heading_deg": 90.0,
+        "level_ground": True,
+    },
 ]
 
 SKY = {"time": 0.16, "utc_offset": "-6", "year": 2026, "month": 6, "day": 20}

@@ -134,16 +134,38 @@ ROADS = {
     },
 }
 
+# As on Factory Butte: the apron gate binds only on a spawn that promises level ground,
+# none of these did, and the published build put the default spawn on the offset
+# channel's own bank at 19.54 degrees across the heading with 2.10 m of roughness. The
+# channel is the landmark, so the fix is 29 m along the flat above it rather than a new
+# viewpoint. The other two already passed and now say so.
 SPAWNS = [
+    # On the terrace above the offset channel, still looking down it at 135 degrees:
+    # 4.21 across, 0.27 along, 0.11 m rough.
     {
         "name": "wallace_creek_offset",
-        "lat": 35.2717,
-        "lon": -119.8275,
+        "lat": 35.271480,
+        "lon": -119.827668,
         "heading_deg": 135.0,
         "default": True,
+        "level_ground": True,
     },
-    {"name": "elkhorn_scarp", "lat": 35.255, "lon": -119.805, "heading_deg": 315.0},
-    {"name": "plain_west", "lat": 35.265, "lon": -119.830, "heading_deg": 90.0},
+    # 6.46 across, 0.32 m rough.
+    {
+        "name": "elkhorn_scarp",
+        "lat": 35.255,
+        "lon": -119.805,
+        "heading_deg": 315.0,
+        "level_ground": True,
+    },
+    # 1.35 across, 0.10 m rough.
+    {
+        "name": "plain_west",
+        "lat": 35.265,
+        "lon": -119.830,
+        "heading_deg": 90.0,
+        "level_ground": True,
+    },
 ]
 
 SKY = {"time": 0.86, "utc_offset": "-7", "year": 2026, "month": 5, "day": 10}
