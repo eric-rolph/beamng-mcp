@@ -182,6 +182,21 @@ jobs:
       # step that tests the maps. Annotate it the way the build step is annotated, with
       # --pytest so the assertion is what gets raised rather than the tail, which under
       # -q is a hundred-odd SKIPPED reasons and never the failure.
+      # Every number the build measured, into the log, BEFORE the gates run.
+      #
+      # The handoffs only leave the runner in `Collect release assets`, which is behind
+      # the gates and skipped when they go red - so a red run measures everything and then
+      # throws it away, and a session cannot reach the Actions artifact either (blob host,
+      # 403 egress). That is this pack's own recurring defect turned on its pipeline: the
+      # numbers exist and are recorded where nobody can read them, exactly when they are
+      # wanted, since a red gate is when you want to know what the build saw.
+      #
+      # Before the gates rather than behind `if: always()`, so its own failure cannot be
+      # read as a gate failure, and `|| true` so a malformed handoff never turns a green
+      # run red on the strength of a diagnostic.
+      - name: Imagery numbers from every built map
+        run: python3 .github/scripts/imagery_summary.py examples/gis_maps || true
+
       - name: Static gates on the built trees
         run: |
           set +e
