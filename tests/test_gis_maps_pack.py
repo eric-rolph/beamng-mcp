@@ -1618,6 +1618,73 @@ def test_ring_matching_reaches_the_fields_it_was_turned_on_for(map_key: str) -> 
     assert cover["with_ring"] > 0, (map_key, "ring matching reached no field", cover)
 
 
+def test_a_field_the_erosion_empties_says_so_instead_of_reading_as_roadless() -> None:
+    """``refill_check`` erodes 6 m off every boundary before it looks at the bed, so an
+    elongated field can lose its whole interior - and that is exactly the shape of a
+    shadow lying along a road, which is what the bed exclusion exists for.
+
+    When it happens, three things used to collapse into one number: ``bed_fraction``
+    divided by a guarded zero and came out 0.0, the >= 20 test failed so no bed was
+    excluded, and the fallback measured the whole component including the bed. A reader
+    could not tell that from a field with no road within a hundred metres. The
+    population and the fallback flag are what separate them."""
+
+    _, _, level_builder, _, _, _ = load_maplib()
+
+    n, texel = 256, 0.5
+    colour = np.full((n, n, 3), 120, dtype="uint8")
+    refill = np.zeros((n, n), dtype="uint8")
+    bed = np.zeros((n, n), dtype=bool)
+    # 10 m by 100 m: wider than min_area_m2 but narrower than the 12 m the erosion takes
+    # off each side, and lying along a road, which is the case that matters.
+    refill[100:120, 28:228] = 1
+    bed[104:116, 28:228] = True
+    colour[refill == 1] = 96
+
+    out = level_builder.refill_check(colour, refill, texel, bed=bed, min_area_m2=500.0)
+    assert out, "the synthetic field is over the area floor and should be reported"
+    field = out["largest"][0]
+
+    assert field["interior_eroded"] is False, (
+        "a 10 m wide field cannot survive a 6 m erosion from both sides",
+        field,
+    )
+    assert field["bed_fraction"] is None, (
+        "there was no interior to take a bed share of, and 0.0 would read as 'no road'",
+        field,
+    )
+    # The fallback measured the whole component, so the population is the field itself.
+    assert field["interior_texels"] == int((refill == 1).sum()), field
+
+
+def test_a_field_that_survives_the_erosion_reports_its_bed_share_and_population() -> None:
+    """The other half of the pair: a compact field keeps its eroded interior, so the bed
+    share is a real measurement and the population is smaller than ``area_m2`` implies."""
+
+    _, _, level_builder, _, _, _ = load_maplib()
+
+    n, texel = 256, 0.5
+    colour = np.full((n, n, 3), 120, dtype="uint8")
+    refill = np.zeros((n, n), dtype="uint8")
+    bed = np.zeros((n, n), dtype=bool)
+    refill[80:180, 80:180] = 1  # 50 m square, survives a 6 m erosion easily
+    bed[80:180, 80:100] = True  # a road up one edge, inside the field
+    colour[refill == 1] = 96
+
+    out = level_builder.refill_check(colour, refill, texel, bed=bed, min_area_m2=500.0)
+    assert out, "the synthetic field is over the area floor and should be reported"
+    field = out["largest"][0]
+
+    assert field["interior_eroded"] is True, field
+    assert field["bed_fraction"] is not None and field["bed_fraction"] > 0.0, (
+        "the road runs through the interior, so the share is measurable and non-zero",
+        field,
+    )
+    # area_m2 counts the component; the ratios rest on the eroded, bed-excluded interior,
+    # which is the number that was previously unrecorded.
+    assert 0 < field["interior_texels"] < int((refill == 1).sum()), field
+
+
 def test_ring_matching_can_rescue_a_field_at_half_its_ring() -> None:
     """The full ``match_ring`` sequence lifts a field at 0.46 of its ring past the 0.75
     floor, so the contract is reachable from the worst measured starting point.
