@@ -3207,6 +3207,107 @@ load, assert the difference is empty. `ast` and not grep, so a name surviving
 only in a comment still counts as dead. It found two more on the first run
 (`PAD_WRAP`, `PAD_HEIGHT`), both deleted.
 
+## GIS maps pack field guide (examples/gis_maps)
+
+Six BeamNG levels whose terrain is public GIS data rather than sculpting. The evidence
+chain mirrors Giant Props: `spec.py` owns every number, `fetch -> terrain -> level ->
+dist -> ledger` is deterministic, and `authoring/<mod_id>.handoff.json` carries the
+SHA-256 of every shipped file for the static gates to hash against.
+
+The first four items below were each found by driving the shipped ZIP, not by a gate.
+Every gate and every critic sheet in this pack reads the generator's own arrays, so
+none of them can see what the engine draws. Two play-tests found what seventeen critic
+rounds could not. Budget for that.
+
+### Terrain contracts proven in game
+
+- The base texture set is written **south-up, like the `.ter` heights**. The engine maps
+  an image's first row onto the terrain's y = 0. A north-up base comes out mirrored
+  against the heightmap (the tell: a landmark on the wrong rim).
+- `TerrainBlock` sits **half a square in** from the footprint corner: the game puts its
+  first height sample on the block's corner, while a GIS grid holds each cell's centre.
+  Without the offset every placed object is half a square off the ground it was
+  measured from.
+- `TerrainBlock.baseTexSize` is the far-field bake resolution in pixels and must equal
+  the texture set's `baseTexSize`. A hard-coded 2048 under a 4096 px orthophoto halves
+  the resolution of everything past the near field, which is most of a mountain level.
+- A `TerrainMaterial`'s `*TexSize` fields are documented as world metres for one tile,
+  and the shipped level this pack was read against agrees — but that level is sampled
+  at 1 m, where metres and terrain squares are the same number, so the two readings
+  cannot be told apart on it. **They can be told apart on a map that is not sampled at
+  1 m, and there the engine appears to divide the terrain's sample count by the field.**
+  Authoring every size in metres and dividing by `square_size_m` is therefore the safe
+  form. NOT SETTLED: Meteor Crater still drew four craters after that fix shipped and
+  was verified in the published ZIP, so neither reading explains it on its own. The map
+  now samples at 1 m so the question cannot bite, and `_calibration/build_texcal.py`
+  builds a 58 KB level — one grid base map, four quadrants, four different
+  `*BaseTexSize` values — that names the real rule in one screenshot. Run it before
+  anything in this pack goes sub-metre again.
+
+### Pack conventions that are ours, not the engine's
+
+- `size_px` is gated to a power of two between 1024 and 8192 in
+  `tests/test_gis_maps_pack.py`. **That bound is ours.** TerrainFile v9 stores the
+  sample count as a u32 and has no such limit; the gate exists because nothing larger
+  has been proven to load. Raising it is a decision, not a port.
+- `dist` is a re-zip of `mod/`, never a rebuild, and the ZIP is `ZIP_STORED` with a
+  release lock — same contract as the giant_props pack.
+- Download size is not a reason to refuse resolution. Shipping BeamNG maps run to
+  2.5 GB (Roane County) and 4.5 GB (West Coast USA) installed; an 805 MB `.ter` is
+  unremarkable in that company. Argue from the data's own density instead: at this
+  survey's 1.11 ground returns per m2, a 0.5 m grid holds a real return in 24 % of its
+  cells under canopy and 76 % above tree line.
+
+### Roads, friction and the AI graph
+
+- Friction lives on the **terrain material** (`groundmodelName` on `TerrainMaterial`),
+  not on the road material. A `DecalRoad` conforms to the terrain and inherits its
+  collision and friction, so the carved bed's terrain layer is what decides grip; the
+  road material carries `annotation: "DRIVABLE_ROAD"` and the picture.
+- `drivability` on a `DecalRoad` is a **preference weight for the AI's route planner,
+  not a flag**. Giving every way 1 offers a 3.2 m shelf road with a 20 % ledge to
+  traffic on the same terms as a two-lane tertiary. `DRIVABILITY_BY_HIGHWAY` in
+  `maplib/level_builder.py` scales it by OSM class (tertiary 0.7, track 0.2), and a
+  spec's `ROADS["drivability"]` overrides per class.
+- `renderPriority` layers overlapping decals: lower draws first. Paved beds 10, unpaved
+  11 here; markings and wear patches belong above both.
+- `textureLength` short (3-5 m) on hairpins, or the UVs stretch through the radius
+  change. Black Bear Pass is hairpins end to end and runs 5 m.
+- UNVERIFIED HERE (from an external pipeline spec, no simulator in this environment):
+  `MeshRoad` carries its own rigid collision body and side/bottom thickness, which is
+  what bridges, viaducts and suspended roadbeds want; this pack ships `DecalRoad` only.
+
+### Meshes and collision
+
+- BeamNG resolves vehicle-to-mesh collision per triangle against a 2000 Hz physics
+  loop. A face emitted as one large quad gives the solver a 30 m triangle, which reads
+  as a trampoline under a wheel. **Keep every collision triangle's longest edge under
+  about 2.5-3.5 m.** `maplib/buildings.py` lays every wall, pitch, gable end and roof
+  deck out as a grid or a midpoint-subdivided triangle for exactly this reason.
+- Only nodes named exactly `Colmesh-N` are collision-only and invisible. A collision
+  mesh should be the simplified shape: small details a suspension can catch on belong
+  to the visual mesh alone. UNVERIFIED HERE: the external spec reports
+  `Colmesh-<material>` naming (`Colmesh-asphalt`, `Colmesh-wood`) selecting tyre sound
+  and particle reactions; this pack has not probed it.
+- Segment big geometry so it can cull. One 10 km ribbon as a single shape is a draw-call
+  bottleneck. Buildings here ship one Collada shape per 512 m tile; a road-corridor mesh
+  should segment at 100-250 m.
+- `collisionType` is `"Visible Mesh Final"`, not `"Visible Mesh"` — the latter logs a
+  performance warning.
+
+### Buildings (maplib/buildings.py)
+
+- OSM gives the outline and nothing else. Height comes from the 3DEP point cloud's
+  highest-hit surface minus its classified ground **inside that outline** (low quartile
+  the eaves, p90 the ridge); roof shape is fitted to the same returns; roof colour is
+  the median of the de-lit orthophoto inside the outline, snapped to a small palette.
+- A roof is a bump to the surface-object detector and a nine metre tree to the canopy
+  height model. **Both must take the building mask as an exclusion** or a town grows a
+  forest and a boulder field on its rooftops.
+- Neither the terrain nor the photograph needs healing under a building: 3DEP's raster
+  is a bare-earth DTM with no buildings in it, and the roof the orthophoto recorded is
+  exactly where the roof mesh goes.
+
 ## Verification and Git hygiene
 
 Run focused tests first, then the repository checks before claiming completion:

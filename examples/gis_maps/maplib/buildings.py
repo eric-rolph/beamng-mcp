@@ -438,6 +438,70 @@ def _tri(p0, p1, p2, uvs, positions, normals, uv_out, tris):
     tris.append((base, base + 1, base + 2))
 
 
+# BeamNG resolves vehicle-to-mesh collision per triangle at 2000 Hz. A wall or a roof
+# pitch emitted as one big quad gives the solver a 30 m triangle, which reads as a
+# trampoline under a wheel and lights flat besides. Every face is laid out as a grid of
+# quads no longer than this.
+MAX_FACE_M = 2.5
+
+
+def _grid_quad(corners, texcoords, positions, normals, uvs, tris, *, max_m: float = MAX_FACE_M):
+    """A quad as a bilinear grid of sub-quads, wound like its corners.
+
+    ``corners`` runs round the face; the normal comes out of the same cross product
+    ``_quad`` uses, so a face that was wound outward stays wound outward.
+    """
+
+    p00, p10, p11, p01 = (np.asarray(c, dtype="float64") for c in corners)
+    t00, t10, t11, t01 = (np.asarray(t, dtype="float64") for t in texcoords)
+    nu = max(1, math.ceil(max(np.linalg.norm(p10 - p00), np.linalg.norm(p11 - p01)) / max_m))
+    nv = max(1, math.ceil(max(np.linalg.norm(p01 - p00), np.linalg.norm(p11 - p10)) / max_m))
+    if nu == 1 and nv == 1:
+        _quad(p00, p10, p11, p01, [t00, t10, t11, t01], positions, normals, uvs, tris)
+        return
+
+    def at(u, v):
+        p = (1 - v) * ((1 - u) * p00 + u * p10) + v * ((1 - u) * p01 + u * p11)
+        t = (1 - v) * ((1 - u) * t00 + u * t10) + v * ((1 - u) * t01 + u * t11)
+        return p, t
+
+    for i in range(nu):
+        for j in range(nv):
+            u0, u1 = i / nu, (i + 1) / nu
+            v0, v1 = j / nv, (j + 1) / nv
+            (a, ta), (b, tb) = at(u0, v0), at(u1, v0)
+            (c, tc), (d, td) = at(u1, v1), at(u0, v1)
+            _quad(a, b, c, d, [ta, tb, tc, td], positions, normals, uvs, tris)
+
+
+def _grid_tri(points, texcoords, positions, normals, uvs, tris, *, max_m: float = MAX_FACE_M):
+    """A triangle split four ways at its midpoints until no edge is longer than max_m.
+
+    Midpoint subdivision keeps the winding of every child, so an outward face stays
+    outward, and the flat roof deck of a 40 m mill shed stops being two triangles.
+    """
+
+    pts = [np.asarray(q, dtype="float64") for q in points]
+    txs = [np.asarray(t, dtype="float64") for t in texcoords]
+    stack = [(pts, txs)]
+    guard = 0
+    while stack and guard < 20000:
+        guard += 1
+        pp, tt = stack.pop()
+        longest = max(float(np.linalg.norm(pp[i] - pp[(i + 1) % 3])) for i in range(3))
+        if longest <= max_m:
+            _tri(*pp, tt, positions, normals, uvs, tris)
+            continue
+        m = [(pp[i] + pp[(i + 1) % 3]) / 2 for i in range(3)]
+        mt = [(tt[i] + tt[(i + 1) % 3]) / 2 for i in range(3)]
+        stack += [
+            ([pp[0], m[0], m[2]], [tt[0], mt[0], mt[2]]),
+            ([m[0], pp[1], m[1]], [mt[0], tt[1], mt[1]]),
+            ([m[2], m[1], pp[2]], [mt[2], mt[1], tt[2]]),
+            ([m[0], m[1], m[2]], [mt[0], mt[1], mt[2]]),
+        ]
+
+
 def building_meshes(
     b: dict,
     terrain_z,
@@ -478,17 +542,19 @@ def building_meshes(
         u0, u1 = perim / wall_tile_m, (perim + seg) / wall_tile_m
         perim += seg
         z0, z1 = feet[i], feet[(i + 1) % m]
-        _quad(
-            (x0 - ox, y0 - oy, z0 - oz),
-            (x1 - ox, y1 - oy, z1 - oz),
-            (x1 - ox, y1 - oy, eaves_z - oz),
-            (x0 - ox, y0 - oy, eaves_z - oz),
-            [
+        _grid_quad(
+            (
+                (x0 - ox, y0 - oy, z0 - oz),
+                (x1 - ox, y1 - oy, z1 - oz),
+                (x1 - ox, y1 - oy, eaves_z - oz),
+                (x0 - ox, y0 - oy, eaves_z - oz),
+            ),
+            (
                 (u0, 0.0),
                 (u1, 0.0),
                 (u1, (eaves_z - z1) / wall_tile_m),
                 (u0, (eaves_z - z0) / wall_tile_m),
-            ],
+            ),
             positions,
             normals,
             uvs,
@@ -513,12 +579,14 @@ def building_meshes(
             seg = math.hypot(x1 - x0, y1 - y0)
             if seg < 1e-6:
                 continue
-            _quad(
-                (x0 - ox, y0 - oy, eaves_z - oz),
-                (x1 - ox, y1 - oy, eaves_z - oz),
-                (x1 - ox, y1 - oy, top - oz),
-                (x0 - ox, y0 - oy, top - oz),
-                [(0, 0), (seg / roof_tile_m, 0), (seg / roof_tile_m, 0.35), (0, 0.35)],
+            _grid_quad(
+                (
+                    (x0 - ox, y0 - oy, eaves_z - oz),
+                    (x1 - ox, y1 - oy, eaves_z - oz),
+                    (x1 - ox, y1 - oy, top - oz),
+                    (x0 - ox, y0 - oy, top - oz),
+                ),
+                ((0, 0), (seg / roof_tile_m, 0), (seg / roof_tile_m, 0.35), (0, 0.35)),
                 positions,
                 normals,
                 uvs,
@@ -526,10 +594,12 @@ def building_meshes(
             )
         deck = eaves_z + 0.2
         for i0, i1, i2 in earclip(ring):
-            _tri(
-                (ring[i0][0] - ox, ring[i0][1] - oy, deck - oz),
-                (ring[i1][0] - ox, ring[i1][1] - oy, deck - oz),
-                (ring[i2][0] - ox, ring[i2][1] - oy, deck - oz),
+            _grid_tri(
+                (
+                    (ring[i0][0] - ox, ring[i0][1] - oy, deck - oz),
+                    (ring[i1][0] - ox, ring[i1][1] - oy, deck - oz),
+                    (ring[i2][0] - ox, ring[i2][1] - oy, deck - oz),
+                ),
                 [(ring[i][0] / roof_tile_m, ring[i][1] / roof_tile_m) for i in (i0, i1, i2)],
                 positions,
                 normals,
@@ -562,9 +632,9 @@ def building_meshes(
                 pts.reverse()
                 uvw.reverse()
             if len(pts) == 4:
-                _quad(*pts, uvw, positions, normals, uvs, tris)
+                _grid_quad(pts, uvw, positions, normals, uvs, tris)
             else:
-                _tri(*pts, uvw, positions, normals, uvs, tris)
+                _grid_tri(pts, uvw, positions, normals, uvs, tris)
 
         # The two pitches, eaves to ridge.
         for sign in (1.0, -1.0):

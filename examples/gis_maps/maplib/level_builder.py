@@ -82,6 +82,25 @@ def write_json(path: Path, payload) -> None:
     )
 
 
+# What the AI's route planner should think of each class of way. A DecalRoad's
+# drivability is a preference weight, not a flag, and the pack was giving every way
+# the same 1: a 3.2 m shelf road with a 20 % ledge on it was being offered to traffic
+# on the same terms as a two-lane tertiary. These are the defaults; a spec's
+# ROADS["drivability"] overrides any of them by highway class.
+DRIVABILITY_BY_HIGHWAY = {
+    "motorway": 1.0,
+    "trunk": 1.0,
+    "primary": 0.9,
+    "secondary": 0.8,
+    "tertiary": 0.7,
+    "unclassified": 0.5,
+    "residential": 0.5,
+    "service": 0.4,
+    "track": 0.2,
+    "path": 0.1,
+}
+
+
 def write_items(path: Path, objects: list[dict]) -> None:
     """items.level.json is line-delimited JSON: one complete object per line, no array."""
 
@@ -236,7 +255,7 @@ def build_roads(
                     "textureLength": 8,
                     "renderPriority": 10,
                     "startEndFade": [2, 2],
-                    "drivability": 1,
+                    "drivability": DRIVABILITY_BY_HIGHWAY.get(highway, 0.3),
                     "nodes": nodes,
                 }
             )
@@ -325,7 +344,11 @@ def build_surface_roads(spec, frame: Frame, osm_path: Path, fp, *, max_step_m: f
                 "breakAngle": 3.0,
                 "renderPriority": 10 if road["surface"] == "paved" else 11,
                 "startEndFade": [3, 3],
-                "drivability": 1,
+                "drivability": float(
+                    (getattr(spec, "ROADS", {}).get("drivability") or {}).get(
+                        road["highway"], DRIVABILITY_BY_HIGHWAY.get(road["highway"], 0.3)
+                    )
+                ),
                 "nodes": nodes,
             }
         )
