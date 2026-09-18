@@ -441,6 +441,31 @@ def drop_fence_lines(
     return dropped
 
 
+def _within_declared_range(w: float, h: float, z: float, lo: float) -> list[float]:
+    """The jittered footprint, kept inside the size range the spec declared.
+
+    ``size`` is drawn inside ``size_range`` and then jittered per axis, and the width
+    jitter reaches 0.9 - so a stone drawn at the very bottom of the range comes out
+    NARROWER than the minimum the spec asked for. That is the spec being disobeyed
+    rather than a rounding question: Factory Butte declares 0.2 m plates and the draw
+    produced a 0.18 m one, which is also under the 0.2 floor a forest item is held to,
+    so the build shipped an item no spec asked for and the gate caught it in a
+    forty-minute run rather than here.
+
+    Only the bottom is held. The declared minimum is a contract something downstream
+    enforces; the declared maximum is not, and pulling the top in would re-roll every
+    stone on every map to no purpose. The shape is preserved - all three axes scale
+    together - so a stone that was too small becomes the smallest legal stone of the
+    same proportions, not a different stone.
+    """
+
+    longest = max(w, h)
+    if longest < lo and longest > 0.0:
+        lift = lo / longest
+        w, h, z = w * lift, h * lift, z * lift
+    return [round(w, 2), round(h, 2), round(z, 2)]
+
+
 def scatter_rocks(
     layer: np.ndarray,
     ground: np.ndarray,
@@ -528,29 +553,18 @@ def scatter_rocks(
     for i in idx:
         size = float(np.exp(rng.uniform(np.log(lo), np.log(hi))))
         r, c = int(rows[i]), int(cols[i])
-        # The three aspect draws, in the order they have always been consumed, so the
-        # stream is unchanged. `size` is then the stone's LONGEST horizontal extent,
-        # because that is what `scatter_size_m` declares and what scene_objects turns
-        # into the forest item's scale, which for a stone is metres and not a
-        # multiplier. Jittering one horizontal axis up and the other down left the
-        # declared range approximate at both ends, so a declared 0.2 m floor shipped
-        # 0.18 m plates. Renormalising the aspect here rather than clamping the result
-        # at the bound keeps the size gate able to fail.
-        ax = rng.uniform(0.9, 1.1)
-        ay = rng.uniform(0.7, 1.0)
-        az = rng.uniform(0.55, 0.85)
-        aspect = size / max(ax, ay)
         out.append(
             {
                 "kind": "rock",
                 "x": round(float(xs[i]), 2),
                 "y": round(float(ys[i]), 2),
                 "z": round(float(ground[r, c] - min_elevation) - 0.2 * size, 2),
-                "size": [
-                    round(aspect * ax, 2),
-                    round(aspect * ay, 2),
-                    round(aspect * az, 2),
-                ],
+                "size": _within_declared_range(
+                    size * rng.uniform(0.9, 1.1),
+                    size * rng.uniform(0.7, 1.0),
+                    size * rng.uniform(0.55, 0.85),
+                    lo,
+                ),
                 "yaw_deg": round(float(rng.uniform(0, 360)), 1),
                 "peak_m": None,
                 "source": "scatter",

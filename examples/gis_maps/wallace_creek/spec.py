@@ -279,7 +279,14 @@ OBJECTS = {
         "wc_fault_scarp": 30.0,
         "wc_dry_pond": 0.0,
     },
-    "scatter_size_m": [0.10, 0.40],
+    # A scattered stone's forest scale is its longest horizontal extent in metres, not a
+    # multiplier, so this is the physical size of shipped rock. The Carrizo gravel really
+    # does run finer than this, but a sub-20 cm pebble costs a whole forest instance for
+    # something no driver resolves, and nothing measured here argued for the 0.10 this was
+    # first written at. 0.25 and not 0.20 because a forest item is held to a 0.2 floor, and
+    # a minimum authored flush against a bound has no margin for rounding - which is how
+    # Factory Butte killed a forty-minute build.
+    "scatter_size_m": [0.25, 0.40],
     "scatter_max": 45000,
     # The washes are where the gravel ends up, so the toe bias is strong and its window
     # is the 40 m Black Bear Pass and Factory Butte both use. A metre of concavity is the

@@ -247,7 +247,10 @@ OBJECTS = {
     },
     # Plates, not boulders: a 0.7 m slab is a big one here, and the z_aspect above keeps
     # them flat. Black Bear Pass's 0.3-1.2 m is a talus block.
-    "scatter_size_m": [0.2, 0.7],
+    # 0.25 rather than 0.2, which was flush against the 0.2 floor a forest item is held
+    # to. A minimum authored exactly on a bound fails on some draws and passes on
+    # others: run 51 died on one 0.18 m stone out of tens of thousands.
+    "scatter_size_m": [0.25, 0.7],
     "scatter_max": 60000,
     # 40 m and 0.35 m are the measured numbers above. Black Bear Pass's 40 m window
     # carries over; its 0.5 m threshold does not, because these toes are shallower.

@@ -1293,6 +1293,111 @@ def test_detect_objects_lifts_a_boulder_and_leaves_the_ground() -> None:
     assert len(placed) == 1 and placed[0]["kind"] == "rock" and placed[0]["size"][2] >= 1.0
 
 
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_object_clearance_and_scatter_have_something_to_act_on(map_key: str) -> None:
+    """Two spec keys that accept any value and can quietly do nothing.
+
+    `road_clear_m` is applied against the painted road bed, and a level whose roads are
+    decals over untouched ground has no bed - `ROADS["surfaces"]` is empty and no layer
+    carries a bed material. `level_builder` now falls back to the road centrelines, but
+    that needs `ROADS` to include something, so a spec asking for clearance with neither
+    is asking for nothing. Measured on Factory Butte before the fallback existed: 188 of
+    54,040 scattered stones inside 3 m of a centreline, 62 of them 0.5 m or wider, on
+    14.3 km of road, and `rocks_cleared_from_roads` never appeared to say so.
+
+    The scatter's materials are the same shape of trap: an unmapped layer falls through
+    to `rock_talus`, which a spec that authors its own rocks does not define.
+    """
+
+    spec = load_spec(map_key)
+    objects_spec = getattr(spec, "OBJECTS", None)
+    if not objects_spec:
+        pytest.skip(f"{map_key}: no OBJECTS block")
+
+    materials = spec.TERRAIN["materials"]
+    if float(objects_spec.get("road_clear_m", 0.0)) > 0:
+        roads = getattr(spec, "ROADS", None) or {}
+        beds = [
+            cfg["terrain_material"]
+            for cfg in (roads.get("surfaces") or {}).values()
+            if cfg.get("terrain_material") in materials
+        ]
+        assert beds or roads.get("include"), (
+            f"{map_key} asks for {objects_spec['road_clear_m']} m of road clearance with no bed "
+            "material and no included road types, so there is nothing to clear against"
+        )
+
+    scatter = objects_spec.get("scatter") or {}
+    if scatter:
+        declared = set(objects_spec.get("rock_materials") or {})
+        by_layer = {
+            **(objects_spec.get("rock_material_by_layer") or {}),
+            **(objects_spec.get("scatter_rock_material") or {}),
+        }
+        for layer_name in scatter:
+            assert layer_name in materials, f"{map_key}: scatter names unknown layer {layer_name}"
+            if declared:
+                rock = by_layer.get(layer_name)
+                assert rock in declared, (
+                    f"{map_key}: {layer_name} scatters stones with no material mapped, so they "
+                    f"fall through to rock_talus, which this spec does not author"
+                )
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_road_clearance_actually_ran(map_key: str) -> None:
+    """The gate the spec-level one cannot be: did the clearance find anything to act on.
+
+    A spec can name a bed material or a road include list and the implementation can
+    still do nothing with either - which is what happened, because the clearance was
+    gated on the painted bed and ran on no decal-road level. So the build records WHICH
+    instrument it used, and this asserts it used one. Skips on the spec not asking for
+    clearance, never on the number being absent, because absent is the failure.
+    """
+
+    require_built(map_key)
+    spec = load_spec(map_key)
+    objects_spec = getattr(spec, "OBJECTS", None) or {}
+    if float(objects_spec.get("road_clear_m", 0.0)) <= 0:
+        pytest.skip(f"{map_key}: spec asks for no road clearance")
+
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    level = handoff.get("level", handoff)
+    assert "road_clearance_from" in level, (
+        f"{map_key} asks for {objects_spec['road_clear_m']} m of road clearance and the build "
+        "recorded nothing about it, so nobody can tell whether it ran"
+    )
+    assert level["road_clearance_from"] in {"bed", "centrelines"}, (
+        f"{map_key}: clearance had {level['road_clearance_from']}"
+    )
+    assert "rocks_cleared_from_roads" in level
+
+
+def test_centreline_clearance_removes_what_sits_on_a_road() -> None:
+    """The fallback `road_clear_m` now uses when a level has no painted bed."""
+
+    load_maplib()
+    from maplib import roads as road_tools
+
+    size, res, fp_size_m = 200, 1.0, 200.0
+    ways = [{"points": [(-80.0, 0.0), (80.0, 0.0)], "width_m": 6.0, "highway": "track"}]
+    mask = road_tools.centreline_mask(ways, res, fp_size_m, size, 3.0)
+    half = fp_size_m / 2.0
+
+    def cell(x, y):
+        return mask[int(half - y), int(x + half)]
+
+    assert cell(0.0, 0.0) and cell(50.0, 2.0), "on the way, inside the buffer"
+    assert not cell(0.0, 20.0) and not cell(0.0, -20.0), "20 m off the way is open ground"
+    # The buffer is a corridor, not the whole grid: a clearance that masked everything
+    # would "clear" the scatter by deleting it.
+    assert 0.0 < mask.mean() < 0.15, mask.mean()
+
+
 def test_detect_off_stats_reports_every_count_a_real_pass_does() -> None:
     """The skip path's handoff keeps a real pass's shape: zeros, not a missing section."""
 
@@ -1569,6 +1674,27 @@ SUN_FIT_PINNED_ON_PURPOSE = {
     ),
 }
 
+# A pin that is KNOWN and accepted for now, which is a different thing from a deliberate
+# window and must not borrow its exemption: these maps have a wide range and the fit
+# still lands on a bound, so the search wanted to go outside and the spec stopped it.
+# Each entry is a debt with its reason attached, not a licence - it says somebody chose
+# to ship this, not that there is nothing to fix. The assertion below requires the fit
+# to STILL be on a bound, so an entry cannot outlive the pin it was written for.
+SUN_FIT_PIN_ACCEPTED = {
+    "bingham_canyon": (
+        "the floor moved 52.0 -> 30.0 to free the fit and instead re-pinned it on the "
+        "new bound, so the true window for an open pit at 40.52 N is still unknown. It "
+        "also shipped 5,534 near-black texels in three blobs on bc_bench_face, which is "
+        "a separate open defect: the floor is NOT the mechanism, because mt_st_helens "
+        "took the same drop and the same re-pin with zero near-black texels either side"
+    ),
+    "mt_st_helens": (
+        "the same 45.0 -> 30.0 floor drop re-pinned this fit on the new bound too. No "
+        "damage here - near_black_fraction is 0.000000 on both published bases - but "
+        "the window is as unknown as bingham's and the pin is as real"
+    ),
+}
+
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_a_narrow_sun_window_is_declared_as_deliberate(map_key: str) -> None:
@@ -1615,6 +1741,15 @@ def test_the_sun_fit_does_not_sit_on_its_own_bound(map_key: str) -> None:
 
     Skips on the SPEC, so a map that declares a window and then fails to record a fit
     FAILS here rather than skipping quietly. All six declare `delight` and a range.
+
+    `test_imagery_delighting_is_recorded` is not a second opinion on this, and the two
+    disagreeing is expected rather than a contradiction: it bounds
+    `cast_shadow_fraction` at 0.3, and bingham_canyon's jump to 0.1620 sits comfortably
+    inside that. It cannot be tightened into a substitute either, because the fraction
+    is an OUTCOME that varies with the ground - a crater rim and an open pit shadow more
+    than a plain, so any cross-map bound on it is either loose enough to miss a pin or
+    tight enough to fail a map for its terrain. This gates the cause instead, where the
+    test is exact and needs no threshold at all.
     """
 
     spec = load_spec(map_key)
@@ -1638,6 +1773,25 @@ def test_the_sun_fit_does_not_sit_on_its_own_bound(map_key: str) -> None:
     )
     low, high = float(window[0]), float(window[1])
     assert low <= float(altitude) <= high, (map_key, "the fit escaped its own window", fit, window)
+
+    accepted = SUN_FIT_PIN_ACCEPTED.get(map_key)
+    if accepted is not None:
+        # Recorded, not excused. The window is wide, so this really is the search being
+        # stopped at a bound rather than a spec pinning a known time of day - and the
+        # entry is asserted live, so it cannot quietly outlive the pin it describes.
+        assert float(altitude) in (low, high), (
+            map_key,
+            "listed in SUN_FIT_PIN_ACCEPTED but the fit is no longer on a bound - the "
+            "pin is gone, so remove the entry",
+            fit,
+            window,
+        )
+        assert map_key not in SUN_FIT_PINNED_ON_PURPOSE, (
+            map_key,
+            "a map cannot be both a deliberate pin and an accepted one - the first says "
+            "there is nothing to fix and the second says there is",
+        )
+        return
 
     reason = SUN_FIT_PINNED_ON_PURPOSE.get(map_key)
     if reason is not None:
@@ -1735,16 +1889,18 @@ def test_ring_matching_reaches_the_fields_it_was_turned_on_for(map_key: str) -> 
     assert cover["with_ring"] > 0, (map_key, "ring matching reached no field", cover)
 
 
-def test_a_field_the_erosion_empties_says_so_instead_of_reading_as_roadless() -> None:
-    """``refill_check`` erodes 6 m off every boundary before it looks at the bed, so an
-    elongated field can lose its whole interior - and that is exactly the shape of a
-    shadow lying along a road, which is what the bed exclusion exists for.
+def test_the_bed_exclusion_reaches_the_field_it_was_written_for() -> None:
+    """``refill_check`` erodes 6 m off every boundary, so an elongated field loses its
+    whole interior - and that is exactly the shape of a shadow lying along a road,
+    which is what the bed exclusion exists for.
 
-    When it happens, three things used to collapse into one number: ``bed_fraction``
-    divided by a guarded zero and came out 0.0, the >= 20 test failed so no bed was
-    excluded, and the fallback measured the whole component including the bed. A reader
-    could not tell that from a field with no road within a hundred metres. The
-    population and the fallback flag are what separate them."""
+    It used to ask about the bed BEFORE settling which population it was measuring, so
+    on this field the share was taken of an empty interior, the >= 20 test failed
+    against nothing, no bed was excluded, and the fallback then measured the whole
+    component with the road still in it. The order is now the other way round: the
+    fallback first, then the bed question about the population actually in use. The
+    exclusion reaches this field, which is the whole point of it.
+    """
 
     _, _, level_builder, _, _, _ = load_maplib()
 
@@ -1752,7 +1908,7 @@ def test_a_field_the_erosion_empties_says_so_instead_of_reading_as_roadless() ->
     colour = np.full((n, n, 3), 120, dtype="uint8")
     refill = np.zeros((n, n), dtype="uint8")
     bed = np.zeros((n, n), dtype=bool)
-    # 10 m by 100 m: wider than min_area_m2 but narrower than the 12 m the erosion takes
+    # 10 m by 100 m: over the area floor but narrower than the 12 m the erosion takes
     # off each side, and lying along a road, which is the case that matters.
     refill[100:120, 28:228] = 1
     bed[104:116, 28:228] = True
@@ -1766,12 +1922,55 @@ def test_a_field_the_erosion_empties_says_so_instead_of_reading_as_roadless() ->
         "a 10 m wide field cannot survive a 6 m erosion from both sides",
         field,
     )
-    assert field["bed_fraction"] is None, (
-        "there was no interior to take a bed share of, and 0.0 would read as 'no road'",
-        field,
-    )
-    # The fallback measured the whole component, so the population is the field itself.
-    assert field["interior_texels"] == int((refill == 1).sum()), field
+    # 12 of the field's 20 rows are bed, and that share is now taken of the population
+    # the numbers rest on rather than of an empty array.
+    assert field["bed_fraction"] == pytest.approx(0.6, abs=0.01), field
+    # Eight rows of ground is far more than the 20-cell floor, so the exclusion runs
+    # and the population is the field minus its road.
+    assert field["on_road_bed"] is False, field
+    assert field["interior_texels"] == int(((refill == 1) & ~bed).sum()), field
+    assert out["fields"] == 1 and out["fields_on_road_bed"] == 0, out
+
+
+def test_a_field_that_is_entirely_road_comes_out_of_the_population() -> None:
+    """A shadow lying wholly on a road is not an unlifted field, and reporting it as a
+    failed match asks for something no fix can deliver.
+
+    ``refill_match`` refuses to correct a bed cell by design - it zeroes its feather
+    there, so the bed keeps the contrast the stage before it just enforced. When a
+    field has no ground left in it, every ratio compares asphalt against a bed-free
+    ring, and the gate reads the match as having failed at what it is forbidden to
+    attempt. Meteor Crater shipped exactly this: a 2,973 m2 field at (-35.3, 670.3),
+    entirely bed on a level that is 1.16 % bed, reported at 0.459 of its ring.
+    """
+
+    _, _, level_builder, _, _, _ = load_maplib()
+
+    n, texel = 256, 0.5
+    colour = np.full((n, n, 3), 120, dtype="uint8")
+    refill = np.zeros((n, n), dtype="uint8")
+    bed = np.zeros((n, n), dtype=bool)
+    # The road shadow: every texel of it is bed, so there is no ground to measure.
+    refill[100:120, 28:228] = 1
+    bed[100:120, 28:228] = True
+    colour[refill == 1] = 55
+    # And an ordinary field elsewhere, so the population does not empty - the summary
+    # has to keep reporting on what is left.
+    refill[40:90, 40:90] = 1
+    colour[40:90, 40:90] = 118
+
+    out = level_builder.refill_check(colour, refill, texel, bed=bed, min_area_m2=500.0)
+    assert out, "both synthetic fields are over the area floor"
+    on_bed = [f for f in out["largest"] if f["on_road_bed"]]
+    ground = [f for f in out["largest"] if not f["on_road_bed"]]
+    assert len(on_bed) == 1 and len(ground) == 1, out["largest"]
+    assert on_bed[0]["bed_fraction"] == pytest.approx(1.0), on_bed[0]
+    assert out["fields"] == 1 and out["fields_on_road_bed"] == 1, out
+    # The dark road is still in the record - it is dropped from the statistics, not
+    # from the report, so a reader can see what was set aside and why.
+    assert on_bed[0]["lum_ratio"] < 0.75, on_bed[0]
+    # And no summary statistic carries it.
+    assert out["lum_ratio_min"] == ground[0]["lum_ratio"], out
 
 
 def test_a_field_that_survives_the_erosion_reports_its_bed_share_and_population() -> None:
@@ -2055,6 +2254,38 @@ def test_refills_carry_their_rings_grain(map_key: str) -> None:
     assert ratio and ratio["p10"] >= 0.8, (map_key, ratio)
 
 
+def _assert_the_bed_exclusion_left_a_population(map_key: str, check: dict) -> None:
+    """The other end of the road-bed exclusion, without which it is an escape hatch.
+
+    A field whose interior is entirely painted road bed is dropped from the refill
+    statistics, because `refill_match` refuses to correct a bed cell by design and
+    every ratio on such a field compares asphalt against a bed-free ring. That is
+    right, and it is also exactly the shape of a fix that can quietly swallow the gate:
+    widen what counts as bed and the population empties, and the suite goes green on
+    nothing. So the exclusion is asserted from both ends - it must leave a population,
+    and it must stay the exception.
+
+    Meteor Crater, the only map with roads through its shadows, is 1.16 % road bed and
+    reported one such field out of eighteen.
+    """
+
+    dropped = check.get("fields_on_road_bed", 0)
+    measured = check.get("fields", 0)
+    total = measured + dropped
+    assert measured > 0, (
+        map_key,
+        f"all {dropped} refilled fields were dropped as road bed, so nothing was "
+        "measured and the gates below assert nothing",
+        check,
+    )
+    assert dropped <= max(2, 0.2 * total), (
+        map_key,
+        f"{dropped} of {total} refilled fields were dropped as road bed - the "
+        "exclusion is meant to be the exception, not the population",
+        check,
+    )
+
+
 @pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_refills_read_as_their_ground_on_the_shipped_base(map_key: str) -> None:
     """Every large refilled field (cast shadow or snow) measured on the base the game
@@ -2075,6 +2306,7 @@ def test_refills_read_as_their_ground_on_the_shipped_base(map_key: str) -> None:
     )
     check = (handoff.get("imagery") or {}).get("refill_check")
     assert check, (map_key, "no refill_check in the handoff")
+    _assert_the_bed_exclusion_left_a_population(map_key, check)
     assert check["lum_ratio_p10"] >= 0.90 and check["lum_ratio_max"] <= 1.10, (map_key, check)
     assert check["grain_ratio_p10"] >= 0.45, (map_key, check)
     assert check["br_diff_max_abs"] <= 0.04, (map_key, check)
@@ -2115,8 +2347,10 @@ def test_no_refilled_field_reads_as_a_blotch(map_key: str) -> None:
         # is a fact about the ground and not a missing measurement - the assertion above
         # is what separates the two.
         pytest.skip(f"{map_key}: no refilled field large enough to be reported")
-    worst = min((e["lum_ratio"] for e in check["largest"]), default=1.0)
-    assert worst >= 0.75, (map_key, "a refilled field reads as a blotch", worst, check["largest"])
+    _assert_the_bed_exclusion_left_a_population(map_key, check)
+    measured = [e for e in check["largest"] if not e.get("on_road_bed")]
+    worst = min((e["lum_ratio"] for e in measured), default=1.0)
+    assert worst >= 0.75, (map_key, "a refilled field reads as a blotch", worst, measured)
     # And the other side, which this gate was missing while the tight one above had it
     # (0.90 AND 1.10). A refill brighter than its ground is the same defect seen from
     # the other end, and it is the one `refill_match`'s 1.4 gain clip exists to prevent
@@ -2124,16 +2358,16 @@ def test_no_refilled_field_reads_as_a_blotch(map_key: str) -> None:
     # nobody can responsibly raise it. 1.25 is the floor's own 0.25 mirrored, and it
     # sits in open space: across 127 fields on six maps the highest ratio measured is
     # 1.047.
-    palest = max((e["lum_ratio"] for e in check["largest"]), default=1.0)
+    palest = max((e["lum_ratio"] for e in measured), default=1.0)
     assert palest <= 1.25, (
         map_key,
         "a refill reads paler than its ground",
         palest,
-        check["largest"],
+        measured,
     )
     for axis in ("br_diff", "exg_diff"):
-        off = max((abs(e[axis]) for e in check["largest"]), default=0.0)
-        assert off <= 0.10, (map_key, axis, off, check["largest"])
+        off = max((abs(e[axis]) for e in measured), default=0.0)
+        assert off <= 0.10, (map_key, axis, off, measured)
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
@@ -2213,6 +2447,78 @@ def test_decal_roads_have_no_node_steps(map_key: str) -> None:
     for surface, cap in (spec.ROADS.get("max_grade_10m") or {}).items():
         steepest = roads["max_grade_10m"].get(surface, 0.0)
         assert steepest <= cap, (map_key, surface, steepest, cap)
+
+
+# The smallest scale a forest item may ship at, asserted below in
+# `test_forest_items_are_declared_draped_and_inside`. Kept here, in the suite, rather
+# than imported from the pack: a gate that reads its own threshold out of the code it
+# gates cannot fail.
+MIN_FOREST_SCALE = 0.2
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_a_scatter_cannot_declare_stones_below_the_forest_floor(map_key: str) -> None:
+    """A spec asking for stones smaller than a forest item may be is asking for a build
+    that cannot pass, and it should say so here rather than forty minutes later.
+
+    A scattered stone's forest scale IS its longest axis in metres - `scene_objects`
+    takes `scale = longest` for a stone with no measured peak - so the spec's declared
+    minimum and the gate's floor are the same number in the same units.
+    """
+
+    spec = load_spec(map_key)
+    objects_spec = getattr(spec, "OBJECTS", None) or {}
+    if not objects_spec.get("scatter"):
+        pytest.skip(f"{map_key}: no scatter")
+    lo, high = (float(v) for v in objects_spec.get("scatter_size_m", (0.3, 1.2)))
+    assert lo < high, (map_key, "the scatter's size range is empty or inverted")
+    # Strictly above, not at. A minimum authored flush against the floor has no margin
+    # for the per-axis jitter or for rounding, so it fails on some draws and passes on
+    # others - which is the hardest kind of failure to diagnose, and is exactly what
+    # happened: factory_butte declared 0.2 against a 0.2 floor and a forty-minute build
+    # died on one stone out of tens of thousands.
+    assert lo > MIN_FOREST_SCALE, (
+        map_key,
+        f"scatters stones down to {lo} m against a {MIN_FOREST_SCALE} floor, so the "
+        "bottom of the range is unshippable or flush against the bound",
+        objects_spec["scatter_size_m"],
+    )
+
+
+def test_a_scattered_stone_is_never_narrower_than_the_spec_asked_for() -> None:
+    """The jitter used to take a stone outside the range its spec declared.
+
+    `size` is drawn inside `scatter_size_m` and then jittered per axis, and the width
+    jitter reaches 0.9 - so a stone drawn at the bottom came out narrower than the
+    minimum asked for. Factory Butte declares 0.2 m and the build shipped a 0.18 m
+    stone, which is also under the forest floor, so a forty-minute build died on a
+    draw from the distribution's lower tail. It would recur on every re-roll.
+    """
+
+    load_maplib()
+    from maplib import objects as objects_mod
+
+    size = 200
+    layer = np.zeros((size, size), dtype="int16")
+    ground = np.zeros((size, size), dtype="float32")
+    lo = 0.2
+    stones = objects_mod.scatter_rocks(
+        layer,
+        ground,
+        1.0,
+        float(size),
+        0.0,
+        {0: 4000.0},
+        seed=3,
+        size_range=(lo, 0.7),
+    )
+    assert len(stones) > 500, f"too few stones to say anything: {len(stones)}"
+    widest = [max(st["size"][0], st["size"][1]) for st in stones]
+    assert min(widest) >= lo, ("a stone narrower than the declared minimum", min(widest))
+    # And the lift is confined to the tail rather than rescaling the field: the stones
+    # it touches are the ones that were under the floor, nothing else moves.
+    assert min(widest) < lo + 0.03, ("the floor is not where the stones are", min(widest))
+    assert max(widest) > 0.6, ("the top of the range is unreachable now", max(widest))
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
@@ -2844,60 +3150,3 @@ def test_shrub_scatter_keeps_off_a_wall() -> None:
     cols = np.array([min(max(int((o["x"] + n * res / 2) / res), 0), n - 1) for o in out])
     on = slope[rows, cols]
     assert float(on.max()) < 32.0, float(on.max())
-
-
-@pytest.mark.parametrize("map_key", MAP_KEYS)
-def test_a_scattered_stone_is_the_size_its_spec_declares(map_key: str) -> None:
-    """`scatter_size_m` is the stone's longest horizontal extent, in metres.
-
-    `scene_objects` gives a scattered stone a forest scale of `max(w, h)` off its size
-    triple, and for a stone that scale is an extent and not a multiplier: the rock
-    variants are unit-normalised to a 1 m longest axis. So the declared range is a
-    statement about what ships and the generator has to keep it. It did not: the
-    aspect was applied as an independent jitter per axis, one of which ran below 1.0,
-    so factory_butte declared a 0.2 m floor and shipped 0.18 m plates - which is what
-    the forest-item size gate caught on run 51 - and every map overshot its ceiling by
-    the same 10 %.
-
-    Gated on the spec rather than on a built tree: a map that declares a scatter is
-    checked here whether or not anything has been built.
-    """
-    spec = load_spec(map_key)
-    objects_spec = getattr(spec, "OBJECTS", None) or {}
-    if not objects_spec.get("scatter"):
-        pytest.skip(f"{map_key}: no stone scatter declared")
-    lo, hi = (float(v) for v in objects_spec.get("scatter_size_m", (0.3, 1.2)))
-
-    if str(PACK_ROOT) not in sys.path:
-        sys.path.insert(0, str(PACK_ROOT))
-    from maplib import objects as objects_lib
-
-    # Flat ground on one layer: this measures the size draw, not the placement.
-    res, fp_size_m = 2.0, 1024.0
-    cells = int(fp_size_m / res)
-    ground = np.zeros((cells, cells), dtype=float)
-    layer = np.ones((cells, cells), dtype=np.int32)
-    stones = objects_lib.scatter_rocks(
-        layer,
-        ground,
-        res,
-        fp_size_m,
-        0.0,
-        {1: 40.0},
-        size_range=(lo, hi),
-        seed=7,
-    )
-    assert len(stones) > 500, (map_key, len(stones))
-
-    longest = np.array([max(s["size"][0], s["size"][1]) for s in stones])
-    # 2 dp of rounding in the emitted triple is the only slack allowed.
-    assert longest.min() >= lo - 0.005, (map_key, float(longest.min()), lo)
-    assert longest.max() <= hi + 0.005, (map_key, float(longest.max()), hi)
-    # The declared range is spent, not merely respected: a generator that shrank every
-    # stone to the floor would pass the two bounds above and ship a plain of gravel.
-    assert longest.min() <= lo * 1.15, (map_key, float(longest.min()), lo)
-    assert longest.max() >= hi * 0.85, (map_key, float(longest.max()), hi)
-    # The other two axes stay under the longest one, which is what makes it the longest.
-    for s in stones:
-        w, h, z_ext = s["size"]
-        assert min(w, h) <= max(w, h) and z_ext <= max(w, h) + 0.005, (map_key, s["size"])
