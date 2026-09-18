@@ -2545,6 +2545,86 @@ def test_the_decast_guard_number_can_actually_fail() -> None:
     ]
 
 
+def test_the_breach_distribution_can_actually_leave_the_bound() -> None:
+    """The negative control for `breach_composed_p50` / `_min`, which exist to tell a
+    float edge from a writer outside the contract.
+
+    `under_gain_floor_untouched` counts cells; it cannot say whether one shipped at 0.4489
+    or at 0.30, and those are different findings. The risk this control exists to kill is
+    a pair of numbers that always read "just under 0.45" whatever the stage did, which
+    would look like a measurement and license a tolerance that hides a real defect. So the
+    clean case asserts the near-bound signature AND the driven case asserts the numbers
+    leave it.
+    """
+
+    load_maplib()
+    from maplib import imagery
+
+    rng = np.random.default_rng(11)
+    n = 256
+    y, x = np.mgrid[0:n, 0:n].astype("float32")
+    dem = 260.0 * np.exp(-((y - 110) ** 2) / (2 * 14.0**2)) + 90.0 * np.sin(x / 13.0)
+    dem = (dem + rng.normal(0, 0.5, dem.shape)).astype("float32")
+    shade = np.clip(imagery.cast_shadows(dem, 2.0, 180.0, 15.0), 0.02, 1.0)
+    ground = np.clip(0.5 + 0.06 * rng.normal(0, 1, (n, n, 1)), 0.08, 0.9) * np.array(
+        [0.82, 0.90, 1.0]
+    )
+    sky = 1.0 + 0.35 * (1.0 - shade)[..., None] * np.array([-0.2, 0.0, 0.35])
+    colour = (np.clip(ground * shade[..., None] * sky, 0, 1) ** (1 / 2.2) * 255).astype("uint8")
+    # A low sun and a high Minnaert exponent, because the breach needs the gain to reach
+    # its own low clip: `strength` multiplies `k` (imagery.py, `k = clip(k, 0.5, 1.4) *
+    # strength`), so this is the one knob that drives `gain_p05` onto 0.45.
+    kw = dict(
+        azimuth_deg=180.0,
+        altitude_deg=15.0,
+        strength=3.5,
+        max_gain=4.5,
+        steep_deg=32.0,
+        steep_feather_deg=8.0,
+        steep_cap=True,
+    )
+
+    _out, clean = imagery.delight(colour, dem, 2.0, **kw)
+    composed = clean["composed_ratio"]
+    # The control is only meaningful if there is a breach to describe.
+    assert composed["under_gain_floor_untouched_cells"] > 100, composed
+    # On a scene with no deep population the breach sits ON the clip: `composed` is
+    # `out_lum / src_lum` recomputed through two three-channel means, not the gain, so it
+    # lands either side of the constant the gain was clipped to.
+    assert composed["breach_composed_p50"] == 0.45, composed
+    assert 0.44 < composed["breach_composed_min"] < 0.45, composed
+
+    # Drive it: a writer after the refill that halves every texel. It runs last, so the
+    # cells it darkens still read `untouched`, which is exactly the shape the gate is
+    # meant to catch and the one a near-bound-only instrument would report as harmless.
+    real_clamp = imagery.clamp_highlights
+
+    def _halved(lin, ceiling):
+        out, fraction = real_clamp(lin, ceiling)
+        return out * 0.5, fraction
+
+    try:
+        imagery.clamp_highlights = _halved
+        _out, driven = imagery.delight(colour, dem, 2.0, **kw)
+    finally:
+        imagery.clamp_highlights = real_clamp
+    forced = driven["composed_ratio"]
+    assert (
+        forced["under_gain_floor_untouched_cells"] > composed["under_gain_floor_untouched_cells"]
+    ), (composed, forced)
+    # The whole point: the distribution MOVES, and it moves far enough that no tolerance
+    # calibrated on the clean case could absorb it.
+    assert forced["breach_composed_p50"] < 0.44, forced
+    assert forced["breach_composed_min"] < 0.35, forced
+
+    # And it reports nothing rather than a zero when there is no breach: an empty mask has
+    # no median, and a 0.0 there would read as "shipped at nothing" instead of "no cells".
+    _out, quiet = imagery.delight(colour, dem, 2.0, **{**kw, "strength": 1.0})
+    if quiet["composed_ratio"]["under_gain_floor_untouched_cells"] == 0:
+        assert quiet["composed_ratio"]["breach_composed_p50"] is None, quiet["composed_ratio"]
+        assert quiet["composed_ratio"]["breach_composed_min"] is None, quiet["composed_ratio"]
+
+
 def test_the_anti_black_floor_never_darkens_a_cell() -> None:
     """The floor against black holes must not write one.
 
