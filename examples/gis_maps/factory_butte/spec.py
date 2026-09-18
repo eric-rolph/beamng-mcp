@@ -257,6 +257,39 @@ OBJECTS = {
     "spawn_clear_m": 8.0,
     "road_clear_m": 3.0,
 }
+# The fins are the landform here and they are also the thing the heightmap handles
+# worst: a knife-edge of Mancos Shale is two triangles wide on the terrain grid with the
+# photograph smeared down both sides. The level's slope p95 is 32.1 degrees, so the
+# threshold is 26 - six degrees over the line the terrain calls clay fin, and well inside
+# the distribution rather than off its end, which is what 34 would have been. The fins
+# are short, so the relief floor is 6 m
+# and the area floor 300: a fin is a narrow thing and the pack's default would throw
+# every one of them away.
+#
+# Shale is the most finely bedded rock in the pack and it sheds plates continuously, so
+# the beds are 1.2 m, the joints are close, and the relief is small - a shale fin is
+# ribbed, not blocky. The stone scatter below already carries the plates that come off
+# it.
+CLIFFS = {
+    "seed": 1703,
+    "min_slope_deg": 26.0,
+    "min_relief_m": 6.0,
+    "min_area_m2": 300.0,
+    "face_step_m": 1.2,
+    "bed_m": 1.2,
+    "joint_m": 3.5,
+    "relief_m": 0.45,
+    "buttress_m": 0.9,
+    "tile_m": 2.0,
+    "max_triangles": 420000,
+    "materials": {
+        # The fin tile's own base. Shale splits along its bedding harder than any rock
+        # here, hence the strata; nothing holds on a slope that moves every time it
+        # rains, hence no lichen.
+        "cliff_shale": {"colour": [0.30, 0.34, 0.44], "strata": 0.8, "lichen": 0.0},
+    },
+}
+
 
 # The apron the gate measures is a 14 by 7 m rectangle at the heading: no more than 8
 # degrees across it and 0.6 m off the plane it sits on. Nothing here promised that, so

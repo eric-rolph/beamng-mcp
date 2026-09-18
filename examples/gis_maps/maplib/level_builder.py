@@ -1766,6 +1766,29 @@ def build_level(
                     log=print,
                 )
 
+    # --- cliffs ---------------------------------------------------------------------
+    # Modelled before anything is scattered, because the mask the walls return is what
+    # keeps a stone from hovering on a face that is no longer where the terrain is.
+    # This stage is NOT gated on OBJECTS: a map can have walls and no scatter, and the
+    # whole point of the pass is that a map which declared nothing stops shipping empty.
+    cliff: dict = {"items": [], "materials": {}, "mask": None, "stats": {"bands_modelled": 0}}
+    if getattr(spec, "CLIFFS", None):
+        from . import cliffs as cf
+
+        cliff = cf.build(
+            spec,
+            fp,
+            level_root,
+            level_url,
+            lambda key: pid(mod_id, key),
+            dem=dem,
+            res=res,
+            min_elevation=encoded.min_elevation_m,
+            layer=layer,
+            materials=materials,
+            log=print,
+        )
+
     # --- placed objects: rocks, shrubs, the forest ------------------------------------
     placed: list[dict] = []
     trees: list[dict] = []
@@ -1856,6 +1879,22 @@ def build_level(
                 obj["material"] = scatter_rock.get(materials[int(layer[r, c])], default_rock)
                 rock_materials.add(obj["material"])
             placed += extra_rocks
+        if cliff["mask"] is not None and cliff["mask"].any() and placed:
+            # A stone placed from the DEM on a wall the cliff stage has just replaced
+            # hangs in the air in front of the new rock, because the surface it was
+            # seated on is no longer the surface. The toe keeps its talus: the mask is
+            # the face itself, not the ground under it.
+            face = cliff["mask"]
+            before = len(placed)
+            placed = [
+                obj
+                for obj in placed
+                if not face[
+                    int(min(max((fp.size_m / 2 - obj["y"]) / res, 0), size - 1)),
+                    int(min(max((obj["x"] + fp.size_m / 2) / res, 0), size - 1)),
+                ]
+            ]
+            report["objects_cleared_from_cliffs"] = before - len(placed)
         road_clear_m = float((objects_spec or {}).get("road_clear_m", 0.0))
         if road_clear_m > 0 and surfaces:
             from scipy import ndimage
@@ -1919,6 +1958,40 @@ def build_level(
                     colour_full, dots, 10.0, fp.size_m / colour_full.shape[0]
                 )
                 report["imagery_dots_erased"] = int(dots.sum())
+        shrub_scatter = (objects_spec or {}).get("shrub_scatter")
+        if shrub_scatter:
+            # The third way a bush can be placed, beside the lidar bump and the dark dot
+            # in the photograph: a density per hectare on the layers named. It is the
+            # only one that works on dry grass and knee-high scrub, which is what most
+            # of Wallace Creek and the Factory Butte washes are.
+            densities = {
+                materials.index(name): float(per_ha)
+                for name, per_ha in (shrub_scatter.get("density") or {}).items()
+                if name in materials
+            }
+            if densities:
+                block = None
+                if cliff["mask"] is not None and cliff["mask"].any():
+                    block = cliff["mask"]
+                placed += ob.scatter_shrubs(
+                    layer,
+                    dem,
+                    res,
+                    fp.size_m,
+                    encoded.min_elevation_m,
+                    densities,
+                    seed=int(objects_spec.get("seed", 1)) + 9,
+                    height_range=tuple(shrub_scatter.get("height_m", (0.4, 1.2))),
+                    width_ratio=tuple(shrub_scatter.get("width_ratio", (1.0, 1.8))),
+                    max_slope_deg=float(shrub_scatter.get("max_slope_deg", 32.0)),
+                    patch_m=float(shrub_scatter.get("patch_m", 60.0)),
+                    patchiness=float(shrub_scatter.get("patchiness", 0.65)),
+                    swale_bias=float(shrub_scatter.get("swale_bias", 0.0)),
+                    swale_window_m=float(shrub_scatter.get("swale_window_m", 40.0)),
+                    swale_threshold_m=float(shrub_scatter.get("swale_threshold_m", 1.0)),
+                    max_count=int(shrub_scatter.get("max", 40000)),
+                    exclude=block,
+                )
         cover_colours: dict = {}
         if forest_spec:
             cover = vegetation.cover_maps(colour_full, dem, res, forest_spec)
@@ -1990,6 +2063,9 @@ def build_level(
 
         tree_species = {t["species"] for t in trees}
         shrub_by_layer = (objects_spec or {}).get("shrub_material_by_layer", {})
+        shrub_scatter_by_layer = ((objects_spec or {}).get("shrub_scatter") or {}).get(
+            "material_by_layer"
+        )
         shrub_families = (objects_spec or {}).get("shrub_materials") or {}
         default_shrub = next(iter(shrub_families), "shrub")
         shrub_materials: set[str] = set()
@@ -2002,11 +2078,20 @@ def build_level(
                 continue
             r = int(min(max((fp.size_m / 2 - obj["y"]) / res, 0), size - 1))
             c = int(min(max((obj["x"] + fp.size_m / 2) / res, 0), size - 1))
-            obj["material"] = shrub_by_layer.get(materials[int(layer[r, c])], default_shrub)
+            under = materials[int(layer[r, c])]
+            obj["material"] = shrub_by_layer.get(under, default_shrub)
             for min_h, name in by_height:
                 if float(obj["size"][2]) >= min_h:
                     obj["material"] = name
                     break
+            if obj.get("source") == "scatter":
+                # A plant the density scatter placed is a different plant from one the
+                # lidar measured on the same ground: the layer's bush is the big one the
+                # detector keeps, and what fills between them is grass and low scrub. A
+                # spec that says so wins over the layer mapping and over the height
+                # rules, which are cut for lidar heights and would call a 0.3 m tussock
+                # by the name of the metre-and-a-half juniper beside it.
+                obj["material"] = (shrub_scatter_by_layer or {}).get(under, obj["material"])
             family = shrub_families.get(obj["material"]) or {}
             cap = float(family.get("max_width_m", 0.0))
             if cap > 0 and max(obj["size"][:2]) > cap:
@@ -2047,6 +2132,7 @@ def build_level(
     report["forest"] = forest_stats
     report["shapes"] = catalogue.get("shapes", [])
     report["buildings"] = built["stats"]
+    report["cliffs"] = cliff["stats"]
 
     # --- previews + minimap --------------------------------------------------------
     previews = build_previews(
@@ -2181,10 +2267,24 @@ def build_level(
             ]
             if built["items"]
             else []
+        )
+        + (
+            [
+                {
+                    "name": "cliffs",
+                    "class": "SimGroup",
+                    "persistentId": pid(mod_id, "cliffs"),
+                    "__parent": "MissionGroup",
+                }
+            ]
+            if cliff["items"]
+            else []
         ),
     )
     if built["items"]:
         write_items(main / "MissionGroup" / "buildings" / "items.level.json", built["items"])
+    if cliff["items"]:
+        write_items(main / "MissionGroup" / "cliffs" / "items.level.json", cliff["items"])
     if catalogue:
         from . import scene_objects
 

@@ -454,6 +454,24 @@ OBJECTS = {
             "height": 1.0,
             "width": 1.3,
         },
+        # Snakeweed: the knee-high grey-green half-shrub that covers the ejecta between
+        # the junipers, straw-tipped by June.
+        "shrub_snakeweed": {
+            "colour": [0.42, 0.42, 0.31],
+            "light_colour": [0.63, 0.61, 0.46],
+            "height": 0.4,
+            "width": 0.55,
+            "max_width_m": 1.0,
+        },
+        # Galleta grass: the bunchgrass of the desert floor, straw with the green left
+        # in it, and the smallest thing the level places.
+        "shrub_galleta": {
+            "colour": [0.50, 0.47, 0.32],
+            "light_colour": [0.68, 0.64, 0.45],
+            "height": 0.3,
+            "width": 0.45,
+            "max_width_m": 0.8,
+        },
         "shrub_sage": {
             # Grey-green, not chartreuse: green over blue under 0.06 and red within
             # a fiftieth of green, the desert sage of the rim photographs.
@@ -487,6 +505,45 @@ OBJECTS = {
         "layers": ["mc_desert_floor", "mc_ejecta_gravel", "mc_rim_rubble"],
         "max_slope_deg": 28.0,  # the crest layer reaches 28 degrees by construction
         "erase_unplaced": True,  # a dark dot nothing stands on is repainted
+    },
+    # The plain between the junipers. Both existing paths need a plant the lidar
+    # measured or the photograph darkened, so what this level places is its 4,977 big
+    # bushes and nothing else: at ground level the Colorado Plateau desert floor is bare
+    # tan between them, where the reference photographs have continuous knee-high
+    # saltbush, snakeweed and galleta grass. Those are under the 0.45 m the detector
+    # keeps and paler than the 0.45 brightness the dot finder needs, so they were
+    # invisible to the pack until the density scatter existed.
+    #
+    # The densities are read as a stand average and are deliberately under the plain's
+    # real cover: the junipers are already placed and this scatter must not double-count
+    # them. 180 a hectare on the desert floor and the ejecta, less on the crest and the
+    # talus where the rubble is, and nothing inside the crater walls, which are bare rock
+    # in every photograph. 22 degrees because the inner wall starts there.
+    "shrub_scatter": {
+        "density": {
+            "mc_desert_floor": 180.0,
+            "mc_ejecta_gravel": 150.0,
+            "mc_rim_rubble": 70.0,
+            "mc_talus": 40.0,
+        },
+        "height_m": [0.15, 0.55],
+        "width_ratio": [1.0, 1.6],
+        "max_slope_deg": 22.0,
+        "patch_m": 45.0,
+        "patchiness": 0.7,
+        "swale_bias": 1.2,
+        "swale_window_m": 40.0,
+        "swale_threshold_m": 0.6,
+        "max": 200000,
+        # What fills between the junipers is not a small juniper: the layer mapping
+        # above is for the bushes the lidar measured, and the height rules are cut for
+        # lidar heights, so the scatter names its own plants.
+        "material_by_layer": {
+            "mc_desert_floor": "shrub_galleta",
+            "mc_ejecta_gravel": "shrub_snakeweed",
+            "mc_rim_rubble": "shrub_snakeweed",
+            "mc_talus": "shrub_snakeweed",
+        },
     },
     "spawn_clear_m": 8.0,
     "road_clear_m": 3.0,
@@ -618,6 +675,38 @@ ROADS = {
         },
     },
 }
+# Meteor Crater's rim is a cliff by any driver's reckoning and never by the module's
+# default: the level's slope p95 is 36.3 degrees, so a 48 degree threshold would model
+# nothing at all and the handoff would say so in a line nobody reads. The terrain's own
+# classifier calls 28 degrees limestone rim, and the walls that read as walls from the
+# floor are the top of that distribution, so 32 is the line here - four degrees over the
+# classifier and four under the level's own slope p95 of 36.3, which leaves a band with
+# something in it rather than one sitting on the end of the distribution - and the search
+# is restricted to the two rim layers.
+#
+# Kaibab limestone is the thickest-bedded rock in the pack - the rim's ledges are metres
+# apart in every photograph of the crater - so the beds are 3.2 m against Black Bear
+# Pass's 2.4, and the joints are wide to match.
+CLIFFS = {
+    "seed": 1702,
+    "layers": ["mc_limestone_rim", "mc_limestone_rim_ew"],
+    "min_slope_deg": 32.0,
+    "min_relief_m": 12.0,
+    "min_area_m2": 800.0,
+    "bed_m": 3.2,
+    "joint_m": 8.0,
+    "relief_m": 1.1,
+    "buttress_m": 1.6,
+    "tile_m": 3.0,
+    "max_triangles": 380000,
+    "materials": {
+        # The rim's cream limestone at the palette's own base, so the modelled ledge and
+        # the painted ledge under it are the same stone. No lichen: this is high desert
+        # and the reference photographs have none on the rim.
+        "cliff_kaibab": {"colour": [0.72, 0.66, 0.56], "strata": 0.5, "lichen": 0.0},
+    },
+}
+
 
 SPAWNS = [
     {

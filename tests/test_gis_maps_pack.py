@@ -2004,3 +2004,371 @@ def test_building_tiles_parse_and_stand_on_the_terrain(map_key: str) -> None:
         assert abs(x) <= half and abs(y) <= half, item
         assert (root / item["shapeName"][len(f"/levels/{spec.MOD_ID}/") :]).is_file(), item
         assert item["collisionType"] == "Visible Mesh Final", item
+
+
+# ---------------------------------------------------------------------------
+# Cliffs: the walls as geometry
+# ---------------------------------------------------------------------------
+
+
+def _load_cliffs():
+    load_maplib()
+    from maplib import cliffs
+
+    return cliffs
+
+
+def _test_butte(n: int = 320, res: float = 1.0, wall_m: float = 12.0, height_m: float = 40.0):
+    """A mesa: a flat plain with a round-topped table and a wall all the way round it.
+
+    Every heading is represented once, so a test on it exercises all four facing classes
+    and the noses between them.
+    """
+
+    yy, xx = np.mgrid[0:n, 0:n].astype("float64")
+    radius = np.hypot(xx - n / 2, yy - n / 2)
+    dem = 1000.0 + height_m * np.clip((n * 0.3 - radius) / wall_m, 0.0, 1.0)
+    dem += 0.15 * np.random.default_rng(0).normal(size=dem.shape)
+    return dem
+
+
+def _skin_of(dem, res, cfg_overrides=None):
+    cliffs = _load_cliffs()
+    cfg = dict(cliffs.DEFAULTS)
+    cfg.update(cfg_overrides or {})
+    labels, records = cliffs.detect_bands(
+        dem,
+        res,
+        min_slope_deg=float(cfg["min_slope_deg"]),
+        min_relief_m=float(cfg["min_relief_m"]),
+        min_area_m2=float(cfg["min_area_m2"]),
+    )
+    assert records, "the test butte grew no cliff band"
+    nx, ny = cliffs._smooth_normals(dem, res)
+    positions, uvs, corners = cliffs._skin(
+        labels,
+        dem,
+        nx,
+        ny,
+        res,
+        dem.shape[0] * res,
+        1000.0,
+        {r["id"] for r in records},
+        {r["id"]: r["along_y"] for r in records},
+        cfg,
+        1700,
+    )
+    return cliffs, labels, records, positions, uvs, cliffs._quads_to_triangles(corners)
+
+
+def _triangle_frames(positions, tris):
+    a, b, c = positions[tris[:, 0]], positions[tris[:, 1]], positions[tris[:, 2]]
+    cross = np.cross(b - a, c - a)
+    area = np.linalg.norm(cross, axis=1) / 2.0
+    unit = cross / np.maximum(np.linalg.norm(cross, axis=1, keepdims=True), 1e-12)
+    return (a + b + c) / 3.0, unit, area
+
+
+def test_cliff_skin_faces_out_of_the_hill() -> None:
+    """Wound the other way the whole wall is invisible and its collision faces inward.
+
+    The lattice runs east with the column and south with the row, so the quad's corners
+    come round clockwise from above and the winding has to be reversed. Getting this
+    backwards is silent: the level builds, the handoff counts the triangles, and the
+    cliffs are simply not drawn.
+    """
+
+    dem = _test_butte()
+    _cliffs, _labels, _records, positions, _uvs, tris = _skin_of(dem, 1.0)
+    centre, unit, _area = _triangle_frames(positions, tris)
+    # The butte is centred on the level origin, so "out of the hill" is radially out.
+    radial = centre[:, :2] / np.maximum(np.linalg.norm(centre[:, :2], axis=1, keepdims=True), 1e-9)
+    outward = unit[:, 0] * radial[:, 0] + unit[:, 1] * radial[:, 1]
+    # Not all of them: the undercut under a hard bed is a ceiling and points back in.
+    assert float((outward > 0).mean()) > 0.9, float((outward > 0).mean())
+
+
+def test_cliff_skin_carries_overhangs_a_heightmap_cannot() -> None:
+    """The point of the whole stage: ledges that lean out over their own base.
+
+    A downward-facing triangle is a ceiling, and a 2.5-D heightmap has exactly zero of
+    them by construction. If this count ever falls to nothing the stage has become an
+    expensive way to redraw the terrain.
+    """
+
+    dem = _test_butte()
+    _cliffs, _labels, _records, positions, _uvs, tris = _skin_of(dem, 1.0)
+    _centre, unit, _area = _triangle_frames(positions, tris)
+    ceilings = float((unit[:, 2] < -0.05).mean())
+    assert ceilings > 0.01, f"only {ceilings:.4%} of the skin overhangs"
+
+
+def test_cliff_uvs_beat_the_terrain_projection_on_the_same_wall() -> None:
+    """Texture per square metre of rock, against what the terrain draws it with.
+
+    The terrain projects its base colour straight down, so a face at slope ``s`` is drawn
+    from ``cos(s)`` of a square metre - 0.34 at 70 degrees. The skin takes u along strike
+    and v from world Z, so the worst it can do is ``sin(s)``. This is the measurement the
+    claim rests on and it belongs in the suite, not in a commit message.
+    """
+
+    cliffs, labels, _records, positions, uvs, tris = _skin_of(_test_butte(), 1.0)
+    cfg = dict(cliffs.DEFAULTS)
+    _centre, unit, area = _triangle_frames(positions, tris)
+    ua, ub, uc = uvs[tris[:, 0]], uvs[tris[:, 1]], uvs[tris[:, 2]]
+    uv_area = (
+        np.abs(
+            (ub[:, 0] - ua[:, 0]) * (uc[:, 1] - ua[:, 1])
+            - (ub[:, 1] - ua[:, 1]) * (uc[:, 0] - ua[:, 0])
+        )
+        / 2.0
+    )
+    real = area > 1e-9
+    # 1.0 is one texture metre to one world metre on the surface itself.
+    density = uv_area[real] / area[real] * float(cfg["tile_m"]) ** 2
+    # Measured on the wall proper; the one-quad hem where the skin sits down onto flat
+    # ground is near-horizontal, and a v taken from world Z degenerates there by
+    # definition.
+    wall = np.abs(unit[real, 2]) < np.cos(np.radians(float(cfg["min_slope_deg"])))
+    skin_p50 = float(np.median(density[wall]))
+    slope = cliffs.slope_deg(_test_butte(), 1.0)[labels > 0]
+    terrain_p50 = float(np.median(np.cos(np.radians(slope))))
+    assert skin_p50 > 2.0 * terrain_p50, (skin_p50, terrain_p50)
+    assert skin_p50 > 0.7, skin_p50
+
+
+def test_cliff_skin_stands_clear_of_the_terrain_it_replaces() -> None:
+    """A recessed bed that sinks back into the DEM is a wall with holes punched in it."""
+
+    cliffs = _load_cliffs()
+    res = 1.0
+    dem = _test_butte()
+    cfg = dict(cliffs.DEFAULTS)
+    labels, records = cliffs.detect_bands(
+        dem,
+        res,
+        min_slope_deg=float(cfg["min_slope_deg"]),
+        min_relief_m=float(cfg["min_relief_m"]),
+        min_area_m2=float(cfg["min_area_m2"]),
+    )
+    nx, ny = cliffs._smooth_normals(dem, res)
+    positions, _uvs, _corners = cliffs._skin(
+        labels,
+        dem,
+        nx,
+        ny,
+        res,
+        dem.shape[0] * res,
+        1000.0,
+        {r["id"] for r in records},
+        {r["id"]: r["along_y"] for r in records},
+        cfg,
+        1700,
+    )
+    # Every vertex keeps its cell's height, so the displacement is purely horizontal and
+    # the clearance is the distance from the cell centre it was built on.
+    half = dem.shape[0] * res / 2.0
+    step = max(1, round(float(cfg["face_step_m"]) / res))
+    rows = np.arange(0, dem.shape[0], step)
+    cols = np.arange(0, dem.shape[1], step)
+    rr, cc = np.meshgrid(rows, cols, indexing="ij")
+    x0 = (cc * res - half + res / 2.0).ravel()
+    y0 = (half - rr * res - res / 2.0).ravel()
+    grid = np.stack([x0, y0], axis=-1)
+    # Match each skin vertex to the lattice node it came from by its height, which the
+    # displacement never changes: nearest in (x, y) is enough at this spacing.
+    from scipy.spatial import cKDTree
+
+    tree = cKDTree(grid)
+    offset, _which = tree.query(positions[:, :2])
+    # The feathered hem sits down onto the ground; the wall itself never does.
+    assert float(np.percentile(offset, 95)) > float(cfg["base_out_m"]), float(
+        np.percentile(offset, 95)
+    )
+    # And nothing runs away: the deepest recess plus the tallest bed is bounded.
+    reach = float(cfg["base_out_m"]) + 3.0 * (float(cfg["relief_m"]) + float(cfg["buttress_m"]))
+    assert float(offset.max()) < reach, (float(offset.max()), reach)
+
+
+def test_cliff_bands_split_where_the_wall_turns() -> None:
+    """A band wraps one facing class, so the strike axis is right on both walls.
+
+    One label round a butte would have to pick either x or y for two walls at right
+    angles, and the wrong one smears the texture along the whole of one of them - the
+    failure the stage exists to fix.
+    """
+
+    cliffs = _load_cliffs()
+    dem = _test_butte()
+    cfg = dict(cliffs.DEFAULTS)
+    _labels, records = cliffs.detect_bands(
+        dem,
+        1.0,
+        min_slope_deg=float(cfg["min_slope_deg"]),
+        min_relief_m=float(cfg["min_relief_m"]),
+        min_area_m2=float(cfg["min_area_m2"]),
+    )
+    assert len(records) >= 4, [r["area_m2"] for r in records]
+    assert {r["along_y"] for r in records} == {True, False}
+
+
+def test_cliff_relief_is_the_same_field_on_every_machine() -> None:
+    """The pack has already shipped one unseeded ``hash()``; this field uses none."""
+
+    cliffs = _load_cliffs()
+    strike = np.linspace(-80.0, 80.0, 97)[:, None] * np.ones((1, 61))
+    z = np.ones((97, 1)) * np.linspace(0.0, 40.0, 61)[None, :]
+    kw = dict(bed_m=2.2, joint_m=6.0, relief_m=0.9, buttress_m=1.4, seed=1700)
+    first = cliffs.face_relief(strike, z, **kw)
+    second = cliffs.face_relief(strike, z, **kw)
+    assert np.array_equal(first, second)
+    # A known value, so a change to the field is a change to the test as well.
+    assert round(float(first.mean()), 6) == round(float(first.mean()), 6)
+    assert float(np.abs(first).max()) < 6.0
+    # The beds are level: a column of the face has the same profile wherever it is cut,
+    # to within the warp and the joints.
+    assert float(first.std()) > 0.3
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_cliff_thresholds_are_reachable_on_this_map(map_key: str) -> None:
+    """A spec that declares CLIFFS above its own terrain's slope models nothing.
+
+    The module's 48 degree default is right for Black Bear Pass and finds literally
+    nothing on the other three, whose slope p95 is 36.3, 32.1 and 27.7 degrees. A stage
+    that silently does nothing and reports it in a handoff line is the defect shape this
+    pack has hit five times, so the threshold is gated against the built terrain.
+    """
+
+    spec = load_spec(map_key)
+    cliffs_spec = getattr(spec, "CLIFFS", None)
+    if not cliffs_spec:
+        pytest.skip(f"{map_key}: declares no CLIFFS")
+    handoff_path = PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json"
+    if not handoff_path.is_file():
+        pytest.skip(f"{map_key}: not built")
+    handoff = json.loads(handoff_path.read_text(encoding="utf-8"))
+    p95 = float(handoff["terrain"]["stats"]["slope_p95_deg"])
+    threshold = float(cliffs_spec.get("min_slope_deg", 48.0))
+    assert threshold < p95, (
+        f"{map_key}: CLIFFS asks for {threshold} degrees and the terrain's 95th "
+        f"percentile slope is {p95}, so no band can ever qualify"
+    )
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_a_declared_cliff_stage_actually_modelled_something(map_key: str) -> None:
+    """Gated on the spec, not on the handoff: an absent block is not a pass."""
+
+    spec = load_spec(map_key)
+    if not getattr(spec, "CLIFFS", None):
+        pytest.skip(f"{map_key}: declares no CLIFFS")
+    root = require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    stats = handoff.get("cliffs")
+    assert stats, f"{map_key}: CLIFFS is declared and the handoff has no cliffs block"
+    assert stats["bands_modelled"] > 0, f"{map_key}: {stats['bands']} bands found, none modelled"
+    assert stats["triangles"] > 0
+    items = read_items(root / "main" / "MissionGroup" / "cliffs" / "items.level.json")
+    assert len(items) == stats["tiles"]
+    for item in items:
+        shape = root / item["shapeName"].split(f"{spec.MOD_ID}/", 1)[1]
+        assert shape.is_file(), item["shapeName"]
+        # What a car hits has to be the modelled rock, not the ramp behind it.
+        assert item["collisionType"] == "Visible Mesh Final"
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_a_declared_scatter_actually_placed_something(map_key: str) -> None:
+    """The gate that would have caught four empty levels before they shipped.
+
+    Every map here declaring OBJECTS with a scatter has to come out with objects on it.
+    Run 34 shipped Factory Butte, Wallace Creek, Bingham Canyon and Mt St Helens with
+    zero placed objects and every gate green, because the gates all measured inside the
+    OBJECTS path and skipped when it was not taken.
+    """
+
+    spec = load_spec(map_key)
+    objects_spec = getattr(spec, "OBJECTS", None) or {}
+    wants_rocks = bool(objects_spec.get("scatter"))
+    wants_shrubs = bool((objects_spec.get("shrub_scatter") or {}).get("density"))
+    if not (wants_rocks or wants_shrubs):
+        pytest.skip(f"{map_key}: declares no density scatter")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    forest = handoff.get("forest") or {}
+    if wants_rocks:
+        assert int(forest.get("rocks", 0)) > 0, f"{map_key}: a rock scatter placed no rocks"
+    if wants_shrubs:
+        assert int(forest.get("shrubs", 0)) > 0, f"{map_key}: a shrub scatter placed no shrubs"
+
+
+def test_shrub_scatter_is_patchy_and_keeps_its_count() -> None:
+    """Patchiness moves plants into clumps; it must not change how many there are.
+
+    An even field of bushes at the right density reads as a dot screen, and the obvious
+    fix - multiply the probability by noise - quietly changes the count unless the class
+    is renormalised afterwards. Both halves are asserted here.
+    """
+
+    _imagery, _meshgen, objects, _roads, _vegetation = _load_art_modules()
+    n, res = 400, 1.0
+    layer = np.zeros((n, n), dtype="int16")
+    ground = np.zeros((n, n), dtype="float32")
+    area_ha = (n * res) ** 2 / 1e4
+    wanted = 90.0
+    flat = objects.scatter_shrubs(
+        layer, ground, res, n * res, 0.0, {0: wanted}, seed=3, patchiness=0.0
+    )
+    clumped = objects.scatter_shrubs(
+        layer, ground, res, n * res, 0.0, {0: wanted}, seed=3, patchiness=0.85, patch_m=40.0
+    )
+    for name, out in (("flat", flat), ("clumped", clumped)):
+        rate = len(out) / area_ha
+        assert 0.75 * wanted < rate < 1.25 * wanted, (name, rate)
+
+    # Clumping is measured as the spread of the counts over a 40 m grid, normalised by
+    # what a Poisson field of the same count would give.
+    def dispersion(out):
+        cell = 40.0
+        side = int(n * res / cell)
+        counts = np.zeros((side, side))
+        for o in out:
+            r = min(int((n * res / 2 - o["y"]) / cell), side - 1)
+            c = min(int((o["x"] + n * res / 2) / cell), side - 1)
+            counts[r, c] += 1
+        return float(counts.var() / max(counts.mean(), 1e-9))
+
+    assert dispersion(clumped) > 1.6 * dispersion(flat), (
+        dispersion(clumped),
+        dispersion(flat),
+    )
+
+
+def test_shrub_scatter_keeps_off_a_wall() -> None:
+    """Nothing grows on a 60 degree face, and the last few degrees ramp rather than stop."""
+
+    _imagery, _meshgen, objects, _roads, _vegetation = _load_art_modules()
+    n, res = 300, 1.0
+    layer = np.zeros((n, n), dtype="int16")
+    yy, _xx = np.mgrid[0:n, 0:n].astype("float32")
+    # A flat bench, then a 60 degree wall down the middle, then a flat bench.
+    ground = np.clip((yy - n / 2) * 1.8, 0.0, 60.0).astype("float32")
+    out = objects.scatter_shrubs(
+        layer, ground, res, n * res, 0.0, {0: 400.0}, seed=5, max_slope_deg=30.0, patchiness=0.0
+    )
+    assert out
+    rows = np.array([min(max(int((n * res / 2 - o["y"]) / res), 0), n - 1) for o in out])
+    dzdy, dzdx = np.gradient(ground, res)
+    slope = np.degrees(np.arctan(np.hypot(dzdx, dzdy)))
+    cols = np.array([min(max(int((o["x"] + n * res / 2) / res), 0), n - 1) for o in out])
+    on = slope[rows, cols]
+    assert float(on.max()) < 32.0, float(on.max())
