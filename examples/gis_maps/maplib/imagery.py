@@ -73,6 +73,28 @@ def linear_to_srgb_u8(lin: np.ndarray) -> np.ndarray:
     return s.round().astype("uint8")
 
 
+def clamp_highlights(lin: np.ndarray, ceiling: float) -> tuple[np.ndarray, float]:
+    """Scale any texel whose brightest channel passes ``ceiling`` down until it does not.
+
+    Returns the image and the share of texels touched; a ceiling of 0 or less is a no-op.
+    The scale is one number per texel, so the hue and the saturation stay the ones the
+    de-lighting produced and only the brightness moves. Clamping the channel on its own
+    would swing the hue of every surface it touched.
+    """
+
+    if ceiling <= 0:
+        return lin, 0.0
+    hi = lin.max(axis=-1)
+    over = hi > ceiling
+    fraction = float(over.mean())
+    if over.any():
+        scale = np.where(over, ceiling / np.maximum(hi, 1e-6), 1.0).astype("float32")
+        lin *= scale[..., None]
+        del scale
+    del hi, over
+    return lin, fraction
+
+
 def fit_sun(
     colour_u8: np.ndarray,
     dem: np.ndarray,
@@ -197,6 +219,7 @@ def delight(
     steep_cap_lum: float | None = None,
     steep_feather_deg: float = 0.0,
     knee_lum: float = 0.55,
+    highlight_ceiling: float = 0.95,
     cover_mask: np.ndarray | None = None,
     match_ring: bool = False,
     shadow_dark_ratio: float | None = None,
@@ -214,8 +237,11 @@ def delight(
     them is lifted past the median of their lit cells; the cap comes in over
     ``steep_feather_deg`` below ``steep_deg`` so it draws no contour. ``knee_lum`` is
     the linear luminance above which the output is compressed so no gain runs to
-    white. With ``cover_mask`` (canopy) a refill under a canopy borrows only from the
-    canopy round it and one in the open only from open ground; with ``match_ring``
+    white, and ``highlight_ceiling`` is the linear value no CHANNEL may pass (0.95
+    encodes to 249, a texel under the 250 the gates read as blown); set it to 0 to
+    leave the highlights alone. With ``cover_mask`` (canopy) a refill under a canopy
+    borrows only from the canopy round it and one in the open only from open ground;
+    with ``match_ring``
     every refilled field is brought to the mean colour and the grain amplitude of
     its own 10-30 m ring of lit ground. With ``shadow_dark_ratio`` a cell darker
     than that share of its 40 m mean and bluer than green (a cast shadow the
@@ -825,7 +851,18 @@ def delight(
             scale = 1.0 - cap_w * (1.0 - scale)
             out = out * scale[..., None]
             del lum_o, scale
+    # And nothing reaches white, per channel. The soft knee above compresses on MEAN
+    # luminance, but it is a single CHANNEL that hits the 8-bit wall, so a warm surface
+    # saturates its red while its mean sits well under the knee: measured on the shipped
+    # bases, every clipped texel of Factory Butte's caprock and Meteor Crater's
+    # east-facing limestone is clipped in red alone or in red and green, never in all
+    # three, in blobs of 4-1200 texels rather than the specks a resampling artefact
+    # leaves. Scaling the whole texel by the ceiling over its own brightest channel
+    # holds its hue and its saturation and darkens only what the 8-bit wall would have
+    # thrown away. Last thing before the encode, so no refill, floor or cap re-lifts it.
+    out, over_ceiling = clamp_highlights(out, highlight_ceiling)
     stats = {
+        "highlight_ceiling_fraction": round(over_ceiling, 6),
         "snow_fraction": round(float(snow_mask.mean()), 4),
         # The 2-8 m grain of every refilled field over its ring's, after the match
         # (area-weighted p10 and median over the fields of the last refill).

@@ -309,6 +309,71 @@ def test_delight_stats_survive_the_handoff_json() -> None:
     json.dumps(stats)
 
 
+def test_delight_never_blows_a_channel() -> None:
+    """No texel `delight` returns has a channel at or above 250, on warm ground.
+
+    The soft knee compresses on the texel's MEAN luminance, but it is one CHANNEL that
+    reaches the 8-bit wall, so a warm surface saturates its red while its mean sits
+    under the knee and the knee does nothing about it. Measured on the shipped bases,
+    every clipped texel of Factory Butte's caprock and Meteor Crater's east-facing
+    limestone was clipped in red alone or in red and green, never in all three.
+    """
+
+    load_maplib()
+    from maplib import imagery
+
+    n, res = 128, 1.0
+    yy, xx = np.mgrid[0:n, 0:n].astype("float32")
+    dem = (80.0 * np.sin(xx / 24.0) * np.cos(yy / 24.0)).astype("float32")
+    # Bright warm rock, the shape that clips: red near the wall, blue well under it.
+    colour = np.dstack(
+        [
+            np.full((n, n), 250, dtype="uint8"),
+            np.full((n, n), 214, dtype="uint8"),
+            np.full((n, n), 156, dtype="uint8"),
+        ]
+    )
+    out, stats = imagery.delight(
+        colour, dem, res, azimuth_deg=160.0, altitude_deg=55.0, strength=1.0, max_gain=2.2
+    )
+    assert out.max() < 250, (out.max(), out.reshape(-1, 3)[out.max(axis=-1).ravel().argmax()])
+    assert stats["highlight_ceiling_fraction"] > 0, "this fixture is meant to hit the ceiling"
+    # And the ceiling is off when a spec turns it off, so it stays an authored choice.
+    loose, loose_stats = imagery.delight(
+        colour,
+        dem,
+        res,
+        azimuth_deg=160.0,
+        altitude_deg=55.0,
+        strength=1.0,
+        max_gain=2.2,
+        highlight_ceiling=0.0,
+    )
+    assert loose.max() > out.max()
+    assert loose_stats["highlight_ceiling_fraction"] == 0.0
+
+
+def test_clamp_highlights_holds_hue() -> None:
+    """The ceiling scales the whole texel, so only its brightness moves."""
+
+    load_maplib()
+    from maplib import imagery
+
+    warm = np.array([[[1.30, 1.05, 0.62]]], dtype="float32")
+    out, fraction = imagery.clamp_highlights(warm.copy(), 0.95)
+    assert fraction == 1.0
+    assert out.max() == pytest.approx(0.95, abs=1e-6)
+    assert np.allclose(out[0, 0] / out[0, 0].max(), warm[0, 0] / warm[0, 0].max(), atol=1e-6)
+    # 0.95 linear is the brightest value that still encodes under the gates' 250.
+    assert imagery.linear_to_srgb_u8(out.copy()).max() == 249
+    # Under the ceiling nothing moves, and a ceiling of 0 is a no-op.
+    dim = np.array([[[0.40, 0.31, 0.22]]], dtype="float32")
+    same, none = imagery.clamp_highlights(dim.copy(), 0.95)
+    assert none == 0.0 and np.array_equal(same, dim)
+    off, none_off = imagery.clamp_highlights(warm.copy(), 0.0)
+    assert none_off == 0.0 and np.array_equal(off, warm)
+
+
 def test_yaw_matrix_convention() -> None:
     _, _, level_builder, _, _, _ = load_maplib()
     north = level_builder.yaw_matrix(0.0)
