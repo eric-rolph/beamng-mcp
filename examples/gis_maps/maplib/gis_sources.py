@@ -237,6 +237,79 @@ def tile_grid(fp: Footprint, tile_m: float) -> list[tuple[int, int, Tile]]:
     return tiles
 
 
+def _export_3dep(tile, width: int, height: int, params: dict, log: Log, depth: int = 0) -> bytes:
+    """One 3DEP tile, halved and mosaicked where the server will not serve it whole.
+
+    The ImageServer has a per-request budget that is not published and is not the same
+    everywhere: 2048 x 2048 at 1 m serves fine over the San Juans and returns 504 in
+    eleven seconds over the Carrizo Plain. Retrying the same request cannot help, so a
+    504, 502, 503 or a timeout splits the tile into quadrants and asks again, down to
+    256 px. Every quadrant is written into the tile's own array, so the cache layout,
+    the manifest and the tile names are unchanged.
+    """
+
+    import numpy as np
+
+    try:
+        response = _get(USGS_3DEP_EXPORT, params=params, log=log, retries=6 if depth == 0 else 3)
+        if response.headers.get("Content-Type", "").startswith("application/json"):
+            raise RuntimeError(f"3DEP export error: {response.text[:300]}")
+        return response.content
+    except Exception:
+        if depth >= 3 or min(width, height) <= 256:
+            raise
+    import rasterio
+    from rasterio.io import MemoryFile
+    from rasterio.transform import from_origin
+
+    log(f"    server refused {width}x{height} px; splitting into quadrants")
+    res_x = (tile.east - tile.west) / width
+    res_y = (tile.north - tile.south) / height
+    out = np.full((height, width), np.nan, dtype="float32")
+    hw, hh = width // 2, height // 2
+    for y0, _y1, r0, r1 in ((0, hh, hh, height), (hh, height, 0, hh)):
+        for x0, x1 in ((0, hw), (hw, width)):
+            sub = Tile(
+                epsg=tile.epsg,
+                west=tile.west + x0 * res_x,
+                south=tile.south + y0 * res_y,
+                width_m=(x1 - x0) * res_x,
+                height_m=(r1 - r0) * res_y,
+            )
+            sub_params = dict(
+                params,
+                bbox=f"{sub.west},{sub.south},{sub.east},{sub.north}",
+                size=f"{x1 - x0},{r1 - r0}",
+            )
+            data = _export_3dep(sub, x1 - x0, r1 - r0, sub_params, log, depth + 1)
+            with MemoryFile(data) as mem, mem.open() as src:
+                out[r0:r1, x0:x1] = src.read(1)
+    profile = {
+        "driver": "GTiff",
+        "height": height,
+        "width": width,
+        "count": 1,
+        "dtype": "float32",
+        "crs": rasterio.crs.CRS.from_epsg(tile.epsg),
+        "transform": from_origin(tile.west, tile.north, res_x, res_y),
+        "nodata": -999999.0,
+    }
+    with MemoryFile() as mem:
+        with mem.open(**profile) as dst:
+            dst.write(np.nan_to_num(out, nan=-999999.0), 1)
+        return mem.read()
+
+
+def _write_3dep_tile(tile, width: int, height: int, params: dict, path: Path, log: Log) -> None:
+    data = _export_3dep(tile, width, height, params, log)
+    tmp = path.with_suffix(".part")
+    tmp.write_bytes(data)
+    if not _raster_ok(tmp, (height, width)):
+        tmp.unlink(missing_ok=True)
+        raise RuntimeError(f"3DEP export returned an unreadable tile for {path.name}")
+    tmp.replace(path)
+
+
 def fetch_3dep_tiles(
     fp: Footprint,
     out_dir: Path,
@@ -253,6 +326,7 @@ def fetch_3dep_tiles(
     area = fp.buffered(margin_m)
     tile_m = tile_px * resolution
     paths = []
+    deferred: list = []
     for ix, iy, tile in tile_grid(area, tile_m):
         width = round(tile.width_m / resolution)
         height = round(tile.height_m / resolution)
@@ -272,15 +346,17 @@ def fetch_3dep_tiles(
             "interpolation": "RSP_BilinearInterpolation",
             "f": "image",
         }
-        response = _get(USGS_3DEP_EXPORT, params=params, log=log)
-        if response.headers.get("Content-Type", "").startswith("application/json"):
-            raise RuntimeError(f"3DEP export error: {response.text[:300]}")
-        tmp = path.with_suffix(".part")
-        tmp.write_bytes(response.content)
-        if not _raster_ok(tmp, (height, width)):
-            tmp.unlink(missing_ok=True)
-            raise RuntimeError(f"3DEP export returned an unreadable tile for {path.name}")
-        tmp.replace(path)
+        try:
+            _write_3dep_tile(tile, width, height, params, path, log)
+        except Exception as exc:  # retried in the second pass below
+            log(f"    {path.name} failed: {str(exc)[:100]}")
+            deferred.append((tile, width, height, params, path))
+    if deferred:
+        log(f"  {len(deferred)} tile(s) the server would not serve; taking them round again")
+        time.sleep(20.0)
+        for tile, width, height, params, path in deferred:
+            log(f"  3DEP retry {width}x{height}px -> {path.name}")
+            _write_3dep_tile(tile, width, height, params, path, log)
     _write_manifest(
         out_dir / "3dep.manifest.json",
         {

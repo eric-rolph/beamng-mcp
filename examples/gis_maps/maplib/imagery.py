@@ -42,7 +42,7 @@ def fit_sun(
     from scipy import ndimage
 
     lum = colour_u8.astype("float32").mean(axis=-1)
-    smooth = ndimage.gaussian_filter(dem.astype("float64"), 2.0)
+    smooth = ndimage.gaussian_filter(dem.astype("float32"), 2.0)
     gy, gx = np.gradient(smooth, res)
     slope = np.arctan(np.hypot(gx, gy))
     aspect = np.arctan2(-gx, gy)
@@ -180,7 +180,7 @@ def delight(
         res_r = res * dem.shape[0] / colour_u8.shape[0]
     else:
         dem_r, res_r = dem, res
-    smooth = ndimage.gaussian_filter(dem_r.astype("float64"), 1.0)
+    smooth = ndimage.gaussian_filter(dem_r.astype("float32"), 1.0)
     shade = hm.hillshade(smooth, res_r, azimuth_deg, altitude_deg)
     visibility = cast_shadows(smooth, res_r, azimuth_deg, altitude_deg)
     # Sky light is what the shadows see, and a crater floor sees less sky than a plain:
@@ -1466,7 +1466,7 @@ def aspect_flatfield(
 
     from scipy import ndimage
 
-    smooth = ndimage.gaussian_filter(dem.astype("float64"), 2.0)
+    smooth = ndimage.gaussian_filter(dem.astype("float32"), 2.0)
     gy, gx = np.gradient(smooth, res)
     slope = np.degrees(np.arctan(np.hypot(gx, gy)))
     aspect = np.arctan2(gx, -gy) % (2 * np.pi)  # 0 = north-facing, clockwise

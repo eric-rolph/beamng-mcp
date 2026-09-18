@@ -1,9 +1,19 @@
 """Carrizo Plain and Wallace Creek - authored constants shared by the generator and the level.
 
 The San Andreas Fault's textbook surface trace: the 130 m offset channel at Wallace
-Creek, sag ponds, pressure ridges and linear scarps along the Elkhorn Scarp. A 4096 m
+Creek, sag ponds, pressure ridges and linear scarps along the Elkhorn Scarp. A 16,384 m
 square at 1 m per sample, with the B4 0.5 m bare-earth lidar composited over the 3DEP
 baseline wherever the B4 swath covers the level.
+
+The square used to be 4096 m round the offset channel alone, which is the geology and
+none of the place. It now runs 16.4 km along the plain: Soda Lake and its north shore,
+the Goodwin Education Center, Elkhorn Road down the fault, Wallace Creek and its
+interpretive trail, and the Temblor crest above them. Terrain sizes are powers of two
+and the rungs in metres are 16,384 and 32,768, so reaching KCL Campground and the run
+out to Fellows - another 13 km east - would have meant a 32.8 km square: four times the
+ground, 1,074 km2 of it, 5.3 GB on disk, 7.5 billion lidar returns and twelve hours of
+point-cloud reading, with the base texture capped at 2 m per texel anyway because one
+32,768 px image is past the GPU ceiling. This holds 268 km2 at a metre for 1.85 GB.
 """
 
 MOD_ID = "ericrolph_wallace_creek"
@@ -13,11 +23,17 @@ AUTHOR = "ericrolph"
 
 SITE = {
     "place": "Carrizo Plain National Monument, San Luis Obispo County, California, USA",
-    "center_lat": 35.262,
-    "center_lon": -119.815,
+    # Balanced over the landmarks rather than over the offset channel: the tightest of
+    # them (Elkhorn Road's south end, and the Temblor crest above Wallace Creek) each
+    # keep 790 m of margin, and Wallace Creek itself 2.6 km.
+    "center_lat": 35.2215,
+    "center_lon": -119.8310,
     "epsg": 32611,  # WGS 84 / UTM zone 11N
-    "size_px": 4096,
-    "square_size_m": 1.0,  # 4096 m footprint
+    "size_px": 16384,
+    "square_size_m": 1.0,  # 16,384 m footprint
+    # 16,384 px holds the de-lit NAIP at its own 1 m per texel, and is the largest
+    # single base texture a GPU will take.
+    "base_tex_px": 16384,
 }
 
 SOURCES = {

@@ -3271,6 +3271,37 @@ class of defect a play-test would otherwise have to find.
   `*BaseTexSize` values — that names the real rule in one screenshot. Run it before
   anything in this pack goes sub-metre again.
 
+### The de-lighting holds the whole base texture, and that is the memory ceiling
+
+`imagery.py` conditions the base colour over the entire array at once - the sun fit, the
+cast-shadow refills, the per-layer flat-field and the base pulls all read and write the
+whole picture. So the build's working set scales with `base_tex_px` squared, NOT with the
+terrain's sample count, and it is the photograph rather than the ground that decides
+whether a map can be built at all.
+
+Measured on a 15 GB box: Black Bear Pass at 8192 samples with an 8192 px base was
+**OOM-killed (exit 137)**, having climbed from 2.5 GB during compositing to over 11 GB
+once it reached the de-lighting. The same map with a 4096 px base builds. A silent
+`Killed` in the log with no traceback, or a background stage that simply stops writing
+output, is this and not a network fault - check for exit 137 before blaming anything
+else.
+
+Two consequences:
+
+- **Raising `size_px` is cheap; raising `base_tex_px` is not.** A 16384-sample DEM is
+  1.07 GB in float32 and fine. A 16384 px base texture would want tens of gigabytes
+  through the de-lighting. Grow the ground first and let the photograph lag.
+- Elevation in float32 holds a millimetre at terrestrial magnitudes, so a float64 DEM
+  copy is 537 MB at 8192 squared bought for nothing - and `scipy.ndimage` allocates its
+  own copy alongside whatever it is handed.
+
+The fix that removes the ceiling is to run the de-lighting in overlapping tiles, which
+is not a small change: the sun fit is global, the flat-field bins over a whole layer,
+and the refills read 100-200 m neighbourhoods, so each of those needs either a global
+pre-pass over a decimated copy or a margin wide enough to be exact. Until that exists,
+`base_tex_px` is capped by the machine, and the cap belongs in the spec with a comment
+saying so.
+
 ### Pack conventions that are ours, not the engine's
 
 - `size_px` is gated to a power of two between 1024 and 8192 in

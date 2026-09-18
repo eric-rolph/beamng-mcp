@@ -29,9 +29,12 @@ SITE = {
     "epsg": 32613,
     "size_px": 8192,
     "square_size_m": 1.0,
-    # 8192 px over 8192 m keeps the de-lit NAIP at its native 1 m per texel over
-    # four times the ground. The base set goes from 67 MB to about 270 MB.
-    "base_tex_px": 8192,
+    # 4096 px over 8192 m is 2 m per texel, the same as Bingham Canyon and Mt St
+    # Helens. 8192 px would hold the de-lit NAIP at its own 1 m, but the de-lighting
+    # works on the whole base at once and an 8192 px pass was OOM-killed at about
+    # 15 GB on a 15 GB box (exit 137). Until imagery.py works in overlapping tiles
+    # rather than over the whole array, the photograph pays for the ground.
+    "base_tex_px": 4096,
     "detail_tex_px": 1024,
 }
 
