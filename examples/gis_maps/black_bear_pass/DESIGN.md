@@ -29,7 +29,7 @@ aspen groves on the lowest benches.
 
 ## Why the physics pops
 
-1 m samples over 1378 m of relief: the shelf road is a measured 3-4 m ledge with a
+2 m samples over 1475 m of relief: the shelf road is a measured 3-4 m ledge with a
 real wall on one side and a real void on the other, the Steps are the actual bedrock
 ledges, and a missed line is 400 m of measured scree to the basin floor. The high
 slope statistics (half the level over 30 degrees) are the point.
@@ -186,7 +186,7 @@ closed when every finding is a spec or parameter change in the tree.
 | Decision | Value | Why |
 | --- | --- | --- |
 | Footprint | 8192 m, centred 37.9220 N 107.7765 W | The whole box canyon: the pass summit 1,240 m inside the south edge, Bridal Veil Falls and Pandora in the middle, Telluride end to end, Tomboy and Savage Basin, Marshall Basin and Mendota Peak inside the north edge |
-| Samples | 8192 @ 1 m | Four times the ground at the same metre. The shelf road is 3.2 m wide and does not survive a coarser grid, so the sample was the one thing not for trading |
+| Samples | 4096 @ 2 m | WANTED: 8192 @ 1 m, four times the ground at the same metre, because the shelf road is 3.2 m wide and reads as 1.6 samples at this one. BLOCKED: the de-lighting holds the level in memory and 8192 samples is OOM-killed on a 15 GB box, so reaching Telluride was paid for out of the ground. 4096 is the array size every map that builds today uses |
 | Base colour | 8192 px de-lit NAIP, 1 m/texel | The photograph at its own resolution over four times the ground; the base set goes from 67 MB to about 270 MB |
 | Buildings | OSM outlines, lidar heights, fitted roofs | Telluride, Pandora and the Tomboy and Savage Basin workings are inside the level now. A town painted on bare ground reads worse than no town, so they are modelled |
 | Materials | tundra, talus blocks (15-30 deg), scree slope (30-45 deg), cliff rock (>45 deg), gravel road bed | Slope-painted plus the carved beds |
