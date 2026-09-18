@@ -1159,16 +1159,31 @@ def refill_check(
         # Meteor Crater level, the 2,973 m2 field this gate reports at (-35.3, 670.3) is
         # 84.4% road bed, on a level that is 1.16% road bed overall. It is a shadow on a
         # road, not an unlifted field.
-        bed_share = 0.0
+        # The erosion runs first, and on an elongated field it can take everything: at
+        # meteor_crater's 0.5 m texel this is twelve iterations, a 6 m band off every
+        # boundary, and a road shadow at the 1000 m2 floor is about 12 m by 83 m. Both
+        # numbers below have to say so, or a field the exclusion could not reach looks
+        # exactly like a field with no road near it.
+        bed_share: float | None = 0.0
         if bed is not None:
             not_bed = ~bed[r0:r1, c0:c1]
-            bed_share = float((interior & ~not_bed).sum()) / max(int(interior.sum()), 1)
+            # An empty interior has no share to report. Reporting 0.0 here would read as
+            # "no road in this field" on precisely the elongated shadows the exclusion
+            # was written for, which is the one case worth telling apart.
+            bed_share = (
+                float((interior & ~not_bed).sum()) / int(interior.sum()) if interior.any() else None
+            )
             # Below 20 cells the remainder is noise, so the field keeps its old reading
             # and `bed_fraction` says why it is the one it is.
             if (interior & not_bed).sum() >= 20:
                 interior = interior & not_bed
             del not_bed
-        if interior.sum() < 20:
+        # Whether the numbers below rest on the eroded interior or on the whole
+        # component, bed and all. The fallback is not a failure - it is the old reading,
+        # deliberately - but it is a different measurement and the handoff should say
+        # which one it is.
+        interior_eroded = bool(interior.sum() >= 20)
+        if not interior_eroded:
             interior = field
         dist = ndimage.distance_transform_edt(~field) * texel_m
         ring = (dist > 10.0) & (dist <= 30.0) & ring_ok[r0:r1, c0:c1]
@@ -1192,8 +1207,18 @@ def refill_check(
                     float(exg[r0:r1, c0:c1][interior].mean() - exg[r0:r1, c0:c1][ring].mean()), 3
                 ),
                 "grain_ratio": round(float(f_in.std() / max(f_ring.std(), 1e-4)), 3),
-                # How much of the field is road the match is not allowed to touch.
-                "bed_fraction": round(bed_share, 3),
+                # The population every ratio above rests on. `area_m2` is the component
+                # BEFORE the erosion and the bed exclusion, so it is an upper bound and
+                # not the sample size; `grain_ratio` in particular is a standard
+                # deviation over exactly these texels.
+                "interior_texels": int(interior.sum()),
+                # False when the erosion left under 20 cells and the whole component was
+                # used instead - bed included, so `bed_fraction` describes nothing that
+                # was excluded.
+                "interior_eroded": interior_eroded,
+                # How much of the field is road the match is not allowed to touch. None
+                # when the erosion emptied the interior, so there was nothing to measure.
+                "bed_fraction": None if bed_share is None else round(bed_share, 3),
             }
         )
     if not fields:
