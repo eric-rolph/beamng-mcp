@@ -1512,7 +1512,16 @@ def test_road_clearance_actually_ran(map_key: str) -> None:
             encoding="utf-8"
         )
     )
-    level = handoff.get("level", handoff)
+    # The handoff has no "level" key and never had one - these sit at its root, beside
+    # `roads` and `forest`. The `handoff.get("level", handoff)` this replaces is what hid
+    # the bug this gate exists to catch: with no such key the fallback searched the root,
+    # found nothing, and reported the clearance as unrecorded without ever saying it had
+    # looked somewhere that could not hold it. A missing writer, a key the handoff's
+    # allow-list drops, and a clearance that genuinely did nothing all rendered as one
+    # message, on the one gate whose whole purpose is to tell those three apart. Read the
+    # real place and let it raise: a default that makes the wrong place look plausible is
+    # worse than a KeyError.
+    level = handoff
     assert "road_clearance_from" in level, (
         f"{map_key} asks for {objects_spec['road_clear_m']} m of road clearance and the build "
         "recorded nothing about it, so nobody can tell whether it ran"
@@ -2214,6 +2223,84 @@ def test_a_field_that_survives_the_erosion_reports_its_bed_share_and_population(
     assert 0 < field["interior_texels"] < int((refill == 1).sum()), field
 
 
+def test_a_failing_bed_exclusion_names_the_fields_it_set_aside() -> None:
+    """Run 73 failed this guard on meteor_crater at 4 of 18 and named none of the four.
+
+    The counts say the exclusion grew; only the fields say whether it grew for the
+    documented reason. So the guard's message has to carry each dropped field's
+    ``bed_fraction`` - the share that dropped it - and the two keys that say the field
+    took the under-20-cell path rather than the mask having widened underneath it.
+    """
+
+    check = {
+        "fields": 2,
+        "fields_on_road_bed": 2,
+        "br_diff_max_abs": 0.038,
+        "exg_diff_max_abs": 0.041,
+        "largest": [
+            {
+                "lum_ratio": 0.459,
+                "area_m2": 2973.0,
+                "center_xy": [-35.3, 670.3],
+                "kind": "shadow",
+                "bed_fraction": 1.0,
+                "interior_eroded": False,
+                "interior_texels": 18,
+                "on_road_bed": True,
+            },
+            {
+                "lum_ratio": 0.981,
+                "area_m2": 4100.0,
+                "center_xy": [12.0, -8.0],
+                "kind": "shadow",
+                "bed_fraction": 0.0,
+                "interior_eroded": True,
+                "interior_texels": 900,
+                "on_road_bed": False,
+            },
+            {
+                "lum_ratio": 0.612,
+                "area_m2": 1550.0,
+                "center_xy": [40.1, 655.0],
+                "kind": "shadow",
+                "bed_fraction": 0.62,
+                "interior_eroded": True,
+                "interior_texels": 14,
+                "on_road_bed": True,
+            },
+            {
+                "lum_ratio": 1.004,
+                "area_m2": 2200.0,
+                "center_xy": [-90.0, 3.0],
+                "kind": "snow",
+                "bed_fraction": None,
+                "interior_eroded": True,
+                "interior_texels": 450,
+                "on_road_bed": False,
+            },
+        ],
+    }
+
+    excluded = _excluded_fields(check)
+    # Exactly the set-aside fields, in order, and nothing that stayed in the population.
+    assert len(excluded) == 2, excluded
+    assert [f["center_xy"] for f in excluded] == [[-35.3, 670.3], [40.1, 655.0]]
+    # The reason each was dropped travels with it: at or above half bed, and a remainder
+    # under the 20 cells below which the exclusion is allowed to fire at all.
+    assert all(f["bed_fraction"] >= 0.5 for f in excluded), excluded
+    assert all(f["interior_texels"] < 20 for f in excluded), excluded
+    # A field that stayed in must never be reported as set aside - naming a measured
+    # field as the cause of the exclusion's size is worse than naming none.
+    assert all(f["center_xy"] != [12.0, -8.0] for f in excluded)
+    # And it has to survive pytest's abbreviation, which is the whole reason it exists.
+    assert len(repr(excluded)) < 400, len(repr(excluded))
+
+    # A check whose fields carry no bed at all reports an empty set rather than raising,
+    # so the guard's own assertion is what fails and says what it failed on.
+    assert _excluded_fields({"largest": [], "fields": 0, "fields_on_road_bed": 0}) == []
+    assert _excluded_fields({}) == []
+
+
 def test_a_failing_refill_gate_names_the_field_and_why_it_could_not_be_lifted() -> None:
     """The aggregate gates fail on a percentile or a minimum, which says a value and not
     a place. ``_field_at`` is what turns that back into a field, and it has to carry the
@@ -2394,6 +2481,70 @@ def test_the_delighting_contract_number_can_actually_fail() -> None:
     assert dark["refill_carry_ratio"]["under_0_1"] > 0.5, dark
 
 
+def test_the_decast_guard_number_can_actually_fail() -> None:
+    """The negative control for `decast_guard`, on a base the blue de-cast will act on.
+
+    The de-cast only writes where a cell is bluer than the lit ground round it, so a warm
+    synthetic ground drives nothing and the number would read zero for the wrong reason -
+    the same "true and cannot move" shape the rest of this file exists to prevent. So the
+    ground here is cool and the shadows bluer still, which is what the flight actually
+    photographs on a shaded wall.
+    """
+
+    load_maplib()
+    from maplib import imagery
+
+    rng = np.random.default_rng(11)
+    n = 256
+    y, x = np.mgrid[0:n, 0:n].astype("float32")
+    dem = 150.0 * np.exp(-((y - 110) ** 2) / (2 * 18.0**2)) + 50.0 * np.sin(x / 24.0)
+    dem = (dem + rng.normal(0, 0.4, dem.shape)).astype("float32")
+    shade = np.clip(imagery.cast_shadows(dem, 2.0, 180.0, 25.0), 0.05, 1.0)
+    ground = np.clip(0.5 + 0.05 * rng.normal(0, 1, (n, n, 1)), 0.1, 0.9) * np.array(
+        [0.82, 0.90, 1.0]
+    )
+    # A shaded cell is bluer than a lit one, which is the condition the de-cast tests.
+    sky = 1.0 + 0.35 * (1.0 - shade)[..., None] * np.array([-0.2, 0.0, 0.35])
+    colour = (np.clip(ground * shade[..., None] * sky, 0, 1) ** (1 / 2.2) * 255).astype("uint8")
+    kw = dict(
+        azimuth_deg=180.0,
+        altitude_deg=25.0,
+        strength=1.0,
+        max_gain=4.5,
+        steep_deg=32.0,
+        steep_feather_deg=8.0,
+        steep_cap=True,
+    )
+
+    _out, clean = imagery.delight(colour, dem, 2.0, **kw)
+    assert clean["decast_guard"]["cells_under_guard"] == 0.0, clean["decast_guard"]
+    assert clean["decast_guard"]["written_under_guard"] == 0.0, clean["decast_guard"]
+
+    # Drive it: a carry pushed under the 1e-4 guard turns the de-cast from a rotation that
+    # holds luminance into a multiply by `local_lit.mean / 1e-4`. This is the elimination
+    # the pack got wrong by reading the line's intent rather than its denominator.
+    real_carry = imagery._carry_tone
+    try:
+        imagery._carry_tone = lambda corrected, weight, res_m, **kw2: (
+            real_carry(corrected, weight, res_m, **kw2) * 1e-5
+        )
+        _out, unguarded = imagery.delight(colour, dem, 2.0, **kw)
+    finally:
+        imagery._carry_tone = real_carry
+    assert unguarded["decast_guard"]["cells_under_guard"] > 0.5, unguarded["decast_guard"]
+    assert unguarded["decast_guard"]["written_under_guard"] > 0.0, unguarded["decast_guard"]
+    # And the per-cell question the share across maps cannot answer: of the cells this stage
+    # encodes black, what fraction did the de-cast write while its guard was binding? None on
+    # a base with no black at all, which is why the clean case above asserts the None rather
+    # than a zero - a ratio with an empty denominator is not a passing measurement.
+    assert clean["decast_guard"]["near_black_here"] == 0.0, clean["decast_guard"]
+    assert clean["decast_guard"]["near_black_written_under_guard"] is None, clean["decast_guard"]
+    assert unguarded["decast_guard"]["near_black_here"] > 0.0, unguarded["decast_guard"]
+    assert unguarded["decast_guard"]["near_black_written_under_guard"] > 0.0, unguarded[
+        "decast_guard"
+    ]
+
+
 def test_the_anti_black_floor_never_darkens_a_cell() -> None:
     """The floor against black holes must not write one.
 
@@ -2417,6 +2568,15 @@ def test_the_anti_black_floor_never_darkens_a_cell() -> None:
     the neighbourhood sits between 2.9 and 4 times the cell - which is to say it is close
     to redundant, and where it is not redundant it is the one that can darken. That is a
     question for whoever next opens the de-lighting, not something this test settles.
+
+    Nor does it cover the sibling floors' own version of the same defect, and that is a
+    limit rather than an omission. Their trigger used to read the lit neighbourhood through
+    a `np.maximum(..., 1e-4)` guard while their write did not, so where the guard bound they
+    darkened too - but reaching it needs a neighbourhood under 7.14e-05, which u8 source
+    quantisation and the 0.01 `seen` cut keep out of every number this suite reads. It is
+    repaired by making the trigger read the array the write uses, which is structural and
+    needs no scene to demonstrate; a test that claimed to drive it would be the shape of
+    gate this file exists to prevent.
     """
 
     load_maplib()
@@ -2648,6 +2808,94 @@ def test_the_delighting_stays_inside_the_contract_its_clips_give(map_key: str) -
         "the refill borrowed a tone and did not record what it was worth",
         stats.get("refill_carry_ratio"),
     )
+    # And whether the blue de-cast held luminance where it actually wrote. Its `lit_ratio`
+    # has channel-mean exactly 1 only while `local_lit.mean` clears the 1e-4 guard; below
+    # it the guard clamps the denominator and the line becomes a straight multiply by
+    # `local_lit.mean / 1e-4`. An equality rather than a threshold, and zero is the only
+    # healthy value, so it needs no population: the stage is written as luminance-preserving
+    # here, and a non-zero share says it was not, on the cells it wrote.
+    guard = stats.get("decast_guard")
+    assert guard is not None, (
+        map_key,
+        "built before the de-cast guard was recorded - rebuild; until then nothing says "
+        "whether that write held luminance",
+    )
+    for key in ("cells_under_guard", "written_under_guard", "near_black_here"):
+        assert guard.get(key) is not None, (map_key, key, guard)
+    assert guard.get("written_under_guard") == 0.0, (
+        map_key,
+        "the blue de-cast wrote on cells where its own 1e-4 guard was binding, so on those "
+        "cells it multiplied by local_lit.mean/1e-4 instead of holding luminance",
+        guard,
+    )
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_the_shipped_base_records_how_close_it_stands_to_black(map_key: str) -> None:
+    """And how much of the base is STANDING at the threshold, not only what crossed it.
+
+    `near_black_fraction` is a gate on one end of a two-ended contract, so it cannot
+    distinguish a base whose shadows floor comfortably above 13 from one sitting at 14 that
+    the next contrast change will push over - which is the whole of what happened to
+    bingham_canyon on a one-line spec edit. This asserts the distribution EXISTS on every
+    de-lit map; the bound on it comes from the first round that reports it, from the
+    population, rather than being invented here.
+
+    Measured on the array that ships, which is the point: `delight` is not the last writer
+    of the base, so the de-lighting's own numbers cannot see `paint_road_beds`,
+    `enforce_bed_contrast`, `refill_match` or the shipping clamp.
+    """
+
+    spec = load_spec(map_key)
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if not getattr(spec, "IMAGERY", None):
+        pytest.skip(f"{map_key}: the base is not conditioned imagery")
+    stats = handoff.get("base_colour") or {}
+    floor = stats.get("base_floor")
+    assert floor is not None, (
+        map_key,
+        "built before the shipped base's distance to black was recorded - rebuild; until "
+        "then near_black_fraction is the only number on it and it reads zero right up to "
+        "the moment it does not",
+    )
+    for key in ("max_channel_p01", "max_channel_p05", "under_13", "under_20", "under_32"):
+        assert floor.get(key) is not None, (map_key, key, floor)
+    # Both are taken on the same shipped array in the same call, so this is an equality
+    # rather than a threshold: it needs no population and cannot be tuned. What it catches
+    # is the failure this file has already had once - a base number read from a different
+    # array than the one that ships, which is why near_black_fraction had to be moved here
+    # from the terrain stage in the first place.
+    assert floor["under_13"] == stats.get("near_black_fraction"), (map_key, floor, stats)
+
+
+def test_the_shipped_base_floor_number_can_actually_fail() -> None:
+    """The negative control: a base standing at the threshold must MOVE the number.
+
+    A distribution that reads the same on a healthy base and a crushed one is a gate that
+    cannot fail, which is the defect this pack spent a day repairing. So the instrument is
+    shown against a base it should be alarmed by, not only against the ones that pass.
+    """
+
+    _, _, level_builder, _, _, _ = load_maplib()
+    rng = np.random.default_rng(3)
+    healthy = rng.integers(40, 200, (256, 256, 3), dtype="uint8")
+    good = level_builder.base_floor_stats(healthy)
+    assert good["under_20"] == 0.0, good
+    assert good["max_channel_p05"] > 32, good
+
+    # The same base with a quarter of it floored just above the gate: nothing is near
+    # black, so near_black_fraction is still zero and says nothing is wrong.
+    standing = healthy.copy()
+    standing[:128, :128] = 14
+    crushed = level_builder.base_floor_stats(standing)
+    assert crushed["under_13"] == 0.0, crushed
+    assert crushed["under_20"] > 0.2, crushed
+    assert crushed["max_channel_p01"] <= 14, crushed
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
@@ -2743,8 +2991,21 @@ def _assert_the_bed_exclusion_left_a_population(map_key: str, check: dict) -> No
     nothing. So the exclusion is asserted from both ends - it must leave a population,
     and it must stay the exception.
 
-    Meteor Crater, the only map with roads through its shadows, is 1.16 % road bed and
-    reported one such field out of eighteen.
+    Meteor Crater, the only map with roads through its shadows, is 1.16 % road bed.
+    The "one such field out of eighteen" this bound was set against came from run 51,
+    which predates `ee35029`'s own reordering - that commit moved the bed question after
+    the fallback so the exclusion reaches an elongated shadow over a road "where before
+    it could not", and then calibrated the ceiling on the count from before that change.
+    Run 73, the first build after it, drops four of eighteen and fails here at 4 > 3.6.
+
+    So a failure at this bound is not by itself evidence the exclusion ran away: on this
+    map shadows follow the roads, and the count of shadows lying on one is not bounded by
+    the 1.16 % road area. Read `_excluded_fields` before touching either end. Four fields
+    each reading `bed_fraction` at or above 0.5 is the exclusion doing what `ee35029`
+    widened it to do; a dropped field under 0.5, or an unexpected `interior_eroded`,
+    means the mask changed and that is the thing to fix. What must not happen is the
+    ceiling being raised to admit whatever the latest build produced, which would leave
+    the exclusion with no upper end at all.
     """
 
     dropped = check.get("fields_on_road_bed", 0)
@@ -2754,14 +3015,50 @@ def _assert_the_bed_exclusion_left_a_population(map_key: str, check: dict) -> No
         map_key,
         f"all {dropped} refilled fields were dropped as road bed, so nothing was "
         "measured and the gates below assert nothing",
-        check,
+        _excluded_fields(check),
     )
     assert dropped <= max(2, 0.2 * total), (
         map_key,
         f"{dropped} of {total} refilled fields were dropped as road bed - the "
         "exclusion is meant to be the exception, not the population",
-        check,
+        _excluded_fields(check),
     )
+
+
+def _excluded_fields(check: dict) -> list[dict]:
+    """The fields the road-bed exclusion set aside, each with the keys that say why.
+
+    The two assertions above used to hand pytest the whole ``check`` dict, whose
+    ``largest`` holds every measured field. pytest abbreviates that with ``...`` at the
+    depth the per-field numbers live at, so run 73's annotation read
+    ``{'br_diff_max_abs': 0.038, 'exg_diff_max_abs': 0.041, 'fields': 14,
+    'fields_on_road_bed': 4, ...}`` - four fields were dropped and not one of them was
+    named. That is the same truncation ``_field_at`` exists to defeat, one assertion
+    upstream, and it matters more here: the counts alone cannot distinguish an exclusion
+    that widened for a bad reason from a map that honestly has four road shadows.
+
+    ``bed_fraction`` is the share that got each field dropped, and the exclusion only
+    reaches a field whose remainder fell under 20 cells, so ``interior_texels`` and
+    ``interior_eroded`` are what say whether it took the documented path. A dropped field
+    reading ``bed_fraction`` under 0.5 would mean the bed mask, not the population, is
+    what changed.
+    """
+
+    return [
+        {
+            k: field.get(k)
+            for k in (
+                "bed_fraction",
+                "interior_texels",
+                "interior_eroded",
+                "area_m2",
+                "center_xy",
+                "kind",
+            )
+        }
+        for field in check.get("largest", ())
+        if field.get("on_road_bed")
+    ]
 
 
 def _field_at(fields: list[dict], key: str, *, palest: bool = False) -> dict:
