@@ -34,6 +34,15 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# The GIS maps pack (examples/gis_maps) reprojects public lidar with rasterio, filters
+# it with scipy and fetches it with requests. Declared, not assumed: its test gates
+# import maplib, so a clean `.[dev]` install must carry them or the suite cannot run.
+gis = [
+  "laspy[lazrs]>=2.5,<3",
+  "rasterio>=1.4,<2",
+  "requests>=2.31,<3",
+  "scipy>=1.12,<2",
+]
 vision = [
   "opencv-python-headless>=4.11,<5",
   "onnxruntime-gpu>=1.22,<1.27",
@@ -41,6 +50,7 @@ vision = [
   "transformers>=4.53,<5",
 ]
 dev = [
+  "beamng-mcp[gis]",
   # The giant_props headless gates run each mod's REAL generated runtime.lua
   # under lupa, and the Spin Launch audio gate hashes DECODED PCM through
   # soundfile. Both were undeclared, and both are guarded by

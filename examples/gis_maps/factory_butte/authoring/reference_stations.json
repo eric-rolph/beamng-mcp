@@ -1,0 +1,181 @@
+{
+  "map": "factory_butte",
+  "every_m": 250.0,
+  "ring_m": null,
+  "stations": [
+    {
+      "n": 1,
+      "lat": 38.362093,
+      "lon": -110.922019,
+      "heading_deg": 66.9,
+      "level_xy": [
+        -1921.2,
+        -1987.9
+      ],
+      "aerial": "https://www.google.com/maps/@38.362093,-110.922019,300a,35y,66.90h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=38.362093,-110.922019&heading=66.90&pitch=0&fov=80"
+    },
+    {
+      "n": 2,
+      "lat": 38.365449,
+      "lon": -110.911998,
+      "heading_deg": 68.19,
+      "level_xy": [
+        -1046.1,
+        -1614.7
+      ],
+      "aerial": "https://www.google.com/maps/@38.365449,-110.911998,300a,35y,68.19h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=38.365449,-110.911998&heading=68.19&pitch=0&fov=80"
+    },
+    {
+      "n": 3,
+      "lat": 38.366167,
+      "lon": -110.908866,
+      "heading_deg": 84.18,
+      "level_xy": [
+        -772.6,
+        -1534.8
+      ],
+      "aerial": "https://www.google.com/maps/@38.366167,-110.908866,300a,35y,84.18h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=38.366167,-110.908866&heading=84.18&pitch=0&fov=80"
+    },
+    {
+      "n": 4,
+      "lat": 38.366046,
+      "lon": -110.905406,
+      "heading_deg": 105.18,
+      "level_xy": [
+        -470.4,
+        -1548.0
+      ],
+      "aerial": "https://www.google.com/maps/@38.366046,-110.905406,300a,35y,105.18h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=38.366046,-110.905406&heading=105.18&pitch=0&fov=80"
+    },
+    {
+      "n": 5,
+      "lat": 38.365195,
+      "lon": -110.900429,
+      "heading_deg": 81.23,
+      "level_xy": [
+        -35.5,
+        -1641.9
+      ],
+      "aerial": "https://www.google.com/maps/@38.365195,-110.900429,300a,35y,81.23h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=38.365195,-110.900429&heading=81.23&pitch=0&fov=80"
+    },
+    {
+      "n": 6,
+      "lat": 38.365456,
+      "lon": -110.898966,
+      "heading_deg": 69.7,
+      "level_xy": [
+        92.3,
+        -1612.8
+      ],
+      "aerial": "https://www.google.com/maps/@38.365456,-110.898966,300a,35y,69.70h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=38.365456,-110.898966&heading=69.70&pitch=0&fov=80"
+    },
+    {
+      "n": 7,
+      "lat": 38.366962,
+      "lon": -110.892901,
+      "heading_deg": 87.48,
+      "level_xy": [
+        622.0,
+        -1445.1
+      ],
+      "aerial": "https://www.google.com/maps/@38.366962,-110.892901,300a,35y,87.48h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=38.366962,-110.892901&heading=87.48&pitch=0&fov=80"
+    },
+    {
+      "n": 8,
+      "lat": 38.366826,
+      "lon": -110.889721,
+      "heading_deg": 104.24,
+      "level_xy": [
+        899.8,
+        -1459.8
+      ],
+      "aerial": "https://www.google.com/maps/@38.366826,-110.889721,300a,35y,104.24h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=38.366826,-110.889721&heading=104.24&pitch=0&fov=80"
+    },
+    {
+      "n": 9,
+      "lat": 38.366361,
+      "lon": -110.887905,
+      "heading_deg": 117.59,
+      "level_xy": [
+        1058.5,
+        -1511.2
+      ],
+      "aerial": "https://www.google.com/maps/@38.366361,-110.887905,300a,35y,117.59h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=38.366361,-110.887905&heading=117.59&pitch=0&fov=80"
+    },
+    {
+      "n": 10,
+      "lat": 38.36495,
+      "lon": -110.882966,
+      "heading_deg": 82.48,
+      "level_xy": [
+        1490.2,
+        -1667.3
+      ],
+      "aerial": "https://www.google.com/maps/@38.364950,-110.882966,300a,35y,82.48h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=38.364950,-110.882966&heading=82.48&pitch=0&fov=80"
+    },
+    {
+      "n": 11,
+      "lat": 38.364725,
+      "lon": -110.879106,
+      "heading_deg": 126.32,
+      "level_xy": [
+        1827.4,
+        -1691.8
+      ],
+      "aerial": "https://www.google.com/maps/@38.364725,-110.879106,300a,35y,126.32h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=38.364725,-110.879106&heading=126.32&pitch=0&fov=80"
+    },
+    {
+      "n": 12,
+      "lat": 38.38,
+      "lon": -110.905,
+      "heading_deg": 60.0,
+      "level_xy": [
+        -436.5,
+        0.4
+      ],
+      "aerial": "https://www.google.com/maps/@38.380000,-110.905000,300a,35y,60.00h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=38.380000,-110.905000&heading=60.00&pitch=0&fov=80",
+      "spawn": "butte_base",
+      "near": "butte_base"
+    },
+    {
+      "n": 13,
+      "lat": 38.366,
+      "lon": -110.895,
+      "heading_deg": 0.0,
+      "level_xy": [
+        438.7,
+        -1552.0
+      ],
+      "aerial": "https://www.google.com/maps/@38.366000,-110.895000,300a,35y,0.00h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=38.366000,-110.895000&heading=0.00&pitch=0&fov=80",
+      "spawn": "badlands_south",
+      "near": "badlands_south"
+    },
+    {
+      "n": 14,
+      "lat": 38.385,
+      "lon": -110.918,
+      "heading_deg": 90.0,
+      "level_xy": [
+        -1572.4,
+        554.2
+      ],
+      "aerial": "https://www.google.com/maps/@38.385000,-110.918000,300a,35y,90.00h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=38.385000,-110.918000&heading=90.00&pitch=0&fov=80",
+      "spawn": "wash_west",
+      "near": "wash_west"
+    }
+  ]
+}

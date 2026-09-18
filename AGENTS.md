@@ -3207,6 +3207,453 @@ load, assert the difference is empty. `ast` and not grep, so a name surviving
 only in a comment still counts as dead. It found two more on the first run
 (`PAD_WRAP`, `PAD_HEIGHT`), both deleted.
 
+## GIS maps pack field guide (examples/gis_maps)
+
+Six BeamNG levels whose terrain is public GIS data rather than sculpting. The evidence
+chain mirrors Giant Props: `spec.py` owns every number, `fetch -> terrain -> level ->
+dist -> ledger` is deterministic, and `authoring/<mod_id>.handoff.json` carries the
+SHA-256 of every shipped file for the static gates to hash against.
+
+The first four items below were each found by driving the shipped ZIP, not by a gate.
+Every gate and every critic sheet in this pack reads the generator's own arrays, so
+none of them can see what the engine draws. Two play-tests found what seventeen critic
+rounds could not. Budget for that.
+
+### Every series of changes ends in a map you can load
+
+A change to this pack is not finished when the gates pass. The gates and the critic
+sheets read the generator's own arrays and have never seen what the engine draws -
+that is how a mirrored base texture, a too-bright road and a two-by-two tiled crater
+all shipped green. **The deliverable is a ZIP in the player's mods folder, every
+time.** Close a run of work like this:
+
+1. `python examples/gis_maps/build.py <key> all` for every map the change touches -
+   `level` and `dist` are where a generator change actually reaches a file. A change in
+   `maplib/` touches ALL SIX, even when only one map was being worked on: the pack has
+   shipped stale levels before because only the map under discussion was rebuilt.
+2. `python -m pytest -q tests/test_gis_maps_pack.py` - and read the skips, which are
+   the pack's own inventory of what each map has not got yet.
+3. Commit and push. The `GIS maps release` workflow rebuilds all six on a runner and
+   republishes `gis-maps-v1`; that release is the delivery channel, because a whole ZIP
+   is 90-250 MB and the session file limit is 30 MiB.
+4. Hand over the one command that installs it, and say what to look for:
+   `python examples/gis_maps/install_local.py --release gis-maps-v1 --maps <keys>`, then
+   `python examples/gis_maps/deploy_local.py --verify --maps <keys>`, which quotes the
+   profile's `beamng.log` lines for each level's namespace and exits nonzero when the
+   engine never mounted the zip. `--remove --confirm` is the uninstall.
+   An assistant can run all of this itself, but only from the machine that plays the
+   game: the MCP server is loopback-only (`allowed_hosts` in `mcp_adapter.py`), and
+   `mod_install` cannot carry these ZIPs - it installs from the text-file workspace,
+   whose default per-file cap is 2 MiB against a level ZIP of 90-250 MB.
+5. Small artefacts (a calibration level, a preview render) go straight to the user as
+   files - `_calibration/build_texcal.py` is 58 KB and answers a question no gate can.
+
+Anything that can be rendered without the engine, render: `maplib/preview3d.py`
+(`render_mesh`, `render_terrain_view`) rasterises the pack's own meshes and terrain to
+PNG. A picture of a building or a road before a play-test costs seconds and catches the
+class of defect a play-test would otherwise have to find.
+
+### Terrain contracts proven in game
+
+- The base texture set is written **south-up, like the `.ter` heights**. The engine maps
+  an image's first row onto the terrain's y = 0. A north-up base comes out mirrored
+  against the heightmap (the tell: a landmark on the wrong rim).
+- `TerrainBlock` sits **half a square in** from the footprint corner: the game puts its
+  first height sample on the block's corner, while a GIS grid holds each cell's centre.
+  Without the offset every placed object is half a square off the ground it was
+  measured from.
+- `TerrainBlock.baseTexSize` is the far-field bake resolution in pixels and must equal
+  the texture set's `baseTexSize`. A hard-coded 2048 under a 4096 px orthophoto halves
+  the resolution of everything past the near field, which is most of a mountain level.
+- A `TerrainMaterial`'s `*TexSize` fields are documented as world metres for one tile,
+  and the shipped level this pack was read against agrees — but that level is sampled
+  at 1 m, where metres and terrain squares are the same number, so the two readings
+  cannot be told apart on it. **They can be told apart on a map that is not sampled at
+  1 m, and there the engine appears to divide the terrain's sample count by the field.**
+  Authoring every size in metres and dividing by `square_size_m` is therefore the safe
+  form. NOT SETTLED: Meteor Crater still drew four craters after that fix shipped and
+  was verified in the published ZIP, so neither reading explains it on its own. The map
+  now samples at 1 m so the question cannot bite, and `_calibration/build_texcal.py`
+  builds a 58 KB level — one grid base map, four quadrants, four different
+  `*BaseTexSize` values — that names the real rule in one screenshot. Run it before
+  anything in this pack goes sub-metre again.
+
+### The de-lighting is the memory ceiling, and `base_tex_px` is not ITS knob
+
+`imagery.py` conditions the base colour over the whole array at once, so the build's
+working set scales with the LEVEL's sample count. `base_tex_px` does not enter that at
+all: `conditioned_colour` mosaics NAIP at `dem.shape[0]` and works at the level's own
+resolution, and dropping 8192 to 4096 changed nothing when the build was being killed
+inside `delight`. That was a wrong guess made from a parameter name, and it cost two
+runs. Measure the phases before blaming one.
+
+**`base_tex_px` has a second consumer, and that one it does drive.** This section used
+to stop at the paragraph above, which reads as though the parameter were free. It is
+not. `build_base_set` allocates at the texture's own resolution - the LANCZOS resize,
+the resampled DEM, the normal map, the AO, the luminance and the roughness - while
+`colour_full`, the layer map and the DEM are all still live. On a 4096-sample map it
+peaks at **8.18 GB at `base_tex_px` 8192 against 2.11 GB at 4096**, measured on a 15 GB
+box, and 8192 on Bingham Canyon and Mount St. Helens killed the release build three runs
+running, inside the first map, before a single gate ran. So `base_tex_px` is free of the
+de-lighting's memory and is not free overall.
+
+**Above `size_px` it also buys nothing.** `conditioned_colour` returns colour at
+`dem.shape[0]`, so `build_base_set` reaches a larger `base_tex_px` by upsampling that
+array: a texture with no more detail in it, for three times the PNG bytes (176.7 MiB
+against 48.0 MiB at 4096) in a ZIP the release notes already call 80-90 MiB. Author
+`base_tex_px` equal to the level's sample count. Meteor Crater is the one map still
+above it, 4096 over 2048 samples: harmless at that size and green, but it is upsampling
+too, and it is not the thing to copy.
+
+The signature is **exit 137** with a bare `Killed` and no traceback - a stage that just
+stops writing output is this, not a network fault.
+
+Set `GIS_MAPS_MEM=1` and `imagery.py` prints RSS at each phase. On Black Bear Pass at
+8192 samples that reads:
+
+    [mem]   1.66 GB  fit_sun
+    [mem]   1.79 GB  delight
+    [mem]   2.29 GB  cast_shadows      <- first call
+    [mem]   7.20 GB  cast_shadows      <- second call, then killed
+
+Two things it showed:
+
+- **`cast_shadows` held six copies of a padded, rotated grid.** It pads by 21 % and
+  rotates so the sun runs along +x; at 8192 samples that grid is 11,632 squared, 541 MB
+  a copy, and the plain array form kept `padded`, `rotated`, `ray`, `suffix_max`,
+  `horizon`, `ray + 0.05`, `lit` and `back` alive together. Every row is independent
+  once rotated, so it now runs in row blocks and frees as it goes: **measured 1.83 GB
+  peak at 8192 samples, down from about 4 GB, and bit-identical to the whole-array form
+  on every case tested.**
+- **`delight` itself is the remaining ceiling.** Between its two `cast_shadows` calls it
+  adds about 5 GB: `smooth`, `shade`, `visibility`, `openness`, `sky`, `illum`, plus
+  `colour_u8.astype("float32") / 255.0`, which is 805 MB and a temporary of the same
+  size.
+
+  **Decimating the illumination model is NOT the fix, though this section used to say
+  it was.** Two sessions went at it on that advice. The one term that genuinely is
+  low-frequency is the openness the AO estimate measures - a box mean over a 40 m
+  radius, which holds nothing finer by construction - and taking even that one on a
+  coarser grid does not survive measurement. Against the full-resolution result on
+  1,500 m of relief, a grid twice as coarse brought back bilinearly moves the finished
+  AO by **0.18 at the 99th percentile** (max 0.43), and four times as coarse by 0.32
+  (max 0.60). The reason is structural rather than a tuning problem: `depth` is divided
+  by only `radius_px * res * 0.35`, about 14 m at radius 40, so a few metres of error
+  in the mean is a large part of the output, and the bilinear re-expansion adds its own
+  error exactly at the steep features the de-lighting cares about. `shade` and
+  `visibility` are worse candidates still - a terrain normal and a cast-shadow edge are
+  the per-cell signal the de-lighting exists to remove, so decimating them would smooth
+  away the thing being corrected. The rejection is recorded in
+  `heightmap.ambient_occlusion`'s own docstring so it is not re-derived from here.
+
+  **The ceiling is `refill`, not the illumination model.** Sampling RSS every 20 ms and
+  charging each sample to the phase it lands in puts the peak at 2048 samples in the
+  snow re-seeding rounds - `refill(snow_mask)` and `_fill_kinds` - at **1.05 GB of a
+  1.05 GB peak**, while the whole illumination prologue tops out at 0.55 GB. `refill`
+  rebuilds the ring fields and the neighbourhood weights over the whole array, and the
+  snow path calls it up to three times. Any fix that gets 8192 samples to build has to
+  come from there. Two sessions measured this independently and agree.
+
+  **The two array-accounting fixes are real, keep the result bit-identical, and are not
+  enough on their own** - measured 4.18 GB to 3.94 GB at 4096 samples, about 6 %, which
+  does not lift the ceiling. Worth having, not worth mistaking for the answer:
+
+  - **The colour conversions.** `np.where(cond, a, b)` evaluates BOTH arms over the
+    whole array before it picks, so the obvious spelling of `srgb_to_linear` holds four
+    to six full RGB float32 temporaries at once - 805 MB each at 8192 samples. Applying
+    the transfer curve in place, and computing separately only the few cells below the
+    knee, is the same numbers in one buffer.
+  - **Lifetimes.** `shade`, `sky` and `openness` were each left bound for the remaining
+    600 lines of the frame after their last real read - 268 MB apiece at 8192 samples,
+    on top of the temporaries. Freeing them at that read is the rest of it. Watch
+    `shade` in particular: it looks finished early but is read again about 550 lines
+    down as `shade > 0.5`, so what survives is the one-byte mask, not the float array.
+
+  And keep the DEM in float32 on the way through: `ambient_occlusion` used to take
+  `dem.astype("float64")` and hand it to `uniform_filter`, which allocates its own
+  output beside it - two 537 MB arrays at 8192 squared for a field float32 holds to a
+  millimetre. The float32 form agrees with the old one to 8e-06.
+
+Elevation in float32 holds a millimetre at terrestrial magnitudes, so a float64 DEM copy
+is 537 MB at 8192 squared bought for nothing - and `scipy.ndimage` allocates its own copy
+alongside whatever it is handed.
+
+### A conditioned base cannot be judged against another map's base
+
+The shipped base's own luminance spread is not evidence about the de-lighting, and on
+2026-09-18 two sessions read the same number to opposite conclusions on Factory Butte
+(0.152 p5-p95 against Meteor Crater's 0.242, at a third of the chroma): one called it a
+bleached base and proposed a cross-map spread floor, the other called it the photograph.
+
+**Spread measures relief.** Across the five de-lit maps, the shipped base's spread tracks
+`terrain.stats` steepness in perfect rank order, Pearson 0.975:
+
+    map              steep_frac  gain p95/p05  spread    sat
+    wallace_creek        0.0045         1.192   0.131  0.183
+    factory_butte        0.0232         1.359   0.152  0.097
+    meteor_crater        0.0304         1.595   0.242  0.271
+    mt_st_helens         0.1854         2.702   0.363  0.074
+    bingham_canyon       0.3833         2.573   0.527  0.192
+
+So a floor drawn across maps fails the flat desert maps and passes the high-relief ones
+whatever the conditioning did. Spread and chroma are independent axes as well:
+`mt_st_helens` has the highest spread of the six and the lowest saturation, and its base
+chroma (0.019-0.053) is below Factory Butte's - correctly, because a pumice plain is grey.
+
+**`imagery.source` is the other end of the question.** `level_builder.source_colour_stats`
+measures the NAIP mosaic before `delight` touches it and records its luminance
+percentiles, spread and mean chroma, so the conditioning reads as a within-map ratio,
+which is the only form that does not also measure relief. It is taken on a stride-4
+subsample so the full mosaic is never copied, and it rides in the stats dict the cached
+`data/terrain/imagery.json` path reloads, so it exists on both paths.
+
+**What the measurement is FOR, so a later round knows what to do with it.** One reading
+survives the argument above and is not decidable from the output: the slope classes and
+the correction are both functions of slope, so a de-lighting that mistook albedo for
+shading would divide out the genuine warm-flat / cool-slope contrast a badlands has.
+Factory Butte's between-layer base luminance span is 0.045 across its four classes, which
+fits either story. **The ratio of conditioned spread to source spread is the test of that
+hypothesis specifically.** A ratio near 1 on a map with almost no shading to remove
+(Factory Butte is 2.3 % steep with 0.24 % cast shadow) says the pale base is the
+photograph; a ratio well under 1 there says the correction ate real albedo.
+
+No floor is gated on the ratio yet, deliberately: set it from the population once a
+six-map build has produced one, never from taste. The gate that exists asserts only that
+the measurement is present and well formed on every de-lit map, which is this pack's
+recurring failure - a statistic that goes silently absent for some maps and reports as
+not-applicable.
+
+### Every stage is bounded and the pipeline is not
+
+Found 2026-09-18 while hunting what collapsed 5,534 bingham_canyon texels to near-black.
+Not the answer to that question yet, and written down anyway, because it is unbounded by
+construction rather than by accident.
+
+Every reducing stage in `imagery.py` clips itself. `delight`'s gain floors at 0.45.
+`_match_bands`'s factor floors at 0.5. `pull_layers`'s windowed gain floors at 0.5.
+`_clamp_to_ring`, `pull_regions` and `aspect_flatfield` each carry their own. **Nothing
+anywhere bounds the product.** 0.45 x 0.5 x 0.5 x 0.5 is 0.056, so four stages that each
+consider themselves conservative can take a mid-tone texel to black between them, and each
+one's own statistics will look reasonable afterwards.
+
+That also explains the shape such a failure takes, which is worth recognising: it fires
+only where several independent stages happen to agree about the same cells, so it appears
+as a few small regions rather than as a global darkening, and the base as a whole can get
+BRIGHTER in the same build. A whole-image mean cannot see it, and neither can any
+per-stage number.
+
+**The rule: a bound on each step is not a bound on the path.** When a pipeline's stages
+each clip, ask separately what the composition can do, and record the end-to-end ratio -
+not each stage's own. `gain_p05` and `gain_p95` are the illumination gain, which is one
+stage of several; nothing yet records what a cell's luminance did from the source mosaic
+to the shipped base. That measurement is the instrument this question needs and it does
+not exist.
+
+### A value authored flush against a bound fails intermittently
+
+Three instances on 2026-09-18, which is what makes it a family rather than a coincidence.
+
+- `factory_butte`'s `scatter_size_m` declared a 0.2 m minimum against the 0.2 floor a
+  forest item is held to. One stone in tens of thousands came out at 0.18 and killed a
+  forty-minute build.
+- `clamp_highlights(0.95)` encodes to u8 249 and `base_colour_stats` counts 250. One count
+  apart, in the clamp's favour, which retired the assertion instead of satisfying it.
+- `bingham_canyon` and `mt_st_helens` both fit the sun at exactly their window's floor,
+  which is the search being stopped at a bound rather than a fit.
+
+The shape is always the same: a declared value sits ON a gate's threshold rather than
+inside it, so whether the build passes depends on a draw, a rounding, or which side of the
+comparison the implementation happens to use. It passes most of the time, which is worse
+than failing, because the failure arrives forty minutes into a build with no obvious cause.
+
+**The rule: a spec value is authored strictly inside the bound that governs it, with room
+for whatever jitter or rounding sits between them, and the gate demands strictly - not
+merely at.** `test_a_scatter_cannot_declare_stones_below_the_forest_floor` is the worked
+example: it asserts `lo > MIN_FOREST_SCALE`, not `>=`, and says why in its own comment.
+
+**Do not go looking for these with a text sweep.** One was run here - every numeric value
+in all six specs against every numeric literal on the bound side of an assertion in the
+suite - and it returned 220 hits, essentially all coincidental: a 5.0 m road width matching
+an unrelated 5.0 degree threshold. The match has to be between a spec key and a gate about
+the SAME quantity, which is a judgement, not a regex. Done by hand over the spec keys a
+gate reads directly, the list is the three above.
+
+### A gate's edge is a visible edge
+
+Also found 2026-09-18, while ruling `pull_layers` out of the above.
+
+`pull_layers` leaves alone any cell outside `lum_gate` times its layer's median luminance -
+0.6 to 1.25 by default - so a white spoil field or a black shadow keeps its own tone while
+the rest of the layer is pulled. The exemption is right. Its edge is not: measured on a
+synthetic chalk field pulled to rubble, a patch at 0.55 of the layer median comes through
+untouched and a patch at 0.60 is multiplied by 0.555. Two patches four counts apart in the
+photograph ship two to one apart.
+
+Nothing looks for this. It is not what the near-black gate measures, and it will read in
+game as a hard tonal line wherever a layer's tone crosses 0.6 of its own median - which a
+cast shadow's own gradient does routinely. **A gate applied to some cells and not others
+needs a taper, or it authors a contour of its own.** `tapers` already exists on this
+function for exactly this reason, at layer boundaries; the luminance gate has no equivalent.
+
+### A ceiling that lands on the gate's boundary is not a ceiling
+
+Two defects behind `test_base_colour_has_no_black_holes`, found on 2026-09-18 while the pack
+branch could not publish, and both fixed in `53807cb`. Written down because the shape generalises
+well past this one contract.
+
+**The documented lever did not exist.** `c5865de` introduced `highlight_ceiling` and said in its
+own commit message that a spec can turn it off with `highlight_ceiling 0`. The single
+`imagery.delight(` call site in `level_builder.py` passed `knee_lum` from the spec and never
+passed `highlight_ceiling`, so every de-lighting map took the 0.95 default and no spec could opt
+out. A knob described in a commit message is not a knob until a call site passes it.
+
+**The clamp aimed one count below the threshold it existed to satisfy.** `clamp_highlights` holds
+the brightest channel at 0.95 linear, which encodes to 249, and `base_colour_stats` counts a texel
+as clipped at `>= 250`. One count of margin - so any later stage that lifts a texel by a single
+count puts it back over. And there are later stages: `delight` returns, then the level stage writes
+the array again through `_enforce_beds`, `refill_match` and `_enforce_beds` a second time, and only
+then is `base_colour_stats` taken. `delight`'s own comment called the clamp "last thing before the
+encode, so no refill, floor or cap re-lifts it", which is true inside `delight` and false in the
+pipeline. The fix enforces the ceiling on what ships, after the resize, immediately before the
+array is written and measured.
+
+**The rule: a contract enforced mid-pipeline is enforced where it is measured, or it is not
+enforced.** Ask which stage writes the array last before the number is taken, not which stage
+feels final. Two stages in this file carry a comment claiming to be last.
+
+**A corollary about reading the failures.** The same assertion failing on two maps does not mean
+one cause. `base_colour_stats` measures the array after the LANCZOS resize to `base_tex_px`, and
+its own docstring notes that overshoot on a hard edge lands in the clipped fraction. Meteor Crater
+is 2048 upscaled to 4096, so that path is live; Factory Butte is 4096 to 4096 and is never
+resampled. A resize fix would green one and leave the other where it was.
+
+**And the question the fix deliberately does not close.** `shipped_ceiling_fraction` records how
+much the final clamp had to hold back, which is a symptom meter, not a result: a large number says
+a later stage lifted a lot of texels past the ceiling. Factory Butte's caprock went from 0.00498
+on the shipped `fc4db59` base to 0.05629 four imagery commits later while its mean luminance
+*fell* - a widening distribution, which reads as a regression rather than as a gate newly
+reporting. The clamp makes the release publishable; it does not explain that.
+
+**And the sting in the tail: the fix also retired one of that test's assertions.** So this
+section is two defects fixed and a third created in fixing them, which is the honest shape of it.
+The rest is the third one and its repair.
+
+Scope it precisely, because an earlier draft of this section overstated it. What the clamp retires
+is the `clipped` assertion, not `test_base_colour_has_no_black_holes` as a whole. The other
+assertions in that test are still live: `near_black_fraction` measures the dark end, which a
+highlight clamp cannot move, and `lighter_than` compares layer luminances, which the clamp shifts
+by at most 0.0011 (`fb_caprock`; every other layer rounds to 0.0000). The two refill gates are
+untouched - `refill_check` runs on `colour_full`, before the base is resized or clamped at all.
+When counting which red gates went vacuous, count failures of the `clipped` assertion alone.
+
+And that one assertion is not deleted, it is re-aimed. `< 0.002` was unfailable, so it now reads
+`== 0.0`, which is not a tightening: under the contract the only reachable value is zero, and the
+loose form could not have failed for any other reason. At exactly zero it fails for one reason,
+the one that can recur - a stage writing the base after the clamp, which is the defect `53807cb`
+existed to fix and which `refill_match` and `_enforce_beds` caused once already. **A vacuous
+threshold is often worth re-aiming rather than removing: ask what the clamp guarantees, assert
+that exactly, and the assertion starts guarding the guarantee instead of the symptom.**
+
+`53807cb` ends the level stage with a highlight clamp on the base, because `delight`'s
+own ceiling is not the last word: `refill_match`, `_enforce_beds` and the LANCZOS resize
+all write after it. The clamp is right, and what ships is correct. But 0.95 linear
+encodes to 249 and `base_colour_stats` counts 250, so after it `clipped` is **exactly
+zero for every layer of every map with an IMAGERY spec**, whatever the pipeline did
+upstream - and `test_base_colour_has_no_black_holes` asserts `clipped < 0.002`. The
+assertion reads as live and cannot fail. The whole-base `shipped_ceiling_fraction` the
+same commit records is a far weaker instrument than the per-layer number it replaced:
+fb_caprock is 5.6% over the ceiling and 0.13% of its base, so no plausible whole-base
+threshold sees it. `clipped_before_ceiling` keeps the per-layer share, measured on the
+array the clamp read.
+
+**When a fix works by rewriting what a gate measures, move the gate, not just the array.**
+Otherwise the suite goes green on the fix and stays green through the regression.
+
+The population, measured on run 33's shipped bases (which predate the clamp, so they are
+the unclamped arrays the number describes) - 22 layers over five maps:
+
+| band | layers |
+| --- | --- |
+| 0.0563 | `fb_caprock` |
+| 0.0027 - 0.0066 | `bc_scrub_hillside` 0.00660, `mc_limestone_rim_ew` 0.00431, `bc_haul_gravel` 0.00373, `mc_road_dirt` 0.00352, `bc_waste_rock` 0.00266 |
+| under 0.002 | the remaining 16 |
+
+Whole-base: bingham_canyon 0.00225, factory_butte 0.00132, meteor_crater 0.00045,
+mt_st_helens 0.00002, wallace_creek 0.00000.
+
+**The gate is the population, not an absolute.** 0.002 was the contract written for an
+unclamped base and six of those 22 layers are already above it, so restoring it hard
+re-reds three maps over a blow-out the clamp has made invisible in game. Each layer is
+instead held to its own run 33 figure plus 0.005 (`CEILING_BASELINE` and `CEILING_SLACK`
+in the suite), which catches a layer that *starts* blowing out - the failure that
+actually happened to `fb_caprock` - without failing the ones that always did. A layer
+with no baseline, black_bear_pass's and any new material, is asserted present only.
+Same shape as the refill floor: take the number from the population, never invent it.
+
+### Pack conventions that are ours, not the engine's
+
+- `size_px` is gated to a power of two between 1024 and 8192 in
+  `tests/test_gis_maps_pack.py`. **That bound is ours.** TerrainFile v9 stores the
+  sample count as a u32 and has no such limit; the gate exists because nothing larger
+  has been proven to load. Raising it is a decision, not a port.
+- `dist` is a re-zip of `mod/`, never a rebuild, and the ZIP is `ZIP_STORED` with a
+  release lock — same contract as the giant_props pack.
+- Download size is not a reason to refuse resolution. Shipping BeamNG maps run to
+  2.5 GB (Roane County) and 4.5 GB (West Coast USA) installed; an 805 MB `.ter` is
+  unremarkable in that company. Argue from the data's own density instead: at this
+  survey's 1.11 ground returns per m2, a 0.5 m grid holds a real return in 24 % of its
+  cells under canopy and 76 % above tree line.
+
+### Roads, friction and the AI graph
+
+- Friction lives on the **terrain material** (`groundmodelName` on `TerrainMaterial`),
+  not on the road material. A `DecalRoad` conforms to the terrain and inherits its
+  collision and friction, so the carved bed's terrain layer is what decides grip; the
+  road material carries `annotation: "DRIVABLE_ROAD"` and the picture.
+- `drivability` on a `DecalRoad` is a **preference weight for the AI's route planner,
+  not a flag**. Giving every way 1 offers a 3.2 m shelf road with a 20 % ledge to
+  traffic on the same terms as a two-lane tertiary. `DRIVABILITY_BY_HIGHWAY` in
+  `maplib/level_builder.py` scales it by OSM class (tertiary 0.7, track 0.2), and a
+  spec's `ROADS["drivability"]` overrides per class.
+- `renderPriority` layers overlapping decals: lower draws first. Paved beds 10, unpaved
+  11 here; markings and wear patches belong above both.
+- `textureLength` short (3-5 m) on hairpins, or the UVs stretch through the radius
+  change. Black Bear Pass is hairpins end to end and runs 5 m.
+- UNVERIFIED HERE (from an external pipeline spec, no simulator in this environment):
+  `MeshRoad` carries its own rigid collision body and side/bottom thickness, which is
+  what bridges, viaducts and suspended roadbeds want; this pack ships `DecalRoad` only.
+
+### Meshes and collision
+
+- BeamNG resolves vehicle-to-mesh collision per triangle against a 2000 Hz physics
+  loop. A face emitted as one large quad gives the solver a 30 m triangle, which reads
+  as a trampoline under a wheel. **Keep every collision triangle's longest edge under
+  about 2.5-3.5 m.** `maplib/buildings.py` lays every wall, pitch, gable end and roof
+  deck out as a grid or a midpoint-subdivided triangle for exactly this reason.
+- Only nodes named exactly `Colmesh-N` are collision-only and invisible. A collision
+  mesh should be the simplified shape: small details a suspension can catch on belong
+  to the visual mesh alone. UNVERIFIED HERE: the external spec reports
+  `Colmesh-<material>` naming (`Colmesh-asphalt`, `Colmesh-wood`) selecting tyre sound
+  and particle reactions; this pack has not probed it.
+- Segment big geometry so it can cull. One 10 km ribbon as a single shape is a draw-call
+  bottleneck. Buildings here ship one Collada shape per 512 m tile; a road-corridor mesh
+  should segment at 100-250 m.
+- `collisionType` is `"Visible Mesh Final"`, not `"Visible Mesh"` — the latter logs a
+  performance warning.
+
+### Buildings (maplib/buildings.py)
+
+- OSM gives the outline and nothing else. Height comes from the 3DEP point cloud's
+  highest-hit surface minus its classified ground **inside that outline** (low quartile
+  the eaves, p90 the ridge); roof shape is fitted to the same returns; roof colour is
+  the median of the de-lit orthophoto inside the outline, snapped to a small palette.
+- A roof is a bump to the surface-object detector and a nine metre tree to the canopy
+  height model. **Both must take the building mask as an exclusion** or a town grows a
+  forest and a boulder field on its rooftops.
+- Neither the terrain nor the photograph needs healing under a building: 3DEP's raster
+  is a bare-earth DTM with no buildings in it, and the roof the orthophoto recorded is
+  exactly where the roof mesh goes.
+
 ## Verification and Git hygiene
 
 Run focused tests first, then the repository checks before claiming completion:
