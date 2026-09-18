@@ -2650,6 +2650,74 @@ def test_the_delighting_stays_inside_the_contract_its_clips_give(map_key: str) -
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_the_shipped_base_records_how_close_it_stands_to_black(map_key: str) -> None:
+    """And how much of the base is STANDING at the threshold, not only what crossed it.
+
+    `near_black_fraction` is a gate on one end of a two-ended contract, so it cannot
+    distinguish a base whose shadows floor comfortably above 13 from one sitting at 14 that
+    the next contrast change will push over - which is the whole of what happened to
+    bingham_canyon on a one-line spec edit. This asserts the distribution EXISTS on every
+    de-lit map; the bound on it comes from the first round that reports it, from the
+    population, rather than being invented here.
+
+    Measured on the array that ships, which is the point: `delight` is not the last writer
+    of the base, so the de-lighting's own numbers cannot see `paint_road_beds`,
+    `enforce_bed_contrast`, `refill_match` or the shipping clamp.
+    """
+
+    spec = load_spec(map_key)
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if not getattr(spec, "IMAGERY", None):
+        pytest.skip(f"{map_key}: the base is not conditioned imagery")
+    stats = handoff.get("base_colour") or {}
+    floor = stats.get("base_floor")
+    assert floor is not None, (
+        map_key,
+        "built before the shipped base's distance to black was recorded - rebuild; until "
+        "then near_black_fraction is the only number on it and it reads zero right up to "
+        "the moment it does not",
+    )
+    for key in ("max_channel_p01", "max_channel_p05", "under_13", "under_20", "under_32"):
+        assert floor.get(key) is not None, (map_key, key, floor)
+    # Both are taken on the same shipped array in the same call, so this is an equality
+    # rather than a threshold: it needs no population and cannot be tuned. What it catches
+    # is the failure this file has already had once - a base number read from a different
+    # array than the one that ships, which is why near_black_fraction had to be moved here
+    # from the terrain stage in the first place.
+    assert floor["under_13"] == stats.get("near_black_fraction"), (map_key, floor, stats)
+
+
+def test_the_shipped_base_floor_number_can_actually_fail() -> None:
+    """The negative control: a base standing at the threshold must MOVE the number.
+
+    A distribution that reads the same on a healthy base and a crushed one is a gate that
+    cannot fail, which is the defect this pack spent a day repairing. So the instrument is
+    shown against a base it should be alarmed by, not only against the ones that pass.
+    """
+
+    _, _, level_builder, _, _, _ = load_maplib()
+    rng = np.random.default_rng(3)
+    healthy = rng.integers(40, 200, (256, 256, 3), dtype="uint8")
+    good = level_builder.base_floor_stats(healthy)
+    assert good["under_20"] == 0.0, good
+    assert good["max_channel_p05"] > 32, good
+
+    # The same base with a quarter of it floored just above the gate: nothing is near
+    # black, so near_black_fraction is still zero and says nothing is wrong.
+    standing = healthy.copy()
+    standing[:128, :128] = 14
+    crushed = level_builder.base_floor_stats(standing)
+    assert crushed["under_13"] == 0.0, crushed
+    assert crushed["under_20"] > 0.2, crushed
+    assert crushed["max_channel_p01"] <= 14, crushed
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_base_colour_has_no_black_holes(map_key: str) -> None:
     """No in-paint, refill or gain leaves black ground: under a texel in ten thousand of
     the finished base is near black (the asphalt is dark, never black)."""
