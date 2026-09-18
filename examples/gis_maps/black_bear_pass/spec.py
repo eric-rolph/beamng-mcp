@@ -568,7 +568,13 @@ ROADS = {
     "carve": {
         "profile_window_m": 32.0,
         "feather_m": 2.0,
-        "max_cut_fill_m": 3.0,
+        # 3 m was tuned when this map held 13 ways over 19 km. It now carries 55 over
+        # 53 km - Telluride's streets, Tomboy Road, the mine tracks in Savage Basin -
+        # and on that much mountain track a 3 m budget leaves the grade line unable to
+        # plane the benches: nine ways came out over the 0.25 node-to-node grade-change
+        # contract, worst 1.68 on the raw ground. The bed is what a vehicle drives, so
+        # it gets the depth to be a bed.
+        "max_cut_fill_m": 4.5,
         "junction_snap_m": 8.0,
         "bridge_m": 20.0,  # two free ends this close, within 3 m of height, are one road
         "end_feather_m": 25.0,  # a cut fragment's free end fades over 25 m

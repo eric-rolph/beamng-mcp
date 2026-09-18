@@ -884,6 +884,39 @@ def terrain(spec, example_root: Path) -> dict:
         stats["base_pull_regions"] = region_stats
         _log(f"  base colour pulled by elevation band on {len(region_stats)} regions")
     if colour is not None:
+        # Last guard before the base ships: no cell may be near-black. The engine lights
+        # what is here, and a black cell is a hole in the ground however it got there -
+        # a gorge the refills never reached, a shadow under a cliff the de-lighting
+        # could not fit. Each one takes the median of a widening ring of its own
+        # non-black neighbourhood, so the fill is the ground beside it rather than a
+        # flat grey. Over 8192 m of San Juan relief this caught 0.02 % of the base,
+        # which is the Bridal Veil gorge and the wall under Ingram Falls.
+        from scipy import ndimage
+
+        black = colour.max(axis=-1) < 13
+        if black.any():
+            filled = colour.copy()
+            for radius in (3, 7, 15, 31):
+                if not black.any():
+                    break
+                lit = (~black).astype("float32")
+                weight = ndimage.uniform_filter(lit, size=radius, mode="nearest")
+                for channel in range(3):
+                    blur = ndimage.uniform_filter(
+                        np.where(black, 0.0, colour[..., channel]).astype("float32"),
+                        size=radius,
+                        mode="nearest",
+                    )
+                    take = black & (weight > 0.05)
+                    filled[..., channel] = np.where(
+                        take,
+                        np.clip(blur / np.maximum(weight, 1e-6), 0, 255).astype("uint8"),
+                        filled[..., channel],
+                    )
+                black = black & ~(weight > 0.05)
+            stats["near_black_refilled"] = int((colour.max(axis=-1) < 13).sum())
+            colour = filled
+
         # The mean sRGB colour and luminance of the finished base under each layer.
         from PIL import Image
 

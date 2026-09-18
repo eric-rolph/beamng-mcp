@@ -266,6 +266,94 @@ def build_roads(
     return roads, stats
 
 
+def _trim_end_kinks(nodes: list, cap: float, max_drop: int = 12) -> list:
+    """Drop end nodes until the decal stops ending in a step.
+
+    A free end lands where the carved bed has feathered back into raw ground, and on a
+    coarse grid that last metre can turn over sharply. The window is the same three
+    intervals the ledger measures: reading only the outermost change misses a kink two
+    nodes in, which is how the first version of this trimmed nothing.
+    """
+
+    def change_at(seq, at_start: bool) -> float:
+        if len(seq) < 5:
+            return 0.0
+        grades = [
+            (b[2] - a[2]) / max(math.hypot(b[0] - a[0], b[1] - a[1]), 1e-3)
+            for a, b in itertools.pairwise(seq)
+        ]
+        changes = [abs(g2 - g1) for g1, g2 in itertools.pairwise(grades)]
+        window = changes[:3] if at_start else changes[-3:]
+        return max(window) if window else 0.0
+
+    for at_start in (True, False):
+        for _ in range(max_drop):
+            if len(nodes) < 6 or change_at(nodes, at_start) <= cap:
+                break
+            nodes = nodes[1:] if at_start else nodes[:-1]
+    return nodes
+
+
+def _drop_step_nodes(nodes: list, cap: float, max_share: float = 0.02) -> list:
+    """Remove the samples that make a decal step, worst first.
+
+    One interval in 2,408 on the Imogene Pass track drops six metres between
+    consecutive 8 m nodes: the way crosses something the ground does not carry through.
+    Smoothing cannot fix a discontinuity and a wider carve does not reach it, but a
+    road does span a washout - so the sample that makes the step goes, and the decal
+    bridges it. Bounded to ``max_share`` of the way's nodes so this can never quietly
+    rewrite a road's shape.
+    """
+
+    budget = max(1, int(len(nodes) * max_share))
+    for _ in range(budget):
+        if len(nodes) < 5:
+            break
+        grades = [
+            (b[2] - a[2]) / max(math.hypot(b[0] - a[0], b[1] - a[1]), 1e-3)
+            for a, b in itertools.pairwise(nodes)
+        ]
+        changes = [abs(g2 - g1) for g1, g2 in itertools.pairwise(grades)]
+        worst = max(range(len(changes)), key=lambda i: changes[i])
+        if changes[worst] <= cap:
+            break
+        nodes = nodes[: worst + 1] + nodes[worst + 2 :]
+    return nodes
+
+
+def _relax_node_heights(
+    nodes: list, cap: float, max_lift_m: float = 0.25, rounds: int = 24
+) -> list:
+    """Take the creases out of a decal's node heights without letting it float.
+
+    A DecalRoad drapes onto the terrain when drawn, so node heights inform the spline
+    rather than fix it - but a node-to-node grade change still reads as a crease. Each
+    interior node relaxes toward the mean of its neighbours and is then clamped to
+    within ``max_lift_m`` of the ground it was sampled from, so the decal is never more
+    than a quarter metre off the terrain it lies on. Ends are pinned: they are already
+    trimmed and junction-joined.
+    """
+
+    if len(nodes) < 5:
+        return nodes
+    ground = [n[2] for n in nodes]
+    z = list(ground)
+    for _ in range(rounds):
+        worst = 0.0
+        for i in range(1, len(z) - 1):
+            a = math.hypot(nodes[i][0] - nodes[i - 1][0], nodes[i][1] - nodes[i - 1][1])
+            b = math.hypot(nodes[i + 1][0] - nodes[i][0], nodes[i + 1][1] - nodes[i][1])
+            if a < 1e-3 or b < 1e-3:
+                continue
+            worst = max(worst, abs((z[i + 1] - z[i]) / b - (z[i] - z[i - 1]) / a))
+        if worst <= cap:
+            break
+        for i in range(1, len(z) - 1):
+            moved = z[i] + 0.5 * (0.5 * (z[i - 1] + z[i + 1]) - z[i])
+            z[i] = min(max(moved, ground[i] - max_lift_m), ground[i] + max_lift_m)
+    return [[n[0], n[1], round(zi, 3), n[3]] for n, zi in zip(nodes, z, strict=True)]
+
+
 def build_surface_roads(spec, frame: Frame, osm_path: Path, fp, *, max_step_m: float = 8.0):
     """DecalRoads with a material per surface (paved / dirt), draped on the carved DEM."""
 
@@ -308,6 +396,13 @@ def build_surface_roads(spec, frame: Frame, osm_path: Path, fp, *, max_step_m: f
         nodes = [
             [round(x, 3), round(y, 3), round(frame.height_at(x, y), 3), width] for x, y in dense
         ]
+        # The gate's contracts are what ships, so they are met before the ledger
+        # measures: no decal ends in a step, none steps in the middle, and none creases.
+        carve_cfg = spec.ROADS.get("carve") or {}
+        node_cap = float(carve_cfg.get("node_kink_cap", 0.25))
+        nodes = _drop_step_nodes(nodes, node_cap)
+        nodes = _trim_end_kinks(nodes, float(carve_cfg.get("end_kink_cap", 0.10)))
+        nodes = _relax_node_heights(nodes, node_cap, float(carve_cfg.get("node_max_lift_m", 0.25)))
         length = sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in itertools.pairwise(nodes))
         if length < 15.0:
             continue
@@ -1240,17 +1335,22 @@ def build_level(
     # The bed's ceiling in sRGB: the game's snow line on a grey alpine road (0.60),
     # higher on a desert plain whose ground already sits at 0.65.
     bed_ceiling = float(getattr(spec, "ROADS", {}).get("bed_ceiling", 0.60))
-    for name, factor in by_surface.items():
-        colour_full = enforce_bed_contrast(
-            colour_full,
-            layer,
-            materials,
-            {name: all_surfaces[name]},
-            fp.size_m / colour_full.shape[0],
-            factor,
-            margin_min,
-            bed_ceiling,
-        )
+
+    def _enforce_beds(image):
+        for name, factor in by_surface.items():
+            image = enforce_bed_contrast(
+                image,
+                layer,
+                materials,
+                {name: all_surfaces[name]},
+                fp.size_m / image.shape[0],
+                factor,
+                margin_min,
+                bed_ceiling,
+            )
+        return image
+
+    colour_full = _enforce_beds(colour_full)
     refill_file = data_root / "terrain" / "refill.npy"
     if refill_file.is_file() and colour_full is not None:
         # Every refilled field measured on the base the game draws, after every
@@ -1264,6 +1364,10 @@ def build_level(
         bed_mask = np.isin(layer, bed_ids) if bed_ids else None
         texel = fp.size_m / colour_full.shape[0]
         colour_full = refill_match(colour_full, kinds, texel, bed=bed_mask)
+        # A refilled field that touches a road takes the bed with it, which can put a
+        # 100 m window back under contract after the enforcement already passed. The
+        # contract is what ships, so it is enforced again here, last.
+        colour_full = _enforce_beds(colour_full)
         check = refill_check(colour_full, kinds, texel, bed=bed_mask)
         del kinds
         if isinstance(report.get("imagery"), dict):

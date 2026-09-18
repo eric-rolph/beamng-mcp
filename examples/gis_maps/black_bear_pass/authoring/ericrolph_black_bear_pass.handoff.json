@@ -5,17 +5,17 @@
     "zip": "black_bear_pass_ericrolph.zip"
   },
   "buildings": {
-    "count": 1172,
+    "count": 1170,
     "dropped_no_lidar": 20,
     "dropped_why": {
       "height_out_of_range": 12,
       "too_few_cells": 8
     },
-    "mask_cells": 78950,
+    "mask_cells": 78836,
     "materials": 14,
-    "outlines": 1192,
-    "removed_objects": 4,
-    "removed_trees": 871,
+    "outlines": 1190,
+    "removed_objects": 8,
+    "removed_trees": 867,
     "ridge_max_m": 23.31,
     "ridge_p50_m": 8.61,
     "ridge_p95_m": 12.69,
@@ -23,23 +23,23 @@
     "roof_colours": {
       "brown": 67,
       "charcoal": 1,
-      "galv": 178,
+      "galv": 177,
       "green": 15,
-      "grey": 336,
+      "grey": 335,
       "tan": 575
     },
     "roof_kinds": {
-      "flat": 417,
+      "flat": 415,
       "gable": 573,
       "hip": 182
     },
     "shapes_dir": "art/shapes/ericrolph_black_bear_pass_buildings",
-    "tiles": 23,
-    "triangles": 932351,
+    "tiles": 22,
+    "triangles": 917089,
     "wall_families": {
       "board": 2,
       "brick": 1,
-      "clapboard": 1169
+      "clapboard": 1167
     }
   },
   "footprint": {
@@ -62,12 +62,12 @@
   },
   "forest": {
     "by_item": {
-      "ericrolph_black_bear_pass_aspen_00": 4136,
-      "ericrolph_black_bear_pass_aspen_01": 4147,
-      "ericrolph_black_bear_pass_aspen_02": 4131,
-      "ericrolph_black_bear_pass_fir_00": 11856,
-      "ericrolph_black_bear_pass_fir_01": 11943,
-      "ericrolph_black_bear_pass_fir_02": 12004,
+      "ericrolph_black_bear_pass_aspen_00": 4133,
+      "ericrolph_black_bear_pass_aspen_01": 4177,
+      "ericrolph_black_bear_pass_aspen_02": 4095,
+      "ericrolph_black_bear_pass_fir_00": 11992,
+      "ericrolph_black_bear_pass_fir_01": 11910,
+      "ericrolph_black_bear_pass_fir_02": 12113,
       "ericrolph_black_bear_pass_rock_summit_00": 28,
       "ericrolph_black_bear_pass_rock_summit_01": 85,
       "ericrolph_black_bear_pass_rock_summit_02": 184,
@@ -76,42 +76,42 @@
       "ericrolph_black_bear_pass_rock_summit_05": 49,
       "ericrolph_black_bear_pass_rock_summit_06": 32,
       "ericrolph_black_bear_pass_rock_summit_07": 58,
-      "ericrolph_black_bear_pass_rock_talus_00": 12464,
-      "ericrolph_black_bear_pass_rock_talus_01": 12390,
-      "ericrolph_black_bear_pass_rock_talus_02": 13374,
-      "ericrolph_black_bear_pass_rock_talus_03": 13434,
-      "ericrolph_black_bear_pass_rock_talus_04": 13357,
-      "ericrolph_black_bear_pass_rock_talus_05": 12753,
-      "ericrolph_black_bear_pass_rock_talus_06": 12585,
-      "ericrolph_black_bear_pass_rock_talus_07": 12461,
-      "ericrolph_black_bear_pass_spruce_00": 20385,
-      "ericrolph_black_bear_pass_spruce_01": 20019,
-      "ericrolph_black_bear_pass_spruce_02": 20189,
-      "ericrolph_black_bear_pass_spruce_03": 20319
+      "ericrolph_black_bear_pass_rock_talus_00": 12459,
+      "ericrolph_black_bear_pass_rock_talus_01": 12384,
+      "ericrolph_black_bear_pass_rock_talus_02": 13369,
+      "ericrolph_black_bear_pass_rock_talus_03": 13427,
+      "ericrolph_black_bear_pass_rock_talus_04": 13355,
+      "ericrolph_black_bear_pass_rock_talus_05": 12745,
+      "ericrolph_black_bear_pass_rock_talus_06": 12577,
+      "ericrolph_black_bear_pass_rock_talus_07": 12456,
+      "ericrolph_black_bear_pass_spruce_00": 20294,
+      "ericrolph_black_bear_pass_spruce_01": 19982,
+      "ericrolph_black_bear_pass_spruce_02": 20178,
+      "ericrolph_black_bear_pass_spruce_03": 20259
     },
     "file": "/levels/ericrolph_black_bear_pass/forest/ericrolph_black_bear_pass.forest4.json",
     "height_p50_m": 19.59,
     "height_p95_m": 28.7,
-    "instances": 232811,
+    "instances": 232769,
     "min_tree_height_m": 1.2,
     "rock_gap_m": {
       "max": 0.4,
       "over_0_5_fraction": 0.0,
       "p95": 0.0
     },
-    "rocks": 105009,
-    "sha256": "7ddbc0b5cff7ed4c7e7f7851eb76914504cb2a5e4cb182c542f2dbb8b5c836ed",
+    "rocks": 104963,
+    "sha256": "5f7d257e1d5d73f302a83e7374f99b727bd6150b2b2919b96867fdf994f6e0a6",
     "shrubs": 0,
     "source": "lidar canopy",
     "species": {
-      "aspen": 12528,
-      "fir": 35931,
-      "spruce": 81541
+      "aspen": 12519,
+      "fir": 36106,
+      "spruce": 81375
     },
     "tops": 130000,
     "treeline_m": 3620.0,
     "trees": 130000,
-    "triangles_if_all_drawn": 50203916
+    "triangles_if_all_drawn": 50185824
   },
   "imagery": {
     "cast_shadow_fraction": 0.0227,
@@ -120,7 +120,7 @@
     "gain_p95": 1.727,
     "minnaert_k": 1.074,
     "refill_check": {
-      "br_diff_max_abs": 0.029,
+      "br_diff_max_abs": 0.028,
       "exg_diff_max_abs": 0.032,
       "fields": 23,
       "grain_ratio_p10": 0.547,
@@ -235,15 +235,15 @@
         },
         {
           "area_m2": 20044.0,
-          "br_diff": -0.029,
+          "br_diff": -0.028,
           "center_xy": [
             204.7,
             -2672.2
           ],
-          "exg_diff": 0.031,
-          "grain_ratio": 1.115,
+          "exg_diff": 0.03,
+          "grain_ratio": 1.112,
           "kind": "shadow",
-          "lum_ratio": 0.945
+          "lum_ratio": 0.939
         },
         {
           "area_m2": 19236.0,
@@ -315,7 +315,7 @@
           "exg_diff": 0.018,
           "grain_ratio": 0.849,
           "kind": "shadow",
-          "lum_ratio": 0.974
+          "lum_ratio": 0.976
         },
         {
           "area_m2": 14132.0,
@@ -387,7 +387,7 @@
           "exg_diff": 0.001,
           "grain_ratio": 1.115,
           "kind": "shadow",
-          "lum_ratio": 0.985
+          "lum_ratio": 0.986
         },
         {
           "area_m2": 11736.0,
@@ -403,7 +403,7 @@
         }
       ],
       "lum_ratio_max": 1.045,
-      "lum_ratio_min": 0.944,
+      "lum_ratio_min": 0.939,
       "lum_ratio_p10": 0.945
     },
     "refill_grain_ratio": {
@@ -425,21 +425,21 @@
     "bb_cliff_rock": [
       0.1147,
       0.1088,
-      0.0985
+      0.0986
     ],
     "bb_cliff_rock_ew": [
       0.1153,
       0.1092,
-      0.0988
+      0.0987
     ],
     "bb_fellfield": [
-      0.1352,
-      0.1273,
+      0.1351,
+      0.1272,
       0.1063
     ],
     "bb_forest_floor": [
-      0.1176,
-      0.1138,
+      0.1175,
+      0.1137,
       0.0645
     ],
     "bb_lake": [
@@ -448,56 +448,56 @@
       0.0803
     ],
     "bb_road_gravel": [
-      0.272,
-      0.2505,
-      0.2201
+      0.2745,
+      0.2528,
+      0.222
     ],
     "bb_scree_slope": [
-      0.1701,
+      0.17,
       0.1623,
       0.1462
     ],
     "bb_talus": [
-      0.1659,
-      0.1573,
-      0.1452
+      0.1658,
+      0.1572,
+      0.1451
     ],
     "bb_tundra": [
-      0.146,
-      0.1644,
-      0.0821
+      0.1459,
+      0.1643,
+      0.082
     ]
   },
   "road_contrast": {
     "bb_fellfield": {
-      "margin": 0.3822,
-      "ratio": 1.382
+      "margin": 0.38,
+      "ratio": 1.395
     },
     "bb_forest_floor": {
-      "margin": 0.341,
-      "ratio": 1.549
+      "margin": 0.3382,
+      "ratio": 1.567
     },
     "bb_scree_slope": {
-      "margin": 0.4309,
-      "ratio": 1.226
+      "margin": 0.4278,
+      "ratio": 1.239
     },
     "bb_talus": {
-      "margin": 0.4113,
-      "ratio": 1.284
+      "margin": 0.4077,
+      "ratio": 1.3
     },
     "bb_tundra": {
-      "margin": 0.3836,
-      "ratio": 1.377
+      "margin": 0.3789,
+      "ratio": 1.399
     },
-    "bed": 0.5282,
+    "bed": 0.53,
     "windows": {
-      "min": 1.195,
-      "p05": 1.243,
-      "p50": 1.388
+      "min": 1.198,
+      "p05": 1.25,
+      "p50": 1.406
     },
     "windows_vs_pale": {
-      "min": 1.052,
-      "p05": 1.177
+      "min": 1.15,
+      "p05": 1.189
     }
   },
   "roads": {
@@ -512,13 +512,13 @@
       "track": 32,
       "unclassified": 2
     },
-    "length_m": 52532.4,
-    "max_end_grade_change": 0.374,
+    "length_m": 52531.1,
+    "max_end_grade_change": 0.0863,
     "max_grade_10m": {
       "dirt": 0.4025,
       "paved": 0.1885
     },
-    "max_grade_change": 0.748,
+    "max_grade_change": 0.2477,
     "roads": 50,
     "ways_seen": 50
   },
@@ -544,18 +544,18 @@
       "triangles": 64
     },
     "art/shapes/ericrolph_black_bear_pass/fir_00.dae": {
-      "sha256": "34e4ea4eb7ec36c210ee22634e60ec77e4132eec3702bc28e002b5aa63ad953e",
-      "size": 17644,
+      "sha256": "51317dd7bac9326bec3f9f8baa065f9b00fc6c5526ffb6764ccc7dfe9e878200",
+      "size": 17638,
       "triangles": 68
     },
     "art/shapes/ericrolph_black_bear_pass/fir_01.dae": {
-      "sha256": "350cfada9d876d6a2839fbd700356c1a78ff76b472dc1d870f3f90675defd48d",
-      "size": 17631,
+      "sha256": "de30502480ff8de2afd777f400a568ee73f2e0007c116150b32a884d1a2dce9f",
+      "size": 17655,
       "triangles": 68
     },
     "art/shapes/ericrolph_black_bear_pass/fir_02.dae": {
-      "sha256": "26bc42d57ddb9c74868add4201abfeaefb3d05bbb3b9223f471f22e75272e724",
-      "size": 17657,
+      "sha256": "9a4e72e5c085d88efe0af1eefd36eee6a8ec6bced64c0cf0382ce8421d84c375",
+      "size": 17647,
       "triangles": 68
     },
     "art/shapes/ericrolph_black_bear_pass/main.materials.json": {
@@ -563,103 +563,103 @@
       "size": 7712
     },
     "art/shapes/ericrolph_black_bear_pass/rock_summit_00.dae": {
-      "sha256": "0d93279b6c225cd6f5a0024f9386596adbdf7861bdc475c6fe5fa806dd941eaf",
-      "size": 78857,
+      "sha256": "a6072c2b6a57432e27789fb677f8278d56afb03d7d08b8136b033685b8252347",
+      "size": 79160,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_summit_01.dae": {
-      "sha256": "dbf47eae9c1682727336166ca1bd2c25fc5f751e628acafc0d3ae016244fa988",
-      "size": 79645,
+      "sha256": "7ce73a666eaf0a8b88d02a27ad1e9ce5180ae9cb0113129d887b0e5d6665c8d0",
+      "size": 78967,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_summit_02.dae": {
-      "sha256": "d0ebfde6195afb849acf120402fee8c3d83aad33d3d4ffce79a8a3e895ced922",
-      "size": 79362,
+      "sha256": "494750b6d1ef53c4a6bd063ca45c95a8894948397b80f0f801c8a822483c3741",
+      "size": 79059,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_summit_03.dae": {
-      "sha256": "d4e2c2a0dda77588915f071c205abdb2d5e7c02f82fc622180be447ea418b547",
-      "size": 79146,
+      "sha256": "37daa10339e847202dfd5aef3a764203fc6bdafa4ae328db579ad2c5b1bae1b6",
+      "size": 79051,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_summit_04.dae": {
-      "sha256": "3318971630505b5860e3096ae6c9085593e83da6fd694cba564a01ce60690683",
-      "size": 78810,
+      "sha256": "1f59b5840f312cde80e9512f46f67afc47f27f413b3438156bf62f6c7b57584c",
+      "size": 79582,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_summit_05.dae": {
-      "sha256": "d842a928837558730e556c58c43efe948d56f8d624e1cf078b47f8279a4a9079",
-      "size": 79558,
+      "sha256": "093faed304ca02da4a6c54ab438de66ece2b0eea3a908511186bef3814cbf918",
+      "size": 79214,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_summit_06.dae": {
-      "sha256": "e7b2daafa636ebbc229b6aa6b54226477fb14197878b3725ff6b74334b4a5879",
-      "size": 78437,
+      "sha256": "d4802a068b668fc8044612e1c8c1578a87468d847e82c9e196382b356b8f64b5",
+      "size": 79934,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_summit_07.dae": {
-      "sha256": "8d6d07c6760bc342ef9007de21a8df37fb52c895b9e9e643b58e231a0508d7bc",
-      "size": 79806,
+      "sha256": "50a7de0442bafdae031229439c0524af79635582a8b0ec327079041d1885593a",
+      "size": 79742,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_talus_00.dae": {
-      "sha256": "738aa68dda9b1f44b5d9e1d1a8e1e7fc9bf7d0f15bdd22f6f9476a228f79e343",
-      "size": 79118,
+      "sha256": "fde48ecab3a4b8ec21a4fbb3cfdc900241dcfcf738b11c6bc6ecbbc978c0d7c9",
+      "size": 79382,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_talus_01.dae": {
-      "sha256": "5910aa9d664d12fc24f71e3eb9b9fec5856e9802a0d5aa54e76c12c726fe75d9",
-      "size": 80183,
+      "sha256": "23957c4968f097007ff793f58c9b454b35e837b7be277bee8b433a6202c0f7e9",
+      "size": 79155,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_talus_02.dae": {
-      "sha256": "7d3953b048a5031b2b6ba8a3c7a465e87b78c84d1ad329aec319f7b4cad9fa20",
-      "size": 79069,
+      "sha256": "b3714b962b5a119f768b92d58cbdf6cad4b7b8ed6a2c146a089d10963f0305c0",
+      "size": 78720,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_talus_03.dae": {
-      "sha256": "c5754fdabe9d7c25a2bec9c40e8b8ed5afa6897beae81ff80e98473b0c235f2e",
-      "size": 78794,
+      "sha256": "21a5dbb80321fed962affea84b2cb6b468a8bd5d3e3520ee40d956dec8213493",
+      "size": 78968,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_talus_04.dae": {
-      "sha256": "8fcfc5ef30f1f74c318d9fd2aee1fb6213ca41e590e85baf8b69906e3d8274e9",
-      "size": 79831,
+      "sha256": "823c1439a7bc75310604d98e9e30ce1f87f7d53ba724228749a80c51d6cf0c17",
+      "size": 78703,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_talus_05.dae": {
-      "sha256": "2c71e5e8b8ed794686c9226d1e6d8e202a0eed330802c324a57cb2ad976f40a4",
-      "size": 79512,
+      "sha256": "35186f14a948e1748c9cbec390f494d76449f5c6f5f5362654cb6b7ea537ef21",
+      "size": 80664,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_talus_06.dae": {
-      "sha256": "413232a8898e4ae94c6f2d6866b773b89d1b520a1366e2d80d5a20fe10be3250",
-      "size": 80008,
+      "sha256": "2818bd3bb3cba145e7a7928eacf7b1d45ecbcb81c423787317e87b7a5bc42820",
+      "size": 79437,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/rock_talus_07.dae": {
-      "sha256": "6f8a63f2d74b58746e322cc7bc475c8aecbc575cf26b57c09beec60364d9858e",
-      "size": 79591,
+      "sha256": "1b7a3fe22fcaab9e40c5ca3ca042853e7a8ec27db8f21af764629e4e9f6e20b8",
+      "size": 79726,
       "triangles": 400
     },
     "art/shapes/ericrolph_black_bear_pass/spruce_00.dae": {
-      "sha256": "2f44f433d041b94c3dad7dd9c34804ddbb264cb52501b1f23f059cf17cf65e6a",
-      "size": 18076,
+      "sha256": "7a17c2afed55bcf02e7077601f7a33b51a43db6332ca0ba30348402b00040743",
+      "size": 18109,
       "triangles": 68
     },
     "art/shapes/ericrolph_black_bear_pass/spruce_01.dae": {
-      "sha256": "68470f588cfbe267901c1a87dd4649b5ab559c275a51d4fba322452015d7861d",
-      "size": 18107,
+      "sha256": "b71826ea2105c27dd42d7a6cf48e67eb413596bfa9b1d9580dc3a3e2d33269c7",
+      "size": 18083,
       "triangles": 68
     },
     "art/shapes/ericrolph_black_bear_pass/spruce_02.dae": {
-      "sha256": "87841710a9d29fb5414402a2b7caa0af1dec157043dbece19e2a05bf05f59aed",
-      "size": 18112,
+      "sha256": "7fd9c54767324c553753c8ac35079936f3c09f1fa82605622833f13bd48e0d90",
+      "size": 18084,
       "triangles": 68
     },
     "art/shapes/ericrolph_black_bear_pass/spruce_03.dae": {
-      "sha256": "da3d5cf575431776fc3f2a0bcb419020771bcceb7c2a3d1c1785bc516d0000e3",
-      "size": 18112,
+      "sha256": "b0c66f174052859a266321c80418c9c2bd96c7684867610724ec54c46af11ab1",
+      "size": 18090,
       "triangles": 68
     },
     "art/shapes/ericrolph_black_bear_pass_buildings/main.materials.json": {
@@ -726,10 +726,6 @@
       "sha256": "af6fe98f209c6fa32225f4d14a954770124072daf93033452aec22f81052d4b0",
       "size": 41783435
     },
-    "art/shapes/ericrolph_black_bear_pass_buildings/tile_r+03_c-09.dae": {
-      "sha256": "00e1ca599b80a7827eb6de8d7c54faebae29d7c612a5d152efaca40836f38397",
-      "size": 3287354
-    },
     "art/shapes/ericrolph_black_bear_pass_buildings/tile_r+04_c+01.dae": {
       "sha256": "3f1fa1590adc9cd2db6fb37ca0f07e2b26276f33c01bcaf609d45a7e4b03d5e7",
       "size": 446999
@@ -763,15 +759,15 @@
       "size": 25110
     },
     "forest/ericrolph_black_bear_pass.forest4.json": {
-      "sha256": "7ddbc0b5cff7ed4c7e7f7851eb76914504cb2a5e4cb182c542f2dbb8b5c836ed",
-      "size": 41820370
+      "sha256": "5f7d257e1d5d73f302a83e7374f99b727bd6150b2b2919b96867fdf994f6e0a6",
+      "size": 41811130
     },
     "info.json": {
       "sha256": "6bea276aea986f43087d54bbbe2b73ddecfcd00b198e8f07893847fa0d719c36",
       "size": 2583
     },
     "theTerrain.ter": {
-      "sha256": "691c90e00ba143a664cb7ba4ca273724676b6d9dc47bf5359f226546c764e7a3",
+      "sha256": "46cb34f66fe71310a53d9c9f3bf9e338894bc1e9bd1f8362d2df4ba999d4b15b",
       "size": 50331774
     },
     "theTerrain.terrain.json": {
@@ -779,8 +775,8 @@
       "size": 658
     },
     "theTerrain.terrainheightmap.png": {
-      "sha256": "e439698fc40bbdd7f91504026573d1a66cb726aadb5dbac6feded2a75d5a19f0",
-      "size": 18128418
+      "sha256": "41cf12d71322cf03928396ab08728a8326a78b22713a57fb3e8c73942aa59e5a",
+      "size": 18128457
     }
   },
   "site": {
@@ -989,8 +985,8 @@
             169126,
             210187,
             209002,
-            150840,
-            138808,
+            150839,
+            138809,
             108478
           ],
           "bin_means_after": [
@@ -1054,7 +1050,7 @@
             210645,
             238566,
             227256,
-            274549,
+            274548,
             280319,
             246295
           ],
@@ -1184,8 +1180,8 @@
             250122,
             262464,
             294174,
-            312162,
-            388884,
+            312161,
+            388885,
             857697
           ],
           "bin_means_after": [
@@ -1557,11 +1553,11 @@
         "bb_cliff_rock": {
           "cells": 754551,
           "clipped": 0.0,
-          "luminance": 0.3514,
+          "luminance": 0.3516,
           "rgb": [
-            0.3624,
-            0.3538,
-            0.338
+            0.3626,
+            0.354,
+            0.3382
           ]
         },
         "bb_cliff_rock_ew": {
@@ -1638,7 +1634,8 @@
       "max_elevation_m": 4132.66845703125,
       "mean_elevation_m": 3501.8486328125,
       "min_elevation_m": 2657.33740234375,
-      "near_black_fraction": 0.000213,
+      "near_black_fraction": 4.6e-05,
+      "near_black_refilled": 3570,
       "objects": {
         "berms_removed": 0,
         "candidates": 29750,
@@ -1686,14 +1683,14 @@
         "length_m": 53411.9,
         "max_cut_m": 2.6,
         "max_fill_m": 1.8,
-        "max_seam_step_m": 0.759,
+        "max_seam_step_m": 0.356,
         "rejected_steep": 0,
         "roads": 55
       },
       "road_cliff_cuts": 32,
       "road_corridor_cells_cleared": 3153,
       "size_px": 4096,
-      "slope_mean_deg": 29.687053680419922,
+      "slope_mean_deg": 29.687055587768555,
       "slope_over_30_fraction": 0.533312201499939,
       "slope_p95_deg": 53.4251594543457,
       "smooth_sigma_px": 0.0,

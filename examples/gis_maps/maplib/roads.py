@@ -390,69 +390,80 @@ def carve(
     # bridge at their shared height, so no gap is left for the ground to hump.
     snap_m = max(junction_snap_m, 0.0)
     seam_steps: list[float] = []
-    for i, pi in enumerate(profiles):
-        for end_idx in (0, 1):
-            index = 0 if end_idx == 0 else pi["dense"].shape[0] - 1
-            p = pi["dense"][index]
-            best = None
-            if snap_m > 0:
+    # Junctions are a coupled system, not independent: a way pinned at one end can
+    # be moved again by the join at its other end, and with 56 junctions over 55
+    # ways those chains do not settle in one sweep - the residual shipped as a
+    # 0.76 m step where a spur met its bed. Sweep until it stops moving, the way
+    # any Gauss-Seidel relaxation is run; three passes is enough in practice and
+    # the cap keeps it bounded.
+    for _sweep in range(3):
+        seam_steps = []
+        for i, pi in enumerate(profiles):
+            for end_idx in (0, 1):
+                index = 0 if end_idx == 0 else pi["dense"].shape[0] - 1
+                p = pi["dense"][index]
+                best = None
+                if snap_m > 0:
+                    for j, pj in enumerate(profiles):
+                        if j == i or pj["way_id"] == pi["way_id"]:
+                            continue
+                        d = np.hypot(*(pj["dense"] - p).T)
+                        k = int(np.argmin(d))
+                        if d[k] <= snap_m and (best is None or d[k] < best[0]):
+                            best = (float(d[k]), j, k)
+                if best is not None:
+                    _d, j, k = best
+                    pj = profiles[j]
+                    interior = 3 < k < pj["dense"].shape[0] - 4
+                    if interior or pj["length"] >= pi["length"]:
+                        z_join = float(pj["smooth"][k])
+                    else:
+                        z_join = 0.5 * (float(pj["smooth"][k]) + float(pi["smooth"][index]))
+                        ramp_to(pj, k, z_join)
+                        pj["joined"][0 if k < pj["dense"].shape[0] // 2 else 1] = True
+                    ramp_to(pi, index, z_join)
+                    pi["joined"][end_idx] = True
+                    continue
+                # A gap bridge to another way's free end.
                 for j, pj in enumerate(profiles):
                     if j == i or pj["way_id"] == pi["way_id"]:
                         continue
-                    d = np.hypot(*(pj["dense"] - p).T)
-                    k = int(np.argmin(d))
-                    if d[k] <= snap_m and (best is None or d[k] < best[0]):
-                        best = (float(d[k]), j, k)
-            if best is not None:
-                _d, j, k = best
-                pj = profiles[j]
-                interior = 3 < k < pj["dense"].shape[0] - 4
-                if interior or pj["length"] >= pi["length"]:
-                    z_join = float(pj["smooth"][k])
-                else:
-                    z_join = 0.5 * (float(pj["smooth"][k]) + float(pi["smooth"][index]))
-                    ramp_to(pj, k, z_join)
-                    pj["joined"][0 if k < pj["dense"].shape[0] // 2 else 1] = True
-                ramp_to(pi, index, z_join)
-                pi["joined"][end_idx] = True
-                continue
-            # A gap bridge to another way's free end.
-            for j, pj in enumerate(profiles):
-                if j == i or pj["way_id"] == pi["way_id"]:
-                    continue
-                for kj in (0, pj["dense"].shape[0] - 1):
-                    q = pj["dense"][kj]
-                    gap = float(np.hypot(*(q - p)))
-                    if gap <= snap_m or gap > bridge_m:
-                        continue
-                    if abs(float(pj["smooth"][kj]) - float(pi["smooth"][index])) > 3.0:
-                        continue
-                    z_join = 0.5 * (float(pj["smooth"][kj]) + float(pi["smooth"][index]))
-                    ramp_to(pi, index, z_join)
-                    ramp_to(pj, kj, z_join)
-                    count = max(2, int(gap / (res * 0.5)))
-                    bridge = np.linspace(p, q, count + 1)[1:]
-                    if end_idx == 0:
-                        pi["dense"] = np.concatenate([bridge[::-1], pi["dense"]])
-                        pi["smooth"] = np.concatenate([np.full(count, z_join), pi["smooth"]])
-                        pi["z"] = np.concatenate(
-                            [sample(bridge[::-1, 0], bridge[::-1, 1]).astype("float64"), pi["z"]]
-                        )
-                    else:
-                        pi["dense"] = np.concatenate([pi["dense"], bridge])
-                        pi["smooth"] = np.concatenate([pi["smooth"], np.full(count, z_join)])
-                        pi["z"] = np.concatenate(
-                            [pi["z"], sample(bridge[:, 0], bridge[:, 1]).astype("float64")]
-                        )
-                    seg = np.hypot(*np.diff(pi["dense"], axis=0).T)
-                    pi["along"] = np.concatenate([[0.0], np.cumsum(seg)])
-                    pi["length"] = float(seg.sum())
-                    pi["joined"][end_idx] = True
-                    pj["joined"][0 if kj == 0 else 1] = True
-                    stats["bridges"] = stats.get("bridges", 0) + 1
-                    break
-                if pi["joined"][end_idx]:
-                    break
+                    for kj in (0, pj["dense"].shape[0] - 1):
+                        q = pj["dense"][kj]
+                        gap = float(np.hypot(*(q - p)))
+                        if gap <= snap_m or gap > bridge_m:
+                            continue
+                        if abs(float(pj["smooth"][kj]) - float(pi["smooth"][index])) > 3.0:
+                            continue
+                        z_join = 0.5 * (float(pj["smooth"][kj]) + float(pi["smooth"][index]))
+                        ramp_to(pi, index, z_join)
+                        ramp_to(pj, kj, z_join)
+                        count = max(2, int(gap / (res * 0.5)))
+                        bridge = np.linspace(p, q, count + 1)[1:]
+                        if end_idx == 0:
+                            pi["dense"] = np.concatenate([bridge[::-1], pi["dense"]])
+                            pi["smooth"] = np.concatenate([np.full(count, z_join), pi["smooth"]])
+                            pi["z"] = np.concatenate(
+                                [
+                                    sample(bridge[::-1, 0], bridge[::-1, 1]).astype("float64"),
+                                    pi["z"],
+                                ]
+                            )
+                        else:
+                            pi["dense"] = np.concatenate([pi["dense"], bridge])
+                            pi["smooth"] = np.concatenate([pi["smooth"], np.full(count, z_join)])
+                            pi["z"] = np.concatenate(
+                                [pi["z"], sample(bridge[:, 0], bridge[:, 1]).astype("float64")]
+                            )
+                        seg = np.hypot(*np.diff(pi["dense"], axis=0).T)
+                        pi["along"] = np.concatenate([[0.0], np.cumsum(seg)])
+                        pi["length"] = float(seg.sum())
+                        pi["joined"][end_idx] = True
+                        pj["joined"][0 if kj == 0 else 1] = True
+                        stats["bridges"] = stats.get("bridges", 0) + 1
+                        break
+                    if pi["joined"][end_idx]:
+                        break
 
     # Pass 3: stamp, longest first; a spur never overwrites the bed it joins.
     for pi in profiles:
