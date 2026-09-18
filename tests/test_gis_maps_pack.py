@@ -3653,14 +3653,39 @@ def test_forest_items_are_declared_draped_and_inside(map_key: str) -> None:
         if line.strip()
     ]
     assert lines, "an empty forest is a broken detector"
+    # NAME THE ITEM, NOT JUST THE NUMBER. This assertion reported a bare maximum, and
+    # on 2026-09-18 three different defects could each claim the same one: the gate's
+    # own half-cell lookup (fixed above), `scatter_rocks`/`scatter_shrubs`/the
+    # imagery-shrub centroid reading their containing cell (#134), and
+    # `scene_objects.emit` burying a block by a fraction of its height under
+    # `rock_gap_max_m` (#135), which is deliberate and which a flat 3.5 m bound cannot
+    # express. Three sessions spent an evening inferring which one owned
+    # `4.612250549316286` from whether it reproduced across rebuilds. The item's own
+    # `type` says which placement path drew it, and the SIGN of the drape says hanging
+    # from buried - a deliberate sink is always negative. Two lines of bookkeeping
+    # settle permanently what reproducibility could only suggest.
     worst = 0.0
+    worst_item: dict = {}
     for line in lines:
         assert set(line) == {"type", "pos", "rotationMatrix", "scale"} and line["type"] in items
         x, y, z = line["pos"]
         assert -half <= x <= half and -half <= y <= half
         assert len(line["rotationMatrix"]) == 9 and 0.2 <= line["scale"] <= 30.0
-        worst = max(worst, abs(z - z_at(x, y)))
-    assert worst < 3.5, f"{map_key}: a placed object floats or sinks {worst:.1f} m off the terrain"
+        ground = z_at(x, y)
+        drape = z - ground
+        if abs(drape) > worst:
+            worst = abs(drape)
+            worst_item = {
+                "type": line["type"],
+                "drape_m": round(float(drape), 4),
+                "pos": [round(float(v), 2) for v in line["pos"]],
+                "scale": round(float(line["scale"]), 3),
+                "ground_m": round(float(ground), 3),
+            }
+    assert worst < 3.5, (
+        f"{map_key}: a placed object floats or sinks {worst:.1f} m off the terrain",
+        worst_item,
+    )
     forest_objects = [o for _, o in all_items(root / "main") if o.get("class") == "Forest"]
     assert (
         len(forest_objects) == 1
