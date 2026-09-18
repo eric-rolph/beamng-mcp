@@ -13,8 +13,9 @@ uses semantic versioning after the initial alpha series.
   for commit. This repository keeps the MCP server and the machinery that produces mods - the
   BeamNGpy adapter, the GELua bridge, the Blender export pipeline, the Collada and JBeam writers,
   the vision backends - and the 27 suites that gate them. The tree drops from 684 files and 188 MB
-  to 106 files and 2 MB, and `lupa` and `soundfile` leave the dev extra with the gates that needed
-  them
+  to 106 files and 2 MB. `lupa` and `soundfile` are now unused here but stay pinned for now, because
+  dropping them invalidates `uv.lock` and it needs a `uv lock` run on a machine that can reach the
+  PyTorch index
 
 ### Added
 

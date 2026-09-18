@@ -33,6 +33,13 @@ dependencies = [
   "websockets>=16.1,<17",
 ]
 
+# NOTE: `lupa` and `soundfile` existed only for the mod gates that have moved to
+# beamng-mods - lupa ran each prop's generated runtime.lua, soundfile decoded PCM
+# for the Spin Launch audio gate - and nothing that remains here imports either.
+# They stay pinned for now because removing them invalidates uv.lock, and the
+# lockfile cannot be regenerated from a container whose network policy denies
+# download.pytorch.org, the index the vision extra's torch pin resolves from.
+# Drop both and run `uv lock` from a machine that can reach it.
 [project.optional-dependencies]
 vision = [
   "opencv-python-headless>=4.11,<5",
@@ -41,6 +48,15 @@ vision = [
   "transformers>=4.53,<5",
 ]
 dev = [
+  # The giant_props headless gates run each mod's REAL generated runtime.lua
+  # under lupa, and the Spin Launch audio gate hashes DECODED PCM through
+  # soundfile. Both were undeclared, and both are guarded by
+  # `pytest.importorskip` - so on a clean `pip install -e .[dev]` they did not
+  # fail, they SKIPPED: 135 of Spin Launch's 162 tests evaporated silently,
+  # and eleven test modules across the pack lost their lupa rig. A dependency
+  # that only the author happens to have installed is a gate that only runs on
+  # the author's machine.
+  "lupa>=2.8,<3",
   "mypy>=1.15,<2",
   "pytest>=8.3,<9",
   "pytest-asyncio>=0.25,<1",
@@ -51,6 +67,7 @@ dev = [
   # output failed `format --check` on two dozen files authored under
   # 0.15 that no commit had touched.
   "ruff>=0.15,<0.16",
+  "soundfile>=0.14,<1",
 ]
 
 [project.urls]
