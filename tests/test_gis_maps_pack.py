@@ -4296,3 +4296,107 @@ def test_a_scattered_shrub_ships_at_the_height_it_was_drawn(tmp_path) -> None:
     assert worst_n < 0.10 * len(scales), (
         f"{worst_n} of {len(scales)} shrubs ship at scale {worst}",
     )
+
+
+# The handoff is assembled in `pipeline.write_level` as an explicit allow-list, and twice in
+# one evening a stage's report key stopped there: `road_clearance_from` red-flagged three
+# maps on run 65, and `cliffs` red-flagged four on run 77. Both gates asserted a key that
+# could never arrive, so neither could pass however good the stage was, and each cost a
+# 40-minute build to discover. Two misses in one hand-maintained list means the list is the
+# defect rather than its entries.
+#
+# This reads the source rather than a built tree, so it runs on a pull request where
+# `require_built` skips every artefact gate - which is the point: the two it is written for
+# were both invisible to CI and cost a release build each.
+#
+# Excluded keys are the ones that legitimately do not travel: internal paths, and values the
+# handoff already carries under another name or in another shape. Adding a key to the
+# exclusion list is a deliberate act with a reason beside it; forgetting one is what this
+# gate exists to stop.
+HANDOFF_EXCLUDED_REPORT_KEYS = {
+    "level_root",  # a runner-local absolute path, meaningless in the artefact
+    "imagery",  # travels filtered through `public_stats`, not raw
+    "texture_set",  # the gate that wants it reads the level JSON, not the handoff
+}
+
+
+def test_every_key_a_stage_writes_reaches_the_handoff() -> None:
+    import ast
+
+    maplib = PACK_ROOT / "maplib"
+    builder = ast.parse((maplib / "level_builder.py").read_text(encoding="utf-8"))
+    written: set[str] = set()
+    for node in ast.walk(builder):
+        targets = []
+        if isinstance(node, ast.Assign):
+            targets = node.targets
+        elif isinstance(node, ast.AugAssign | ast.AnnAssign):
+            targets = [node.target]
+        for target in targets:
+            if (
+                isinstance(target, ast.Subscript)
+                and isinstance(target.value, ast.Name)
+                and target.value.id == "report"
+                and isinstance(target.slice, ast.Constant)
+                and isinstance(target.slice.value, str)
+            ):
+                written.add(target.slice.value)
+        # `report.update({...})` writes five more keys, `texture_set` among them, and a
+        # scan that only understood subscript assignment missed every one of them - a gate
+        # blind to the very thing it checks. If an update() argument is ever something
+        # this cannot read, the scan says so and fails rather than passing on a short list.
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "update"
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "report"
+        ):
+            assert len(node.args) == 1 and isinstance(node.args[0], ast.Dict), (
+                f"report.update() at line {node.lineno} is not a literal dict, so this "
+                "gate can no longer see every key a stage writes - teach it or inline it"
+            )
+            for key in node.args[0].keys:
+                assert isinstance(key, ast.Constant) and isinstance(key.value, str), (
+                    f"report.update() at line {node.lineno} has a computed key, which "
+                    "this gate cannot follow"
+                )
+                written.add(key.value)
+
+    # Two canaries: one key from each of the two ways a stage writes into its report. If
+    # either disappears the scan has gone blind, which must fail loudly rather than pass.
+    assert "cliffs" in written, "the subscript scan found nothing - fix the scan"
+    assert "texture_set" in written, "the update() scan found nothing - fix the scan"
+
+    pipeline = ast.parse((maplib / "pipeline.py").read_text(encoding="utf-8"))
+    carried: set[str] = set()
+    for node in ast.walk(pipeline):
+        if isinstance(node, ast.Dict):
+            for key in node.keys:
+                if isinstance(key, ast.Constant) and isinstance(key.value, str):
+                    carried.add(key.value)
+        # `report.get("x")` and `report["x"]` both count as read into the artefact.
+        if (
+            isinstance(node, ast.Subscript)
+            and isinstance(node.value, ast.Name)
+            and node.value.id == "report"
+            and isinstance(node.slice, ast.Constant)
+            and isinstance(node.slice.value, str)
+        ):
+            carried.add(node.slice.value)
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "get"
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "report"
+            and node.args
+            and isinstance(node.args[0], ast.Constant)
+        ):
+            carried.add(node.args[0].value)
+
+    dropped = sorted(written - carried - HANDOFF_EXCLUDED_REPORT_KEYS)
+    assert not dropped, (
+        f"build_level writes {dropped} into its report and write_level never copies them "
+        "into the handoff, so a gate reading any of them asserts a key that cannot arrive"
+    )
