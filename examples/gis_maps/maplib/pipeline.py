@@ -304,7 +304,31 @@ def terrain(spec, example_root: Path) -> dict:
         from . import level_builder
         from . import objects as ob
 
-        dem, detected, ostats = ob.detect_objects(dem, res, **objects_spec.get("detect", {}))
+        # `"detect": None` turns the bump pass off and leaves the DEM alone. A level
+        # whose landform IS fine relief has nothing for it to find and everything to
+        # lose: measured on Factory Butte's shipped terrain, the pass finds 6,768
+        # bumps over 16.8 km2 and not one of them is on fb_mud_flat, the 61.94% of the
+        # map where a block resting on a wash floor would actually be. All 6,768 are on
+        # the two steep classes, which is to say they are the fin crests and spur noses
+        # themselves, and it takes 106,602 m3 of terrain off to place them. `rock_layers`
+        # does not save it: that filters which bumps become meshes, and by then the
+        # opened surface has already replaced the DEM here. Such a level gets its stones
+        # from `scatter` instead.
+        detect_spec = objects_spec.get("detect", {})
+        if detect_spec is None:
+            # The same keys a real pass returns, so the handoff and the log keep their
+            # shape and a reader sees the zeros rather than a missing section.
+            ostats = {
+                "candidates": 0,
+                "objects": 0,
+                "rejected_cliff": 0,
+                "berms_removed": 0,
+                "structures_flattened": 0,
+                "removed_volume_m3": 0.0,
+                "detect": "off",
+            }
+        else:
+            dem, detected, ostats = ob.detect_objects(dem, res, **detect_spec)
         if objects_spec.get("flatten_boxes"):
             dem, box_notes = ob.flatten_boxes(
                 dem, res, fp.size_m, objects_spec["flatten_boxes"], baseline=baseline_dem
