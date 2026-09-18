@@ -3474,6 +3474,14 @@ by at most 0.0011 (`fb_caprock`; every other layer rounds to 0.0000). The two re
 untouched - `refill_check` runs on `colour_full`, before the base is resized or clamped at all.
 When counting which red gates went vacuous, count failures of the `clipped` assertion alone.
 
+And that one assertion is not deleted, it is re-aimed. `< 0.002` was unfailable, so it now reads
+`== 0.0`, which is not a tightening: under the contract the only reachable value is zero, and the
+loose form could not have failed for any other reason. At exactly zero it fails for one reason,
+the one that can recur - a stage writing the base after the clamp, which is the defect `53807cb`
+existed to fix and which `refill_match` and `_enforce_beds` caused once already. **A vacuous
+threshold is often worth re-aiming rather than removing: ask what the clamp guarantees, assert
+that exactly, and the assertion starts guarding the guarantee instead of the symptom.**
+
 `53807cb` ends the level stage with a highlight clamp on the base, because `delight`'s
 own ceiling is not the last word: `refill_match`, `_enforce_beds` and the LANCZOS resize
 all write after it. The clamp is right, and what ships is correct. But 0.95 linear

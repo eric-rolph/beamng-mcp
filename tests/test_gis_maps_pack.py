@@ -1792,11 +1792,14 @@ def test_base_colour_has_no_black_holes(map_key: str) -> None:
     means = stats.get("layer_mean_srgb", {})
     assert means, f"{map_key}: no layer was measured on the finished base"
     for name, entry in means.items():
-        # And no layer of the finished base runs to white either. This one cannot fail
-        # any more: the shipping clamp caps every channel at 249 and this counts 250,
-        # so it is zero on every map with an IMAGERY spec - which is every map that
-        # reaches here. Kept because it is what ships, not because it gates anything.
-        assert entry.get("clipped", 0.0) < 0.002, (map_key, name, entry)
+        # And no layer of the finished base runs to white either. Asserted at exactly
+        # zero rather than under 0.002, which is not a tightening: the shipping clamp
+        # caps every channel at 249 and this counts 250, so under the contract the only
+        # reachable value IS zero, and `< 0.002` could not fail for any other reason.
+        # At zero it fails for one reason, the one that can recur - something writing
+        # the base after the clamp, which is the defect `53807cb` existed to fix and
+        # which `refill_match` and `_enforce_beds` caused once already.
+        assert entry.get("clipped", 0.0) == 0.0, (map_key, name, entry)
         # The share the clamp had to rescue, measured before it, at the resolution the
         # whole-base `shipped_ceiling_fraction` throws away - fb_caprock is 5.6% over
         # the ceiling and 0.13% of its base, so no whole-base threshold sees it.
