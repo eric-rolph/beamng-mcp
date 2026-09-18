@@ -1206,6 +1206,53 @@ def test_detect_objects_lifts_a_boulder_and_leaves_the_ground() -> None:
     assert len(placed) == 1 and placed[0]["kind"] == "rock" and placed[0]["size"][2] >= 1.0
 
 
+def test_detect_off_stats_reports_every_count_a_real_pass_does() -> None:
+    """The skip path's handoff keeps a real pass's shape: zeros, not a missing section."""
+
+    _, _, objects, _, _ = _load_art_modules()
+    n, res = 120, 0.5
+    y, x = np.mgrid[0:n, 0:n].astype("float32") * res
+    dem = 10.0 + 0.02 * x
+    bump = 1.2 * np.exp(-(((x - 30) ** 2 + (y - 30) ** 2) / (2 * 0.8**2)))
+    _, _, live = objects.detect_objects(dem + bump, res, open_m=6.0, min_height_m=0.4)
+    off = objects.detect_off_stats()
+
+    counts = {k for k, v in live.items() if not isinstance(v, str)} - {"open_m", "min_height_m"}
+    assert counts <= set(off), f"the skip path drops {counts - set(off)} from the handoff"
+    assert all(off[k] == 0 for k in counts), "a skipped pass removed nothing and found nothing"
+    assert off["detect"] == "off", "a reader has to be able to tell a skip from an empty pass"
+    # `open_m` and `min_height_m` describe an opening that did not happen. Reporting them
+    # would read as a pass that ran and found nothing, which is the confusion the whole
+    # `"detect": None` path exists to avoid.
+    assert "open_m" not in off and "min_height_m" not in off
+
+
+def test_the_bump_detector_takes_a_badlands_landform_for_boulders() -> None:
+    """Why `"detect": None` exists: on fine relief the pass finds the relief.
+
+    Measured on Factory Butte's shipped terrain, `detect_objects` found 6,768 bumps over
+    16.8 km2, none of them on the 61.94% that is wash floor, and took 106,602 m3 of fins
+    off to place them. This is that finding at test scale, so that anyone who later makes
+    the detector ignore ridges can see the skip become unnecessary instead of guessing.
+    """
+
+    _, _, objects, _, _ = _load_art_modules()
+    n, res = 300, 1.0
+    y, x = np.mgrid[0:n, 0:n].astype("float32") * res
+    # Flat wash floor on the west half; a rill-and-fin field at a 12 m wavelength and 3 m
+    # of relief on the east, which is the scale Mancos Shale badlands actually run at.
+    relief = 1.5 * (1.0 + np.sin(2 * np.pi * x / 12.0)) * np.sin(2 * np.pi * y / 30.0) ** 2
+    dem = (40.0 - 0.01 * y + np.where(x >= 150.0, relief, 0.0)).astype("float32")
+
+    ground, found, stats = objects.detect_objects(dem, res, open_m=6.0, min_height_m=0.6)
+    assert stats["objects"] > 100, "the detector is expected to find the fins, not nothing"
+    assert all(o["col"] >= 150 for o in found), "nothing on the flat, which is where rocks are"
+    assert stats["removed_volume_m3"] > 1000.0
+    moved = np.abs(ground - dem)
+    assert moved[:, 150:].max() > 2.5, "it shaves the fins down by most of their height"
+    assert moved[:, :150].max() < 0.1, "and leaves the wash floor, so the count cannot rebalance"
+
+
 def test_ept_hierarchy_walk_visits_only_overlapping_nodes() -> None:
     """A fake Entwine index: the walker opens sub-hierarchies and skips distant nodes."""
 
