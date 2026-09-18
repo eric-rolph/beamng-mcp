@@ -164,7 +164,13 @@ def sprites_for(
 
 
 def detail_tiles(level_root: Path, root: Path, spec) -> dict | None:
-    """The terrain's own detail textures as luminance tiles, for the near field."""
+    """The terrain's own detail textures, in colour, for the near field.
+
+    These were luminance until now, so the near ground wore the material's brightness
+    over the orthophoto's colour and a material's own hue never reached the sheet: four
+    near-identical beiges and four well-separated rocks looked the same. Each tile is
+    divided by its own mean luminance, which keeps its colour ratio and leaves its level
+    to the base, so what the near field shows is the base tinted by the material."""
 
     from PIL import Image
 
@@ -176,11 +182,12 @@ def detail_tiles(level_root: Path, root: Path, spec) -> dict | None:
     for name in spec.TERRAIN["materials"]:
         p = terrains / f"t_{name}_b.png"
         if not p.is_file():
-            tiles.append((np.ones((2, 2), dtype="float32"), 2.0))
+            tiles.append((np.ones((2, 2, 3), dtype="float32"), 2.0))
             continue
-        lum = np.asarray(Image.open(p).convert("L").resize((256, 256)), dtype="float32") / 255.0
-        lum = np.clip(lum / max(float(lum.mean()), 1e-3), 0.55, 1.6)
-        tiles.append((lum, float(spec.PALETTE.get(name, {}).get("tile_m", 2.0))))
+        rgb = np.asarray(Image.open(p).convert("RGB").resize((256, 256)), dtype="float32") / 255.0
+        lum = 0.2126 * rgb[..., 0] + 0.7152 * rgb[..., 1] + 0.0722 * rgb[..., 2]
+        rgb = np.clip(rgb / max(float(lum.mean()), 1e-3), 0.55, 1.6)
+        tiles.append((rgb, float(spec.PALETTE.get(name, {}).get("tile_m", 2.0))))
     return {"layer": np.load(layer_file), "tiles": tiles, "fade_m": 120.0}
 
 

@@ -382,6 +382,52 @@ def test_yaw_matrix_convention() -> None:
     assert north[0] == -1.0 and north[4] == -1.0
 
 
+def test_shipped_index_records_every_file_in_the_level_tree(tmp_path: Path) -> None:
+    """The handoff's ``shipped`` block is the whole level tree, nested files included.
+
+    The artefact gate that hashes it only runs where a map has been built, which is a
+    runner, so this is the one place the coverage rule is checked on every push. It is
+    worth checking: the block was a hand-written list of nine names for most of this
+    pack's life, and on a map with no generated objects that came to five files of
+    fifty-five.
+    """
+
+    _, _, _, _, pipeline, _ = load_maplib()
+    root = tmp_path / "levels" / "m"
+    for name in ("info.json", "art/terrains/main.materials.json", "art/shapes/m/rock_0.dae"):
+        path = root / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(name)
+    (root / "empty_dir").mkdir()
+
+    index = pipeline.shipped_index(root, "m", [{"file": "rock_0.dae", "triangles": 12}])
+
+    assert set(index) == {
+        "info.json",
+        "art/terrains/main.materials.json",
+        "art/shapes/m/rock_0.dae",
+    }, "a directory is not a file and every file in the tree is recorded"
+    assert index["info.json"]["sha256"] == hashlib.sha256(b"info.json").hexdigest()
+    assert index["info.json"]["size"] == len("info.json")
+    assert index["art/shapes/m/rock_0.dae"]["triangles"] == 12
+    assert "triangles" not in index["info.json"]
+
+
+def test_shipped_index_refuses_a_shape_the_tree_does_not_have(tmp_path: Path) -> None:
+    """A report naming a shape that never reached the tree is a packaging bug, not a note.
+
+    Silently skipping it would write a handoff that disagrees with its own report, and the
+    hash gate would never notice because the file it would have hashed is not there.
+    """
+
+    _, _, _, _, pipeline, _ = load_maplib()
+    root = tmp_path / "levels" / "m"
+    root.mkdir(parents=True)
+    (root / "info.json").write_text("{}")
+    with pytest.raises(FileNotFoundError, match=r"rock_0\.dae"):
+        pipeline.shipped_index(root, "m", [{"file": "rock_0.dae", "triangles": 12}])
+
+
 def test_packaging_refuses_unapproved_roots(tmp_path: Path) -> None:
     _, _, _, packaging, _, _ = load_maplib()
     (tmp_path / "mod" / "README").parent.mkdir(parents=True)
@@ -406,6 +452,19 @@ def test_handoff_hashes_match_shipped_files(map_key: str) -> None:
     )
     assert handoff["schema"] == HANDOFF_SCHEMA
     assert handoff["asset"]["id"] == spec.MOD_ID
+
+    # Coverage first, then hashes. A recorded hash that matches says nothing about the file
+    # next to it that nobody recorded, and for most of this pack's life that was most of the
+    # level: 5 of 55 files on the maps that generate no objects. The gate is only a gate on
+    # the release if the two sets are equal, so compare the sets and let a diff name the
+    # files rather than reporting a count.
+    on_disk = {path.relative_to(root).as_posix() for path in root.rglob("*") if path.is_file()}
+    recorded = set(handoff["shipped"])
+    assert on_disk == recorded, {
+        "shipped but never recorded": sorted(on_disk - recorded),
+        "recorded but not shipped": sorted(recorded - on_disk),
+    }
+
     for name, record in handoff["shipped"].items():
         path = root / name
         assert path.stat().st_size == record["size"], name
@@ -1401,6 +1460,84 @@ def test_the_photograph_is_measured_before_it_is_conditioned(map_key: str) -> No
     assert 0.0 < source["lum_spread"] < 1.0, (map_key, source)
     assert source["lum_p05"] <= source["lum_p50"] <= source["lum_p95"], (map_key, source)
     assert 0.0 <= source["chroma_mean"] <= 1.0, (map_key, source)
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_ring_matching_reaches_the_fields_it_was_turned_on_for(map_key: str) -> None:
+    """A map that opts into ``refill_match_ring`` records how many refilled fields the
+    matching could actually reach, and reaches at least one of them.
+
+    `_ring_fields` gives a field a ring only when 50 or more lit cells sit in its
+    10-30 m annulus, and every matching step is a no-op on a field without one. So the
+    contract silently does not apply to exactly the fields most likely to fail it: a
+    field wide enough and dark enough to read as a blotch is a field whose surroundings
+    are likely also shadow. Before ``refill_ring_cover`` existed, a skipped field was
+    indistinguishable in the handoff from a matched field that came out badly - Meteor
+    Crater's worst field measured 0.460 before the flag was turned on and 0.459 after,
+    and nothing in the build said which of those two it was.
+
+    Zero coverage is not a threshold chosen from taste: it means the feature the spec
+    asked for did nothing at all.
+    """
+
+    spec = load_spec(map_key)
+    imagery_spec = getattr(spec, "IMAGERY", None) or {}
+    if not imagery_spec.get("refill_match_ring"):
+        pytest.skip(f"{map_key}: refills are not ring-matched")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    cover = (handoff.get("imagery") or {}).get("refill_ring_cover")
+    assert cover is not None, (
+        f"{map_key}: opted into ring matching but the build records no ring coverage"
+    )
+    if not cover["fields"]:
+        pytest.skip(f"{map_key}: the de-lighting refilled no field at all")
+    assert cover["with_ring"] > 0, (map_key, "ring matching reached no field", cover)
+
+
+def test_ring_matching_can_rescue_a_field_at_half_its_ring() -> None:
+    """The full ``match_ring`` sequence lifts a field at 0.46 of its ring past the 0.75
+    floor, so the contract is reachable from the worst measured starting point.
+
+    This pins a capability that is not obvious from either function alone. `_match_mean`
+    clips its per-field correction to 1.25, so on its own it can reach the 0.90 contract
+    only from 0.72 and the 0.75 floor only from 0.60 - measured, a field at 0.46 comes
+    out of it at 0.575. Every bit of the rescue below that comes from `_clamp_to_ring`.
+    Tightening either one silently puts the contract out of reach rather than failing
+    loudly, which is what this catches.
+    """
+
+    load_maplib()
+    from maplib.imagery import _clamp_to_ring, _match_mean, _ring_fields
+
+    size = 400
+    fill = np.zeros((size, size), dtype=bool)
+    fill[150:250, 150:250] = True
+    lit = np.full((size, size, 3), 0.70, dtype="float32")
+    rgb = lit.copy()
+    rgb[fill] = 0.70 * 0.46
+    fields = _ring_fields(fill, ~fill, 1.0)
+    assert bool(fields["has_ring"][0]), "the synthetic field must have a ring to test the match"
+
+    matched = _match_mean(rgb.copy(), lit, fields)
+    ratio_mean = float(matched[fill].mean() / lit[~fill].mean())
+    assert ratio_mean == pytest.approx(0.46 * 1.25, abs=0.01), (
+        "the mean match is clipped at 1.25; if this changes, the floor below moves too",
+        ratio_mean,
+    )
+
+    fill_w = fill.astype("float32")
+    composited = lit * (1 - fill_w[..., None]) + matched * fill_w[..., None]
+    clamped = _clamp_to_ring(composited, lit, fields, fill_w)
+    ratio_clamped = float(clamped[fill].mean() / lit[~fill].mean())
+    assert ratio_clamped >= 0.75, (
+        "the clamp must carry a 0.46 field over the floor",
+        ratio_clamped,
+    )
 
 
 def test_base_colour_stats_measures_each_layer() -> None:

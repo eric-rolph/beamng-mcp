@@ -154,6 +154,15 @@ Each round the critic (a separate agent holding `critic_rubric.md`) reviews the
 sheets in `authoring/critic/` and writes findings with generator fixes; the round is
 closed when every finding is a spec or parameter change in the tree.
 
+**Every round below was judged on a sheet that could not show the colour of the ground.**
+`critic_sheets.detail_tiles` loaded each terrain material through `convert("L")` until
+2026-09-18, so the near field drew the orthophoto's colour wearing the material's
+brightness and no material's own hue ever reached a sheet. The geometry, silhouette,
+placement, road and gate findings are unaffected; a line that turned on near-ground
+colour may read as closed without being closed, and the next round should re-judge those
+rather than trust them. A session can now render these sheets itself in about two minutes
+from the published ZIP (`rehydrate_release.py`), so re-judging costs nothing.
+
 | Round | Verdict | Findings and what changed |
 | --- | --- | --- |
 | 1 | NOT YET | Textures read as worms, corduroy and brickwork (families rewritten: Worley facets, log-normal beds, shale chips); boulders missing (talus scatter, cliff filter moved into detection); spawns off the road (snapped, facing downhill); pale halos on cards (colour dilation); tree species all one silhouette (spruce, fir, krummholz, aspen cards). |

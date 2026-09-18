@@ -721,6 +721,20 @@ def delight(
                 terrain_fill = terrain_fill & ~(gap_fill & ~snow_now)
             fields = _ring_fields(terrain_fill, source, res_r)
             del terrain_fill
+            # A field with under 50 lit cells in its 10-30 m annulus has no ring, and
+            # every matching step below then leaves it exactly as it was - so the
+            # whole contract silently does not apply to it. That is the failure this
+            # records: a field dark enough and wide enough to read as a blotch is a
+            # field whose surroundings are likely also shadow, which is precisely
+            # when `has_ring` goes false. Without the count, a skipped field is
+            # indistinguishable in the handoff from a field that was matched and
+            # came out badly.
+            ring_reports.append(
+                {
+                    "fields": int(fields["count"]),
+                    "with_ring": int(np.asarray(fields["has_ring"]).sum()),
+                }
+            )
             texture = _match_amplitude(texture, hp, fields)
         del hp
         recoloured = local * texture[..., None] * chroma_tex
@@ -751,6 +765,7 @@ def delight(
         return result, local, fill_w
 
     grain_ratios: list[np.ndarray] = []
+    ring_reports: list[dict] = []
     out, local_lit, _fill_w = refill(snow_mask)
 
     def _fill_kinds(snow_now: np.ndarray) -> np.ndarray:
@@ -863,6 +878,8 @@ def delight(
     out, over_ceiling = clamp_highlights(out, highlight_ceiling)
     stats = {
         "highlight_ceiling_fraction": round(over_ceiling, 6),
+        # How many refilled fields ring matching could actually reach (last refill).
+        "refill_ring_cover": ring_reports[-1] if ring_reports else None,
         "snow_fraction": round(float(snow_mask.mean()), 4),
         # The 2-8 m grain of every refilled field over its ring's, after the match
         # (area-weighted p10 and median over the fields of the last refill).

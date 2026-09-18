@@ -3426,34 +3426,41 @@ not-applicable.
 ### A ceiling that lands on the gate's boundary is not a ceiling
 
 Two defects behind `test_base_colour_has_no_black_holes`, found on 2026-09-18 while the pack
-branch could not publish. Written down because whoever fixes the assertions should not have to
-rediscover them, and because the shape generalises past this one contract.
+branch could not publish, and both fixed in `53807cb`. Written down because the shape generalises
+well past this one contract.
 
-**The documented lever does not exist.** `c5865de` introduced `highlight_ceiling` and said in its
+**The documented lever did not exist.** `c5865de` introduced `highlight_ceiling` and said in its
 own commit message that a spec can turn it off with `highlight_ceiling 0`. The single
-`imagery.delight(` call site in `level_builder.py` passes `knee_lum` from the spec and does not
-pass `highlight_ceiling` at all; the name appears nowhere in `level_builder.py` or `pipeline.py`.
-So every de-lighting map takes the 0.95 default and no spec can opt out. The clamp still runs -
-this is not why the gate is red - but a knob described in a commit message is not a knob.
+`imagery.delight(` call site in `level_builder.py` passed `knee_lum` from the spec and never
+passed `highlight_ceiling`, so every de-lighting map took the 0.95 default and no spec could opt
+out. A knob described in a commit message is not a knob until a call site passes it.
 
-**The clamp aims one count below the threshold it exists to satisfy.** `clamp_highlights` holds
-the brightest channel at 0.95 linear, which encodes to 249. `base_colour_stats` counts a texel as
-clipped at `>= 250`. One count of margin, which means any later stage that lifts a texel by a
-single count puts it back over. And there are later stages: `delight` returns, then the level
-stage writes the array again through `_enforce_beds`, `refill_match` and `_enforce_beds` a second
-time, and only then is `base_colour_stats` taken. `delight`'s own comment calls the clamp "last
-thing before the encode, so no refill, floor or cap re-lifts it", which is true inside `delight`
-and false in the pipeline.
+**The clamp aimed one count below the threshold it existed to satisfy.** `clamp_highlights` holds
+the brightest channel at 0.95 linear, which encodes to 249, and `base_colour_stats` counts a texel
+as clipped at `>= 250`. One count of margin - so any later stage that lifts a texel by a single
+count puts it back over. And there are later stages: `delight` returns, then the level stage writes
+the array again through `_enforce_beds`, `refill_match` and `_enforce_beds` a second time, and only
+then is `base_colour_stats` taken. `delight`'s own comment called the clamp "last thing before the
+encode, so no refill, floor or cap re-lifts it", which is true inside `delight` and false in the
+pipeline. The fix enforces the ceiling on what ships, after the resize, immediately before the
+array is written and measured.
 
 **The rule: a contract enforced mid-pipeline is enforced where it is measured, or it is not
 enforced.** Ask which stage writes the array last before the number is taken, not which stage
-feels final. Two stages in this file have a comment claiming to be last.
+feels final. Two stages in this file carry a comment claiming to be last.
 
-**And a corollary about reading the failures.** The same assertion failing on two maps does not
-mean one cause. `base_colour_stats` measures the array after the LANCZOS resize to `base_tex_px`,
-and its own docstring notes that overshoot on a hard edge lands in the clipped fraction. Meteor
-Crater is 2048 upscaled to 4096, so that path is live; Factory Butte is 4096 to 4096 and is never
+**A corollary about reading the failures.** The same assertion failing on two maps does not mean
+one cause. `base_colour_stats` measures the array after the LANCZOS resize to `base_tex_px`, and
+its own docstring notes that overshoot on a hard edge lands in the clipped fraction. Meteor Crater
+is 2048 upscaled to 4096, so that path is live; Factory Butte is 4096 to 4096 and is never
 resampled. A resize fix would green one and leave the other where it was.
+
+**And the question the fix deliberately does not close.** `shipped_ceiling_fraction` records how
+much the final clamp had to hold back, which is a symptom meter, not a result: a large number says
+a later stage lifted a lot of texels past the ceiling. Factory Butte's caprock went from 0.00498
+on the shipped `fc4db59` base to 0.05629 four imagery commits later while its mean luminance
+*fell* - a widening distribution, which reads as a regression rather than as a gate newly
+reporting. The clamp makes the release publishable; it does not explain that.
 
 ### Pack conventions that are ours, not the engine's
 
