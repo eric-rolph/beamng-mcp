@@ -3219,6 +3219,33 @@ Every gate and every critic sheet in this pack reads the generator's own arrays,
 none of them can see what the engine draws. Two play-tests found what seventeen critic
 rounds could not. Budget for that.
 
+### Every series of changes ends in a map you can load
+
+A change to this pack is not finished when the gates pass. The gates and the critic
+sheets read the generator's own arrays and have never seen what the engine draws -
+that is how a mirrored base texture, a too-bright road and a two-by-two tiled crater
+all shipped green. **The deliverable is a ZIP in the player's mods folder, every
+time.** Close a run of work like this:
+
+1. `python examples/gis_maps/build.py <key> all` for every map the change touches -
+   `level` and `dist` are where a generator change actually reaches a file. A change in
+   `maplib/` touches ALL SIX, even when only one map was being worked on: the pack has
+   shipped stale levels before because only the map under discussion was rebuilt.
+2. `python -m pytest -q tests/test_gis_maps_pack.py` - and read the skips, which are
+   the pack's own inventory of what each map has not got yet.
+3. Commit and push. The `GIS maps release` workflow rebuilds all six on a runner and
+   republishes `gis-maps-v1`; that release is the delivery channel, because a whole ZIP
+   is 90-250 MB and the session file limit is 30 MiB.
+4. Hand over the one command that installs it, and say what to look for:
+   `python examples/gis_maps/install_local.py --release gis-maps-v1 --maps <keys>`
+5. Small artefacts (a calibration level, a preview render) go straight to the user as
+   files - `_calibration/build_texcal.py` is 58 KB and answers a question no gate can.
+
+Anything that can be rendered without the engine, render: `maplib/preview3d.py`
+(`render_mesh`, `render_terrain_view`) rasterises the pack's own meshes and terrain to
+PNG. A picture of a building or a road before a play-test costs seconds and catches the
+class of defect a play-test would otherwise have to find.
+
 ### Terrain contracts proven in game
 
 - The base texture set is written **south-up, like the `.ter` heights**. The engine maps
