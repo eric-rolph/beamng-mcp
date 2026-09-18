@@ -41,6 +41,19 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def public_stats(stats: dict) -> dict:
+    """A stats dict with its private keys dropped, for anything that ships as JSON.
+
+    A leading underscore marks a stat the stages pass between themselves rather than
+    publish: ``delight`` returns its refilled-cell mask as ``_refill_mask``, an ndarray.
+    Each stage pops what it consumes, and this is the backstop, because the handoff is
+    written at the very end of ``level`` - an unserialisable value there throws away a
+    36-minute six-map build, which is how this was found.
+    """
+
+    return {key: value for key, value in stats.items() if not key.startswith("_")}
+
+
 # ---------------------------------------------------------------------------
 # fetch
 # ---------------------------------------------------------------------------
@@ -1193,7 +1206,7 @@ def level(spec, example_root: Path) -> dict:
         },
         "roads": report["roads"],
         "spawns": report["spawns"],
-        "imagery": report.get("imagery", {}),
+        "imagery": public_stats(report.get("imagery", {})),
         "layer_tints": report.get("layer_tints", {}),
         "forest": report.get("forest", {}),
         "buildings": report.get("buildings", {}),

@@ -264,6 +264,51 @@ def test_terrain_texture_sizes_are_terrain_squares() -> None:
     assert coarse["baseColorMacroTexSize"] == 40.0
 
 
+def test_delight_stats_survive_the_handoff_json() -> None:
+    """`delight` returns one ndarray, and every stage that keeps it must pop it.
+
+    It comes back as the private ``_refill_mask``, the refilled cells the level stage
+    measures against their rings. The terrain stage pops it and saves it, but only maps
+    with an OBJECTS spec condition their colour there; the four without one reach
+    ``conditioned_colour`` from the level stage instead, where nothing did. The first
+    release build after those four turned the de-lighting on died on
+    ``TypeError: Object of type ndarray is not JSON serializable`` writing the handoff.
+
+    So: every public stat survives ``json.dumps``, and the private key stays the only
+    one that does not.
+    """
+    load_maplib()
+    from maplib import imagery
+
+    n, res = 128, 1.5
+    yy, xx = np.mgrid[0:n, 0:n].astype("float32")
+    dem = (120.0 * np.sin(xx / 30.0) * np.cos(yy / 30.0)).astype("float32")
+    colour = np.random.default_rng(0).integers(40, 200, size=(n, n, 3), dtype=np.uint8)
+    # Bingham Canyon's authored block, the one that hit this.
+    _, stats = imagery.delight(
+        colour,
+        dem,
+        res,
+        azimuth_deg=180.0,
+        altitude_deg=63.0,
+        strength=1.0,
+        max_gain=4.5,
+        steep_deg=32.0,
+        steep_cap=True,
+        steep_feather_deg=8.0,
+    )
+    private = sorted(k for k in stats if k.startswith("_"))
+    assert private == ["_refill_mask"], private
+    assert isinstance(stats["_refill_mask"], np.ndarray)
+    with pytest.raises(TypeError):
+        json.dumps(stats)
+    # The handoff takes the public view, whatever a stage forgot to pop.
+    _, _, _, _, pipeline, _ = load_maplib()
+    json.dumps(pipeline.public_stats(stats))
+    stats.pop("_refill_mask")
+    json.dumps(stats)
+
+
 def test_yaw_matrix_convention() -> None:
     _, _, level_builder, _, _, _ = load_maplib()
     north = level_builder.yaw_matrix(0.0)

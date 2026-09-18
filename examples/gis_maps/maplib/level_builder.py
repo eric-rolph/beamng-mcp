@@ -1299,6 +1299,17 @@ def build_level(
         colour_full, imagery_stats = conditioned_colour(
             dem, res, fp, data_root / "naip", imagery_spec
         )
+        # Only the terrain stage's OBJECTS path caches a conditioned colour, so a map
+        # that de-lights and has no OBJECTS spec lands here - and `delight` returns its
+        # refilled-cell mask as the private `_refill_mask`, an ndarray the handoff JSON
+        # cannot hold. The terrain stage pops it and saves it; do the same, so the
+        # refill check below reads it from the same file either way.
+        refill_mask = imagery_stats.pop("_refill_mask", None)
+        if refill_mask is not None:
+            terrain_dir = data_root / "terrain"
+            terrain_dir.mkdir(parents=True, exist_ok=True)
+            np.save(terrain_dir / "refill.npy", refill_mask.astype("uint8"))
+            del refill_mask
     report["imagery"] = imagery_stats
     colour_full = paint_road_beds(
         colour_full, layer, materials, spec.PALETTE, getattr(spec, "ROADS", {}).get("surfaces", {})
