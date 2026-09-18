@@ -633,6 +633,10 @@ def conditioned_colour(
             steep_cap_lum=imagery_spec.get("steep_cap_lum"),
             steep_feather_deg=float(imagery_spec.get("steep_feather_deg", 0.0)),
             knee_lum=float(imagery_spec.get("knee_lum", 0.55)),
+            # `delight`'s docstring offers a spec `highlight_ceiling`, and 0 to turn the
+            # clamp off. This is the only call site and it was not passing the name, so
+            # every de-lit map took the default and no spec could reach the lever.
+            highlight_ceiling=float(imagery_spec.get("highlight_ceiling", 0.95)),
             cover_mask=(canopy_chm > 2.0)
             if canopy_chm is not None and imagery_spec.get("refill_by_cover")
             else (canopy_cover > 0.5)
@@ -1445,6 +1449,31 @@ def build_level(
         base_colour = np.asarray(
             Image.fromarray(colour_full).resize((base_px, base_px), Image.LANCZOS)
         )
+    # Nothing reaches white, enforced on what SHIPS rather than in the middle of the
+    # pipeline. `delight` already ends with this clamp, and it is not enough, for the
+    # same reason the bed contract above is enforced twice: `delight` is not the last
+    # writer of the base. `refill_match` lifts every refilled field toward its ring
+    # after the clamp, `_enforce_beds` lifts a bed toward its margin, and the LANCZOS
+    # resize overshoots on a hard edge - and the clamp leaves exactly one count of
+    # margin (0.95 linear encodes to 249, the gate counts 250), so any of the three
+    # re-breaks it. Measured on the shipped Factory Butte base, the resize alone puts
+    # back 0.0016 on fb_caprock; the refill match put back far more than that, which is
+    # how a map with an unconditional highlight ceiling shipped 5.6% of its caprock
+    # blown out. The u8 -> linear -> u8 round trip is exactly lossless, so a texel under
+    # the ceiling is not touched at all.
+    # Scoped to the maps the gate scopes itself to: a level with no IMAGERY spec ships
+    # the photograph as flown and nobody promised this of it.
+    if getattr(spec, "IMAGERY", None):
+        from . import imagery
+
+        _linear, _over = imagery.clamp_highlights(imagery.srgb_to_linear(base_colour), 0.95)
+        base_colour = imagery.linear_to_srgb_u8(_linear)
+        del _linear
+        if isinstance(report.get("imagery"), dict):
+            # A large number here is not this clamp misbehaving, it is how much a later
+            # stage lifted past the ceiling - which is worth seeing rather than silently
+            # correcting.
+            report["imagery"]["shipped_ceiling_fraction"] = round(_over, 6)
     build_base_set(
         dem,
         res,
