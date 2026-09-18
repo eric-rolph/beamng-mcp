@@ -682,7 +682,13 @@ def source_colour_stats(colour: np.ndarray, stride: int = 4) -> dict:
     return out
 
 
-def base_colour_stats(colour: np.ndarray, layer: np.ndarray, materials) -> dict:
+def base_colour_stats(
+    colour: np.ndarray,
+    layer: np.ndarray,
+    materials,
+    *,
+    before_ceiling: np.ndarray | None = None,
+) -> dict:
     """The finished base's black-hole and per-layer numbers, measured on what ships.
 
     Every map reaches build_base_set, and only some reach the terrain stage's OBJECTS
@@ -690,6 +696,14 @@ def base_colour_stats(colour: np.ndarray, layer: np.ndarray, materials) -> dict:
     exist for all six maps and they describe the array that was written rather than an
     upstream one of a different size (the base is resized to base_px on its way out, and
     LANCZOS overshoot on a hard edge lands exactly in the clipped fraction).
+
+    ``before_ceiling`` is the same base one step earlier, before the shipping clamp.
+    The clamp caps every channel at 249 and ``clipped`` counts 250, so once a map runs
+    the clamp its ``clipped`` is zero however the pipeline behaved - a true number that
+    can no longer be a gate. Measured on the array handed in here instead, the per-layer
+    share survives the fix that hid it, at the resolution the whole-base
+    ``shipped_ceiling_fraction`` throws away: fb_caprock is 5.6% over the ceiling and
+    0.13% of its base.
     """
 
     from PIL import Image
@@ -713,6 +727,10 @@ def base_colour_stats(colour: np.ndarray, layer: np.ndarray, materials) -> dict:
             "cells": int(where.sum()),
             "clipped": round(float((colour[where].max(axis=-1) >= 250).mean()), 5),
         }
+        if before_ceiling is not None:
+            means[name]["clipped_before_ceiling"] = round(
+                float((before_ceiling[where].max(axis=-1) >= 250).mean()), 5
+            )
     return {
         "base_px": int(colour.shape[0]),
         "layer_mean_srgb": means,
@@ -1517,9 +1535,15 @@ def build_level(
     # the ceiling is not touched at all.
     # Scoped to the maps the gate scopes itself to: a level with no IMAGERY spec ships
     # the photograph as flown and nobody promised this of it.
+    before_ceiling = None
     if getattr(spec, "IMAGERY", None):
         from . import imagery
 
+        # Kept so the per-layer share below is measured on the array the clamp read.
+        # Without it the clamp erases its own evidence: it caps every channel at 249
+        # and the base's gate counts 250, so `clipped` reads zero on every map that
+        # runs this, whatever the pipeline did upstream.
+        before_ceiling = base_colour
         _linear, _over = imagery.clamp_highlights(imagery.srgb_to_linear(base_colour), 0.95)
         base_colour = imagery.linear_to_srgb_u8(_linear)
         del _linear
@@ -1538,8 +1562,10 @@ def build_level(
         colour_full=base_colour,
         base_px=base_px,
     )
-    report["base_colour"] = base_colour_stats(base_colour, layer, materials)
-    del base_colour
+    report["base_colour"] = base_colour_stats(
+        base_colour, layer, materials, before_ceiling=before_ceiling
+    )
+    del base_colour, before_ceiling
     texture_kit.build_set(
         terrains_dir,
         macro_prefix,

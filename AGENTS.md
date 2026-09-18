@@ -3423,6 +3423,44 @@ the measurement is present and well formed on every de-lit map, which is this pa
 recurring failure - a statistic that goes silently absent for some maps and reports as
 not-applicable.
 
+### A fix that clamps what ships can void the gate that caught it
+
+`53807cb` ends the level stage with a highlight clamp on the base, because `delight`'s
+own ceiling is not the last word: `refill_match`, `_enforce_beds` and the LANCZOS resize
+all write after it. The clamp is right, and what ships is correct. But 0.95 linear
+encodes to 249 and `base_colour_stats` counts 250, so after it `clipped` is **exactly
+zero for every layer of every map with an IMAGERY spec**, whatever the pipeline did
+upstream - and `test_base_colour_has_no_black_holes` asserts `clipped < 0.002`. The
+assertion reads as live and cannot fail. The whole-base `shipped_ceiling_fraction` the
+same commit records is a far weaker instrument than the per-layer number it replaced:
+fb_caprock is 5.6% over the ceiling and 0.13% of its base, so no plausible whole-base
+threshold sees it. `clipped_before_ceiling` keeps the per-layer share, measured on the
+array the clamp read.
+
+**When a fix works by rewriting what a gate measures, move the gate, not just the array.**
+Otherwise the suite goes green on the fix and stays green through the regression.
+
+The population, measured on run 33's shipped bases (which predate the clamp, so they are
+the unclamped arrays the number describes) - 22 layers over five maps:
+
+| band | layers |
+| --- | --- |
+| 0.0563 | `fb_caprock` |
+| 0.0027 - 0.0066 | `bc_scrub_hillside` 0.00660, `mc_limestone_rim_ew` 0.00431, `bc_haul_gravel` 0.00373, `mc_road_dirt` 0.00352, `bc_waste_rock` 0.00266 |
+| under 0.002 | the remaining 16 |
+
+Whole-base: bingham_canyon 0.00225, factory_butte 0.00132, meteor_crater 0.00045,
+mt_st_helens 0.00002, wallace_creek 0.00000.
+
+**The gate is the population, not an absolute.** 0.002 was the contract written for an
+unclamped base and six of those 22 layers are already above it, so restoring it hard
+re-reds three maps over a blow-out the clamp has made invisible in game. Each layer is
+instead held to its own run 33 figure plus 0.005 (`CEILING_BASELINE` and `CEILING_SLACK`
+in the suite), which catches a layer that *starts* blowing out - the failure that
+actually happened to `fb_caprock` - without failing the ones that always did. A layer
+with no baseline, black_bear_pass's and any new material, is asserted present only.
+Same shape as the refill floor: take the number from the population, never invent it.
+
 ### Pack conventions that are ours, not the engine's
 
 - `size_px` is gated to a power of two between 1024 and 8192 in

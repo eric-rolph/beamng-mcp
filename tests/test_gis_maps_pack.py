@@ -1564,6 +1564,87 @@ def test_base_colour_stats_measures_each_layer() -> None:
     assert stats["layer_mean_srgb"]["ledge"]["clipped"] == pytest.approx(1.0)
     assert stats["layer_mean_srgb"]["ground"]["clipped"] == pytest.approx(0.0)
     assert stats["layer_mean_srgb"]["ledge"]["cells"] == 256
+    # Nothing was handed in as the pre-clamp array, so nothing claims to describe one.
+    assert "clipped_before_ceiling" not in stats["layer_mean_srgb"]["ledge"]
+
+
+def test_the_clamp_does_not_erase_the_number_that_caught_it() -> None:
+    """The shipping clamp caps every channel at 249 and the gate counts 250, so after it
+    `clipped` is zero on every map it runs for - a true number that can no longer fail.
+    The share is kept at full per-layer resolution on the array the clamp read, so the
+    contract survives its own fix."""
+
+    _, _, level_builder, _, _, _ = load_maplib()
+    from maplib import imagery
+
+    colour = np.full((32, 32, 3), 128, dtype="uint8")
+    colour[16:, :16] = 255  # one layer entirely over the ceiling
+    layer = np.zeros((16, 16), dtype="uint8")
+    layer[8:, :8] = 1
+
+    linear, _over = imagery.clamp_highlights(imagery.srgb_to_linear(colour), 0.95)
+    shipped = imagery.linear_to_srgb_u8(linear)
+    # 0.95 linear encodes to 249.31, and 250 needs 0.9516 - so the clamp leaves the gate
+    # nothing to count, on any map, whatever a later stage did to the base.
+    assert int(shipped.max()) == 249
+
+    stats = level_builder.base_colour_stats(
+        shipped, layer, ["ground", "ledge"], before_ceiling=colour
+    )
+    means = stats["layer_mean_srgb"]
+    assert means["ledge"]["clipped"] == pytest.approx(0.0), "the clamp makes this vacuous"
+    assert means["ledge"]["clipped_before_ceiling"] == pytest.approx(1.0)
+    assert means["ground"]["clipped_before_ceiling"] == pytest.approx(0.0)
+
+
+# What each layer's pre-clamp share over the highlight ceiling measured on run 33's
+# published ZIPs - the last bases built before `53807cb` added the shipping clamp, so
+# they are the unclamped arrays `clipped_before_ceiling` describes. Measured directly
+# off `t_base_b.png` against `theTerrain.ter`'s layer indices, with the same `>= 250`
+# test `base_colour_stats` uses, so the numbers are the same quantity.
+#
+# The gate is the population rather than an absolute, deliberately. 0.002 was the
+# contract written for an unclamped base; six of these 22 layers are already above it,
+# so restoring it hard re-reds three maps over a blow-out the clamp has made invisible
+# in game. Held to the baseline instead, a layer that starts blowing out is caught -
+# which is the failure that actually happened - without failing the ones that always
+# did. Set from five maps: black_bear_pass has no published base to measure, so its
+# layers carry no baseline and are asserted present only, and so is any new material.
+CEILING_BASELINE = {
+    # factory_butte
+    "fb_caprock": 0.05631,
+    "fb_clay_fin": 0.00167,
+    "fb_shale_slope": 0.00014,
+    "fb_mud_flat": 0.00000,
+    # meteor_crater
+    "mc_limestone_rim_ew": 0.00431,
+    "mc_road_dirt": 0.00352,
+    "mc_limestone_rim": 0.00069,
+    "mc_ejecta_gravel": 0.00029,
+    "mc_desert_floor": 0.00012,
+    "mc_talus": 0.00001,
+    "mc_rim_rubble": 0.00000,
+    "mc_road_asphalt": 0.00000,
+    # wallace_creek
+    "wc_grassland": 0.00000,
+    "wc_alluvial_wash": 0.00000,
+    "wc_fault_scarp": 0.00000,
+    "wc_dry_pond": 0.00000,
+    # bingham_canyon and mt_st_helens: out of scope for development, still built
+    "bc_scrub_hillside": 0.00660,
+    "bc_haul_gravel": 0.00373,
+    "bc_waste_rock": 0.00266,
+    "bc_bench_face": 0.00052,
+    "sh_debris_slope": 0.00003,
+    "sh_ash_gully": 0.00002,
+    "sh_snow_ice": 0.00001,
+    "sh_pumice_plain": 0.00000,
+    "sh_crater_wall": 0.00000,
+}
+# Room for the build to move without the gate reading the movement as a regression.
+# It is wider than any difference measured between two builds of this pack and far
+# narrower than the step that put fb_caprock where it is.
+CEILING_SLACK = 0.005
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
@@ -1592,8 +1673,31 @@ def test_base_colour_has_no_black_holes(map_key: str) -> None:
     means = stats.get("layer_mean_srgb", {})
     assert means, f"{map_key}: no layer was measured on the finished base"
     for name, entry in means.items():
-        # And no layer of the finished base runs to white either.
+        # And no layer of the finished base runs to white either. This one cannot fail
+        # any more: the shipping clamp caps every channel at 249 and this counts 250,
+        # so it is zero on every map with an IMAGERY spec - which is every map that
+        # reaches here. Kept because it is what ships, not because it gates anything.
         assert entry.get("clipped", 0.0) < 0.002, (map_key, name, entry)
+        # The share the clamp had to rescue, measured before it, at the resolution the
+        # whole-base `shipped_ceiling_fraction` throws away - fb_caprock is 5.6% over
+        # the ceiling and 0.13% of its base, so no whole-base threshold sees it.
+        assert entry.get("clipped_before_ceiling") is not None, (
+            map_key,
+            name,
+            "the level stage recorded no pre-clamp share, so nothing measures the base",
+        )
+        assert 0.0 <= entry["clipped_before_ceiling"] <= 1.0, (map_key, name, entry)
+        # And it is held to the population rather than to an absolute, for the reason
+        # CEILING_BASELINE gives.
+        baseline = CEILING_BASELINE.get(name)
+        if baseline is not None:
+            assert entry["clipped_before_ceiling"] <= baseline + CEILING_SLACK, (
+                map_key,
+                name,
+                "this layer blows out further past the ceiling than it did on run 33",
+                entry["clipped_before_ceiling"],
+                baseline,
+            )
     for name, lit in (getattr(spec, "IMAGERY", None) or {}).get("lighter_than", {}).items():
         # A layer the spec says reads lighter than another (the cream ledges over
         # the tan plain) does so in the finished base.
