@@ -623,6 +623,49 @@ ROADS = {
         },
     },
 }
+# The walls come off the terrain. Black Bear Pass has the pack's steepest ground -
+# slope p95 53.4 degrees, 53 % of the level over 30 - and fifteen critic rounds have
+# been spent trying to make a top-down projection read as a cliff on it. It cannot: at
+# 70 degrees the terrain draws a square metre of rock from 0.34 m2 of texture and it
+# cannot hold a ledge at all, because a ledge is an overhang. So the walls are modelled
+# now and the tile's job shrinks to the grain inside a bed.
+#
+# 50 degrees rather than the module's 48: the level's slope p95 is 53.4, the steepest
+# in the pack, so 48 would take in the steep scree as well as the rock and the scree is
+# not a wall - it is where the talus this map already scatters belongs. The same reason
+# restricts the search to the two layers the terrain classifier already calls cliff, so
+# the skin lands exactly where the charcoal tuff is painted and nowhere else.
+#
+# The tuff is thin-bedded (the tile carries forty beds to 12 m, median 0.3 m) but the
+# geometry cannot resolve a 0.3 m bed at a 1.5 m step and should not try: what the mesh
+# owes the driver is the metre-scale ledge-and-undercut the photographs show, so the
+# beds are 2.4 m and the thin partings stay in the texture. The joints are 4.5 m, which
+# is the tuff's columnar spacing in the reference photographs.
+CLIFFS = {
+    "seed": 1701,
+    "layers": ["bb_cliff_rock", "bb_cliff_rock_ew"],
+    "min_slope_deg": 50.0,
+    "min_relief_m": 15.0,
+    "min_area_m2": 900.0,
+    "bed_m": 2.4,
+    "joint_m": 4.5,
+    "relief_m": 0.95,
+    "buttress_m": 1.8,
+    "tile_m": 3.0,
+    # The pack's biggest map and its steepest: the budget is the one place this stage
+    # can cost a level its frame rate, so it is named here rather than defaulted.
+    "max_triangles": 520000,
+    "materials": {
+        # The charcoal tuff of the reference photographs, at the palette's own base for
+        # bb_cliff_rock so the modelled wall and the ground it stands on are one rock.
+        # Strata 0.45 rather than the tile's full bedding: the mesh has taken the beds,
+        # and what is left for the texture is the partings inside one. Alpine walls
+        # carry lichen, but only a fifth of what the talus below them does - a face this
+        # steep sheds.
+        "cliff_tuff": {"colour": [0.36, 0.35, 0.34], "strata": 0.45, "lichen": 0.12},
+    },
+}
+
 
 # Every spawn sits on the pass road and snaps to the carved bed keeping its authored
 # sense of direction. The named places come from the trail review's GPS fixes

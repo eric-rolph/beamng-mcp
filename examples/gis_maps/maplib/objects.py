@@ -574,6 +574,142 @@ def scatter_rocks(
     return out
 
 
+def scatter_shrubs(
+    layer: np.ndarray,
+    ground: np.ndarray,
+    res: float,
+    fp_size_m: float,
+    min_elevation: float,
+    densities_per_ha: dict[int, float],
+    *,
+    seed: int = 21,
+    height_range: tuple[float, float] = (0.4, 1.2),
+    width_ratio: tuple[float, float] = (1.0, 1.8),
+    max_slope_deg: float = 32.0,
+    patch_m: float = 60.0,
+    patchiness: float = 0.65,
+    swale_bias: float = 0.0,
+    swale_window_m: float = 40.0,
+    swale_threshold_m: float = 1.0,
+    material_by_layer: dict[int, str] | None = None,
+    max_count: int = 40000,
+    exclude: np.ndarray | None = None,
+) -> list[dict]:
+    """Bushes and tussocks sampled by density per hectare on the layers named.
+
+    The pack could only put a bush somewhere two ways: lift it out of the lidar as a
+    bump, or find its shadow in the photograph. Both need the plant to be big enough and
+    dark enough to have been measured, so a map of dry grass and knee-high saltbush -
+    the Carrizo Plain, the Factory Butte washes - came out with nothing on it at all,
+    and that is most of why four of the six levels ship bare. This is the third way, and
+    it is the same instrument ``scatter_rocks`` already uses for the stones below the
+    lidar's resolution.
+
+    Two things separate it from scattering stones. Vegetation is patchy rather than
+    Poisson - a plain of evenly spaced bushes reads as a dot screen - so the density is
+    multiplied by a normalised noise field at ``patch_m`` and renormalised afterwards,
+    which moves the plants into clumps without changing how many there are. And a bush
+    grows where the water is, so ``swale_bias`` gathers them into the hollows exactly as
+    the stones' toe bias gathers scree into the concavities.
+    """
+
+    from scipy import ndimage
+
+    rng = np.random.default_rng(seed)
+    half = fp_size_m / 2.0
+    n = layer.shape[0]
+    # One candidate per 2 m square, so a density up to 2,500 a hectare is reachable and
+    # two bushes never land inside one another.
+    spacing = 2.0
+    count = int(fp_size_m / spacing)
+    gx, gy = np.meshgrid(np.arange(count), np.arange(count))
+    xs = (gx.ravel() + rng.uniform(0.1, 0.9, gx.size)) * spacing - half
+    ys = half - (gy.ravel() + rng.uniform(0.1, 0.9, gy.size)) * spacing
+    cols = np.clip(((xs + half) / res).astype(int), 0, n - 1)
+    rows = np.clip(((half - ys) / res).astype(int), 0, n - 1)
+
+    dzdy, dzdx = np.gradient(ground.astype("float32"), res)
+    slope = np.degrees(np.arctan(np.hypot(dzdx, dzdy)))
+    # Nothing grows on a wall, and the last few degrees ramp rather than stop dead, so
+    # a hillside does not end in a line of bushes along a contour.
+    grows = np.clip((float(max_slope_deg) - slope) / 6.0, 0.0, 1.0)
+    if exclude is not None:
+        grows = grows * ~exclude
+
+    field = np.zeros(layer.shape, dtype="float32")
+    for index, per_ha in densities_per_ha.items():
+        field += (layer == index) * float(per_ha)
+    own = field.copy()
+    # Ramped 20 m across every class line: a wash's saltbush does not stop on the
+    # classifier's contour, it thins out over the bank.
+    field = ndimage.gaussian_filter(field, max(1.0, 20.0 / res))
+    field = np.minimum(field, 3.0 * own) * np.isin(layer, list(densities_per_ha.keys()))
+
+    probability = field[rows, cols] * (spacing * spacing / 1e4) * grows[rows, cols]
+    if patchiness > 0.0:
+        # Patchiness is one smoothed white-noise field normalised to a mean of 1, so it
+        # redistributes plants and never invents them.
+        noise = rng.uniform(0.0, 1.0, layer.shape).astype("float32")
+        noise = ndimage.gaussian_filter(noise, max(1.0, float(patch_m) / res / 2.0))
+        lo, hi = float(noise.min()), float(noise.max())
+        noise = (noise - lo) / max(hi - lo, 1e-6)
+        patch = 1.0 + float(patchiness) * (2.0 * noise - 1.0)
+        probability = probability * patch[rows, cols]
+    if swale_bias > 0.0:
+        smooth = ndimage.uniform_filter(
+            ground.astype("float32"), size=max(3, int(swale_window_m / res)), mode="nearest"
+        )
+        concave = np.clip((smooth - ground) / max(swale_threshold_m, 1e-3), 0.0, 1.0)
+        probability = probability * (1.0 + float(swale_bias) * concave[rows, cols])
+
+    # Each class is renormalised to density x area after the ramp, the patches and the
+    # swales, so what those three do is move plants about and never change the count.
+    layer_at = layer[rows, cols]
+    cell_ha = res * res / 1e4
+    for index, per_ha in densities_per_ha.items():
+        on_points = layer_at == index
+        expected = float(probability[on_points].sum())
+        if expected <= 0:
+            continue
+        area = float((layer == index).sum())
+        probability[on_points] *= per_ha * area * cell_ha / expected
+    probability = np.minimum(probability, 1.0)
+    keep = rng.uniform(0, 1, xs.size) < probability
+    idx = np.nonzero(keep)[0]
+    if idx.size > max_count:
+        idx = rng.choice(idx, size=max_count, replace=False)
+
+    lo_h, hi_h = height_range
+    lo_w, hi_w = width_ratio
+    out = []
+    for i in idx:
+        r, c = int(rows[i]), int(cols[i])
+        # Log-normal heights: a stand of one-size bushes is a crop, not scrub.
+        height = float(np.exp(rng.uniform(np.log(lo_h), np.log(hi_h))))
+        width = height * float(rng.uniform(lo_w, hi_w))
+        entry = {
+            "kind": "shrub",
+            "x": round(float(xs[i]), 2),
+            "y": round(float(ys[i]), 2),
+            # 3 cm in, the seating the pack already uses for a mat or a sapling.
+            "z": round(float(ground[r, c] - min_elevation) - 0.03, 2),
+            "size": [
+                round(width, 2),
+                round(width * float(rng.uniform(0.8, 1.0)), 2),
+                round(height, 2),
+            ],
+            "yaw_deg": round(float(rng.uniform(0, 360)), 1),
+            "peak_m": None,
+            "source": "scatter",
+        }
+        if material_by_layer:
+            family = material_by_layer.get(int(layer[r, c]))
+            if family:
+                entry["material"] = family
+        out.append(entry)
+    return out
+
+
 def _coarse_opening(window: np.ndarray, radius_px: float) -> np.ndarray:
     """A grey opening with a very wide disc, done on a block-minimum pyramid.
 

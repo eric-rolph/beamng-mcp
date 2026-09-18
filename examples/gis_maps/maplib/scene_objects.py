@@ -526,7 +526,23 @@ def write_forest(
             families = catalogue["shrub_variants"]
             variants = families.get(obj.get("material") or "") or next(iter(families.values()))
             v = variants[int(rng.integers(0, len(variants)))]
-            scale = max(obj["size"][2], 0.6) / float(v.get("base_height", 1.0))
+            # The drawn height, not a floored one. This used to read
+            # `max(obj["size"][2], 0.6)`, which was written when the only shrubs here
+            # were lidar bumps - and `place_objects` already floors those at 0.6 - so
+            # the clamp was a no-op and nobody saw it. A scattered shrub draws its
+            # height log-normally from the spec's own range, and that range goes below
+            # 0.6 on both maps that have one, so the clamp started biting the moment
+            # the scatter existed: it piled the whole lower tail onto one value.
+            # Measured on the declared ranges, 100 % of Meteor Crater's scattered
+            # shrubs (range 0.15-0.55, entirely under the clamp) and 59.7 % of Wallace
+            # Creek's (0.25-1.1) shipped at exactly 0.60 m - a stand of one-size
+            # bushes, which is the thing the log-normal draw exists to prevent.
+            #
+            # Removing it cannot move a detected shrub, whose size already clears 0.6,
+            # and the floor it was standing in for is the forest scale bound, which is
+            # now gated on the spec in
+            # `test_a_shrub_scatter_cannot_declare_plants_below_the_forest_floor`.
+            scale = float(obj["size"][2]) / float(v.get("base_height", 1.0))
             emit(v["item"], obj["x"], obj["y"], obj["z"], obj["yaw_deg"], scale)
     for tree in trees:
         variants = catalogue.get("tree_variants", {}).get(tree["species"])
