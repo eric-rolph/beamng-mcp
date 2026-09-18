@@ -2481,6 +2481,70 @@ def test_the_delighting_contract_number_can_actually_fail() -> None:
     assert dark["refill_carry_ratio"]["under_0_1"] > 0.5, dark
 
 
+def test_the_decast_guard_number_can_actually_fail() -> None:
+    """The negative control for `decast_guard`, on a base the blue de-cast will act on.
+
+    The de-cast only writes where a cell is bluer than the lit ground round it, so a warm
+    synthetic ground drives nothing and the number would read zero for the wrong reason -
+    the same "true and cannot move" shape the rest of this file exists to prevent. So the
+    ground here is cool and the shadows bluer still, which is what the flight actually
+    photographs on a shaded wall.
+    """
+
+    load_maplib()
+    from maplib import imagery
+
+    rng = np.random.default_rng(11)
+    n = 256
+    y, x = np.mgrid[0:n, 0:n].astype("float32")
+    dem = 150.0 * np.exp(-((y - 110) ** 2) / (2 * 18.0**2)) + 50.0 * np.sin(x / 24.0)
+    dem = (dem + rng.normal(0, 0.4, dem.shape)).astype("float32")
+    shade = np.clip(imagery.cast_shadows(dem, 2.0, 180.0, 25.0), 0.05, 1.0)
+    ground = np.clip(0.5 + 0.05 * rng.normal(0, 1, (n, n, 1)), 0.1, 0.9) * np.array(
+        [0.82, 0.90, 1.0]
+    )
+    # A shaded cell is bluer than a lit one, which is the condition the de-cast tests.
+    sky = 1.0 + 0.35 * (1.0 - shade)[..., None] * np.array([-0.2, 0.0, 0.35])
+    colour = (np.clip(ground * shade[..., None] * sky, 0, 1) ** (1 / 2.2) * 255).astype("uint8")
+    kw = dict(
+        azimuth_deg=180.0,
+        altitude_deg=25.0,
+        strength=1.0,
+        max_gain=4.5,
+        steep_deg=32.0,
+        steep_feather_deg=8.0,
+        steep_cap=True,
+    )
+
+    _out, clean = imagery.delight(colour, dem, 2.0, **kw)
+    assert clean["decast_guard"]["cells_under_guard"] == 0.0, clean["decast_guard"]
+    assert clean["decast_guard"]["written_under_guard"] == 0.0, clean["decast_guard"]
+
+    # Drive it: a carry pushed under the 1e-4 guard turns the de-cast from a rotation that
+    # holds luminance into a multiply by `local_lit.mean / 1e-4`. This is the elimination
+    # the pack got wrong by reading the line's intent rather than its denominator.
+    real_carry = imagery._carry_tone
+    try:
+        imagery._carry_tone = lambda corrected, weight, res_m, **kw2: (
+            real_carry(corrected, weight, res_m, **kw2) * 1e-5
+        )
+        _out, unguarded = imagery.delight(colour, dem, 2.0, **kw)
+    finally:
+        imagery._carry_tone = real_carry
+    assert unguarded["decast_guard"]["cells_under_guard"] > 0.5, unguarded["decast_guard"]
+    assert unguarded["decast_guard"]["written_under_guard"] > 0.0, unguarded["decast_guard"]
+    # And the per-cell question the share across maps cannot answer: of the cells this stage
+    # encodes black, what fraction did the de-cast write while its guard was binding? None on
+    # a base with no black at all, which is why the clean case above asserts the None rather
+    # than a zero - a ratio with an empty denominator is not a passing measurement.
+    assert clean["decast_guard"]["near_black_here"] == 0.0, clean["decast_guard"]
+    assert clean["decast_guard"]["near_black_written_under_guard"] is None, clean["decast_guard"]
+    assert unguarded["decast_guard"]["near_black_here"] > 0.0, unguarded["decast_guard"]
+    assert unguarded["decast_guard"]["near_black_written_under_guard"] > 0.0, unguarded[
+        "decast_guard"
+    ]
+
+
 def test_the_clamp_does_not_erase_the_number_that_caught_it() -> None:
     """The shipping clamp caps every channel at 249 and the gate counts 250, so after it
     `clipped` is zero on every map it runs for - a true number that can no longer fail.
@@ -2646,6 +2710,26 @@ def test_the_delighting_stays_inside_the_contract_its_clips_give(map_key: str) -
         map_key,
         "the refill borrowed a tone and did not record what it was worth",
         stats.get("refill_carry_ratio"),
+    )
+    # And whether the blue de-cast held luminance where it actually wrote. Its `lit_ratio`
+    # has channel-mean exactly 1 only while `local_lit.mean` clears the 1e-4 guard; below
+    # it the guard clamps the denominator and the line becomes a straight multiply by
+    # `local_lit.mean / 1e-4`. An equality rather than a threshold, and zero is the only
+    # healthy value, so it needs no population: the stage is written as luminance-preserving
+    # here, and a non-zero share says it was not, on the cells it wrote.
+    guard = stats.get("decast_guard")
+    assert guard is not None, (
+        map_key,
+        "built before the de-cast guard was recorded - rebuild; until then nothing says "
+        "whether that write held luminance",
+    )
+    for key in ("cells_under_guard", "written_under_guard", "near_black_here"):
+        assert guard.get(key) is not None, (map_key, key, guard)
+    assert guard.get("written_under_guard") == 0.0, (
+        map_key,
+        "the blue de-cast wrote on cells where its own 1e-4 guard was binding, so on those "
+        "cells it multiplied by local_lit.mean/1e-4 instead of holding luminance",
+        guard,
     )
 
 
