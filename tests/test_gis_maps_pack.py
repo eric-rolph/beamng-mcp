@@ -3010,19 +3010,36 @@ def _assert_the_bed_exclusion_left_a_population(map_key: str, check: dict) -> No
 
     dropped = check.get("fields_on_road_bed", 0)
     measured = check.get("fields", 0)
-    total = measured + dropped
     assert measured > 0, (
         map_key,
         f"all {dropped} refilled fields were dropped as road bed, so nothing was "
         "measured and the gates below assert nothing",
         _excluded_fields(check),
     )
-    assert dropped <= max(2, 0.2 * total), (
-        map_key,
-        f"{dropped} of {total} refilled fields were dropped as road bed - the "
-        "exclusion is meant to be the exception, not the population",
-        _excluded_fields(check),
-    )
+    # The upper end, asserted as the exclusion's OWN criterion rather than as a count.
+    # `level_builder.py` sets `on_road_bed` only where the eroded interior has under 20
+    # non-bed cells left AND `bed_share >= 0.5`, so a field that is dropped while reading
+    # under 0.5 means the bed mask, the erosion or the ordering moved - which is the
+    # runaway this end exists to catch, and it says so about the field rather than about
+    # a total. This replaces `dropped <= max(2, 0.2 * total)`, which was calibrated on
+    # run 51's "one such field out of eighteen" and then invalidated by `ee35029` moving
+    # the bed question after the fallback so the exclusion reaches an elongated shadow
+    # over a road where before it could not. Run 73 dropped four of eighteen and failed
+    # at 4 > 3.6 with every dropped field a genuine road shadow. Raising the ceiling to
+    # admit that build was the one repair the docstring above forbids, because it leaves
+    # the exclusion with no upper end at all; this keeps an upper end that no build can
+    # widen by producing more road shadows, only by breaking the mask.
+    #
+    # `bed_fraction` is None only when the caller passed no bed, and then nothing can be
+    # excluded, so a dropped field with None is itself the contradiction.
+    for field in _excluded_fields(check):
+        share = field.get("bed_fraction")
+        assert share is not None and share >= 0.5, (
+            map_key,
+            "a field was dropped as road bed while reading under half bed, so the mask, "
+            "the erosion or their order moved - the exclusion is running away",
+            field,
+        )
 
 
 def _excluded_fields(check: dict) -> list[dict]:
@@ -3093,6 +3110,62 @@ def _field_at(fields: list[dict], key: str, *, palest: bool = False) -> dict:
             "interior_texels",
         )
     }
+
+
+def test_the_bed_exclusions_upper_end_can_actually_fail() -> None:
+    """The negative control for the road-bed exclusion's upper end.
+
+    That end used to be a count, `dropped <= max(2, 0.2 * total)`, calibrated on run 51's
+    one-of-eighteen and then invalidated by `ee35029` widening what the exclusion reaches.
+    Run 73 failed it at 4 > 3.6 with four genuine road shadows, which is the failure mode
+    of a bound calibrated on a build that no longer exists: it fires on the map being
+    honest. It is now the exclusion's own criterion, per dropped field, and a criterion
+    can go stale in the other direction - into a bound that cannot fail - so drive it.
+
+    Runs without a built tree, on fabricated summaries, because the gates that call this
+    need a level on disk and skip everywhere else.
+    """
+
+    # Four dropped road shadows, each over half bed, on a map that honestly has four.
+    # This is run 73's shape and it must PASS: the old count bound failed it.
+    honest = {
+        "fields": 14,
+        "fields_on_road_bed": 4,
+        "largest": [
+            {
+                "on_road_bed": True,
+                "bed_fraction": share,
+                "interior_texels": 40,
+                "interior_eroded": False,
+                "area_m2": 2973.0,
+                "center_xy": [-35.3, 670.3],
+                "kind": "shadow",
+            }
+            for share in (0.844, 0.71, 0.55, 0.5)
+        ]
+        + [{"on_road_bed": False, "bed_fraction": 0.0} for _ in range(14)],
+    }
+    _assert_the_bed_exclusion_left_a_population("meteor_crater", honest)
+
+    # A mask that moved: one field dropped while under half bed. The criterion the
+    # builder claims for `on_road_bed` no longer held, so this MUST fail.
+    runaway = json.loads(json.dumps(honest))
+    runaway["largest"][2]["bed_fraction"] = 0.31
+    with pytest.raises(AssertionError, match="running away"):
+        _assert_the_bed_exclusion_left_a_population("meteor_crater", runaway)
+
+    # And a dropped field with no bed share at all, which is the contradiction of a
+    # caller that passed no bed excluding something for being bed.
+    no_bed = json.loads(json.dumps(honest))
+    no_bed["largest"][0]["bed_fraction"] = None
+    with pytest.raises(AssertionError, match="running away"):
+        _assert_the_bed_exclusion_left_a_population("meteor_crater", no_bed)
+
+    # The lower end still holds: an exclusion that took the whole population leaves
+    # nothing for the ratios below it to assert.
+    emptied = {"fields": 0, "fields_on_road_bed": 18, "largest": []}
+    with pytest.raises(AssertionError, match="nothing was measured"):
+        _assert_the_bed_exclusion_left_a_population("meteor_crater", emptied)
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
