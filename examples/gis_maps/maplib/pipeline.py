@@ -1265,6 +1265,14 @@ def level(spec, example_root: Path) -> dict:
         "buildings": report.get("buildings", {}),
         "trail_features": report.get("trail_features", []),
         "road_contrast": report.get("road_contrast", {}),
+        # The clearance keys travel because a gate reads them, and this dict is an
+        # explicit allow-list: `build_level` wrote `road_clearance_from` into its report
+        # from the day the clearance learned to use centrelines, and it stopped here,
+        # so `test_road_clearance_actually_ran` asserted a key that could never arrive
+        # and red-flagged three maps on a 40-minute build. Recording a fact in the stage
+        # that produces it is not the same as shipping it to the artefact that is read.
+        "road_clearance_from": report.get("road_clearance_from"),
+        "rocks_cleared_from_roads": report.get("rocks_cleared_from_roads"),
         "shipped": shipped,
     }
     (authoring / f"{spec.MOD_ID}.handoff.json").write_text(
