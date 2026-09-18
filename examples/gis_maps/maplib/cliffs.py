@@ -618,11 +618,20 @@ def build(
     # cells of the bands actually KEPT, at the step actually used.
     wall_slope = slope_deg(dem, res)[mask] if mask.any() else np.zeros(1, dtype="float32")
     bed_m = float(cfg["bed_m"])
+    # THE STEP THE MESH ACTUALLY USES, not the one the budget produced. `_skin` lays its
+    # vertices on WHOLE DEM cells - `step = max(1, round(face_step_m / res))` at line 299
+    # - so the lattice really used is that many cells wide, and `face_step_m` below is the
+    # pre-rounding float. Dividing by the float would make this metric the very thing it
+    # was written to catch: a stage recording what it INTENDED rather than what it did.
+    # On a 2 m DEM a declared 1.5 m step IS 2.0 m, so samples per bed computed from 1.5
+    # reads a third better than the mesh can deliver, and a map already at one DEM cell
+    # cannot be improved by any budget at all - it has run out of elevation data.
+    lattice_step_m = max(1, round(step_m / res)) * res
 
     def _samples_per_bed(slope_percentile: float) -> float:
         deg = float(np.percentile(wall_slope, slope_percentile))
         # arctan keeps this under 90, but a near-vertical wall still wants a bound.
-        vertical_step = step_m * math.tan(math.radians(min(deg, 89.0)))
+        vertical_step = lattice_step_m * math.tan(math.radians(min(deg, 89.0)))
         return bed_m / vertical_step if vertical_step > 1e-6 else float("inf")
 
     stats = {
@@ -641,6 +650,12 @@ def build(
         "found_area_m2": round(sum(r["area_m2"] for r in records), 1),
         "relief_p50_m": round(float(np.median(kept_relief)), 2),
         "relief_max_m": round(float(max(kept_relief)), 2),
+        # The lattice `_skin` really used, beside the pre-rounding float in
+        # `face_step_m`. When these differ the mesh is coarser than the budget thinks,
+        # and a map whose lattice is already one DEM cell cannot be helped by a bigger
+        # triangle budget - only by finer elevation data.
+        "face_step_lattice_m": round(float(lattice_step_m), 3),
+        "face_step_is_one_dem_cell": bool(round(step_m / res) <= 1),
         "wall_slope_p50_deg": round(float(np.median(wall_slope)), 1),
         "wall_slope_p90_deg": round(float(np.percentile(wall_slope, 90)), 1),
         # Beds per vertex along Z, at the median wall and at the steep tail. Under 2.0 the
