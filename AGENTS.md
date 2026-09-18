@@ -3462,9 +3462,17 @@ on the shipped `fc4db59` base to 0.05629 four imagery commits later while its me
 *fell* - a widening distribution, which reads as a regression rather than as a gate newly
 reporting. The clamp makes the release publishable; it does not explain that.
 
-**And the sting in the tail: the fix also made the gate unfailable.** So this section is two
-defects fixed and a third created in fixing them, which is the honest shape of it. The rest is the
-third one and its repair.
+**And the sting in the tail: the fix also retired one of that test's assertions.** So this
+section is two defects fixed and a third created in fixing them, which is the honest shape of it.
+The rest is the third one and its repair.
+
+Scope it precisely, because an earlier draft of this section overstated it. What the clamp retires
+is the `clipped` assertion, not `test_base_colour_has_no_black_holes` as a whole. The other
+assertions in that test are still live: `near_black_fraction` measures the dark end, which a
+highlight clamp cannot move, and `lighter_than` compares layer luminances, which the clamp shifts
+by at most 0.0011 (`fb_caprock`; every other layer rounds to 0.0000). The two refill gates are
+untouched - `refill_check` runs on `colour_full`, before the base is resized or clamped at all.
+When counting which red gates went vacuous, count failures of the `clipped` assertion alone.
 
 `53807cb` ends the level stage with a highlight clamp on the base, because `delight`'s
 own ceiling is not the last word: `refill_match`, `_enforce_beds` and the LANCZOS resize
