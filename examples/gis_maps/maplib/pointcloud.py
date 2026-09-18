@@ -159,8 +159,22 @@ def fetch_canopy(
                 tmp.replace(path)
         return key, path
 
+    def in_batches(pool, keys: list[str], batch: int):
+        """``pool.map`` over ``keys``, but never more than ``batch`` downloads ahead.
+
+        ``Executor.map`` submits every item up front, so the whole node set would land
+        in ``laz_dir`` while the gridding loop below consumes it one at a time and the
+        downloads - being the faster half - run away from it. On Black Bear Pass that is
+        10,755 nodes, about 2.35 GB, held on disk instead of the few MB the delete-as-you-go
+        contract implies. Batching keeps the pool saturated and the disk bounded.
+        """
+
+        for start in range(0, len(keys), batch):
+            yield from pool.map(download, keys[start : start + batch])
+
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        for done, (_key, path) in enumerate(pool.map(download, nodes), start=1):
+        ahead = max(workers * 4, 1)
+        for done, (_key, path) in enumerate(in_batches(pool, nodes, ahead), start=1):
             las = laspy.read(path)
             x = np.asarray(las.x, dtype="float64")
             y = np.asarray(las.y, dtype="float64")

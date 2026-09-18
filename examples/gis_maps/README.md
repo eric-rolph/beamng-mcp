@@ -192,8 +192,13 @@ have them locally:
    the ZIP rather than leaving something unverifiable to install.
 
 2. **Rebuild from the public data.** `python examples\gis_maps\build.py --all all` downloads
-   about 3 GB (2.3 GB of it the Meteor Crater lidar grid) and rebuilds everything;
-   allow ten to fifteen minutes.
+   about 3 GB of rasters (2.3 GB of it the Meteor Crater lidar grid, fetched once, windowed
+   to the footprint and deleted) plus about 2.35 GB of Black Bear Pass point-cloud nodes,
+   and rebuilds everything. The five smaller maps are quick; Black Bear Pass dominates,
+   because its forest is planted from 10,755 octree nodes of 3DEP returns streamed one at
+   a time. The six took 26 minutes on a runner before that map grew, and the release
+   workflow's timeout is 340 minutes; budget accordingly on a home connection. Everything
+   is cached afterwards, so the cost is paid once.
 
 Then deploy, with BeamNG closed:
 
@@ -251,7 +256,7 @@ already knows. They are in each map's handoff under `terrain`:
 
 | Map | Samples | Square size | Height scale (`maxHeight`) | Real elevation the 0..maxHeight band covers |
 | --- | --- | --- | --- | --- |
-| `black_bear_pass` | 8192 | 1.0 m | (rebuilding) | (rebuilding) |
+| `black_bear_pass` | 4096 | 2.0 m | 1492 m | 2657.3 - 4132.7 m |
 | `meteor_crater` | 2048 | 1.0 m | 192 m | 1561.8 - 1750.4 m |
 | `bingham_canyon` | 4096 | 1.5 m | 1556 m | 1263.8 - 2803.2 m |
 | `factory_butte` | 4096 | 1.0 m | 106 m | 1353.0 - 1456.6 m |

@@ -33,8 +33,11 @@ permissions:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
-    # Black Bear Pass is 8192 samples over 8192 m: its point cloud alone is about
-    # 470 M returns to read, and the six maps together took 26 minutes before it grew.
+    # Black Bear Pass is 4096 samples over 8192 m (2 m per sample: the de-lighting is
+    # OOM-killed at 8192 samples, see AGENTS.md). Its point cloud is read at the full
+    # 8192 m footprint whatever the sample count - 10,755 octree nodes, about 2.35 GB
+    # of LAZ - so it still dominates the job; the six together took 26 minutes before
+    # this map grew to the whole box canyon.
     timeout-minutes: 340
     steps:
       - uses: actions/checkout@v7
