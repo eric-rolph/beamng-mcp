@@ -57,6 +57,11 @@ jobs:
 
       - name: Build every map (fetch -> terrain -> level -> dist -> ledger)
         run: |
+          # Actions runs a `run:` step as `bash -e {0}`, so -e is already on when this
+          # line is reached and `set -uo pipefail` does NOT clear it. Without the +e the
+          # shell exits on the failing build pipeline and the annotation below never
+          # runs, which is exactly what happened on 4037639.
+          set +e
           set -uo pipefail
           MAPS="${{ github.event.inputs.maps }}"
           build() {
