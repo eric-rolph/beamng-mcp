@@ -815,16 +815,95 @@ def delight(
     if debug_hook is not None:
         debug_hook("after_refills", out, None)
     # No black holes: whatever a refill or a cap left near zero takes a third of
-    # the lit neighbourhood instead.
-    dark = out.mean(axis=-1) < 0.02
+    # the lit neighbourhood instead -- but only where that is BRIGHTER than what the
+    # cell already has.
+    #
+    # A FLOOR ONLY FLOORS WHEN ITS TRIGGER AND ITS WRITE SHARE A REFERENCE. The two
+    # floors below now satisfy that, each triggering on a fraction of the lit
+    # neighbourhood and writing that same fraction of it (`lum_o < 0.25 * lit_l` writing
+    # `0.25 * local_lit`), so the written value is the very quantity the trigger compared
+    # against and cannot land below it -- but only since the clamp came off `lit_l` below;
+    # read that note before trusting the word "construction" here. This one triggered on
+    # an ABSOLUTE 0.02 and wrote
+    # a RELATIVE `local_lit * 0.35`, and nothing connects the two: it darkened a cell
+    # whenever `0.35 * lit_l < out.mean`, which is every lit neighbourhood under
+    # 0.02 / 0.35 = 0.0571. The floor against black holes was writing one.
+    #
+    # It is also the only writer between the refill and the encode that satisfies all
+    # three conjuncts of `under_gain_floor_untouched` at once: it is not the refill, so
+    # the cell still reads untouched; its written value is under 0.02, far below any
+    # `floor_lum`; and a third of a dark neighbourhood over a brighter source is far
+    # under 0.45. It can also put a texel under the near-black threshold the finished
+    # base is gated on: its 0.0571 crossover encodes to u8 68 through `linear_to_srgb_u8`
+    # -- true sRGB with a 12.92 toe, not a 2.2 power -- so it can carry a plainly visible
+    # mid-tone into black. Measured on a uniformly dark synthetic scene: near black 37% of
+    # the source and 56% of the OUTPUT, this floor accounting for every darkened cell and
+    # the two below it for none. Gated, 0%.
+    # Tested by `test_the_anti_black_floor_never_darkens_a_cell`.
+    #
+    # BUT `under_gain_floor_untouched` IS NOT A DETECTOR FOR THIS FLOOR, and the 100% above
+    # belongs to that scene rather than to the gate. On a moderate scene -- lit median 0.31
+    # -- an independent sweep found this floor's trigger share at 0.000000 across every
+    # `strength`, with the breach still rising to 0.000454 as `gain_p05` settled onto the
+    # gain's own 0.45 low clip. Of those 67 cells, measured at ULP resolution: none sits
+    # exactly on `np.float32(0.45)`, 34 are within 4 ULP of the constant, 16 are more than
+    # 1024 ULP under it, and the gap between 64 and 1024 ULP is empty. A cell pinned at the
+    # clip is INVISIBLE here rather than counted -- `composed` stays float32 end to end, so
+    # the test runs in float32 where `np.float32(0.45) < 0.45` is False. What the near-edge
+    # half is, then, is the rounding of `composed` itself: it is `out_lum / src_lum` through
+    # two separate three-channel means, which carries its own error independent of the clip.
+    # So the number has at least two producers, roughly half of one of them is its own
+    # arithmetic, and none of it reaches 0.40. Quote the 100% with the scene attached; a
+    # reader who carries it to another map will be wrong.
+    #
+    # The two are SEPARABLE and only share this writer: swept independently, a scene can
+    # reach 2,786 breach cells with the near-black fraction still at exactly zero. So a
+    # green `under_gain_floor_untouched` is not evidence that a map's black ground is
+    # fixed, and neither number stands in for the other.
+    #
+    # The gate is on luminance rather than per channel, so a rescued cell still takes the
+    # lit neighbourhood's COLOUR and not a channel-wise maximum of two tones. Skipping
+    # the write cannot darken anything either: where it is skipped `out.mean` is already
+    # at or above `0.35 * lit_l`, hence above the `0.25 * lit_l` the floor below would
+    # write, so `out >= 0.25 * local_lit` still holds everywhere after this block.
+    #
+    # Memory: the comparison is held as two SINGLE-channel arrays and the write keeps
+    # the transient `local_lit * 0.35` it always had, so the peak here is what it was.
+    # A full-size `lit_third` to compare and then write would be 200 MB at 4096 samples
+    # against a stage peak near 250 MB, which is the ceiling this stage already runs at.
+    lum_dark = out.mean(axis=-1)
+    lit_third_lum = local_lit.mean(axis=-1) * 0.35
+    dark = (lum_dark < 0.02) & (lit_third_lum > lum_dark)
     out = np.where(dark[..., None], local_lit * 0.35, out)
+    del lum_dark, lit_third_lum, dark
     # And a relative floor: nothing sits under a quarter of the lit neighbourhood's
     # luminance (the shaded side of a spruce crown is near black in the flight, and
     # a base seen between the trunks is ground, not a black blotch). Such a cell
     # takes the lit neighbourhood's colour at the floor's luminance. The reference
     # is the lit neighbourhood, not a window mean a wide blob would drag down.
     lum_o = out.mean(axis=-1)
-    lit_l = np.maximum(local_lit.mean(axis=-1), 1e-4)
+    # The reference is UNCLAMPED, because the writes below are `local_lit * 0.25` and
+    # `local_lit * 0.4` and a floor only floors when its trigger and its write share one.
+    # This read `np.maximum(local_lit.mean(axis=-1), 1e-4)` while both writes stayed
+    # unclamped, so wherever the guard bound, the trigger compared against a brighter
+    # neighbourhood than the write delivered and the floor darkened -- the same defect as
+    # the floor above, one guard further down. Worked through: at a neighbourhood mean of
+    # 6.0e-05 the guard reports 1.0e-04, a cell the floor above had just set to 2.1e-05
+    # trips a trigger of 2.5e-05, and the write puts it at 1.5e-05, a factor of 0.714.
+    #
+    # LATENT, not observed, and IMMATERIAL to the near-black gate, which is the difference
+    # between this and the floor above: it needs a lit neighbourhood under
+    # 0.25e-4 / 0.35 = 7.14e-05, and there floor 1 writes 2.5e-05 and this one 1.8e-05,
+    # both of which encode to u8 0 -- a cell it darkened was already counted near black and
+    # still is. `seen`'s 0.01 source cut keeps such cells out of
+    # `under_gain_floor_untouched` too, so no gate here would have reported it. Repaired
+    # because the reference mismatch is the same defect, not because it ships anything.
+    # It was found by two readers checking the sibling floors' exoneration against the
+    # guard rather than against the intent -- and the exoneration was conditional, which
+    # is why it is repaired structurally rather than bounded. Nothing divided by `lit_l`:
+    # it is only ever multiplied by a fraction and compared, so the guard bought nothing
+    # here and its only effect was to break the reference it was standing next to.
+    lit_l = local_lit.mean(axis=-1)
     under = lum_o < 0.25 * lit_l
     out = np.where(under[..., None], local_lit * 0.25, out)
     if canopy_fill is not None:

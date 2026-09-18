@@ -2545,6 +2545,103 @@ def test_the_decast_guard_number_can_actually_fail() -> None:
     ]
 
 
+def test_the_anti_black_floor_never_darkens_a_cell() -> None:
+    """The floor against black holes must not write one.
+
+    Its trigger is ABSOLUTE - a cell under 0.02 linear - and its write is RELATIVE, a
+    third of the lit neighbourhood. Where that neighbourhood is itself under 0.057 the
+    two cross and the floor writes something darker than the near-black it fired on,
+    with no bound of its own: it is the one writer that can take a cell the refill never
+    touched under the gain's 0.45 clip, which is what `under_gain_floor_untouched`
+    counts, and it can put a texel under the near-black threshold the finished base is
+    gated on. Measured on the scene below before the gate went in: near black 37% of the
+    source and 56% of the OUTPUT, the de-lighting manufacturing black ground in the name
+    of removing it, every darkened cell attributable to this floor and none to the two
+    relative floors or the blue rewrite after it.
+
+    The second half asserts the anti-black floors still remove a black blob the flight
+    itself left, so a fix that stops the darkening by refusing to write at all is caught.
+    It does NOT isolate this floor: measured, deleting its write outright leaves the blob
+    rescued anyway, because the relative floor below it fires on the same cells wherever
+    the lit neighbourhood is bright (`0.02 > lum` implies `lum < 0.25 * lit` for any
+    neighbourhood over 0.08). This floor is the sole writer only in the narrow band where
+    the neighbourhood sits between 2.9 and 4 times the cell - which is to say it is close
+    to redundant, and where it is not redundant it is the one that can darken. That is a
+    question for whoever next opens the de-lighting, not something this test settles.
+
+    Nor does it cover the sibling floors' own version of the same defect, and that is a
+    limit rather than an omission. Their trigger used to read the lit neighbourhood through
+    a `np.maximum(..., 1e-4)` guard while their write did not, so where the guard bound they
+    darkened too - but reaching it needs a neighbourhood under 7.14e-05, which u8 source
+    quantisation and the 0.01 `seen` cut keep out of every number this suite reads. It is
+    repaired by making the trigger read the array the write uses, which is structural and
+    needs no scene to demonstrate; a test that claimed to drive it would be the shape of
+    gate this file exists to prevent.
+    """
+
+    load_maplib()
+    from maplib import imagery
+
+    def scene(ground_lin: float) -> tuple[np.ndarray, np.ndarray]:
+        rng = np.random.default_rng(7)
+        n = 256
+        y, x = np.mgrid[0:n, 0:n].astype("float32")
+        dem = 120.0 * np.exp(-((y - 100) ** 2) / (2 * 20.0**2)) + 40.0 * np.sin(x / 30.0)
+        dem = (dem + rng.normal(0, 0.4, dem.shape)).astype("float32")
+        shade = np.clip(imagery.cast_shadows(dem, 2.0, 180.0, 25.0), 0.05, 1.0)
+        ground = np.clip(
+            ground_lin + 0.05 * ground_lin * rng.normal(0, 1, (n, n, 1)), 1e-4, 0.9
+        ) * np.array([1.0, 0.94, 0.82])
+        colour = (np.clip(ground * shade[..., None], 0, 1) ** (1 / 2.2) * 255).astype("uint8")
+        return colour, dem
+
+    kw = dict(
+        azimuth_deg=180.0,
+        altitude_deg=25.0,
+        strength=1.0,
+        max_gain=4.5,
+        steep_deg=32.0,
+        steep_feather_deg=8.0,
+        steep_cap=True,
+    )
+
+    def near_black(rgb8: np.ndarray) -> float:
+        """The threshold the finished base is gated on, on the array this stage returns."""
+        return float((rgb8.max(axis=-1) < 13).mean())
+
+    # A pit: ground the flight photographed at a fiftieth of an ordinary desert, so the
+    # lit neighbourhood the floor reads for its rescue is darker than the floor's own
+    # trigger. This is the shape bingham_canyon took when its sun floor was dropped.
+    for ground_lin in (0.02, 0.01):
+        colour, dem = scene(ground_lin)
+        out, stats = imagery.delight(colour, dem, 2.0, **kw)
+        composed = stats["composed_ratio"]
+        assert composed["under_gain_floor_untouched"] == 0.0, (
+            ground_lin,
+            "the anti-black floor took a cell the refill never touched under the gain's own clip",
+            composed,
+        )
+        assert near_black(out) <= near_black(colour), (
+            ground_lin,
+            "the de-lighting shipped more near-black texels than the flight gave it",
+            near_black(colour),
+            near_black(out),
+        )
+
+    # And the floors still rescue what they exist for: a black blob the flight itself left
+    # on ground that is otherwise lit - water read at a dark angle, a shadow no gain can
+    # recover. Its lit neighbourhood is bright, so a third of it is a real lift, and a
+    # gate that declined to write here would ship the blob.
+    colour, dem = scene(0.55)
+    colour[40:80, 150:190] = 1  # 1600 texels of black on lit desert
+    out, _stats = imagery.delight(colour, dem, 2.0, **kw)
+    assert near_black(colour) > 0.01, near_black(colour)
+    assert near_black(out) == 0.0, (
+        "a black blob on lit ground shipped as a black hole, so no anti-black floor fired",
+        near_black(out),
+    )
+
+
 def test_the_clamp_does_not_erase_the_number_that_caught_it() -> None:
     """The shipping clamp caps every channel at 249 and the gate counts 250, so after it
     `clipped` is zero on every map it runs for - a true number that can no longer fail.
@@ -2913,19 +3010,36 @@ def _assert_the_bed_exclusion_left_a_population(map_key: str, check: dict) -> No
 
     dropped = check.get("fields_on_road_bed", 0)
     measured = check.get("fields", 0)
-    total = measured + dropped
     assert measured > 0, (
         map_key,
         f"all {dropped} refilled fields were dropped as road bed, so nothing was "
         "measured and the gates below assert nothing",
         _excluded_fields(check),
     )
-    assert dropped <= max(2, 0.2 * total), (
-        map_key,
-        f"{dropped} of {total} refilled fields were dropped as road bed - the "
-        "exclusion is meant to be the exception, not the population",
-        _excluded_fields(check),
-    )
+    # The upper end, asserted as the exclusion's OWN criterion rather than as a count.
+    # `level_builder.py` sets `on_road_bed` only where the eroded interior has under 20
+    # non-bed cells left AND `bed_share >= 0.5`, so a field that is dropped while reading
+    # under 0.5 means the bed mask, the erosion or the ordering moved - which is the
+    # runaway this end exists to catch, and it says so about the field rather than about
+    # a total. This replaces `dropped <= max(2, 0.2 * total)`, which was calibrated on
+    # run 51's "one such field out of eighteen" and then invalidated by `ee35029` moving
+    # the bed question after the fallback so the exclusion reaches an elongated shadow
+    # over a road where before it could not. Run 73 dropped four of eighteen and failed
+    # at 4 > 3.6 with every dropped field a genuine road shadow. Raising the ceiling to
+    # admit that build was the one repair the docstring above forbids, because it leaves
+    # the exclusion with no upper end at all; this keeps an upper end that no build can
+    # widen by producing more road shadows, only by breaking the mask.
+    #
+    # `bed_fraction` is None only when the caller passed no bed, and then nothing can be
+    # excluded, so a dropped field with None is itself the contradiction.
+    for field in _excluded_fields(check):
+        share = field.get("bed_fraction")
+        assert share is not None and share >= 0.5, (
+            map_key,
+            "a field was dropped as road bed while reading under half bed, so the mask, "
+            "the erosion or their order moved - the exclusion is running away",
+            field,
+        )
 
 
 def _excluded_fields(check: dict) -> list[dict]:
@@ -2996,6 +3110,62 @@ def _field_at(fields: list[dict], key: str, *, palest: bool = False) -> dict:
             "interior_texels",
         )
     }
+
+
+def test_the_bed_exclusions_upper_end_can_actually_fail() -> None:
+    """The negative control for the road-bed exclusion's upper end.
+
+    That end used to be a count, `dropped <= max(2, 0.2 * total)`, calibrated on run 51's
+    one-of-eighteen and then invalidated by `ee35029` widening what the exclusion reaches.
+    Run 73 failed it at 4 > 3.6 with four genuine road shadows, which is the failure mode
+    of a bound calibrated on a build that no longer exists: it fires on the map being
+    honest. It is now the exclusion's own criterion, per dropped field, and a criterion
+    can go stale in the other direction - into a bound that cannot fail - so drive it.
+
+    Runs without a built tree, on fabricated summaries, because the gates that call this
+    need a level on disk and skip everywhere else.
+    """
+
+    # Four dropped road shadows, each over half bed, on a map that honestly has four.
+    # This is run 73's shape and it must PASS: the old count bound failed it.
+    honest = {
+        "fields": 14,
+        "fields_on_road_bed": 4,
+        "largest": [
+            {
+                "on_road_bed": True,
+                "bed_fraction": share,
+                "interior_texels": 40,
+                "interior_eroded": False,
+                "area_m2": 2973.0,
+                "center_xy": [-35.3, 670.3],
+                "kind": "shadow",
+            }
+            for share in (0.844, 0.71, 0.55, 0.5)
+        ]
+        + [{"on_road_bed": False, "bed_fraction": 0.0} for _ in range(14)],
+    }
+    _assert_the_bed_exclusion_left_a_population("meteor_crater", honest)
+
+    # A mask that moved: one field dropped while under half bed. The criterion the
+    # builder claims for `on_road_bed` no longer held, so this MUST fail.
+    runaway = json.loads(json.dumps(honest))
+    runaway["largest"][2]["bed_fraction"] = 0.31
+    with pytest.raises(AssertionError, match="running away"):
+        _assert_the_bed_exclusion_left_a_population("meteor_crater", runaway)
+
+    # And a dropped field with no bed share at all, which is the contradiction of a
+    # caller that passed no bed excluding something for being bed.
+    no_bed = json.loads(json.dumps(honest))
+    no_bed["largest"][0]["bed_fraction"] = None
+    with pytest.raises(AssertionError, match="running away"):
+        _assert_the_bed_exclusion_left_a_population("meteor_crater", no_bed)
+
+    # The lower end still holds: an exclusion that took the whole population leaves
+    # nothing for the ratios below it to assert.
+    emptied = {"fields": 0, "fields_on_road_bed": 18, "largest": []}
+    with pytest.raises(AssertionError, match="nothing was measured"):
+        _assert_the_bed_exclusion_left_a_population("meteor_crater", emptied)
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
