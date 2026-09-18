@@ -1543,6 +1543,10 @@ def build_level(
         # Without it the clamp erases its own evidence: it caps every channel at 249
         # and the base's gate counts 250, so `clipped` reads zero on every map that
         # runs this, whatever the pipeline did upstream.
+        # The cost is one more u8 base held alongside the clamped one and `_linear`,
+        # about 50 MB at base_px 4096 against a peak near 250 MB. Freed with the stats
+        # call below rather than held to the end of the stage, because the de-lighting
+        # is where this pack meets its memory ceiling.
         before_ceiling = base_colour
         _linear, _over = imagery.clamp_highlights(imagery.srgb_to_linear(base_colour), 0.95)
         base_colour = imagery.linear_to_srgb_u8(_linear)

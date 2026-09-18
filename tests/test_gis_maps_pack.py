@@ -1706,12 +1706,32 @@ def test_the_clamp_does_not_erase_the_number_that_caught_it() -> None:
     # 0.95 linear encodes to 249.31, and 250 needs 0.9516 - so the clamp leaves the gate
     # nothing to count, on any map, whatever a later stage did to the base.
     assert int(shipped.max()) == 249
+    # Pinned from both ends, because either constant can move the blinding on its own:
+    # raise the ceiling past the value below and `clipped` starts counting again, lower
+    # the gate's 250 and it does too. Bisected rather than asserted from a literal.
+    lo, hi = 0.9, 1.0
+    for _ in range(80):
+        mid = (lo + hi) / 2
+        if (1.055 * mid ** (1 / 2.4) - 0.055) * 255.0 >= 249.5:
+            hi = mid
+        else:
+            lo = mid
+    assert hi == pytest.approx(0.951634, abs=1e-6), "the linear value that first reaches 250"
+    assert 0.95 < hi, "the ceiling must sit BELOW what the clipped gate tests for"
+    # And the clamp scales a texel rather than clipping a channel, so the blown square
+    # keeps its grey. A per-channel clip would have swung the hue of every texel it hit.
+    blown = shipped[16:, :16]
+    assert blown.min() == blown.max(), "the clamp moved brightness only"
 
     stats = level_builder.base_colour_stats(
         shipped, layer, ["ground", "ledge"], before_ceiling=colour
     )
     means = stats["layer_mean_srgb"]
-    assert means["ledge"]["clipped"] == pytest.approx(0.0), "the clamp makes this vacuous"
+    # Exactly zero, not merely under the old 0.002: the clamp caps at 249, so `clipped`
+    # is 0 if and only if the clamp is the LAST writer of the base. A later stage that
+    # writes `colour_full` after it puts the number back above zero - which is the bug
+    # `53807cb` exists to fix, since `delight`'s own clamp was not the last writer either.
+    assert means["ledge"]["clipped"] == 0.0
     assert means["ledge"]["clipped_before_ceiling"] == pytest.approx(1.0)
     assert means["ground"]["clipped_before_ceiling"] == pytest.approx(0.0)
 
@@ -1729,6 +1749,9 @@ def test_the_clamp_does_not_erase_the_number_that_caught_it() -> None:
 # which is the failure that actually happened - without failing the ones that always
 # did. Set from five maps: black_bear_pass has no published base to measure, so its
 # layers carry no baseline and are asserted present only, and so is any new material.
+# TODO: fill black_bear_pass's layers from the first good build. It is the map at critic
+# round 17 with the most at stake, and asserted-present is the weakest thing this gate
+# says about any map.
 CEILING_BASELINE = {
     # factory_butte
     "fb_caprock": 0.05631,
