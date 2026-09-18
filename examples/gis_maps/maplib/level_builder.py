@@ -1656,10 +1656,18 @@ def build_level(
 
     # --- spawns ------------------------------------------------------------------
     road_polylines = []
-    if surfaces:
+    # Gated on ROADS rather than on `surfaces`: a level whose roads are decals over
+    # untouched ground paints no bed, so `ROADS["surfaces"]` is empty while the level
+    # still has roads - Factory Butte writes 13 of them over 14.3 km. Gating on the bed
+    # left `road_polylines` empty there, which silently disabled every consumer of it
+    # (spawn snapping, trail features, and the stone clearance below) on exactly the
+    # levels whose roads are not carved. Both consumers already test the list, so a
+    # level with no ROADS at all is unaffected.
+    _osm_roads = data_root / "osm" / "roads.json"
+    if getattr(spec, "ROADS", None) and _osm_roads.is_file():
         from . import roads as road_tools
 
-        road_polylines = road_tools.road_polylines(spec, fp, data_root / "osm" / "roads.json")
+        road_polylines = road_tools.road_polylines(spec, fp, _osm_roads)
         if spec.ROADS.get("max_grade"):
             road_polylines, _cuts = road_tools.drop_cliff_segments(
                 road_polylines,
@@ -1857,28 +1865,56 @@ def build_level(
                 rock_materials.add(obj["material"])
             placed += extra_rocks
         road_clear_m = float((objects_spec or {}).get("road_clear_m", 0.0))
-        if road_clear_m > 0 and surfaces:
+        if road_clear_m > 0:
             from scipy import ndimage
 
+            # The bed is the painted road surface, and a level whose roads are decals
+            # over untouched ground has none - `ROADS["surfaces"]` is empty and no layer
+            # carries a bed material. This used to be gated on `surfaces`, so on such a
+            # level `road_clear_m` was accepted, reported nothing and removed nothing.
+            # Measured on Factory Butte's terrain, that silently left 188 of its 54,040
+            # scattered stones inside 3 m of a centreline, 62 of them 0.5 m or wider, on
+            # 14.3 km of road the level exists to be driven. So where there is no bed,
+            # clear against the centrelines themselves, which is what the spec key means
+            # either way.
             bed_ids = [
                 materials.index(cfg["terrain_material"])
-                for cfg in surfaces.values()
+                for cfg in (surfaces or {}).values()
                 if cfg.get("terrain_material") in materials
             ]
-            bed = ndimage.binary_dilation(
-                np.isin(layer, bed_ids), iterations=max(1, round(road_clear_m / res))
-            )
+            if bed_ids:
+                bed = ndimage.binary_dilation(
+                    np.isin(layer, bed_ids), iterations=max(1, round(road_clear_m / res))
+                )
+            elif road_polylines:
+                from . import roads as _road_tools
+
+                bed = _road_tools.centreline_mask(
+                    road_polylines, res, fp.size_m, size, road_clear_m
+                )
+            else:
+                # No bed and no centrelines: say so rather than reporting a clearance of
+                # zero, which is what this whole change exists to stop happening.
+                bed = None
             before = len(placed)
-            placed = [
-                obj
-                for obj in placed
-                if obj["kind"] != "rock"
-                or not bed[
-                    int(min(max((fp.size_m / 2 - obj["y"]) / res, 0), size - 1)),
-                    int(min(max((obj["x"] + fp.size_m / 2) / res, 0), size - 1)),
+            if bed is not None:
+                placed = [
+                    obj
+                    for obj in placed
+                    if obj["kind"] != "rock"
+                    or not bed[
+                        int(min(max((fp.size_m / 2 - obj["y"]) / res, 0), size - 1)),
+                        int(min(max((obj["x"] + fp.size_m / 2) / res, 0), size - 1)),
+                    ]
                 ]
-            ]
             report["rocks_cleared_from_roads"] = before - len(placed)
+            report["road_clearance_from"] = (
+                "bed"
+                if bed_ids
+                else "centrelines"
+                if bed is not None
+                else "nothing to clear against"
+            )
         shrub_from_imagery = (objects_spec or {}).get("shrubs_from_imagery")
         if shrub_from_imagery:
             extra = vegetation.shrubs_from_imagery(
