@@ -1110,6 +1110,46 @@ def terrain(spec, example_root: Path) -> dict:
 # ---------------------------------------------------------------------------
 
 
+def shipped_index(level_root: Path, mod_id: str, shapes: list[dict]) -> dict[str, dict]:
+    """``{level-relative posix path: {sha256, size}}`` for EVERY file in the level tree.
+
+    This is the handoff's ``shipped`` block, and the tests hash the built level against it.
+    The point of walking rather than listing is coverage: ``mod/levels/<mod_id>/`` is the
+    only thing ever written under ``mod/`` and packaging zips ``mod/``, so the walk is the
+    ZIP's payload exactly, and nothing can ship unrecorded.
+
+    It was a literal list of nine names plus the generated shapes until 2026-09-18, and what
+    that list covered depended on how much a map generated: 57 files of 202 on Black Bear
+    Pass, 38 of 127 on Meteor Crater, and on the four maps declaring neither OBJECTS nor
+    FOREST only 5 of 55. A build could move fifty files on Wallace Creek and
+    ``test_handoff_hashes_match_shipped_files`` still passed. That is the same defect shape
+    as the imagery and spawn gates that measured only inside ``if objects_spec:`` - a gate
+    whose scope was quietly narrower than the artefact it was gating - and it is why the
+    walk, and not a longer list, is the fix.
+
+    ``triangles`` rides along on the generated shapes because the report is the only place
+    that count exists; a shape the report names and the tree does not have is a packaging
+    bug worth raising here rather than shipping a handoff that disagrees with itself.
+    """
+
+    shipped: dict[str, dict] = {}
+    for path in sorted(level_root.rglob("*")):
+        if not path.is_file():
+            continue
+        shipped[path.relative_to(level_root).as_posix()] = {
+            "sha256": sha256_file(path),
+            "size": path.stat().st_size,
+        }
+    for summary in shapes:
+        name = f"art/shapes/{mod_id}/{summary['file']}"
+        if name not in shipped:
+            raise FileNotFoundError(
+                f"{mod_id}: the shapes report lists {name} but it is not in the level tree"
+            )
+        shipped[name]["triangles"] = summary["triangles"]
+    return shipped
+
+
 def level(spec, example_root: Path) -> dict:
     """Terrain arrays -> the complete mod/levels/<mod_id>/ tree + authoring evidence."""
 
@@ -1150,35 +1190,7 @@ def level(spec, example_root: Path) -> dict:
     # Authoring evidence: the handoff is the single source of truth the tests hash against.
     authoring = example_root / "authoring"
     authoring.mkdir(parents=True, exist_ok=True)
-    shipped = {}
-    for name in (
-        "theTerrain.ter",
-        "theTerrain.terrainheightmap.png",
-        "theTerrain.terrain.json",
-        "info.json",
-        "art/terrains/main.materials.json",
-        f"forest/{spec.MOD_ID}.forest4.json",
-        "art/forest/managedItemData.json",
-        f"art/shapes/{spec.MOD_ID}/main.materials.json",
-        f"art/shapes/{spec.MOD_ID}_buildings/main.materials.json",
-    ):
-        path = level_root / name
-        if not path.is_file():
-            continue
-        shipped[name] = {"sha256": sha256_file(path), "size": path.stat().st_size}
-    buildings_dir = level_root / "art" / "shapes" / f"{spec.MOD_ID}_buildings"
-    for path in sorted(buildings_dir.glob("*.dae")) if buildings_dir.is_dir() else []:
-        shipped[f"art/shapes/{spec.MOD_ID}_buildings/{path.name}"] = {
-            "sha256": sha256_file(path),
-            "size": path.stat().st_size,
-        }
-    for summary in report.get("shapes", []):
-        path = level_root / "art" / "shapes" / spec.MOD_ID / summary["file"]
-        shipped[f"art/shapes/{spec.MOD_ID}/{summary['file']}"] = {
-            "sha256": sha256_file(path),
-            "size": path.stat().st_size,
-            "triangles": summary["triangles"],
-        }
+    shipped = shipped_index(level_root, spec.MOD_ID, report.get("shapes", []))
     handoff = {
         "schema": HANDOFF_SCHEMA,
         "asset": {"id": spec.MOD_ID, "display_name": spec.DISPLAY_NAME, "zip": spec.ZIP_BASENAME},
