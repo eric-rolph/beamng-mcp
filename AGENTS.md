@@ -3423,6 +3423,62 @@ the measurement is present and well formed on every de-lit map, which is this pa
 recurring failure - a statistic that goes silently absent for some maps and reports as
 not-applicable.
 
+### A ceiling that lands on the gate's boundary is not a ceiling
+
+Two defects behind `test_base_colour_has_no_black_holes`, found on 2026-09-18 while the pack
+branch could not publish, and both fixed in `53807cb`. Written down because the shape generalises
+well past this one contract.
+
+**The documented lever did not exist.** `c5865de` introduced `highlight_ceiling` and said in its
+own commit message that a spec can turn it off with `highlight_ceiling 0`. The single
+`imagery.delight(` call site in `level_builder.py` passed `knee_lum` from the spec and never
+passed `highlight_ceiling`, so every de-lighting map took the 0.95 default and no spec could opt
+out. A knob described in a commit message is not a knob until a call site passes it.
+
+**The clamp aimed one count below the threshold it existed to satisfy.** `clamp_highlights` holds
+the brightest channel at 0.95 linear, which encodes to 249, and `base_colour_stats` counts a texel
+as clipped at `>= 250`. One count of margin - so any later stage that lifts a texel by a single
+count puts it back over. And there are later stages: `delight` returns, then the level stage writes
+the array again through `_enforce_beds`, `refill_match` and `_enforce_beds` a second time, and only
+then is `base_colour_stats` taken. `delight`'s own comment called the clamp "last thing before the
+encode, so no refill, floor or cap re-lifts it", which is true inside `delight` and false in the
+pipeline. The fix enforces the ceiling on what ships, after the resize, immediately before the
+array is written and measured.
+
+**The rule: a contract enforced mid-pipeline is enforced where it is measured, or it is not
+enforced.** Ask which stage writes the array last before the number is taken, not which stage
+feels final. Two stages in this file carry a comment claiming to be last.
+
+**A corollary about reading the failures.** The same assertion failing on two maps does not mean
+one cause. `base_colour_stats` measures the array after the LANCZOS resize to `base_tex_px`, and
+its own docstring notes that overshoot on a hard edge lands in the clipped fraction. Meteor Crater
+is 2048 upscaled to 4096, so that path is live; Factory Butte is 4096 to 4096 and is never
+resampled. A resize fix would green one and leave the other where it was.
+
+**And the question the fix deliberately does not close.** `shipped_ceiling_fraction` records how
+much the final clamp had to hold back, which is a symptom meter, not a result: a large number says
+a later stage lifted a lot of texels past the ceiling. Factory Butte's caprock went from 0.00498
+on the shipped `fc4db59` base to 0.05629 four imagery commits later while its mean luminance
+*fell* - a widening distribution, which reads as a regression rather than as a gate newly
+reporting. The clamp makes the release publishable; it does not explain that.
+
+**And the sting in the tail: the fix also made the gate unfailable.** `clamp_highlights` holds the
+brightest channel at 0.95 linear. sRGB-encoded that is 249.311, so u8 249; reaching 250 needs
+0.95163 linear, which the clamp forbids. Since the clamp now runs last, immediately before the array
+`base_colour_stats` measures, `clipped` is exactly 0.00000 for every layer of every map with an
+IMAGERY spec, whatever happened upstream. Measured on the shipped Factory Butte base: `fb_caprock`
+0.05631 before, 0.00000 after, max channel 249. **`test_base_colour_has_no_black_holes` now reads
+as a live gate and cannot fail.** `shipped_ceiling_fraction` does not close the gap either, because
+it is whole-base while the defect is per-layer - `fb_caprock` is 5.6% over the ceiling and 0.13% of
+the base.
+
+So this section describes two defects fixed and a third created in fixing them, which is the honest
+shape of it. **The general rule: a clamp placed immediately before a threshold test does not satisfy
+the test, it retires it.** When a fix moves an enforcement to just before the measurement, ask what
+the measurement can still report. The repair is to measure the pre-clamp array -
+`clipped_before_ceiling` per layer - and to set its floor from the population rather than restoring
+a hard 0.002, which would re-red three maps over a defect the clamp has made invisible in game.
+
 ### Pack conventions that are ours, not the engine's
 
 - `size_px` is gated to a power of two between 1024 and 8192 in
