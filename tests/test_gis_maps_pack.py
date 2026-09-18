@@ -2263,6 +2263,69 @@ def test_base_colour_stats_measures_each_layer() -> None:
     assert "clipped_before_ceiling" not in stats["layer_mean_srgb"]["ledge"]
 
 
+def test_the_delighting_contract_number_can_actually_fail() -> None:
+    """The negative control for `under_gain_floor_untouched`.
+
+    It reads zero on every correct build, which is precisely the shape of the gate this
+    pack has just spent a day repairing: a number that is true, looks live, and cannot
+    move. So drive it. A late writer that darkens cells the refill never touched is the
+    regression it exists for - the mirror of the one `53807cb` fixed at the bright end -
+    and the count must find it. Its companion is driven the same way: a carry that finds
+    its donors and borrows nothing worth having.
+    """
+
+    load_maplib()
+    from maplib import imagery
+
+    rng = np.random.default_rng(7)
+    n = 256
+    y, x = np.mgrid[0:n, 0:n].astype("float32")
+    dem = 120.0 * np.exp(-((y - 100) ** 2) / (2 * 20.0**2)) + 40.0 * np.sin(x / 30.0)
+    dem = (dem + rng.normal(0, 0.4, dem.shape)).astype("float32")
+    shade = np.clip(imagery.cast_shadows(dem, 2.0, 180.0, 25.0), 0.05, 1.0)
+    ground = np.clip(0.55 + 0.05 * rng.normal(0, 1, (n, n, 1)), 0.1, 0.9) * np.array(
+        [1.0, 0.94, 0.82]
+    )
+    colour = (np.clip(ground * shade[..., None], 0, 1) ** (1 / 2.2) * 255).astype("uint8")
+    kw = dict(
+        azimuth_deg=180.0,
+        altitude_deg=25.0,
+        strength=1.0,
+        max_gain=4.5,
+        steep_deg=32.0,
+        steep_feather_deg=8.0,
+        steep_cap=True,
+    )
+
+    _out, clean = imagery.delight(colour, dem, 2.0, **kw)
+    assert clean["composed_ratio"]["under_gain_floor_untouched"] == 0.0
+    assert clean["composed_ratio"]["p50"] is not None
+
+    real_clamp = imagery.clamp_highlights
+    try:
+
+        def crushing_clamp(out, ceiling):
+            out = out.copy()
+            out[n // 2 :, :] *= 0.02  # a writer outside every clip in the stage
+            return real_clamp(out, ceiling)
+
+        imagery.clamp_highlights = crushing_clamp
+        _out, broken = imagery.delight(colour, dem, 2.0, **kw)
+    finally:
+        imagery.clamp_highlights = real_clamp
+    assert broken["composed_ratio"]["under_gain_floor_untouched"] > 0.01, broken
+
+    real_carry = imagery._carry_tone
+    try:
+        imagery._carry_tone = lambda corrected, weight, res_m, **kw2: (
+            real_carry(corrected, weight, res_m, **kw2) * 0.02
+        )
+        _out, dark = imagery.delight(colour, dem, 2.0, **kw)
+    finally:
+        imagery._carry_tone = real_carry
+    assert dark["refill_carry_ratio"]["under_0_1"] > 0.5, dark
+
+
 def test_the_clamp_does_not_erase_the_number_that_caught_it() -> None:
     """The shipping clamp caps every channel at 249 and the gate counts 250, so after it
     `clipped` is zero on every map it runs for - a true number that can no longer fail.
@@ -2363,6 +2426,72 @@ CEILING_BASELINE = {
 # It is wider than any difference measured between two builds of this pack and far
 # narrower than the step that put fb_caprock where it is.
 CEILING_SLACK = 0.005
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_the_delighting_stays_inside_the_contract_its_clips_give(map_key: str) -> None:
+    """A cell the refill never touched ships at no less than 0.45 of what was photographed.
+
+    Every reducing step in `delight` is clipped, and until now nothing measured their
+    product or the one input none of the clips can bound. `gain_p05` is the ILLUMINATION
+    gain - the model's intent, not the result - so a cell can ship at a fiftieth of its
+    source with every recorded number comfortably inside its own bound. That is how
+    bingham_canyon shipped 5,534 crushed texels on `bc_bench_face` while its handoff read
+    `gain_p05` 0.651 and `cast_shadow_fraction` 0.1620, both unremarkable.
+
+    The bound needs no population behind it, which is why it is an equality and not a
+    tuned threshold. An untouched cell is `source * gain`, then the knee and the steep
+    cap - and both of those are one-sided pulls toward their own reference, so a cell
+    that has been through either ends at or above `min(knee_lum, cap_lum)`. A cell
+    shipping DARKER than that has been through neither, leaving the gain as its only
+    writer, and the gain is clipped at 0.45. So an untouched dark cell under 0.45 of its
+    source means some writer is outside the contract every clip in there is meant to
+    give, which is a defect rather than a tuning question.
+
+    This is NOT a gate that cannot fail. `under_gain_floor_untouched` is zero if and only
+    if no writer escapes the gain floor on an unrefilled cell; a late stage that darkens
+    one - exactly the shape `53807cb` had to fix at the other end of the range - moves it
+    off zero. The suite's own unit test drives it off zero to prove it.
+
+    `refill_carry_ratio` is the companion and is asserted PRESENT rather than bounded.
+    The carry normalises by the donor weight it found, so its arithmetic says the donors
+    were there and never what they were worth: a field ringed by ground this stage has
+    itself left dark refills to dark, and the anti-black floors then write a quarter of
+    that same dark tone. Its threshold belongs to the first round that reports it, set
+    from the population the way CEILING_BASELINE was, not invented here.
+
+    Skips on the SPEC, not on the handoff, so a de-lit map that records nothing FAILS.
+    """
+
+    spec = load_spec(map_key)
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    imagery_spec = getattr(spec, "IMAGERY", None) or {}
+    if not imagery_spec.get("delight"):
+        pytest.skip(f"{map_key}: the base is not de-lit, so no de-lighting to bound")
+    stats = handoff.get("imagery") or {}
+    composed = stats.get("composed_ratio")
+    assert composed is not None, (
+        map_key,
+        "built before the de-lighting's end-to-end effect was recorded - rebuild; until "
+        "then nothing on this tree bounds what the stage did between its clips",
+    )
+    assert composed.get("under_gain_floor_untouched") == 0.0, (
+        map_key,
+        "cells the refill never touched shipped under 0.45 of what the flight "
+        "photographed, which no clip in the de-lighting allows - a writer is outside "
+        "the contract",
+        composed,
+    )
+    assert stats.get("refill_carry_ratio") is not None or stats.get("snow_fraction") == 0.0, (
+        map_key,
+        "the refill borrowed a tone and did not record what it was worth",
+        stats.get("refill_carry_ratio"),
+    )
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)

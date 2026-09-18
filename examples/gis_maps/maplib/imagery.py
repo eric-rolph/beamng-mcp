@@ -766,7 +766,7 @@ def delight(
 
     grain_ratios: list[np.ndarray] = []
     ring_reports: list[dict] = []
-    out, local_lit, _fill_w = refill(snow_mask)
+    out, local_lit, fill_w_last = refill(snow_mask)
 
     def _fill_kinds(snow_now: np.ndarray) -> np.ndarray:
         # 1 cast shadow of the terrain, 2 snow, 3 a crown's shadow in a gap, 4 a
@@ -810,7 +810,7 @@ def delight(
             if (snow_mask | still).mean() > float(snow.get("max_fraction", 0.02)):
                 break  # a refill that wants more than the cap is eating ground, not snow
             snow_mask |= still
-            out, local_lit, _fill_w = refill(snow_mask)
+            out, local_lit, fill_w_last = refill(snow_mask)
             fill_last = _fill_kinds(snow_mask)
     if debug_hook is not None:
         debug_hook("after_refills", out, None)
@@ -876,8 +876,61 @@ def delight(
     # holds its hue and its saturation and darkens only what the 8-bit wall would have
     # thrown away. Last thing before the encode, so no refill, floor or cap re-lifts it.
     out, over_ceiling = clamp_highlights(out, highlight_ceiling)
+    # What this stage did to each cell, end to end. Every reducing step above is clipped
+    # -- the gain floors at 0.45, the knee and the steep cap cannot take a cell below
+    # their own reference, the refill's floors hold one at a quarter of the lit
+    # neighbourhood -- and nothing measures their product. `gain_p05` is the ILLUMINATION
+    # gain, which is the model's intent rather than the result, so a cell can ship at a
+    # fiftieth of what the flight photographed with every recorded number inside its own
+    # bound. That is this pack's recurring defect (a stage recording what it produced and
+    # not what it consumed), and these two numbers close it for the de-lighting.
+    #
+    # Memory: the source luminance is summed a channel at a time from `colour_u8`, which
+    # is still bound, rather than re-forming `lin`. Three single-channel float32 arrays
+    # are live at the peak (source, output, ratio), about 200 MB at 4096 samples against
+    # a stage peak near 250 MB; the source is freed as soon as the ratio exists and the
+    # output luminance as soon as the breach mask does, and the percentiles run on the
+    # same stride `source_colour_stats` uses rather than on a full copy. This is where
+    # the pack meets its memory ceiling, so nothing here outlives its last read.
+    src_lum = np.zeros(out.shape[:2], dtype="float32")
+    for _ch in range(3):
+        src_lum += srgb_to_linear(colour_u8[..., _ch])
+    src_lum /= 3.0
+    out_lum = out.mean(axis=-1)
+    # Only where there was something to darken: a cell the flight already photographed
+    # near black says nothing about this stage, and dividing by it manufactures outliers.
+    seen = src_lum > 0.01
+    composed = out_lum / np.maximum(src_lum, 1e-4)
+    del src_lum
+    # The one bound that needs no population behind it. A cell the refill did not touch
+    # is `source * gain`, then the knee and the steep cap -- and both of those are
+    # one-sided pulls toward their own reference, so a cell that has been through either
+    # ends at or above `min(knee_lum, cap_lum)`. A cell that ships DARKER than that has
+    # been through neither, which leaves the gain as its only writer, and the gain is
+    # clipped at 0.45. So an untouched dark cell under 0.45 of its source is not a tuning
+    # question: some writer is outside the contract every clip in here is meant to give.
+    untouched = seen & (fill_w_last < 0.01)
+    floor_lum = min(float(knee_lum), float(cap_lum) if cap_lum is not None else float(knee_lum))
+    breach = untouched & (out_lum < floor_lum) & (composed < 0.45)
+    del out_lum
+    sample = composed[::4, ::4][seen[::4, ::4]]
     stats = {
         "highlight_ceiling_fraction": round(over_ceiling, 6),
+        # The de-lighting's own end-to-end effect, over the cells the flight gave it
+        # something to work with (`seen`), and what it did where it had no licence to.
+        "composed_ratio": {
+            "p01": round(float(np.percentile(sample, 1)), 4) if sample.size else None,
+            "p50": round(float(np.percentile(sample, 50)), 4) if sample.size else None,
+            "under_0_25": round(float((seen & (composed < 0.25)).mean()), 6),
+            "under_gain_floor_untouched": round(float(breach.mean()), 6),
+        },
+        # What the refill BORROWED, against the lit ground it borrowed from. `_carry_tone`
+        # normalises by the donor weight it found, so its own arithmetic says the donors
+        # were THERE and never what they were worth: a field ringed by ground this stage
+        # has itself left dark refills to dark, the anti-black floors then write a quarter
+        # of that same dark tone, and every clip upstream stays inside its bound. This is
+        # the number that would say so, as a share of the median the lit ground shipped at.
+        "refill_carry_ratio": _carry_ratio(local_lit, fill_w_last, out),
         # How many refilled fields ring matching could actually reach (last refill).
         "refill_ring_cover": ring_reports[-1] if ring_reports else None,
         "snow_fraction": round(float(snow_mask.mean()), 4),
@@ -904,6 +957,30 @@ def delight(
         "_refill_mask": fill_last,
     }
     return linear_to_srgb_u8(out), stats
+
+
+def _carry_ratio(local_lit: np.ndarray, fill_w: np.ndarray, out: np.ndarray) -> dict | None:
+    """The refill's carried tone over the lit ground's own median, at the low end.
+
+    The carry is a weighted mean of the lit donors and its normaliser is a weight, not a
+    value, so nothing in the refill notices donors that are themselves dark. Reported as
+    a ratio rather than a level so it reads the same on a pale desert and a dark pit."""
+
+    refilled = fill_w > 0.5
+    lit = fill_w < 0.01
+    if not refilled.any() or not lit.any():
+        return None
+    lum = local_lit.mean(axis=-1)
+    reference = float(np.median(out.mean(axis=-1)[lit][::4]))
+    if reference <= 1e-4:
+        return None
+    sample = lum[refilled][::4] / reference
+    del lum
+    return {
+        "p01": round(float(np.percentile(sample, 1)), 4),
+        "p50": round(float(np.percentile(sample, 50)), 4),
+        "under_0_1": round(float((sample < 0.1).mean()), 6),
+    }
 
 
 def layer_colour_stats(
