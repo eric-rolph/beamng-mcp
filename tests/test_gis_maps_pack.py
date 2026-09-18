@@ -2223,6 +2223,84 @@ def test_a_field_that_survives_the_erosion_reports_its_bed_share_and_population(
     assert 0 < field["interior_texels"] < int((refill == 1).sum()), field
 
 
+def test_a_failing_bed_exclusion_names_the_fields_it_set_aside() -> None:
+    """Run 73 failed this guard on meteor_crater at 4 of 18 and named none of the four.
+
+    The counts say the exclusion grew; only the fields say whether it grew for the
+    documented reason. So the guard's message has to carry each dropped field's
+    ``bed_fraction`` - the share that dropped it - and the two keys that say the field
+    took the under-20-cell path rather than the mask having widened underneath it.
+    """
+
+    check = {
+        "fields": 2,
+        "fields_on_road_bed": 2,
+        "br_diff_max_abs": 0.038,
+        "exg_diff_max_abs": 0.041,
+        "largest": [
+            {
+                "lum_ratio": 0.459,
+                "area_m2": 2973.0,
+                "center_xy": [-35.3, 670.3],
+                "kind": "shadow",
+                "bed_fraction": 1.0,
+                "interior_eroded": False,
+                "interior_texels": 18,
+                "on_road_bed": True,
+            },
+            {
+                "lum_ratio": 0.981,
+                "area_m2": 4100.0,
+                "center_xy": [12.0, -8.0],
+                "kind": "shadow",
+                "bed_fraction": 0.0,
+                "interior_eroded": True,
+                "interior_texels": 900,
+                "on_road_bed": False,
+            },
+            {
+                "lum_ratio": 0.612,
+                "area_m2": 1550.0,
+                "center_xy": [40.1, 655.0],
+                "kind": "shadow",
+                "bed_fraction": 0.62,
+                "interior_eroded": True,
+                "interior_texels": 14,
+                "on_road_bed": True,
+            },
+            {
+                "lum_ratio": 1.004,
+                "area_m2": 2200.0,
+                "center_xy": [-90.0, 3.0],
+                "kind": "snow",
+                "bed_fraction": None,
+                "interior_eroded": True,
+                "interior_texels": 450,
+                "on_road_bed": False,
+            },
+        ],
+    }
+
+    excluded = _excluded_fields(check)
+    # Exactly the set-aside fields, in order, and nothing that stayed in the population.
+    assert len(excluded) == 2, excluded
+    assert [f["center_xy"] for f in excluded] == [[-35.3, 670.3], [40.1, 655.0]]
+    # The reason each was dropped travels with it: at or above half bed, and a remainder
+    # under the 20 cells below which the exclusion is allowed to fire at all.
+    assert all(f["bed_fraction"] >= 0.5 for f in excluded), excluded
+    assert all(f["interior_texels"] < 20 for f in excluded), excluded
+    # A field that stayed in must never be reported as set aside - naming a measured
+    # field as the cause of the exclusion's size is worse than naming none.
+    assert all(f["center_xy"] != [12.0, -8.0] for f in excluded)
+    # And it has to survive pytest's abbreviation, which is the whole reason it exists.
+    assert len(repr(excluded)) < 400, len(repr(excluded))
+
+    # A check whose fields carry no bed at all reports an empty set rather than raising,
+    # so the guard's own assertion is what fails and says what it failed on.
+    assert _excluded_fields({"largest": [], "fields": 0, "fields_on_road_bed": 0}) == []
+    assert _excluded_fields({}) == []
+
+
 def test_a_failing_refill_gate_names_the_field_and_why_it_could_not_be_lifted() -> None:
     """The aggregate gates fail on a percentile or a minimum, which says a value and not
     a place. ``_field_at`` is what turns that back into a field, and it has to carry the
@@ -2664,8 +2742,21 @@ def _assert_the_bed_exclusion_left_a_population(map_key: str, check: dict) -> No
     nothing. So the exclusion is asserted from both ends - it must leave a population,
     and it must stay the exception.
 
-    Meteor Crater, the only map with roads through its shadows, is 1.16 % road bed and
-    reported one such field out of eighteen.
+    Meteor Crater, the only map with roads through its shadows, is 1.16 % road bed.
+    The "one such field out of eighteen" this bound was set against came from run 51,
+    which predates `ee35029`'s own reordering - that commit moved the bed question after
+    the fallback so the exclusion reaches an elongated shadow over a road "where before
+    it could not", and then calibrated the ceiling on the count from before that change.
+    Run 73, the first build after it, drops four of eighteen and fails here at 4 > 3.6.
+
+    So a failure at this bound is not by itself evidence the exclusion ran away: on this
+    map shadows follow the roads, and the count of shadows lying on one is not bounded by
+    the 1.16 % road area. Read `_excluded_fields` before touching either end. Four fields
+    each reading `bed_fraction` at or above 0.5 is the exclusion doing what `ee35029`
+    widened it to do; a dropped field under 0.5, or an unexpected `interior_eroded`,
+    means the mask changed and that is the thing to fix. What must not happen is the
+    ceiling being raised to admit whatever the latest build produced, which would leave
+    the exclusion with no upper end at all.
     """
 
     dropped = check.get("fields_on_road_bed", 0)
@@ -2675,14 +2766,50 @@ def _assert_the_bed_exclusion_left_a_population(map_key: str, check: dict) -> No
         map_key,
         f"all {dropped} refilled fields were dropped as road bed, so nothing was "
         "measured and the gates below assert nothing",
-        check,
+        _excluded_fields(check),
     )
     assert dropped <= max(2, 0.2 * total), (
         map_key,
         f"{dropped} of {total} refilled fields were dropped as road bed - the "
         "exclusion is meant to be the exception, not the population",
-        check,
+        _excluded_fields(check),
     )
+
+
+def _excluded_fields(check: dict) -> list[dict]:
+    """The fields the road-bed exclusion set aside, each with the keys that say why.
+
+    The two assertions above used to hand pytest the whole ``check`` dict, whose
+    ``largest`` holds every measured field. pytest abbreviates that with ``...`` at the
+    depth the per-field numbers live at, so run 73's annotation read
+    ``{'br_diff_max_abs': 0.038, 'exg_diff_max_abs': 0.041, 'fields': 14,
+    'fields_on_road_bed': 4, ...}`` - four fields were dropped and not one of them was
+    named. That is the same truncation ``_field_at`` exists to defeat, one assertion
+    upstream, and it matters more here: the counts alone cannot distinguish an exclusion
+    that widened for a bad reason from a map that honestly has four road shadows.
+
+    ``bed_fraction`` is the share that got each field dropped, and the exclusion only
+    reaches a field whose remainder fell under 20 cells, so ``interior_texels`` and
+    ``interior_eroded`` are what say whether it took the documented path. A dropped field
+    reading ``bed_fraction`` under 0.5 would mean the bed mask, not the population, is
+    what changed.
+    """
+
+    return [
+        {
+            k: field.get(k)
+            for k in (
+                "bed_fraction",
+                "interior_texels",
+                "interior_eroded",
+                "area_m2",
+                "center_xy",
+                "kind",
+            )
+        }
+        for field in check.get("largest", ())
+        if field.get("on_road_bed")
+    ]
 
 
 def _field_at(fields: list[dict], key: str, *, palest: bool = False) -> dict:
