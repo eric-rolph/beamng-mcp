@@ -57,12 +57,25 @@ jobs:
 
       - name: Build every map (fetch -> terrain -> level -> dist -> ledger)
         run: |
-          set -euo pipefail
+          set -uo pipefail
           MAPS="${{ github.event.inputs.maps }}"
-          if [ -z "$MAPS" ]; then
-            python examples/gis_maps/build.py --all all
-          else
-            for key in $MAPS; do python examples/gis_maps/build.py "$key" all; done
+          build() {
+            if [ -z "$MAPS" ]; then
+              python examples/gis_maps/build.py --all all
+            else
+              for key in $MAPS; do python examples/gis_maps/build.py "$key" all; done
+            fi
+          }
+          # On a failure the tail of the build is raised as a check annotation, because
+          # the sessions that drive this branch cannot read an Actions log. See
+          # .github/scripts/build_failure_annotation.py.
+          build 2>&1 | tee /tmp/build.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            { echo "--- exit status $status"; free -m; df -h / | tail -1; } > /tmp/build.env
+            python3 .github/scripts/build_failure_annotation.py \
+              "$status" /tmp/build.log /tmp/build.env
+            exit "$status"
           fi
           du -sh examples/gis_maps/*/dist
           df -h / | tail -1

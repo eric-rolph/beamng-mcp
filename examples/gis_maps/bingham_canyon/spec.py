@@ -17,10 +17,12 @@ SITE = {
     "epsg": 32612,
     "size_px": 4096,
     "square_size_m": 1.5,  # 6144 m footprint
-    # 8192 px over 6144 m is 0.75 m per texel. Without this the module default of 2048
-    # left the ground at 3 m per texel, where a 15 m bench is five texels wide. Drop to
-    # 4096 (1.5 m per texel, still double) if the release job cannot carry the bytes.
-    "base_tex_px": 8192,
+    # 4096 px over 6144 m is 1.5 m per texel, against the 3 m the module default of 2048
+    # left, where a 15 m bench was five texels wide. 4096 is the ceiling, not a budget:
+    # conditioned_colour mosaics NAIP at the DEM sample count, so anything above size_px
+    # is a LANCZOS upsample of an array that holds no more detail - and it is not free,
+    # 8192 peaks build_base_set at 8.18 GB against 2.11 GB here.
+    "base_tex_px": 4096,
 }
 
 SOURCES = {
