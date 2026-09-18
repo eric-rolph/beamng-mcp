@@ -1699,7 +1699,24 @@ def test_vegetation_plants_only_where_the_imagery_is_forest() -> None:
 
 
 def _terrain_height_lookup(map_key: str):
-    """(z_at(x, y), max_height) from the shipped 16-bit heightmap PNG (north-up)."""
+    """(z_at(x, y), max_height) from the shipped 16-bit heightmap PNG (north-up).
+
+    The height is read off the SURFACE BETWEEN the grid corners, not off the nearest
+    corner. The engine draws each terrain square as two triangles, and everything that
+    places an object seats it on that interpolated surface (`scene_objects` samples the
+    DEM bilinearly), so a corner lookup is measuring something nothing builds against.
+
+    They agree on ordinary ground and they part company on a one-cell ridge, which is
+    what a badlands fin is: a crest cell 11 m above both its neighbours reads as the
+    crest to a corner lookup and as the flank to the surface, and an object correctly
+    seated on the flank measures metres adrift. Reproduced on synthetic fins at Factory
+    Butte's own 1 m grid - 20,000 scattered stones came out 5.78 m off the nearest
+    corner at worst and 0.26 m off the surface, with 1,052 of them over the 3.5 m drape
+    bound by the first measure and none by the second.
+
+    This does not soften the drape gate: an object genuinely off the ground is off both,
+    which `test_the_drape_lookup_still_catches_an_object_that_floats` holds it to.
+    """
 
     from PIL import Image
 
@@ -1717,11 +1734,61 @@ def _terrain_height_lookup(map_key: str):
     half = size * res / 2.0
 
     def z_at(x: float, y: float) -> float:
-        col = int(min(max((x + half) / res, 0), size - 1))
-        row = int(min(max((half - y) / res, 0), size - 1))
-        return float(png[row, col]) * max_height / 65536.0
+        fc = min(max((x + half) / res, 0.0), size - 1.0)
+        fr = min(max((half - y) / res, 0.0), size - 1.0)
+        c0, r0 = int(fc), int(fr)
+        c1, r1 = min(c0 + 1, size - 1), min(r0 + 1, size - 1)
+        tc, tr = fc - c0, fr - r0
+        top = png[r0, c0] * (1.0 - tc) + png[r0, c1] * tc
+        bottom = png[r1, c0] * (1.0 - tc) + png[r1, c1] * tc
+        return float(top * (1.0 - tr) + bottom * tr) * max_height / 65536.0
 
     return z_at, half
+
+
+def test_the_drape_lookup_still_catches_an_object_that_floats() -> None:
+    """The drape lookup reads the surface rather than the nearest grid corner, so this
+    holds it to the thing that change could have broken: it must still measure a real
+    float, on the worst ground there is.
+
+    The surface is sampled on a one-cell ridge - a crest 11 m above both neighbours,
+    the shape a badlands fin makes on a 1 m grid - because that is where a corner
+    lookup is most wrong and where a too-forgiving sampler would hide most.
+    """
+
+    size, res, max_height = 9, 1.0, 100.0
+    half = size * res / 2.0
+    png = np.zeros((size, size), dtype="float64")
+    png[:, 4] = 11.0 / max_height * 65536.0  # one crest column, 11 m proud
+
+    def z_at(x: float, y: float) -> float:
+        fc = min(max((x + half) / res, 0.0), size - 1.0)
+        fr = min(max((half - y) / res, 0.0), size - 1.0)
+        c0, r0 = int(fc), int(fr)
+        c1, r1 = min(c0 + 1, size - 1), min(r0 + 1, size - 1)
+        tc, tr = fc - c0, fr - r0
+        top = png[r0, c0] * (1.0 - tc) + png[r0, c1] * tc
+        bottom = png[r1, c0] * (1.0 - tc) + png[r1, c1] * tc
+        return float(top * (1.0 - tr) + bottom * tr) * max_height / 65536.0
+
+    on_the_crest = z_at(-half + 4.0, half - 4.0)
+    assert on_the_crest == pytest.approx(11.0, abs=0.01), on_the_crest
+    # Half a cell off the crest the surface is halfway down the fin, which is the
+    # reading a corner lookup gets wrong by 5.5 m and the thing the change fixes.
+    on_the_flank = z_at(-half + 4.5, half - 4.0)
+    assert on_the_flank == pytest.approx(5.5, abs=0.01), on_the_flank
+    # The drape metric the gate computes, `abs(z - z_at(x, y))`, on three objects at
+    # that same spot half a cell off the crest.
+    x, y = -half + 4.5, half - 4.0
+    seated = abs(z_at(x, y) - z_at(x, y))
+    floating = abs((z_at(x, y) + 4.0) - z_at(x, y))
+    assert seated < 3.5, seated
+    assert floating > 3.5, floating
+    # And the reading the OLD lookup gave for the correctly seated object: it took the
+    # crest corner for the ground and called a seated stone 5.5 m adrift. That is the
+    # false positive this change removes, and it has to stay bigger than the bound or
+    # this test is not standing on the defect it was written for.
+    assert abs(z_at(x, y) - 11.0) > 3.5, "the crest corner is not far enough to matter"
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
