@@ -89,6 +89,22 @@ IMAGERY = {
     # the answer rather than the data. 30 is the acquisition minimum NAIP is specified
     # to and the floor Meteor Crater already carries, where the fit settles at 56 in the
     # interior, so a wide range is not a runaway. The ceiling is unchanged.
+    #
+    # Measured afterwards: it did not work here either. The fit came back at exactly 30.0, so
+    # the bound is still the answer. It freed factory_butte (54.0) and wallace_creek (31.0)
+    # and re-pinned this map and bingham_canyon, where the lower sun took
+    # cast_shadow_fraction from 0.0126 to 0.1620.
+    #
+    # The floor is NOT being raised yet, for the reason written out in bingham_canyon's spec:
+    # that map took the same drop and the same re-pin and also shipped near-black patches,
+    # this one shipped none, so the floor is not the mechanism and the hunt goes first. Here
+    # too, reverting is not a way out of the gate - 45.0 was itself a pinned answer, so a fit
+    # free of both bounds needs a floor below the optimum, around 38.0.
+    #
+    # The pin is DECLARED in `SUN_FIT_PIN_ACCEPTED` in tests/test_gis_maps_pack.py rather than
+    # by a key here, because that entry is asserted live and a key in this dict would be inert
+    # in both directions. 30.0 is NAIP's specified acquisition minimum, not a claim about
+    # this flight.
     "sun_altitude_range": [30.0, 68.0],
     "sun_azimuth_hint": 180.0,
     "sun_azimuth_window": 50.0,
