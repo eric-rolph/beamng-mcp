@@ -17,6 +17,7 @@ import shutil
 import struct
 import sys
 import zipfile
+from collections import Counter
 from pathlib import Path
 from unittest import mock
 
@@ -3576,3 +3577,117 @@ def test_shrub_scatter_keeps_off_a_wall() -> None:
     cols = np.array([min(max(int((o["x"] + n * res / 2) / res), 0), n - 1) for o in out])
     on = slope[rows, cols]
     assert float(on.max()) < 32.0, float(on.max())
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_a_shrub_scatter_cannot_declare_plants_below_the_forest_floor(map_key: str) -> None:
+    """A scattered plant's forest scale is its drawn height over its family's mesh
+    height, so the spec can ask for a scale the forest will not accept.
+
+    Unlike a stone, whose scale IS its size in metres, a plant's is a ratio: a 0.25 m
+    bunchgrass against a 0.35 m mesh ships at 0.71, and the same plant against a 2 m
+    juniper mesh would ship at 0.125 and fail the forest bound in a forty-minute build.
+    Both ends of that ratio are authored, so both are checked here.
+    """
+
+    spec = load_spec(map_key)
+    objects_spec = getattr(spec, "OBJECTS", None) or {}
+    scatter = objects_spec.get("shrub_scatter") or {}
+    if not scatter.get("density"):
+        pytest.skip(f"{map_key}: no shrub scatter")
+    lo, high = (float(v) for v in scatter.get("height_m", (0.4, 1.2)))
+    assert lo < high, (map_key, "the shrub scatter's height range is empty or inverted")
+    families = objects_spec.get("shrub_materials") or {}
+    assert families, (map_key, "a shrub scatter with no family to draw from")
+    by_layer = objects_spec.get("shrub_material_by_layer") or {}
+    scatter_by_layer = scatter.get("material_by_layer") or {}
+    fallback = next(iter(sorted(families)))
+    # Every layer the scatter actually places on, resolved the way `level_builder`
+    # resolves it: the layer mapping first, then the scatter's own mapping over it.
+    for layer_name in scatter["density"]:
+        family = scatter_by_layer.get(layer_name, by_layer.get(layer_name, fallback))
+        assert family in families, (
+            map_key,
+            f"layer {layer_name!r} is scattered with {family!r}, which no shrub_materials "
+            "entry declares",
+        )
+        mesh_m = float(families[family].get("height", 1.0))
+        assert mesh_m > 0.0, (map_key, family, "a shrub family with no mesh height")
+        assert lo / mesh_m > MIN_FOREST_SCALE, (
+            map_key,
+            f"{layer_name!r} scatters {family!r} down to {lo} m against a {mesh_m} m mesh, "
+            f"which is a forest scale of {lo / mesh_m:.3f} against a {MIN_FOREST_SCALE} "
+            "floor, so the bottom of the range is unshippable",
+        )
+
+
+def test_a_scattered_shrub_ships_at_the_height_it_was_drawn(tmp_path) -> None:
+    """The emitter used to floor a shrub's height at 0.6 m before dividing by the mesh.
+
+    That floor was written when every shrub here came off the lidar, and
+    `place_objects` already floors a detected shrub at 0.6, so it was a no-op and
+    nobody saw it. A scattered shrub draws its height from the spec's own range, and
+    both ranges that exist go below 0.6 - so the clamp swallowed the draw: measured on
+    the declared ranges it put 100 % of Meteor Crater's scattered shrubs (0.15-0.55,
+    entirely under the floor) and 59.7 % of Wallace Creek's (0.25-1.1) on one value.
+
+    A stand of one-size bushes is the exact thing the log-normal draw exists to
+    prevent, and a clamp sitting immediately before the forest bound retires the gate
+    that would have caught it, so the bound is checked on the spec above instead.
+    """
+
+    load_maplib()
+    from maplib import objects as objects_mod
+    from maplib import scene_objects
+
+    spec = load_spec("meteor_crater")
+    lo, high = (float(v) for v in spec.OBJECTS["shrub_scatter"]["height_m"])
+    assert high < 0.6, "this map is the regression case because its whole range is low"
+    n = 300
+    layer = np.zeros((n, n), dtype="int16")
+    ground = np.zeros((n, n), dtype="float32")
+    shrubs = objects_mod.scatter_shrubs(
+        layer, ground, 1.0, float(n), 0.0, {0: 2000.0}, seed=5, height_range=(lo, high)
+    )
+    assert len(shrubs) > 500, f"too few shrubs to say anything: {len(shrubs)}"
+    for shrub in shrubs:
+        shrub["material"] = "shrub_probe"
+    mesh_m = 0.4
+    item = "probe_shrub_probe_00"
+    catalogue = {
+        "items": {item: {"class": "TSForestItemData", "internalName": item}},
+        "shrub_variants": {"shrub_probe": [{"item": item, "base_height": mesh_m, "triangles": 12}]},
+    }
+    scene_objects.write_forest(
+        spec,
+        tmp_path,
+        "/levels/probe",
+        lambda key: key,
+        catalogue,
+        placed_objects=shrubs,
+        trees=[],
+    )
+    forest = tmp_path / "forest" / f"{spec.MOD_ID}.forest4.json"
+    scales = [
+        json.loads(line)["scale"]
+        for line in forest.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    assert len(scales) == len(shrubs)
+    # The shipped spread is the declared spread. Under the clamp this ratio was 1.0 on
+    # this map - every bush identical - which is what makes it the gate and not the
+    # bounds below.
+    assert (max(scales) / min(scales)) > 0.95 * (high / lo), (
+        "the shipped shrubs are flatter than the range that was drawn",
+        min(scales),
+        max(scales),
+        high / lo,
+    )
+    assert min(scales) == pytest.approx(lo / mesh_m, abs=0.01), min(scales)
+    assert max(scales) == pytest.approx(high / mesh_m, abs=0.02), max(scales)
+    # And nothing piles: no single scale carries a tenth of the field.
+    counts = Counter(round(s, 2) for s in scales)
+    worst, worst_n = counts.most_common(1)[0]
+    assert worst_n < 0.10 * len(scales), (
+        f"{worst_n} of {len(scales)} shrubs ship at scale {worst}",
+    )
