@@ -2345,12 +2345,6 @@ def test_imagery_delighting_is_recorded(map_key: str) -> None:
     assert recorded["sun_fit"]["correlation"] > 0.3, "the fitted sun does not explain the shading"
     assert 0.0 <= recorded["cast_shadow_fraction"] < 0.3
     assert 0.5 <= recorded["minnaert_k"] <= 1.4 and recorded["gain_p95"] <= 4.0
-    # A fit sitting ON its own bound means the bound answered, not the photograph, and
-    # nothing downstream could tell: `fit_sun` searches the altitude in 5 degree coarse
-    # steps from `altitude_range[0]`, then 1 degree fine steps over alt0 +/- 4, skipping
-    # out-of-range values with a bare `continue` (imagery.py:136-143), and returns the same
-    # `{azimuth_deg, altitude_deg, correlation}` either way.
-    #
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
