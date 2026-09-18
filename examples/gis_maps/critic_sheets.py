@@ -164,7 +164,13 @@ def sprites_for(
 
 
 def detail_tiles(level_root: Path, root: Path, spec) -> dict | None:
-    """The terrain's own detail textures as luminance tiles, for the near field."""
+    """The terrain's own detail textures, in colour, for the near field.
+
+    These were luminance until now, so the near ground wore the material's brightness
+    over the orthophoto's colour and a material's own hue never reached the sheet: four
+    near-identical beiges and four well-separated rocks looked the same. Each tile is
+    divided by its own mean luminance, which keeps its colour ratio and leaves its level
+    to the base, so what the near field shows is the base tinted by the material."""
 
     from PIL import Image
 
@@ -176,11 +182,12 @@ def detail_tiles(level_root: Path, root: Path, spec) -> dict | None:
     for name in spec.TERRAIN["materials"]:
         p = terrains / f"t_{name}_b.png"
         if not p.is_file():
-            tiles.append((np.ones((2, 2), dtype="float32"), 2.0))
+            tiles.append((np.ones((2, 2, 3), dtype="float32"), 2.0))
             continue
-        lum = np.asarray(Image.open(p).convert("L").resize((256, 256)), dtype="float32") / 255.0
-        lum = np.clip(lum / max(float(lum.mean()), 1e-3), 0.55, 1.6)
-        tiles.append((lum, float(spec.PALETTE.get(name, {}).get("tile_m", 2.0))))
+        rgb = np.asarray(Image.open(p).convert("RGB").resize((256, 256)), dtype="float32") / 255.0
+        lum = 0.2126 * rgb[..., 0] + 0.7152 * rgb[..., 1] + 0.0722 * rgb[..., 2]
+        rgb = np.clip(rgb / max(float(lum.mean()), 1e-3), 0.55, 1.6)
+        tiles.append((rgb, float(spec.PALETTE.get(name, {}).get("tile_m", 2.0))))
     return {"layer": np.load(layer_file), "tiles": tiles, "fade_m": 120.0}
 
 
@@ -367,7 +374,9 @@ def main(argv: list[str]) -> int:
             "olive krummholz, yellow aspen, blue rings spawns)",
         ).save(out_dir / "06_placement_map.jpg", quality=88)
 
-    # 6. road profile of the longest road
+    # 6. road profiles: the road under the default spawn first, then the longest.
+    # A critic stands at the default spawn, so profiling only the longest road
+    # answered for a track nobody drives from there.
     roads_file = level_root / "main" / "MissionGroup" / "roads" / "items.level.json"
     roads = [
         json.loads(line)
@@ -375,24 +384,47 @@ def main(argv: list[str]) -> int:
         if line.strip()
     ]
     if roads:
+        spawn = handoff["spawns"][0]
+        sx, sy = spawn["level_xy"]
+
+        def _near(road) -> float:
+            xy = np.array([n[:2] for n in road["nodes"]])
+            return float(np.min(np.hypot(xy[:, 0] - sx, xy[:, 1] - sy)))
+
+        picks = [(f"under {spawn['label']}", min(roads, key=_near))]
         longest = max(roads, key=lambda r: len(r["nodes"]))
-        nodes = np.array([n[:3] for n in longest["nodes"]])
-        d = np.concatenate([[0], np.cumsum(np.hypot(*np.diff(nodes[:, :2], axis=0).T))])
+        if longest is not picks[0][1]:
+            picks.append(("longest road", longest))
+
         W, H = 1200, 300
-        img = Image.new("RGB", (W, H), "white")
+        img = Image.new("RGB", (W, H * len(picks)), "white")
         dr = ImageDraw.Draw(img)
-        lo, hi = nodes[:, 2].min(), nodes[:, 2].max()
-        pts = [
-            (x / max(d[-1], 1) * W, H - 10 - (z - lo) / max(hi - lo, 1e-6) * (H - 30))
-            for x, z in zip(d, nodes[:, 2], strict=True)
-        ]
-        dr.line(pts, fill=(40, 40, 220), width=2)
-        dr.text(
-            (10, 5),
-            f"{longest['name']} ({longest['material']}): {d[-1]:.0f} m, "
-            f"{lo:.0f}-{hi:.0f} m above terrain origin, {len(nodes)} nodes",
-            fill="black",
-        )
+        for panel, (why, road) in enumerate(picks):
+            top = panel * H
+            nodes = np.array([n[:3] for n in road["nodes"]])
+            d = np.concatenate([[0], np.cumsum(np.hypot(*np.diff(nodes[:, :2], axis=0).T))])
+            lo, hi = nodes[:, 2].min(), nodes[:, 2].max()
+            pts = [
+                (x / max(d[-1], 1) * W, top + H - 10 - (z - lo) / max(hi - lo, 1e-6) * (H - 30))
+                for x, z in zip(d, nodes[:, 2], strict=True)
+            ]
+            dr.line(pts, fill=(40, 40, 220), width=2)
+            # The steepest 10 m is what a car feels; the sheet quoted no number at all.
+            grade = 0.0
+            if d[-1] >= 10.0:
+                even = np.arange(0.0, d[-1], 1.0)
+                z = np.interp(even, d, nodes[:, 2])
+                if z.size > 10:
+                    grade = float(np.max(np.abs(z[10:] - z[:-10])) / 10.0)
+            dr.text(
+                (10, top + 5),
+                f"{road['name']} ({road['material']}, {why}): {d[-1]:.0f} m, "
+                f"{lo:.0f}-{hi:.0f} m above terrain origin, {len(nodes)} nodes, "
+                f"steepest 10 m {grade * 100:.1f}%",
+                fill="black",
+            )
+            if panel:
+                dr.line([(0, top), (W, top)], fill=(200, 200, 200), width=1)
         img.save(out_dir / "07_road_profile.png")
     print(f"critic sheets written to {out_dir}")
     return 0

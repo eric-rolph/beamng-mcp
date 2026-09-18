@@ -304,7 +304,21 @@ def terrain(spec, example_root: Path) -> dict:
         from . import level_builder
         from . import objects as ob
 
-        dem, detected, ostats = ob.detect_objects(dem, res, **objects_spec.get("detect", {}))
+        # `"detect": None` turns the bump pass off and leaves the DEM alone. A level
+        # whose landform IS fine relief has nothing for it to find and everything to
+        # lose: measured on Factory Butte's shipped terrain, the pass finds 6,768
+        # bumps over 16.8 km2 and not one of them is on fb_mud_flat, the 61.94% of the
+        # map where a block resting on a wash floor would actually be. All 6,768 are on
+        # the two steep classes, which is to say they are the fin crests and spur noses
+        # themselves, and it takes 106,602 m3 of terrain off to place them. `rock_layers`
+        # does not save it: that filters which bumps become meshes, and by then the
+        # opened surface has already replaced the DEM here. Such a level gets its stones
+        # from `scatter` instead.
+        detect_spec = objects_spec.get("detect", {})
+        if detect_spec is None:
+            ostats = ob.detect_off_stats()
+        else:
+            dem, detected, ostats = ob.detect_objects(dem, res, **detect_spec)
         if objects_spec.get("flatten_boxes"):
             dem, box_notes = ob.flatten_boxes(
                 dem, res, fp.size_m, objects_spec["flatten_boxes"], baseline=baseline_dem
@@ -338,6 +352,25 @@ def terrain(spec, example_root: Path) -> dict:
             source_exclude=road_corridor,
         )
         del road_corridor
+        # Say what the conditioning did, in the build log, because that is the only
+        # place a session can read it. The numbers live in the handoff, the handoff
+        # ships as a release asset, and a run that goes red at the gates never
+        # publishes one - so exactly when someone needs to know why a base blew out,
+        # the measurement is locked inside an Actions artifact, which cannot be
+        # downloaded from here at all. One line costs nothing and answers the first
+        # question every time: did the sun fit pin on its bound, how far did the gain
+        # run, and did the highlight ceiling have to catch anything.
+        _sun = imagery_stats.get("sun_fit") or {}
+        _log(
+            "  imagery: sun {} deg az {} corr {} | gain {} to {} | over the ceiling {}".format(
+                _sun.get("altitude_deg"),
+                _sun.get("azimuth_deg"),
+                _sun.get("correlation"),
+                imagery_stats.get("gain_p05"),
+                imagery_stats.get("gain_p95"),
+                imagery_stats.get("highlight_ceiling_fraction"),
+            )
+        )
         # The refilled cells (1 cast shadow, 2 snow) ship for the level stage's
         # check of every field against its ring on the finished base.
         refill_mask = imagery_stats.pop("_refill_mask", None)
@@ -1110,6 +1143,46 @@ def terrain(spec, example_root: Path) -> dict:
 # ---------------------------------------------------------------------------
 
 
+def shipped_index(level_root: Path, mod_id: str, shapes: list[dict]) -> dict[str, dict]:
+    """``{level-relative posix path: {sha256, size}}`` for EVERY file in the level tree.
+
+    This is the handoff's ``shipped`` block, and the tests hash the built level against it.
+    The point of walking rather than listing is coverage: ``mod/levels/<mod_id>/`` is the
+    only thing ever written under ``mod/`` and packaging zips ``mod/``, so the walk is the
+    ZIP's payload exactly, and nothing can ship unrecorded.
+
+    It was a literal list of nine names plus the generated shapes until 2026-09-18, and what
+    that list covered depended on how much a map generated: 57 files of 202 on Black Bear
+    Pass, 38 of 127 on Meteor Crater, and on the four maps declaring neither OBJECTS nor
+    FOREST only 5 of 55. A build could move fifty files on Wallace Creek and
+    ``test_handoff_hashes_match_shipped_files`` still passed. That is the same defect shape
+    as the imagery and spawn gates that measured only inside ``if objects_spec:`` - a gate
+    whose scope was quietly narrower than the artefact it was gating - and it is why the
+    walk, and not a longer list, is the fix.
+
+    ``triangles`` rides along on the generated shapes because the report is the only place
+    that count exists; a shape the report names and the tree does not have is a packaging
+    bug worth raising here rather than shipping a handoff that disagrees with itself.
+    """
+
+    shipped: dict[str, dict] = {}
+    for path in sorted(level_root.rglob("*")):
+        if not path.is_file():
+            continue
+        shipped[path.relative_to(level_root).as_posix()] = {
+            "sha256": sha256_file(path),
+            "size": path.stat().st_size,
+        }
+    for summary in shapes:
+        name = f"art/shapes/{mod_id}/{summary['file']}"
+        if name not in shipped:
+            raise FileNotFoundError(
+                f"{mod_id}: the shapes report lists {name} but it is not in the level tree"
+            )
+        shipped[name]["triangles"] = summary["triangles"]
+    return shipped
+
+
 def level(spec, example_root: Path) -> dict:
     """Terrain arrays -> the complete mod/levels/<mod_id>/ tree + authoring evidence."""
 
@@ -1150,35 +1223,7 @@ def level(spec, example_root: Path) -> dict:
     # Authoring evidence: the handoff is the single source of truth the tests hash against.
     authoring = example_root / "authoring"
     authoring.mkdir(parents=True, exist_ok=True)
-    shipped = {}
-    for name in (
-        "theTerrain.ter",
-        "theTerrain.terrainheightmap.png",
-        "theTerrain.terrain.json",
-        "info.json",
-        "art/terrains/main.materials.json",
-        f"forest/{spec.MOD_ID}.forest4.json",
-        "art/forest/managedItemData.json",
-        f"art/shapes/{spec.MOD_ID}/main.materials.json",
-        f"art/shapes/{spec.MOD_ID}_buildings/main.materials.json",
-    ):
-        path = level_root / name
-        if not path.is_file():
-            continue
-        shipped[name] = {"sha256": sha256_file(path), "size": path.stat().st_size}
-    buildings_dir = level_root / "art" / "shapes" / f"{spec.MOD_ID}_buildings"
-    for path in sorted(buildings_dir.glob("*.dae")) if buildings_dir.is_dir() else []:
-        shipped[f"art/shapes/{spec.MOD_ID}_buildings/{path.name}"] = {
-            "sha256": sha256_file(path),
-            "size": path.stat().st_size,
-        }
-    for summary in report.get("shapes", []):
-        path = level_root / "art" / "shapes" / spec.MOD_ID / summary["file"]
-        shipped[f"art/shapes/{spec.MOD_ID}/{summary['file']}"] = {
-            "sha256": sha256_file(path),
-            "size": path.stat().st_size,
-            "triangles": summary["triangles"],
-        }
+    shipped = shipped_index(level_root, spec.MOD_ID, report.get("shapes", []))
     handoff = {
         "schema": HANDOFF_SCHEMA,
         "asset": {"id": spec.MOD_ID, "display_name": spec.DISPLAY_NAME, "zip": spec.ZIP_BASENAME},
@@ -1215,6 +1260,7 @@ def level(spec, example_root: Path) -> dict:
         "spawns": report["spawns"],
         "imagery": public_stats(report.get("imagery", {})),
         "layer_tints": report.get("layer_tints", {}),
+        "base_colour": report.get("base_colour", {}),
         "forest": report.get("forest", {}),
         "buildings": report.get("buildings", {}),
         "trail_features": report.get("trail_features", []),

@@ -11,12 +11,14 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
-import math
+import os
+import re
 import shutil
 import struct
 import sys
 import zipfile
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 import pytest
@@ -233,6 +235,77 @@ def test_texture_kit_is_deterministic(tmp_path: Path) -> None:
     assert a["b"].read_bytes() != c["b"].read_bytes(), "a different seed must change the map"
 
 
+# The names the placed-object generators seed themselves from. A seed built on the
+# builtin hash() of one of these is a different seed in every process, which is how two
+# CI builds of the same commit shipped different rocks, different shrubs and a forest of
+# 9032 instances against 9040.
+_SEED_NAMES = ("rock_limestone", "rock_talus", "sage", "juniper", "aspen_sapling", "brick")
+
+_SEED_PROBE = """
+import json, sys
+sys.path.insert(0, sys.argv[1])
+from maplib.stable_seed import stable_hash
+names = json.loads(sys.argv[2])
+print(json.dumps({
+    "stable": [stable_hash(n) for n in names],
+    "builtin": [hash(n) for n in names],
+}))
+"""
+
+
+def _seed_probe(hash_seed: str) -> dict:
+    """Run the probe in a fresh interpreter with PYTHONHASHSEED set to ``hash_seed``."""
+
+    import os
+    import subprocess
+
+    env = dict(os.environ, PYTHONHASHSEED=hash_seed)
+    out = subprocess.run(  # noqa: S603 - this interpreter, a literal script, static arguments
+        [sys.executable, "-c", _SEED_PROBE, str(PACK_ROOT), json.dumps(list(_SEED_NAMES))],
+        capture_output=True,
+        text=True,
+        check=True,
+        env=env,
+    )
+    return json.loads(out.stdout)
+
+
+def test_object_seeds_are_stable_across_processes() -> None:
+    """``stable_hash`` gives the same number in a differently salted interpreter.
+
+    This has to cross a process boundary: str hashing is salted once per process, so a
+    single-process test passes with the defect present and proves nothing. The builtin
+    is measured alongside as the control - if it ever stops differing here, the salt is
+    pinned in the environment and this test has quietly stopped testing anything."""
+
+    a, b = _seed_probe("1"), _seed_probe("2")
+    assert a["stable"] == b["stable"], (a["stable"], b["stable"])
+    assert a["builtin"] != b["builtin"], (
+        "PYTHONHASHSEED appears to be pinned, so this test can no longer tell a stable "
+        "seed from an unstable one"
+    )
+
+
+def test_no_generator_is_seeded_from_the_builtin_hash() -> None:
+    """No module under ``maplib`` derives a seed or a shipped id from ``hash()``.
+
+    Guards the spelling as well as the property: the test above cannot see a new call
+    site that no map exercises yet, and a reviewer reading `hash(family) % 97` has no
+    reason to suspect it."""
+
+    offenders = []
+    for path in sorted((PACK_ROOT / "maplib").glob("*.py")):
+        # stable_seed.py names the builtin in its own docstring to explain what it
+        # replaces; it is the one file that is allowed to say the word.
+        if path.name == "stable_seed.py":
+            continue
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            code = line.split("#", 1)[0]
+            if re.search(r"(?<![\w.])hash\s*\(", code):
+                offenders.append(f"{path.name}:{number}: {line.strip()}")
+    assert not offenders, "use maplib.stable_seed.stable_hash instead:\n" + "\n".join(offenders)
+
+
 def test_texture_tiles_wrap() -> None:
     _, _, _, _, _, texture_kit = load_maplib()
     rng = np.random.default_rng(1)
@@ -310,12 +383,123 @@ def test_delight_stats_survive_the_handoff_json() -> None:
     json.dumps(stats)
 
 
+def test_delight_never_blows_a_channel() -> None:
+    """No texel `delight` returns has a channel at or above 250, on warm ground.
+
+    The soft knee compresses on the texel's MEAN luminance, but it is one CHANNEL that
+    reaches the 8-bit wall, so a warm surface saturates its red while its mean sits
+    under the knee and the knee does nothing about it. Measured on the shipped bases,
+    every clipped texel of Factory Butte's caprock and Meteor Crater's east-facing
+    limestone was clipped in red alone or in red and green, never in all three.
+    """
+
+    load_maplib()
+    from maplib import imagery
+
+    n, res = 128, 1.0
+    yy, xx = np.mgrid[0:n, 0:n].astype("float32")
+    dem = (80.0 * np.sin(xx / 24.0) * np.cos(yy / 24.0)).astype("float32")
+    # Bright warm rock, the shape that clips: red near the wall, blue well under it.
+    colour = np.dstack(
+        [
+            np.full((n, n), 250, dtype="uint8"),
+            np.full((n, n), 214, dtype="uint8"),
+            np.full((n, n), 156, dtype="uint8"),
+        ]
+    )
+    out, stats = imagery.delight(
+        colour, dem, res, azimuth_deg=160.0, altitude_deg=55.0, strength=1.0, max_gain=2.2
+    )
+    assert out.max() < 250, (out.max(), out.reshape(-1, 3)[out.max(axis=-1).ravel().argmax()])
+    assert stats["highlight_ceiling_fraction"] > 0, "this fixture is meant to hit the ceiling"
+    # And the ceiling is off when a spec turns it off, so it stays an authored choice.
+    loose, loose_stats = imagery.delight(
+        colour,
+        dem,
+        res,
+        azimuth_deg=160.0,
+        altitude_deg=55.0,
+        strength=1.0,
+        max_gain=2.2,
+        highlight_ceiling=0.0,
+    )
+    assert loose.max() > out.max()
+    assert loose_stats["highlight_ceiling_fraction"] == 0.0
+
+
+def test_clamp_highlights_holds_hue() -> None:
+    """The ceiling scales the whole texel, so only its brightness moves."""
+
+    load_maplib()
+    from maplib import imagery
+
+    warm = np.array([[[1.30, 1.05, 0.62]]], dtype="float32")
+    out, fraction = imagery.clamp_highlights(warm.copy(), 0.95)
+    assert fraction == 1.0
+    assert out.max() == pytest.approx(0.95, abs=1e-6)
+    assert np.allclose(out[0, 0] / out[0, 0].max(), warm[0, 0] / warm[0, 0].max(), atol=1e-6)
+    # 0.95 linear is the brightest value that still encodes under the gates' 250.
+    assert imagery.linear_to_srgb_u8(out.copy()).max() == 249
+    # Under the ceiling nothing moves, and a ceiling of 0 is a no-op.
+    dim = np.array([[[0.40, 0.31, 0.22]]], dtype="float32")
+    same, none = imagery.clamp_highlights(dim.copy(), 0.95)
+    assert none == 0.0 and np.array_equal(same, dim)
+    off, none_off = imagery.clamp_highlights(warm.copy(), 0.0)
+    assert none_off == 0.0 and np.array_equal(off, warm)
+
+
 def test_yaw_matrix_convention() -> None:
     _, _, level_builder, _, _, _ = load_maplib()
     north = level_builder.yaw_matrix(0.0)
     south = level_builder.yaw_matrix(180.0)
     assert south == [1.0, 0.0, 0.0, -0.0, 1.0, 0.0, 0.0, 0.0, 1.0] or south[0] == 1.0
     assert north[0] == -1.0 and north[4] == -1.0
+
+
+def test_shipped_index_records_every_file_in_the_level_tree(tmp_path: Path) -> None:
+    """The handoff's ``shipped`` block is the whole level tree, nested files included.
+
+    The artefact gate that hashes it only runs where a map has been built, which is a
+    runner, so this is the one place the coverage rule is checked on every push. It is
+    worth checking: the block was a hand-written list of nine names for most of this
+    pack's life, and on a map with no generated objects that came to five files of
+    fifty-five.
+    """
+
+    _, _, _, _, pipeline, _ = load_maplib()
+    root = tmp_path / "levels" / "m"
+    for name in ("info.json", "art/terrains/main.materials.json", "art/shapes/m/rock_0.dae"):
+        path = root / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(name)
+    (root / "empty_dir").mkdir()
+
+    index = pipeline.shipped_index(root, "m", [{"file": "rock_0.dae", "triangles": 12}])
+
+    assert set(index) == {
+        "info.json",
+        "art/terrains/main.materials.json",
+        "art/shapes/m/rock_0.dae",
+    }, "a directory is not a file and every file in the tree is recorded"
+    assert index["info.json"]["sha256"] == hashlib.sha256(b"info.json").hexdigest()
+    assert index["info.json"]["size"] == len("info.json")
+    assert index["art/shapes/m/rock_0.dae"]["triangles"] == 12
+    assert "triangles" not in index["info.json"]
+
+
+def test_shipped_index_refuses_a_shape_the_tree_does_not_have(tmp_path: Path) -> None:
+    """A report naming a shape that never reached the tree is a packaging bug, not a note.
+
+    Silently skipping it would write a handoff that disagrees with its own report, and the
+    hash gate would never notice because the file it would have hashed is not there.
+    """
+
+    _, _, _, _, pipeline, _ = load_maplib()
+    root = tmp_path / "levels" / "m"
+    root.mkdir(parents=True)
+    (root / "info.json").write_text("{}")
+    with pytest.raises(FileNotFoundError, match=r"rock_0\.dae"):
+        pipeline.shipped_index(root, "m", [{"file": "rock_0.dae", "triangles": 12}])
 
 
 def test_packaging_refuses_unapproved_roots(tmp_path: Path) -> None:
@@ -342,6 +526,19 @@ def test_handoff_hashes_match_shipped_files(map_key: str) -> None:
     )
     assert handoff["schema"] == HANDOFF_SCHEMA
     assert handoff["asset"]["id"] == spec.MOD_ID
+
+    # Coverage first, then hashes. A recorded hash that matches says nothing about the file
+    # next to it that nobody recorded, and for most of this pack's life that was most of the
+    # level: 5 of 55 files on the maps that generate no objects. The gate is only a gate on
+    # the release if the two sets are equal, so compare the sets and let a diff name the
+    # files rather than reporting a count.
+    on_disk = {path.relative_to(root).as_posix() for path in root.rglob("*") if path.is_file()}
+    recorded = set(handoff["shipped"])
+    assert on_disk == recorded, {
+        "shipped but never recorded": sorted(on_disk - recorded),
+        "recorded but not shipped": sorted(recorded - on_disk),
+    }
+
     for name, record in handoff["shipped"].items():
         path = root / name
         assert path.stat().st_size == record["size"], name
@@ -567,6 +764,19 @@ def test_distribution_zip_matches_lock(map_key: str) -> None:
         assert f"levels/{spec.MOD_ID}/theTerrain.ter" in members
         assert all(info.compress_type == zipfile.ZIP_STORED for info in archive.infolist())
         assert packaging.future_dated_members(archive) == []
+    # And the lock says which build made it. Every other field here is a property of
+    # the ZIP alone, so they all pass on a release assembled from two runs at two
+    # commits: each map is internally consistent with itself. These two are the only
+    # fields that can disagree between maps, which is what makes a mixed release
+    # detectable rather than inferred.
+    assert "source_commit" in lock, (
+        f"{map_key}: the lock names no commit, so nothing binds this ZIP to a build"
+    )
+    assert re.fullmatch(r"[0-9a-f]{40}", lock["source_commit"] or ""), lock["source_commit"]
+    # A runner checks out the commit it names, so a CI lock is never dirty. A local
+    # build may be, and says so rather than claiming a commit it was not built from.
+    if lock.get("build_run_id") is not None:
+        assert lock["source_dirty"] is False, lock
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
@@ -1083,6 +1293,53 @@ def test_detect_objects_lifts_a_boulder_and_leaves_the_ground() -> None:
     assert len(placed) == 1 and placed[0]["kind"] == "rock" and placed[0]["size"][2] >= 1.0
 
 
+def test_detect_off_stats_reports_every_count_a_real_pass_does() -> None:
+    """The skip path's handoff keeps a real pass's shape: zeros, not a missing section."""
+
+    _, _, objects, _, _ = _load_art_modules()
+    n, res = 120, 0.5
+    y, x = np.mgrid[0:n, 0:n].astype("float32") * res
+    dem = 10.0 + 0.02 * x
+    bump = 1.2 * np.exp(-(((x - 30) ** 2 + (y - 30) ** 2) / (2 * 0.8**2)))
+    _, _, live = objects.detect_objects(dem + bump, res, open_m=6.0, min_height_m=0.4)
+    off = objects.detect_off_stats()
+
+    counts = {k for k, v in live.items() if not isinstance(v, str)} - {"open_m", "min_height_m"}
+    assert counts <= set(off), f"the skip path drops {counts - set(off)} from the handoff"
+    assert all(off[k] == 0 for k in counts), "a skipped pass removed nothing and found nothing"
+    assert off["detect"] == "off", "a reader has to be able to tell a skip from an empty pass"
+    # `open_m` and `min_height_m` describe an opening that did not happen. Reporting them
+    # would read as a pass that ran and found nothing, which is the confusion the whole
+    # `"detect": None` path exists to avoid.
+    assert "open_m" not in off and "min_height_m" not in off
+
+
+def test_the_bump_detector_takes_a_badlands_landform_for_boulders() -> None:
+    """Why `"detect": None` exists: on fine relief the pass finds the relief.
+
+    Measured on Factory Butte's shipped terrain, `detect_objects` found 6,768 bumps over
+    16.8 km2, none of them on the 61.94% that is wash floor, and took 106,602 m3 of fins
+    off to place them. This is that finding at test scale, so that anyone who later makes
+    the detector ignore ridges can see the skip become unnecessary instead of guessing.
+    """
+
+    _, _, objects, _, _ = _load_art_modules()
+    n, res = 300, 1.0
+    y, x = np.mgrid[0:n, 0:n].astype("float32") * res
+    # Flat wash floor on the west half; a rill-and-fin field at a 12 m wavelength and 3 m
+    # of relief on the east, which is the scale Mancos Shale badlands actually run at.
+    relief = 1.5 * (1.0 + np.sin(2 * np.pi * x / 12.0)) * np.sin(2 * np.pi * y / 30.0) ** 2
+    dem = (40.0 - 0.01 * y + np.where(x >= 150.0, relief, 0.0)).astype("float32")
+
+    ground, found, stats = objects.detect_objects(dem, res, open_m=6.0, min_height_m=0.6)
+    assert stats["objects"] > 100, "the detector is expected to find the fins, not nothing"
+    assert all(o["col"] >= 150 for o in found), "nothing on the flat, which is where rocks are"
+    assert stats["removed_volume_m3"] > 1000.0
+    moved = np.abs(ground - dem)
+    assert moved[:, 150:].max() > 2.5, "it shaves the fins down by most of their height"
+    assert moved[:, :150].max() < 0.1, "and leaves the wash floor, so the count cannot rebalance"
+
+
 def test_ept_hierarchy_walk_visits_only_overlapping_nodes() -> None:
     """A fake Entwine index: the walker opens sub-hierarchies and skips distant nodes."""
 
@@ -1301,6 +1558,421 @@ def test_road_bed_reads_lighter_than_its_ground(map_key: str) -> None:
     assert seam is not None and seam < 0.4, (map_key, carved)
 
 
+# Maps whose `sun_altitude_range` is deliberately narrow, with the reason. A fit sitting
+# on a bound is the spec working as intended for these, so the gate below exempts them by
+# name rather than by inferring intent from the window's width - a range that is narrow by
+# accident and one that is narrow on purpose look identical, and only one of them is a bug.
+SUN_FIT_PINNED_ON_PURPOSE = {
+    "black_bear_pass": (
+        "the window is 1.5 degrees wide on purpose: the reference photography is a known "
+        "time of day and the fit is not free to wander off it"
+    ),
+}
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_a_narrow_sun_window_is_declared_as_deliberate(map_key: str) -> None:
+    """A `sun_altitude_range` narrow enough to decide the fit by itself is listed as a
+    deliberate pin, or it is a mistake nobody made on purpose.
+
+    This runs without a built tree, so narrowing a window lands here in the two minutes a
+    pull request takes rather than in a forty-minute build. `fit_sun` refines on a
+    1-degree step, so a window under 5 degrees leaves the search almost nothing to do and
+    the spec, not the photograph, picks the altitude.
+    """
+
+    spec = load_spec(map_key)
+    imagery_spec = getattr(spec, "IMAGERY", None) or {}
+    window = imagery_spec.get("sun_altitude_range")
+    if not imagery_spec.get("delight") or window is None:
+        pytest.skip(f"{map_key}: no sun is fitted, so no window decides one")
+    low, high = float(window[0]), float(window[1])
+    assert low < high, (map_key, "the window is empty or inverted", window)
+    if high - low < 5.0:
+        assert map_key in SUN_FIT_PINNED_ON_PURPOSE, (
+            map_key,
+            "this window is too narrow for the fit to be the photograph's - add it to "
+            "SUN_FIT_PINNED_ON_PURPOSE with the reason, or widen it",
+            window,
+        )
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_the_sun_fit_does_not_sit_on_its_own_bound(map_key: str) -> None:
+    """A de-lit map's fitted sun altitude lands INSIDE the window its spec allows.
+
+    `fit_sun` grid-searches and clips every candidate to `sun_altitude_range`, so a fit
+    landing exactly on a bound is not a fit - it is the search being stopped there, and
+    the true optimum lying outside. The refine pass steps 1 degree, so an unpinned fit
+    is at least a degree clear of both ends; equality with a bound is the signature.
+
+    Nothing announced this before. `282a6aa` moved bingham_canyon's floor rather than
+    removing it, and a pinned fit and a free one are indistinguishable from outside the
+    build: same key, same shape, a plausible number. The cost lands somewhere else
+    entirely - the altitude sets what `cast_shadows` calls shadow, so a wrong one
+    refills terrain that was never in shadow. That is the same family as the blown
+    highlights: the number that would have caught it was never recorded, or never read.
+
+    Skips on the SPEC, so a map that declares a window and then fails to record a fit
+    FAILS here rather than skipping quietly. All six declare `delight` and a range.
+    """
+
+    spec = load_spec(map_key)
+    imagery_spec = getattr(spec, "IMAGERY", None) or {}
+    if not imagery_spec.get("delight"):
+        pytest.skip(f"{map_key}: the base is not de-lit, so no sun is fitted")
+    window = imagery_spec.get("sun_altitude_range")
+    if window is None:
+        pytest.skip(f"{map_key}: no sun_altitude_range declared, so there is no bound to sit on")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    fit = (handoff.get("imagery") or {}).get("sun_fit") or {}
+    altitude = fit.get("altitude_deg")
+    assert altitude is not None, (
+        map_key,
+        "declares a sun_altitude_range but records no fitted altitude",
+    )
+    low, high = float(window[0]), float(window[1])
+    assert low <= float(altitude) <= high, (map_key, "the fit escaped its own window", fit, window)
+
+    reason = SUN_FIT_PINNED_ON_PURPOSE.get(map_key)
+    if reason is not None:
+        # A window this narrow cannot help but put the fit on a bound; that is the
+        # point of it. Asserted above that the fit is still inside the window, so the
+        # exemption covers the pin and not the spec going unread.
+        assert high - low < 5.0, (
+            map_key,
+            "exempted as a deliberate pin, but its window is wide enough to fit in - "
+            "remove the exemption or narrow the window",
+            window,
+        )
+        return
+    assert low < float(altitude) < high, (
+        map_key,
+        "the sun fit is pinned to its own bound, so the spec chose it and the "
+        "photograph did not - widen sun_altitude_range or exempt it deliberately",
+        fit,
+        window,
+    )
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_the_photograph_is_measured_before_it_is_conditioned(map_key: str) -> None:
+    """Every de-lit map records the source mosaic's own luminance spread and chroma,
+    so what the conditioning did can be read as a ratio rather than an absolute.
+
+    A shipped base's spread on its own cannot be judged. Factory Butte's is 0.152
+    against Meteor Crater's 0.242 at a third of the chroma, and that is equally
+    consistent with a flat pale basin photographed near noon and with de-lighting
+    having flattened it - the handoff carried only the output, so two sessions read
+    the same number to opposite conclusions. ``imagery.source`` is the other end.
+
+    This asserts the measurement exists and is well formed, not a floor on the ratio.
+    The floor comes from the population once a six-map build has produced one; a
+    number picked before that is taste. What it does gate is the failure this pack
+    keeps repeating - a statistic that goes silently absent for some maps and reports
+    as not-applicable - which is why it asserts on every de-lit map rather than
+    skipping where the key is missing.
+    """
+
+    spec = load_spec(map_key)
+    if not (getattr(spec, "IMAGERY", None) or {}).get("delight"):
+        pytest.skip(f"{map_key}: the base is not de-lit, so there is nothing to compare")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    imagery = handoff.get("imagery") or {}
+    source = imagery.get("source")
+    assert source, f"{map_key}: de-lit but the handoff carries no source-mosaic statistics"
+    for key in ("lum_p05", "lum_p50", "lum_p95", "lum_spread", "chroma_mean", "px"):
+        assert key in source, (map_key, "missing", key, sorted(source))
+    assert 0.0 < source["lum_spread"] < 1.0, (map_key, source)
+    assert source["lum_p05"] <= source["lum_p50"] <= source["lum_p95"], (map_key, source)
+    assert 0.0 <= source["chroma_mean"] <= 1.0, (map_key, source)
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_ring_matching_reaches_the_fields_it_was_turned_on_for(map_key: str) -> None:
+    """A map that opts into ``refill_match_ring`` records how many refilled fields the
+    matching could actually reach, and reaches at least one of them.
+
+    `_ring_fields` gives a field a ring only when 50 or more lit cells sit in its
+    10-30 m annulus, and every matching step is a no-op on a field without one. So the
+    contract silently does not apply to exactly the fields most likely to fail it: a
+    field wide enough and dark enough to read as a blotch is a field whose surroundings
+    are likely also shadow. Before ``refill_ring_cover`` existed, a skipped field was
+    indistinguishable in the handoff from a matched field that came out badly - Meteor
+    Crater's worst field measured 0.460 before the flag was turned on and 0.459 after,
+    and nothing in the build said which of those two it was.
+
+    Zero coverage is not a threshold chosen from taste: it means the feature the spec
+    asked for did nothing at all.
+    """
+
+    spec = load_spec(map_key)
+    imagery_spec = getattr(spec, "IMAGERY", None) or {}
+    if not imagery_spec.get("refill_match_ring"):
+        pytest.skip(f"{map_key}: refills are not ring-matched")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    cover = (handoff.get("imagery") or {}).get("refill_ring_cover")
+    assert cover is not None, (
+        f"{map_key}: opted into ring matching but the build records no ring coverage"
+    )
+    if not cover["fields"]:
+        pytest.skip(f"{map_key}: the de-lighting refilled no field at all")
+    assert cover["with_ring"] > 0, (map_key, "ring matching reached no field", cover)
+
+
+def test_a_field_the_erosion_empties_says_so_instead_of_reading_as_roadless() -> None:
+    """``refill_check`` erodes 6 m off every boundary before it looks at the bed, so an
+    elongated field can lose its whole interior - and that is exactly the shape of a
+    shadow lying along a road, which is what the bed exclusion exists for.
+
+    When it happens, three things used to collapse into one number: ``bed_fraction``
+    divided by a guarded zero and came out 0.0, the >= 20 test failed so no bed was
+    excluded, and the fallback measured the whole component including the bed. A reader
+    could not tell that from a field with no road within a hundred metres. The
+    population and the fallback flag are what separate them."""
+
+    _, _, level_builder, _, _, _ = load_maplib()
+
+    n, texel = 256, 0.5
+    colour = np.full((n, n, 3), 120, dtype="uint8")
+    refill = np.zeros((n, n), dtype="uint8")
+    bed = np.zeros((n, n), dtype=bool)
+    # 10 m by 100 m: wider than min_area_m2 but narrower than the 12 m the erosion takes
+    # off each side, and lying along a road, which is the case that matters.
+    refill[100:120, 28:228] = 1
+    bed[104:116, 28:228] = True
+    colour[refill == 1] = 96
+
+    out = level_builder.refill_check(colour, refill, texel, bed=bed, min_area_m2=500.0)
+    assert out, "the synthetic field is over the area floor and should be reported"
+    field = out["largest"][0]
+
+    assert field["interior_eroded"] is False, (
+        "a 10 m wide field cannot survive a 6 m erosion from both sides",
+        field,
+    )
+    assert field["bed_fraction"] is None, (
+        "there was no interior to take a bed share of, and 0.0 would read as 'no road'",
+        field,
+    )
+    # The fallback measured the whole component, so the population is the field itself.
+    assert field["interior_texels"] == int((refill == 1).sum()), field
+
+
+def test_a_field_that_survives_the_erosion_reports_its_bed_share_and_population() -> None:
+    """The other half of the pair: a compact field keeps its eroded interior, so the bed
+    share is a real measurement and the population is smaller than ``area_m2`` implies."""
+
+    _, _, level_builder, _, _, _ = load_maplib()
+
+    n, texel = 256, 0.5
+    colour = np.full((n, n, 3), 120, dtype="uint8")
+    refill = np.zeros((n, n), dtype="uint8")
+    bed = np.zeros((n, n), dtype=bool)
+    refill[80:180, 80:180] = 1  # 50 m square, survives a 6 m erosion easily
+    bed[80:180, 80:100] = True  # a road up one edge, inside the field
+    colour[refill == 1] = 96
+
+    out = level_builder.refill_check(colour, refill, texel, bed=bed, min_area_m2=500.0)
+    assert out, "the synthetic field is over the area floor and should be reported"
+    field = out["largest"][0]
+
+    assert field["interior_eroded"] is True, field
+    assert field["bed_fraction"] is not None and field["bed_fraction"] > 0.0, (
+        "the road runs through the interior, so the share is measurable and non-zero",
+        field,
+    )
+    # area_m2 counts the component; the ratios rest on the eroded, bed-excluded interior,
+    # which is the number that was previously unrecorded.
+    assert 0 < field["interior_texels"] < int((refill == 1).sum()), field
+
+
+def test_ring_matching_can_rescue_a_field_at_half_its_ring() -> None:
+    """The full ``match_ring`` sequence lifts a field at 0.46 of its ring past the 0.75
+    floor, so the contract is reachable from the worst measured starting point.
+
+    This pins a capability that is not obvious from either function alone. `_match_mean`
+    clips its per-field correction to 1.25, so on its own it can reach the 0.90 contract
+    only from 0.72 and the 0.75 floor only from 0.60 - measured, a field at 0.46 comes
+    out of it at 0.575. Every bit of the rescue below that comes from `_clamp_to_ring`.
+    Tightening either one silently puts the contract out of reach rather than failing
+    loudly, which is what this catches.
+    """
+
+    load_maplib()
+    from maplib.imagery import _clamp_to_ring, _match_mean, _ring_fields
+
+    size = 400
+    fill = np.zeros((size, size), dtype=bool)
+    fill[150:250, 150:250] = True
+    lit = np.full((size, size, 3), 0.70, dtype="float32")
+    rgb = lit.copy()
+    rgb[fill] = 0.70 * 0.46
+    fields = _ring_fields(fill, ~fill, 1.0)
+    assert bool(fields["has_ring"][0]), "the synthetic field must have a ring to test the match"
+
+    matched = _match_mean(rgb.copy(), lit, fields)
+    ratio_mean = float(matched[fill].mean() / lit[~fill].mean())
+    assert ratio_mean == pytest.approx(0.46 * 1.25, abs=0.01), (
+        "the mean match is clipped at 1.25; if this changes, the floor below moves too",
+        ratio_mean,
+    )
+
+    fill_w = fill.astype("float32")
+    composited = lit * (1 - fill_w[..., None]) + matched * fill_w[..., None]
+    clamped = _clamp_to_ring(composited, lit, fields, fill_w)
+    ratio_clamped = float(clamped[fill].mean() / lit[~fill].mean())
+    assert ratio_clamped >= 0.75, (
+        "the clamp must carry a 0.46 field over the floor",
+        ratio_clamped,
+    )
+
+
+def test_base_colour_stats_measures_each_layer() -> None:
+    """The base's gate numbers: a near-black fraction over the whole image and a clipped
+    fraction per layer, with a layer map resized to the colour rather than assumed equal.
+
+    This runs without a built tree, so the arithmetic behind the gate below is checked
+    even where the levels are not on disk."""
+
+    _, _, level_builder, _, _, _ = load_maplib()
+
+    colour = np.full((32, 32, 3), 128, dtype="uint8")
+    colour[0, 0] = 0  # one near-black texel out of 1024
+    colour[16:, :16] = 255  # a quarter of the image blown out
+    layer = np.zeros((16, 16), dtype="uint8")
+    layer[8:, :8] = 1  # at half resolution, the quarter that is white
+
+    stats = level_builder.base_colour_stats(colour, layer, ["ground", "ledge"])
+    assert stats["base_px"] == 32
+    # Rounded to six places on the way into the handoff, two orders under the 1e-4 gate.
+    assert stats["near_black_fraction"] == pytest.approx(1 / 1024, abs=1e-6)
+    # The white quarter is layer 1 alone, so its clipping does not hide in the average:
+    # over the whole image it is 0.25, which the per-layer number resolves to 1.0 and 0.0.
+    assert stats["layer_mean_srgb"]["ledge"]["clipped"] == pytest.approx(1.0)
+    assert stats["layer_mean_srgb"]["ground"]["clipped"] == pytest.approx(0.0)
+    assert stats["layer_mean_srgb"]["ledge"]["cells"] == 256
+    # Nothing was handed in as the pre-clamp array, so nothing claims to describe one.
+    assert "clipped_before_ceiling" not in stats["layer_mean_srgb"]["ledge"]
+
+
+def test_the_clamp_does_not_erase_the_number_that_caught_it() -> None:
+    """The shipping clamp caps every channel at 249 and the gate counts 250, so after it
+    `clipped` is zero on every map it runs for - a true number that can no longer fail.
+    The share is kept at full per-layer resolution on the array the clamp read, so the
+    contract survives its own fix."""
+
+    _, _, level_builder, _, _, _ = load_maplib()
+    from maplib import imagery
+
+    colour = np.full((32, 32, 3), 128, dtype="uint8")
+    colour[16:, :16] = 255  # one layer entirely over the ceiling
+    layer = np.zeros((16, 16), dtype="uint8")
+    layer[8:, :8] = 1
+
+    linear, _over = imagery.clamp_highlights(imagery.srgb_to_linear(colour), 0.95)
+    shipped = imagery.linear_to_srgb_u8(linear)
+    # 0.95 linear encodes to 249.31, and 250 needs 0.9516 - so the clamp leaves the gate
+    # nothing to count, on any map, whatever a later stage did to the base.
+    assert int(shipped.max()) == 249
+    # Pinned from both ends, because either constant can move the blinding on its own:
+    # raise the ceiling past the value below and `clipped` starts counting again, lower
+    # the gate's 250 and it does too. Bisected rather than asserted from a literal.
+    lo, hi = 0.9, 1.0
+    for _ in range(80):
+        mid = (lo + hi) / 2
+        if (1.055 * mid ** (1 / 2.4) - 0.055) * 255.0 >= 249.5:
+            hi = mid
+        else:
+            lo = mid
+    assert hi == pytest.approx(0.951634, abs=1e-6), "the linear value that first reaches 250"
+    assert 0.95 < hi, "the ceiling must sit BELOW what the clipped gate tests for"
+    # And the clamp scales a texel rather than clipping a channel, so the blown square
+    # keeps its grey. A per-channel clip would have swung the hue of every texel it hit.
+    blown = shipped[16:, :16]
+    assert blown.min() == blown.max(), "the clamp moved brightness only"
+
+    stats = level_builder.base_colour_stats(
+        shipped, layer, ["ground", "ledge"], before_ceiling=colour
+    )
+    means = stats["layer_mean_srgb"]
+    # Exactly zero, not merely under the old 0.002: the clamp caps at 249, so `clipped`
+    # is 0 if and only if the clamp is the LAST writer of the base. A later stage that
+    # writes `colour_full` after it puts the number back above zero - which is the bug
+    # `53807cb` exists to fix, since `delight`'s own clamp was not the last writer either.
+    assert means["ledge"]["clipped"] == 0.0
+    assert means["ledge"]["clipped_before_ceiling"] == pytest.approx(1.0)
+    assert means["ground"]["clipped_before_ceiling"] == pytest.approx(0.0)
+
+
+# What each layer's pre-clamp share over the highlight ceiling measured on run 33's
+# published ZIPs - the last bases built before `53807cb` added the shipping clamp, so
+# they are the unclamped arrays `clipped_before_ceiling` describes. Measured directly
+# off `t_base_b.png` against `theTerrain.ter`'s layer indices, with the same `>= 250`
+# test `base_colour_stats` uses, so the numbers are the same quantity.
+#
+# The gate is the population rather than an absolute, deliberately. 0.002 was the
+# contract written for an unclamped base; six of these 22 layers are already above it,
+# so restoring it hard re-reds three maps over a blow-out the clamp has made invisible
+# in game. Held to the baseline instead, a layer that starts blowing out is caught -
+# which is the failure that actually happened - without failing the ones that always
+# did. Set from five maps: black_bear_pass has no published base to measure, so its
+# layers carry no baseline and are asserted present only, and so is any new material.
+# TODO: fill black_bear_pass's layers from the first good build. It is the map at critic
+# round 17 with the most at stake, and asserted-present is the weakest thing this gate
+# says about any map.
+CEILING_BASELINE = {
+    # factory_butte
+    "fb_caprock": 0.05631,
+    "fb_clay_fin": 0.00167,
+    "fb_shale_slope": 0.00014,
+    "fb_mud_flat": 0.00000,
+    # meteor_crater
+    "mc_limestone_rim_ew": 0.00431,
+    "mc_road_dirt": 0.00352,
+    "mc_limestone_rim": 0.00069,
+    "mc_ejecta_gravel": 0.00029,
+    "mc_desert_floor": 0.00012,
+    "mc_talus": 0.00001,
+    "mc_rim_rubble": 0.00000,
+    "mc_road_asphalt": 0.00000,
+    # wallace_creek
+    "wc_grassland": 0.00000,
+    "wc_alluvial_wash": 0.00000,
+    "wc_fault_scarp": 0.00000,
+    "wc_dry_pond": 0.00000,
+    # bingham_canyon and mt_st_helens: out of scope for development, still built
+    "bc_scrub_hillside": 0.00660,
+    "bc_haul_gravel": 0.00373,
+    "bc_waste_rock": 0.00266,
+    "bc_bench_face": 0.00052,
+    "sh_debris_slope": 0.00003,
+    "sh_ash_gully": 0.00002,
+    "sh_snow_ice": 0.00001,
+    "sh_pumice_plain": 0.00000,
+    "sh_crater_wall": 0.00000,
+}
+# Room for the build to move without the gate reading the movement as a regression.
+# It is wider than any difference measured between two builds of this pack and far
+# narrower than the step that put fb_caprock where it is.
+CEILING_SLACK = 0.005
+
+
 @pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_base_colour_has_no_black_holes(map_key: str) -> None:
     """No in-paint, refill or gain leaves black ground: under a texel in ten thousand of
@@ -1313,14 +1985,48 @@ def test_base_colour_has_no_black_holes(map_key: str) -> None:
             encoding="utf-8"
         )
     )
-    stats = handoff["terrain"]["stats"]
-    if "near_black_fraction" not in stats:
-        pytest.skip(f"{map_key}: no imagery statistics")
+    if not getattr(spec, "IMAGERY", None):
+        pytest.skip(f"{map_key}: the base is not conditioned imagery")
+    # Measured by the level stage on the base it wrote, so it is here for every map.
+    # It used to be read from the terrain stage's stats, which only the OBJECTS path
+    # fills - so four of the six maps skipped this gate silently and the two that ran
+    # it were measured before the base was resized to its own resolution.
+    stats = handoff.get("base_colour") or {}
+    assert stats.get("near_black_fraction") is not None, (
+        f"{map_key}: the level stage recorded no base colour statistics"
+    )
     assert stats["near_black_fraction"] < 1e-4, stats["near_black_fraction"]
     means = stats.get("layer_mean_srgb", {})
+    assert means, f"{map_key}: no layer was measured on the finished base"
     for name, entry in means.items():
-        # And no layer of the finished base runs to white either.
-        assert entry.get("clipped", 0.0) < 0.002, (map_key, name, entry)
+        # And no layer of the finished base runs to white either. Asserted at exactly
+        # zero rather than under 0.002, which is not a tightening: the shipping clamp
+        # caps every channel at 249 and this counts 250, so under the contract the only
+        # reachable value IS zero, and `< 0.002` could not fail for any other reason.
+        # At zero it fails for one reason, the one that can recur - something writing
+        # the base after the clamp, which is the defect `53807cb` existed to fix and
+        # which `refill_match` and `_enforce_beds` caused once already.
+        assert entry.get("clipped", 0.0) == 0.0, (map_key, name, entry)
+        # The share the clamp had to rescue, measured before it, at the resolution the
+        # whole-base `shipped_ceiling_fraction` throws away - fb_caprock is 5.6% over
+        # the ceiling and 0.13% of its base, so no whole-base threshold sees it.
+        assert entry.get("clipped_before_ceiling") is not None, (
+            map_key,
+            name,
+            "the level stage recorded no pre-clamp share, so nothing measures the base",
+        )
+        assert 0.0 <= entry["clipped_before_ceiling"] <= 1.0, (map_key, name, entry)
+        # And it is held to the population rather than to an absolute, for the reason
+        # CEILING_BASELINE gives.
+        baseline = CEILING_BASELINE.get(name)
+        if baseline is not None:
+            assert entry["clipped_before_ceiling"] <= baseline + CEILING_SLACK, (
+                map_key,
+                name,
+                "this layer blows out further past the ceiling than it did on run 33",
+                entry["clipped_before_ceiling"],
+                baseline,
+            )
     for name, lit in (getattr(spec, "IMAGERY", None) or {}).get("lighter_than", {}).items():
         # A layer the spec says reads lighter than another (the cream ledges over
         # the tan plain) does so in the finished base.
@@ -1375,6 +2081,59 @@ def test_refills_read_as_their_ground_on_the_shipped_base(map_key: str) -> None:
     # And on the green axis: a refill matched on luminance alone came back as
     # dusty-rose banding through the tundra and mint patches in the meadows.
     assert check["exg_diff_max_abs"] <= 0.04, (map_key, check)
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_no_refilled_field_reads_as_a_blotch(map_key: str) -> None:
+    """The floor under the contract above, which every de-lighting map owes whether or
+    not it asked for ring matching: no refilled field is under 0.75 of its ring's
+    luminance or more than 0.10 off it on either chroma axis.
+
+    The gate above is tighter (0.90 and 0.04) and skips unless a spec sets
+    ``refill_match_ring``, which one map of six does. That is a sound skip - a map that
+    did not opt into ring matching did not promise that contract - but it left the
+    failure mode itself ungated on the other five, and a refill at half its ring's
+    brightness is not a contract anyone declines. Meteor Crater shipped five fields at
+    0.46 to 0.70 with up to 0.18 of blue-minus-red on them before ``refill_match_ring``
+    was turned on for it.
+    """
+
+    spec = load_spec(map_key)
+    if not (getattr(spec, "IMAGERY", None) or {}).get("delight"):
+        pytest.skip(f"{map_key}: the base is not de-lit, so nothing is refilled")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    imagery = handoff.get("imagery") or {}
+    assert imagery, f"{map_key}: de-lit but the handoff carries no imagery statistics"
+    check = imagery.get("refill_check")
+    if check is None:
+        # A map whose refills are all under the reporting size records None here, which
+        # is a fact about the ground and not a missing measurement - the assertion above
+        # is what separates the two.
+        pytest.skip(f"{map_key}: no refilled field large enough to be reported")
+    worst = min((e["lum_ratio"] for e in check["largest"]), default=1.0)
+    assert worst >= 0.75, (map_key, "a refilled field reads as a blotch", worst, check["largest"])
+    # And the other side, which this gate was missing while the tight one above had it
+    # (0.90 AND 1.10). A refill brighter than its ground is the same defect seen from
+    # the other end, and it is the one `refill_match`'s 1.4 gain clip exists to prevent
+    # - so while nothing asserts it, that clip guards a failure no gate can see, and
+    # nobody can responsibly raise it. 1.25 is the floor's own 0.25 mirrored, and it
+    # sits in open space: across 127 fields on six maps the highest ratio measured is
+    # 1.047.
+    palest = max((e["lum_ratio"] for e in check["largest"]), default=1.0)
+    assert palest <= 1.25, (
+        map_key,
+        "a refill reads paler than its ground",
+        palest,
+        check["largest"],
+    )
+    for axis in ("br_diff", "exg_diff"):
+        off = max((abs(e[axis]) for e in check["largest"]), default=0.0)
+        assert off <= 0.10, (map_key, axis, off, check["largest"])
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
@@ -1592,30 +2351,6 @@ def test_imagery_delighting_is_recorded(map_key: str) -> None:
     # out-of-range values with a bare `continue` (imagery.py:136-143), and returns the same
     # `{azimuth_deg, altitude_deg, correlation}` either way.
     #
-    # EQUALITY, not a margin. The fine pass's resolution is 1 degree, so a fit at low + 1
-    # is a real optimum that beat the bound - wallace_creek returns 31.0 on [30.0, 80.0],
-    # which means 30.0 was evaluated and lost. A "within a degree" test would fail the one
-    # map that demonstrably converged.
-    #
-    # 282a6aa dropped four floors to 30 to stop the fit answering with its bound, after all
-    # four came back sitting on it (52.0, 55.0, 45.0, 60.0 against floors of exactly those).
-    # It freed factory_butte to 54.0 and wallace_creek to 31.0 and RE-PINNED the other two at
-    # 30.0, and bingham_canyon's cast_shadow_fraction went 0.0126 -> 0.1620 as a result -
-    # thirteenfold, 16% of the map refilled where 1.3% was, and still inside the 0.3 ceiling
-    # three lines up, so nothing said a word.
-    #
-    # Two exemptions, both declared rather than inferred:
-    #  - a range narrower than the 5 degree coarse step has ONE candidate, so its answer is
-    #    forced; black_bear_pass's [56.0, 57.5] is the flight's own figure, not a clamp.
-    #  - `sun_altitude_pin_ok` is a spec saying it means to sit on the floor, and why.
-    low, high = (float(v) for v in imagery_spec["sun_altitude_range"])
-    fitted = float(recorded["sun_fit"]["altitude_deg"])
-    if high - low >= 5.0 and not imagery_spec.get("sun_altitude_pin_ok"):
-        for edge, name in ((low, "floor"), (high, "ceiling")):
-            assert not math.isclose(fitted, edge, abs_tol=1e-6), (
-                f"{map_key}: the sun fit is pinned on its {name} ({fitted} deg, range "
-                f"[{low}, {high}]), so the bound is the answer rather than the photograph"
-            )
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
@@ -1708,3 +2443,42 @@ def test_building_tiles_parse_and_stand_on_the_terrain(map_key: str) -> None:
         assert abs(x) <= half and abs(y) <= half, item
         assert (root / item["shapeName"][len(f"/levels/{spec.MOD_ID}/") :]).is_file(), item
         assert item["collisionType"] == "Visible Mesh Final", item
+
+
+def test_the_lock_records_the_commit_and_run_that_built_it() -> None:
+    """A per-map lock proves the ZIP, not the release.
+
+    `sha256`, `size` and `members` are all properties of the ZIP in front of them, so a
+    release assembled from two runs at two commits passes every one of them: each map is
+    internally consistent with itself, and the only commit statement anywhere is the
+    release body, written by whichever run happened to upload last. The commit and run
+    are the only fields that can disagree BETWEEN maps.
+    """
+    _, _, _, packaging, _, _ = load_maplib()
+    env = {
+        "GITHUB_SHA": "0" * 39 + "a",
+        "GITHUB_RUN_ID": "35389688806",
+        "GITHUB_RUN_NUMBER": "55",
+    }
+    with mock.patch.dict(os.environ, env, clear=False):
+        under_actions = packaging.build_provenance()
+    assert under_actions == {
+        "source_commit": "0" * 39 + "a",
+        # Nothing to be dirty about: the runner checks out the commit it names.
+        "source_dirty": False,
+        "build_run_id": 35389688806,
+        "build_run_number": 55,
+    }
+
+    # Off a runner the run fields are absent rather than invented, and the commit comes
+    # from git with `source_dirty` beside it - a lock naming a commit it was not built
+    # from is worse than one naming none.
+    bare = {k: "" for k in env}
+    with mock.patch.dict(os.environ, bare, clear=False):
+        for key in env:
+            os.environ.pop(key, None)
+        local = packaging.build_provenance()
+    assert local["build_run_id"] is None and local["build_run_number"] is None
+    assert local["source_commit"] is None or re.fullmatch(r"[0-9a-f]{40}", local["source_commit"])
+    assert local["source_dirty"] in (True, False, None)
+    assert (local["source_commit"] is None) == (local["source_dirty"] is None)

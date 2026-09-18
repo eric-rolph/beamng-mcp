@@ -596,7 +596,8 @@ def conditioned_colour(
     """The full-resolution orthoimagery, de-lit against the DEM when the spec asks."""
 
     colour = naip_mosaic(naip_dir, fp, dem.shape[0])
-    stats: dict = {"delight": False}
+    source = source_colour_stats(colour)
+    stats: dict = {"delight": False, "source": source}
     if imagery_spec and imagery_spec.get("delight"):
         from . import imagery
 
@@ -633,6 +634,10 @@ def conditioned_colour(
             steep_cap_lum=imagery_spec.get("steep_cap_lum"),
             steep_feather_deg=float(imagery_spec.get("steep_feather_deg", 0.0)),
             knee_lum=float(imagery_spec.get("knee_lum", 0.55)),
+            # `delight`'s docstring offers a spec `highlight_ceiling`, and 0 to turn the
+            # clamp off. This is the only call site and it was not passing the name, so
+            # every de-lit map took the default and no spec could reach the lever.
+            highlight_ceiling=float(imagery_spec.get("highlight_ceiling", 0.95)),
             cover_mask=(canopy_chm > 2.0)
             if canopy_chm is not None and imagery_spec.get("refill_by_cover")
             else (canopy_cover > 0.5)
@@ -642,8 +647,95 @@ def conditioned_colour(
             shadow_dark_ratio=imagery_spec.get("shadow_dark_ratio"),
             exclude_sources=source_exclude,
         )
-        stats = {"delight": True, "sun_fit": sun, **dstats}
+        stats = {"delight": True, "sun_fit": sun, **dstats, "source": source}
     return colour, stats
+
+
+def source_colour_stats(colour: np.ndarray, stride: int = 4) -> dict:
+    """What the photograph measures before any conditioning touches it.
+
+    The shipped base's own luminance spread says nothing on its own: a flat pale basin
+    and a mosaic the de-lighting flattened read the same number. Only the ratio of the
+    two separates them, and this end of it was the end nobody recorded - every stat in
+    the handoff describes the output. Factory Butte is the case that needs it: its base
+    is the palest of the pack at 0.052 chroma under the mud flat, and whether that is
+    the badlands or the correction is not answerable from the output alone.
+
+    Taken on a stride, so the full mosaic is never copied to measure it.
+    """
+
+    sample = colour[::stride, ::stride].astype("float32") / 255.0
+    lum = sample.mean(axis=-1)
+    p05, p50, p95 = (float(v) for v in np.percentile(lum, [5, 50, 95]))
+    brightest = sample.max(axis=-1)
+    chroma = (brightest - sample.min(axis=-1)) / np.maximum(brightest, 1e-6)
+    out = {
+        "px": int(colour.shape[0]),
+        "stride": int(stride),
+        "lum_p05": round(p05, 4),
+        "lum_p50": round(p50, 4),
+        "lum_p95": round(p95, 4),
+        "lum_spread": round(p95 - p05, 4),
+        "chroma_mean": round(float(chroma.mean()), 4),
+    }
+    del sample, lum, brightest, chroma
+    return out
+
+
+def base_colour_stats(
+    colour: np.ndarray,
+    layer: np.ndarray,
+    materials,
+    *,
+    before_ceiling: np.ndarray | None = None,
+) -> dict:
+    """The finished base's black-hole and per-layer numbers, measured on what ships.
+
+    Every map reaches build_base_set, and only some reach the terrain stage's OBJECTS
+    path, so this is where the base's own gate numbers are taken: measured here, they
+    exist for all six maps and they describe the array that was written rather than an
+    upstream one of a different size (the base is resized to base_px on its way out, and
+    LANCZOS overshoot on a hard edge lands exactly in the clipped fraction).
+
+    ``before_ceiling`` is the same base one step earlier, before the shipping clamp.
+    The clamp caps every channel at 249 and ``clipped`` counts 250, so once a map runs
+    the clamp its ``clipped`` is zero however the pipeline behaved - a true number that
+    can no longer be a gate. Measured on the array handed in here instead, the per-layer
+    share survives the fix that hid it, at the resolution the whole-base
+    ``shipped_ceiling_fraction`` throws away: fb_caprock is 5.6% over the ceiling and
+    0.13% of its base.
+    """
+
+    from PIL import Image
+
+    layer_at_colour = layer
+    if layer.shape[0] != colour.shape[0]:
+        layer_at_colour = np.asarray(
+            Image.fromarray(layer.astype("uint8")).resize(
+                (colour.shape[0], colour.shape[0]), Image.NEAREST
+            )
+        )
+    means = {}
+    for index, name in enumerate(materials):
+        where = layer_at_colour == index
+        if where.sum() < 100:
+            continue
+        rgb = colour[where].reshape(-1, 3).mean(axis=0) / 255.0
+        means[name] = {
+            "rgb": [round(float(v), 4) for v in rgb],
+            "luminance": round(float(rgb.mean()), 4),
+            "cells": int(where.sum()),
+            "clipped": round(float((colour[where].max(axis=-1) >= 250).mean()), 5),
+        }
+        if before_ceiling is not None:
+            means[name]["clipped_before_ceiling"] = round(
+                float((before_ceiling[where].max(axis=-1) >= 250).mean()), 5
+            )
+    return {
+        "base_px": int(colour.shape[0]),
+        "layer_mean_srgb": means,
+        "near_black_fraction": round(float((colour.max(axis=-1) < 13).mean()), 6),
+    }
 
 
 def build_base_set(
@@ -1074,7 +1166,42 @@ def refill_check(
         c0, c1 = max(cols.min() - pad, 0), min(cols.max() + pad + 1, n)
         field = labels[r0:r1, c0:c1] == lab
         interior = ndimage.binary_erosion(field, iterations=max(1, int(6.0 / texel_m)))
-        if interior.sum() < 20:
+        # And the painted bed is not part of the field, for the same reason it is not
+        # part of the ring. `refill_match` already refuses to correct a bed cell inside
+        # a field - it zeroes its feather there, so the bed keeps the contrast the stage
+        # before it just enforced - while this measured those same cells as if they were
+        # ground. Whichever way the bed sits against the shadow, the match cannot move
+        # those texels by design, so counting them here asks for something no fix can
+        # deliver: the ratio barely moves however hard the ground around them is lifted,
+        # and the gate reads that as the match having failed. Measured on the shipped
+        # Meteor Crater level, the 2,973 m2 field this gate reports at (-35.3, 670.3) is
+        # 84.4% road bed, on a level that is 1.16% road bed overall. It is a shadow on a
+        # road, not an unlifted field.
+        # The erosion runs first, and on an elongated field it can take everything: at
+        # meteor_crater's 0.5 m texel this is twelve iterations, a 6 m band off every
+        # boundary, and a road shadow at the 1000 m2 floor is about 12 m by 83 m. Both
+        # numbers below have to say so, or a field the exclusion could not reach looks
+        # exactly like a field with no road near it.
+        bed_share: float | None = 0.0
+        if bed is not None:
+            not_bed = ~bed[r0:r1, c0:c1]
+            # An empty interior has no share to report. Reporting 0.0 here would read as
+            # "no road in this field" on precisely the elongated shadows the exclusion
+            # was written for, which is the one case worth telling apart.
+            bed_share = (
+                float((interior & ~not_bed).sum()) / int(interior.sum()) if interior.any() else None
+            )
+            # Below 20 cells the remainder is noise, so the field keeps its old reading
+            # and `bed_fraction` says why it is the one it is.
+            if (interior & not_bed).sum() >= 20:
+                interior = interior & not_bed
+            del not_bed
+        # Whether the numbers below rest on the eroded interior or on the whole
+        # component, bed and all. The fallback is not a failure - it is the old reading,
+        # deliberately - but it is a different measurement and the handoff should say
+        # which one it is.
+        interior_eroded = bool(interior.sum() >= 20)
+        if not interior_eroded:
             interior = field
         dist = ndimage.distance_transform_edt(~field) * texel_m
         ring = (dist > 10.0) & (dist <= 30.0) & ring_ok[r0:r1, c0:c1]
@@ -1098,6 +1225,18 @@ def refill_check(
                     float(exg[r0:r1, c0:c1][interior].mean() - exg[r0:r1, c0:c1][ring].mean()), 3
                 ),
                 "grain_ratio": round(float(f_in.std() / max(f_ring.std(), 1e-4)), 3),
+                # The population every ratio above rests on. `area_m2` is the component
+                # BEFORE the erosion and the bed exclusion, so it is an upper bound and
+                # not the sample size; `grain_ratio` in particular is a standard
+                # deviation over exactly these texels.
+                "interior_texels": int(interior.sum()),
+                # False when the erosion left under 20 cells and the whole component was
+                # used instead - bed included, so `bed_fraction` describes nothing that
+                # was excluded.
+                "interior_eroded": interior_eroded,
+                # How much of the field is road the match is not allowed to touch. None
+                # when the erosion emptied the interior, so there was nothing to measure.
+                "bed_fraction": None if bed_share is None else round(bed_share, 3),
             }
         )
     if not fields:
@@ -1398,6 +1537,50 @@ def build_level(
         report["road_contrast"] = road_contrast(
             colour_full, layer, materials, all_surfaces, fp.size_m / colour_full.shape[0]
         )
+    # Resize to the base's own resolution HERE, so the numbers below are taken from the
+    # same array build_base_set writes (it passes a matching array straight through).
+    base_colour = colour_full
+    if base_colour.shape[0] != base_px:
+        from PIL import Image
+
+        base_colour = np.asarray(
+            Image.fromarray(colour_full).resize((base_px, base_px), Image.LANCZOS)
+        )
+    # Nothing reaches white, enforced on what SHIPS rather than in the middle of the
+    # pipeline. `delight` already ends with this clamp, and it is not enough, for the
+    # same reason the bed contract above is enforced twice: `delight` is not the last
+    # writer of the base. `refill_match` lifts every refilled field toward its ring
+    # after the clamp, `_enforce_beds` lifts a bed toward its margin, and the LANCZOS
+    # resize overshoots on a hard edge - and the clamp leaves exactly one count of
+    # margin (0.95 linear encodes to 249, the gate counts 250), so any of the three
+    # re-breaks it. Measured on the shipped Factory Butte base, the resize alone puts
+    # back 0.0016 on fb_caprock; the refill match put back far more than that, which is
+    # how a map with an unconditional highlight ceiling shipped 5.6% of its caprock
+    # blown out. The u8 -> linear -> u8 round trip is exactly lossless, so a texel under
+    # the ceiling is not touched at all.
+    # Scoped to the maps the gate scopes itself to: a level with no IMAGERY spec ships
+    # the photograph as flown and nobody promised this of it.
+    before_ceiling = None
+    if getattr(spec, "IMAGERY", None):
+        from . import imagery
+
+        # Kept so the per-layer share below is measured on the array the clamp read.
+        # Without it the clamp erases its own evidence: it caps every channel at 249
+        # and the base's gate counts 250, so `clipped` reads zero on every map that
+        # runs this, whatever the pipeline did upstream.
+        # The cost is one more u8 base held alongside the clamped one and `_linear`,
+        # about 50 MB at base_px 4096 against a peak near 250 MB. Freed with the stats
+        # call below rather than held to the end of the stage, because the de-lighting
+        # is where this pack meets its memory ceiling.
+        before_ceiling = base_colour
+        _linear, _over = imagery.clamp_highlights(imagery.srgb_to_linear(base_colour), 0.95)
+        base_colour = imagery.linear_to_srgb_u8(_linear)
+        del _linear
+        if isinstance(report.get("imagery"), dict):
+            # A large number here is not this clamp misbehaving, it is how much a later
+            # stage lifted past the ceiling - which is worth seeing rather than silently
+            # correcting.
+            report["imagery"]["shipped_ceiling_fraction"] = round(_over, 6)
     build_base_set(
         dem,
         res,
@@ -1405,9 +1588,13 @@ def build_level(
         data_root / "naip",
         terrains_dir,
         base_prefix,
-        colour_full=colour_full,
+        colour_full=base_colour,
         base_px=base_px,
     )
+    report["base_colour"] = base_colour_stats(
+        base_colour, layer, materials, before_ceiling=before_ceiling
+    )
+    del base_colour, before_ceiling
     texture_kit.build_set(
         terrains_dir,
         macro_prefix,
