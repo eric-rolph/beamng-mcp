@@ -23,10 +23,25 @@ on:
       - "gis-maps-v*"
     # Branch pushes run the workflow file AT THE PUSHED COMMIT, which is the only trigger
     # available before this file reaches the default branch (workflow_dispatch resolves
-    # against the default branch). Scoped to the pack's own branches so nothing else
-    # ever rebuilds the release.
+    # against the default branch).
+    #
+    # THE BRANCH NAME DECIDES WHETHER A PUSH TAKES THE RELEASE SLOT. Every branch matched
+    # here joins the repository-wide concurrency group below, and because a queued run is
+    # replaced rather than queued behind, a newer push CANCELS THE PENDING run instead of
+    # waiting for it. A push whose point was to validate a test edit therefore discards a
+    # six-map build somebody else is waiting on, silently. The pattern this list replaced
+    # was "claude/gis-maps**", which swept in every PR branch for the pack, and that is
+    # exactly what happened: four builds superseded in one afternoon, one of them by a
+    # pure-Python change that needed nothing from a runner.
+    #
+    # So, the rule, written down here rather than learned the way it was learned: a PR
+    # branch for the maps pack goes OUTSIDE this list unless the six-map build is the point
+    # of the push. Name a branch claude/gis-maps-build-<topic> to opt IN. Anything else is
+    # validated by ci.yml, which runs on the pull request in about two minutes and takes
+    # no slot.
     branches:
-      - "claude/gis-maps**"
+      - "claude/gis-maps-pack"
+      - "claude/gis-maps-build-**"
 
 permissions:
   contents: write
