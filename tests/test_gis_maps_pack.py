@@ -1476,6 +1476,45 @@ def test_refills_read_as_their_ground_on_the_shipped_base(map_key: str) -> None:
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_no_refilled_field_reads_as_a_blotch(map_key: str) -> None:
+    """The floor under the contract above, which every de-lighting map owes whether or
+    not it asked for ring matching: no refilled field is under 0.75 of its ring's
+    luminance or more than 0.10 off it on either chroma axis.
+
+    The gate above is tighter (0.90 and 0.04) and skips unless a spec sets
+    ``refill_match_ring``, which one map of six does. That is a sound skip - a map that
+    did not opt into ring matching did not promise that contract - but it left the
+    failure mode itself ungated on the other five, and a refill at half its ring's
+    brightness is not a contract anyone declines. Meteor Crater shipped five fields at
+    0.46 to 0.70 with up to 0.18 of blue-minus-red on them before ``refill_match_ring``
+    was turned on for it.
+    """
+
+    spec = load_spec(map_key)
+    if not (getattr(spec, "IMAGERY", None) or {}).get("delight"):
+        pytest.skip(f"{map_key}: the base is not de-lit, so nothing is refilled")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    imagery = handoff.get("imagery") or {}
+    assert imagery, f"{map_key}: de-lit but the handoff carries no imagery statistics"
+    check = imagery.get("refill_check")
+    if check is None:
+        # A map whose refills are all under the reporting size records None here, which
+        # is a fact about the ground and not a missing measurement - the assertion above
+        # is what separates the two.
+        pytest.skip(f"{map_key}: no refilled field large enough to be reported")
+    worst = min((e["lum_ratio"] for e in check["largest"]), default=1.0)
+    assert worst >= 0.75, (map_key, "a refilled field reads as a blotch", worst, check["largest"])
+    for axis in ("br_diff", "exg_diff"):
+        off = max((abs(e[axis]) for e in check["largest"]), default=0.0)
+        assert off <= 0.10, (map_key, axis, off, check["largest"])
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_spawns_stand_on_ground_a_vehicle_fits_on(map_key: str) -> None:
     """A spawn the spec marks ``level_ground`` stands on ground a line of vehicles
     fits on: a 14 by 7 m rectangle at its heading, tilted no more than 8 degrees

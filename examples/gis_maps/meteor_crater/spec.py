@@ -198,6 +198,15 @@ IMAGERY = {
     # never reached: a cell darker than half its 20 m mean and bluer than green
     # is refilled as cast shadow.
     "shadow_dark_ratio": 0.65,
+    # And every refilled field is brought to the mean colour and the grain amplitude of
+    # its own 10-30 m ring of lit ground. Without it, five of the eighteen fields the
+    # north rim's crest shadows leave came out at 0.46 to 0.70 of their ring's luminance
+    # and 0.10 to 0.18 bluer than it on blue-minus-red (measured on run 33's published
+    # ZIP; three of them cluster around 650 m north of centre), which reads as dark
+    # blue-grey blotches on ground the flight simply had in shade. Black Bear Pass has
+    # carried this since its refills were written and measures 0.945 at the tenth
+    # percentile against the same rings.
+    "refill_match_ring": True,
     # The near-rim ejecta read lilac-grey: on the plain and ejecta layers a 100 m
     # neighbourhood bluer than the far plain (b/r 0.72) by 5 % is pulled to it.
     "chroma_pull": {
