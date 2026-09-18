@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import re
 import shutil
 import struct
 import sys
@@ -230,6 +231,77 @@ def test_texture_kit_is_deterministic(tmp_path: Path) -> None:
         tmp_path / "c", "x", "gravel", seed=43, size=64, base_rgb=[0.5, 0.4, 0.3]
     )
     assert a["b"].read_bytes() != c["b"].read_bytes(), "a different seed must change the map"
+
+
+# The names the placed-object generators seed themselves from. A seed built on the
+# builtin hash() of one of these is a different seed in every process, which is how two
+# CI builds of the same commit shipped different rocks, different shrubs and a forest of
+# 9032 instances against 9040.
+_SEED_NAMES = ("rock_limestone", "rock_talus", "sage", "juniper", "aspen_sapling", "brick")
+
+_SEED_PROBE = """
+import json, sys
+sys.path.insert(0, sys.argv[1])
+from maplib.stable_seed import stable_hash
+names = json.loads(sys.argv[2])
+print(json.dumps({
+    "stable": [stable_hash(n) for n in names],
+    "builtin": [hash(n) for n in names],
+}))
+"""
+
+
+def _seed_probe(hash_seed: str) -> dict:
+    """Run the probe in a fresh interpreter with PYTHONHASHSEED set to ``hash_seed``."""
+
+    import os
+    import subprocess
+
+    env = dict(os.environ, PYTHONHASHSEED=hash_seed)
+    out = subprocess.run(  # noqa: S603 - this interpreter, a literal script, static arguments
+        [sys.executable, "-c", _SEED_PROBE, str(PACK_ROOT), json.dumps(list(_SEED_NAMES))],
+        capture_output=True,
+        text=True,
+        check=True,
+        env=env,
+    )
+    return json.loads(out.stdout)
+
+
+def test_object_seeds_are_stable_across_processes() -> None:
+    """``stable_hash`` gives the same number in a differently salted interpreter.
+
+    This has to cross a process boundary: str hashing is salted once per process, so a
+    single-process test passes with the defect present and proves nothing. The builtin
+    is measured alongside as the control - if it ever stops differing here, the salt is
+    pinned in the environment and this test has quietly stopped testing anything."""
+
+    a, b = _seed_probe("1"), _seed_probe("2")
+    assert a["stable"] == b["stable"], (a["stable"], b["stable"])
+    assert a["builtin"] != b["builtin"], (
+        "PYTHONHASHSEED appears to be pinned, so this test can no longer tell a stable "
+        "seed from an unstable one"
+    )
+
+
+def test_no_generator_is_seeded_from_the_builtin_hash() -> None:
+    """No module under ``maplib`` derives a seed or a shipped id from ``hash()``.
+
+    Guards the spelling as well as the property: the test above cannot see a new call
+    site that no map exercises yet, and a reviewer reading `hash(family) % 97` has no
+    reason to suspect it."""
+
+    offenders = []
+    for path in sorted((PACK_ROOT / "maplib").glob("*.py")):
+        # stable_seed.py names the builtin in its own docstring to explain what it
+        # replaces; it is the one file that is allowed to say the word.
+        if path.name == "stable_seed.py":
+            continue
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            code = line.split("#", 1)[0]
+            if re.search(r"(?<![\w.])hash\s*\(", code):
+                offenders.append(f"{path.name}:{number}: {line.strip()}")
+    assert not offenders, "use maplib.stable_seed.stable_hash instead:\n" + "\n".join(offenders)
 
 
 def test_texture_tiles_wrap() -> None:
