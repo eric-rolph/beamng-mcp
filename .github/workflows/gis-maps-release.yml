@@ -23,10 +23,35 @@ on:
       - "gis-maps-v*"
     # Branch pushes run the workflow file AT THE PUSHED COMMIT, which is the only trigger
     # available before this file reaches the default branch (workflow_dispatch resolves
-    # against the default branch). Scoped to the pack's own branches so nothing else
-    # ever rebuilds the release.
+    # against the default branch).
+    #
+    # THE BRANCH NAME DECIDES WHETHER A PUSH TAKES THE RELEASE SLOT. Every branch matched
+    # here joins the repository-wide concurrency group below, and because a queued run is
+    # replaced rather than queued behind, a newer push CANCELS THE PENDING run instead of
+    # waiting for it. A push whose point was to validate a test edit therefore discards a
+    # six-map build somebody else is waiting on, silently. The pattern this list replaced
+    # was "claude/gis-maps**", which swept in every PR branch for the pack, and that is
+    # exactly what happened: four builds superseded in one afternoon, one of them by a
+    # pure-Python change that needed nothing from a runner.
+    #
+    # So, the rule, written down here rather than learned the way it was learned: a PR
+    # branch for the maps pack goes OUTSIDE this list unless the six-map build is the point
+    # of the push. Name a branch claude/gis-maps-build-<topic> to opt IN. Anything else is
+    # validated by ci.yml, which runs on the pull request in about two minutes and takes
+    # no slot.
+    #
+    # WHAT THAT VALIDATION DOES NOT COVER, because it will mislead you otherwise: ci.yml
+    # runs on windows-latest and never builds a map, so `require_built` skips every
+    # artefact gate in tests/test_gis_maps_pack.py there. The gates that read a built
+    # level - the handoff hashes, the .ter binary, the colour and refill contracts, the
+    # spawn checks - run ONLY on a build runner, which means this workflow's "Static gates
+    # on the built trees" step and a critic round. A pull request can therefore be green
+    # on all four checks while the branch it targets is red on a gate no pull request can
+    # see, and on 2026-09-18 three of them were. Green here is evidence about the static
+    # suite, never about the maps.
     branches:
-      - "claude/gis-maps**"
+      - "claude/gis-maps-pack"
+      - "claude/gis-maps-build-**"
 
 permissions:
   contents: write
@@ -108,6 +133,9 @@ jobs:
           du -sh examples/gis_maps/*/dist
           df -h / | tail -1
 
+      # The only place most of this suite actually runs. ci.yml is windows-latest with no
+      # build, so every gate behind `require_built` skips there; a pull request cannot go
+      # red on any of them. Read a failure here as the first real word on the maps.
       - name: Static gates on the built trees
         run: python -m pytest -q tests/test_gis_maps_pack.py
 
