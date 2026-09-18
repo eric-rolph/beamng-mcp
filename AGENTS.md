@@ -3462,6 +3462,23 @@ on the shipped `fc4db59` base to 0.05629 four imagery commits later while its me
 *fell* - a widening distribution, which reads as a regression rather than as a gate newly
 reporting. The clamp makes the release publishable; it does not explain that.
 
+**And the sting in the tail: the fix also made the gate unfailable.** `clamp_highlights` holds the
+brightest channel at 0.95 linear. sRGB-encoded that is 249.311, so u8 249; reaching 250 needs
+0.95163 linear, which the clamp forbids. Since the clamp now runs last, immediately before the array
+`base_colour_stats` measures, `clipped` is exactly 0.00000 for every layer of every map with an
+IMAGERY spec, whatever happened upstream. Measured on the shipped Factory Butte base: `fb_caprock`
+0.05631 before, 0.00000 after, max channel 249. **`test_base_colour_has_no_black_holes` now reads
+as a live gate and cannot fail.** `shipped_ceiling_fraction` does not close the gap either, because
+it is whole-base while the defect is per-layer - `fb_caprock` is 5.6% over the ceiling and 0.13% of
+the base.
+
+So this section describes two defects fixed and a third created in fixing them, which is the honest
+shape of it. **The general rule: a clamp placed immediately before a threshold test does not satisfy
+the test, it retires it.** When a fix moves an enforcement to just before the measurement, ask what
+the measurement can still report. The repair is to measure the pre-clamp array -
+`clipped_before_ceiling` per layer - and to set its floor from the population rather than restoring
+a hard 0.002, which would re-red three maps over a defect the clamp has made invisible in game.
+
 ### Pack conventions that are ours, not the engine's
 
 - `size_px` is gated to a power of two between 1024 and 8192 in
