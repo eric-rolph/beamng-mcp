@@ -833,12 +833,22 @@ def delight(
     # three conjuncts of `under_gain_floor_untouched` at once: it is not the refill, so
     # the cell still reads untouched; its written value is under 0.02, far below any
     # `floor_lum`; and a third of a dark neighbourhood over a brighter source is far
-    # under 0.45. So it is that gate's writer, and it can put a texel under the
-    # near-black threshold the finished base is gated on. Measured on a uniformly dark
-    # synthetic scene: near black 37% of the source and 56% of the OUTPUT, this floor
-    # accounting for every darkened cell and the two below it for none, in a scene where
-    # the clamp below never bound. Gated, 0%.
+    # under 0.45. It can also put a texel under the near-black threshold the finished
+    # base is gated on: its 0.0571 crossover encodes to u8 68 through `linear_to_srgb_u8`
+    # -- true sRGB with a 12.92 toe, not a 2.2 power -- so it can carry a plainly visible
+    # mid-tone into black. Measured on a uniformly dark synthetic scene: near black 37% of
+    # the source and 56% of the OUTPUT, this floor accounting for every darkened cell and
+    # the two below it for none. Gated, 0%.
     # Tested by `test_the_anti_black_floor_never_darkens_a_cell`.
+    #
+    # BUT `under_gain_floor_untouched` IS NOT A DETECTOR FOR THIS FLOOR, and the 100% above
+    # belongs to that scene rather than to the gate. On a moderate scene -- lit median 0.31
+    # -- an independent sweep found this floor's trigger share at 0.000000 across every
+    # `strength`, with the breach still rising to 0.000454 as `gain_p05` settled onto the
+    # gain's own 0.45 low clip, and 56 of those 67 cells within 1e-4 of 0.45, which is the
+    # edge of a strict `composed < 0.45` against `np.float32(0.45)` = 0.44999998807907104.
+    # So the number has at least two producers and one of them is its own comparison. Quote
+    # it with the scene attached; a reader who carries "100%" to another map will be wrong.
     #
     # The two are SEPARABLE and only share this writer: swept independently, a scene can
     # reach 2,786 breach cells with the near-black fraction still at exactly zero. So a
@@ -875,9 +885,13 @@ def delight(
     # 6.0e-05 the guard reports 1.0e-04, a cell the floor above had just set to 2.1e-05
     # trips a trigger of 2.5e-05, and the write puts it at 1.5e-05, a factor of 0.714.
     #
-    # LATENT, not observed: it needs a lit neighbourhood under 0.25e-4 / 0.35 = 7.14e-05,
-    # which no scene in the suite reaches, and `seen`'s 0.01 source cut keeps such cells
-    # out of `under_gain_floor_untouched` anyway, so no gate here would have reported it.
+    # LATENT, not observed, and IMMATERIAL to the near-black gate, which is the difference
+    # between this and the floor above: it needs a lit neighbourhood under
+    # 0.25e-4 / 0.35 = 7.14e-05, and there floor 1 writes 2.5e-05 and this one 1.8e-05,
+    # both of which encode to u8 0 -- a cell it darkened was already counted near black and
+    # still is. `seen`'s 0.01 source cut keeps such cells out of
+    # `under_gain_floor_untouched` too, so no gate here would have reported it. Repaired
+    # because the reference mismatch is the same defect, not because it ships anything.
     # It was found by two readers checking the sibling floors' exoneration against the
     # guard rather than against the intent -- and the exoneration was conditional, which
     # is why it is repaired structurally rather than bounded. Nothing divided by `lit_l`:
