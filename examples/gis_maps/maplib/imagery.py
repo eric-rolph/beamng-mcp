@@ -40,15 +40,37 @@ def _mem(tag: str) -> None:
         print(f"    [mem] {_rss_gb():6.2f} GB  {tag}", flush=True)
 
 
+# `np.where(mask, a, b)` evaluates BOTH branches over the whole array before it
+# chooses, so the one-line form of each conversion below allocated four to five
+# full-size temporaries: at 8192 samples a colour array is 805 MB and the pair of
+# conversions was several gigabytes of peak on its own. Each now works in place and
+# computes the rare branch only where it applies, in the same order and with the same
+# operations, so the result is bit-identical to the `np.where` form.
+
+
 def srgb_to_linear(rgb_u8: np.ndarray) -> np.ndarray:
-    c = rgb_u8.astype("float32") / 255.0
-    return np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
+    c = rgb_u8.astype("float32")
+    c /= 255.0
+    toe = c <= 0.04045
+    toe_values = c[toe] / 12.92
+    c += 0.055
+    c /= 1.055
+    c **= 2.4
+    c[toe] = toe_values
+    return c
 
 
 def linear_to_srgb_u8(lin: np.ndarray) -> np.ndarray:
-    lin = np.clip(lin, 0.0, 1.0)
-    s = np.where(lin <= 0.0031308, lin * 12.92, 1.055 * np.power(lin, 1 / 2.4) - 0.055)
-    return (s * 255.0).round().astype("uint8")
+    s = np.clip(lin, 0.0, 1.0)
+    toe = s <= 0.0031308
+    toe_values = s[toe] * 12.92
+    np.power(s, 1 / 2.4, out=s)
+    s *= 1.055
+    s -= 0.055
+    s[toe] = toe_values
+    del toe, toe_values
+    s *= 255.0
+    return s.round().astype("uint8")
 
 
 def fit_sun(
@@ -224,9 +246,26 @@ def delight(
     visibility = cast_shadows(smooth, res_r, azimuth_deg, altitude_deg)
     # Sky light is what the shadows see, and a crater floor sees less sky than a plain:
     # scale the ambient term by the openness the AO estimate measures.
-    openness = hm.ambient_occlusion(smooth, res_r, radius_px=max(8, int(40 / res_r)))
-    sky = ambient * (0.55 + 0.45 * openness)
-    illum = sky + (1.0 - sky) * shade * visibility
+    # `openness` becomes `sky` in place, and both it and the hillshade are released
+    # here rather than at the end of the frame. Written as the one-line expression
+    # this held four full-size arrays plus three temporaries at once, and left
+    # `shade`, `sky` and `openness` bound for the remaining 600 lines. Each step below
+    # is the same operation in the same order on the same values, so `illum` is
+    # bit-identical to `sky + (1.0 - sky) * shade * visibility`.
+    sky = hm.ambient_occlusion(smooth, res_r, radius_px=max(8, int(40 / res_r)))
+    sky *= 0.45
+    sky += 0.55
+    sky *= ambient
+    illum = 1.0 - sky
+    illum *= shade
+    illum *= visibility
+    illum += sky
+    del sky
+    # `shade` itself is read once more, 550 lines down, and only as `shade > 0.5`.
+    # The mask is a byte a sample where the float is four, so it is taken here and the
+    # hillshade is freed with the rest of the illumination.
+    lit_shade = shade > 0.5
+    del shade
     flat = ambient + (1.0 - ambient) * math.sin(math.radians(altitude_deg))
     lin = srgb_to_linear(colour_u8)
     # Minnaert-style calibration: the exponent that best explains the photographed
@@ -235,6 +274,7 @@ def delight(
     lum = lin.mean(axis=-1)
     gy, gx = np.gradient(smooth, res_r)
     grade = np.hypot(gx, gy)
+    del gy, gx  # 268 MB each at 8192 samples, and `grade` is their only reader
     steep = grade > math.tan(math.radians(steep_deg))
     # The cap's weight: 0 a feather below ``steep_deg``, 1 at it (a hard threshold
     # drew a luminance contour along the 40 degree line through the scree).
@@ -415,7 +455,7 @@ def delight(
     # samples with `srgb` at 805 MB. Holding them to the end of a 650-line function is
     # most of what put this stage over the OOM killer's line: the names stay bound to
     # the frame long after the arrays stop being read.
-    del openness, illum, dem_r, smooth, lum
+    del illum, dem_r, smooth, lum
     if "srgb" in dir():
         del srgb
     # The penumbra: a cell the gain lifts more than 2.5x within 4 m of a field took
@@ -770,7 +810,7 @@ def delight(
     if steep_cap:
         # Nothing on a steep face is lifted past what its lit faces measure: the
         # gain that brings a shaded wall back must not make it paler than a lit one.
-        lit_steep = steep & (visibility > 0.9) & (shade > 0.5) & ~snow_mask
+        lit_steep = steep & (visibility > 0.9) & lit_shade & ~snow_mask
         if lit_steep.sum() > 2000:
             lum_o = out.mean(axis=-1)
             cap_lum = float(np.median(lum_o[lit_steep]))
