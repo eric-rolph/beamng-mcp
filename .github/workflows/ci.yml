@@ -2,7 +2,12 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # The pack branch is here because it is long-lived and nothing else covers it. The
+    # suite reaches it today only through PR #89, whose head it is, so the branch's only
+    # coverage is a side effect of a pull request nobody intends to merge: close or merge
+    # #89 and the pack branch silently stops being tested. Two minutes on windows-latest
+    # per push is the cheapest way to not depend on that.
+    branches: [main, claude/gis-maps-pack]
   pull_request:
   workflow_dispatch:
 
