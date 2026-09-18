@@ -25,20 +25,18 @@ on:
     # available before this file reaches the default branch (workflow_dispatch resolves
     # against the default branch).
     #
-    # THE BRANCH NAME DECIDES WHETHER A PUSH TAKES THE RELEASE SLOT. Every branch matched
-    # here joins the repository-wide concurrency group below, and because a queued run is
-    # replaced rather than queued behind, a newer push CANCELS THE PENDING run instead of
-    # waiting for it. A push whose point was to validate a test edit therefore discards a
-    # six-map build somebody else is waiting on, silently. The pattern this list replaced
-    # was "claude/gis-maps**", which swept in every PR branch for the pack, and that is
-    # exactly what happened: four builds superseded in one afternoon, one of them by a
-    # pure-Python change that needed nothing from a runner.
+    # A branch matched here spends 36 minutes of a runner on a six-map build, so this list
+    # is an opt-in: name a branch claude/gis-maps-build-<topic> when the build IS the point
+    # of the push, and keep every other PR branch out. Anything else is validated by
+    # ci.yml, which runs on the pull request in about two minutes.
     #
-    # So, the rule, written down here rather than learned the way it was learned: a PR
-    # branch for the maps pack goes OUTSIDE this list unless the six-map build is the point
-    # of the push. Name a branch claude/gis-maps-build-<topic> to opt IN. Anything else is
-    # validated by ci.yml, which runs on the pull request in about two minutes and takes
-    # no slot.
+    # It used to cost more than runner time. Every branch here shared ONE repository-wide
+    # concurrency group, and GitHub keeps a single pending run per group: a new run
+    # REPLACES the one waiting rather than queueing behind it. So a push on any branch
+    # silently discarded a six-map build somebody else was waiting on - four of them in
+    # one afternoon, one by a pure-Python change that needed no runner at all. The group
+    # below is keyed per branch now, so that gun is unloaded; what is left is the runner
+    # time, which is reason enough to stay out.
     #
     # WHAT THAT VALIDATION DOES NOT COVER, because it will mislead you otherwise: ci.yml
     # runs on windows-latest and never builds a map, so `require_built` skips every
@@ -61,19 +59,36 @@ permissions:
 # the release can finish holding ZIPs from one commit and a SHA256SUMS.txt from another
 # with no field saying so.
 #
-# The group is deliberately repository-wide and carries no ref: what it serialises is
-# one release, and a tag push and a manual run can both reach it. Adding ${{ github.ref }}
-# here would let two of those clobber one release at once, which is the failure above.
-# Only the integration branch publishes now (see the `if:` on the release steps); the other
-# branches are in the group to keep one six-map build on the runners at a time.
+# Two things need serialising here and they are not the same shape, which is why one flat
+# key could not do it. A bare ${{ github.ref }} was rejected for a real reason - THREE
+# disjoint paths publish (a gis-maps-v* tag, a workflow_dispatch on any ref, and a push to
+# the integration branch), they carry three different refs, and keying on the ref would
+# put them in three groups and let them clobber one release at once. That reasoning was
+# right. Dropping the ref entirely was the wrong conclusion from it.
 #
-# cancel-in-progress is false BECAUSE the group is repository-wide. Cancelling would
-# mean a push to any branch killing a six-map build on another, and this branch is
-# worked by several people at once. Queueing wastes a doomed build's runner time;
-# cancelling destroys a good one. GitHub holds a single pending run per group and a
-# newer push supersedes the pending one, so the queue does not grow past one.
+# A BUILD IS PER BRANCH. Two branches building six maps share nothing at all.
+#
+# Repository-wide made every build queue for the release's slot, and that slot holds ONE
+# pending run: a new run REPLACES the pending one rather than queueing behind it, so a
+# push on any branch threw away another branch's waiting build. cancel-in-progress does
+# not enter into it - it governs the RUNNING run, and what was lost was the PENDING one.
+# Setting it false was correct on its own merits and could never have fixed this.
+#
+# So key on the publish CONDITION, not on the ref: all three publishing paths collapse to
+# one group and keep the release serialised, while every other branch gets a group of its
+# own and waits for nobody. The condition is repeated on the two release steps below, and
+# the three have to agree - change them together.
+#
+# cancel-in-progress stays false. Several sessions work the integration branch at once,
+# and a 36-minute build is worth more than the seconds killing it would save. Inside a
+# group a newer push still supersedes the pending run, which is what you want: the queue
+# never grows past one and the newest commit wins.
 concurrency:
-  group: gis-maps-release
+  group: >-
+    gis-maps-release-${{ (startsWith(github.ref, 'refs/tags/')
+    || github.event_name == 'workflow_dispatch'
+    || github.ref == 'refs/heads/claude/gis-maps-pack')
+    && 'publish' || github.ref }}
   cancel-in-progress: false
 
 jobs:
