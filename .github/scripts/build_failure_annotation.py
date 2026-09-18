@@ -11,7 +11,12 @@ there: ``pytest -q`` ends with a wall of SKIPPED reasons, so the last sixty line
 failed gates run name which maps opted out of which contract and never name the
 assertion that failed. Pass ``--pytest`` to select the lines a failure is actually in.
 
+``--title`` names the annotation. It defaults to the release workflow's wording, which
+is wrong anywhere else: the same digest now runs on `ci.yml`'s test suite, where "Static
+gates failed" would send a reader to the wrong workflow.
+
 Usage: python3 .github/scripts/build_failure_annotation.py <status> <log> [env] [--pytest]
+                                                           [--title TEXT]
 """
 
 from __future__ import annotations
@@ -71,6 +76,10 @@ def pytest_digest(lines: list[str]) -> list[str]:
 
 def main(argv: list[str]) -> int:
     pytest_mode = "--pytest" in argv
+    title_at = argv.index("--title") if "--title" in argv else -1
+    title_arg = argv[title_at + 1] if 0 <= title_at < len(argv) - 1 else None
+    if title_at >= 0:
+        del argv[title_at : title_at + 2]
     argv = [a for a in argv if a != "--pytest"]
     status = argv[0] if argv else "?"
     lines = _read(argv[1]) if len(argv) > 1 else []
@@ -90,7 +99,7 @@ def main(argv: list[str]) -> int:
     # a build's tail is where its error is, so keep the tail of that.
     trimmed = body[:LIMIT] if pytest_mode else body[-LIMIT:]
     escaped = trimmed.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
-    title = "Static gates failed" if pytest_mode else "Build failed"
+    title = title_arg or ("Static gates failed" if pytest_mode else "Build failed")
     print(f"::error title={title} (status {status})::{escaped}")
     return 0
 

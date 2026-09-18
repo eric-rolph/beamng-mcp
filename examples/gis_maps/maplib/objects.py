@@ -528,6 +528,18 @@ def scatter_rocks(
     for i in idx:
         size = float(np.exp(rng.uniform(np.log(lo), np.log(hi))))
         r, c = int(rows[i]), int(cols[i])
+        # The three aspect draws, in the order they have always been consumed, so the
+        # stream is unchanged. `size` is then the stone's LONGEST horizontal extent,
+        # because that is what `scatter_size_m` declares and what scene_objects turns
+        # into the forest item's scale, which for a stone is metres and not a
+        # multiplier. Jittering one horizontal axis up and the other down left the
+        # declared range approximate at both ends, so a declared 0.2 m floor shipped
+        # 0.18 m plates. Renormalising the aspect here rather than clamping the result
+        # at the bound keeps the size gate able to fail.
+        ax = rng.uniform(0.9, 1.1)
+        ay = rng.uniform(0.7, 1.0)
+        az = rng.uniform(0.55, 0.85)
+        aspect = size / max(ax, ay)
         out.append(
             {
                 "kind": "rock",
@@ -535,9 +547,9 @@ def scatter_rocks(
                 "y": round(float(ys[i]), 2),
                 "z": round(float(ground[r, c] - min_elevation) - 0.2 * size, 2),
                 "size": [
-                    round(size * rng.uniform(0.9, 1.1), 2),
-                    round(size * rng.uniform(0.7, 1.0), 2),
-                    round(size * rng.uniform(0.55, 0.85), 2),
+                    round(aspect * ax, 2),
+                    round(aspect * ay, 2),
+                    round(aspect * az, 2),
                 ],
                 "yaw_deg": round(float(rng.uniform(0, 360)), 1),
                 "peak_m": None,
