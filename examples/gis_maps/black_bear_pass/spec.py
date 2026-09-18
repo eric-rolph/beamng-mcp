@@ -239,7 +239,16 @@ IMAGERY = {
     "delight": True,
     # 2019-09-09 13:30 MDT at 37.9 N: the sun was at 56 degrees; the fit is pinned to
     # that, so the cast-shadow mask covers the ground that was actually in shadow.
-    "sun_altitude_range": [55.0, 58.0],
+    #
+    # Run the NOAA position for that date and place and the quarter hour either side of
+    # 13:30 gives 56.9 to 57.2 degrees, with the day topping out at 57.3 at 13:10. The
+    # bracket used to be [55, 58] and the fit sat on the 55, which is the sun at about
+    # 14:05 - the floor was holding the fit off the horizon, as intended, but holding it
+    # two degrees under the geometry the flight actually had. This brackets the computed
+    # altitude instead. The pin itself is not a guess to be widened: the dark north faces
+    # of the cliffs drag an unconstrained fit toward the horizon, which is why the range
+    # is narrow and why it stays narrow.
+    "sun_altitude_range": [56.0, 57.5],
     "sun_azimuth_hint": 200.0,
     "sun_azimuth_window": 40.0,
     "strength": 1.0,

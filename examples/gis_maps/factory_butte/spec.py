@@ -51,11 +51,46 @@ TERRAIN = {
     "smooth_sigma_px": 0.0,
 }
 
+# Mancos Shale is a cool grey where it is cut and a warm buff where the wash has
+# spread it, and that warm-cool split is the only colour the badlands have. The first
+# pass authored all four surfaces as warm neutrals within 1 % of each other in hue, and
+# the imagery tint then pulled them tighter still: measured off the shipped textures,
+# fb_shale_slope and fb_clay_fin came out 0.0006 apart, which is the same surface. The
+# terrain classifies four materials by slope and a driver saw one. So the slopes and
+# fins go cool, the wash and the cap stay warm, and the two that sit under most of the
+# map take a lighter tint so the authored hue survives the photograph.
+#
+# The photograph is the reason for that last part rather than a preference: Factory
+# Butte's NAIP mosaic is the flattest in the pack (mean chroma 0.097 against Meteor
+# Crater's 0.271), so at the shared 0.6 tint the layer mean sets the colour and the
+# authored value is decoration. tint_weight per material is the existing lever for
+# that - mc_ejecta_gravel already carries 0.35 for the same reason. The cost is that a
+# detail material matches the base texture less closely where the two blend by
+# distance; 0.35 is where Meteor Crater put that trade and it is bounded, because the
+# built chroma still only reaches 0.09-0.13 on the two cool surfaces.
 PALETTE = {
-    "fb_mud_flat": {"family": "clay_pan", "seed": 301, "size": 1024, "base": [0.58, 0.55, 0.50]},
-    "fb_shale_slope": {"family": "shale", "seed": 302, "size": 1024, "base": [0.50, 0.48, 0.45]},
-    "fb_clay_fin": {"family": "shale", "seed": 303, "size": 1024, "base": [0.44, 0.42, 0.40]},
-    "fb_caprock": {"family": "rock_strata", "seed": 304, "size": 1024, "base": [0.52, 0.44, 0.36]},
+    "fb_mud_flat": {"family": "clay_pan", "seed": 301, "size": 1024, "base": [0.63, 0.58, 0.47]},
+    "fb_shale_slope": {
+        "family": "shale",
+        "seed": 302,
+        "size": 1024,
+        "base": [0.40, 0.44, 0.52],
+        "tint_weight": 0.35,
+    },
+    "fb_clay_fin": {
+        "family": "shale",
+        "seed": 303,
+        "size": 1024,
+        "base": [0.30, 0.34, 0.44],
+        "tint_weight": 0.35,
+    },
+    "fb_caprock": {
+        "family": "rock_strata",
+        "seed": 304,
+        "size": 1024,
+        "base": [0.58, 0.48, 0.35],
+        "tint_weight": 0.45,
+    },
 }
 
 IMAGERY = {
