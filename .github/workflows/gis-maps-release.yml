@@ -37,9 +37,10 @@ permissions:
 # with no field saying so.
 #
 # The group is deliberately repository-wide and carries no ref: what it serialises is
-# one release, which every branch publishes to, because the release steps below have no
-# `if:` and TAG falls through to gis-maps-v1 on any push. Adding ${{ github.ref }} here
-# would let two branches clobber one release at once, which is the failure above.
+# one release, and a tag push and a manual run can both reach it. Adding ${{ github.ref }}
+# here would let two of those clobber one release at once, which is the failure above.
+# Branch pushes no longer publish at all (see the `if:` on the release steps), so they are
+# in the group only to keep one six-map build on the runners at a time.
 #
 # cancel-in-progress is false BECAUSE the group is repository-wide. Cancelling would
 # mean a push to any branch killing a six-map build on another, and this branch is
@@ -110,7 +111,13 @@ jobs:
       - name: Static gates on the built trees
         run: python -m pytest -q tests/test_gis_maps_pack.py
 
+      # Publishing is for tags and manual runs only. A branch push still builds all six
+      # maps and runs the gates above - that is the CI value and it is unchanged - but it
+      # no longer rewrites the shared release, because every branch published to the same
+      # gis-maps-v1 and the last writer won. To refresh the installable ZIPs from a
+      # branch, run this workflow from the Actions tab.
       - name: Collect release assets
+        if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
         env:
           TAG: ${{ github.event.inputs.tag || (startsWith(github.ref, 'refs/tags/') && github.ref_name) || 'gis-maps-v1' }}
         run: |
@@ -133,6 +140,7 @@ jobs:
           } > release/NOTES.md
 
       - name: Create or update the GitHub Release
+        if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.inputs.tag || (startsWith(github.ref, 'refs/tags/') && github.ref_name) || 'gis-maps-v1' }}
