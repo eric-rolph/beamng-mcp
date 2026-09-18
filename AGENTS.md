@@ -3271,14 +3271,32 @@ class of defect a play-test would otherwise have to find.
   `*BaseTexSize` values — that names the real rule in one screenshot. Run it before
   anything in this pack goes sub-metre again.
 
-### The de-lighting is the memory ceiling, and `base_tex_px` is NOT the knob
+### The de-lighting is the memory ceiling, and `base_tex_px` is not ITS knob
 
 `imagery.py` conditions the base colour over the whole array at once, so the build's
-working set scales with the LEVEL's sample count. `base_tex_px` only sets the size the
-finished texture is written at: `conditioned_colour` works at the level's own
-resolution, and dropping 8192 to 4096 changed nothing when the build was being killed.
-That was a wrong guess made from a parameter name, and it cost two runs. Measure the
-phases before blaming one.
+working set scales with the LEVEL's sample count. `base_tex_px` does not enter that at
+all: `conditioned_colour` mosaics NAIP at `dem.shape[0]` and works at the level's own
+resolution, and dropping 8192 to 4096 changed nothing when the build was being killed
+inside `delight`. That was a wrong guess made from a parameter name, and it cost two
+runs. Measure the phases before blaming one.
+
+**`base_tex_px` has a second consumer, and that one it does drive.** This section used
+to stop at the paragraph above, which reads as though the parameter were free. It is
+not. `build_base_set` allocates at the texture's own resolution - the LANCZOS resize,
+the resampled DEM, the normal map, the AO, the luminance and the roughness - while
+`colour_full`, the layer map and the DEM are all still live. On a 4096-sample map it
+peaks at **8.18 GB at `base_tex_px` 8192 against 2.11 GB at 4096**, measured on a 15 GB
+box, and 8192 on Bingham Canyon and Mount St. Helens killed the release build three runs
+running, inside the first map, before a single gate ran. So `base_tex_px` is free of the
+de-lighting's memory and is not free overall.
+
+**Above `size_px` it also buys nothing.** `conditioned_colour` returns colour at
+`dem.shape[0]`, so `build_base_set` reaches a larger `base_tex_px` by upsampling that
+array: a texture with no more detail in it, for three times the PNG bytes (176.7 MiB
+against 48.0 MiB at 4096) in a ZIP the release notes already call 80-90 MiB. Author
+`base_tex_px` equal to the level's sample count. Meteor Crater is the one map still
+above it, 4096 over 2048 samples: harmless at that size and green, but it is upsampling
+too, and it is not the thing to copy.
 
 The signature is **exit 137** with a bare `Killed` and no traceback - a stage that just
 stops writing output is this, not a network fault.

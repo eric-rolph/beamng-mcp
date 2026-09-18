@@ -23,11 +23,14 @@ SITE = {
     # orthoimagery tiled two by two whichever number it was given. The four maps
     # sampled at 1 m have never tiled, so this one joins them: metres and squares are
     # the same number here, and the base map covers the level once under either
-    # reading. The photograph keeps its own resolution - base_tex_px stays 4096, so
-    # the flight is still 0.5 m per texel over the 2048 m square.
+    # reading. base_tex_px stays 4096, which does NOT keep the flight at 0.5 m per
+    # texel the way this comment used to claim: conditioned_colour mosaics NAIP at
+    # dem.shape[0], so the colour is 2048 px, 1 m per texel, and the base set upsamples
+    # it. Harmless at this size and left alone rather than re-cut, but not a pattern to
+    # copy - see the base_tex_px section in AGENTS.md.
     "size_px": 2048,  # heightmap edge in samples (power of two)
     "square_size_m": 1.0,  # metres per sample -> 2048 m footprint
-    "base_tex_px": 4096,  # the de-lit orthoimagery at 0.5 m per texel
+    "base_tex_px": 4096,  # 2x the sample count: an upsample of 1 m per texel colour
     "detail_tex_px": 1024,
 }
 
