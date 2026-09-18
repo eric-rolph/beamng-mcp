@@ -3378,6 +3378,51 @@ Elevation in float32 holds a millimetre at terrestrial magnitudes, so a float64 
 is 537 MB at 8192 squared bought for nothing - and `scipy.ndimage` allocates its own copy
 alongside whatever it is handed.
 
+### A conditioned base cannot be judged against another map's base
+
+The shipped base's own luminance spread is not evidence about the de-lighting, and on
+2026-09-18 two sessions read the same number to opposite conclusions on Factory Butte
+(0.152 p5-p95 against Meteor Crater's 0.242, at a third of the chroma): one called it a
+bleached base and proposed a cross-map spread floor, the other called it the photograph.
+
+**Spread measures relief.** Across the five de-lit maps, the shipped base's spread tracks
+`terrain.stats` steepness in perfect rank order, Pearson 0.975:
+
+    map              steep_frac  gain p95/p05  spread    sat
+    wallace_creek        0.0045         1.192   0.131  0.183
+    factory_butte        0.0232         1.359   0.152  0.097
+    meteor_crater        0.0304         1.595   0.242  0.271
+    mt_st_helens         0.1854         2.702   0.363  0.074
+    bingham_canyon       0.3833         2.573   0.527  0.192
+
+So a floor drawn across maps fails the flat desert maps and passes the high-relief ones
+whatever the conditioning did. Spread and chroma are independent axes as well:
+`mt_st_helens` has the highest spread of the six and the lowest saturation, and its base
+chroma (0.019-0.053) is below Factory Butte's - correctly, because a pumice plain is grey.
+
+**`imagery.source` is the other end of the question.** `level_builder.source_colour_stats`
+measures the NAIP mosaic before `delight` touches it and records its luminance
+percentiles, spread and mean chroma, so the conditioning reads as a within-map ratio,
+which is the only form that does not also measure relief. It is taken on a stride-4
+subsample so the full mosaic is never copied, and it rides in the stats dict the cached
+`data/terrain/imagery.json` path reloads, so it exists on both paths.
+
+**What the measurement is FOR, so a later round knows what to do with it.** One reading
+survives the argument above and is not decidable from the output: the slope classes and
+the correction are both functions of slope, so a de-lighting that mistook albedo for
+shading would divide out the genuine warm-flat / cool-slope contrast a badlands has.
+Factory Butte's between-layer base luminance span is 0.045 across its four classes, which
+fits either story. **The ratio of conditioned spread to source spread is the test of that
+hypothesis specifically.** A ratio near 1 on a map with almost no shading to remove
+(Factory Butte is 2.3 % steep with 0.24 % cast shadow) says the pale base is the
+photograph; a ratio well under 1 there says the correction ate real albedo.
+
+No floor is gated on the ratio yet, deliberately: set it from the population once a
+six-map build has produced one, never from taste. The gate that exists asserts only that
+the measurement is present and well formed on every de-lit map, which is this pack's
+recurring failure - a statistic that goes silently absent for some maps and reports as
+not-applicable.
+
 ### Pack conventions that are ours, not the engine's
 
 - `size_px` is gated to a power of two between 1024 and 8192 in

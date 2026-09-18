@@ -596,7 +596,8 @@ def conditioned_colour(
     """The full-resolution orthoimagery, de-lit against the DEM when the spec asks."""
 
     colour = naip_mosaic(naip_dir, fp, dem.shape[0])
-    stats: dict = {"delight": False}
+    source = source_colour_stats(colour)
+    stats: dict = {"delight": False, "source": source}
     if imagery_spec and imagery_spec.get("delight"):
         from . import imagery
 
@@ -646,8 +647,39 @@ def conditioned_colour(
             shadow_dark_ratio=imagery_spec.get("shadow_dark_ratio"),
             exclude_sources=source_exclude,
         )
-        stats = {"delight": True, "sun_fit": sun, **dstats}
+        stats = {"delight": True, "sun_fit": sun, **dstats, "source": source}
     return colour, stats
+
+
+def source_colour_stats(colour: np.ndarray, stride: int = 4) -> dict:
+    """What the photograph measures before any conditioning touches it.
+
+    The shipped base's own luminance spread says nothing on its own: a flat pale basin
+    and a mosaic the de-lighting flattened read the same number. Only the ratio of the
+    two separates them, and this end of it was the end nobody recorded - every stat in
+    the handoff describes the output. Factory Butte is the case that needs it: its base
+    is the palest of the pack at 0.052 chroma under the mud flat, and whether that is
+    the badlands or the correction is not answerable from the output alone.
+
+    Taken on a stride, so the full mosaic is never copied to measure it.
+    """
+
+    sample = colour[::stride, ::stride].astype("float32") / 255.0
+    lum = sample.mean(axis=-1)
+    p05, p50, p95 = (float(v) for v in np.percentile(lum, [5, 50, 95]))
+    brightest = sample.max(axis=-1)
+    chroma = (brightest - sample.min(axis=-1)) / np.maximum(brightest, 1e-6)
+    out = {
+        "px": int(colour.shape[0]),
+        "stride": int(stride),
+        "lum_p05": round(p05, 4),
+        "lum_p50": round(p50, 4),
+        "lum_p95": round(p95, 4),
+        "lum_spread": round(p95 - p05, 4),
+        "chroma_mean": round(float(chroma.mean()), 4),
+    }
+    del sample, lum, brightest, chroma
+    return out
 
 
 def base_colour_stats(colour: np.ndarray, layer: np.ndarray, materials) -> dict:
