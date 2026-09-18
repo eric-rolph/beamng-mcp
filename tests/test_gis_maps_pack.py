@@ -1684,6 +1684,20 @@ def test_no_refilled_field_reads_as_a_blotch(map_key: str) -> None:
         pytest.skip(f"{map_key}: no refilled field large enough to be reported")
     worst = min((e["lum_ratio"] for e in check["largest"]), default=1.0)
     assert worst >= 0.75, (map_key, "a refilled field reads as a blotch", worst, check["largest"])
+    # And the other side, which this gate was missing while the tight one above had it
+    # (0.90 AND 1.10). A refill brighter than its ground is the same defect seen from
+    # the other end, and it is the one `refill_match`'s 1.4 gain clip exists to prevent
+    # - so while nothing asserts it, that clip guards a failure no gate can see, and
+    # nobody can responsibly raise it. 1.25 is the floor's own 0.25 mirrored, and it
+    # sits in open space: across 127 fields on six maps the highest ratio measured is
+    # 1.047.
+    palest = max((e["lum_ratio"] for e in check["largest"]), default=1.0)
+    assert palest <= 1.25, (
+        map_key,
+        "a refill reads paler than its ground",
+        palest,
+        check["largest"],
+    )
     for axis in ("br_diff", "exg_diff"):
         off = max((abs(e[axis]) for e in check["largest"]), default=0.0)
         assert off <= 0.10, (map_key, axis, off, check["largest"])
