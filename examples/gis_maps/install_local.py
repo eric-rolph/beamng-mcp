@@ -6,6 +6,8 @@
     python examples/gis_maps/install_local.py --maps meteor_crater black_bear_pass
     python examples/gis_maps/install_local.py --no-deploy          # stop after the dist ZIPs exist
 
+To uninstall, see ``deploy_local.py --remove``.
+
 For every map it makes sure ``<map>/dist/<key>_ericrolph.zip`` exists and matches its lock:
 downloaded from a GitHub Release when ``--release`` names a tag (verified against the
 release's ``SHA256SUMS.txt``), from delivered parts when ``--parts`` names a folder that
@@ -178,7 +180,12 @@ def main(argv: list[str]) -> int:
         print("dist ZIPs are ready; run: python examples/gis_maps/deploy_local.py --deploy")
         return 0
     print("== deploying into the BeamNG play profile")
-    return deploy_local.main(["--deploy"])
+    # --maps has to reach the deploy step too, or installing one map silently deploys
+    # every ZIP that happens to be sitting in the pack's dist folders.
+    argv = ["--deploy"]
+    if args.maps:
+        argv += ["--maps", *keys]
+    return deploy_local.main(argv)
 
 
 if __name__ == "__main__":

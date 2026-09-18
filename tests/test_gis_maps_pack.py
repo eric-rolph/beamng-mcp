@@ -676,6 +676,206 @@ def test_deploy_local_reports_and_deploys_into_a_profile(
     assert deploy_local.main(["--deploy"]) == 1
 
 
+def _pack_with_one_map(tmp_path: Path, key: str = "meteor_crater") -> Path:
+    pack = tmp_path / "pack"
+    (pack / key / "dist").mkdir(parents=True)
+    (pack / key / "spec.py").write_text(
+        f"MOD_ID='ericrolph_{key}'\nDISPLAY_NAME='Crater'\nZIP_BASENAME='{key}_ericrolph.zip'\n"
+    )
+    return pack
+
+
+def test_deploy_local_maps_filter_deploys_only_the_named_map(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """--maps must narrow the deploy, or installing one map ships every ZIP in dist/."""
+
+    deploy_local = _load_script("deploy_local")
+    pack = tmp_path / "pack"
+    for key in ("meteor_crater", "factory_butte"):
+        (pack / key / "dist").mkdir(parents=True)
+        (pack / key / "spec.py").write_text(
+            f"MOD_ID='ericrolph_{key}'\nDISPLAY_NAME='{key}'\nZIP_BASENAME='{key}_ericrolph.zip'\n",
+        )
+        release = _tiny_release(pack / key / "dist", key)
+        (pack / key / "dist" / f"ericrolph_{key}.lock.json").write_text(
+            json.dumps({"sha256": hashlib.sha256(release.read_bytes()).hexdigest()})
+        )
+    profile = tmp_path / "profile"
+    (profile / "mods").mkdir(parents=True)
+    monkeypatch.setattr(deploy_local, "PACK_ROOT", pack)
+    monkeypatch.setenv("BEAMNG_MAPS_PROFILE", str(profile))
+    monkeypatch.setenv("BEAMNG_MAPS_ALLOW_RUNNING", "1")
+    assert deploy_local.main(["--maps", "meteor_crater", "--deploy"]) == 0
+    assert (profile / "mods" / "meteor_crater_ericrolph.zip").is_file()
+    assert not (profile / "mods" / "factory_butte_ericrolph.zip").exists()
+    with pytest.raises(SystemExit):
+        deploy_local.main(["--maps", "no_such_map"])
+
+
+def test_deploy_local_remove_is_a_dry_run_until_confirmed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """--remove reports, --remove --confirm deletes, by CONTENT and wherever the zip sits."""
+
+    deploy_local = _load_script("deploy_local")
+    pack = _pack_with_one_map(tmp_path)
+    profile = tmp_path / "profile"
+    mods = profile / "mods"
+    mods.mkdir(parents=True)
+    monkeypatch.setattr(deploy_local, "PACK_ROOT", pack)
+    monkeypatch.setenv("BEAMNG_MAPS_PROFILE", str(profile))
+    monkeypatch.setenv("BEAMNG_MAPS_ALLOW_RUNNING", "1")
+
+    # Nothing installed: removal is a clean no-op, not an error.
+    assert deploy_local.main(["--remove", "--confirm"]) == 0
+
+    installed = _tiny_release(mods, "meteor_crater")
+    stale_copy = mods / "unpacked" / "an_old_name.zip"
+    stale_copy.parent.mkdir()
+    shutil.copyfile(installed, stale_copy)
+    unrelated = _tiny_release(mods, "somebody_elses_level")
+    assert deploy_local.main(["--remove"]) == 1  # dry run exits non-zero, deletes nothing
+    assert installed.is_file() and stale_copy.is_file()
+    assert deploy_local.main(["--remove", "--confirm"]) == 0
+    assert not installed.exists() and not stale_copy.exists()
+    assert unrelated.is_file()  # a level this pack does not own is never touched
+
+
+def test_deploy_local_remove_spares_a_zip_that_also_carries_an_unselected_level(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Deleting a mixed zip would take a level nobody asked about, so it is reported."""
+
+    deploy_local = _load_script("deploy_local")
+    pack = _pack_with_one_map(tmp_path)
+    profile = tmp_path / "profile"
+    mods = profile / "mods"
+    mods.mkdir(parents=True)
+    monkeypatch.setattr(deploy_local, "PACK_ROOT", pack)
+    monkeypatch.setenv("BEAMNG_MAPS_PROFILE", str(profile))
+    monkeypatch.setenv("BEAMNG_MAPS_ALLOW_RUNNING", "1")
+    mixed = mods / "someone_elses_pack.zip"
+    with zipfile.ZipFile(mixed, "w", compression=zipfile.ZIP_STORED) as archive:
+        archive.writestr("levels/ericrolph_meteor_crater/info.json", "{}")
+        archive.writestr("levels/their_level/info.json", "{}")
+    assert deploy_local.main(["--remove", "--confirm"]) == 1
+    assert mixed.is_file()
+
+    # Same rule protects one of our own levels that --maps held back.
+    (pack / "factory_butte").mkdir()
+    (pack / "factory_butte" / "spec.py").write_text(
+        "MOD_ID='ericrolph_factory_butte'\nDISPLAY_NAME='Butte'\n"
+        "ZIP_BASENAME='factory_butte_ericrolph.zip'\n"
+    )
+    both = mods / "two_of_ours.zip"
+    with zipfile.ZipFile(both, "w", compression=zipfile.ZIP_STORED) as archive:
+        archive.writestr("levels/ericrolph_meteor_crater/info.json", "{}")
+        archive.writestr("levels/ericrolph_factory_butte/info.json", "{}")
+    assert deploy_local.main(["--remove", "--confirm", "--maps", "meteor_crater"]) == 1
+    assert both.is_file()
+    assert (
+        deploy_local.main(["--remove", "--confirm", "--maps", "meteor_crater", "factory_butte"])
+        == 1
+    )
+    assert not both.exists()  # both named: the bundle goes
+
+
+def test_deploy_local_remove_needs_no_local_build(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An uninstall has to work from spec.py alone: dist/ may have been deleted."""
+
+    deploy_local = _load_script("deploy_local")
+    pack = tmp_path / "pack"
+    (pack / "meteor_crater").mkdir(parents=True)  # no dist/ at all
+    (pack / "meteor_crater" / "spec.py").write_text(
+        "MOD_ID='ericrolph_meteor_crater'\nDISPLAY_NAME='Crater'\n"
+        "ZIP_BASENAME='meteor_crater_ericrolph.zip'\n"
+    )
+    profile = tmp_path / "profile"
+    mods = profile / "mods"
+    mods.mkdir(parents=True)
+    monkeypatch.setattr(deploy_local, "PACK_ROOT", pack)
+    monkeypatch.setenv("BEAMNG_MAPS_PROFILE", str(profile))
+    monkeypatch.setenv("BEAMNG_MAPS_ALLOW_RUNNING", "1")
+    installed = _tiny_release(mods, "meteor_crater")
+    assert deploy_local.main(["--remove", "--confirm"]) == 0
+    assert not installed.exists()
+
+
+def test_deploy_local_remove_refuses_while_the_game_is_running(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    deploy_local = _load_script("deploy_local")
+    pack = _pack_with_one_map(tmp_path)
+    profile = tmp_path / "profile"
+    mods = profile / "mods"
+    mods.mkdir(parents=True)
+    monkeypatch.setattr(deploy_local, "PACK_ROOT", pack)
+    monkeypatch.setattr(deploy_local, "beamng_running", lambda: True)
+    monkeypatch.setenv("BEAMNG_MAPS_PROFILE", str(profile))
+    installed = _tiny_release(mods, "meteor_crater")
+    assert deploy_local.main(["--remove", "--confirm"]) == 1
+    assert installed.is_file()
+
+
+def test_install_local_passes_the_maps_filter_to_the_deploy_step(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    install_local = _load_script("install_local")
+    pack = tmp_path / "pack"
+    for key in ("meteor_crater", "factory_butte"):
+        (pack / key).mkdir(parents=True)
+        (pack / key / "spec.py").write_text(
+            f"MOD_ID='ericrolph_{key}'\nDISPLAY_NAME='{key}'\nZIP_BASENAME='{key}_ericrolph.zip'\n",
+        )
+    for module in (install_local.build, install_local.join_parts, install_local.deploy_local):
+        monkeypatch.setattr(module, "PACK_ROOT", pack)
+    monkeypatch.setattr(install_local, "release_ok", lambda key: True)
+    seen: list[list[str]] = []
+    monkeypatch.setattr(install_local.deploy_local, "main", lambda argv: seen.append(argv) or 0)
+    assert install_local.main(["--maps", "meteor_crater"]) == 0
+    assert seen == [["--deploy", "--maps", "meteor_crater"]]
+    seen.clear()
+    assert install_local.main([]) == 0
+    assert seen == [["--deploy"]]
+
+
+def test_deploy_local_verify_reads_the_game_log(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """--verify has to answer "did it load?" from the engine's own log, not from eyes."""
+
+    deploy_local = _load_script("deploy_local")
+    pack = _pack_with_one_map(tmp_path)
+    profile = tmp_path / "profile"
+    mods = profile / "mods"
+    mods.mkdir(parents=True)
+    monkeypatch.setattr(deploy_local, "PACK_ROOT", pack)
+    monkeypatch.setenv("BEAMNG_MAPS_PROFILE", str(profile))
+
+    # No log at all: the game has never run against this profile.
+    assert deploy_local.main(["--verify"]) == 1
+
+    log = profile / "beamng.log"
+    log.write_text("mounted /mods/meteor_crater_ericrolph.zip\n", encoding="utf-8")
+    assert deploy_local.main(["--verify"]) == 0
+
+    # A line naming the namespace with an error word is a failure, not a pass.
+    log.write_text(
+        "mounted /mods/meteor_crater_ericrolph.zip\n"
+        "failed to load levels/ericrolph_meteor_crater/info.json\n",
+        encoding="utf-8",
+    )
+    assert deploy_local.main(["--verify"]) == 1
+
+    # Deployed but never mentioned: the engine has not rescanned yet.
+    log.write_text("nothing to see here\n", encoding="utf-8")
+    _tiny_release(mods, "meteor_crater")
+    assert deploy_local.main(["--verify"]) == 1
+
+
 def test_install_local_rejoins_parts_and_deploys(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

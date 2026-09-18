@@ -214,12 +214,69 @@ is open, and refuses if any other zip below `mods\` already carries one of the
 copy shadows the release). Launch BeamNG.drive, then Freeroam > Select Level: the six
 levels are listed under their display names (Barringer Meteor Crater, Carrizo Plain -
 Wallace Creek, Factory Butte Badlands, Mount St. Helens Pumice Plain, Black Bear Pass,
-Bingham Canyon Mine), each with three spawn points.
+Bingham Canyon Mine). Five carry three spawn points; Black Bear Pass carries six.
 
-If a level does not appear after deployment, the first place to look is
-`%LOCALAPPDATA%\BeamNG\BeamNG.drive\current\beamng.log` for lines mentioning
-`ericrolph_`; that log says whether the zip was mounted and whether `info.json` or
-the terrain failed to load.
+`--maps` narrows every mode to the keys you name, so one map can be installed, checked
+or removed without touching the other five:
+
+```powershell
+python examples\gis_maps\install_local.py --release gis-maps-v1 --maps black_bear_pass
+python examples\gis_maps\deploy_local.py --maps black_bear_pass --deploy
+```
+
+### Confirming a level actually loaded
+
+The level selector is one answer; the engine's own log is the one that says why when a
+level is missing. `--verify` reads it for you:
+
+```powershell
+python examples\gis_maps\deploy_local.py --verify                    # all six
+python examples\gis_maps\deploy_local.py --verify --maps black_bear_pass
+```
+
+For each map it quotes the lines in
+`%LOCALAPPDATA%\BeamNG\BeamNG.drive\current\beamng.log` that mention that map's
+`levels/ericrolph_<key>/` namespace or its ZIP, and exits non-zero when a map is never
+mentioned (the zip was not mounted: the engine has not rescanned, so relaunch it) or
+when a line mentioning it carries an error word. BeamNG owns that log's wording, so read
+the quoted lines rather than trusting the exit code alone.
+
+### Removing a map
+
+```powershell
+python examples\gis_maps\deploy_local.py --remove                    # list what would go
+python examples\gis_maps\deploy_local.py --remove --confirm          # delete it
+python examples\gis_maps\deploy_local.py --remove --confirm --maps meteor_crater
+```
+
+Removal is content-based, like the shadow scan: it deletes every zip below `mods\` that
+claims one of the pack's `levels/ericrolph_<key>/` namespaces, wherever it sits and
+whatever it is called, which is exactly the set that puts the level in the game. A zip
+carrying any level you did not name - somebody else's, or one of ours held back by
+`--maps` - is reported and left alone rather than becoming collateral damage; the pack
+ships one level per zip, so that only fires on a hand-made bundle. Nothing else in the
+profile is touched: no
+`db.json` edit, no cache purge, no other mod. The levels are gone from the selector on
+the next launch. It needs no local build, so it still cleans up a profile whose `dist\`
+ZIPs were deleted or were never built on this machine.
+
+### Letting an assistant do it
+
+Installing is `install_local.py` plus `deploy_local.py --verify`, so an MCP-capable
+assistant can run the whole thing as two commands and read the verification itself. What
+it cannot do is run them from somewhere else: this repository's MCP server is
+loopback-only by design (`src/beamng_mcp/mcp_adapter.py` pins `allowed_hosts` to
+`127.0.0.1`, `localhost` and `[::1]`, and `beamng-mcp serve --host` accepts nothing
+else), and BeamNG.drive is on the same machine as the profile. The client has to run on
+the machine that plays the game.
+
+The server's own `mod_install` tool is not the route for these maps: it installs a mod
+from the server's workspace (`src/beamng_mcp/services/mods.py`), and the workspace is a
+text-file surface with a 2 MiB default per-file cap (`ModFileWrite.content` is `str`;
+`workspace.max_file_bytes` in `src/beamng_mcp/config.py`), while a level ZIP here is
+tens to hundreds of MB of terrain and textures. These maps install as release ZIPs
+through `deploy_local.py`, which is why it carries its own lock check, shadow scan,
+verification and uninstall.
 
 ## Layout
 
