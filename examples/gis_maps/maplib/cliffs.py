@@ -46,6 +46,7 @@ import numpy as np
 
 from . import foliage_textures as ft
 from .meshgen import Mesh, vertex_normals, write_dae
+from .stable_seed import stable_hash
 
 TILE_M = 256.0
 
@@ -522,7 +523,9 @@ def build(
         ft.rock_set(
             tex_dir,
             full,
-            seed + 500 + (abs(hash(family)) % 500),
+            # Not the builtin: it is salted per process, so a seed built from it plants
+            # a different level on every build. See maplib/stable_seed.py.
+            seed + 500 + (stable_hash(family) % 500),
             colour=tuple(params.get("colour", (0.46, 0.44, 0.42))),
             # The mesh carries the beds now, so the tile's own strata are the partings
             # inside a bed rather than the bedding itself: authored per material.

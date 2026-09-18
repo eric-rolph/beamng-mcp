@@ -316,17 +316,7 @@ def terrain(spec, example_root: Path) -> dict:
         # from `scatter` instead.
         detect_spec = objects_spec.get("detect", {})
         if detect_spec is None:
-            # The same keys a real pass returns, so the handoff and the log keep their
-            # shape and a reader sees the zeros rather than a missing section.
-            ostats = {
-                "candidates": 0,
-                "objects": 0,
-                "rejected_cliff": 0,
-                "berms_removed": 0,
-                "structures_flattened": 0,
-                "removed_volume_m3": 0.0,
-                "detect": "off",
-            }
+            ostats = ob.detect_off_stats()
         else:
             dem, detected, ostats = ob.detect_objects(dem, res, **detect_spec)
         if objects_spec.get("flatten_boxes"):

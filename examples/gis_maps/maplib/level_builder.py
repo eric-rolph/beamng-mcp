@@ -682,7 +682,13 @@ def source_colour_stats(colour: np.ndarray, stride: int = 4) -> dict:
     return out
 
 
-def base_colour_stats(colour: np.ndarray, layer: np.ndarray, materials) -> dict:
+def base_colour_stats(
+    colour: np.ndarray,
+    layer: np.ndarray,
+    materials,
+    *,
+    before_ceiling: np.ndarray | None = None,
+) -> dict:
     """The finished base's black-hole and per-layer numbers, measured on what ships.
 
     Every map reaches build_base_set, and only some reach the terrain stage's OBJECTS
@@ -690,6 +696,14 @@ def base_colour_stats(colour: np.ndarray, layer: np.ndarray, materials) -> dict:
     exist for all six maps and they describe the array that was written rather than an
     upstream one of a different size (the base is resized to base_px on its way out, and
     LANCZOS overshoot on a hard edge lands exactly in the clipped fraction).
+
+    ``before_ceiling`` is the same base one step earlier, before the shipping clamp.
+    The clamp caps every channel at 249 and ``clipped`` counts 250, so once a map runs
+    the clamp its ``clipped`` is zero however the pipeline behaved - a true number that
+    can no longer be a gate. Measured on the array handed in here instead, the per-layer
+    share survives the fix that hid it, at the resolution the whole-base
+    ``shipped_ceiling_fraction`` throws away: fb_caprock is 5.6% over the ceiling and
+    0.13% of its base.
     """
 
     from PIL import Image
@@ -713,6 +727,10 @@ def base_colour_stats(colour: np.ndarray, layer: np.ndarray, materials) -> dict:
             "cells": int(where.sum()),
             "clipped": round(float((colour[where].max(axis=-1) >= 250).mean()), 5),
         }
+        if before_ceiling is not None:
+            means[name]["clipped_before_ceiling"] = round(
+                float((before_ceiling[where].max(axis=-1) >= 250).mean()), 5
+            )
     return {
         "base_px": int(colour.shape[0]),
         "layer_mean_srgb": means,
@@ -1159,16 +1177,31 @@ def refill_check(
         # Meteor Crater level, the 2,973 m2 field this gate reports at (-35.3, 670.3) is
         # 84.4% road bed, on a level that is 1.16% road bed overall. It is a shadow on a
         # road, not an unlifted field.
-        bed_share = 0.0
+        # The erosion runs first, and on an elongated field it can take everything: at
+        # meteor_crater's 0.5 m texel this is twelve iterations, a 6 m band off every
+        # boundary, and a road shadow at the 1000 m2 floor is about 12 m by 83 m. Both
+        # numbers below have to say so, or a field the exclusion could not reach looks
+        # exactly like a field with no road near it.
+        bed_share: float | None = 0.0
         if bed is not None:
             not_bed = ~bed[r0:r1, c0:c1]
-            bed_share = float((interior & ~not_bed).sum()) / max(int(interior.sum()), 1)
+            # An empty interior has no share to report. Reporting 0.0 here would read as
+            # "no road in this field" on precisely the elongated shadows the exclusion
+            # was written for, which is the one case worth telling apart.
+            bed_share = (
+                float((interior & ~not_bed).sum()) / int(interior.sum()) if interior.any() else None
+            )
             # Below 20 cells the remainder is noise, so the field keeps its old reading
             # and `bed_fraction` says why it is the one it is.
             if (interior & not_bed).sum() >= 20:
                 interior = interior & not_bed
             del not_bed
-        if interior.sum() < 20:
+        # Whether the numbers below rest on the eroded interior or on the whole
+        # component, bed and all. The fallback is not a failure - it is the old reading,
+        # deliberately - but it is a different measurement and the handoff should say
+        # which one it is.
+        interior_eroded = bool(interior.sum() >= 20)
+        if not interior_eroded:
             interior = field
         dist = ndimage.distance_transform_edt(~field) * texel_m
         ring = (dist > 10.0) & (dist <= 30.0) & ring_ok[r0:r1, c0:c1]
@@ -1192,8 +1225,18 @@ def refill_check(
                     float(exg[r0:r1, c0:c1][interior].mean() - exg[r0:r1, c0:c1][ring].mean()), 3
                 ),
                 "grain_ratio": round(float(f_in.std() / max(f_ring.std(), 1e-4)), 3),
-                # How much of the field is road the match is not allowed to touch.
-                "bed_fraction": round(bed_share, 3),
+                # The population every ratio above rests on. `area_m2` is the component
+                # BEFORE the erosion and the bed exclusion, so it is an upper bound and
+                # not the sample size; `grain_ratio` in particular is a standard
+                # deviation over exactly these texels.
+                "interior_texels": int(interior.sum()),
+                # False when the erosion left under 20 cells and the whole component was
+                # used instead - bed included, so `bed_fraction` describes nothing that
+                # was excluded.
+                "interior_eroded": interior_eroded,
+                # How much of the field is road the match is not allowed to touch. None
+                # when the erosion emptied the interior, so there was nothing to measure.
+                "bed_fraction": None if bed_share is None else round(bed_share, 3),
             }
         )
     if not fields:
@@ -1517,9 +1560,19 @@ def build_level(
     # the ceiling is not touched at all.
     # Scoped to the maps the gate scopes itself to: a level with no IMAGERY spec ships
     # the photograph as flown and nobody promised this of it.
+    before_ceiling = None
     if getattr(spec, "IMAGERY", None):
         from . import imagery
 
+        # Kept so the per-layer share below is measured on the array the clamp read.
+        # Without it the clamp erases its own evidence: it caps every channel at 249
+        # and the base's gate counts 250, so `clipped` reads zero on every map that
+        # runs this, whatever the pipeline did upstream.
+        # The cost is one more u8 base held alongside the clamped one and `_linear`,
+        # about 50 MB at base_px 4096 against a peak near 250 MB. Freed with the stats
+        # call below rather than held to the end of the stage, because the de-lighting
+        # is where this pack meets its memory ceiling.
+        before_ceiling = base_colour
         _linear, _over = imagery.clamp_highlights(imagery.srgb_to_linear(base_colour), 0.95)
         base_colour = imagery.linear_to_srgb_u8(_linear)
         del _linear
@@ -1538,8 +1591,10 @@ def build_level(
         colour_full=base_colour,
         base_px=base_px,
     )
-    report["base_colour"] = base_colour_stats(base_colour, layer, materials)
-    del base_colour
+    report["base_colour"] = base_colour_stats(
+        base_colour, layer, materials, before_ceiling=before_ceiling
+    )
+    del base_colour, before_ceiling
     texture_kit.build_set(
         terrains_dir,
         macro_prefix,

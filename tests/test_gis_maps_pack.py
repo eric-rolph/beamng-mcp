@@ -11,11 +11,14 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
+import re
 import shutil
 import struct
 import sys
 import zipfile
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 import pytest
@@ -230,6 +233,77 @@ def test_texture_kit_is_deterministic(tmp_path: Path) -> None:
         tmp_path / "c", "x", "gravel", seed=43, size=64, base_rgb=[0.5, 0.4, 0.3]
     )
     assert a["b"].read_bytes() != c["b"].read_bytes(), "a different seed must change the map"
+
+
+# The names the placed-object generators seed themselves from. A seed built on the
+# builtin hash() of one of these is a different seed in every process, which is how two
+# CI builds of the same commit shipped different rocks, different shrubs and a forest of
+# 9032 instances against 9040.
+_SEED_NAMES = ("rock_limestone", "rock_talus", "sage", "juniper", "aspen_sapling", "brick")
+
+_SEED_PROBE = """
+import json, sys
+sys.path.insert(0, sys.argv[1])
+from maplib.stable_seed import stable_hash
+names = json.loads(sys.argv[2])
+print(json.dumps({
+    "stable": [stable_hash(n) for n in names],
+    "builtin": [hash(n) for n in names],
+}))
+"""
+
+
+def _seed_probe(hash_seed: str) -> dict:
+    """Run the probe in a fresh interpreter with PYTHONHASHSEED set to ``hash_seed``."""
+
+    import os
+    import subprocess
+
+    env = dict(os.environ, PYTHONHASHSEED=hash_seed)
+    out = subprocess.run(  # noqa: S603 - this interpreter, a literal script, static arguments
+        [sys.executable, "-c", _SEED_PROBE, str(PACK_ROOT), json.dumps(list(_SEED_NAMES))],
+        capture_output=True,
+        text=True,
+        check=True,
+        env=env,
+    )
+    return json.loads(out.stdout)
+
+
+def test_object_seeds_are_stable_across_processes() -> None:
+    """``stable_hash`` gives the same number in a differently salted interpreter.
+
+    This has to cross a process boundary: str hashing is salted once per process, so a
+    single-process test passes with the defect present and proves nothing. The builtin
+    is measured alongside as the control - if it ever stops differing here, the salt is
+    pinned in the environment and this test has quietly stopped testing anything."""
+
+    a, b = _seed_probe("1"), _seed_probe("2")
+    assert a["stable"] == b["stable"], (a["stable"], b["stable"])
+    assert a["builtin"] != b["builtin"], (
+        "PYTHONHASHSEED appears to be pinned, so this test can no longer tell a stable "
+        "seed from an unstable one"
+    )
+
+
+def test_no_generator_is_seeded_from_the_builtin_hash() -> None:
+    """No module under ``maplib`` derives a seed or a shipped id from ``hash()``.
+
+    Guards the spelling as well as the property: the test above cannot see a new call
+    site that no map exercises yet, and a reviewer reading `hash(family) % 97` has no
+    reason to suspect it."""
+
+    offenders = []
+    for path in sorted((PACK_ROOT / "maplib").glob("*.py")):
+        # stable_seed.py names the builtin in its own docstring to explain what it
+        # replaces; it is the one file that is allowed to say the word.
+        if path.name == "stable_seed.py":
+            continue
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            code = line.split("#", 1)[0]
+            if re.search(r"(?<![\w.])hash\s*\(", code):
+                offenders.append(f"{path.name}:{number}: {line.strip()}")
+    assert not offenders, "use maplib.stable_seed.stable_hash instead:\n" + "\n".join(offenders)
 
 
 def test_texture_tiles_wrap() -> None:
@@ -690,6 +764,19 @@ def test_distribution_zip_matches_lock(map_key: str) -> None:
         assert f"levels/{spec.MOD_ID}/theTerrain.ter" in members
         assert all(info.compress_type == zipfile.ZIP_STORED for info in archive.infolist())
         assert packaging.future_dated_members(archive) == []
+    # And the lock says which build made it. Every other field here is a property of
+    # the ZIP alone, so they all pass on a release assembled from two runs at two
+    # commits: each map is internally consistent with itself. These two are the only
+    # fields that can disagree between maps, which is what makes a mixed release
+    # detectable rather than inferred.
+    assert "source_commit" in lock, (
+        f"{map_key}: the lock names no commit, so nothing binds this ZIP to a build"
+    )
+    assert re.fullmatch(r"[0-9a-f]{40}", lock["source_commit"] or ""), lock["source_commit"]
+    # A runner checks out the commit it names, so a CI lock is never dirty. A local
+    # build may be, and says so rather than claiming a commit it was not built from.
+    if lock.get("build_run_id") is not None:
+        assert lock["source_dirty"] is False, lock
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
@@ -1206,6 +1293,53 @@ def test_detect_objects_lifts_a_boulder_and_leaves_the_ground() -> None:
     assert len(placed) == 1 and placed[0]["kind"] == "rock" and placed[0]["size"][2] >= 1.0
 
 
+def test_detect_off_stats_reports_every_count_a_real_pass_does() -> None:
+    """The skip path's handoff keeps a real pass's shape: zeros, not a missing section."""
+
+    _, _, objects, _, _ = _load_art_modules()
+    n, res = 120, 0.5
+    y, x = np.mgrid[0:n, 0:n].astype("float32") * res
+    dem = 10.0 + 0.02 * x
+    bump = 1.2 * np.exp(-(((x - 30) ** 2 + (y - 30) ** 2) / (2 * 0.8**2)))
+    _, _, live = objects.detect_objects(dem + bump, res, open_m=6.0, min_height_m=0.4)
+    off = objects.detect_off_stats()
+
+    counts = {k for k, v in live.items() if not isinstance(v, str)} - {"open_m", "min_height_m"}
+    assert counts <= set(off), f"the skip path drops {counts - set(off)} from the handoff"
+    assert all(off[k] == 0 for k in counts), "a skipped pass removed nothing and found nothing"
+    assert off["detect"] == "off", "a reader has to be able to tell a skip from an empty pass"
+    # `open_m` and `min_height_m` describe an opening that did not happen. Reporting them
+    # would read as a pass that ran and found nothing, which is the confusion the whole
+    # `"detect": None` path exists to avoid.
+    assert "open_m" not in off and "min_height_m" not in off
+
+
+def test_the_bump_detector_takes_a_badlands_landform_for_boulders() -> None:
+    """Why `"detect": None` exists: on fine relief the pass finds the relief.
+
+    Measured on Factory Butte's shipped terrain, `detect_objects` found 6,768 bumps over
+    16.8 km2, none of them on the 61.94% that is wash floor, and took 106,602 m3 of fins
+    off to place them. This is that finding at test scale, so that anyone who later makes
+    the detector ignore ridges can see the skip become unnecessary instead of guessing.
+    """
+
+    _, _, objects, _, _ = _load_art_modules()
+    n, res = 300, 1.0
+    y, x = np.mgrid[0:n, 0:n].astype("float32") * res
+    # Flat wash floor on the west half; a rill-and-fin field at a 12 m wavelength and 3 m
+    # of relief on the east, which is the scale Mancos Shale badlands actually run at.
+    relief = 1.5 * (1.0 + np.sin(2 * np.pi * x / 12.0)) * np.sin(2 * np.pi * y / 30.0) ** 2
+    dem = (40.0 - 0.01 * y + np.where(x >= 150.0, relief, 0.0)).astype("float32")
+
+    ground, found, stats = objects.detect_objects(dem, res, open_m=6.0, min_height_m=0.6)
+    assert stats["objects"] > 100, "the detector is expected to find the fins, not nothing"
+    assert all(o["col"] >= 150 for o in found), "nothing on the flat, which is where rocks are"
+    assert stats["removed_volume_m3"] > 1000.0
+    moved = np.abs(ground - dem)
+    assert moved[:, 150:].max() > 2.5, "it shaves the fins down by most of their height"
+    assert moved[:, :150].max() < 0.1, "and leaves the wash floor, so the count cannot rebalance"
+
+
 def test_ept_hierarchy_walk_visits_only_overlapping_nodes() -> None:
     """A fake Entwine index: the walker opens sub-hierarchies and skips distant nodes."""
 
@@ -1499,6 +1633,73 @@ def test_ring_matching_reaches_the_fields_it_was_turned_on_for(map_key: str) -> 
     assert cover["with_ring"] > 0, (map_key, "ring matching reached no field", cover)
 
 
+def test_a_field_the_erosion_empties_says_so_instead_of_reading_as_roadless() -> None:
+    """``refill_check`` erodes 6 m off every boundary before it looks at the bed, so an
+    elongated field can lose its whole interior - and that is exactly the shape of a
+    shadow lying along a road, which is what the bed exclusion exists for.
+
+    When it happens, three things used to collapse into one number: ``bed_fraction``
+    divided by a guarded zero and came out 0.0, the >= 20 test failed so no bed was
+    excluded, and the fallback measured the whole component including the bed. A reader
+    could not tell that from a field with no road within a hundred metres. The
+    population and the fallback flag are what separate them."""
+
+    _, _, level_builder, _, _, _ = load_maplib()
+
+    n, texel = 256, 0.5
+    colour = np.full((n, n, 3), 120, dtype="uint8")
+    refill = np.zeros((n, n), dtype="uint8")
+    bed = np.zeros((n, n), dtype=bool)
+    # 10 m by 100 m: wider than min_area_m2 but narrower than the 12 m the erosion takes
+    # off each side, and lying along a road, which is the case that matters.
+    refill[100:120, 28:228] = 1
+    bed[104:116, 28:228] = True
+    colour[refill == 1] = 96
+
+    out = level_builder.refill_check(colour, refill, texel, bed=bed, min_area_m2=500.0)
+    assert out, "the synthetic field is over the area floor and should be reported"
+    field = out["largest"][0]
+
+    assert field["interior_eroded"] is False, (
+        "a 10 m wide field cannot survive a 6 m erosion from both sides",
+        field,
+    )
+    assert field["bed_fraction"] is None, (
+        "there was no interior to take a bed share of, and 0.0 would read as 'no road'",
+        field,
+    )
+    # The fallback measured the whole component, so the population is the field itself.
+    assert field["interior_texels"] == int((refill == 1).sum()), field
+
+
+def test_a_field_that_survives_the_erosion_reports_its_bed_share_and_population() -> None:
+    """The other half of the pair: a compact field keeps its eroded interior, so the bed
+    share is a real measurement and the population is smaller than ``area_m2`` implies."""
+
+    _, _, level_builder, _, _, _ = load_maplib()
+
+    n, texel = 256, 0.5
+    colour = np.full((n, n, 3), 120, dtype="uint8")
+    refill = np.zeros((n, n), dtype="uint8")
+    bed = np.zeros((n, n), dtype=bool)
+    refill[80:180, 80:180] = 1  # 50 m square, survives a 6 m erosion easily
+    bed[80:180, 80:100] = True  # a road up one edge, inside the field
+    colour[refill == 1] = 96
+
+    out = level_builder.refill_check(colour, refill, texel, bed=bed, min_area_m2=500.0)
+    assert out, "the synthetic field is over the area floor and should be reported"
+    field = out["largest"][0]
+
+    assert field["interior_eroded"] is True, field
+    assert field["bed_fraction"] is not None and field["bed_fraction"] > 0.0, (
+        "the road runs through the interior, so the share is measurable and non-zero",
+        field,
+    )
+    # area_m2 counts the component; the ratios rest on the eroded, bed-excluded interior,
+    # which is the number that was previously unrecorded.
+    assert 0 < field["interior_texels"] < int((refill == 1).sum()), field
+
+
 def test_ring_matching_can_rescue_a_field_at_half_its_ring() -> None:
     """The full ``match_ring`` sequence lifts a field at 0.46 of its ring past the 0.75
     floor, so the contract is reachable from the worst measured starting point.
@@ -1564,6 +1765,110 @@ def test_base_colour_stats_measures_each_layer() -> None:
     assert stats["layer_mean_srgb"]["ledge"]["clipped"] == pytest.approx(1.0)
     assert stats["layer_mean_srgb"]["ground"]["clipped"] == pytest.approx(0.0)
     assert stats["layer_mean_srgb"]["ledge"]["cells"] == 256
+    # Nothing was handed in as the pre-clamp array, so nothing claims to describe one.
+    assert "clipped_before_ceiling" not in stats["layer_mean_srgb"]["ledge"]
+
+
+def test_the_clamp_does_not_erase_the_number_that_caught_it() -> None:
+    """The shipping clamp caps every channel at 249 and the gate counts 250, so after it
+    `clipped` is zero on every map it runs for - a true number that can no longer fail.
+    The share is kept at full per-layer resolution on the array the clamp read, so the
+    contract survives its own fix."""
+
+    _, _, level_builder, _, _, _ = load_maplib()
+    from maplib import imagery
+
+    colour = np.full((32, 32, 3), 128, dtype="uint8")
+    colour[16:, :16] = 255  # one layer entirely over the ceiling
+    layer = np.zeros((16, 16), dtype="uint8")
+    layer[8:, :8] = 1
+
+    linear, _over = imagery.clamp_highlights(imagery.srgb_to_linear(colour), 0.95)
+    shipped = imagery.linear_to_srgb_u8(linear)
+    # 0.95 linear encodes to 249.31, and 250 needs 0.9516 - so the clamp leaves the gate
+    # nothing to count, on any map, whatever a later stage did to the base.
+    assert int(shipped.max()) == 249
+    # Pinned from both ends, because either constant can move the blinding on its own:
+    # raise the ceiling past the value below and `clipped` starts counting again, lower
+    # the gate's 250 and it does too. Bisected rather than asserted from a literal.
+    lo, hi = 0.9, 1.0
+    for _ in range(80):
+        mid = (lo + hi) / 2
+        if (1.055 * mid ** (1 / 2.4) - 0.055) * 255.0 >= 249.5:
+            hi = mid
+        else:
+            lo = mid
+    assert hi == pytest.approx(0.951634, abs=1e-6), "the linear value that first reaches 250"
+    assert 0.95 < hi, "the ceiling must sit BELOW what the clipped gate tests for"
+    # And the clamp scales a texel rather than clipping a channel, so the blown square
+    # keeps its grey. A per-channel clip would have swung the hue of every texel it hit.
+    blown = shipped[16:, :16]
+    assert blown.min() == blown.max(), "the clamp moved brightness only"
+
+    stats = level_builder.base_colour_stats(
+        shipped, layer, ["ground", "ledge"], before_ceiling=colour
+    )
+    means = stats["layer_mean_srgb"]
+    # Exactly zero, not merely under the old 0.002: the clamp caps at 249, so `clipped`
+    # is 0 if and only if the clamp is the LAST writer of the base. A later stage that
+    # writes `colour_full` after it puts the number back above zero - which is the bug
+    # `53807cb` exists to fix, since `delight`'s own clamp was not the last writer either.
+    assert means["ledge"]["clipped"] == 0.0
+    assert means["ledge"]["clipped_before_ceiling"] == pytest.approx(1.0)
+    assert means["ground"]["clipped_before_ceiling"] == pytest.approx(0.0)
+
+
+# What each layer's pre-clamp share over the highlight ceiling measured on run 33's
+# published ZIPs - the last bases built before `53807cb` added the shipping clamp, so
+# they are the unclamped arrays `clipped_before_ceiling` describes. Measured directly
+# off `t_base_b.png` against `theTerrain.ter`'s layer indices, with the same `>= 250`
+# test `base_colour_stats` uses, so the numbers are the same quantity.
+#
+# The gate is the population rather than an absolute, deliberately. 0.002 was the
+# contract written for an unclamped base; six of these 22 layers are already above it,
+# so restoring it hard re-reds three maps over a blow-out the clamp has made invisible
+# in game. Held to the baseline instead, a layer that starts blowing out is caught -
+# which is the failure that actually happened - without failing the ones that always
+# did. Set from five maps: black_bear_pass has no published base to measure, so its
+# layers carry no baseline and are asserted present only, and so is any new material.
+# TODO: fill black_bear_pass's layers from the first good build. It is the map at critic
+# round 17 with the most at stake, and asserted-present is the weakest thing this gate
+# says about any map.
+CEILING_BASELINE = {
+    # factory_butte
+    "fb_caprock": 0.05631,
+    "fb_clay_fin": 0.00167,
+    "fb_shale_slope": 0.00014,
+    "fb_mud_flat": 0.00000,
+    # meteor_crater
+    "mc_limestone_rim_ew": 0.00431,
+    "mc_road_dirt": 0.00352,
+    "mc_limestone_rim": 0.00069,
+    "mc_ejecta_gravel": 0.00029,
+    "mc_desert_floor": 0.00012,
+    "mc_talus": 0.00001,
+    "mc_rim_rubble": 0.00000,
+    "mc_road_asphalt": 0.00000,
+    # wallace_creek
+    "wc_grassland": 0.00000,
+    "wc_alluvial_wash": 0.00000,
+    "wc_fault_scarp": 0.00000,
+    "wc_dry_pond": 0.00000,
+    # bingham_canyon and mt_st_helens: out of scope for development, still built
+    "bc_scrub_hillside": 0.00660,
+    "bc_haul_gravel": 0.00373,
+    "bc_waste_rock": 0.00266,
+    "bc_bench_face": 0.00052,
+    "sh_debris_slope": 0.00003,
+    "sh_ash_gully": 0.00002,
+    "sh_snow_ice": 0.00001,
+    "sh_pumice_plain": 0.00000,
+    "sh_crater_wall": 0.00000,
+}
+# Room for the build to move without the gate reading the movement as a regression.
+# It is wider than any difference measured between two builds of this pack and far
+# narrower than the step that put fb_caprock where it is.
+CEILING_SLACK = 0.005
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
@@ -1592,8 +1897,34 @@ def test_base_colour_has_no_black_holes(map_key: str) -> None:
     means = stats.get("layer_mean_srgb", {})
     assert means, f"{map_key}: no layer was measured on the finished base"
     for name, entry in means.items():
-        # And no layer of the finished base runs to white either.
-        assert entry.get("clipped", 0.0) < 0.002, (map_key, name, entry)
+        # And no layer of the finished base runs to white either. Asserted at exactly
+        # zero rather than under 0.002, which is not a tightening: the shipping clamp
+        # caps every channel at 249 and this counts 250, so under the contract the only
+        # reachable value IS zero, and `< 0.002` could not fail for any other reason.
+        # At zero it fails for one reason, the one that can recur - something writing
+        # the base after the clamp, which is the defect `53807cb` existed to fix and
+        # which `refill_match` and `_enforce_beds` caused once already.
+        assert entry.get("clipped", 0.0) == 0.0, (map_key, name, entry)
+        # The share the clamp had to rescue, measured before it, at the resolution the
+        # whole-base `shipped_ceiling_fraction` throws away - fb_caprock is 5.6% over
+        # the ceiling and 0.13% of its base, so no whole-base threshold sees it.
+        assert entry.get("clipped_before_ceiling") is not None, (
+            map_key,
+            name,
+            "the level stage recorded no pre-clamp share, so nothing measures the base",
+        )
+        assert 0.0 <= entry["clipped_before_ceiling"] <= 1.0, (map_key, name, entry)
+        # And it is held to the population rather than to an absolute, for the reason
+        # CEILING_BASELINE gives.
+        baseline = CEILING_BASELINE.get(name)
+        if baseline is not None:
+            assert entry["clipped_before_ceiling"] <= baseline + CEILING_SLACK, (
+                map_key,
+                name,
+                "this layer blows out further past the ceiling than it did on run 33",
+                entry["clipped_before_ceiling"],
+                baseline,
+            )
     for name, lit in (getattr(spec, "IMAGERY", None) or {}).get("lighter_than", {}).items():
         # A layer the spec says reads lighter than another (the cream ledges over
         # the tan plain) does so in the finished base.
@@ -2004,6 +2335,45 @@ def test_building_tiles_parse_and_stand_on_the_terrain(map_key: str) -> None:
         assert abs(x) <= half and abs(y) <= half, item
         assert (root / item["shapeName"][len(f"/levels/{spec.MOD_ID}/") :]).is_file(), item
         assert item["collisionType"] == "Visible Mesh Final", item
+
+
+def test_the_lock_records_the_commit_and_run_that_built_it() -> None:
+    """A per-map lock proves the ZIP, not the release.
+
+    `sha256`, `size` and `members` are all properties of the ZIP in front of them, so a
+    release assembled from two runs at two commits passes every one of them: each map is
+    internally consistent with itself, and the only commit statement anywhere is the
+    release body, written by whichever run happened to upload last. The commit and run
+    are the only fields that can disagree BETWEEN maps.
+    """
+    _, _, _, packaging, _, _ = load_maplib()
+    env = {
+        "GITHUB_SHA": "0" * 39 + "a",
+        "GITHUB_RUN_ID": "35389688806",
+        "GITHUB_RUN_NUMBER": "55",
+    }
+    with mock.patch.dict(os.environ, env, clear=False):
+        under_actions = packaging.build_provenance()
+    assert under_actions == {
+        "source_commit": "0" * 39 + "a",
+        # Nothing to be dirty about: the runner checks out the commit it names.
+        "source_dirty": False,
+        "build_run_id": 35389688806,
+        "build_run_number": 55,
+    }
+
+    # Off a runner the run fields are absent rather than invented, and the commit comes
+    # from git with `source_dirty` beside it - a lock naming a commit it was not built
+    # from is worse than one naming none.
+    bare = {k: "" for k in env}
+    with mock.patch.dict(os.environ, bare, clear=False):
+        for key in env:
+            os.environ.pop(key, None)
+        local = packaging.build_provenance()
+    assert local["build_run_id"] is None and local["build_run_number"] is None
+    assert local["source_commit"] is None or re.fullmatch(r"[0-9a-f]{40}", local["source_commit"])
+    assert local["source_dirty"] in (True, False, None)
+    assert (local["source_commit"] is None) == (local["source_dirty"] is None)
 
 
 # ---------------------------------------------------------------------------
