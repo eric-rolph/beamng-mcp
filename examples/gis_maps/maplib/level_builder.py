@@ -1179,30 +1179,33 @@ def refill_check(
         # road, not an unlifted field.
         # The erosion runs first, and on an elongated field it can take everything: at
         # meteor_crater's 0.5 m texel this is twelve iterations, a 6 m band off every
-        # boundary, and a road shadow at the 1000 m2 floor is about 12 m by 83 m. Both
-        # numbers below have to say so, or a field the exclusion could not reach looks
-        # exactly like a field with no road near it.
-        bed_share: float | None = 0.0
-        if bed is not None:
-            not_bed = ~bed[r0:r1, c0:c1]
-            # An empty interior has no share to report. Reporting 0.0 here would read as
-            # "no road in this field" on precisely the elongated shadows the exclusion
-            # was written for, which is the one case worth telling apart.
-            bed_share = (
-                float((interior & ~not_bed).sum()) / int(interior.sum()) if interior.any() else None
-            )
-            # Below 20 cells the remainder is noise, so the field keeps its old reading
-            # and `bed_fraction` says why it is the one it is.
-            if (interior & not_bed).sum() >= 20:
-                interior = interior & not_bed
-            del not_bed
+        # boundary, and a road shadow at the 1000 m2 floor is about 12 m by 83 m. So
+        # settle which population is in use BEFORE asking anything about the bed;
+        # measuring the share on an interior the numbers do not rest on was how a field
+        # the exclusion could not reach came to look like a field with no road near it.
         # Whether the numbers below rest on the eroded interior or on the whole
-        # component, bed and all. The fallback is not a failure - it is the old reading,
-        # deliberately - but it is a different measurement and the handoff should say
-        # which one it is.
+        # component. The fallback is not a failure - it is the old reading, deliberately
+        # - but it is a different measurement and the handoff should say which.
         interior_eroded = bool(interior.sum() >= 20)
         if not interior_eroded:
             interior = field
+        bed_share: float | None = None
+        on_road_bed = False
+        if bed is not None:
+            not_bed = ~bed[r0:r1, c0:c1]
+            bed_share = float((interior & ~not_bed).sum()) / int(interior.sum())
+            # Below 20 cells the remainder is noise, so the field keeps its old reading.
+            if (interior & not_bed).sum() >= 20:
+                interior = interior & not_bed
+            elif bed_share >= 0.5:
+                # There is no ground left in this field: it IS a road. `refill_match`
+                # refuses to correct a bed cell by design - it zeroes its feather there
+                # - so every ratio below compares asphalt against a bed-free ring and
+                # reports the match as having failed at something it is forbidden to
+                # attempt. No fix moves those texels. It stays in `largest` with the
+                # reason on it and comes out of the population the gates read.
+                on_road_bed = True
+            del not_bed
         dist = ndimage.distance_transform_edt(~field) * texel_m
         ring = (dist > 10.0) & (dist <= 30.0) & ring_ok[r0:r1, c0:c1]
         if ring.sum() < 50:
@@ -1234,25 +1237,43 @@ def refill_check(
                 # used instead - bed included, so `bed_fraction` describes nothing that
                 # was excluded.
                 "interior_eroded": interior_eroded,
-                # How much of the field is road the match is not allowed to touch. None
-                # when the erosion emptied the interior, so there was nothing to measure.
+                # How much of the population above is road the match is not allowed to
+                # touch, taken before the exclusion. None only when the caller passed no
+                # bed at all, so 0.0 now means "no road here" and nothing else.
                 "bed_fraction": None if bed_share is None else round(bed_share, 3),
+                # True when that share left no ground to measure. Every ratio on this
+                # field is asphalt against a bed-free ring, so the gates skip it.
+                "on_road_bed": on_road_bed,
             }
         )
     if not fields:
         return None
-    lum_r = np.array([f["lum_ratio"] for f in fields])
-    grain = np.array([f["grain_ratio"] for f in fields])
-    return {
-        "fields": len(fields),
-        "lum_ratio_min": round(float(lum_r.min()), 3),
-        "lum_ratio_max": round(float(lum_r.max()), 3),
-        "lum_ratio_p10": round(float(np.percentile(lum_r, 10)), 3),
-        "grain_ratio_p10": round(float(np.percentile(grain, 10)), 3),
-        "br_diff_max_abs": round(float(np.abs([f["br_diff"] for f in fields]).max()), 3),
-        "exg_diff_max_abs": round(float(np.abs([f["exg_diff"] for f in fields]).max()), 3),
+    # The fields a match could have moved. A field that is all road bed is reported in
+    # `largest` and counted here, but no summary statistic rests on it - see
+    # `on_road_bed` above. `fields` is the size of the population the statistics come
+    # from, so a build where the exclusion runs away leaves a number that says so
+    # rather than a quietly smaller sample.
+    measured = [f for f in fields if not f["on_road_bed"]]
+    summary: dict = {
+        "fields": len(measured),
+        "fields_on_road_bed": len(fields) - len(measured),
         "largest": fields,
     }
+    if not measured:
+        return summary
+    lum_r = np.array([f["lum_ratio"] for f in measured])
+    grain = np.array([f["grain_ratio"] for f in measured])
+    summary.update(
+        {
+            "lum_ratio_min": round(float(lum_r.min()), 3),
+            "lum_ratio_max": round(float(lum_r.max()), 3),
+            "lum_ratio_p10": round(float(np.percentile(lum_r, 10)), 3),
+            "grain_ratio_p10": round(float(np.percentile(grain, 10)), 3),
+            "br_diff_max_abs": round(float(np.abs([f["br_diff"] for f in measured]).max()), 3),
+            "exg_diff_max_abs": round(float(np.abs([f["exg_diff"] for f in measured]).max()), 3),
+        }
+    )
+    return summary
 
 
 def road_contrast(colour, layer, materials, surfaces, texel_m: float) -> dict:

@@ -1735,16 +1735,18 @@ def test_ring_matching_reaches_the_fields_it_was_turned_on_for(map_key: str) -> 
     assert cover["with_ring"] > 0, (map_key, "ring matching reached no field", cover)
 
 
-def test_a_field_the_erosion_empties_says_so_instead_of_reading_as_roadless() -> None:
-    """``refill_check`` erodes 6 m off every boundary before it looks at the bed, so an
-    elongated field can lose its whole interior - and that is exactly the shape of a
-    shadow lying along a road, which is what the bed exclusion exists for.
+def test_the_bed_exclusion_reaches_the_field_it_was_written_for() -> None:
+    """``refill_check`` erodes 6 m off every boundary, so an elongated field loses its
+    whole interior - and that is exactly the shape of a shadow lying along a road,
+    which is what the bed exclusion exists for.
 
-    When it happens, three things used to collapse into one number: ``bed_fraction``
-    divided by a guarded zero and came out 0.0, the >= 20 test failed so no bed was
-    excluded, and the fallback measured the whole component including the bed. A reader
-    could not tell that from a field with no road within a hundred metres. The
-    population and the fallback flag are what separate them."""
+    It used to ask about the bed BEFORE settling which population it was measuring, so
+    on this field the share was taken of an empty interior, the >= 20 test failed
+    against nothing, no bed was excluded, and the fallback then measured the whole
+    component with the road still in it. The order is now the other way round: the
+    fallback first, then the bed question about the population actually in use. The
+    exclusion reaches this field, which is the whole point of it.
+    """
 
     _, _, level_builder, _, _, _ = load_maplib()
 
@@ -1752,7 +1754,7 @@ def test_a_field_the_erosion_empties_says_so_instead_of_reading_as_roadless() ->
     colour = np.full((n, n, 3), 120, dtype="uint8")
     refill = np.zeros((n, n), dtype="uint8")
     bed = np.zeros((n, n), dtype=bool)
-    # 10 m by 100 m: wider than min_area_m2 but narrower than the 12 m the erosion takes
+    # 10 m by 100 m: over the area floor but narrower than the 12 m the erosion takes
     # off each side, and lying along a road, which is the case that matters.
     refill[100:120, 28:228] = 1
     bed[104:116, 28:228] = True
@@ -1766,12 +1768,55 @@ def test_a_field_the_erosion_empties_says_so_instead_of_reading_as_roadless() ->
         "a 10 m wide field cannot survive a 6 m erosion from both sides",
         field,
     )
-    assert field["bed_fraction"] is None, (
-        "there was no interior to take a bed share of, and 0.0 would read as 'no road'",
-        field,
-    )
-    # The fallback measured the whole component, so the population is the field itself.
-    assert field["interior_texels"] == int((refill == 1).sum()), field
+    # 12 of the field's 20 rows are bed, and that share is now taken of the population
+    # the numbers rest on rather than of an empty array.
+    assert field["bed_fraction"] == pytest.approx(0.6, abs=0.01), field
+    # Eight rows of ground is far more than the 20-cell floor, so the exclusion runs
+    # and the population is the field minus its road.
+    assert field["on_road_bed"] is False, field
+    assert field["interior_texels"] == int(((refill == 1) & ~bed).sum()), field
+    assert out["fields"] == 1 and out["fields_on_road_bed"] == 0, out
+
+
+def test_a_field_that_is_entirely_road_comes_out_of_the_population() -> None:
+    """A shadow lying wholly on a road is not an unlifted field, and reporting it as a
+    failed match asks for something no fix can deliver.
+
+    ``refill_match`` refuses to correct a bed cell by design - it zeroes its feather
+    there, so the bed keeps the contrast the stage before it just enforced. When a
+    field has no ground left in it, every ratio compares asphalt against a bed-free
+    ring, and the gate reads the match as having failed at what it is forbidden to
+    attempt. Meteor Crater shipped exactly this: a 2,973 m2 field at (-35.3, 670.3),
+    entirely bed on a level that is 1.16 % bed, reported at 0.459 of its ring.
+    """
+
+    _, _, level_builder, _, _, _ = load_maplib()
+
+    n, texel = 256, 0.5
+    colour = np.full((n, n, 3), 120, dtype="uint8")
+    refill = np.zeros((n, n), dtype="uint8")
+    bed = np.zeros((n, n), dtype=bool)
+    # The road shadow: every texel of it is bed, so there is no ground to measure.
+    refill[100:120, 28:228] = 1
+    bed[100:120, 28:228] = True
+    colour[refill == 1] = 55
+    # And an ordinary field elsewhere, so the population does not empty - the summary
+    # has to keep reporting on what is left.
+    refill[40:90, 40:90] = 1
+    colour[40:90, 40:90] = 118
+
+    out = level_builder.refill_check(colour, refill, texel, bed=bed, min_area_m2=500.0)
+    assert out, "both synthetic fields are over the area floor"
+    on_bed = [f for f in out["largest"] if f["on_road_bed"]]
+    ground = [f for f in out["largest"] if not f["on_road_bed"]]
+    assert len(on_bed) == 1 and len(ground) == 1, out["largest"]
+    assert on_bed[0]["bed_fraction"] == pytest.approx(1.0), on_bed[0]
+    assert out["fields"] == 1 and out["fields_on_road_bed"] == 1, out
+    # The dark road is still in the record - it is dropped from the statistics, not
+    # from the report, so a reader can see what was set aside and why.
+    assert on_bed[0]["lum_ratio"] < 0.75, on_bed[0]
+    # And no summary statistic carries it.
+    assert out["lum_ratio_min"] == ground[0]["lum_ratio"], out
 
 
 def test_a_field_that_survives_the_erosion_reports_its_bed_share_and_population() -> None:
@@ -2055,6 +2100,38 @@ def test_refills_carry_their_rings_grain(map_key: str) -> None:
     assert ratio and ratio["p10"] >= 0.8, (map_key, ratio)
 
 
+def _assert_the_bed_exclusion_left_a_population(map_key: str, check: dict) -> None:
+    """The other end of the road-bed exclusion, without which it is an escape hatch.
+
+    A field whose interior is entirely painted road bed is dropped from the refill
+    statistics, because `refill_match` refuses to correct a bed cell by design and
+    every ratio on such a field compares asphalt against a bed-free ring. That is
+    right, and it is also exactly the shape of a fix that can quietly swallow the gate:
+    widen what counts as bed and the population empties, and the suite goes green on
+    nothing. So the exclusion is asserted from both ends - it must leave a population,
+    and it must stay the exception.
+
+    Meteor Crater, the only map with roads through its shadows, is 1.16 % road bed and
+    reported one such field out of eighteen.
+    """
+
+    dropped = check.get("fields_on_road_bed", 0)
+    measured = check.get("fields", 0)
+    total = measured + dropped
+    assert measured > 0, (
+        map_key,
+        f"all {dropped} refilled fields were dropped as road bed, so nothing was "
+        "measured and the gates below assert nothing",
+        check,
+    )
+    assert dropped <= max(2, 0.2 * total), (
+        map_key,
+        f"{dropped} of {total} refilled fields were dropped as road bed - the "
+        "exclusion is meant to be the exception, not the population",
+        check,
+    )
+
+
 @pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_refills_read_as_their_ground_on_the_shipped_base(map_key: str) -> None:
     """Every large refilled field (cast shadow or snow) measured on the base the game
@@ -2075,6 +2152,7 @@ def test_refills_read_as_their_ground_on_the_shipped_base(map_key: str) -> None:
     )
     check = (handoff.get("imagery") or {}).get("refill_check")
     assert check, (map_key, "no refill_check in the handoff")
+    _assert_the_bed_exclusion_left_a_population(map_key, check)
     assert check["lum_ratio_p10"] >= 0.90 and check["lum_ratio_max"] <= 1.10, (map_key, check)
     assert check["grain_ratio_p10"] >= 0.45, (map_key, check)
     assert check["br_diff_max_abs"] <= 0.04, (map_key, check)
@@ -2115,8 +2193,10 @@ def test_no_refilled_field_reads_as_a_blotch(map_key: str) -> None:
         # is a fact about the ground and not a missing measurement - the assertion above
         # is what separates the two.
         pytest.skip(f"{map_key}: no refilled field large enough to be reported")
-    worst = min((e["lum_ratio"] for e in check["largest"]), default=1.0)
-    assert worst >= 0.75, (map_key, "a refilled field reads as a blotch", worst, check["largest"])
+    _assert_the_bed_exclusion_left_a_population(map_key, check)
+    measured = [e for e in check["largest"] if not e.get("on_road_bed")]
+    worst = min((e["lum_ratio"] for e in measured), default=1.0)
+    assert worst >= 0.75, (map_key, "a refilled field reads as a blotch", worst, measured)
     # And the other side, which this gate was missing while the tight one above had it
     # (0.90 AND 1.10). A refill brighter than its ground is the same defect seen from
     # the other end, and it is the one `refill_match`'s 1.4 gain clip exists to prevent
@@ -2124,16 +2204,16 @@ def test_no_refilled_field_reads_as_a_blotch(map_key: str) -> None:
     # nobody can responsibly raise it. 1.25 is the floor's own 0.25 mirrored, and it
     # sits in open space: across 127 fields on six maps the highest ratio measured is
     # 1.047.
-    palest = max((e["lum_ratio"] for e in check["largest"]), default=1.0)
+    palest = max((e["lum_ratio"] for e in measured), default=1.0)
     assert palest <= 1.25, (
         map_key,
         "a refill reads paler than its ground",
         palest,
-        check["largest"],
+        measured,
     )
     for axis in ("br_diff", "exg_diff"):
-        off = max((abs(e[axis]) for e in check["largest"]), default=0.0)
-        assert off <= 0.10, (map_key, axis, off, check["largest"])
+        off = max((abs(e[axis]) for e in measured), default=0.0)
+        assert off <= 0.10, (map_key, axis, off, measured)
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
