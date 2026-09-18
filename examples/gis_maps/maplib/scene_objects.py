@@ -20,6 +20,7 @@ import numpy as np
 
 from . import foliage_textures as ft
 from . import meshgen
+from .stable_seed import stable_hash
 
 
 def _yaw_matrix(yaw_deg: float) -> list[float]:
@@ -134,7 +135,7 @@ def build_shapes(
         ft.rock_set(
             tex_dir,
             f"{mod_id}_{family}",
-            seed_base + hash(family) % 1000,
+            seed_base + stable_hash(family) % 1000,
             colour=tuple(params["colour"]),
             strata=float(params.get("strata", 0.2)),
             lichen_cover=float(params.get("lichen", 0.3)),
@@ -151,7 +152,7 @@ def build_shapes(
             sz = float(rng.uniform(float(z_lo), float(z_hi)))
             name = f"{family}_{v:02d}"
             meshes = meshgen.rock_meshes(
-                seed_base + 31 * v + hash(family) % 97,
+                seed_base + 31 * v + stable_hash(family) % 97,
                 (sx, sy, sz),
                 subdivisions=2,
                 angular=float(rng.uniform(0.7, 1.0)),
@@ -227,7 +228,7 @@ def build_shapes(
             ft.conifer_card(
                 tex_dir,
                 f"{mod_id}_{cards}",
-                seed_base + 43 + hash(species) % 50,
+                seed_base + 43 + stable_hash(species) % 50,
                 kind=params["kind"],
                 colour=params["colour"],
             )
@@ -236,7 +237,7 @@ def build_shapes(
             ft.conifer_tier_card(
                 tex_dir,
                 f"{mod_id}_{species}_tiers",
-                seed_base + 47 + hash(species) % 50,
+                seed_base + 47 + stable_hash(species) % 50,
                 kind=params["kind"],
                 colour=params["colour"],
             )
@@ -258,7 +259,7 @@ def build_shapes(
                 )
             else:
                 meshes = meshgen.conifer_meshes(
-                    seed_base + 200 + v + hash(species) % 50,
+                    seed_base + 200 + v + stable_hash(species) % 50,
                     params["base_height"],
                     params["crown"] * (1.0 + 0.12 * (v % 2)),
                     kind=params["kind"],
@@ -305,7 +306,7 @@ def build_shapes(
         ft.shrub_card(
             tex_dir,
             f"{mod_id}_{family}_cards",
-            seed_base + 51 + hash(family) % 97,
+            seed_base + 51 + stable_hash(family) % 97,
             colour=tuple(params.get("colour", (0.18, 0.24, 0.12))),
             light_colour=tuple(params.get("light_colour", (0.30, 0.37, 0.19))),
         )
@@ -316,7 +317,7 @@ def build_shapes(
         for v in range(3):
             name = f"{family}_{v:02d}"
             meshes = meshgen.shrub_meshes(
-                seed_base + 300 + v + hash(family) % 53,
+                seed_base + 300 + v + stable_hash(family) % 53,
                 height,
                 width + 0.2 * v,
                 card_material=card_mat,

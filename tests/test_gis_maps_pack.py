@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import re
 import shutil
 import struct
 import sys
@@ -230,6 +231,77 @@ def test_texture_kit_is_deterministic(tmp_path: Path) -> None:
         tmp_path / "c", "x", "gravel", seed=43, size=64, base_rgb=[0.5, 0.4, 0.3]
     )
     assert a["b"].read_bytes() != c["b"].read_bytes(), "a different seed must change the map"
+
+
+# The names the placed-object generators seed themselves from. A seed built on the
+# builtin hash() of one of these is a different seed in every process, which is how two
+# CI builds of the same commit shipped different rocks, different shrubs and a forest of
+# 9032 instances against 9040.
+_SEED_NAMES = ("rock_limestone", "rock_talus", "sage", "juniper", "aspen_sapling", "brick")
+
+_SEED_PROBE = """
+import json, sys
+sys.path.insert(0, sys.argv[1])
+from maplib.stable_seed import stable_hash
+names = json.loads(sys.argv[2])
+print(json.dumps({
+    "stable": [stable_hash(n) for n in names],
+    "builtin": [hash(n) for n in names],
+}))
+"""
+
+
+def _seed_probe(hash_seed: str) -> dict:
+    """Run the probe in a fresh interpreter with PYTHONHASHSEED set to ``hash_seed``."""
+
+    import os
+    import subprocess
+
+    env = dict(os.environ, PYTHONHASHSEED=hash_seed)
+    out = subprocess.run(  # noqa: S603 - this interpreter, a literal script, static arguments
+        [sys.executable, "-c", _SEED_PROBE, str(PACK_ROOT), json.dumps(list(_SEED_NAMES))],
+        capture_output=True,
+        text=True,
+        check=True,
+        env=env,
+    )
+    return json.loads(out.stdout)
+
+
+def test_object_seeds_are_stable_across_processes() -> None:
+    """``stable_hash`` gives the same number in a differently salted interpreter.
+
+    This has to cross a process boundary: str hashing is salted once per process, so a
+    single-process test passes with the defect present and proves nothing. The builtin
+    is measured alongside as the control - if it ever stops differing here, the salt is
+    pinned in the environment and this test has quietly stopped testing anything."""
+
+    a, b = _seed_probe("1"), _seed_probe("2")
+    assert a["stable"] == b["stable"], (a["stable"], b["stable"])
+    assert a["builtin"] != b["builtin"], (
+        "PYTHONHASHSEED appears to be pinned, so this test can no longer tell a stable "
+        "seed from an unstable one"
+    )
+
+
+def test_no_generator_is_seeded_from_the_builtin_hash() -> None:
+    """No module under ``maplib`` derives a seed or a shipped id from ``hash()``.
+
+    Guards the spelling as well as the property: the test above cannot see a new call
+    site that no map exercises yet, and a reviewer reading `hash(family) % 97` has no
+    reason to suspect it."""
+
+    offenders = []
+    for path in sorted((PACK_ROOT / "maplib").glob("*.py")):
+        # stable_seed.py names the builtin in its own docstring to explain what it
+        # replaces; it is the one file that is allowed to say the word.
+        if path.name == "stable_seed.py":
+            continue
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            code = line.split("#", 1)[0]
+            if re.search(r"(?<![\w.])hash\s*\(", code):
+                offenders.append(f"{path.name}:{number}: {line.strip()}")
+    assert not offenders, "use maplib.stable_seed.stable_hash instead:\n" + "\n".join(offenders)
 
 
 def test_texture_tiles_wrap() -> None:
@@ -1204,6 +1276,53 @@ def test_detect_objects_lifts_a_boulder_and_leaves_the_ground() -> None:
     assert counts == {"rock": 1, "shrub": 0, "linear": 0}
     placed = objects.place_objects(found, ground, res, n * res, 10.0)
     assert len(placed) == 1 and placed[0]["kind"] == "rock" and placed[0]["size"][2] >= 1.0
+
+
+def test_detect_off_stats_reports_every_count_a_real_pass_does() -> None:
+    """The skip path's handoff keeps a real pass's shape: zeros, not a missing section."""
+
+    _, _, objects, _, _ = _load_art_modules()
+    n, res = 120, 0.5
+    y, x = np.mgrid[0:n, 0:n].astype("float32") * res
+    dem = 10.0 + 0.02 * x
+    bump = 1.2 * np.exp(-(((x - 30) ** 2 + (y - 30) ** 2) / (2 * 0.8**2)))
+    _, _, live = objects.detect_objects(dem + bump, res, open_m=6.0, min_height_m=0.4)
+    off = objects.detect_off_stats()
+
+    counts = {k for k, v in live.items() if not isinstance(v, str)} - {"open_m", "min_height_m"}
+    assert counts <= set(off), f"the skip path drops {counts - set(off)} from the handoff"
+    assert all(off[k] == 0 for k in counts), "a skipped pass removed nothing and found nothing"
+    assert off["detect"] == "off", "a reader has to be able to tell a skip from an empty pass"
+    # `open_m` and `min_height_m` describe an opening that did not happen. Reporting them
+    # would read as a pass that ran and found nothing, which is the confusion the whole
+    # `"detect": None` path exists to avoid.
+    assert "open_m" not in off and "min_height_m" not in off
+
+
+def test_the_bump_detector_takes_a_badlands_landform_for_boulders() -> None:
+    """Why `"detect": None` exists: on fine relief the pass finds the relief.
+
+    Measured on Factory Butte's shipped terrain, `detect_objects` found 6,768 bumps over
+    16.8 km2, none of them on the 61.94% that is wash floor, and took 106,602 m3 of fins
+    off to place them. This is that finding at test scale, so that anyone who later makes
+    the detector ignore ridges can see the skip become unnecessary instead of guessing.
+    """
+
+    _, _, objects, _, _ = _load_art_modules()
+    n, res = 300, 1.0
+    y, x = np.mgrid[0:n, 0:n].astype("float32") * res
+    # Flat wash floor on the west half; a rill-and-fin field at a 12 m wavelength and 3 m
+    # of relief on the east, which is the scale Mancos Shale badlands actually run at.
+    relief = 1.5 * (1.0 + np.sin(2 * np.pi * x / 12.0)) * np.sin(2 * np.pi * y / 30.0) ** 2
+    dem = (40.0 - 0.01 * y + np.where(x >= 150.0, relief, 0.0)).astype("float32")
+
+    ground, found, stats = objects.detect_objects(dem, res, open_m=6.0, min_height_m=0.6)
+    assert stats["objects"] > 100, "the detector is expected to find the fins, not nothing"
+    assert all(o["col"] >= 150 for o in found), "nothing on the flat, which is where rocks are"
+    assert stats["removed_volume_m3"] > 1000.0
+    moved = np.abs(ground - dem)
+    assert moved[:, 150:].max() > 2.5, "it shaves the fins down by most of their height"
+    assert moved[:, :150].max() < 0.1, "and leaves the wash floor, so the count cannot rebalance"
 
 
 def test_ept_hierarchy_walk_visits_only_overlapping_nodes() -> None:
