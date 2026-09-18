@@ -846,8 +846,9 @@ def delight(
     # -- an independent sweep found this floor's trigger share at 0.000000 across every
     # `strength`, with the breach still rising to 0.000454 as `gain_p05` settled onto the
     # gain's own 0.45 low clip. Of those 67 cells, measured at ULP resolution: none sits
-    # exactly on `np.float32(0.45)`, 34 are within 4 ULP of the constant, 16 are more than
-    # 1024 ULP under it, and the gap between 64 and 1024 ULP is empty. A cell pinned at the
+    # exactly on `np.float32(0.45)`, 34 are within 4 ULP of the constant and 16 are more
+    # than 1024 ULP under it -- but 14 sit BETWEEN 64 and 1024 ULP, so there is no empty
+    # gap to cut at, and no bucket boundary here is a finding. A cell pinned at the
     # clip is INVISIBLE here rather than counted -- `composed` stays float32 end to end, so
     # the test runs in float32 where `np.float32(0.45) < 0.45` is False. What the near-edge
     # half is, then, is the rounding of `composed` itself: it is `out_lum / src_lum` through
@@ -1011,6 +1012,21 @@ def delight(
     floor_lum = min(float(knee_lum), float(cap_lum) if cap_lum is not None else float(knee_lum))
     breach = untouched & (out_lum < floor_lum) & (composed < 0.45)
     del out_lum
+    # HOW FAR under the bound, not just how many. The fraction above says a cell breached
+    # the contract; it cannot say whether the cell shipped at 0.4489 or at 0.30, and those
+    # are different findings. A cell a quarter of a percent under the clip is this gate
+    # reading its own float error -- `composed` is `out_lum / src_lum` recomputed through
+    # two separate three-channel means, not the gain itself, so it lands either side of
+    # the constant the gain was clipped to. A cell at 0.30 is a writer outside the
+    # contract. Without these two numbers the only way to tell them apart is to calibrate
+    # a tolerance on a synthetic, and a synthetic that cannot produce the deep population
+    # would set that tolerance to hide it: measured, this stage on a dark synthetic gives
+    # `under_0_25` 0.0 at every strength while bingham_canyon ships 0.003254.
+    #
+    # Memory: `composed[breach]` is the breach cells alone -- 0.1% of the array on the
+    # worst map, about 70 KB at 4096 samples against a stage peak near 250 MB -- and it
+    # is freed as soon as the two numbers exist.
+    breach_lo = composed[breach]
     sample = composed[::4, ::4][seen[::4, ::4]]
     stats = {
         "highlight_ceiling_fraction": round(over_ceiling, 6),
@@ -1024,6 +1040,12 @@ def delight(
             # The count, because the bound is exactly 0.0: a fraction of 7e-06 cannot say
             # whether that is one edge cell or a real artefact, and the count can.
             "under_gain_floor_untouched_cells": int(breach.sum()),
+            # And the breach population's OWN distribution, so the next round can tell a
+            # float edge from a real writer without calibrating anything on a synthetic.
+            "breach_composed_p50": (
+                round(float(np.median(breach_lo)), 6) if breach_lo.size else None
+            ),
+            "breach_composed_min": (round(float(breach_lo.min()), 6) if breach_lo.size else None),
         },
         # What the refill BORROWED, against the lit ground it borrowed from. `_carry_tone`
         # normalises by the donor weight it found, so its own arithmetic says the donors
@@ -1059,6 +1081,7 @@ def delight(
         # every field against its ring on the shipped base.
         "_refill_mask": fill_last,
     }
+    del breach_lo
     shipped = linear_to_srgb_u8(out)
     # Does the de-cast's unguarded write land on the cells that ship black? A share across
     # maps is a correlation; this is the per-cell question on one map. Taken on THIS stage's

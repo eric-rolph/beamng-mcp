@@ -1273,6 +1273,23 @@ def level(spec, example_root: Path) -> dict:
         # that produces it is not the same as shipping it to the artefact that is read.
         "road_clearance_from": report.get("road_clearance_from"),
         "rocks_cleared_from_roads": report.get("rocks_cleared_from_roads"),
+        # `cliffs` is the same defect found a second time, and it cost four maps on run
+        # 77. `build_level` writes `report["cliffs"] = cliff["stats"]` and ships the rock
+        # geometry to MissionGroup/cliffs, but the key stopped here, so
+        # `test_a_declared_cliff_stage_actually_modelled_something` asserted
+        # `handoff.get("cliffs")` on every map that declares CLIFFS and would have failed
+        # identically had the cliffs been perfect. A gate that cannot pass says nothing
+        # about the stage it names.
+        "cliffs": report.get("cliffs", {}),
+        # Two misses in one hand-maintained allow-list means the list is the defect, not
+        # the entries, so the rest of it was diffed against every key `build_level`
+        # writes rather than patching the one that failed. These three break no gate
+        # today; they are measurements the build takes and then discards, which is the
+        # same fault one layer down. They travel now so the next gate that wants one
+        # finds it already there instead of red-flagging a map for 40 minutes.
+        "imagery_dots_erased": report.get("imagery_dots_erased"),
+        "objects_cleared_from_cliffs": report.get("objects_cleared_from_cliffs"),
+        "water_objects": report.get("water_objects"),
         "shipped": shipped,
     }
     (authoring / f"{spec.MOD_ID}.handoff.json").write_text(

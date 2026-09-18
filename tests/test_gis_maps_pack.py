@@ -2545,6 +2545,86 @@ def test_the_decast_guard_number_can_actually_fail() -> None:
     ]
 
 
+def test_the_breach_distribution_can_actually_leave_the_bound() -> None:
+    """The negative control for `breach_composed_p50` / `_min`, which exist to tell a
+    float edge from a writer outside the contract.
+
+    `under_gain_floor_untouched` counts cells; it cannot say whether one shipped at 0.4489
+    or at 0.30, and those are different findings. The risk this control exists to kill is
+    a pair of numbers that always read "just under 0.45" whatever the stage did, which
+    would look like a measurement and license a tolerance that hides a real defect. So the
+    clean case asserts the near-bound signature AND the driven case asserts the numbers
+    leave it.
+    """
+
+    load_maplib()
+    from maplib import imagery
+
+    rng = np.random.default_rng(11)
+    n = 256
+    y, x = np.mgrid[0:n, 0:n].astype("float32")
+    dem = 260.0 * np.exp(-((y - 110) ** 2) / (2 * 14.0**2)) + 90.0 * np.sin(x / 13.0)
+    dem = (dem + rng.normal(0, 0.5, dem.shape)).astype("float32")
+    shade = np.clip(imagery.cast_shadows(dem, 2.0, 180.0, 15.0), 0.02, 1.0)
+    ground = np.clip(0.5 + 0.06 * rng.normal(0, 1, (n, n, 1)), 0.08, 0.9) * np.array(
+        [0.82, 0.90, 1.0]
+    )
+    sky = 1.0 + 0.35 * (1.0 - shade)[..., None] * np.array([-0.2, 0.0, 0.35])
+    colour = (np.clip(ground * shade[..., None] * sky, 0, 1) ** (1 / 2.2) * 255).astype("uint8")
+    # A low sun and a high Minnaert exponent, because the breach needs the gain to reach
+    # its own low clip: `strength` multiplies `k` (imagery.py, `k = clip(k, 0.5, 1.4) *
+    # strength`), so this is the one knob that drives `gain_p05` onto 0.45.
+    kw = dict(
+        azimuth_deg=180.0,
+        altitude_deg=15.0,
+        strength=3.5,
+        max_gain=4.5,
+        steep_deg=32.0,
+        steep_feather_deg=8.0,
+        steep_cap=True,
+    )
+
+    _out, clean = imagery.delight(colour, dem, 2.0, **kw)
+    composed = clean["composed_ratio"]
+    # The control is only meaningful if there is a breach to describe.
+    assert composed["under_gain_floor_untouched_cells"] > 100, composed
+    # On a scene with no deep population the breach sits ON the clip: `composed` is
+    # `out_lum / src_lum` recomputed through two three-channel means, not the gain, so it
+    # lands either side of the constant the gain was clipped to.
+    assert composed["breach_composed_p50"] == 0.45, composed
+    assert 0.44 < composed["breach_composed_min"] < 0.45, composed
+
+    # Drive it: a writer after the refill that halves every texel. It runs last, so the
+    # cells it darkens still read `untouched`, which is exactly the shape the gate is
+    # meant to catch and the one a near-bound-only instrument would report as harmless.
+    real_clamp = imagery.clamp_highlights
+
+    def _halved(lin, ceiling):
+        out, fraction = real_clamp(lin, ceiling)
+        return out * 0.5, fraction
+
+    try:
+        imagery.clamp_highlights = _halved
+        _out, driven = imagery.delight(colour, dem, 2.0, **kw)
+    finally:
+        imagery.clamp_highlights = real_clamp
+    forced = driven["composed_ratio"]
+    assert (
+        forced["under_gain_floor_untouched_cells"] > composed["under_gain_floor_untouched_cells"]
+    ), (composed, forced)
+    # The whole point: the distribution MOVES, and it moves far enough that no tolerance
+    # calibrated on the clean case could absorb it.
+    assert forced["breach_composed_p50"] < 0.44, forced
+    assert forced["breach_composed_min"] < 0.35, forced
+
+    # And it reports nothing rather than a zero when there is no breach: an empty mask has
+    # no median, and a 0.0 there would read as "shipped at nothing" instead of "no cells".
+    _out, quiet = imagery.delight(colour, dem, 2.0, **{**kw, "strength": 1.0})
+    if quiet["composed_ratio"]["under_gain_floor_untouched_cells"] == 0:
+        assert quiet["composed_ratio"]["breach_composed_p50"] is None, quiet["composed_ratio"]
+        assert quiet["composed_ratio"]["breach_composed_min"] is None, quiet["composed_ratio"]
+
+
 def test_the_anti_black_floor_never_darkens_a_cell() -> None:
     """The floor against black holes must not write one.
 
@@ -4215,6 +4295,110 @@ def test_a_scattered_shrub_ships_at_the_height_it_was_drawn(tmp_path) -> None:
     worst, worst_n = counts.most_common(1)[0]
     assert worst_n < 0.10 * len(scales), (
         f"{worst_n} of {len(scales)} shrubs ship at scale {worst}",
+    )
+
+
+# The handoff is assembled in `pipeline.write_level` as an explicit allow-list, and twice in
+# one evening a stage's report key stopped there: `road_clearance_from` red-flagged three
+# maps on run 65, and `cliffs` red-flagged four on run 77. Both gates asserted a key that
+# could never arrive, so neither could pass however good the stage was, and each cost a
+# 40-minute build to discover. Two misses in one hand-maintained list means the list is the
+# defect rather than its entries.
+#
+# This reads the source rather than a built tree, so it runs on a pull request where
+# `require_built` skips every artefact gate - which is the point: the two it is written for
+# were both invisible to CI and cost a release build each.
+#
+# Excluded keys are the ones that legitimately do not travel: internal paths, and values the
+# handoff already carries under another name or in another shape. Adding a key to the
+# exclusion list is a deliberate act with a reason beside it; forgetting one is what this
+# gate exists to stop.
+HANDOFF_EXCLUDED_REPORT_KEYS = {
+    "level_root",  # a runner-local absolute path, meaningless in the artefact
+    "imagery",  # travels filtered through `public_stats`, not raw
+    "texture_set",  # the gate that wants it reads the level JSON, not the handoff
+}
+
+
+def test_every_key_a_stage_writes_reaches_the_handoff() -> None:
+    import ast
+
+    maplib = PACK_ROOT / "maplib"
+    builder = ast.parse((maplib / "level_builder.py").read_text(encoding="utf-8"))
+    written: set[str] = set()
+    for node in ast.walk(builder):
+        targets = []
+        if isinstance(node, ast.Assign):
+            targets = node.targets
+        elif isinstance(node, ast.AugAssign | ast.AnnAssign):
+            targets = [node.target]
+        for target in targets:
+            if (
+                isinstance(target, ast.Subscript)
+                and isinstance(target.value, ast.Name)
+                and target.value.id == "report"
+                and isinstance(target.slice, ast.Constant)
+                and isinstance(target.slice.value, str)
+            ):
+                written.add(target.slice.value)
+        # `report.update({...})` writes five more keys, `texture_set` among them, and a
+        # scan that only understood subscript assignment missed every one of them - a gate
+        # blind to the very thing it checks. If an update() argument is ever something
+        # this cannot read, the scan says so and fails rather than passing on a short list.
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "update"
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "report"
+        ):
+            assert len(node.args) == 1 and isinstance(node.args[0], ast.Dict), (
+                f"report.update() at line {node.lineno} is not a literal dict, so this "
+                "gate can no longer see every key a stage writes - teach it or inline it"
+            )
+            for key in node.args[0].keys:
+                assert isinstance(key, ast.Constant) and isinstance(key.value, str), (
+                    f"report.update() at line {node.lineno} has a computed key, which "
+                    "this gate cannot follow"
+                )
+                written.add(key.value)
+
+    # Two canaries: one key from each of the two ways a stage writes into its report. If
+    # either disappears the scan has gone blind, which must fail loudly rather than pass.
+    assert "cliffs" in written, "the subscript scan found nothing - fix the scan"
+    assert "texture_set" in written, "the update() scan found nothing - fix the scan"
+
+    pipeline = ast.parse((maplib / "pipeline.py").read_text(encoding="utf-8"))
+    carried: set[str] = set()
+    for node in ast.walk(pipeline):
+        if isinstance(node, ast.Dict):
+            for key in node.keys:
+                if isinstance(key, ast.Constant) and isinstance(key.value, str):
+                    carried.add(key.value)
+        # `report.get("x")` and `report["x"]` both count as read into the artefact.
+        if (
+            isinstance(node, ast.Subscript)
+            and isinstance(node.value, ast.Name)
+            and node.value.id == "report"
+            and isinstance(node.slice, ast.Constant)
+            and isinstance(node.slice.value, str)
+        ):
+            carried.add(node.slice.value)
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "get"
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "report"
+            and node.args
+            and isinstance(node.args[0], ast.Constant)
+        ):
+            carried.add(node.args[0].value)
+
+    dropped = sorted(written - carried - HANDOFF_EXCLUDED_REPORT_KEYS)
+    assert not dropped, (
+        f"build_level writes {dropped} into its report and write_level never copies them "
+        "into the handoff, so a gate reading any of them asserts a key that cannot arrive"
     )
 
 
