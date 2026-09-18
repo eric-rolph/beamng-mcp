@@ -3449,6 +3449,35 @@ stage of several; nothing yet records what a cell's luminance did from the sourc
 to the shipped base. That measurement is the instrument this question needs and it does
 not exist.
 
+### A value authored flush against a bound fails intermittently
+
+Three instances on 2026-09-18, which is what makes it a family rather than a coincidence.
+
+- `factory_butte`'s `scatter_size_m` declared a 0.2 m minimum against the 0.2 floor a
+  forest item is held to. One stone in tens of thousands came out at 0.18 and killed a
+  forty-minute build.
+- `clamp_highlights(0.95)` encodes to u8 249 and `base_colour_stats` counts 250. One count
+  apart, in the clamp's favour, which retired the assertion instead of satisfying it.
+- `bingham_canyon` and `mt_st_helens` both fit the sun at exactly their window's floor,
+  which is the search being stopped at a bound rather than a fit.
+
+The shape is always the same: a declared value sits ON a gate's threshold rather than
+inside it, so whether the build passes depends on a draw, a rounding, or which side of the
+comparison the implementation happens to use. It passes most of the time, which is worse
+than failing, because the failure arrives forty minutes into a build with no obvious cause.
+
+**The rule: a spec value is authored strictly inside the bound that governs it, with room
+for whatever jitter or rounding sits between them, and the gate demands strictly - not
+merely at.** `test_a_scatter_cannot_declare_stones_below_the_forest_floor` is the worked
+example: it asserts `lo > MIN_FOREST_SCALE`, not `>=`, and says why in its own comment.
+
+**Do not go looking for these with a text sweep.** One was run here - every numeric value
+in all six specs against every numeric literal on the bound side of an assertion in the
+suite - and it returned 220 hits, essentially all coincidental: a 5.0 m road width matching
+an unrelated 5.0 degree threshold. The match has to be between a spec key and a gate about
+the SAME quantity, which is a judgement, not a regex. Done by hand over the spec keys a
+gate reads directly, the list is the three above.
+
 ### A gate's edge is a visible edge
 
 Also found 2026-09-18, while ruling `pull_layers` out of the above.
