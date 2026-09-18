@@ -15,6 +15,8 @@ import math
 
 import numpy as np
 
+from .stable_seed import stable_hash
+
 
 def _lonlat_to_level(fp, lons, lats):
     from rasterio.warp import transform
@@ -378,7 +380,7 @@ def carve(
                 "smooth": smooth,
                 "along": along,
                 "length": length,
-                "way_id": hash(str(road["id"]).split("_")[0]) & 0x7FFFFFFF,
+                "way_id": stable_hash(str(road["id"]).split("_")[0]) & 0x7FFFFFFF,
                 "joined": [False, False],
             }
         )

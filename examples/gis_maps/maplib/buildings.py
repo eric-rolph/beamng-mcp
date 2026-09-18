@@ -40,6 +40,7 @@ from pathlib import Path
 import numpy as np
 
 from .meshgen import Mesh
+from .stable_seed import stable_hash
 
 # Roofing colours a building in the San Juans actually has, as linear sRGB 0-1. The
 # measured median inside the outline is snapped to the nearest of these, so a red barn
@@ -816,7 +817,7 @@ def build(
             ft.facade_set(
                 tex_dir,
                 name,
-                seed + 17 * variant + (hash(family) % 997),
+                seed + 17 * variant + (stable_hash(family) % 997),
                 int(cfg.get("facade_px", 1024)),
                 family=family,
                 colour=WALL_COLOURS[family][variant],
@@ -831,7 +832,7 @@ def build(
             ft.roof_set(
                 tex_dir,
                 name,
-                seed + 101 + (hash(colour) % 997),
+                seed + 101 + (stable_hash(colour) % 997),
                 int(cfg.get("roof_px", 512)),
                 colour=ROOF_COLOURS[colour],
             )
