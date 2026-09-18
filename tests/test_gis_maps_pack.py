@@ -2521,6 +2521,61 @@ def test_a_scattered_stone_is_never_narrower_than_the_spec_asked_for() -> None:
     assert max(widest) > 0.6, ("the top of the range is unreachable now", max(widest))
 
 
+def test_a_scattered_stone_is_no_bigger_than_the_spec_asked_for_either() -> None:
+    """The other end of the same range, and the shape of the distribution between.
+
+    The per-axis jitter is an ASPECT, not a second size draw, so it pushed the longest
+    axis out of the declared range at BOTH ends. Only the bottom was caught, because
+    only the bottom has a gate under it: black_bear_pass declares 1.2 m boulders and
+    was shipping 1.31 m ones, 1.3 % of its field, with nothing to notice.
+
+    The second assertion is about how the bottom is held rather than whether it is. A
+    lift that pushes an undersized stone up onto the floor satisfies "never narrower"
+    while piling the whole lower tail onto one value - 3.1 % of Factory Butte's stones
+    on 0.25 m exactly. Scaling the aspect to the drawn size holds the same bound with
+    the drawn distribution intact. Measured on this instrument the lowest centimetre of
+    the range runs 1.16-1.24 times the next centimetre up when the tail is lifted, and
+    0.35-0.63 when it is not, so 0.9 separates them with room on both sides.
+    """
+
+    load_maplib()
+    from maplib import objects as objects_mod
+
+    size = 200
+    layer = np.zeros((size, size), dtype="int16")
+    ground = np.zeros((size, size), dtype="float32")
+    for lo, hi in ((0.25, 0.7), (0.3, 1.2)):
+        stones = objects_mod.scatter_rocks(
+            layer,
+            ground,
+            1.0,
+            float(size),
+            0.0,
+            {0: 4000.0},
+            seed=3,
+            size_range=(lo, hi),
+        )
+        assert len(stones) > 500, f"too few stones to say anything: {len(stones)}"
+        widest = np.array([max(st["size"][0], st["size"][1]) for st in stones])
+        assert widest.max() <= hi + 0.005, (
+            "a stone wider than the declared maximum",
+            float(widest.max()),
+            hi,
+        )
+        # The range is still spent at the top, so the bound is not held by shrinking.
+        assert widest.max() >= hi * 0.9, (
+            "the top of the range is unreachable",
+            float(widest.max()),
+        )
+        floor_bucket = int(((widest >= lo) & (widest < lo + 0.01)).sum())
+        next_bucket = int(((widest >= lo + 0.01) & (widest < lo + 0.02)).sum())
+        assert floor_bucket <= 0.9 * next_bucket, (
+            "the lower tail is piled onto the floor rather than drawn there",
+            floor_bucket,
+            next_bucket,
+        )
+
+
 @pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_forest_items_are_declared_draped_and_inside(map_key: str) -> None:
     spec = load_spec(map_key)
