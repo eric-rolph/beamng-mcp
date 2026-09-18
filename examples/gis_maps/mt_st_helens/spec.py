@@ -95,14 +95,16 @@ IMAGERY = {
     # and re-pinned this map and bingham_canyon, where the lower sun took
     # cast_shadow_fraction from 0.0126 to 0.1620.
     #
-    # The floor is NOT being raised, for the reason written out in bingham_canyon's spec: this
-    # map and that one never enter `level_builder`'s `if objects_spec or forest_spec:` path,
-    # so they are the only two whose build inputs are identical across consecutive releases,
-    # and that makes them the only instrument for localising the unexplained byte-level
-    # variation in a shipped build. The pin is declared instead: 30.0 is NAIP's specified
-    # acquisition minimum rather than a physical claim about this flight, and it stays until
-    # this map re-enters development.
-    "sun_altitude_pin_ok": True,
+    # The floor is NOT being raised yet, for the reason written out in bingham_canyon's spec:
+    # that map took the same drop and the same re-pin and also shipped near-black patches,
+    # this one shipped none, so the floor is not the mechanism and the hunt goes first. Here
+    # too, reverting is not a way out of the gate - 45.0 was itself a pinned answer, so a fit
+    # free of both bounds needs a floor below the optimum, around 38.0.
+    #
+    # The pin is DECLARED in `SUN_FIT_PIN_ACCEPTED` in tests/test_gis_maps_pack.py rather than
+    # by a key here, because that entry is asserted live and a key in this dict would be inert
+    # in both directions. 30.0 is NAIP's specified acquisition minimum, not a claim about
+    # this flight.
     "sun_altitude_range": [30.0, 68.0],
     "sun_azimuth_hint": 180.0,
     "sun_azimuth_window": 50.0,

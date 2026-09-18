@@ -86,16 +86,20 @@ IMAGERY = {
     # refilled where 1.3% was, with gain_p95 widened 2.138 to 2.904. It freed factory_butte
     # (54.0) and wallace_creek (31.0) and re-pinned this map and mt_st_helens.
     #
-    # The floor is NOT being raised, and the reason is not about the sun. This map and
-    # mt_st_helens never enter `level_builder`'s `if objects_spec or forest_spec:` path, which
-    # makes them the only two maps whose build inputs are identical across consecutive
-    # releases - the one instrument that can localise the unexplained byte-level variation in
-    # a shipped build. Changing their imagery inputs spends that instrument, on two maps that
-    # are out of development. So the pin is declared instead: 30.0 is NAIP's specified
-    # acquisition minimum rather than a physical claim about this flight, and it stays until
-    # this map re-enters development, when the fit should be refitted against the reference
-    # stations and this key removed.
-    "sun_altitude_pin_ok": True,
+    # The floor is NOT being raised yet, and the reason is not about the sun. The lower sun
+    # also shipped near-black patches on bc_bench_face, and mt_st_helens took the same floor
+    # drop and the same re-pin with none of them, so the floor is not the mechanism and
+    # reverting it would turn a gate green by moving an input nobody can connect to the
+    # defect. That hunt goes first. Reverting is not even a way out of the gate: 52.0 was
+    # itself a pinned answer, so it would swap one pin for another - a fit free of both bounds
+    # needs a floor BELOW the optimum, around 45.0 here.
+    #
+    # The pin is DECLARED, and the declaration lives in `SUN_FIT_PIN_ACCEPTED` in
+    # tests/test_gis_maps_pack.py, not here: that entry is asserted live, so it fails if the
+    # fit ever stops sitting on a bound and cannot outlive the pin it describes. A key in this
+    # dict could not do that - nothing in the pipeline reads an unrecognised IMAGERY key and
+    # no test checks for one, so it would be inert in both directions. 30.0 is NAIP's
+    # specified acquisition minimum rather than a physical claim about this flight.
     "sun_altitude_range": [30.0, 74.0],
     "sun_azimuth_hint": 180.0,
     "sun_azimuth_window": 50.0,
