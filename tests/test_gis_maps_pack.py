@@ -1558,6 +1558,108 @@ def test_road_bed_reads_lighter_than_its_ground(map_key: str) -> None:
     assert seam is not None and seam < 0.4, (map_key, carved)
 
 
+# Maps whose `sun_altitude_range` is deliberately narrow, with the reason. A fit sitting
+# on a bound is the spec working as intended for these, so the gate below exempts them by
+# name rather than by inferring intent from the window's width - a range that is narrow by
+# accident and one that is narrow on purpose look identical, and only one of them is a bug.
+SUN_FIT_PINNED_ON_PURPOSE = {
+    "black_bear_pass": (
+        "the window is 1.5 degrees wide on purpose: the reference photography is a known "
+        "time of day and the fit is not free to wander off it"
+    ),
+}
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_a_narrow_sun_window_is_declared_as_deliberate(map_key: str) -> None:
+    """A `sun_altitude_range` narrow enough to decide the fit by itself is listed as a
+    deliberate pin, or it is a mistake nobody made on purpose.
+
+    This runs without a built tree, so narrowing a window lands here in the two minutes a
+    pull request takes rather than in a forty-minute build. `fit_sun` refines on a
+    1-degree step, so a window under 5 degrees leaves the search almost nothing to do and
+    the spec, not the photograph, picks the altitude.
+    """
+
+    spec = load_spec(map_key)
+    imagery_spec = getattr(spec, "IMAGERY", None) or {}
+    window = imagery_spec.get("sun_altitude_range")
+    if not imagery_spec.get("delight") or window is None:
+        pytest.skip(f"{map_key}: no sun is fitted, so no window decides one")
+    low, high = float(window[0]), float(window[1])
+    assert low < high, (map_key, "the window is empty or inverted", window)
+    if high - low < 5.0:
+        assert map_key in SUN_FIT_PINNED_ON_PURPOSE, (
+            map_key,
+            "this window is too narrow for the fit to be the photograph's - add it to "
+            "SUN_FIT_PINNED_ON_PURPOSE with the reason, or widen it",
+            window,
+        )
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_the_sun_fit_does_not_sit_on_its_own_bound(map_key: str) -> None:
+    """A de-lit map's fitted sun altitude lands INSIDE the window its spec allows.
+
+    `fit_sun` grid-searches and clips every candidate to `sun_altitude_range`, so a fit
+    landing exactly on a bound is not a fit - it is the search being stopped there, and
+    the true optimum lying outside. The refine pass steps 1 degree, so an unpinned fit
+    is at least a degree clear of both ends; equality with a bound is the signature.
+
+    Nothing announced this before. `282a6aa` moved bingham_canyon's floor rather than
+    removing it, and a pinned fit and a free one are indistinguishable from outside the
+    build: same key, same shape, a plausible number. The cost lands somewhere else
+    entirely - the altitude sets what `cast_shadows` calls shadow, so a wrong one
+    refills terrain that was never in shadow. That is the same family as the blown
+    highlights: the number that would have caught it was never recorded, or never read.
+
+    Skips on the SPEC, so a map that declares a window and then fails to record a fit
+    FAILS here rather than skipping quietly. All six declare `delight` and a range.
+    """
+
+    spec = load_spec(map_key)
+    imagery_spec = getattr(spec, "IMAGERY", None) or {}
+    if not imagery_spec.get("delight"):
+        pytest.skip(f"{map_key}: the base is not de-lit, so no sun is fitted")
+    window = imagery_spec.get("sun_altitude_range")
+    if window is None:
+        pytest.skip(f"{map_key}: no sun_altitude_range declared, so there is no bound to sit on")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    fit = (handoff.get("imagery") or {}).get("sun_fit") or {}
+    altitude = fit.get("altitude_deg")
+    assert altitude is not None, (
+        map_key,
+        "declares a sun_altitude_range but records no fitted altitude",
+    )
+    low, high = float(window[0]), float(window[1])
+    assert low <= float(altitude) <= high, (map_key, "the fit escaped its own window", fit, window)
+
+    reason = SUN_FIT_PINNED_ON_PURPOSE.get(map_key)
+    if reason is not None:
+        # A window this narrow cannot help but put the fit on a bound; that is the
+        # point of it. Asserted above that the fit is still inside the window, so the
+        # exemption covers the pin and not the spec going unread.
+        assert high - low < 5.0, (
+            map_key,
+            "exempted as a deliberate pin, but its window is wide enough to fit in - "
+            "remove the exemption or narrow the window",
+            window,
+        )
+        return
+    assert low < float(altitude) < high, (
+        map_key,
+        "the sun fit is pinned to its own bound, so the spec chose it and the "
+        "photograph did not - widen sun_altitude_range or exempt it deliberately",
+        fit,
+        window,
+    )
+
+
 @pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_the_photograph_is_measured_before_it_is_conditioned(map_key: str) -> None:
     """Every de-lit map records the source mosaic's own luminance spread and chroma,
