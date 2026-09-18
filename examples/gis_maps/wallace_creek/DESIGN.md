@@ -46,7 +46,9 @@ OSM roads, with none of the art pass the two reviewed maps carry; what has been 
 since is noted per line below, none of it built. Three things measured from the committed
 handoff are round 1's agenda, before a sheet is rendered:
 
-- **The base colour: the flight's sun is out of it on paper only.** The last build's
+- ~~**The base colour: the flight's sun is out of it on paper only.**~~ Overtaken by round 1: the de-lighting does run in the published build, and what it leaves is flat rather than lit. See the round below.
+
+  Written before that build: The last build's
   handoff records `imagery.delight` as `false` - the NAIP orthophoto went down as it was
   flown, shadows baked in, which is the rubric's first line and what the two reviewed maps
   spent most of their rounds on. A first-pass `IMAGERY` block turning the de-lighting on
@@ -55,11 +57,11 @@ handoff are round 1's agenda, before a sheet is rendered:
   It has never been built, because no session here can reach the elevation and imagery
   services, so whether it reads as de-lit is unknown rather than settled. Round 1 judges
   it on a rendered sheet; until then this line is open.
-- **The default spawn stands on a 20 degree cross-slope.** `spawn_wallace_creek_offset`
-  measures 19.54 degrees across the heading over its 14 by 7 m pad, 2.1 m of roughness
-  and 6.74 m of relief; the gate asks for 8 degrees and 0.6 m. `spawn_elkhorn_scarp` is
-  6.46 and 0.32. Neither declares `level_ground`, so the number is reported and not
-  checked.
+- ~~**The default spawn stands on a 20 degree cross-slope.**~~ Closed in round 1: the
+  default moved 29 m onto the terrace above the offset channel, and all three spawns now
+  declare `level_ground`. The numbers that were reported and not checked were 19.54
+  degrees across the heading with 2.1 m of roughness on `spawn_wallace_creek_offset`,
+  against the gate's 8 degrees and 0.6 m.
 - **The roads are the pack's stock block.** One `road_gravel` material, no `surfaces`, no
   carve and no bed-contrast contract, so `test_decal_roads_have_no_node_steps` and
   `test_road_surfaces_are_painted_and_decalled` both skip and `road_contrast` is empty.
@@ -71,7 +73,7 @@ crest waits on the de-lighting's memory ceiling.
 
 | Round | Verdict | Findings and what changed |
 | --- | --- | --- |
-| | | |
+| 1 | NOT YET | First round, judged from sheets rendered in-session from the published ZIP at `a9662fc`. As on Factory Butte, the de-lighting runs now - `imagery.delight` true, gain 0.864 to 1.097, 0.17% cast shadow - and the base it produces is the flattest of the four maps: luminance p5 to p95 spans 0.131 against Meteor Crater's 0.242 and Black Bear Pass's 0.301, with a gain range a third of Black Bear Pass's 0.892 to 1.711. Nothing clips and nothing is near black, so every colour gate passes a map with almost no tonal range in it. New, and the finding this round is really for: the terrain itself is corrugated. A single wave dominates the high-pass in four of five 800 m boxes across the map, 50 to 100 m long, consistently oriented between 29 and 45 degrees, about 0.2 m in amplitude, and 423 to 1370 times the median high-pass power against Meteor Crater's 64 to 153 - it draws as diagonal corduroy on every smooth slope in the driver view, which on a grass plain is most of the map. Whether that is flight-line striping in the B4 source or something the composite introduces cannot be settled from a session, because the source tiles need the hosts the network policy denies; the comparison belongs on a runner and it is the first thing round 2 should resolve, since a destripe belongs in the terrain stage and not in the art pass. The default spawn is fixed: `spawn_wallace_creek_offset` stood at 19.54 degrees across its apron with 2.1 m of roughness, and is now 29 m away on the terrace above the offset channel, still looking down it at 135 degrees, with all three spawns declaring `level_ground` and measuring inside the gate. Not started, and why this cannot be better than NOT YET: no art pass at all, 0 objects in every driver view, stock single-material roads, and the footprint question above still open. |
 
 ## Level decisions
 
