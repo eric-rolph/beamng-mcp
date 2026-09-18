@@ -213,7 +213,7 @@ def render_terrain_view(
     ``eye_xy`` and heading are in the level frame (metres east/north of centre, heading
     0 = north, clockwise). ``sprites`` are dicts with ``x, y, z, w, h, rgba`` (an RGBA
     uint8 image) drawn as billboards depth-sorted into the terrain. ``detail`` is
-    ``{"layer": int map, "tiles": [(luminance, tile_m), ...], "fade_m": 120}``: the
+    ``{"layer": int map, "tiles": [(rgb, tile_m), ...], "fade_m": 120}``: the
     terrain's own detail textures, tiled in world metres over the base colour and faded
     out with distance the way the game blends them.
     """
@@ -248,15 +248,18 @@ def render_terrain_view(
         rgb = lit[r0, c0] * w00 + lit[r0, c1] * w01 + lit[r1, c0] * w10 + lit[r1, c1] * w11
         if layer is not None and d < fade_m:
             idx = layer[r0, c0]
-            factor = np.ones_like(z)
-            for li, (lum, tile_m) in enumerate(tiles):
+            # Per channel: a detail tile carries the material's colour, not just its
+            # brightness, and a luminance factor threw that away.
+            factor = np.ones((z.size, 3), dtype="float32")
+            for li, (tile, tile_m) in enumerate(tiles):
                 m = idx == li
                 if m.any():
-                    s_px = lum.shape[0]
+                    s_px = tile.shape[0]
                     tu = ((x[m] / tile_m) % 1.0 * s_px).astype(int)
                     tv = ((-y[m] / tile_m) % 1.0 * s_px).astype(int)
-                    factor[m] = lum[tv, tu]
-            rgb = rgb * (1.0 + (factor - 1.0) * 0.7 * (1.0 - d / fade_m))[:, None]
+                    sampled = tile[tv, tu]
+                    factor[m] = sampled if sampled.ndim == 2 else sampled[:, None]
+            rgb = rgb * (1.0 + (factor - 1.0) * 0.7 * (1.0 - d / fade_m))
         return z, np.clip(rgb, 0, 1)
 
     ex, ey = eye_xy
