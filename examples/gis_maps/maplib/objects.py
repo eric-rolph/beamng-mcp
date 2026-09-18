@@ -23,6 +23,23 @@ def _disc(radius_px: int) -> np.ndarray:
     return (x * x + y * y) <= r * r
 
 
+# What a `detect_objects` pass reports when it never ran. `pipeline` hands this back for a
+# level whose spec sets `"detect": None`, so the handoff and the build log keep their shape
+# and a reader sees the zeros rather than a missing section. Every count a real pass
+# reports is here and zero; `open_m` and `min_height_m` are deliberately NOT, because no
+# opening happened and a settings key present here would read as one that did.
+def detect_off_stats() -> dict:
+    return {
+        "candidates": 0,
+        "objects": 0,
+        "rejected_cliff": 0,
+        "berms_removed": 0,
+        "structures_flattened": 0,
+        "removed_volume_m3": 0.0,
+        "detect": "off",
+    }
+
+
 def detect_objects(
     dsm: np.ndarray,
     res: float,
