@@ -816,22 +816,37 @@ def delight(
         debug_hook("after_refills", out, None)
     # No black holes: whatever a refill or a cap left near zero takes a third of
     # the lit neighbourhood instead -- but only where that is BRIGHTER than what the
-    # cell already has. This floor's trigger is absolute (under 0.02 linear) while its
-    # write is relative to the neighbourhood, and where the lit neighbourhood is itself
-    # under 0.057 the two cross: the floor against black holes writes something darker
-    # than the near-black it fired on, unclipped and with no bound of its own. That is
-    # the one writer that can take a cell the refill never touched below the gain's 0.45
-    # floor, which is what `under_gain_floor_untouched` counts, and it can put a texel
-    # under the near-black threshold the finished base is gated on. Measured on a
-    # uniformly dark synthetic scene: near black 37% of the source and 56% of the
-    # output, the floor alone accounting for every darkened cell. Gated below it is 0%.
+    # cell already has.
+    #
+    # A FLOOR ONLY FLOORS WHEN ITS TRIGGER AND ITS WRITE SHARE A REFERENCE. The two
+    # floors below satisfy that by construction: each triggers on a fraction of the lit
+    # neighbourhood and writes that same fraction of it (`lum_o < 0.25 * lit_l` writing
+    # `0.25 * local_lit`), so the written value is the very quantity the trigger compared
+    # against and cannot land below it. This one triggered on an ABSOLUTE 0.02 and wrote
+    # a RELATIVE `local_lit * 0.35`, and nothing connects the two: it darkened a cell
+    # whenever `0.35 * lit_l < out.mean`, which is every lit neighbourhood under
+    # 0.02 / 0.35 = 0.0571. The floor against black holes was writing one.
+    #
+    # It is also the only writer between the refill and the encode that satisfies all
+    # three conjuncts of `under_gain_floor_untouched` at once: it is not the refill, so
+    # the cell still reads untouched; its written value is under 0.02, far below any
+    # `floor_lum`; and a third of a dark neighbourhood over a brighter source is far
+    # under 0.45. So it is that gate's writer, and it can put a texel under the
+    # near-black threshold the finished base is gated on. Measured on a uniformly dark
+    # synthetic scene: near black 37% of the source and 56% of the OUTPUT, this floor
+    # accounting for every darkened cell and the two below it for none. Gated, 0%.
     # Tested by `test_the_anti_black_floor_never_darkens_a_cell`.
     #
-    # The gate stays on luminance rather than per channel, so a rescued cell still takes
-    # the lit neighbourhood's COLOUR and not a channel-wise maximum of two tones. The
-    # two floors below need no such gate: each triggers on a fraction of the same
-    # reference it writes (`lum_o < 0.25 * lit_l` writing `0.25 * local_lit`), so each
-    # is a strict lift in luminance by construction. This one compares against 0.02.
+    # The two are SEPARABLE and only share this writer: swept independently, a scene can
+    # reach 2,786 breach cells with the near-black fraction still at exactly zero. So a
+    # green `under_gain_floor_untouched` is not evidence that a map's black ground is
+    # fixed, and neither number stands in for the other.
+    #
+    # The gate is on luminance rather than per channel, so a rescued cell still takes the
+    # lit neighbourhood's COLOUR and not a channel-wise maximum of two tones. Skipping
+    # the write cannot darken anything either: where it is skipped `out.mean` is already
+    # at or above `0.35 * lit_l`, hence above the `0.25 * lit_l` the floor below would
+    # write, so `out >= 0.25 * local_lit` still holds everywhere after this block.
     #
     # Memory: the comparison is held as two SINGLE-channel arrays and the write keeps
     # the transient `local_lit * 0.35` it always had, so the peak here is what it was.
