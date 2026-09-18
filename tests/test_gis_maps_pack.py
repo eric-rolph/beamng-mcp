@@ -1512,7 +1512,16 @@ def test_road_clearance_actually_ran(map_key: str) -> None:
             encoding="utf-8"
         )
     )
-    level = handoff.get("level", handoff)
+    # The handoff has no "level" key and never had one - these sit at its root, beside
+    # `roads` and `forest`. The `handoff.get("level", handoff)` this replaces is what hid
+    # the bug this gate exists to catch: with no such key the fallback searched the root,
+    # found nothing, and reported the clearance as unrecorded without ever saying it had
+    # looked somewhere that could not hold it. A missing writer, a key the handoff's
+    # allow-list drops, and a clearance that genuinely did nothing all rendered as one
+    # message, on the one gate whose whole purpose is to tell those three apart. Read the
+    # real place and let it raise: a default that makes the wrong place look plausible is
+    # worse than a KeyError.
+    level = handoff
     assert "road_clearance_from" in level, (
         f"{map_key} asks for {objects_spec['road_clear_m']} m of road clearance and the build "
         "recorded nothing about it, so nobody can tell whether it ran"
