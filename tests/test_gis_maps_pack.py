@@ -2476,3 +2476,60 @@ def test_the_lock_records_the_commit_and_run_that_built_it() -> None:
     assert local["source_commit"] is None or re.fullmatch(r"[0-9a-f]{40}", local["source_commit"])
     assert local["source_dirty"] in (True, False, None)
     assert (local["source_commit"] is None) == (local["source_dirty"] is None)
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_a_scattered_stone_is_the_size_its_spec_declares(map_key: str) -> None:
+    """`scatter_size_m` is the stone's longest horizontal extent, in metres.
+
+    `scene_objects` gives a scattered stone a forest scale of `max(w, h)` off its size
+    triple, and for a stone that scale is an extent and not a multiplier: the rock
+    variants are unit-normalised to a 1 m longest axis. So the declared range is a
+    statement about what ships and the generator has to keep it. It did not: the
+    aspect was applied as an independent jitter per axis, one of which ran below 1.0,
+    so factory_butte declared a 0.2 m floor and shipped 0.18 m plates - which is what
+    the forest-item size gate caught on run 51 - and every map overshot its ceiling by
+    the same 10 %.
+
+    Gated on the spec rather than on a built tree: a map that declares a scatter is
+    checked here whether or not anything has been built.
+    """
+    spec = load_spec(map_key)
+    objects_spec = getattr(spec, "OBJECTS", None) or {}
+    if not objects_spec.get("scatter"):
+        pytest.skip(f"{map_key}: no stone scatter declared")
+    lo, hi = (float(v) for v in objects_spec.get("scatter_size_m", (0.3, 1.2)))
+
+    if str(PACK_ROOT) not in sys.path:
+        sys.path.insert(0, str(PACK_ROOT))
+    from maplib import objects as objects_lib
+
+    # Flat ground on one layer: this measures the size draw, not the placement.
+    res, fp_size_m = 2.0, 1024.0
+    cells = int(fp_size_m / res)
+    ground = np.zeros((cells, cells), dtype=float)
+    layer = np.ones((cells, cells), dtype=np.int32)
+    stones = objects_lib.scatter_rocks(
+        layer,
+        ground,
+        res,
+        fp_size_m,
+        0.0,
+        {1: 40.0},
+        size_range=(lo, hi),
+        seed=7,
+    )
+    assert len(stones) > 500, (map_key, len(stones))
+
+    longest = np.array([max(s["size"][0], s["size"][1]) for s in stones])
+    # 2 dp of rounding in the emitted triple is the only slack allowed.
+    assert longest.min() >= lo - 0.005, (map_key, float(longest.min()), lo)
+    assert longest.max() <= hi + 0.005, (map_key, float(longest.max()), hi)
+    # The declared range is spent, not merely respected: a generator that shrank every
+    # stone to the floor would pass the two bounds above and ship a plain of gravel.
+    assert longest.min() <= lo * 1.15, (map_key, float(longest.min()), lo)
+    assert longest.max() >= hi * 0.85, (map_key, float(longest.max()), hi)
+    # The other two axes stay under the longest one, which is what makes it the longest.
+    for s in stones:
+        w, h, z_ext = s["size"]
+        assert min(w, h) <= max(w, h) and z_ext <= max(w, h) + 0.005, (map_key, s["size"])
