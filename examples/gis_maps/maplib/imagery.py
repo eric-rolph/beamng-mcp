@@ -815,9 +815,33 @@ def delight(
     if debug_hook is not None:
         debug_hook("after_refills", out, None)
     # No black holes: whatever a refill or a cap left near zero takes a third of
-    # the lit neighbourhood instead.
-    dark = out.mean(axis=-1) < 0.02
+    # the lit neighbourhood instead -- but only where that is BRIGHTER than what the
+    # cell already has. This floor's trigger is absolute (under 0.02 linear) while its
+    # write is relative to the neighbourhood, and where the lit neighbourhood is itself
+    # under 0.057 the two cross: the floor against black holes writes something darker
+    # than the near-black it fired on, unclipped and with no bound of its own. That is
+    # the one writer that can take a cell the refill never touched below the gain's 0.45
+    # floor, which is what `under_gain_floor_untouched` counts, and it can put a texel
+    # under the near-black threshold the finished base is gated on. Measured on a
+    # uniformly dark synthetic scene: near black 37% of the source and 56% of the
+    # output, the floor alone accounting for every darkened cell. Gated below it is 0%.
+    # Tested by `test_the_anti_black_floor_never_darkens_a_cell`.
+    #
+    # The gate stays on luminance rather than per channel, so a rescued cell still takes
+    # the lit neighbourhood's COLOUR and not a channel-wise maximum of two tones. The
+    # two floors below need no such gate: each triggers on a fraction of the same
+    # reference it writes (`lum_o < 0.25 * lit_l` writing `0.25 * local_lit`), so each
+    # is a strict lift in luminance by construction. This one compares against 0.02.
+    #
+    # Memory: the comparison is held as two SINGLE-channel arrays and the write keeps
+    # the transient `local_lit * 0.35` it always had, so the peak here is what it was.
+    # A full-size `lit_third` to compare and then write would be 200 MB at 4096 samples
+    # against a stage peak near 250 MB, which is the ceiling this stage already runs at.
+    lum_dark = out.mean(axis=-1)
+    lit_third_lum = local_lit.mean(axis=-1) * 0.35
+    dark = (lum_dark < 0.02) & (lit_third_lum > lum_dark)
     out = np.where(dark[..., None], local_lit * 0.35, out)
+    del lum_dark, lit_third_lum, dark
     # And a relative floor: nothing sits under a quarter of the lit neighbourhood's
     # luminance (the shaded side of a spruce crown is near black in the flight, and
     # a base seen between the trunks is ground, not a black blotch). Such a cell

@@ -2394,6 +2394,94 @@ def test_the_delighting_contract_number_can_actually_fail() -> None:
     assert dark["refill_carry_ratio"]["under_0_1"] > 0.5, dark
 
 
+def test_the_anti_black_floor_never_darkens_a_cell() -> None:
+    """The floor against black holes must not write one.
+
+    Its trigger is ABSOLUTE - a cell under 0.02 linear - and its write is RELATIVE, a
+    third of the lit neighbourhood. Where that neighbourhood is itself under 0.057 the
+    two cross and the floor writes something darker than the near-black it fired on,
+    with no bound of its own: it is the one writer that can take a cell the refill never
+    touched under the gain's 0.45 clip, which is what `under_gain_floor_untouched`
+    counts, and it can put a texel under the near-black threshold the finished base is
+    gated on. Measured on the scene below before the gate went in: near black 37% of the
+    source and 56% of the OUTPUT, the de-lighting manufacturing black ground in the name
+    of removing it, every darkened cell attributable to this floor and none to the two
+    relative floors or the blue rewrite after it.
+
+    The second half asserts the anti-black floors still remove a black blob the flight
+    itself left, so a fix that stops the darkening by refusing to write at all is caught.
+    It does NOT isolate this floor: measured, deleting its write outright leaves the blob
+    rescued anyway, because the relative floor below it fires on the same cells wherever
+    the lit neighbourhood is bright (`0.02 > lum` implies `lum < 0.25 * lit` for any
+    neighbourhood over 0.08). This floor is the sole writer only in the narrow band where
+    the neighbourhood sits between 2.9 and 4 times the cell - which is to say it is close
+    to redundant, and where it is not redundant it is the one that can darken. That is a
+    question for whoever next opens the de-lighting, not something this test settles.
+    """
+
+    load_maplib()
+    from maplib import imagery
+
+    def scene(ground_lin: float) -> tuple[np.ndarray, np.ndarray]:
+        rng = np.random.default_rng(7)
+        n = 256
+        y, x = np.mgrid[0:n, 0:n].astype("float32")
+        dem = 120.0 * np.exp(-((y - 100) ** 2) / (2 * 20.0**2)) + 40.0 * np.sin(x / 30.0)
+        dem = (dem + rng.normal(0, 0.4, dem.shape)).astype("float32")
+        shade = np.clip(imagery.cast_shadows(dem, 2.0, 180.0, 25.0), 0.05, 1.0)
+        ground = np.clip(
+            ground_lin + 0.05 * ground_lin * rng.normal(0, 1, (n, n, 1)), 1e-4, 0.9
+        ) * np.array([1.0, 0.94, 0.82])
+        colour = (np.clip(ground * shade[..., None], 0, 1) ** (1 / 2.2) * 255).astype("uint8")
+        return colour, dem
+
+    kw = dict(
+        azimuth_deg=180.0,
+        altitude_deg=25.0,
+        strength=1.0,
+        max_gain=4.5,
+        steep_deg=32.0,
+        steep_feather_deg=8.0,
+        steep_cap=True,
+    )
+
+    def near_black(rgb8: np.ndarray) -> float:
+        """The threshold the finished base is gated on, on the array this stage returns."""
+        return float((rgb8.max(axis=-1) < 13).mean())
+
+    # A pit: ground the flight photographed at a fiftieth of an ordinary desert, so the
+    # lit neighbourhood the floor reads for its rescue is darker than the floor's own
+    # trigger. This is the shape bingham_canyon took when its sun floor was dropped.
+    for ground_lin in (0.02, 0.01):
+        colour, dem = scene(ground_lin)
+        out, stats = imagery.delight(colour, dem, 2.0, **kw)
+        composed = stats["composed_ratio"]
+        assert composed["under_gain_floor_untouched"] == 0.0, (
+            ground_lin,
+            "the anti-black floor took a cell the refill never touched under the gain's own clip",
+            composed,
+        )
+        assert near_black(out) <= near_black(colour), (
+            ground_lin,
+            "the de-lighting shipped more near-black texels than the flight gave it",
+            near_black(colour),
+            near_black(out),
+        )
+
+    # And the floors still rescue what they exist for: a black blob the flight itself left
+    # on ground that is otherwise lit - water read at a dark angle, a shadow no gain can
+    # recover. Its lit neighbourhood is bright, so a third of it is a real lift, and a
+    # gate that declined to write here would ship the blob.
+    colour, dem = scene(0.55)
+    colour[40:80, 150:190] = 1  # 1600 texels of black on lit desert
+    out, _stats = imagery.delight(colour, dem, 2.0, **kw)
+    assert near_black(colour) > 0.01, near_black(colour)
+    assert near_black(out) == 0.0, (
+        "a black blob on lit ground shipped as a black hole, so no anti-black floor fired",
+        near_black(out),
+    )
+
+
 def test_the_clamp_does_not_erase_the_number_that_caught_it() -> None:
     """The shipping clamp caps every channel at 249 and the gate counts 250, so after it
     `clipped` is zero on every map it runs for - a true number that can no longer fail.
