@@ -1707,13 +1707,48 @@ def test_vegetation_plants_only_where_the_imagery_is_forest() -> None:
 # ---------------------------------------------------------------------------
 
 
+def _surface_height_lookup(png, res: float, max_height: float):
+    """``(z_at(x, y), half)`` on the terrain SURFACE, in the builder's own convention.
+
+    Split out of `_terrain_height_lookup` so the witness below exercises the SHIPPED
+    lookup instead of a copy of it. The half-cell defect fixed here survived `b31273d`
+    exactly because that witness re-implemented the body it was guarding, and a test of
+    a copy agrees with the copy whatever the copy does.
+
+    **Cell (r, c) holds the ground at the CENTRE of its metre**, at
+    ``x = c*res - half + res/2`` and ``y = half - r*res - res/2``, which is what
+    `heightmap.sample_bilinear` says and what seats every object on the level. So the
+    fractional cell coordinate of a point is ``(x + half)/res - 0.5``, and reading it
+    without the half cell measures the surface half a cell north-west of the object,
+    against a terrain block positioned so the game's sample grid sits on those centres.
+    `test_the_drape_lookup_reads_the_ground_the_builder_seats_on` pins the two together.
+    """
+
+    size = png.shape[0]
+    half = size * res / 2.0
+
+    def z_at(x: float, y: float) -> float:
+        fc = min(max((x + half) / res - 0.5, 0.0), size - 1.001)
+        fr = min(max((half - y) / res - 0.5, 0.0), size - 1.001)
+        c0, r0 = int(fc), int(fr)
+        c1, r1 = min(c0 + 1, size - 1), min(r0 + 1, size - 1)
+        tc, tr = fc - c0, fr - r0
+        top = png[r0, c0] * (1.0 - tc) + png[r0, c1] * tc
+        bottom = png[r1, c0] * (1.0 - tc) + png[r1, c1] * tc
+        return float(top * (1.0 - tr) + bottom * tr) * max_height / 65536.0
+
+    return z_at, half
+
+
 def _terrain_height_lookup(map_key: str):
     """(z_at(x, y), max_height) from the shipped 16-bit heightmap PNG (north-up).
 
     The height is read off the SURFACE BETWEEN the grid corners, not off the nearest
-    corner. The engine draws each terrain square as two triangles, and everything that
+    corner, and at the sample centres the builder uses rather than half a cell off
+    them. The engine draws each terrain square as two triangles, and everything that
     places an object seats it on that interpolated surface (`scene_objects` samples the
-    DEM bilinearly), so a corner lookup is measuring something nothing builds against.
+    DEM through `heightmap.sample_bilinear`), so either error measures something nothing
+    builds against.
 
     They agree on ordinary ground and they part company on a one-cell ridge, which is
     what a badlands fin is: a crest cell 11 m above both its neighbours reads as the
@@ -1723,8 +1758,17 @@ def _terrain_height_lookup(map_key: str):
     corner at worst and 0.26 m off the surface, with 1,052 of them over the 3.5 m drape
     bound by the first measure and none by the second.
 
-    This does not soften the drape gate: an object genuinely off the ground is off both,
-    which `test_the_drape_lookup_still_catches_an_object_that_floats` holds it to.
+    **The half cell is the same defect one step further in, and it is what run 77 was
+    still failing on** (`4.19353677063047` at factory_butte, `4.612250549316286` at
+    black_bear_pass, after `b31273d` had predicted both green). Same synthetic, same
+    20,000 stones, seated by `sample_bilinear` and measured by this lookup WITHOUT the
+    half cell: worst 6.957 m, p99 6.261 m, median 0.530 m, 4,453 over the 3.5 m bound.
+    WITH it: worst 0.007439 m and none over the bound, that residual being u16
+    quantisation at a 1000 m max height. The shift alone accounts for the whole failure.
+
+    This does not soften the drape gate: an object genuinely off the ground is off every
+    one of these measures, which `test_the_drape_lookup_still_catches_an_object_that_floats`
+    holds it to.
     """
 
     from PIL import Image
@@ -1738,66 +1782,94 @@ def _terrain_height_lookup(map_key: str):
     )
     max_height = float(handoff["terrain"]["max_height_m"])
     png = np.asarray(Image.open(root / "theTerrain.terrainheightmap.png"), dtype="float64")
-    size = png.shape[0]
-    res = float(spec.SITE["square_size_m"])
-    half = size * res / 2.0
-
-    def z_at(x: float, y: float) -> float:
-        fc = min(max((x + half) / res, 0.0), size - 1.0)
-        fr = min(max((half - y) / res, 0.0), size - 1.0)
-        c0, r0 = int(fc), int(fr)
-        c1, r1 = min(c0 + 1, size - 1), min(r0 + 1, size - 1)
-        tc, tr = fc - c0, fr - r0
-        top = png[r0, c0] * (1.0 - tc) + png[r0, c1] * tc
-        bottom = png[r1, c0] * (1.0 - tc) + png[r1, c1] * tc
-        return float(top * (1.0 - tr) + bottom * tr) * max_height / 65536.0
-
-    return z_at, half
+    return _surface_height_lookup(png, float(spec.SITE["square_size_m"]), max_height)
 
 
 def test_the_drape_lookup_still_catches_an_object_that_floats() -> None:
-    """The drape lookup reads the surface rather than the nearest grid corner, so this
-    holds it to the thing that change could have broken: it must still measure a real
-    float, on the worst ground there is.
+    """The drape lookup reads the surface at the builder's sample centres, so this holds
+    it to the thing that change could have broken: it must still measure a real float,
+    on the worst ground there is.
 
-    The surface is sampled on a one-cell ridge - a crest 11 m above both neighbours,
-    the shape a badlands fin makes on a 1 m grid - because that is where a corner
-    lookup is most wrong and where a too-forgiving sampler would hide most.
+    It calls `_surface_height_lookup` rather than restating its body, which is the whole
+    lesson of the half-cell defect - the previous version of this test inlined a copy of
+    the lookup, so it went on passing while the lookup it guarded read the wrong cell.
+
+    The surface is sampled on a one-cell ridge - a crest 11 m above both neighbours, the
+    shape a badlands fin makes on a 1 m grid - because that is where a corner lookup is
+    most wrong and where a too-forgiving sampler would hide most.
     """
 
     size, res, max_height = 9, 1.0, 100.0
-    half = size * res / 2.0
     png = np.zeros((size, size), dtype="float64")
     png[:, 4] = 11.0 / max_height * 65536.0  # one crest column, 11 m proud
+    z_at, half = _surface_height_lookup(png, res, max_height)
 
-    def z_at(x: float, y: float) -> float:
-        fc = min(max((x + half) / res, 0.0), size - 1.0)
-        fr = min(max((half - y) / res, 0.0), size - 1.0)
-        c0, r0 = int(fc), int(fr)
-        c1, r1 = min(c0 + 1, size - 1), min(r0 + 1, size - 1)
-        tc, tr = fc - c0, fr - r0
-        top = png[r0, c0] * (1.0 - tc) + png[r0, c1] * tc
-        bottom = png[r1, c0] * (1.0 - tc) + png[r1, c1] * tc
-        return float(top * (1.0 - tr) + bottom * tr) * max_height / 65536.0
-
-    on_the_crest = z_at(-half + 4.0, half - 4.0)
+    # Column 4's sample centre is at x = -half + 4.5, not -half + 4.0.
+    on_the_crest = z_at(-half + 4.5, half - 4.5)
     assert on_the_crest == pytest.approx(11.0, abs=0.01), on_the_crest
     # Half a cell off the crest the surface is halfway down the fin, which is the
-    # reading a corner lookup gets wrong by 5.5 m and the thing the change fixes.
-    on_the_flank = z_at(-half + 4.5, half - 4.0)
+    # reading a corner lookup gets wrong by 5.5 m.
+    on_the_flank = z_at(-half + 5.0, half - 4.5)
     assert on_the_flank == pytest.approx(5.5, abs=0.01), on_the_flank
-    # The drape metric the gate computes, `abs(z - z_at(x, y))`, on three objects at
-    # that same spot half a cell off the crest.
-    x, y = -half + 4.5, half - 4.0
+    # The drape metric the gate computes, `abs(z - z_at(x, y))`, on two objects at that
+    # same spot half a cell off the crest.
+    x, y = -half + 5.0, half - 4.5
     seated = abs(z_at(x, y) - z_at(x, y))
     floating = abs((z_at(x, y) + 4.0) - z_at(x, y))
     assert seated < 3.5, seated
     assert floating > 3.5, floating
-    # And the reading the OLD lookup gave for the correctly seated object: it took the
-    # crest corner for the ground and called a seated stone 5.5 m adrift. That is the
-    # false positive this change removes, and it has to stay bigger than the bound or
-    # this test is not standing on the defect it was written for.
+    # And the reading the OLD lookups gave for the correctly seated object: the crest
+    # corner for the ground, calling a seated stone 5.5 m adrift. That is the false
+    # positive this change removes, and it has to stay bigger than the bound or this
+    # test is not standing on the defect it was written for.
     assert abs(z_at(x, y) - 11.0) > 3.5, "the crest corner is not far enough to matter"
+
+
+def test_the_drape_lookup_reads_the_ground_the_builder_seats_on() -> None:
+    """The gate and the builder must read the terrain the SAME WAY, asserted against the
+    builder's own function rather than against a restatement of it.
+
+    `scene_objects` seats every stone, shrub and tree at `heightmap.sample_bilinear`'s
+    height, and the drape gate then asks how far each one sits off the ground. If the
+    two sample the surface differently the gate reports a drape no object has, which is
+    what `4.19`/`4.61` were: a half-cell shift, not a misplaced object. A bound cannot
+    catch that - the disagreement is the measurement - so what is asserted here is that
+    the two agree, to the u16 quantisation of the heightmap and nothing looser.
+
+    The ground is one-cell fins at Factory Butte's own 1 m grid, because that is where
+    the two conventions part company by metres; on ordinary ground they agree anyway and
+    the test would pass on a lookup that is still wrong.
+    """
+
+    load_maplib()
+    from maplib import heightmap as hm
+
+    size, res, max_height = 256, 1.0, 1000.0
+    rng = np.random.default_rng(7)
+    dem = 40.0 + 6.0 * np.sin(np.arange(size) / 9.0)[:, None] * np.ones((1, size))
+    dem = dem + 0.6 * rng.standard_normal((size, size))
+    dem[:, ::7] += 11.0  # a crest column every 7 m, 11 m proud of both neighbours
+
+    png = np.clip(np.round(dem * (65536.0 / max_height)), 0, 65535).astype("float64")
+    z_at, half = _surface_height_lookup(png, res, max_height)
+
+    xs = rng.uniform(-half + 2.0, half - 2.0, 4000)
+    ys = rng.uniform(-half + 2.0, half - 2.0, 4000)
+    seated = hm.sample_bilinear(dem, res, size * res, xs, ys)
+    measured = np.array([z_at(float(x), float(y)) for x, y in zip(xs, ys, strict=True)])
+    worst = float(np.abs(measured - seated).max())
+
+    # One u16 step is max_height/65536 m, and bilinear interpolation of four rounded
+    # samples cannot stray further than one step from the interpolation of the four
+    # exact ones. Anything above that is a convention disagreement, not the encode.
+    assert worst < 2.0 * max_height / 65536.0, worst
+    # The witness: the same comparison against a lookup half a cell off - the defect
+    # this test exists to catch - must be far over the drape bound, or this assertion is
+    # standing on ground that would hold either way.
+    shifted = np.array(
+        [z_at(float(x) + res / 2.0, float(y) - res / 2.0) for x, y in zip(xs, ys, strict=True)]
+    )
+    assert float(np.abs(shifted - seated).max()) > 3.5
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
@@ -3581,14 +3653,39 @@ def test_forest_items_are_declared_draped_and_inside(map_key: str) -> None:
         if line.strip()
     ]
     assert lines, "an empty forest is a broken detector"
+    # NAME THE ITEM, NOT JUST THE NUMBER. This assertion reported a bare maximum, and
+    # on 2026-09-18 three different defects could each claim the same one: the gate's
+    # own half-cell lookup (fixed above), `scatter_rocks`/`scatter_shrubs`/the
+    # imagery-shrub centroid reading their containing cell (#134), and
+    # `scene_objects.emit` burying a block by a fraction of its height under
+    # `rock_gap_max_m` (#135), which is deliberate and which a flat 3.5 m bound cannot
+    # express. Three sessions spent an evening inferring which one owned
+    # `4.612250549316286` from whether it reproduced across rebuilds. The item's own
+    # `type` says which placement path drew it, and the SIGN of the drape says hanging
+    # from buried - a deliberate sink is always negative. Two lines of bookkeeping
+    # settle permanently what reproducibility could only suggest.
     worst = 0.0
+    worst_item: dict = {}
     for line in lines:
         assert set(line) == {"type", "pos", "rotationMatrix", "scale"} and line["type"] in items
         x, y, z = line["pos"]
         assert -half <= x <= half and -half <= y <= half
         assert len(line["rotationMatrix"]) == 9 and 0.2 <= line["scale"] <= 30.0
-        worst = max(worst, abs(z - z_at(x, y)))
-    assert worst < 3.5, f"{map_key}: a placed object floats or sinks {worst:.1f} m off the terrain"
+        ground = z_at(x, y)
+        drape = z - ground
+        if abs(drape) > worst:
+            worst = abs(drape)
+            worst_item = {
+                "type": line["type"],
+                "drape_m": round(float(drape), 4),
+                "pos": [round(float(v), 2) for v in line["pos"]],
+                "scale": round(float(line["scale"]), 3),
+                "ground_m": round(float(ground), 3),
+            }
+    assert worst < 3.5, (
+        f"{map_key}: a placed object floats or sinks {worst:.1f} m off the terrain",
+        worst_item,
+    )
     forest_objects = [o for _, o in all_items(root / "main") if o.get("class") == "Forest"]
     assert (
         len(forest_objects) == 1
