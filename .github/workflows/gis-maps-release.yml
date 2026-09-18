@@ -35,8 +35,21 @@ on:
     # REPLACES the one waiting rather than queueing behind it. So a push on any branch
     # silently discarded a six-map build somebody else was waiting on - four of them in
     # one afternoon, one by a pure-Python change that needed no runner at all. The group
-    # below is keyed per branch now, so that gun is unloaded; what is left is the runner
-    # time, which is reason enough to stay out.
+    # below is keyed on the publish CONDITION now, which unloads that gun for the branches
+    # named here - each gets a group of its own and waits for nobody.
+    #
+    # IT IS STILL LOADED FOR claude/gis-maps-pack, which is the case that matters most.
+    # That branch satisfies the publish condition, so its key is the CONSTANT
+    # gis-maps-release-publish: two pushes to it still share one group and the newer
+    # waiter still discards the older. Runs 43 through 50 died that way under the old
+    # repository-wide key, and runs 56, 57, 58 and 60 died the same way AFTER this
+    # re-keying landed - so do not read the new key as protecting this branch. A batch of
+    # pull requests merged one at a time evicts its own queued build on every merge, so if
+    # a build has to finish, merges to that branch have to stop for the ~40 minutes it
+    # takes.
+    #
+    # What is left for the branches above is the runner time, which is reason enough to
+    # stay out.
     #
     # WHAT THAT VALIDATION DOES NOT COVER, because it will mislead you otherwise: ci.yml
     # runs on windows-latest and never builds a map, so `require_built` skips every
