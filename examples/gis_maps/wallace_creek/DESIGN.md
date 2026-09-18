@@ -35,6 +35,37 @@ rebound over them is a test of the car, not of the heightmap filter.
 Trophy-truck and pre-runner territory: long high-speed runs along the fault, gully
 crossings at speed, and the scarp as a natural jump line. The sag ponds are dry.
 
+## Critic ledger
+
+Each round the critic (a separate agent holding `critic_rubric.md`) reviews the
+sheets in `authoring/critic/` and writes findings with generator fixes; the round is
+closed when every finding is a spec or parameter change in the tree.
+
+This map has had no round yet: it is terrain, slope-painted materials and OSM roads, with
+none of the art pass the two reviewed maps carry. Three things the committed handoff
+already measures are round 1's agenda, before a sheet is rendered:
+
+- **The base colour ships the flight's sun.** `imagery.delight` is `false`, so the NAIP
+  orthophoto goes down as it was flown, shadows baked in. That is the rubric's first
+  line, and it is what the two reviewed maps spent most of their rounds on.
+- **The default spawn stands on a 20 degree cross-slope.** `spawn_wallace_creek_offset`
+  measures 19.54 degrees across the heading over its 14 by 7 m pad, 2.1 m of roughness
+  and 6.74 m of relief; the gate asks for 8 degrees and 0.6 m. `spawn_elkhorn_scarp` is
+  6.46 and 0.32. Neither declares `level_ground`, so the number is reported and not
+  checked.
+- **The roads are the pack's stock block.** One `road_gravel` material, no `surfaces`, no
+  carve and no bed-contrast contract, so `test_decal_roads_have_no_node_steps` and
+  `test_road_surfaces_are_painted_and_decalled` both skip and `road_contrast` is empty.
+
+The footprint is its own open question, recorded in `spec.py` as `WANTED: 16384 at 1 m` /
+`BLOCKED`: this 4096 m square holds the offset channel and not the place, and the 16.4 km
+square that holds Soda Lake, the Goodwin Education Center, Elkhorn Road and the Temblor
+crest waits on the de-lighting's memory ceiling.
+
+| Round | Verdict | Findings and what changed |
+| --- | --- | --- |
+| | | |
+
 ## Level decisions
 
 | Decision | Value | Why |

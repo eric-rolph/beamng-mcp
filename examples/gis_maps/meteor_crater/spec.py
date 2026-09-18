@@ -618,13 +618,31 @@ SPAWNS = [
         "heading_deg": 180.0,
         "snap_to_road": True,
         "default": True,
+        # All three stand on ground a vehicle line fits on, and the last build measured
+        # them at 0.25 / 0.09 / 4.13 degrees across the heading with 0.12 / 0.08 / 0.11 m
+        # of roughness, against the gate's 8 degrees and 0.6 m. The apron was being
+        # reported and not checked, because the gate only binds on a spawn that promises
+        # it: they promise it now, so a future build cannot quietly move one onto a slope.
+        "level_ground": True,
     },
-    {"name": "crater_floor", "lat": 35.0275, "lon": -111.0225, "heading_deg": 0.0},
+    {
+        "name": "crater_floor",
+        "lat": 35.0275,
+        "lon": -111.0225,
+        "heading_deg": 0.0,
+        "level_ground": True,
+    },
     # The flat pad on the outer flank of the south rim (under 8 degrees over 10 m),
     # not the cliff band a car would slide down.
     # 130 m east of the first pick, off the mine spoil (which the rubble pull
     # rightly leaves grey) and on warm red-brown crest.
-    {"name": "south_rim", "lat": 35.02169, "lon": -111.02162, "heading_deg": 0.0},
+    {
+        "name": "south_rim",
+        "lat": 35.02169,
+        "lon": -111.02162,
+        "heading_deg": 0.0,
+        "level_ground": True,
+    },
 ]
 
 SKY = {"time": 0.14, "utc_offset": "-7", "year": 2026, "month": 6, "day": 20}

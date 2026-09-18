@@ -28,6 +28,31 @@ between drainages are real ridgelines a UTV can balance along.
 Free-ride, extreme off-road buggy testing, dirt-bike and UTV lines through the rills,
 and the butte's own scree skirt as a hill climb. No vegetation, no props.
 
+## Critic ledger
+
+Each round the critic (a separate agent holding `critic_rubric.md`) reviews the
+sheets in `authoring/critic/` and writes findings with generator fixes; the round is
+closed when every finding is a spec or parameter change in the tree.
+
+This map has had no round yet: it is terrain, slope-painted materials and OSM roads, with
+none of the art pass the two reviewed maps carry. Three things the committed handoff
+already measures are round 1's agenda, before a sheet is rendered:
+
+- **The base colour ships the flight's sun.** `imagery.delight` is `false`, so the NAIP
+  orthophoto goes down as it was flown, shadows baked in. That is the rubric's first
+  line, and it is what the two reviewed maps spent most of their rounds on.
+- **The default spawn stands on a 20 degree cross-slope.** `spawn_butte_base` measures
+  20.8 degrees across the heading over its 14 by 7 m pad, 2.96 m of roughness and 5.98 m
+  of relief; the gate asks for 8 degrees and 0.6 m. `spawn_badlands_south` is 6.03 and
+  1.08. Neither declares `level_ground`, so the number is reported and not checked.
+- **The roads are the pack's stock block.** One `road_gravel` material, no `surfaces`, no
+  carve and no bed-contrast contract, so `test_decal_roads_have_no_node_steps` and
+  `test_road_surfaces_are_painted_and_decalled` both skip and `road_contrast` is empty.
+
+| Round | Verdict | Findings and what changed |
+| --- | --- | --- |
+| | | |
+
 ## Level decisions
 
 | Decision | Value | Why |
