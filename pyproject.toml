@@ -33,6 +33,13 @@ dependencies = [
   "websockets>=16.1,<17",
 ]
 
+# NOTE: `lupa` and `soundfile` existed only for the mod gates that have moved to
+# beamng-mods - lupa ran each prop's generated runtime.lua, soundfile decoded PCM
+# for the Spin Launch audio gate - and nothing that remains here imports either.
+# They stay pinned for now because removing them invalidates uv.lock, and the
+# lockfile cannot be regenerated from a container whose network policy denies
+# download.pytorch.org, the index the vision extra's torch pin resolves from.
+# Drop both and run `uv lock` from a machine that can reach it.
 [project.optional-dependencies]
 vision = [
   "opencv-python-headless>=4.11,<5",
@@ -114,14 +121,6 @@ markers = [
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-# The Giant Props pack is a rapidly-iterating art/mod workstream: Blender
-# generators, procedural texture families, and Lua-in-string specs, guarded
-# by its own ~550-test structural suite (tests/test_giant_props_*). Holding
-# its checkpoint commits to server-grade lint/format blocked CI on hundreds
-# of cosmetic findings, so ruff (lint AND format) skips the pack tree; the
-# server (src/) and the shared test suite stay fully linted.
-extend-exclude = ["examples/giant_props"]
-
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "ASYNC", "S", "RUF"]
 ignore = ["S101"]

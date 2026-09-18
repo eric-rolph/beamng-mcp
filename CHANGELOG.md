@@ -5,6 +5,18 @@ uses semantic versioning after the initial alpha series.
 
 ## [Unreleased]
 
+### Removed
+
+- Move the mods to [`beamng-mods`](https://github.com/eric-rolph/beamng-mods), a separate private
+  repository: the six GIS-derived maps, the giant props pack, the Cannon Car Wash, and the 49 test
+  modules that gate specific mods rather than the server. Their history moved with them, commit
+  for commit. This repository keeps the MCP server and the machinery that produces mods - the
+  BeamNGpy adapter, the GELua bridge, the Blender export pipeline, the Collada and JBeam writers,
+  the vision backends - and the 27 suites that gate them. The tree drops from 684 files and 188 MB
+  to 106 files and 2 MB. `lupa` and `soundfile` are now unused here but stay pinned for now, because
+  dropping them invalidates `uv.lock` and it needs a `uv lock` run on a machine that can reach the
+  PyTorch index
+
 ### Added
 
 - Add an opt-in official-client capability gauntlet that exercises all 57 tools, every MCP
