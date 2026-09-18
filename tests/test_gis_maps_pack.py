@@ -1174,6 +1174,151 @@ def test_install_local_release_download_verifies_and_locks(
     assert not (dist / "meteor_crater_ericrolph.zip").exists()
 
 
+class _Refusal(Exception):
+    """An HTTP refusal shaped the way requests raises one, without importing requests.
+
+    ``release_downloader`` reads the status off the exception rather than catching a
+    requests type, so that an injected downloader may use any HTTP client. This class
+    is what that contract looks like from the outside.
+    """
+
+    def __init__(self, status: int) -> None:
+        super().__init__(f"HTTP {status}")
+
+        class _Response:
+            status_code = status
+
+        self.response = _Response()
+
+
+def _refusing_download(status: int | None = None):
+    """A ``download`` that records its calls and refuses github.com with ``status``."""
+
+    calls: list[tuple[str, dict[str, str] | None]] = []
+
+    def download(url: str, path: Path, *, headers: dict[str, str] | None = None) -> None:
+        calls.append((url, headers))
+        if status is not None and url.startswith("https://github.com/"):
+            raise _Refusal(status)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"asset")
+
+    return download, calls
+
+
+def _no_tokens(monkeypatch: pytest.MonkeyPatch) -> None:
+    for name in ("BEAMNG_MODS_TOKEN", "GITHUB_TOKEN", "GH_TOKEN"):
+        monkeypatch.delenv(name, raising=False)
+
+
+@pytest.mark.parametrize("status", [401, 403, 404])
+def test_a_refused_release_download_falls_back_to_the_authenticated_endpoint(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, status: int
+) -> None:
+    """A private repository refuses the plain URL; the token route is the only way in.
+
+    This path only runs when the public download is refused, which is the case nobody
+    hits by accident until the release actually goes private - so it is gated here
+    rather than left to be discovered by the person whose install breaks.
+    """
+
+    install_local = _load_script("install_local")
+    _no_tokens(monkeypatch)
+    monkeypatch.setenv("BEAMNG_MODS_TOKEN", "t0ken")
+
+    class _Assets:
+        status_code = 200
+
+        @staticmethod
+        def json() -> dict:
+            return {"assets": [{"name": "a.zip", "url": "https://api.github.com/x/assets/9"}]}
+
+        @staticmethod
+        def raise_for_status() -> None:
+            pass
+
+    seen: list[dict] = []
+
+    def fake_get(url: str, **kwargs):
+        seen.append({"url": url, **kwargs})
+        return _Assets()
+
+    monkeypatch.setitem(sys.modules, "requests", type(sys)("requests"))
+    sys.modules["requests"].get = fake_get  # type: ignore[attr-defined]
+
+    download, calls = _refusing_download(status)
+    fetch = install_local.release_downloader("o/r", "v1", download=download)
+    fetch("a.zip", tmp_path / "one")
+    fetch("a.zip", tmp_path / "two")
+
+    assert calls[0][0] == "https://github.com/o/r/releases/download/v1/a.zip"
+    assert calls[1] == (
+        "https://api.github.com/x/assets/9",
+        {"Accept": "application/octet-stream", "Authorization": "Bearer t0ken"},
+    )
+    # The release is resolved once, not once per asset.
+    assert calls[2] == calls[1] and len(seen) == 1
+    assert seen[0]["headers"]["Authorization"] == "Bearer t0ken"
+
+
+def test_a_refusal_without_a_token_says_which_variable_and_which_permission(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The person who meets this is on their own workstation with nobody to ask."""
+
+    install_local = _load_script("install_local")
+    _no_tokens(monkeypatch)
+    download, _ = _refusing_download(404)
+    fetch = install_local.release_downloader("o/r", "v1", download=download)
+    with pytest.raises(SystemExit) as refused:
+        fetch("a.zip", tmp_path / "one")
+    message = str(refused.value)
+    assert "PRIVATE" in message
+    assert "BEAMNG_MODS_TOKEN" in message
+    assert "Contents: Read" in message
+    assert "personal-access-tokens" in message
+
+
+def test_a_token_the_repository_rejects_is_not_reported_as_a_missing_release(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A private repository answers 404 when the token cannot see it, not 403.
+
+    Without this sentence in the message, a 404 reads as "that release does not
+    exist" and sends the reader looking in the wrong place.
+    """
+
+    install_local = _load_script("install_local")
+    _no_tokens(monkeypatch)
+    monkeypatch.setenv("GITHUB_TOKEN", "wrong")
+
+    class _Rejected:
+        status_code = 404
+
+    monkeypatch.setitem(sys.modules, "requests", type(sys)("requests"))
+    sys.modules["requests"].get = lambda *a, **k: _Rejected()  # type: ignore[attr-defined]
+
+    download, _ = _refusing_download(404)
+    fetch = install_local.release_downloader("o/r", "v1", download=download)
+    with pytest.raises(SystemExit) as rejected:
+        fetch("a.zip", tmp_path / "one")
+    assert "404 rather than 403" in str(rejected.value)
+    assert "Contents: Read" in str(rejected.value)
+
+
+def test_a_server_error_is_not_mistaken_for_a_permission_problem(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Only 401, 403 and 404 mean "try credentials"; anything else is a real failure."""
+
+    install_local = _load_script("install_local")
+    _no_tokens(monkeypatch)
+    download, _ = _refusing_download(500)
+    fetch = install_local.release_downloader("o/r", "v1", download=download)
+    with pytest.raises(_Refusal):
+        fetch("a.zip", tmp_path / "one")
+
+
 # ---------------------------------------------------------------------------
 # Art-pass toolkit gates (no build needed): meshes, shadows, road beds, objects, forest
 # ---------------------------------------------------------------------------
@@ -2519,6 +2664,61 @@ def test_a_scattered_stone_is_never_narrower_than_the_spec_asked_for() -> None:
     # it touches are the ones that were under the floor, nothing else moves.
     assert min(widest) < lo + 0.03, ("the floor is not where the stones are", min(widest))
     assert max(widest) > 0.6, ("the top of the range is unreachable now", max(widest))
+
+
+def test_a_scattered_stone_is_no_bigger_than_the_spec_asked_for_either() -> None:
+    """The other end of the same range, and the shape of the distribution between.
+
+    The per-axis jitter is an ASPECT, not a second size draw, so it pushed the longest
+    axis out of the declared range at BOTH ends. Only the bottom was caught, because
+    only the bottom has a gate under it: black_bear_pass declares 1.2 m boulders and
+    was shipping 1.31 m ones, 1.3 % of its field, with nothing to notice.
+
+    The second assertion is about how the bottom is held rather than whether it is. A
+    lift that pushes an undersized stone up onto the floor satisfies "never narrower"
+    while piling the whole lower tail onto one value - 3.1 % of Factory Butte's stones
+    on 0.25 m exactly. Scaling the aspect to the drawn size holds the same bound with
+    the drawn distribution intact. Measured on this instrument the lowest centimetre of
+    the range runs 1.16-1.24 times the next centimetre up when the tail is lifted, and
+    0.35-0.63 when it is not, so 0.9 separates them with room on both sides.
+    """
+
+    load_maplib()
+    from maplib import objects as objects_mod
+
+    size = 200
+    layer = np.zeros((size, size), dtype="int16")
+    ground = np.zeros((size, size), dtype="float32")
+    for lo, hi in ((0.25, 0.7), (0.3, 1.2)):
+        stones = objects_mod.scatter_rocks(
+            layer,
+            ground,
+            1.0,
+            float(size),
+            0.0,
+            {0: 4000.0},
+            seed=3,
+            size_range=(lo, hi),
+        )
+        assert len(stones) > 500, f"too few stones to say anything: {len(stones)}"
+        widest = np.array([max(st["size"][0], st["size"][1]) for st in stones])
+        assert widest.max() <= hi + 0.005, (
+            "a stone wider than the declared maximum",
+            float(widest.max()),
+            hi,
+        )
+        # The range is still spent at the top, so the bound is not held by shrinking.
+        assert widest.max() >= hi * 0.9, (
+            "the top of the range is unreachable",
+            float(widest.max()),
+        )
+        floor_bucket = int(((widest >= lo) & (widest < lo + 0.01)).sum())
+        next_bucket = int(((widest >= lo + 0.01) & (widest < lo + 0.02)).sum())
+        assert floor_bucket <= 0.9 * next_bucket, (
+            "the lower tail is piled onto the floor rather than drawn there",
+            floor_bucket,
+            next_bucket,
+        )
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
