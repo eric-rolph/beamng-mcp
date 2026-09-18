@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import math
 import shutil
 import struct
 import sys
@@ -1585,6 +1586,36 @@ def test_imagery_delighting_is_recorded(map_key: str) -> None:
     assert recorded["sun_fit"]["correlation"] > 0.3, "the fitted sun does not explain the shading"
     assert 0.0 <= recorded["cast_shadow_fraction"] < 0.3
     assert 0.5 <= recorded["minnaert_k"] <= 1.4 and recorded["gain_p95"] <= 4.0
+    # A fit sitting ON its own bound means the bound answered, not the photograph, and
+    # nothing downstream could tell: `fit_sun` searches the altitude in 5 degree coarse
+    # steps from `altitude_range[0]`, then 1 degree fine steps over alt0 +/- 4, skipping
+    # out-of-range values with a bare `continue` (imagery.py:136-143), and returns the same
+    # `{azimuth_deg, altitude_deg, correlation}` either way.
+    #
+    # EQUALITY, not a margin. The fine pass's resolution is 1 degree, so a fit at low + 1
+    # is a real optimum that beat the bound - wallace_creek returns 31.0 on [30.0, 80.0],
+    # which means 30.0 was evaluated and lost. A "within a degree" test would fail the one
+    # map that demonstrably converged.
+    #
+    # 282a6aa dropped four floors to 30 to stop the fit answering with its bound, after all
+    # four came back sitting on it (52.0, 55.0, 45.0, 60.0 against floors of exactly those).
+    # It freed factory_butte to 54.0 and wallace_creek to 31.0 and RE-PINNED the other two at
+    # 30.0, and bingham_canyon's cast_shadow_fraction went 0.0126 -> 0.1620 as a result -
+    # thirteenfold, 16% of the map refilled where 1.3% was, and still inside the 0.3 ceiling
+    # three lines up, so nothing said a word.
+    #
+    # Two exemptions, both declared rather than inferred:
+    #  - a range narrower than the 5 degree coarse step has ONE candidate, so its answer is
+    #    forced; black_bear_pass's [56.0, 57.5] is the flight's own figure, not a clamp.
+    #  - `sun_altitude_pin_ok` is a spec saying it means to sit on the floor, and why.
+    low, high = (float(v) for v in imagery_spec["sun_altitude_range"])
+    fitted = float(recorded["sun_fit"]["altitude_deg"])
+    if high - low >= 5.0 and not imagery_spec.get("sun_altitude_pin_ok"):
+        for edge, name in ((low, "floor"), (high, "ceiling")):
+            assert not math.isclose(fitted, edge, abs_tol=1e-6), (
+                f"{map_key}: the sun fit is pinned on its {name} ({fitted} deg, range "
+                f"[{low}, {high}]), so the bound is the answer rather than the photograph"
+            )
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)

@@ -79,6 +79,23 @@ IMAGERY = {
     # the answer rather than the data. 30 is the acquisition minimum NAIP is specified
     # to and the floor Meteor Crater already carries, where the fit settles at 56 in the
     # interior, so a wide range is not a runaway. The ceiling is unchanged.
+    #
+    # Measured afterwards: it did not work here. The fit came back at exactly 30.0, so the
+    # bound is still the answer, and the lower sun cost this map real shading -
+    # cast_shadow_fraction went 0.0126 to 0.1620 across that change, 16% of the level
+    # refilled where 1.3% was, with gain_p95 widened 2.138 to 2.904. It freed factory_butte
+    # (54.0) and wallace_creek (31.0) and re-pinned this map and mt_st_helens.
+    #
+    # The floor is NOT being raised, and the reason is not about the sun. This map and
+    # mt_st_helens never enter `level_builder`'s `if objects_spec or forest_spec:` path, which
+    # makes them the only two maps whose build inputs are identical across consecutive
+    # releases - the one instrument that can localise the unexplained byte-level variation in
+    # a shipped build. Changing their imagery inputs spends that instrument, on two maps that
+    # are out of development. So the pin is declared instead: 30.0 is NAIP's specified
+    # acquisition minimum rather than a physical claim about this flight, and it stays until
+    # this map re-enters development, when the fit should be refitted against the reference
+    # stations and this key removed.
+    "sun_altitude_pin_ok": True,
     "sun_altitude_range": [30.0, 74.0],
     "sun_azimuth_hint": 180.0,
     "sun_azimuth_window": 50.0,

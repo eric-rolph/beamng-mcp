@@ -89,6 +89,20 @@ IMAGERY = {
     # the answer rather than the data. 30 is the acquisition minimum NAIP is specified
     # to and the floor Meteor Crater already carries, where the fit settles at 56 in the
     # interior, so a wide range is not a runaway. The ceiling is unchanged.
+    #
+    # Measured afterwards: it did not work here either. The fit came back at exactly 30.0, so
+    # the bound is still the answer. It freed factory_butte (54.0) and wallace_creek (31.0)
+    # and re-pinned this map and bingham_canyon, where the lower sun took
+    # cast_shadow_fraction from 0.0126 to 0.1620.
+    #
+    # The floor is NOT being raised, for the reason written out in bingham_canyon's spec: this
+    # map and that one never enter `level_builder`'s `if objects_spec or forest_spec:` path,
+    # so they are the only two whose build inputs are identical across consecutive releases,
+    # and that makes them the only instrument for localising the unexplained byte-level
+    # variation in a shipped build. The pin is declared instead: 30.0 is NAIP's specified
+    # acquisition minimum rather than a physical claim about this flight, and it stays until
+    # this map re-enters development.
+    "sun_altitude_pin_ok": True,
     "sun_altitude_range": [30.0, 68.0],
     "sun_azimuth_hint": 180.0,
     "sun_azimuth_window": 50.0,
