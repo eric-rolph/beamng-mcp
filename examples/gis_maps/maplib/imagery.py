@@ -845,10 +845,16 @@ def delight(
     # belongs to that scene rather than to the gate. On a moderate scene -- lit median 0.31
     # -- an independent sweep found this floor's trigger share at 0.000000 across every
     # `strength`, with the breach still rising to 0.000454 as `gain_p05` settled onto the
-    # gain's own 0.45 low clip, and 56 of those 67 cells within 1e-4 of 0.45, which is the
-    # edge of a strict `composed < 0.45` against `np.float32(0.45)` = 0.44999998807907104.
-    # So the number has at least two producers and one of them is its own comparison. Quote
-    # it with the scene attached; a reader who carries "100%" to another map will be wrong.
+    # gain's own 0.45 low clip. Of those 67 cells, measured at ULP resolution: none sits
+    # exactly on `np.float32(0.45)`, 34 are within 4 ULP of the constant, 16 are more than
+    # 1024 ULP under it, and the gap between 64 and 1024 ULP is empty. A cell pinned at the
+    # clip is INVISIBLE here rather than counted -- `composed` stays float32 end to end, so
+    # the test runs in float32 where `np.float32(0.45) < 0.45` is False. What the near-edge
+    # half is, then, is the rounding of `composed` itself: it is `out_lum / src_lum` through
+    # two separate three-channel means, which carries its own error independent of the clip.
+    # So the number has at least two producers, roughly half of one of them is its own
+    # arithmetic, and none of it reaches 0.40. Quote the 100% with the scene attached; a
+    # reader who carries it to another map will be wrong.
     #
     # The two are SEPARABLE and only share this writer: swept independently, a scene can
     # reach 2,786 breach cells with the near-black fraction still at exactly zero. So a
