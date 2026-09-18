@@ -68,8 +68,28 @@ TERRAIN = {
 # detail material matches the base texture less closely where the two blend by
 # distance; 0.35 is where Meteor Crater put that trade and it is bounded, because the
 # built chroma still only reaches 0.09-0.13 on the two cool surfaces.
+#
+# The first pass put that 0.35 on fb_shale_slope and fb_clay_fin and called them the
+# two that sit under most of the map. They are not: the built terrain classifies
+# fb_mud_flat over 61.94% of it, fb_shale_slope 26.41, fb_clay_fin 9.66 and fb_caprock
+# 1.99. The lighter tint landed on a third of the map and the dominant surface kept the
+# shared 0.6, which is also the warm half of the only colour split these badlands have -
+# so the split was being held up by the cool side alone. At 0.6 the wash builds to b*
+# 9.00 against the slopes' -5.14, a 14.14 gap in a* b*; at 0.35 it builds to 12.18, a
+# gap of 17.32. The cost is the same one weighed above and it is smaller here than
+# anywhere it has already been accepted: against the de-lit base the wash steps dE76
+# 5.49 at 0.6 and 10.05 at 0.35, where mc_ejecta_gravel ships 12.34 at this same weight
+# and this map's own fb_shale_slope and fb_clay_fin ship 22.82 and 30.20. Rendered on
+# the wash_west driver sheet the ramp stays a ramp - near chroma 0.086 to 0.107, far
+# 0.028 to 0.031, no edge at the 120 m fade.
 PALETTE = {
-    "fb_mud_flat": {"family": "clay_pan", "seed": 301, "size": 1024, "base": [0.63, 0.58, 0.47]},
+    "fb_mud_flat": {
+        "family": "clay_pan",
+        "seed": 301,
+        "size": 1024,
+        "base": [0.63, 0.58, 0.47],
+        "tint_weight": 0.35,
+    },
     "fb_shale_slope": {
         "family": "shale",
         "seed": 302,
