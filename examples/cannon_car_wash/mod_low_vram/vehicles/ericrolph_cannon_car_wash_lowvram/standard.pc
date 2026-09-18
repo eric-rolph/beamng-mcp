@@ -1,6 +1,0 @@
-{
-  "format": 2,
-  "mainPartName": "ericrolph_cannon_car_wash_lowvram",
-  "model": "ericrolph_cannon_car_wash_lowvram",
-  "parts": {}
-}

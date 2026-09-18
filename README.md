@@ -238,56 +238,22 @@ mod_scaffold → mod_file_read/list → mod_file_write(expected_sha256=...)
 `mod_test_start` is a static build job: it validates, packs, and can copy an approved archive. It
 does not activate the mod, launch a scenario, or prove runtime behavior. Deterministic in-game mod
 execution is available as opt-in developer regressions against a sentinel-marked disposable BeamNG
-profile. The Cannon Car Wash example below has automated scenario and free-roam selector-prop
-gates; comprehensive acceptance for arbitrary third-party mods remains manual.
+profile. The worked examples in `beamng-mods` carry automated scenario and free-roam
+selector-prop gates of their own; comprehensive acceptance for arbitrary third-party mods
+remains manual.
 
-### Cannon Car Wash end-to-end example
+### Worked examples: maps, props and objects
 
-https://youtu.be/9bT0M9PmFts
+The mods this server was built to produce live in a separate repository,
+[`beamng-mods`](https://github.com/eric-rolph/beamng-mods): six GIS-derived levels, the giant
+props pack, and the Cannon Car Wash. That is where the end-to-end worked examples are, along with
+their build scripts and their per-mod gates.
 
-[`examples/cannon_car_wash`](examples/cannon_car_wash) contains the Blender source/generator,
-Z-up Collada asset, Gridmap V2 scenario, exact trigger/placement manifests, GELua wash-cycle and
-countdown/launch extension, and a Blender-derived rigid `Type: Prop` model for the vehicle selector.
-Its `mod/` directory is also the exact official-upload staging tree: 40 runtime files under only
-`art`, `levels`, `lua`, and `vehicles`, with every authored runtime identifier namespaced as
-`ericrolph_cannon_car_wash`. Repository-form metadata, provenance, gallery images, authoring
-handoffs, and telemetry remain outside that tree. The stable release filename is
-`cannon_car_wash_ericrolph.zip`.
-The selector cage is grounded from exact Blender-derived datum nodes at Z=0 and contains 79 fixed
-nodes, 329 beams, 144 collision triangles, one multi-material flexbody, and 15,125 kg of mass.
-Its vehicle-local bootstrap registers each placed prop with an on-demand GELua manager. The manager
-adds the animated rollers, six water jets, a ten-node layered mist/steam/dust dryer, and transient
-wash/repair/launch triggers. Crossing the wash midpoint restores transient vehicle damage with
-an acknowledged full physics reset, then uses the renewed live OOBB to center the vehicle in the
-corridor, align it upright and parallel, and preserve its incoming travel sign before integrity
-proof and prior-freeze-state release. The isolated D-Series proof records 0.036987 m centerline
-error, 0.9997017 corridor-direction dot, and 0.9997559 upright dot. Wash occupancy is
-reference-counted, so the rollers and all sixteen effects remain active
-until the final vehicle leaves. The runtime accepts arbitrary real vehicles, waits for full containment, holds the vehicle through
-`3... 2... 1... GO!`, and sets its main cluster to 100 m/s along the measured forward axis. It cleans up those transient
-objects and unloads after the last prop is removed. The Gridmap V2 scenario keeps its separate
-scenario-owned extension and a default D-Series while accepting any exact live vehicle; the
-selector live gate validates the stock `citybus` with configuration `city`. Thus,
-scenario load/unload behavior is not
-conflated with free-roam prop ownership. The live gates exercise both paths and preserve their
-telemetry separately. The scenario result is
-[`cannon_car_wash_phase4_results.json`](examples/cannon_car_wash/telemetry/cannon_car_wash_phase4_results.json).
-
-The v1.8 art pass replaces block bristles with 16-card vertical and 14-card overhead alpha-tested
-fans, adds tileable CMU, interior brick, wet concrete, corrugated-blue, brush, and emissive-sign PBR
-sets, and ships 22 BeamNG-cooked DDS files. The scenario visual is 10,714 triangles across 33
-primitive groups and 18 materials; the selector visual is consolidated to 10,666 triangles across
-18 groups, while a separate vehicle-local DAE preserves the five animated brush channels. Seven
-bounded lights—five tunnel PointLights and two entrance SpotLights—provide real scene illumination.
-See the [technical-art workflow](examples/cannon_car_wash/TECHNICAL_ART.md) for UV, material,
-lighting, performance, texture-cook, and inspection details.
-
-The efficient release loop uses static contracts first, incremental `beamng.log` reads, structured
-Lua telemetry, engine OOBB/quaternion/material/light queries, and semantically reviewed RenderView
-captures. Four serial cold starts cover the final candidate: Phase 2 asset resolution, Phase 4's
-complete scenario lifecycle, selector-runtime with the city bus, and the exact prebuilt ZIP. The
-narrower Phase 3 and selector-spawn gates remain available for diagnosis; they are not repeated
-when the broader gates already subsume them.
+They are kept apart on purpose. This repository is the server and the machinery — the Blender
+bridge, the Collada and JBeam writers, the Lua contract, the safety gates — and it is 2 MB of it.
+The content was 186 MB and had come to dominate both the tree and the test suite. Splitting them
+means a change to the server is reviewed against the server's own gates, not against several
+hundred assertions about the geometry of a particular car wash.
 
 ### Blender to functional soft body
 

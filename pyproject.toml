@@ -41,15 +41,6 @@ vision = [
   "transformers>=4.53,<5",
 ]
 dev = [
-  # The giant_props headless gates run each mod's REAL generated runtime.lua
-  # under lupa, and the Spin Launch audio gate hashes DECODED PCM through
-  # soundfile. Both were undeclared, and both are guarded by
-  # `pytest.importorskip` - so on a clean `pip install -e .[dev]` they did not
-  # fail, they SKIPPED: 135 of Spin Launch's 162 tests evaporated silently,
-  # and eleven test modules across the pack lost their lupa rig. A dependency
-  # that only the author happens to have installed is a gate that only runs on
-  # the author's machine.
-  "lupa>=2.8,<3",
   "mypy>=1.15,<2",
   "pytest>=8.3,<9",
   "pytest-asyncio>=0.25,<1",
@@ -60,7 +51,6 @@ dev = [
   # output failed `format --check` on two dozen files authored under
   # 0.15 that no commit had touched.
   "ruff>=0.15,<0.16",
-  "soundfile>=0.14,<1",
 ]
 
 [project.urls]
@@ -114,14 +104,6 @@ markers = [
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-# The Giant Props pack is a rapidly-iterating art/mod workstream: Blender
-# generators, procedural texture families, and Lua-in-string specs, guarded
-# by its own ~550-test structural suite (tests/test_giant_props_*). Holding
-# its checkpoint commits to server-grade lint/format blocked CI on hundreds
-# of cosmetic findings, so ruff (lint AND format) skips the pack tree; the
-# server (src/) and the shared test suite stay fully linted.
-extend-exclude = ["examples/giant_props"]
-
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "ASYNC", "S", "RUF"]
 ignore = ["S101"]
