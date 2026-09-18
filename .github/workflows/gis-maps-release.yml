@@ -68,16 +68,27 @@ permissions:
 #
 # A BUILD IS PER BRANCH. Two branches building six maps share nothing at all.
 #
-# Repository-wide made every build queue for the release's slot, and that slot holds ONE
-# pending run: a new run REPLACES the pending one rather than queueing behind it, so a
-# push on any branch threw away another branch's waiting build. cancel-in-progress does
+# Repository-wide made every build queue for the release's slot. A group holds one RUNNING
+# run and exactly one WAITING run, and a third arrival discards the waiter - it does not
+# queue behind it. That sentence is what four builds died of on 2026-09-18, and it is not
+# obvious from the documentation. A push on any branch threw away another branch's
+# waiting build. cancel-in-progress does
 # not enter into it - it governs the RUNNING run, and what was lost was the PENDING one.
 # Setting it false was correct on its own merits and could never have fixed this.
 #
-# So key on the publish CONDITION, not on the ref: all three publishing paths collapse to
-# one group and keep the release serialised, while every other branch gets a group of its
+# So key on the publish CONDITION, not on the branch: every publishing path collapses to
+# one group and keeps the release serialised, while every other ref gets a group of its
 # own and waits for nobody. The condition is repeated on the two release steps below, and
 # the three have to agree - change them together.
+#
+# The condition is now a function of github.ref ALONE. It used to include
+# `github.event_name == 'workflow_dispatch'`, which let a manual run publish from ANY ref:
+# the group stopped two runs racing but nothing stopped somebody dispatching a stale
+# branch and overwriting the release with older maps, which is the failure the publish
+# gate was added to prevent. A dispatch carries the ref it was launched from, so dropping
+# that clause says what we actually mean - publish from the integration branch or a tag,
+# and from anywhere else build, gate and upload nothing. Dispatching elsewhere is still
+# useful: it is how you put a branch's maps through the gates without touching a release.
 #
 # cancel-in-progress stays false. Several sessions work the integration branch at once,
 # and a 36-minute build is worth more than the seconds killing it would save. Inside a
@@ -86,7 +97,6 @@ permissions:
 concurrency:
   group: >-
     gis-maps-release-${{ (startsWith(github.ref, 'refs/tags/')
-    || github.event_name == 'workflow_dispatch'
     || github.ref == 'refs/heads/claude/gis-maps-pack')
     && 'publish' || github.ref }}
   cancel-in-progress: false
@@ -185,7 +195,11 @@ jobs:
       # the release over. To publish from anywhere else, run this workflow from the
       # Actions tab.
       - name: Collect release assets
-        if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        # WHO MAY PUBLISH is the ref, and only the ref. A manual dispatch carries the ref it
+        # was launched from, so dispatching from the integration branch or a tag publishes
+        # and dispatching from anywhere else builds, gates and uploads nothing. Keep this
+        # identical to the concurrency group's condition above.
+        if: ${{ startsWith(github.ref, 'refs/tags/')
           || github.ref == 'refs/heads/claude/gis-maps-pack' }}
         env:
           TAG: ${{ github.event.inputs.tag || (startsWith(github.ref, 'refs/tags/') && github.ref_name) || 'gis-maps-v1' }}
@@ -209,7 +223,11 @@ jobs:
           } > release/NOTES.md
 
       - name: Create or update the GitHub Release
-        if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        # WHO MAY PUBLISH is the ref, and only the ref. A manual dispatch carries the ref it
+        # was launched from, so dispatching from the integration branch or a tag publishes
+        # and dispatching from anywhere else builds, gates and uploads nothing. Keep this
+        # identical to the concurrency group's condition above.
+        if: ${{ startsWith(github.ref, 'refs/tags/')
           || github.ref == 'refs/heads/claude/gis-maps-pack' }}
         env:
           GH_TOKEN: ${{ github.token }}

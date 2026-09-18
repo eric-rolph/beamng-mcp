@@ -172,6 +172,11 @@ workflow, tag `gis-maps-v1`) or by pushing a `gis-maps-v*` tag; the runner fetch
 the public data, builds, runs the static gates and uploads the ZIPs, locks, handoffs
 and `SHA256SUMS.txt`.
 
+**Dispatch it from `claude/gis-maps-pack` or from a tag.** Only those refs publish, so
+that a stale branch cannot overwrite the release with older maps. A dispatch from any
+other ref still builds and runs the gates - which is how to put a branch's maps through
+the artefact gates that no pull request can see - but it uploads nothing.
+
 `install_local.py` makes sure every map has a dist ZIP that matches its lock (rejoined
 from delivered parts, or built) and then runs `deploy_local.py --deploy`. The pieces it
 orchestrates are below.
