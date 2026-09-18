@@ -896,7 +896,22 @@ def _feature(kind: str, size: int, rng: np.random.Generator, params: dict | None
         # A crack is a line three or four texels wide (30 mm on an 8 m tile), two
         # fifths darker than the slab, on three edges in ten: at a fifth over one
         # texel it was under threshold at every distance.
-        cracks = (1.0 - _smooth((f2 - f1) / 0.006)) * (_cell_value(cid_c, 61) > 0.7)
+        # worley returns distances in CELL units, so this width is a fraction of a
+        # cell and not of the tile: 16 cells over an 8 m tile make a cell 0.5 m, and
+        # 0.06 of one is that 30 mm. At 0.006 it was 3 mm, under half a texel, so the
+        # line sampled as a row of isolated dots and never reached the authored depth
+        # at all - which is why widening and darkening it in the round before did
+        # nothing. The inner third is flat-bottomed so the two fifths are actually
+        # attained across the crack rather than on a zero-width ridge.
+        width = float(params.get("crack_width_cells", 0.06))
+        core = width / 3.0
+        trench = 1.0 - _smooth((f2 - f1 - core) / max(width - core, 1e-6))
+        # At the sub-texel width the per-cell draw test was invisible; at the real
+        # width it outlined whole cells and the slab read as flagstones. A slow field
+        # breaks every perimeter into runs a metre or two long, so what shows is
+        # cracks rather than paving, and about three tenths of the edge is drawn.
+        runs = _smooth((fbm(size, 6, 2, rng) + 0.10) / 0.30)
+        cracks = trench * runs * (_cell_value(cid_c, 61) > 0.55)
         patches = fbm(size, 3, 2, rng) * 0.15
         # Across the road (u): a pale gravel shoulder each side and a darker wear
         # band down the middle of each lane.
