@@ -42,13 +42,20 @@ def sha256_file(path: Path) -> str:
 
 
 def public_stats(stats: dict) -> dict:
-    """A stats dict with its private keys dropped, for anything that ships as JSON.
+    """The imagery stats with their private keys dropped, for the handoff JSON.
 
     A leading underscore marks a stat the stages pass between themselves rather than
     publish: ``delight`` returns its refilled-cell mask as ``_refill_mask``, an ndarray.
     Each stage pops what it consumes, and this is the backstop, because the handoff is
     written at the very end of ``level`` - an unserialisable value there throws away a
-    36-minute six-map build, which is how this was found.
+    forty-minute six-map build, which is how this was found.
+
+    It guards that one key and is deliberately NOT applied to the handoff's other stat
+    dicts. The underscore convention does not hold across this pack: ``__parent`` is a
+    BeamNG scene-file key, twenty-odd of them across ``level_builder``, ``scene_objects``
+    and ``buildings``, and it has to ship. A blanket filter over every report dict would
+    drop nothing today and silently drop something real the first time one of them
+    carried a key of that shape. Pop what you add; do not widen this.
     """
 
     return {key: value for key, value in stats.items() if not key.startswith("_")}
