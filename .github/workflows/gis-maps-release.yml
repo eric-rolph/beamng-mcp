@@ -39,6 +39,16 @@ on:
     # of the push. Name a branch claude/gis-maps-build-<topic> to opt IN. Anything else is
     # validated by ci.yml, which runs on the pull request in about two minutes and takes
     # no slot.
+    #
+    # WHAT THAT VALIDATION DOES NOT COVER, because it will mislead you otherwise: ci.yml
+    # runs on windows-latest and never builds a map, so `require_built` skips every
+    # artefact gate in tests/test_gis_maps_pack.py there. The gates that read a built
+    # level - the handoff hashes, the .ter binary, the colour and refill contracts, the
+    # spawn checks - run ONLY on a build runner, which means this workflow's "Static gates
+    # on the built trees" step and a critic round. A pull request can therefore be green
+    # on all four checks while the branch it targets is red on a gate no pull request can
+    # see, and on 2026-09-18 three of them were. Green here is evidence about the static
+    # suite, never about the maps.
     branches:
       - "claude/gis-maps-pack"
       - "claude/gis-maps-build-**"
@@ -123,6 +133,9 @@ jobs:
           du -sh examples/gis_maps/*/dist
           df -h / | tail -1
 
+      # The only place most of this suite actually runs. ci.yml is windows-latest with no
+      # build, so every gate behind `require_built` skips there; a pull request cannot go
+      # red on any of them. Read a failure here as the first real word on the maps.
       - name: Static gates on the built trees
         run: python -m pytest -q tests/test_gis_maps_pack.py
 
