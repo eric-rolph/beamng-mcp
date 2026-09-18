@@ -136,8 +136,26 @@ jobs:
       # The only place most of this suite actually runs. ci.yml is windows-latest with no
       # build, so every gate behind `require_built` skips there; a pull request cannot go
       # red on any of them. Read a failure here as the first real word on the maps.
+      #
+      # Which is why a bare pytest here was the worst place to be unreadable: the log
+      # endpoint redirects to blob storage the sessions' egress denies, the logs artifact
+      # lives on the same host, and a check run for an Actions job carries no output text
+      # - so run 41 said "Process completed with exit code 1" and nothing else, on the one
+      # step that tests the maps. Annotate it the way the build step is annotated, with
+      # --pytest so the assertion is what gets raised rather than the tail, which under
+      # -q is a hundred-odd SKIPPED reasons and never the failure.
       - name: Static gates on the built trees
-        run: python -m pytest -q tests/test_gis_maps_pack.py
+        run: |
+          set +e
+          set -uo pipefail
+          python -m pytest -q -ra --tb=short tests/test_gis_maps_pack.py 2>&1 | tee /tmp/gates.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            echo "--- stage: static gates on the built trees" > /tmp/gates.env
+            python3 .github/scripts/build_failure_annotation.py \
+              "$status" /tmp/gates.log /tmp/gates.env --pytest
+            exit "$status"
+          fi
 
       # Publishing is for tags, manual runs, and the pack's own integration branch. Every
       # branch matching the trigger still builds all six maps and runs the gates above -

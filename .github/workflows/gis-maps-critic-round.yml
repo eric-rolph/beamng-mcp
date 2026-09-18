@@ -114,12 +114,16 @@ jobs:
         run: |
           set +e
           set -uo pipefail
-          python -m pytest -q -rs tests/test_gis_maps_pack.py 2>&1 | tee /tmp/round/gates.log
+          python -m pytest -q -ra --tb=short tests/test_gis_maps_pack.py 2>&1 \
+            | tee /tmp/round/gates.log
           status=${PIPESTATUS[0]}
           if [ "$status" -ne 0 ]; then
             echo "--- stage: static gates" > /tmp/round/gates.env
+            # --pytest, because without it this call raised the TAIL, and the tail of a
+            # -q run is the skip wall: round 3's annotation named which maps had no
+            # flat-field and never named the assertion that failed.
             python3 .github/scripts/build_failure_annotation.py \
-              "$status" /tmp/round/gates.log /tmp/round/gates.env
+              "$status" /tmp/round/gates.log /tmp/round/gates.env --pytest
             exit "$status"
           fi
 
