@@ -2,7 +2,8 @@ name: GIS maps release
 
 # Rebuilds the six levels from public data on a GitHub runner and attaches the ZIPs
 # (plus SHA256SUMS.txt and the release locks) to a GitHub Release, so a play-test
-# install is a download rather than a build. Whole ZIPs are 80-90 MiB, over the
+# install is a download rather than a build. Whole ZIPs run from about 90 MB to the
+# 426 MB of Black Bear Pass, over the
 # session file-delivery limit, and release assets are the one place they can live
 # without bloating the repository.
 
@@ -30,6 +31,26 @@ on:
 permissions:
   contents: write
 
+# Every run ends in `gh release upload <tag> --clobber` against the SAME release, and
+# nothing else serialises them. Two runs in flight together interleave their assets, so
+# the release can finish holding ZIPs from one commit and a SHA256SUMS.txt from another
+# with no field saying so.
+#
+# The group is deliberately repository-wide and carries no ref: what it serialises is
+# one release, and a tag push and a manual run can both reach it. Adding ${{ github.ref }}
+# here would let two of those clobber one release at once, which is the failure above.
+# Only the integration branch publishes now (see the `if:` on the release steps); the other
+# branches are in the group to keep one six-map build on the runners at a time.
+#
+# cancel-in-progress is false BECAUSE the group is repository-wide. Cancelling would
+# mean a push to any branch killing a six-map build on another, and this branch is
+# worked by several people at once. Queueing wastes a doomed build's runner time;
+# cancelling destroys a good one. GitHub holds a single pending run per group and a
+# newer push supersedes the pending one, so the queue does not grow past one.
+concurrency:
+  group: gis-maps-release
+  cancel-in-progress: false
+
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
@@ -56,6 +77,8 @@ jobs:
           df -h / | tail -1
 
       - name: Build every map (fetch -> terrain -> level -> dist -> ledger)
+        env:
+          MAPS: ${{ github.event.inputs.maps }}
         run: |
           # Actions runs a `run:` step as `bash -e {0}`, so -e is already on when this
           # line is reached and `set -uo pipefail` does NOT clear it. Without the +e the
@@ -63,7 +86,7 @@ jobs:
           # runs, which is exactly what happened on 4037639.
           set +e
           set -uo pipefail
-          MAPS="${{ github.event.inputs.maps }}"
+          MAPS="${MAPS:-}"
           build() {
             if [ -z "$MAPS" ]; then
               python examples/gis_maps/build.py --all all
@@ -88,7 +111,21 @@ jobs:
       - name: Static gates on the built trees
         run: python -m pytest -q tests/test_gis_maps_pack.py
 
+      # Publishing is for tags, manual runs, and the pack's own integration branch. Every
+      # branch matching the trigger still builds all six maps and runs the gates above -
+      # that is the CI value and it is unchanged - but only claude/gis-maps-pack rewrites
+      # the shared release.
+      #
+      # Before this, a push to ANY claude/gis-maps** branch published to gis-maps-v1, so a
+      # side branch mid-experiment replaced the installable ZIPs and nothing in the release
+      # recorded which branch they came from. Narrowing it to the integration branch keeps
+      # the property that matters - work that reaches claude/gis-maps-pack refreshes the
+      # download with no extra step - while a work-in-progress branch can no longer take
+      # the release over. To publish from anywhere else, run this workflow from the
+      # Actions tab.
       - name: Collect release assets
+        if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+          || github.ref == 'refs/heads/claude/gis-maps-pack' }}
         env:
           TAG: ${{ github.event.inputs.tag || (startsWith(github.ref, 'refs/tags/') && github.ref_name) || 'gis-maps-v1' }}
         run: |
@@ -111,6 +148,8 @@ jobs:
           } > release/NOTES.md
 
       - name: Create or update the GitHub Release
+        if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+          || github.ref == 'refs/heads/claude/gis-maps-pack' }}
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.inputs.tag || (startsWith(github.ref, 'refs/tags/') && github.ref_name) || 'gis-maps-v1' }}

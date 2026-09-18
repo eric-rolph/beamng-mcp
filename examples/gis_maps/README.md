@@ -13,7 +13,7 @@ every file the game reads is generated, never hand-edited.
 | `wallace_creek` | Carrizo Plain - Wallace Creek | 4096 m | 1 m | B4 0.5 m lidar (OpenTopography) over USGS 3DEP 1 m | The San Andreas surface trace: the 130 m offset channel, sag ponds, pressure ridges, scarps. Trophy-truck country. |
 | `factory_butte` | Factory Butte Badlands | 4096 m | 1 m | Utah statewide 1 m lidar via USGS 3DEP | Mancos Shale rills, clay fins and mud-wash flats. Natural half-pipes and spine transfers. |
 | `mt_st_helens` | Mount St. Helens Pumice Plain | 6144 m | 1.5 m | USGS 3DEP 1 m (2018 lidar) | The 1980 crater headwall, the lava dome, braided ash canyons down to Spirit Lake. |
-| `black_bear_pass` | Black Bear Pass | 8192 m | 1 m | USGS 3DEP 1 m (2020 lidar) | 3,913 m summit, one-way shelf road, the Steps, switchbacks above Bridal Veil Falls, then the whole box canyon over Pandora into Telluride and up the far wall to Tomboy and Savage Basin. Buildings modelled from OSM outlines at lidar heights. |
+| `black_bear_pass` | Black Bear Pass | 8192 m | 2 m | USGS 3DEP 1 m (2020 lidar) | 3,913 m summit, one-way shelf road, the Steps, switchbacks above Bridal Veil Falls, then the whole box canyon over Pandora into Telluride and up the far wall to Tomboy and Savage Basin. Buildings modelled from OSM outlines at lidar heights. |
 | `bingham_canyon` | Bingham Canyon Mine | 6144 m | 1.5 m | USGS 3DEP 1 m (2023 lidar) | An inverted mountain: 15 m benches spiralling 1.2 km down, linked by continuous haul roads. |
 
 None of the six has a building, a tree or a guardrail to model. That is the point: the
@@ -176,8 +176,8 @@ and `SHA256SUMS.txt`.
 from delivered parts, or built) and then runs `deploy_local.py --deploy`. The pieces it
 orchestrates are below.
 
-The level ZIPs (80-90 MiB each) are build output, not repository content. Two ways to
-have them locally:
+The level ZIPs (about 90 MB each, 426 MB for Black Bear Pass) are build output, not
+repository content. Two ways to have them locally:
 
 1. **Rejoin a delivered build.** A build handed over from a session arrives as
    `<key>_ericrolph.zip.partN` pieces plus `SHA256SUMS.txt` (whole ZIPs exceed the
@@ -245,7 +245,7 @@ already populated - the generator is the first pass, the editors are the second.
 
 | Editor | What the pack ships for it | Where |
 | --- | --- | --- |
-| **Terrain Editor** (sculpt, smooth, flatten) | `theTerrain.ter`, version 9: u16 heights and the u8 layer map for the level's own sample count (4096 x 4096, 8192 x 8192 on Black Bear Pass, 2048 x 2048 on Meteor Crater), plus the `.terrain.json` companion the engine writes itself | `levels/<mod_id>/theTerrain.ter` |
+| **Terrain Editor** (sculpt, smooth, flatten) | `theTerrain.ter`, version 9: u16 heights and the u8 layer map for the level's own sample count (per map in the terrain-size table below), plus the `.terrain.json` companion the engine writes itself | `levels/<mod_id>/theTerrain.ter` |
 | **Terrain Painter** (paint surface materials) | The `.ter`'s layer map, painted by the slope and elevation classifier, over the level's TerrainMaterials - each one a v1.5 base + macro + detail set with its own groundmodel (`DIRT`, `ROCK`, `ASPHALT`, ...), so the tyres already know what they are on | `art/terrains/main.materials.json` |
 | **Terrain Import/Export Heightmap** | A 16-bit greyscale PNG of the same heightmap, at the same sample count | `levels/<mod_id>/theTerrain.terrainheightmap.png` |
 | **Decal Road Editor** | Every road as a `DecalRoad` with `improvedSpline`, per-node width, `material`, `textureLength`, `breakAngle`, `renderPriority`, `startEndFade` and `drivability` - the nodes are the OSM centreline draped on the carved bed | `main/MissionGroup/roads/items.level.json` |
