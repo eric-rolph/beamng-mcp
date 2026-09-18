@@ -682,6 +682,32 @@ def source_colour_stats(colour: np.ndarray, stride: int = 4) -> dict:
     return out
 
 
+def base_floor_stats(colour: np.ndarray) -> dict:
+    """How close the finished base stands to the black-hole threshold, as a distribution.
+
+    ``near_black_fraction`` is one end of a two-ended fact: it counts what crossed 13 and
+    says nothing about what is standing at 14. A base whose shadows floor at 15 passes the
+    gate and is one contrast change away from failing it - which is exactly how
+    bingham_canyon went from 0.000000 to 0.000330 on a one-line spec edit, with every
+    number the de-lighting records still inside its own bound.
+
+    Measured here, on the array that ships, so it covers every writer after ``delight`` as
+    well: ``paint_road_beds``, ``enforce_bed_contrast``, ``refill_match`` and the shipping
+    clamp all land on the base after the de-lighting has returned, and none of them appears
+    in the de-lighting's own handoff block. The counts are on the same per-texel maximum
+    the gate uses, because a channel maximum is what decides whether a texel reads black.
+    """
+
+    brightest = colour.max(axis=-1)
+    return {
+        "max_channel_p01": int(np.percentile(brightest, 1)),
+        "max_channel_p05": int(np.percentile(brightest, 5)),
+        "under_13": round(float((brightest < 13).mean()), 6),
+        "under_20": round(float((brightest < 20).mean()), 6),
+        "under_32": round(float((brightest < 32).mean()), 6),
+    }
+
+
 def base_colour_stats(
     colour: np.ndarray,
     layer: np.ndarray,
@@ -735,6 +761,7 @@ def base_colour_stats(
         "base_px": int(colour.shape[0]),
         "layer_mean_srgb": means,
         "near_black_fraction": round(float((colour.max(axis=-1) < 13).mean()), 6),
+        "base_floor": base_floor_stats(colour),
     }
 
 
