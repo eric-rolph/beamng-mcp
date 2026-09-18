@@ -1293,6 +1293,111 @@ def test_detect_objects_lifts_a_boulder_and_leaves_the_ground() -> None:
     assert len(placed) == 1 and placed[0]["kind"] == "rock" and placed[0]["size"][2] >= 1.0
 
 
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_object_clearance_and_scatter_have_something_to_act_on(map_key: str) -> None:
+    """Two spec keys that accept any value and can quietly do nothing.
+
+    `road_clear_m` is applied against the painted road bed, and a level whose roads are
+    decals over untouched ground has no bed - `ROADS["surfaces"]` is empty and no layer
+    carries a bed material. `level_builder` now falls back to the road centrelines, but
+    that needs `ROADS` to include something, so a spec asking for clearance with neither
+    is asking for nothing. Measured on Factory Butte before the fallback existed: 188 of
+    54,040 scattered stones inside 3 m of a centreline, 62 of them 0.5 m or wider, on
+    14.3 km of road, and `rocks_cleared_from_roads` never appeared to say so.
+
+    The scatter's materials are the same shape of trap: an unmapped layer falls through
+    to `rock_talus`, which a spec that authors its own rocks does not define.
+    """
+
+    spec = load_spec(map_key)
+    objects_spec = getattr(spec, "OBJECTS", None)
+    if not objects_spec:
+        pytest.skip(f"{map_key}: no OBJECTS block")
+
+    materials = spec.TERRAIN["materials"]
+    if float(objects_spec.get("road_clear_m", 0.0)) > 0:
+        roads = getattr(spec, "ROADS", None) or {}
+        beds = [
+            cfg["terrain_material"]
+            for cfg in (roads.get("surfaces") or {}).values()
+            if cfg.get("terrain_material") in materials
+        ]
+        assert beds or roads.get("include"), (
+            f"{map_key} asks for {objects_spec['road_clear_m']} m of road clearance with no bed "
+            "material and no included road types, so there is nothing to clear against"
+        )
+
+    scatter = objects_spec.get("scatter") or {}
+    if scatter:
+        declared = set(objects_spec.get("rock_materials") or {})
+        by_layer = {
+            **(objects_spec.get("rock_material_by_layer") or {}),
+            **(objects_spec.get("scatter_rock_material") or {}),
+        }
+        for layer_name in scatter:
+            assert layer_name in materials, f"{map_key}: scatter names unknown layer {layer_name}"
+            if declared:
+                rock = by_layer.get(layer_name)
+                assert rock in declared, (
+                    f"{map_key}: {layer_name} scatters stones with no material mapped, so they "
+                    f"fall through to rock_talus, which this spec does not author"
+                )
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_road_clearance_actually_ran(map_key: str) -> None:
+    """The gate the spec-level one cannot be: did the clearance find anything to act on.
+
+    A spec can name a bed material or a road include list and the implementation can
+    still do nothing with either - which is what happened, because the clearance was
+    gated on the painted bed and ran on no decal-road level. So the build records WHICH
+    instrument it used, and this asserts it used one. Skips on the spec not asking for
+    clearance, never on the number being absent, because absent is the failure.
+    """
+
+    require_built(map_key)
+    spec = load_spec(map_key)
+    objects_spec = getattr(spec, "OBJECTS", None) or {}
+    if float(objects_spec.get("road_clear_m", 0.0)) <= 0:
+        pytest.skip(f"{map_key}: spec asks for no road clearance")
+
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    level = handoff.get("level", handoff)
+    assert "road_clearance_from" in level, (
+        f"{map_key} asks for {objects_spec['road_clear_m']} m of road clearance and the build "
+        "recorded nothing about it, so nobody can tell whether it ran"
+    )
+    assert level["road_clearance_from"] in {"bed", "centrelines"}, (
+        f"{map_key}: clearance had {level['road_clearance_from']}"
+    )
+    assert "rocks_cleared_from_roads" in level
+
+
+def test_centreline_clearance_removes_what_sits_on_a_road() -> None:
+    """The fallback `road_clear_m` now uses when a level has no painted bed."""
+
+    load_maplib()
+    from maplib import roads as road_tools
+
+    size, res, fp_size_m = 200, 1.0, 200.0
+    ways = [{"points": [(-80.0, 0.0), (80.0, 0.0)], "width_m": 6.0, "highway": "track"}]
+    mask = road_tools.centreline_mask(ways, res, fp_size_m, size, 3.0)
+    half = fp_size_m / 2.0
+
+    def cell(x, y):
+        return mask[int(half - y), int(x + half)]
+
+    assert cell(0.0, 0.0) and cell(50.0, 2.0), "on the way, inside the buffer"
+    assert not cell(0.0, 20.0) and not cell(0.0, -20.0), "20 m off the way is open ground"
+    # The buffer is a corridor, not the whole grid: a clearance that masked everything
+    # would "clear" the scatter by deleting it.
+    assert 0.0 < mask.mean() < 0.15, mask.mean()
+
+
 def test_detect_off_stats_reports_every_count_a_real_pass_does() -> None:
     """The skip path's handoff keeps a real pass's shape: zeros, not a missing section."""
 

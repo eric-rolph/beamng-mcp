@@ -25,12 +25,26 @@ PACK_ROOT = Path(__file__).resolve().parent
 STAGES = ("fetch", "terrain", "level", "dist", "ledger")
 
 
+# `--all` builds in this order, and the order is load-bearing rather than cosmetic: a
+# six-map build takes about an hour and a run that is cancelled, times out or loses its
+# runner keeps whatever it finished. Alphabetical put the two maps that are NOT in the
+# development scope at positions one and five, so run 35383306792 spent its first stretch
+# on bingham_canyon and was cancelled 38 minutes in during mt_st_helens, having completed
+# three of the four maps anyone was waiting for and none of the fourth. The four in scope
+# therefore go first. This changes nothing about WHICH maps are built - every map with a
+# spec.py is still built, and anything not named here follows alphabetically - only the
+# order in which a partial run pays off.
+BUILD_ORDER = ("black_bear_pass", "meteor_crater", "factory_butte", "wallace_creek")
+
+
 def discover_maps() -> list[str]:
-    return sorted(
+    found = sorted(
         child.name
         for child in PACK_ROOT.iterdir()
         if child.is_dir() and (child / "spec.py").is_file()
     )
+    first = [key for key in BUILD_ORDER if key in found]
+    return first + [key for key in found if key not in first]
 
 
 def load_spec(map_key: str):
