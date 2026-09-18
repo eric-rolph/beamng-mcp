@@ -846,8 +846,9 @@ def delight(
     # -- an independent sweep found this floor's trigger share at 0.000000 across every
     # `strength`, with the breach still rising to 0.000454 as `gain_p05` settled onto the
     # gain's own 0.45 low clip. Of those 67 cells, measured at ULP resolution: none sits
-    # exactly on `np.float32(0.45)`, 34 are within 4 ULP of the constant, 16 are more than
-    # 1024 ULP under it, and the gap between 64 and 1024 ULP is empty. A cell pinned at the
+    # exactly on `np.float32(0.45)`, 34 are within 4 ULP of the constant and 16 are more
+    # than 1024 ULP under it -- but 14 sit BETWEEN 64 and 1024 ULP, so there is no empty
+    # gap to cut at, and no bucket boundary here is a finding. A cell pinned at the
     # clip is INVISIBLE here rather than counted -- `composed` stays float32 end to end, so
     # the test runs in float32 where `np.float32(0.45) < 0.45` is False. What the near-edge
     # half is, then, is the rounding of `composed` itself: it is `out_lum / src_lum` through
