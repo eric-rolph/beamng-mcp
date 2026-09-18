@@ -837,14 +837,33 @@ def delight(
     # No sky on the walls, nor on a refilled field: a cell bluer than the lit ground
     # around it takes that ground's chroma at its own luminance (a steep wall, or
     # a refill whose carry ran from a bluer ring).
-    lit_mean = np.maximum(local_lit.mean(axis=-1, keepdims=True), 1e-4)
+    lit_lum = local_lit.mean(axis=-1, keepdims=True)
+    lit_mean = np.maximum(lit_lum, 1e-4)
     lit_ratio = local_lit / lit_mean
     own_br = out[..., 2] / np.maximum(out[..., 0], 1e-4)
     lit_br = lit_ratio[..., 2] / np.maximum(lit_ratio[..., 0], 1e-4)
     blue = (steep | (fill_last > 0)) & (out[..., 2] > 0.95 * out[..., 0]) & (own_br > 1.05 * lit_br)
     del own_br, lit_br
     out = np.where(blue[..., None], out.mean(axis=-1, keepdims=True) * lit_ratio, out)
-    del lit_mean, lit_ratio, blue
+    # Whether that write was the luminance-preserving one it is written as. `lit_ratio` has
+    # channel-mean exactly 1 only while `local_lit.mean` clears the 1e-4 guard above; below
+    # it the `np.maximum` clamps the DENOMINATOR and this line stops holding luminance and
+    # becomes a straight multiply by `local_lit.mean / 1e-4` - 0.10 at 1e-5, 0.02 at 2e-6.
+    # Nothing recorded that, so the de-cast was eliminated as luminance-preserving on a
+    # reading of its intent rather than of its guard. The contract is that the guard never
+    # binds where this writes, so the number is a share and its only healthy value is zero.
+    # Measured on `lit_lum`, the reference BEFORE the guard clamps it - not on `lit_mean`.
+    # `lit_mean` is the `np.maximum` output, so it can never read under 1e-4 and a share
+    # taken from it is zero on every input, healthy or not. That is this pack's own recurring
+    # defect (a correction upstream of the threshold that judges it) and it was caught here
+    # by the negative control below rather than by review.
+    under_guard = lit_lum[..., 0] < 1e-4
+    decast_written = under_guard & blue
+    decast_guard = {
+        "cells_under_guard": round(float(under_guard.mean()), 6),
+        "written_under_guard": round(float(decast_written.mean()), 6),
+    }
+    del lit_lum, lit_mean, lit_ratio, blue, under_guard
     if debug_hook is not None:
         debug_hook("after_floors_blue", out, None)
     cap_lum = None
@@ -923,6 +942,9 @@ def delight(
             "p50": round(float(np.percentile(sample, 50)), 4) if sample.size else None,
             "under_0_25": round(float((seen & (composed < 0.25)).mean()), 6),
             "under_gain_floor_untouched": round(float(breach.mean()), 6),
+            # The count, because the bound is exactly 0.0: a fraction of 7e-06 cannot say
+            # whether that is one edge cell or a real artefact, and the count can.
+            "under_gain_floor_untouched_cells": int(breach.sum()),
         },
         # What the refill BORROWED, against the lit ground it borrowed from. `_carry_tone`
         # normalises by the donor weight it found, so its own arithmetic says the donors
@@ -931,6 +953,8 @@ def delight(
         # of that same dark tone, and every clip upstream stays inside its bound. This is
         # the number that would say so, as a share of the median the lit ground shipped at.
         "refill_carry_ratio": _carry_ratio(local_lit, fill_w_last, out),
+        # Whether the blue de-cast held luminance where it wrote (see decast_guard above).
+        "decast_guard": decast_guard,
         # How many refilled fields ring matching could actually reach (last refill).
         "refill_ring_cover": ring_reports[-1] if ring_reports else None,
         "snow_fraction": round(float(snow_mask.mean()), 4),
@@ -956,7 +980,21 @@ def delight(
         # every field against its ring on the shipped base.
         "_refill_mask": fill_last,
     }
-    return linear_to_srgb_u8(out), stats
+    shipped = linear_to_srgb_u8(out)
+    # Does the de-cast's unguarded write land on the cells that ship black? A share across
+    # maps is a correlation; this is the per-cell question on one map. Taken on THIS stage's
+    # own encode, which is NOT the shipped base - `paint_road_beds`, `enforce_bed_contrast`,
+    # `refill_match` and the shipping clamp all write after it - so `near_black_here` and the
+    # level stage's `near_black_fraction` are different numbers, and a gap between them is
+    # itself the answer to where the black is made.
+    near_black_here = shipped.max(axis=-1) < 13
+    here = int(near_black_here.sum())
+    decast_guard["near_black_here"] = round(float(near_black_here.mean()), 6)
+    decast_guard["near_black_written_under_guard"] = (
+        round(float((near_black_here & decast_written).sum() / here), 6) if here else None
+    )
+    del near_black_here, decast_written
+    return shipped, stats
 
 
 def _carry_ratio(local_lit: np.ndarray, fill_w: np.ndarray, out: np.ndarray) -> dict | None:
