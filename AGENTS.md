@@ -3423,6 +3423,78 @@ the measurement is present and well formed on every de-lit map, which is this pa
 recurring failure - a statistic that goes silently absent for some maps and reports as
 not-applicable.
 
+### Every stage is bounded and the pipeline is not
+
+Found 2026-09-18 while hunting what collapsed 5,534 bingham_canyon texels to near-black.
+Not the answer to that question yet, and written down anyway, because it is unbounded by
+construction rather than by accident.
+
+Every reducing stage in `imagery.py` clips itself. `delight`'s gain floors at 0.45.
+`_match_bands`'s factor floors at 0.5. `pull_layers`'s windowed gain floors at 0.5.
+`_clamp_to_ring`, `pull_regions` and `aspect_flatfield` each carry their own. **Nothing
+anywhere bounds the product.** 0.45 x 0.5 x 0.5 x 0.5 is 0.056, so four stages that each
+consider themselves conservative can take a mid-tone texel to black between them, and each
+one's own statistics will look reasonable afterwards.
+
+That also explains the shape such a failure takes, which is worth recognising: it fires
+only where several independent stages happen to agree about the same cells, so it appears
+as a few small regions rather than as a global darkening, and the base as a whole can get
+BRIGHTER in the same build. A whole-image mean cannot see it, and neither can any
+per-stage number.
+
+**The rule: a bound on each step is not a bound on the path.** When a pipeline's stages
+each clip, ask separately what the composition can do, and record the end-to-end ratio -
+not each stage's own. `gain_p05` and `gain_p95` are the illumination gain, which is one
+stage of several; nothing yet records what a cell's luminance did from the source mosaic
+to the shipped base. That measurement is the instrument this question needs and it does
+not exist.
+
+### A value authored flush against a bound fails intermittently
+
+Three instances on 2026-09-18, which is what makes it a family rather than a coincidence.
+
+- `factory_butte`'s `scatter_size_m` declared a 0.2 m minimum against the 0.2 floor a
+  forest item is held to. One stone in tens of thousands came out at 0.18 and killed a
+  forty-minute build.
+- `clamp_highlights(0.95)` encodes to u8 249 and `base_colour_stats` counts 250. One count
+  apart, in the clamp's favour, which retired the assertion instead of satisfying it.
+- `bingham_canyon` and `mt_st_helens` both fit the sun at exactly their window's floor,
+  which is the search being stopped at a bound rather than a fit.
+
+The shape is always the same: a declared value sits ON a gate's threshold rather than
+inside it, so whether the build passes depends on a draw, a rounding, or which side of the
+comparison the implementation happens to use. It passes most of the time, which is worse
+than failing, because the failure arrives forty minutes into a build with no obvious cause.
+
+**The rule: a spec value is authored strictly inside the bound that governs it, with room
+for whatever jitter or rounding sits between them, and the gate demands strictly - not
+merely at.** `test_a_scatter_cannot_declare_stones_below_the_forest_floor` is the worked
+example: it asserts `lo > MIN_FOREST_SCALE`, not `>=`, and says why in its own comment.
+
+**Do not go looking for these with a text sweep.** One was run here - every numeric value
+in all six specs against every numeric literal on the bound side of an assertion in the
+suite - and it returned 220 hits, essentially all coincidental: a 5.0 m road width matching
+an unrelated 5.0 degree threshold. The match has to be between a spec key and a gate about
+the SAME quantity, which is a judgement, not a regex. Done by hand over the spec keys a
+gate reads directly, the list is the three above.
+
+### A gate's edge is a visible edge
+
+Also found 2026-09-18, while ruling `pull_layers` out of the above.
+
+`pull_layers` leaves alone any cell outside `lum_gate` times its layer's median luminance -
+0.6 to 1.25 by default - so a white spoil field or a black shadow keeps its own tone while
+the rest of the layer is pulled. The exemption is right. Its edge is not: measured on a
+synthetic chalk field pulled to rubble, a patch at 0.55 of the layer median comes through
+untouched and a patch at 0.60 is multiplied by 0.555. Two patches four counts apart in the
+photograph ship two to one apart.
+
+Nothing looks for this. It is not what the near-black gate measures, and it will read in
+game as a hard tonal line wherever a layer's tone crosses 0.6 of its own median - which a
+cast shadow's own gradient does routinely. **A gate applied to some cells and not others
+needs a taper, or it authors a contour of its own.** `tapers` already exists on this
+function for exactly this reason, at layer boundaries; the luminance gate has no equivalent.
+
 ### A ceiling that lands on the gate's boundary is not a ceiling
 
 Two defects behind `test_base_colour_has_no_black_holes`, found on 2026-09-18 while the pack
