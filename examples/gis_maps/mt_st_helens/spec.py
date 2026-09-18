@@ -83,10 +83,13 @@ IMAGERY = {
     # (the snowfields, chroma pulls, flat-fields) belongs in a critic round with sheets
     # to look at, against the reference stations.
     "delight": True,
-    # NAIP flies within a couple of hours of solar noon in the growing season. At
-    # 46.22 N that puts the sun between 45 and 68 degrees up, and the azimuth within
-    # 50 degrees of due south.
-    "sun_altitude_range": [45.0, 68.0],
+    # The floor was 45, from a near-solar-noon reading of NAIP's flight window at
+    # 46.22 N. The first build fitted the sun at exactly 45 degrees, correlation
+    # 0.495 - pinned on the bound, as all four of these maps were, so the bound was
+    # the answer rather than the data. 30 is the acquisition minimum NAIP is specified
+    # to and the floor Meteor Crater already carries, where the fit settles at 56 in the
+    # interior, so a wide range is not a runaway. The ceiling is unchanged.
+    "sun_altitude_range": [30.0, 68.0],
     "sun_azimuth_hint": 180.0,
     "sun_azimuth_window": 50.0,
     "strength": 1.0,
