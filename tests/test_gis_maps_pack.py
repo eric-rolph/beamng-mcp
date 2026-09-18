@@ -3042,6 +3042,78 @@ def test_base_colour_has_no_black_holes(map_key: str) -> None:
         )
 
 
+# Mirrors of what `scene_objects` declares, as literals rather than imports: a gate that
+# reads its threshold out of the code it gates cannot fail. The first test below is what
+# keeps the mirror honest, so neither side can drift quietly.
+MAX_SINK_FRACTION = 0.5
+DRAPE_BOUND_M = 3.5
+
+
+def test_the_seating_limit_and_the_drape_bound_are_the_numbers_the_stage_reports_against() -> None:
+    """`scene_objects` mirrors the drape gate's metre bound so it can report how many
+    blocks it sank past it on purpose. A mirror nobody checks is just a second copy that
+    drifts, and this pack has already paid for one: `a7691cb` calibrated a bound in the
+    same commit that changed the behaviour it measured, and the stale copy went red on
+    its first real build.
+    """
+
+    load_maplib()
+    from maplib import scene_objects
+
+    assert scene_objects.MAX_SINK_FRACTION == MAX_SINK_FRACTION
+    assert scene_objects.DRAPE_REPORT_BOUND_M == DRAPE_BOUND_M, (
+        "the stage reports its sink against a different bound than the drape gate "
+        "asserts, so its over_drape_bound_m count no longer means what it says"
+    )
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_a_seated_block_is_never_buried_deeper_than_the_stage_declares(map_key: str) -> None:
+    """The seating rules are written in fractions of an object's height. The drape gate
+    bounds absolute metres. Those are different units, so neither can police the other,
+    and on run 77 nobody could say which of the two a red drape gate meant.
+
+    `emit` seats a block up to 0.25 of its height under the footprint's mean ground, 0.4
+    under the ground at its centre, and 0.5 once it is being pushed down to close the gap
+    under its base. A block is therefore MEANT to be underground, by an amount that
+    scales with how big it is, while `abs(z - z_at(x, y)) < 3.5` adds that intended
+    burial to any unintended float and bounds the sum in metres. A tall enough block
+    breaches it having done nothing wrong - black_bear_pass ships lidar pinnacles, and
+    anything over 7 m tall can exceed 3.5 m by design alone.
+
+    This gate is the fraction, in the units the rules are written in, so it fails only
+    when a block is buried deeper than the stage ever meant to bury it.
+
+    It deliberately does NOT re-assert the drape bound. `over_drape_bound_m` rides in the
+    handoff so a red drape gate can be EXPLAINED instead of guessed at; two gates going
+    red over one physical fact would only be noise, and the repair for a genuine
+    conflict is the drape gate bounding this fraction, never a looser metre bound.
+    """
+
+    spec = load_spec(map_key)
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    sink = (handoff.get("forest") or {}).get("rock_sink_m")
+    if sink is None:
+        # Only blocks seated onto the ground plane have a sink at all; a map with no
+        # tilt-seated rocks reports nothing rather than a misleading zero.
+        assert not (getattr(spec, "OBJECTS", None) or {}).get("scatter"), (
+            f"{map_key}: the spec scatters rocks but the stage reported no seating depth"
+        )
+        pytest.skip(f"{map_key}: no seated rocks")
+    assert sink["max_fraction"] <= MAX_SINK_FRACTION, (
+        map_key,
+        f"a block is buried {sink['max_fraction']} of its own height against the "
+        f"{MAX_SINK_FRACTION} the seating rules allow, so something seated it past "
+        "every branch that is supposed to bound it",
+        sink,
+    )
+
+
 @pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_refills_carry_their_rings_grain(map_key: str) -> None:
     """Where the spec matches every refilled field to its ring, the fields' 2-8 m grain
