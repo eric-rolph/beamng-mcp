@@ -1174,6 +1174,151 @@ def test_install_local_release_download_verifies_and_locks(
     assert not (dist / "meteor_crater_ericrolph.zip").exists()
 
 
+class _Refusal(Exception):
+    """An HTTP refusal shaped the way requests raises one, without importing requests.
+
+    ``release_downloader`` reads the status off the exception rather than catching a
+    requests type, so that an injected downloader may use any HTTP client. This class
+    is what that contract looks like from the outside.
+    """
+
+    def __init__(self, status: int) -> None:
+        super().__init__(f"HTTP {status}")
+
+        class _Response:
+            status_code = status
+
+        self.response = _Response()
+
+
+def _refusing_download(status: int | None = None):
+    """A ``download`` that records its calls and refuses github.com with ``status``."""
+
+    calls: list[tuple[str, dict[str, str] | None]] = []
+
+    def download(url: str, path: Path, *, headers: dict[str, str] | None = None) -> None:
+        calls.append((url, headers))
+        if status is not None and url.startswith("https://github.com/"):
+            raise _Refusal(status)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"asset")
+
+    return download, calls
+
+
+def _no_tokens(monkeypatch: pytest.MonkeyPatch) -> None:
+    for name in ("BEAMNG_MODS_TOKEN", "GITHUB_TOKEN", "GH_TOKEN"):
+        monkeypatch.delenv(name, raising=False)
+
+
+@pytest.mark.parametrize("status", [401, 403, 404])
+def test_a_refused_release_download_falls_back_to_the_authenticated_endpoint(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, status: int
+) -> None:
+    """A private repository refuses the plain URL; the token route is the only way in.
+
+    This path only runs when the public download is refused, which is the case nobody
+    hits by accident until the release actually goes private - so it is gated here
+    rather than left to be discovered by the person whose install breaks.
+    """
+
+    install_local = _load_script("install_local")
+    _no_tokens(monkeypatch)
+    monkeypatch.setenv("BEAMNG_MODS_TOKEN", "t0ken")
+
+    class _Assets:
+        status_code = 200
+
+        @staticmethod
+        def json() -> dict:
+            return {"assets": [{"name": "a.zip", "url": "https://api.github.com/x/assets/9"}]}
+
+        @staticmethod
+        def raise_for_status() -> None:
+            pass
+
+    seen: list[dict] = []
+
+    def fake_get(url: str, **kwargs):
+        seen.append({"url": url, **kwargs})
+        return _Assets()
+
+    monkeypatch.setitem(sys.modules, "requests", type(sys)("requests"))
+    sys.modules["requests"].get = fake_get  # type: ignore[attr-defined]
+
+    download, calls = _refusing_download(status)
+    fetch = install_local.release_downloader("o/r", "v1", download=download)
+    fetch("a.zip", tmp_path / "one")
+    fetch("a.zip", tmp_path / "two")
+
+    assert calls[0][0] == "https://github.com/o/r/releases/download/v1/a.zip"
+    assert calls[1] == (
+        "https://api.github.com/x/assets/9",
+        {"Accept": "application/octet-stream", "Authorization": "Bearer t0ken"},
+    )
+    # The release is resolved once, not once per asset.
+    assert calls[2] == calls[1] and len(seen) == 1
+    assert seen[0]["headers"]["Authorization"] == "Bearer t0ken"
+
+
+def test_a_refusal_without_a_token_says_which_variable_and_which_permission(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The person who meets this is on their own workstation with nobody to ask."""
+
+    install_local = _load_script("install_local")
+    _no_tokens(monkeypatch)
+    download, _ = _refusing_download(404)
+    fetch = install_local.release_downloader("o/r", "v1", download=download)
+    with pytest.raises(SystemExit) as refused:
+        fetch("a.zip", tmp_path / "one")
+    message = str(refused.value)
+    assert "PRIVATE" in message
+    assert "BEAMNG_MODS_TOKEN" in message
+    assert "Contents: Read" in message
+    assert "personal-access-tokens" in message
+
+
+def test_a_token_the_repository_rejects_is_not_reported_as_a_missing_release(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A private repository answers 404 when the token cannot see it, not 403.
+
+    Without this sentence in the message, a 404 reads as "that release does not
+    exist" and sends the reader looking in the wrong place.
+    """
+
+    install_local = _load_script("install_local")
+    _no_tokens(monkeypatch)
+    monkeypatch.setenv("GITHUB_TOKEN", "wrong")
+
+    class _Rejected:
+        status_code = 404
+
+    monkeypatch.setitem(sys.modules, "requests", type(sys)("requests"))
+    sys.modules["requests"].get = lambda *a, **k: _Rejected()  # type: ignore[attr-defined]
+
+    download, _ = _refusing_download(404)
+    fetch = install_local.release_downloader("o/r", "v1", download=download)
+    with pytest.raises(SystemExit) as rejected:
+        fetch("a.zip", tmp_path / "one")
+    assert "404 rather than 403" in str(rejected.value)
+    assert "Contents: Read" in str(rejected.value)
+
+
+def test_a_server_error_is_not_mistaken_for_a_permission_problem(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Only 401, 403 and 404 mean "try credentials"; anything else is a real failure."""
+
+    install_local = _load_script("install_local")
+    _no_tokens(monkeypatch)
+    download, _ = _refusing_download(500)
+    fetch = install_local.release_downloader("o/r", "v1", download=download)
+    with pytest.raises(_Refusal):
+        fetch("a.zip", tmp_path / "one")
+
+
 # ---------------------------------------------------------------------------
 # Art-pass toolkit gates (no build needed): meshes, shadows, road beds, objects, forest
 # ---------------------------------------------------------------------------
