@@ -2,7 +2,8 @@ name: GIS maps release
 
 # Rebuilds the six levels from public data on a GitHub runner and attaches the ZIPs
 # (plus SHA256SUMS.txt and the release locks) to a GitHub Release, so a play-test
-# install is a download rather than a build. Whole ZIPs are 80-90 MiB, over the
+# install is a download rather than a build. Whole ZIPs run from about 90 MB to the
+# 426 MB of Black Bear Pass, over the
 # session file-delivery limit, and release assets are the one place they can live
 # without bloating the repository.
 
@@ -30,6 +31,16 @@ on:
 permissions:
   contents: write
 
+# Every run ends in `gh release upload <tag> --clobber` against the SAME release, and
+# nothing else serialises them. Two runs in flight together interleave their assets, so
+# the release can finish holding ZIPs from one commit and a SHA256SUMS.txt from another
+# with no field saying so. Every push to this branch starts a full six-map rebuild, and
+# at 340 minutes a job easily outlives the next push. A push during a build is a
+# supersede rather than a second release, so the older run is cancelled, not raced.
+concurrency:
+  group: gis-maps-release
+  cancel-in-progress: true
+
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
@@ -56,6 +67,8 @@ jobs:
           df -h / | tail -1
 
       - name: Build every map (fetch -> terrain -> level -> dist -> ledger)
+        env:
+          MAPS: ${{ github.event.inputs.maps }}
         run: |
           # Actions runs a `run:` step as `bash -e {0}`, so -e is already on when this
           # line is reached and `set -uo pipefail` does NOT clear it. Without the +e the
@@ -63,7 +76,7 @@ jobs:
           # runs, which is exactly what happened on 4037639.
           set +e
           set -uo pipefail
-          MAPS="${{ github.event.inputs.maps }}"
+          MAPS="${MAPS:-}"
           build() {
             if [ -z "$MAPS" ]; then
               python examples/gis_maps/build.py --all all
