@@ -602,6 +602,29 @@ def build(
         newline="\n",
     )
     kept_relief = [r["relief_m"] for r in keep]
+    # Can the mesh actually CARRY the bedding it is asked for? `face_relief` puts the beds
+    # in the geometry (`phase = (z + warp) / bed_m`, metres of relief per vertex), and the
+    # tile's own `strata` was demoted to the partings inside a bed when that moved -- so
+    # the beds read as layers only if the vertices sample `bed_m` finely enough. Vertices
+    # sit on a world-XY lattice of spacing `face_step_m`, so their spacing ALONG Z, which
+    # is the axis the bedding varies on, is `face_step_m * tan(slope)`: coarser than the
+    # step on anything steeper than 45 degrees, and the walls here are steep by selection.
+    # Two samples per bed is the floor for a wavelength to survive sampling at all; under
+    # one, the beds alias into irregular noise on the face.
+    #
+    # Recorded rather than asserted, because the number is a spec-and-budget question and
+    # not something a build can fix: `max_triangles` coarsens `face_step_m` above what the
+    # spec asked for, so a map can declare beds its own budget forbids. Measured over the
+    # cells of the bands actually KEPT, at the step actually used.
+    wall_slope = slope_deg(dem, res)[mask] if mask.any() else np.zeros(1, dtype="float32")
+    bed_m = float(cfg["bed_m"])
+
+    def _samples_per_bed(slope_percentile: float) -> float:
+        deg = float(np.percentile(wall_slope, slope_percentile))
+        # arctan keeps this under 90, but a near-vertical wall still wants a bound.
+        vertical_step = step_m * math.tan(math.radians(min(deg, 89.0)))
+        return bed_m / vertical_step if vertical_step > 1e-6 else float("inf")
+
     stats = {
         "bands": len(records),
         "bands_modelled": len(keep),
@@ -618,6 +641,12 @@ def build(
         "found_area_m2": round(sum(r["area_m2"] for r in records), 1),
         "relief_p50_m": round(float(np.median(kept_relief)), 2),
         "relief_max_m": round(float(max(kept_relief)), 2),
+        "wall_slope_p50_deg": round(float(np.median(wall_slope)), 1),
+        "wall_slope_p90_deg": round(float(np.percentile(wall_slope, 90)), 1),
+        # Beds per vertex along Z, at the median wall and at the steep tail. Under 2.0 the
+        # bedding is undersampled; under 1.0 it aliases into noise instead of layers.
+        "samples_per_bed_p50": round(_samples_per_bed(50.0), 2),
+        "samples_per_bed_steep": round(_samples_per_bed(90.0), 2),
         "materials": len(materials_json),
         "face_material": family,
         "collada_bytes": int(dae_bytes),
