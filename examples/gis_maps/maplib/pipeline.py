@@ -1215,6 +1215,7 @@ def level(spec, example_root: Path) -> dict:
         "spawns": report["spawns"],
         "imagery": public_stats(report.get("imagery", {})),
         "layer_tints": report.get("layer_tints", {}),
+        "base_colour": report.get("base_colour", {}),
         "forest": report.get("forest", {}),
         "buildings": report.get("buildings", {}),
         "trail_features": report.get("trail_features", []),

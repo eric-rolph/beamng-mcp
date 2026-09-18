@@ -1300,6 +1300,32 @@ def test_road_bed_reads_lighter_than_its_ground(map_key: str) -> None:
     assert seam is not None and seam < 0.4, (map_key, carved)
 
 
+def test_base_colour_stats_measures_each_layer() -> None:
+    """The base's gate numbers: a near-black fraction over the whole image and a clipped
+    fraction per layer, with a layer map resized to the colour rather than assumed equal.
+
+    This runs without a built tree, so the arithmetic behind the gate below is checked
+    even where the levels are not on disk."""
+
+    _, _, level_builder, _, _, _ = load_maplib()
+
+    colour = np.full((32, 32, 3), 128, dtype="uint8")
+    colour[0, 0] = 0  # one near-black texel out of 1024
+    colour[16:, :16] = 255  # a quarter of the image blown out
+    layer = np.zeros((16, 16), dtype="uint8")
+    layer[8:, :8] = 1  # at half resolution, the quarter that is white
+
+    stats = level_builder.base_colour_stats(colour, layer, ["ground", "ledge"])
+    assert stats["base_px"] == 32
+    # Rounded to six places on the way into the handoff, two orders under the 1e-4 gate.
+    assert stats["near_black_fraction"] == pytest.approx(1 / 1024, abs=1e-6)
+    # The white quarter is layer 1 alone, so its clipping does not hide in the average:
+    # over the whole image it is 0.25, which the per-layer number resolves to 1.0 and 0.0.
+    assert stats["layer_mean_srgb"]["ledge"]["clipped"] == pytest.approx(1.0)
+    assert stats["layer_mean_srgb"]["ground"]["clipped"] == pytest.approx(0.0)
+    assert stats["layer_mean_srgb"]["ledge"]["cells"] == 256
+
+
 @pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_base_colour_has_no_black_holes(map_key: str) -> None:
     """No in-paint, refill or gain leaves black ground: under a texel in ten thousand of
@@ -1312,11 +1338,19 @@ def test_base_colour_has_no_black_holes(map_key: str) -> None:
             encoding="utf-8"
         )
     )
-    stats = handoff["terrain"]["stats"]
-    if "near_black_fraction" not in stats:
-        pytest.skip(f"{map_key}: no imagery statistics")
+    if not getattr(spec, "IMAGERY", None):
+        pytest.skip(f"{map_key}: the base is not conditioned imagery")
+    # Measured by the level stage on the base it wrote, so it is here for every map.
+    # It used to be read from the terrain stage's stats, which only the OBJECTS path
+    # fills - so four of the six maps skipped this gate silently and the two that ran
+    # it were measured before the base was resized to its own resolution.
+    stats = handoff.get("base_colour") or {}
+    assert stats.get("near_black_fraction") is not None, (
+        f"{map_key}: the level stage recorded no base colour statistics"
+    )
     assert stats["near_black_fraction"] < 1e-4, stats["near_black_fraction"]
     means = stats.get("layer_mean_srgb", {})
+    assert means, f"{map_key}: no layer was measured on the finished base"
     for name, entry in means.items():
         # And no layer of the finished base runs to white either.
         assert entry.get("clipped", 0.0) < 0.002, (map_key, name, entry)

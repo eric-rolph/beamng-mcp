@@ -646,6 +646,44 @@ def conditioned_colour(
     return colour, stats
 
 
+def base_colour_stats(colour: np.ndarray, layer: np.ndarray, materials) -> dict:
+    """The finished base's black-hole and per-layer numbers, measured on what ships.
+
+    Every map reaches build_base_set, and only some reach the terrain stage's OBJECTS
+    path, so this is where the base's own gate numbers are taken: measured here, they
+    exist for all six maps and they describe the array that was written rather than an
+    upstream one of a different size (the base is resized to base_px on its way out, and
+    LANCZOS overshoot on a hard edge lands exactly in the clipped fraction).
+    """
+
+    from PIL import Image
+
+    layer_at_colour = layer
+    if layer.shape[0] != colour.shape[0]:
+        layer_at_colour = np.asarray(
+            Image.fromarray(layer.astype("uint8")).resize(
+                (colour.shape[0], colour.shape[0]), Image.NEAREST
+            )
+        )
+    means = {}
+    for index, name in enumerate(materials):
+        where = layer_at_colour == index
+        if where.sum() < 100:
+            continue
+        rgb = colour[where].reshape(-1, 3).mean(axis=0) / 255.0
+        means[name] = {
+            "rgb": [round(float(v), 4) for v in rgb],
+            "luminance": round(float(rgb.mean()), 4),
+            "cells": int(where.sum()),
+            "clipped": round(float((colour[where].max(axis=-1) >= 250).mean()), 5),
+        }
+    return {
+        "base_px": int(colour.shape[0]),
+        "layer_mean_srgb": means,
+        "near_black_fraction": round(float((colour.max(axis=-1) < 13).mean()), 6),
+    }
+
+
 def build_base_set(
     dem: np.ndarray,
     res: float,
@@ -1398,6 +1436,15 @@ def build_level(
         report["road_contrast"] = road_contrast(
             colour_full, layer, materials, all_surfaces, fp.size_m / colour_full.shape[0]
         )
+    # Resize to the base's own resolution HERE, so the numbers below are taken from the
+    # same array build_base_set writes (it passes a matching array straight through).
+    base_colour = colour_full
+    if base_colour.shape[0] != base_px:
+        from PIL import Image
+
+        base_colour = np.asarray(
+            Image.fromarray(colour_full).resize((base_px, base_px), Image.LANCZOS)
+        )
     build_base_set(
         dem,
         res,
@@ -1405,9 +1452,11 @@ def build_level(
         data_root / "naip",
         terrains_dir,
         base_prefix,
-        colour_full=colour_full,
+        colour_full=base_colour,
         base_px=base_px,
     )
+    report["base_colour"] = base_colour_stats(base_colour, layer, materials)
+    del base_colour
     texture_kit.build_set(
         terrains_dir,
         macro_prefix,
