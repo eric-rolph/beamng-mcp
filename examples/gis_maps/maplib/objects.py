@@ -467,6 +467,23 @@ def _at_the_drawn_size(w: float, h: float, z: float, size: float) -> list[float]
     return [round(w, 2), round(h, 2), round(z, 2)]
 
 
+# Every placement reads its ground through `heightmap.sample_bilinear`, which is the one
+# surface the game draws: cell (r, c) holds the height at the CENTRE of its cell, and the
+# terrain block is positioned so the engine's own sample grid sits on those centres.
+#
+# The two scatter paths below did not. They drew a stone at a continuous position inside
+# its spacing cell -- `xs` carries a `uniform(0.1, 0.9)` jitter -- and then read the height
+# at `int((x + half) / res)`, the containing cell's single value, so a stone standing near
+# a cell edge was seated on ground up to half a cell away in each axis. On flat ground the
+# two agree to centimetres. On a one-cell fin they do not, and a fin is the landform
+# Factory Butte is made of: measured on 15,876 scatter points over 11 m fins at that map's
+# own 1 m grid, the cell lookup sat a median 2.53 m off the drawn surface, 5.53 m at worst,
+# with 5,308 of them over the 3.5 m the drape gate allows. Half of those stones hung in the
+# air and half were buried, which is what the signed mean of -0.01 m says.
+#
+# This is not the drape gate's half-cell shift (#132), which is a different defect in the
+# gate's own reading and is fixed there. These two are the stones themselves, and no gate
+# would have seen it: the gate measured the same cell the placement did.
 def scatter_rocks(
     layer: np.ndarray,
     ground: np.ndarray,
@@ -551,15 +568,17 @@ def scatter_rocks(
         idx = rng.choice(idx, size=max_count, replace=False)
     lo, hi = size_range
     out = []
-    for i in idx:
+    from . import heightmap as hm
+
+    surface = hm.sample_bilinear(ground, res, fp_size_m, xs[idx], ys[idx])
+    for kept, i in enumerate(idx):
         size = float(np.exp(rng.uniform(np.log(lo), np.log(hi))))
-        r, c = int(rows[i]), int(cols[i])
         out.append(
             {
                 "kind": "rock",
                 "x": round(float(xs[i]), 2),
                 "y": round(float(ys[i]), 2),
-                "z": round(float(ground[r, c] - min_elevation) - 0.2 * size, 2),
+                "z": round(float(surface[kept] - min_elevation) - 0.2 * size, 2),
                 "size": _at_the_drawn_size(
                     size * rng.uniform(0.9, 1.1),
                     size * rng.uniform(0.7, 1.0),
@@ -682,7 +701,12 @@ def scatter_shrubs(
     lo_h, hi_h = height_range
     lo_w, hi_w = width_ratio
     out = []
-    for i in idx:
+    from . import heightmap as hm
+
+    surface = hm.sample_bilinear(ground, res, fp_size_m, xs[idx], ys[idx])
+    for kept, i in enumerate(idx):
+        # The material is a per-cell field, so it is still read at the cell the plant
+        # stands in. Only the HEIGHT moves to the surface the game draws.
         r, c = int(rows[i]), int(cols[i])
         # Log-normal heights: a stand of one-size bushes is a crop, not scrub.
         height = float(np.exp(rng.uniform(np.log(lo_h), np.log(hi_h))))
@@ -692,7 +716,7 @@ def scatter_shrubs(
             "x": round(float(xs[i]), 2),
             "y": round(float(ys[i]), 2),
             # 3 cm in, the seating the pack already uses for a mat or a sapling.
-            "z": round(float(ground[r, c] - min_elevation) - 0.03, 2),
+            "z": round(float(surface[kept] - min_elevation) - 0.03, 2),
             "size": [
                 round(width, 2),
                 round(width * float(rng.uniform(0.8, 1.0)), 2),

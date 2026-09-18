@@ -2617,6 +2617,183 @@ def test_the_decast_guard_number_can_actually_fail() -> None:
     ]
 
 
+def test_the_breach_distribution_can_actually_leave_the_bound() -> None:
+    """The negative control for `breach_composed_p50` / `_min`, which exist to tell a
+    float edge from a writer outside the contract.
+
+    `under_gain_floor_untouched` counts cells; it cannot say whether one shipped at 0.4489
+    or at 0.30, and those are different findings. The risk this control exists to kill is
+    a pair of numbers that always read "just under 0.45" whatever the stage did, which
+    would look like a measurement and license a tolerance that hides a real defect. So the
+    clean case asserts the near-bound signature AND the driven case asserts the numbers
+    leave it.
+    """
+
+    load_maplib()
+    from maplib import imagery
+
+    rng = np.random.default_rng(11)
+    n = 256
+    y, x = np.mgrid[0:n, 0:n].astype("float32")
+    dem = 260.0 * np.exp(-((y - 110) ** 2) / (2 * 14.0**2)) + 90.0 * np.sin(x / 13.0)
+    dem = (dem + rng.normal(0, 0.5, dem.shape)).astype("float32")
+    shade = np.clip(imagery.cast_shadows(dem, 2.0, 180.0, 15.0), 0.02, 1.0)
+    ground = np.clip(0.5 + 0.06 * rng.normal(0, 1, (n, n, 1)), 0.08, 0.9) * np.array(
+        [0.82, 0.90, 1.0]
+    )
+    sky = 1.0 + 0.35 * (1.0 - shade)[..., None] * np.array([-0.2, 0.0, 0.35])
+    colour = (np.clip(ground * shade[..., None] * sky, 0, 1) ** (1 / 2.2) * 255).astype("uint8")
+    # A low sun and a high Minnaert exponent, because the breach needs the gain to reach
+    # its own low clip: `strength` multiplies `k` (imagery.py, `k = clip(k, 0.5, 1.4) *
+    # strength`), so this is the one knob that drives `gain_p05` onto 0.45.
+    kw = dict(
+        azimuth_deg=180.0,
+        altitude_deg=15.0,
+        strength=3.5,
+        max_gain=4.5,
+        steep_deg=32.0,
+        steep_feather_deg=8.0,
+        steep_cap=True,
+    )
+
+    _out, clean = imagery.delight(colour, dem, 2.0, **kw)
+    composed = clean["composed_ratio"]
+    # The control is only meaningful if there is a breach to describe.
+    assert composed["under_gain_floor_untouched_cells"] > 100, composed
+    # On a scene with no deep population the breach sits ON the clip: `composed` is
+    # `out_lum / src_lum` recomputed through two three-channel means, not the gain, so it
+    # lands either side of the constant the gain was clipped to.
+    assert composed["breach_composed_p50"] == 0.45, composed
+    assert 0.44 < composed["breach_composed_min"] < 0.45, composed
+
+    # Drive it: a writer after the refill that halves every texel. It runs last, so the
+    # cells it darkens still read `untouched`, which is exactly the shape the gate is
+    # meant to catch and the one a near-bound-only instrument would report as harmless.
+    real_clamp = imagery.clamp_highlights
+
+    def _halved(lin, ceiling):
+        out, fraction = real_clamp(lin, ceiling)
+        return out * 0.5, fraction
+
+    try:
+        imagery.clamp_highlights = _halved
+        _out, driven = imagery.delight(colour, dem, 2.0, **kw)
+    finally:
+        imagery.clamp_highlights = real_clamp
+    forced = driven["composed_ratio"]
+    assert (
+        forced["under_gain_floor_untouched_cells"] > composed["under_gain_floor_untouched_cells"]
+    ), (composed, forced)
+    # The whole point: the distribution MOVES, and it moves far enough that no tolerance
+    # calibrated on the clean case could absorb it.
+    assert forced["breach_composed_p50"] < 0.44, forced
+    assert forced["breach_composed_min"] < 0.35, forced
+
+    # And it reports nothing rather than a zero when there is no breach: an empty mask has
+    # no median, and a 0.0 there would read as "shipped at nothing" instead of "no cells".
+    _out, quiet = imagery.delight(colour, dem, 2.0, **{**kw, "strength": 1.0})
+    if quiet["composed_ratio"]["under_gain_floor_untouched_cells"] == 0:
+        assert quiet["composed_ratio"]["breach_composed_p50"] is None, quiet["composed_ratio"]
+        assert quiet["composed_ratio"]["breach_composed_min"] is None, quiet["composed_ratio"]
+
+
+def test_the_anti_black_floor_never_darkens_a_cell() -> None:
+    """The floor against black holes must not write one.
+
+    Its trigger is ABSOLUTE - a cell under 0.02 linear - and its write is RELATIVE, a
+    third of the lit neighbourhood. Where that neighbourhood is itself under 0.057 the
+    two cross and the floor writes something darker than the near-black it fired on,
+    with no bound of its own: it is the one writer that can take a cell the refill never
+    touched under the gain's 0.45 clip, which is what `under_gain_floor_untouched`
+    counts, and it can put a texel under the near-black threshold the finished base is
+    gated on. Measured on the scene below before the gate went in: near black 37% of the
+    source and 56% of the OUTPUT, the de-lighting manufacturing black ground in the name
+    of removing it, every darkened cell attributable to this floor and none to the two
+    relative floors or the blue rewrite after it.
+
+    The second half asserts the anti-black floors still remove a black blob the flight
+    itself left, so a fix that stops the darkening by refusing to write at all is caught.
+    It does NOT isolate this floor: measured, deleting its write outright leaves the blob
+    rescued anyway, because the relative floor below it fires on the same cells wherever
+    the lit neighbourhood is bright (`0.02 > lum` implies `lum < 0.25 * lit` for any
+    neighbourhood over 0.08). This floor is the sole writer only in the narrow band where
+    the neighbourhood sits between 2.9 and 4 times the cell - which is to say it is close
+    to redundant, and where it is not redundant it is the one that can darken. That is a
+    question for whoever next opens the de-lighting, not something this test settles.
+
+    Nor does it cover the sibling floors' own version of the same defect, and that is a
+    limit rather than an omission. Their trigger used to read the lit neighbourhood through
+    a `np.maximum(..., 1e-4)` guard while their write did not, so where the guard bound they
+    darkened too - but reaching it needs a neighbourhood under 7.14e-05, which u8 source
+    quantisation and the 0.01 `seen` cut keep out of every number this suite reads. It is
+    repaired by making the trigger read the array the write uses, which is structural and
+    needs no scene to demonstrate; a test that claimed to drive it would be the shape of
+    gate this file exists to prevent.
+    """
+
+    load_maplib()
+    from maplib import imagery
+
+    def scene(ground_lin: float) -> tuple[np.ndarray, np.ndarray]:
+        rng = np.random.default_rng(7)
+        n = 256
+        y, x = np.mgrid[0:n, 0:n].astype("float32")
+        dem = 120.0 * np.exp(-((y - 100) ** 2) / (2 * 20.0**2)) + 40.0 * np.sin(x / 30.0)
+        dem = (dem + rng.normal(0, 0.4, dem.shape)).astype("float32")
+        shade = np.clip(imagery.cast_shadows(dem, 2.0, 180.0, 25.0), 0.05, 1.0)
+        ground = np.clip(
+            ground_lin + 0.05 * ground_lin * rng.normal(0, 1, (n, n, 1)), 1e-4, 0.9
+        ) * np.array([1.0, 0.94, 0.82])
+        colour = (np.clip(ground * shade[..., None], 0, 1) ** (1 / 2.2) * 255).astype("uint8")
+        return colour, dem
+
+    kw = dict(
+        azimuth_deg=180.0,
+        altitude_deg=25.0,
+        strength=1.0,
+        max_gain=4.5,
+        steep_deg=32.0,
+        steep_feather_deg=8.0,
+        steep_cap=True,
+    )
+
+    def near_black(rgb8: np.ndarray) -> float:
+        """The threshold the finished base is gated on, on the array this stage returns."""
+        return float((rgb8.max(axis=-1) < 13).mean())
+
+    # A pit: ground the flight photographed at a fiftieth of an ordinary desert, so the
+    # lit neighbourhood the floor reads for its rescue is darker than the floor's own
+    # trigger. This is the shape bingham_canyon took when its sun floor was dropped.
+    for ground_lin in (0.02, 0.01):
+        colour, dem = scene(ground_lin)
+        out, stats = imagery.delight(colour, dem, 2.0, **kw)
+        composed = stats["composed_ratio"]
+        assert composed["under_gain_floor_untouched"] == 0.0, (
+            ground_lin,
+            "the anti-black floor took a cell the refill never touched under the gain's own clip",
+            composed,
+        )
+        assert near_black(out) <= near_black(colour), (
+            ground_lin,
+            "the de-lighting shipped more near-black texels than the flight gave it",
+            near_black(colour),
+            near_black(out),
+        )
+
+    # And the floors still rescue what they exist for: a black blob the flight itself left
+    # on ground that is otherwise lit - water read at a dark angle, a shadow no gain can
+    # recover. Its lit neighbourhood is bright, so a third of it is a real lift, and a
+    # gate that declined to write here would ship the blob.
+    colour, dem = scene(0.55)
+    colour[40:80, 150:190] = 1  # 1600 texels of black on lit desert
+    out, _stats = imagery.delight(colour, dem, 2.0, **kw)
+    assert near_black(colour) > 0.01, near_black(colour)
+    assert near_black(out) == 0.0, (
+        "a black blob on lit ground shipped as a black hole, so no anti-black floor fired",
+        near_black(out),
+    )
+
+
 def test_the_clamp_does_not_erase_the_number_that_caught_it() -> None:
     """The shipping clamp caps every channel at 249 and the gate counts 250, so after it
     `clipped` is zero on every map it runs for - a true number that can no longer fail.
@@ -2985,19 +3162,36 @@ def _assert_the_bed_exclusion_left_a_population(map_key: str, check: dict) -> No
 
     dropped = check.get("fields_on_road_bed", 0)
     measured = check.get("fields", 0)
-    total = measured + dropped
     assert measured > 0, (
         map_key,
         f"all {dropped} refilled fields were dropped as road bed, so nothing was "
         "measured and the gates below assert nothing",
         _excluded_fields(check),
     )
-    assert dropped <= max(2, 0.2 * total), (
-        map_key,
-        f"{dropped} of {total} refilled fields were dropped as road bed - the "
-        "exclusion is meant to be the exception, not the population",
-        _excluded_fields(check),
-    )
+    # The upper end, asserted as the exclusion's OWN criterion rather than as a count.
+    # `level_builder.py` sets `on_road_bed` only where the eroded interior has under 20
+    # non-bed cells left AND `bed_share >= 0.5`, so a field that is dropped while reading
+    # under 0.5 means the bed mask, the erosion or the ordering moved - which is the
+    # runaway this end exists to catch, and it says so about the field rather than about
+    # a total. This replaces `dropped <= max(2, 0.2 * total)`, which was calibrated on
+    # run 51's "one such field out of eighteen" and then invalidated by `ee35029` moving
+    # the bed question after the fallback so the exclusion reaches an elongated shadow
+    # over a road where before it could not. Run 73 dropped four of eighteen and failed
+    # at 4 > 3.6 with every dropped field a genuine road shadow. Raising the ceiling to
+    # admit that build was the one repair the docstring above forbids, because it leaves
+    # the exclusion with no upper end at all; this keeps an upper end that no build can
+    # widen by producing more road shadows, only by breaking the mask.
+    #
+    # `bed_fraction` is None only when the caller passed no bed, and then nothing can be
+    # excluded, so a dropped field with None is itself the contradiction.
+    for field in _excluded_fields(check):
+        share = field.get("bed_fraction")
+        assert share is not None and share >= 0.5, (
+            map_key,
+            "a field was dropped as road bed while reading under half bed, so the mask, "
+            "the erosion or their order moved - the exclusion is running away",
+            field,
+        )
 
 
 def _excluded_fields(check: dict) -> list[dict]:
@@ -3068,6 +3262,62 @@ def _field_at(fields: list[dict], key: str, *, palest: bool = False) -> dict:
             "interior_texels",
         )
     }
+
+
+def test_the_bed_exclusions_upper_end_can_actually_fail() -> None:
+    """The negative control for the road-bed exclusion's upper end.
+
+    That end used to be a count, `dropped <= max(2, 0.2 * total)`, calibrated on run 51's
+    one-of-eighteen and then invalidated by `ee35029` widening what the exclusion reaches.
+    Run 73 failed it at 4 > 3.6 with four genuine road shadows, which is the failure mode
+    of a bound calibrated on a build that no longer exists: it fires on the map being
+    honest. It is now the exclusion's own criterion, per dropped field, and a criterion
+    can go stale in the other direction - into a bound that cannot fail - so drive it.
+
+    Runs without a built tree, on fabricated summaries, because the gates that call this
+    need a level on disk and skip everywhere else.
+    """
+
+    # Four dropped road shadows, each over half bed, on a map that honestly has four.
+    # This is run 73's shape and it must PASS: the old count bound failed it.
+    honest = {
+        "fields": 14,
+        "fields_on_road_bed": 4,
+        "largest": [
+            {
+                "on_road_bed": True,
+                "bed_fraction": share,
+                "interior_texels": 40,
+                "interior_eroded": False,
+                "area_m2": 2973.0,
+                "center_xy": [-35.3, 670.3],
+                "kind": "shadow",
+            }
+            for share in (0.844, 0.71, 0.55, 0.5)
+        ]
+        + [{"on_road_bed": False, "bed_fraction": 0.0} for _ in range(14)],
+    }
+    _assert_the_bed_exclusion_left_a_population("meteor_crater", honest)
+
+    # A mask that moved: one field dropped while under half bed. The criterion the
+    # builder claims for `on_road_bed` no longer held, so this MUST fail.
+    runaway = json.loads(json.dumps(honest))
+    runaway["largest"][2]["bed_fraction"] = 0.31
+    with pytest.raises(AssertionError, match="running away"):
+        _assert_the_bed_exclusion_left_a_population("meteor_crater", runaway)
+
+    # And a dropped field with no bed share at all, which is the contradiction of a
+    # caller that passed no bed excluding something for being bed.
+    no_bed = json.loads(json.dumps(honest))
+    no_bed["largest"][0]["bed_fraction"] = None
+    with pytest.raises(AssertionError, match="running away"):
+        _assert_the_bed_exclusion_left_a_population("meteor_crater", no_bed)
+
+    # The lower end still holds: an exclusion that took the whole population leaves
+    # nothing for the ratios below it to assert.
+    emptied = {"fields": 0, "fields_on_road_bed": 18, "largest": []}
+    with pytest.raises(AssertionError, match="nothing was measured"):
+        _assert_the_bed_exclusion_left_a_population("meteor_crater", emptied)
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
@@ -4117,4 +4367,253 @@ def test_a_scattered_shrub_ships_at_the_height_it_was_drawn(tmp_path) -> None:
     worst, worst_n = counts.most_common(1)[0]
     assert worst_n < 0.10 * len(scales), (
         f"{worst_n} of {len(scales)} shrubs ship at scale {worst}",
+    )
+
+
+# The handoff is assembled in `pipeline.write_level` as an explicit allow-list, and twice in
+# one evening a stage's report key stopped there: `road_clearance_from` red-flagged three
+# maps on run 65, and `cliffs` red-flagged four on run 77. Both gates asserted a key that
+# could never arrive, so neither could pass however good the stage was, and each cost a
+# 40-minute build to discover. Two misses in one hand-maintained list means the list is the
+# defect rather than its entries.
+#
+# This reads the source rather than a built tree, so it runs on a pull request where
+# `require_built` skips every artefact gate - which is the point: the two it is written for
+# were both invisible to CI and cost a release build each.
+#
+# Excluded keys are the ones that legitimately do not travel: internal paths, and values the
+# handoff already carries under another name or in another shape. Adding a key to the
+# exclusion list is a deliberate act with a reason beside it; forgetting one is what this
+# gate exists to stop.
+HANDOFF_EXCLUDED_REPORT_KEYS = {
+    "level_root",  # a runner-local absolute path, meaningless in the artefact
+    "imagery",  # travels filtered through `public_stats`, not raw
+    "texture_set",  # the gate that wants it reads the level JSON, not the handoff
+}
+
+
+def test_every_key_a_stage_writes_reaches_the_handoff() -> None:
+    import ast
+
+    maplib = PACK_ROOT / "maplib"
+    builder = ast.parse((maplib / "level_builder.py").read_text(encoding="utf-8"))
+    written: set[str] = set()
+    for node in ast.walk(builder):
+        targets = []
+        if isinstance(node, ast.Assign):
+            targets = node.targets
+        elif isinstance(node, ast.AugAssign | ast.AnnAssign):
+            targets = [node.target]
+        for target in targets:
+            if (
+                isinstance(target, ast.Subscript)
+                and isinstance(target.value, ast.Name)
+                and target.value.id == "report"
+                and isinstance(target.slice, ast.Constant)
+                and isinstance(target.slice.value, str)
+            ):
+                written.add(target.slice.value)
+        # `report.update({...})` writes five more keys, `texture_set` among them, and a
+        # scan that only understood subscript assignment missed every one of them - a gate
+        # blind to the very thing it checks. If an update() argument is ever something
+        # this cannot read, the scan says so and fails rather than passing on a short list.
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "update"
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "report"
+        ):
+            assert len(node.args) == 1 and isinstance(node.args[0], ast.Dict), (
+                f"report.update() at line {node.lineno} is not a literal dict, so this "
+                "gate can no longer see every key a stage writes - teach it or inline it"
+            )
+            for key in node.args[0].keys:
+                assert isinstance(key, ast.Constant) and isinstance(key.value, str), (
+                    f"report.update() at line {node.lineno} has a computed key, which "
+                    "this gate cannot follow"
+                )
+                written.add(key.value)
+
+    # Two canaries: one key from each of the two ways a stage writes into its report. If
+    # either disappears the scan has gone blind, which must fail loudly rather than pass.
+    assert "cliffs" in written, "the subscript scan found nothing - fix the scan"
+    assert "texture_set" in written, "the update() scan found nothing - fix the scan"
+
+    pipeline = ast.parse((maplib / "pipeline.py").read_text(encoding="utf-8"))
+    carried: set[str] = set()
+    for node in ast.walk(pipeline):
+        if isinstance(node, ast.Dict):
+            for key in node.keys:
+                if isinstance(key, ast.Constant) and isinstance(key.value, str):
+                    carried.add(key.value)
+        # `report.get("x")` and `report["x"]` both count as read into the artefact.
+        if (
+            isinstance(node, ast.Subscript)
+            and isinstance(node.value, ast.Name)
+            and node.value.id == "report"
+            and isinstance(node.slice, ast.Constant)
+            and isinstance(node.slice.value, str)
+        ):
+            carried.add(node.slice.value)
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "get"
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "report"
+            and node.args
+            and isinstance(node.args[0], ast.Constant)
+        ):
+            carried.add(node.args[0].value)
+
+    dropped = sorted(written - carried - HANDOFF_EXCLUDED_REPORT_KEYS)
+    assert not dropped, (
+        f"build_level writes {dropped} into its report and write_level never copies them "
+        "into the handoff, so a gate reading any of them asserts a key that cannot arrive"
+    )
+
+
+def _one_cell_fins(n: int, relief_m: float = 11.0) -> np.ndarray:
+    """A DEM whose every other column is a crest: the badlands fin, at its sharpest.
+
+    This is the landform that separates a cell lookup from the drawn surface. On ground
+    that varies slowly the two agree to centimetres and no test could tell them apart,
+    which is exactly why the defect below survived: every map with gentle terrain
+    passed, and the two that have fins were the two that failed.
+    """
+
+    dem = np.zeros((n, n), dtype="float32")
+    dem += (np.arange(n) % 2) * relief_m
+    dem += np.linspace(0.0, 40.0, n)[:, None]  # a regional slope under the fins
+    return dem
+
+
+def _rounding_tolerance(dem: np.ndarray, res: float) -> float:
+    """How far a re-sampled height can differ purely from the shipped rounding.
+
+    A placement ships `x` and `y` rounded to 2 dp and `z` to 2 dp, so a test that
+    re-samples the surface at the shipped position is asking for the height half a
+    centimetre away from where the placement asked. On gentle ground that is nothing;
+    over an 11 m one-cell fin the same half centimetre is worth 5 cm of height, which
+    is larger than the 1 cm the z itself is rounded to. Derived from the DEM's own worst
+    gradient rather than chosen, so a fin cannot be made sharper without this following.
+    """
+
+    gx = float(np.abs(np.diff(dem, axis=1)).max()) / res
+    gy = float(np.abs(np.diff(dem, axis=0)).max()) / res
+    return 0.005 * (gx + gy) + 0.005
+
+
+def test_a_scattered_stone_is_seated_on_the_surface_the_game_draws() -> None:
+    """A scatter point is drawn at a continuous position and must read its ground there.
+
+    `heightmap.sample_bilinear` is the pack's one account of the surface the engine
+    draws: cell (r, c) holds the height at the CENTRE of its cell, and the terrain block
+    is positioned so the game's own sample grid sits on those centres. Both scatter
+    paths used to read `ground[int((x + half) / res), ...]` instead - the containing
+    cell's single value - so a stone standing near a cell edge was seated on ground up
+    to half a cell away in each axis.
+
+    Measured on 15,876 scatter points over these fins before the fix: a median 2.53 m
+    off the drawn surface, 5.53 m at worst, 5,308 of them beyond the 3.5 m the drape
+    gate allows, and a signed mean of -0.01 m - so half hung in the air and half were
+    buried. No gate caught it because the drape gate read the same cell the placement
+    did; it is a different defect from that gate's own half-cell shift.
+
+    The bound here is the seating offset itself and nothing more: a stone is set
+    `0.2 * size` into the ground, `size` at most the top of the declared range. Anything
+    above that is the lookup disagreeing with the surface.
+    """
+
+    load_maplib()  # puts the pack on sys.path
+    from maplib import heightmap as hm
+    from maplib import objects as objects_mod
+
+    n = 384
+    res = 1.0
+    fp_size_m = float(n) * res
+    layer = np.zeros((n, n), dtype="int16")
+    ground = _one_cell_fins(n)
+    hi = 0.7
+
+    stones = objects_mod.scatter_rocks(
+        layer,
+        ground,
+        res,
+        fp_size_m,
+        0.0,
+        {0: 4000.0},
+        seed=11,
+        size_range=(0.25, hi),
+    )
+    assert len(stones) > 500, f"too few stones to say anything: {len(stones)}"
+
+    xs = np.array([s["x"] for s in stones], dtype="float64")
+    ys = np.array([s["y"] for s in stones], dtype="float64")
+    zs = np.array([s["z"] for s in stones], dtype="float64")
+    surface = hm.sample_bilinear(ground, res, fp_size_m, xs, ys)
+    into_the_ground = surface - zs  # the seating depth, positive downwards
+
+    # Never above the surface (beyond the 1 cm the shipped z is rounded to), and never
+    # deeper than the seating rule puts it.
+    slack = _rounding_tolerance(ground, res)
+    assert into_the_ground.min() >= -slack, (
+        "a scattered stone floats above the surface the game draws",
+        float(into_the_ground.min()),
+        slack,
+    )
+    assert into_the_ground.max() <= 0.2 * hi + slack, (
+        "a scattered stone is seated deeper than 0.2 * its size, so its ground was "
+        "read somewhere other than under it",
+        float(into_the_ground.max()),
+        slack,
+    )
+
+
+def test_a_scattered_shrub_is_seated_on_the_surface_the_game_draws() -> None:
+    """The same for the shrub scatter, which had the same lookup and 3 cm of seating.
+
+    Its cell index still has a job - the material is a per-cell field and is read at the
+    cell the plant stands in - so this pins the height alone.
+    """
+
+    load_maplib()  # puts the pack on sys.path
+    from maplib import heightmap as hm
+    from maplib import objects as objects_mod
+
+    n = 384
+    res = 1.0
+    fp_size_m = float(n) * res
+    layer = np.zeros((n, n), dtype="int16")
+    ground = _one_cell_fins(n)
+
+    shrubs = objects_mod.scatter_shrubs(
+        layer,
+        ground,
+        res,
+        fp_size_m,
+        0.0,
+        {0: 2000.0},
+        seed=5,
+        height_range=(0.25, 1.1),
+    )
+    assert len(shrubs) > 500, f"too few shrubs to say anything: {len(shrubs)}"
+
+    xs = np.array([s["x"] for s in shrubs], dtype="float64")
+    ys = np.array([s["y"] for s in shrubs], dtype="float64")
+    zs = np.array([s["z"] for s in shrubs], dtype="float64")
+    surface = hm.sample_bilinear(ground, res, fp_size_m, xs, ys)
+    into_the_ground = surface - zs
+
+    slack = _rounding_tolerance(ground, res)
+    assert into_the_ground.min() >= -slack, (
+        "a scattered shrub floats above the surface the game draws",
+        float(into_the_ground.min()),
+        slack,
+    )
+    assert into_the_ground.max() <= 0.03 + slack, (
+        "a scattered shrub is seated deeper than the 3 cm the placement asks for",
+        float(into_the_ground.max()),
+        slack,
     )
