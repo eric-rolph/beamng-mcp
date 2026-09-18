@@ -2320,6 +2320,78 @@ def test_decal_roads_have_no_node_steps(map_key: str) -> None:
         assert steepest <= cap, (map_key, surface, steepest, cap)
 
 
+# The smallest scale a forest item may ship at, asserted below in
+# `test_forest_items_are_declared_draped_and_inside`. Kept here, in the suite, rather
+# than imported from the pack: a gate that reads its own threshold out of the code it
+# gates cannot fail.
+MIN_FOREST_SCALE = 0.2
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_a_scatter_cannot_declare_stones_below_the_forest_floor(map_key: str) -> None:
+    """A spec asking for stones smaller than a forest item may be is asking for a build
+    that cannot pass, and it should say so here rather than forty minutes later.
+
+    A scattered stone's forest scale IS its longest axis in metres - `scene_objects`
+    takes `scale = longest` for a stone with no measured peak - so the spec's declared
+    minimum and the gate's floor are the same number in the same units.
+    """
+
+    spec = load_spec(map_key)
+    objects_spec = getattr(spec, "OBJECTS", None) or {}
+    if not objects_spec.get("scatter"):
+        pytest.skip(f"{map_key}: no scatter")
+    lo, high = (float(v) for v in objects_spec.get("scatter_size_m", (0.3, 1.2)))
+    assert lo < high, (map_key, "the scatter's size range is empty or inverted")
+    # Strictly above, not at. A minimum authored flush against the floor has no margin
+    # for the per-axis jitter or for rounding, so it fails on some draws and passes on
+    # others - which is the hardest kind of failure to diagnose, and is exactly what
+    # happened: factory_butte declared 0.2 against a 0.2 floor and a forty-minute build
+    # died on one stone out of tens of thousands.
+    assert lo > MIN_FOREST_SCALE, (
+        map_key,
+        f"scatters stones down to {lo} m against a {MIN_FOREST_SCALE} floor, so the "
+        "bottom of the range is unshippable or flush against the bound",
+        objects_spec["scatter_size_m"],
+    )
+
+
+def test_a_scattered_stone_is_never_narrower_than_the_spec_asked_for() -> None:
+    """The jitter used to take a stone outside the range its spec declared.
+
+    `size` is drawn inside `scatter_size_m` and then jittered per axis, and the width
+    jitter reaches 0.9 - so a stone drawn at the bottom came out narrower than the
+    minimum asked for. Factory Butte declares 0.2 m and the build shipped a 0.18 m
+    stone, which is also under the forest floor, so a forty-minute build died on a
+    draw from the distribution's lower tail. It would recur on every re-roll.
+    """
+
+    load_maplib()
+    from maplib import objects as objects_mod
+
+    size = 200
+    layer = np.zeros((size, size), dtype="int16")
+    ground = np.zeros((size, size), dtype="float32")
+    lo = 0.2
+    stones = objects_mod.scatter_rocks(
+        layer,
+        ground,
+        1.0,
+        float(size),
+        0.0,
+        {0: 4000.0},
+        seed=3,
+        size_range=(lo, 0.7),
+    )
+    assert len(stones) > 500, f"too few stones to say anything: {len(stones)}"
+    widest = [max(st["size"][0], st["size"][1]) for st in stones]
+    assert min(widest) >= lo, ("a stone narrower than the declared minimum", min(widest))
+    # And the lift is confined to the tail rather than rescaling the field: the stones
+    # it touches are the ones that were under the floor, nothing else moves.
+    assert min(widest) < lo + 0.03, ("the floor is not where the stones are", min(widest))
+    assert max(widest) > 0.6, ("the top of the range is unreachable now", max(widest))
+
+
 @pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_forest_items_are_declared_draped_and_inside(map_key: str) -> None:
     spec = load_spec(map_key)
