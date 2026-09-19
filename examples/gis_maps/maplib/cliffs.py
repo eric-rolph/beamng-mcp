@@ -679,6 +679,22 @@ def build(
         "bands_over_budget": dropped,
         "tiles": len(items),
         "triangles": triangles,
+        # THE BUDGET IS PRICED ON THE FLOAT STEP; THE MESH IS STRIDED ON THE LATTICE.
+        # The loop above spends `area * 2 / step_m**2` per wall and stops at
+        # `max_triangles`, but `_skin` lays vertices on WHOLE DEM cells, so what is
+        # actually built costs `area * 2 / lattice_step_m**2`. Where rounding goes down
+        # the mesh is finer than the price and the map ships over its own budget by
+        # `(step_m / lattice_step_m) ** 2`, with nothing dropped and no warning - the
+        # decision to keep a wall was made against a number the wall does not cost.
+        #
+        # `triangles` above is the real count off the built mesh, so the three numbers
+        # together say which case a map is in without anyone re-deriving it. Recorded,
+        # not asserted: repricing the loop on the lattice would change which walls get
+        # dropped on every map at once, and that is a rebuild-and-look change rather
+        # than one to make blind.
+        "triangles_priced": round(spent),
+        "triangles_budget": budget,
+        "triangles_over_budget": round(triangles / max(budget, 1), 3),
         "face_step_m": round(step_m, 3),
         "bed_m": float(cfg["bed_m"]),
         "joint_m": float(cfg["joint_m"]),
@@ -712,7 +728,10 @@ def build(
     }
     log(
         f"  {len(keep)} cliff bands modelled in {len(items)} tiles, "
-        f"{triangles / 1e3:.0f} k triangles at {step_m:.2f} m, "
+        f"{triangles / 1e3:.0f} k triangles at {step_m:.2f} m "
+        f"(priced {stats['triangles_priced'] / 1e3:.0f} k against a "
+        f"{budget / 1e3:.0f} k budget, {stats['triangles_over_budget']}x), "
+        f"lattice {lattice_step_m:.1f} m, "
         f"tallest {stats['relief_max_m']} m"
     )
     return {"items": items, "materials": materials_json, "mask": mask, "stats": stats}
