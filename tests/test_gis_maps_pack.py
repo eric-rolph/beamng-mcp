@@ -3080,10 +3080,12 @@ def test_the_texture_draws_the_bedding_the_spec_asked_for(map_key: str) -> None:
     either.
 
     The count has to stay a whole number or the tile seams at every boundary up the
-    wall, so the drawn bed is not always exactly the declared one. This bounds the
-    ratio rather than demanding equality: a factor of two either way passes every map
-    in the pack today (1.25, 0.94, 0.83, 1.11) and the hardcoded 7 fails all of them at
-    0.13 to 0.18. It is a regression gate on the link existing, not a tightening.
+    wall, so the drawn bed need not be exactly the declared one. This bounds the ratio
+    rather than demanding equality: a factor of two either way passes, and the
+    hardcoded 7 fails every map in the pack at 0.13 to 0.18. It is a regression gate on
+    the link existing, not a tightening - every map happens to sit at 1.00 today
+    because each `tile_m` is now a whole multiple of its own `bed_m`, and a map is free
+    to stop being exact without failing here.
     """
 
     spec = load_spec(map_key)
@@ -3107,6 +3109,42 @@ def test_the_texture_draws_the_bedding_the_spec_asked_for(map_key: str) -> None:
         f"declares ({ratio:.2f}x), so the bedding answers to something other than "
         "bed_m",
         cliffs.get("texture_beds_per_tile"),
+    )
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_a_cliff_tile_carries_at_least_two_beds(map_key: str) -> None:
+    """Correct bed thickness and no visible beds is a worse wall than wrong thickness.
+
+    Tying the texture's bed count to `bed_m` fixed the pitch, and on any map whose
+    `tile_m` was thinner than about one and a half beds it set that count to 1 - which
+    looks fine in the handoff and draws a wall with no layers in it. `rock_set` tints
+    each bed from a seven-tone palette indexed by `floor(bed_phase)`, and at one bed
+    per tile that index never advances: 100% of the card takes a single tone, against
+    20% at five beds, and the only thing still varying down the wall is the sine that
+    parts one bed from the next. Measured on the cards rock_set really writes, the tile
+    seam then runs 23x the typical interior row step, against 6.5x at five beds - the
+    boundary is the only edge left.
+
+    That caught black_bear_pass (2.4 m beds in a 3 m tile) and meteor_crater (3.2 m
+    beds in a 3 m tile, a tile thinner than one bed), which are exactly the two maps
+    the thickness fix would otherwise have made flatter than it found them. This reads
+    the spec, not a build, so it fails at authoring time. Two is the floor; the pack
+    runs at four and five.
+    """
+
+    spec = load_spec(map_key)
+    cliffs = getattr(spec, "CLIFFS", None) or {}
+    if not cliffs:
+        pytest.skip(f"{map_key}: declares no CLIFFS")
+    tile_m = max(0.25, float(cliffs["tile_m"]))
+    bed_m = float(cliffs.get("bed_m", 2.2))
+    beds_per_tile = max(1, round(tile_m / max(bed_m, 1e-6)))
+    assert beds_per_tile >= 2, (
+        map_key,
+        f"a {tile_m} m tile against {bed_m} m beds puts {beds_per_tile} bed on the "
+        "tile, so every bed on the wall takes the same tone and the face draws as one "
+        f"gradient; widen tile_m to a whole multiple of bed_m ({2 * bed_m} m or more)",
     )
 
 

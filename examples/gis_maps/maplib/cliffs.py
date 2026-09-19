@@ -527,6 +527,22 @@ def build(
     # at every tile boundary, so the bed the wall actually gets is not always the bed
     # the spec named - `texture_bed_m` below reports what was drawn, not what was asked
     # for. That distinction is the one this stage keeps getting wrong.
+    #
+    # A TILE MUST CARRY AT LEAST TWO BEDS, and a spec that cannot is a spec to widen.
+    # `rock_set` tints each bed from a fixed seven-tone palette indexed by the floor of
+    # the phase; at one bed per tile that index never advances, so the per-bed tone is a
+    # single constant over the whole card and the only thing left varying down the wall
+    # is the sine that separates beds. The wall then draws as one broad light-to-dark
+    # gradient - correct bedding THICKNESS and no visible beds, which is a worse result
+    # than the 7-bed corduroy it replaced because it looks like nothing at all. Measured
+    # on the cards rock_set really writes: one bed per tile puts 100% of the card on a
+    # single tone and its tile seam runs 23x the typical interior step, against 20% and
+    # 6.5x at five beds.
+    #
+    # So each map's `tile_m` is now `bed_m` times a whole bed count, picked as the
+    # largest count (at most five) that still leaves about 150 px per metre of wall at
+    # that material's `size`. That makes the drawn bed EXACTLY the declared one on every
+    # map in the pack, with no rounding error left to report.
     tile_m_cfg = max(0.25, float(cfg["tile_m"]))
     beds_per_tile = max(1, round(tile_m_cfg / max(float(cfg["bed_m"]), 1e-6)))
     texture_bed_m = tile_m_cfg / beds_per_tile
@@ -547,6 +563,12 @@ def build(
             # those maps the wall got neither the geometric bedding nor the texture's.
             strata=float(params.get("strata", 0.6)),
             beds_per_tile=beds_per_tile,
+            # A tile wide enough to carry several beds is also a tile whose texels are
+            # spread over more wall, so a map that widens `tile_m` to get its bedding
+            # rhythm can buy the surface detail back here instead of choosing between
+            # them. 1024 over 3 m is 341 px/m; over 12 m it is 85, and 2048 makes that
+            # 171.
+            size=int(params.get("size", 1024)),
             lichen_cover=float(params.get("lichen", 0.15)),
         )
         materials_json[full] = {
