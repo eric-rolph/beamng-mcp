@@ -19,6 +19,7 @@ import sys
 import zipfile
 from collections import Counter
 from pathlib import Path
+from typing import ClassVar
 from unittest import mock
 
 import numpy as np
@@ -4452,6 +4453,14 @@ def test_a_scattered_stone_is_seated_on_the_surface_the_game_draws() -> None:
     The bound here is the seating offset itself and nothing more: a stone is set
     `0.2 * size` into the ground, `size` at most the top of the declared range. Anything
     above that is the lookup disagreeing with the surface.
+
+    WHAT THIS DOES NOT SHOW, stated because the first version of this docstring implied
+    it did: for a ROCK the `z` asserted on here does not ship. `scene_objects.emit` is
+    reached with `tilt=True` for every rock and recomputes the height from its own
+    sampler, so this test covers the function and not the artefact. The scatter fix
+    reaches a forest file through `scatter_shrubs` and the vegetation centroid, which
+    emit without `tilt`, and not through this path. The artefact is gated by
+    `test_the_forest_file_seats_its_stones_on_the_surface_the_game_draws`.
     """
 
     load_maplib()  # puts the pack on sys.path
@@ -4544,4 +4553,176 @@ def test_a_scattered_shrub_is_seated_on_the_surface_the_game_draws() -> None:
         "a scattered shrub is seated deeper than the 3 cm the placement asks for",
         float(into_the_ground.max()),
         slack,
+    )
+
+
+def _forest_lines_for_stones(
+    scene_objects, stones: list[dict], ground, res: float, fp_size_m: float, root
+) -> list[dict]:
+    """Drive the real `write_forest` and hand back the lines it actually wrote."""
+
+    class _Spec:
+        MOD_ID = "seating_probe"
+        # The gap-closing branch of the seating is only reachable when the spec names a
+        # gap, and both maps that seat blocks name 0.4, so the probe names it too.
+        OBJECTS: ClassVar[dict] = {"rock_gap_max_m": 0.4}
+
+    catalogue = {
+        "items": {
+            "probe_stone": {
+                "class": "TSForestItemData",
+                "internalName": "probe_stone",
+                "shapeFile": "/levels/seating_probe/art/shapes/seating_probe/probe_stone.dae",
+            }
+        },
+        "rock_variants": {
+            "rock_talus": [
+                {"item": "probe_stone", "triangles": 12, "aspect": (1.0, 0.8, 0.6)},
+            ]
+        },
+    }
+    scene_objects.write_forest(
+        _Spec,
+        root,
+        "/levels/seating_probe",
+        None,
+        catalogue,
+        placed_objects=stones,
+        trees=[],
+        seed=5,
+        dem=ground,
+        res=res,
+        fp_size_m=fp_size_m,
+        min_elevation=0.0,
+    )
+    text = (root / "forest" / "seating_probe.forest4.json").read_text(encoding="utf-8")
+    return [json.loads(line) for line in text.splitlines() if line.strip()]
+
+
+def test_the_forest_file_seats_its_stones_on_the_surface_the_game_draws(tmp_path) -> None:
+    """The gate the two tests above should have been: it reads the SHIPPED forest file.
+
+    `test_a_scattered_stone_is_seated_on_the_surface_the_game_draws` asserts on the `z`
+    in `scatter_rocks`' return value, and for a rock that value never ships. Every rock
+    reaches `scene_objects.emit` with `tilt=True` - it is the only such call site - and
+    the first thing that branch does with a DEM is recompute the height from scratch:
+    `z = seat - min_elevation`, where `seat` comes from `_bilinear`, which delegates to
+    `heightmap.sample_bilinear`. Nothing reads the passed `z` before that line.
+
+    So a test on the producing function proved the number was computed correctly and
+    said nothing about whether it survived to the artefact. That is the same defect as a
+    synthetic that never calls the real function, one layer further out, and it hid a
+    real consequence: the scatter fix reaches the forest file for shrubs and trees, which
+    emit without `tilt`, and for rocks it does not. The two maps whose forests are all
+    rock shipped byte-identical stones before and after it.
+
+    This asserts the property a player can feel, on the artefact a player loads. The
+    bound is the seating's own: `emit` puts a block at most half its height under the
+    ground at its centre, and `size[2]` is at most `0.85 * size_range[1]` by the draw in
+    `_at_the_drawn_size`, so nothing may sit deeper than that or above the surface at all.
+    """
+
+    load_maplib()  # puts the pack on sys.path
+    from maplib import heightmap as hm
+    from maplib import objects as objects_mod
+    from maplib import scene_objects
+
+    n = 192
+    res = 1.0
+    fp_size_m = float(n) * res
+    ground = _one_cell_fins(n)
+    layer = np.zeros((n, n), dtype="int16")
+    hi = 0.7
+
+    stones = objects_mod.scatter_rocks(
+        layer,
+        ground,
+        res,
+        fp_size_m,
+        0.0,
+        {0: 4000.0},
+        seed=11,
+        size_range=(0.25, hi),
+    )
+    assert len(stones) > 200, f"too few stones to say anything: {len(stones)}"
+
+    lines = _forest_lines_for_stones(
+        scene_objects, stones, ground, res, fp_size_m, tmp_path / "shipped"
+    )
+    assert len(lines) > 200, f"the forest file kept too few stones: {len(lines)}"
+
+    xs = np.array([line["pos"][0] for line in lines], dtype="float64")
+    ys = np.array([line["pos"][1] for line in lines], dtype="float64")
+    zs = np.array([line["pos"][2] for line in lines], dtype="float64")
+    surface = hm.sample_bilinear(ground, res, fp_size_m, xs, ys)
+    into_the_ground = surface - zs  # the seating depth, positive downwards
+
+    slack = _rounding_tolerance(ground, res)
+    # Half the tallest block the draw can produce: `_at_the_drawn_size` takes the z
+    # extent from `size * uniform(0.55, 0.85)`, and `emit` never seats deeper than half
+    # of that. Derived from the declared range rather than chosen.
+    deepest = 0.5 * 0.85 * hi
+    assert into_the_ground.min() >= -slack, (
+        "a stone in the shipped forest file floats above the surface the game draws",
+        float(into_the_ground.min()),
+        slack,
+    )
+    assert into_the_ground.max() <= deepest + slack, (
+        "a stone in the shipped forest file is buried deeper than the seating allows, "
+        "so the height it shipped with was read somewhere other than under it",
+        float(into_the_ground.max()),
+        deepest,
+        slack,
+    )
+
+
+def test_the_shipped_seating_gate_fails_when_the_seating_reads_a_cell(
+    tmp_path, monkeypatch
+) -> None:
+    """Falsify the gate above: a guard seen only to pass cannot be told from one that
+    cannot fail, and this pack has already shipped one such test.
+
+    `emit`'s seating is replaced with the containing-cell lookup that `scatter_rocks`
+    used before it was fixed. That is the defect in the place it would actually matter -
+    inside the stage that writes the artefact - and the gate above must reject it.
+    """
+
+    load_maplib()
+    from maplib import heightmap as hm
+    from maplib import objects as objects_mod
+    from maplib import scene_objects
+
+    n = 192
+    res = 1.0
+    fp_size_m = float(n) * res
+    ground = _one_cell_fins(n)
+    layer = np.zeros((n, n), dtype="int16")
+    hi = 0.7
+
+    def _containing_cell(dem, res_, fp_size, x, y) -> float:
+        half = fp_size / 2.0
+        size = dem.shape[0]
+        c = int(min(max((x + half) / res_, 0), size - 1))
+        r = int(min(max((half - y) / res_, 0), size - 1))
+        return float(dem[r, c])
+
+    monkeypatch.setattr(scene_objects, "_bilinear", _containing_cell)
+
+    stones = objects_mod.scatter_rocks(
+        layer, ground, res, fp_size_m, 0.0, {0: 4000.0}, seed=11, size_range=(0.25, hi)
+    )
+    lines = _forest_lines_for_stones(
+        scene_objects, stones, ground, res, fp_size_m, tmp_path / "broken"
+    )
+    xs = np.array([line["pos"][0] for line in lines], dtype="float64")
+    ys = np.array([line["pos"][1] for line in lines], dtype="float64")
+    zs = np.array([line["pos"][2] for line in lines], dtype="float64")
+    off = np.abs(hm.sample_bilinear(ground, res, fp_size_m, xs, ys) - zs)
+
+    deepest = 0.5 * 0.85 * hi + _rounding_tolerance(ground, res)
+    assert off.max() > deepest, (
+        "the cell lookup put every stone within the seating band, so the gate above "
+        "cannot distinguish a correct seating from a broken one",
+        float(off.max()),
+        deepest,
     )
