@@ -571,6 +571,13 @@ def scatter_rocks(
     from . import heightmap as hm
 
     surface = hm.sample_bilinear(ground, res, fp_size_m, xs[idx], ys[idx])
+    # NOTE ON THE `z` BELOW: for a rock this is a FALLBACK, not what ships.
+    # `scene_objects.emit` is reached with `tilt=True` for every rock and its first act,
+    # given a DEM, is `z = seat - min_elevation` from its own `_bilinear` - so the height
+    # computed here is overwritten. It is used only when no DEM is passed. The sampler is
+    # still the right one and the value is still correct; it is simply not the authority,
+    # and a test that asserts on it is not testing the artefact. `scatter_shrubs` below
+    # emits without `tilt`, so ITS z is the one that ships.
     for kept, i in enumerate(idx):
         size = float(np.exp(rng.uniform(np.log(lo), np.log(hi))))
         out.append(
