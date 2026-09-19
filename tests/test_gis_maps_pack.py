@@ -3146,6 +3146,20 @@ def test_a_cliff_tile_carries_at_least_two_beds(map_key: str) -> None:
         "tile, so every bed on the wall takes the same tone and the face draws as one "
         f"gradient; widen tile_m to a whole multiple of bed_m ({2 * bed_m} m or more)",
     )
+    # The other end of the same palette. `bed_id` is taken modulo 7 because the tone
+    # table is 7 wide, and that draw stays 7 wide on purpose: `rock_set` makes a dozen
+    # later draws from the same generator - lichen colonies, fbm, stains, streaks - so
+    # resizing it would re-weather every map in the pack, including ones nobody touched.
+    # Past 7 beds the tone therefore repeats WITHIN one tile and stops telling beds
+    # apart. Nothing in the pack is near this today; it is here so the rule the specs
+    # are written to ("bed_m times a whole count, at most five") cannot be quietly
+    # exceeded by a later tile_m.
+    assert beds_per_tile <= 7, (
+        map_key,
+        f"a {tile_m} m tile against {bed_m} m beds puts {beds_per_tile} beds on the "
+        "tile, past the 7-tone palette rock_set indexes with, so bed tones repeat "
+        "within a single tile",
+    )
 
 
 @pytest.mark.parametrize("map_key", MAP_KEYS)
