@@ -290,7 +290,14 @@ def shrubs_from_imagery(
                 "kind": "shrub",
                 "x": round(float(x), 2),
                 "y": round(float(y), 2),
-                "z": round(float(dem[r, c] - min_elevation) - 0.05, 2),
+                # `r, c` above are the cell this shrub occupies, for the spacing
+                # mask; its HEIGHT comes off the surface the game draws under its own
+                # centroid, which on a one-cell fin is not that cell's value. Same
+                # defect as the two scatter paths in `objects`.
+                "z": round(
+                    float(hm.sample_bilinear(dem, res, half * 2.0, x, y)) - min_elevation - 0.05,
+                    2,
+                ),
                 "size": [round(w, 2), round(w, 2), round(w * float(rng.uniform(0.45, 0.7)), 2)],
                 "yaw_deg": round(float(rng.uniform(0, 360)), 1),
                 "peak_m": None,

@@ -1008,6 +1008,43 @@ def delight(
     # been through neither, which leaves the gain as its only writer, and the gain is
     # clipped at 0.45. So an untouched dark cell under 0.45 of its source is not a tuning
     # question: some writer is outside the contract every clip in here is meant to give.
+    #
+    # That enumeration is one writer short, and the missing one bounds this gate. The
+    # refill blend is `corrected * (1 - fill_w) + recoloured * fill_w`, so even at
+    # `fill_w` just under the 0.01 below it the blend takes up to 1% off a cell it has
+    # otherwise left alone. `composed` is `out_lum / src_lum` where `src_lum` is the same
+    # decode of `colour_u8` the gain multiplied, and the gain is a per-cell scalar over
+    # all three channels, so on a cell with no other writer `composed` IS the gain. The
+    # two facts together put a floor under this gate: `composed >= 0.99 * 0.45 = 0.4455`
+    # on any untouched cell. The two luminances are summed by different routes and carry
+    # independent float32 error, but that error is one ULP -- measured at 1.2e-07 over
+    # 261k random texels, and invisible after the 6-dp rounding the handoff applies.
+    #
+    # The floor holds on one condition, and it is the writer the enumeration above also
+    # missed. The blue de-cast is luminance-preserving only while `local_lit.mean` clears
+    # its 1e-4 guard; under the guard it becomes a straight multiply by
+    # `local_lit.mean / 1e-4`, and its mask is `steep | (fill_last > 0)`, which does not
+    # exclude an untouched cell. So the floor reads: `composed >= 0.4455` on any untouched
+    # cell the de-cast did not write under its guard, and `decast_guard` below is exactly
+    # the number that says whether any cell did. Read that first; it is why it is reported.
+    #
+    # With that precondition met, a breach counted here is a cell whose gain sat ON its
+    # 0.45 clip and which then lost a fraction of a percent to the blend -- the band
+    # [0.4455, 0.45) and nothing else. Whether this map's reds are that band or something
+    # the derivation misses is what `breach_composed_min` below answers; do not assume
+    # either from this comment. What the comment does settle is that a red here can no
+    # longer be read as "some writer is outside the contract" without checking the
+    # distribution first, and that the fix for a flush gate is never a looser bound.
+    #
+    # `fill_w` is a gaussian blur of the fill mask at `max(2.0, 2.0 / res_r)`, so the 0.01
+    # below means different things at different resolutions: at sigma 2.0 even an isolated
+    # fill cell blurs to 0.0398 and no refilled cell can be called untouched, but at sigma
+    # 4.0 -- which `res_r` 0.5 gives, and meteor_crater's 0.5 m imagery over a 1 m DEM is
+    # exactly that -- an isolated one blurs to 0.009948 and slips under. It cannot fire
+    # today because `shadow_core` is dilated `int(3.0 / res_r)` iterations, so the smallest
+    # reachable blob there is a radius-6 diamond whose minimum `fill_w` is 0.274. Change a
+    # resolution, that dilation, or this sigma and the mask starts admitting cells the
+    # refill wrote, silently and with nothing failing.
     untouched = seen & (fill_w_last < 0.01)
     floor_lum = min(float(knee_lum), float(cap_lum) if cap_lum is not None else float(knee_lum))
     breach = untouched & (out_lum < floor_lum) & (composed < 0.45)

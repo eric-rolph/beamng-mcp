@@ -4567,3 +4567,148 @@ def test_every_key_a_stage_writes_reaches_the_handoff() -> None:
         f"build_level writes {dropped} into its report and write_level never copies them "
         "into the handoff, so a gate reading any of them asserts a key that cannot arrive"
     )
+
+
+def _one_cell_fins(n: int, relief_m: float = 11.0) -> np.ndarray:
+    """A DEM whose every other column is a crest: the badlands fin, at its sharpest.
+
+    This is the landform that separates a cell lookup from the drawn surface. On ground
+    that varies slowly the two agree to centimetres and no test could tell them apart,
+    which is exactly why the defect below survived: every map with gentle terrain
+    passed, and the two that have fins were the two that failed.
+    """
+
+    dem = np.zeros((n, n), dtype="float32")
+    dem += (np.arange(n) % 2) * relief_m
+    dem += np.linspace(0.0, 40.0, n)[:, None]  # a regional slope under the fins
+    return dem
+
+
+def _rounding_tolerance(dem: np.ndarray, res: float) -> float:
+    """How far a re-sampled height can differ purely from the shipped rounding.
+
+    A placement ships `x` and `y` rounded to 2 dp and `z` to 2 dp, so a test that
+    re-samples the surface at the shipped position is asking for the height half a
+    centimetre away from where the placement asked. On gentle ground that is nothing;
+    over an 11 m one-cell fin the same half centimetre is worth 5 cm of height, which
+    is larger than the 1 cm the z itself is rounded to. Derived from the DEM's own worst
+    gradient rather than chosen, so a fin cannot be made sharper without this following.
+    """
+
+    gx = float(np.abs(np.diff(dem, axis=1)).max()) / res
+    gy = float(np.abs(np.diff(dem, axis=0)).max()) / res
+    return 0.005 * (gx + gy) + 0.005
+
+
+def test_a_scattered_stone_is_seated_on_the_surface_the_game_draws() -> None:
+    """A scatter point is drawn at a continuous position and must read its ground there.
+
+    `heightmap.sample_bilinear` is the pack's one account of the surface the engine
+    draws: cell (r, c) holds the height at the CENTRE of its cell, and the terrain block
+    is positioned so the game's own sample grid sits on those centres. Both scatter
+    paths used to read `ground[int((x + half) / res), ...]` instead - the containing
+    cell's single value - so a stone standing near a cell edge was seated on ground up
+    to half a cell away in each axis.
+
+    Measured on 15,876 scatter points over these fins before the fix: a median 2.53 m
+    off the drawn surface, 5.53 m at worst, 5,308 of them beyond the 3.5 m the drape
+    gate allows, and a signed mean of -0.01 m - so half hung in the air and half were
+    buried. No gate caught it because the drape gate read the same cell the placement
+    did; it is a different defect from that gate's own half-cell shift.
+
+    The bound here is the seating offset itself and nothing more: a stone is set
+    `0.2 * size` into the ground, `size` at most the top of the declared range. Anything
+    above that is the lookup disagreeing with the surface.
+    """
+
+    load_maplib()  # puts the pack on sys.path
+    from maplib import heightmap as hm
+    from maplib import objects as objects_mod
+
+    n = 384
+    res = 1.0
+    fp_size_m = float(n) * res
+    layer = np.zeros((n, n), dtype="int16")
+    ground = _one_cell_fins(n)
+    hi = 0.7
+
+    stones = objects_mod.scatter_rocks(
+        layer,
+        ground,
+        res,
+        fp_size_m,
+        0.0,
+        {0: 4000.0},
+        seed=11,
+        size_range=(0.25, hi),
+    )
+    assert len(stones) > 500, f"too few stones to say anything: {len(stones)}"
+
+    xs = np.array([s["x"] for s in stones], dtype="float64")
+    ys = np.array([s["y"] for s in stones], dtype="float64")
+    zs = np.array([s["z"] for s in stones], dtype="float64")
+    surface = hm.sample_bilinear(ground, res, fp_size_m, xs, ys)
+    into_the_ground = surface - zs  # the seating depth, positive downwards
+
+    # Never above the surface (beyond the 1 cm the shipped z is rounded to), and never
+    # deeper than the seating rule puts it.
+    slack = _rounding_tolerance(ground, res)
+    assert into_the_ground.min() >= -slack, (
+        "a scattered stone floats above the surface the game draws",
+        float(into_the_ground.min()),
+        slack,
+    )
+    assert into_the_ground.max() <= 0.2 * hi + slack, (
+        "a scattered stone is seated deeper than 0.2 * its size, so its ground was "
+        "read somewhere other than under it",
+        float(into_the_ground.max()),
+        slack,
+    )
+
+
+def test_a_scattered_shrub_is_seated_on_the_surface_the_game_draws() -> None:
+    """The same for the shrub scatter, which had the same lookup and 3 cm of seating.
+
+    Its cell index still has a job - the material is a per-cell field and is read at the
+    cell the plant stands in - so this pins the height alone.
+    """
+
+    load_maplib()  # puts the pack on sys.path
+    from maplib import heightmap as hm
+    from maplib import objects as objects_mod
+
+    n = 384
+    res = 1.0
+    fp_size_m = float(n) * res
+    layer = np.zeros((n, n), dtype="int16")
+    ground = _one_cell_fins(n)
+
+    shrubs = objects_mod.scatter_shrubs(
+        layer,
+        ground,
+        res,
+        fp_size_m,
+        0.0,
+        {0: 2000.0},
+        seed=5,
+        height_range=(0.25, 1.1),
+    )
+    assert len(shrubs) > 500, f"too few shrubs to say anything: {len(shrubs)}"
+
+    xs = np.array([s["x"] for s in shrubs], dtype="float64")
+    ys = np.array([s["y"] for s in shrubs], dtype="float64")
+    zs = np.array([s["z"] for s in shrubs], dtype="float64")
+    surface = hm.sample_bilinear(ground, res, fp_size_m, xs, ys)
+    into_the_ground = surface - zs
+
+    slack = _rounding_tolerance(ground, res)
+    assert into_the_ground.min() >= -slack, (
+        "a scattered shrub floats above the surface the game draws",
+        float(into_the_ground.min()),
+        slack,
+    )
+    assert into_the_ground.max() <= 0.03 + slack, (
+        "a scattered shrub is seated deeper than the 3 cm the placement asks for",
+        float(into_the_ground.max()),
+        slack,
+    )
