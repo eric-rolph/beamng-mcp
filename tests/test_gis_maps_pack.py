@@ -4617,9 +4617,13 @@ def test_the_forest_file_seats_its_stones_on_the_surface_the_game_draws(tmp_path
     rock shipped byte-identical stones before and after it.
 
     This asserts the property a player can feel, on the artefact a player loads. The
-    bound is the seating's own: `emit` puts a block at most half its height under the
-    ground at its centre, and `size[2]` is at most `0.85 * size_range[1]` by the draw in
-    `_at_the_drawn_size`, so nothing may sit deeper than that or above the surface at all.
+    bound is the seating's own, and it is derived twice over because the obvious
+    derivation is too tight: `0.5 * 0.85 * size_range[1]` reads the z jitter straight off
+    the draw, but `_at_the_drawn_size` RENORMALISES the jittered triple by
+    `size / max(w, h)`, so the z extent that reaches `emit` as `height_m` is the z jitter
+    over the width jitter - at most `0.85 / 0.9` of the size, not `0.85` of it. A bound
+    below what the code permits is a gate that goes red with nothing wrong, which is the
+    one failure mode a gate must not have.
     """
 
     load_maplib()  # puts the pack on sys.path
@@ -4658,10 +4662,21 @@ def test_the_forest_file_seats_its_stones_on_the_surface_the_game_draws(tmp_path
     into_the_ground = surface - zs  # the seating depth, positive downwards
 
     slack = _rounding_tolerance(ground, res)
-    # Half the tallest block the draw can produce: `_at_the_drawn_size` takes the z
-    # extent from `size * uniform(0.55, 0.85)`, and `emit` never seats deeper than half
-    # of that. Derived from the declared range rather than chosen.
-    deepest = 0.5 * 0.85 * hi
+    # Half the tallest block the draw can produce. Both halves of that are read off the
+    # source rather than chosen:
+    #
+    # - The 0.5 is the DEEPEST limb of the seating, the one in the `gap > gap_max` branch
+    #   (`scene_objects.py`, `seat - extra >= centre - 0.5 * max(height_m, 0.1)`). The
+    #   main seat is bounded at 0.4 of the height, so a bound built on 0.4 would be
+    #   narrower than what the code permits.
+    # - The height is `size[2]` as `_at_the_drawn_size` leaves it. That function draws the
+    #   triple as `size * uniform(0.9, 1.1)`, `size * uniform(0.7, 1.0)`,
+    #   `size * uniform(0.55, 0.85)` and then scales all three by `size / max(w, h)`, so
+    #   the z extent is the z jitter OVER the width jitter: at most `0.85 / 0.9` of the
+    #   size, reached when the z jitter tops out and the width jitter bottoms out. Taking
+    #   the raw `0.85` instead loses 10 % of the band, and a bound below what the code
+    #   permits is a gate that goes red on a seed change with nothing wrong.
+    deepest = 0.5 * (0.85 / 0.9) * hi
     assert into_the_ground.min() >= -slack, (
         "a stone in the shipped forest file floats above the surface the game draws",
         float(into_the_ground.min()),
@@ -4719,7 +4734,7 @@ def test_the_shipped_seating_gate_fails_when_the_seating_reads_a_cell(
     zs = np.array([line["pos"][2] for line in lines], dtype="float64")
     off = np.abs(hm.sample_bilinear(ground, res, fp_size_m, xs, ys) - zs)
 
-    deepest = 0.5 * 0.85 * hi + _rounding_tolerance(ground, res)
+    deepest = 0.5 * (0.85 / 0.9) * hi + _rounding_tolerance(ground, res)
     assert off.max() > deepest, (
         "the cell lookup put every stone within the seating band, so the gate above "
         "cannot distinguish a correct seating from a broken one",
