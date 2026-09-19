@@ -22,6 +22,21 @@ from . import foliage_textures as ft
 from . import meshgen
 from .stable_seed import stable_hash
 
+# The deepest a block may be seated into the ground at its centre, as a fraction of its
+# own height. Every branch of the seating in `write_forest.emit` is written in these
+# units - 0.25 of height under the footprint's mean ground, 0.4 under the centre, and
+# 0.5 once a block is being pushed down to close the gap under its base - and 0.5 is the
+# loosest of them, so it is the stage's declared limit and what `rock_sink_m` is gated
+# against.
+MAX_SINK_FRACTION = 0.5
+
+# The drape gate's flat metre bound, MIRRORED here so this stage can report how many
+# blocks it sank past it deliberately. This is a reporting reference, not the gate's
+# source of truth: the gate keeps its own literal, because a gate that reads its
+# threshold out of the code it gates cannot fail. A test asserts the two agree, so
+# neither can drift without saying so.
+DRAPE_REPORT_BOUND_M = 3.5
+
 
 def _yaw_matrix(yaw_deg: float) -> list[float]:
     yaw = math.radians(yaw_deg)
@@ -463,6 +478,25 @@ def write_forest(
                 else:
                     return False
             gaps.append(max(gap, 0.0))
+            # How far this block was seated INTO the ground under its centre, both in
+            # metres and as the fraction of its own height that the seating rules are
+            # actually written in. `rock_gap_m` above records only the other
+            # direction - the air left under a base plane - so a build that buries a
+            # block to the shoulders has reported nothing about it, and the drape gate
+            # sees the two directions added together in one absolute value.
+            #
+            # Both numbers, because they answer different questions. The FRACTION is
+            # the contract: every branch above bounds the seat at a fraction of
+            # height (0.25 of mean ground, 0.4 of centre, 0.5 once a gap is being
+            # closed), so it is the only form in which "too deep" means anything. The
+            # METRES are what the drape gate compares against its flat bound, so
+            # `over_drape_bound_m` says how much of a drape breach this stage caused
+            # ON PURPOSE. A tall block sunk half its height breaches a 3.5 m bound by
+            # design; without this number a red drape gate cannot be told apart from
+            # a genuine seating defect, which is what happened on run 77.
+            sink_m = max(centre - seat, 0.0)
+            sinks.append(sink_m)
+            sink_fractions.append(sink_m / max(height_m, 0.1))
         lines.append(
             json.dumps(
                 {
@@ -479,6 +513,8 @@ def write_forest(
         return True
 
     gaps: list[float] = []
+    sinks: list[float] = []
+    sink_fractions: list[float] = []
     for obj in placed_objects:
         if obj["kind"] == "rock":
             family = obj.get("material") or next(
@@ -565,6 +601,12 @@ def write_forest(
     )
     write_json(level_root / "art" / "forest" / "managedItemData.json", catalogue["items"])
     gap_arr = np.asarray(gaps, dtype="float32") if gaps else np.zeros(0, dtype="float32")
+    sink_arr = np.asarray(sinks, dtype="float32") if sinks else np.zeros(0, dtype="float32")
+    sink_frac_arr = (
+        np.asarray(sink_fractions, dtype="float32")
+        if sink_fractions
+        else np.zeros(0, dtype="float32")
+    )
     return {
         "instances": len(lines),
         "by_item": counts,
@@ -578,6 +620,23 @@ def write_forest(
                 "max": round(float(gap_arr.max()), 2),
             }
             if gap_arr.size
+            else None
+        ),
+        # Rock seating, the other direction: how deep the block was put INTO the
+        # ground. `max_fraction` is the contract the seating rules are written in and
+        # must stay at or under 0.5; `over_drape_bound_m` counts the blocks this stage
+        # sank past the drape gate's flat metre bound ON PURPOSE, so a red drape gate
+        # can be told apart from a seating defect instead of guessed at.
+        "rock_sink_m": (
+            {
+                "p95": round(float(np.percentile(sink_arr, 95)), 2),
+                "max": round(float(sink_arr.max()), 2),
+                "max_fraction": round(float(sink_frac_arr.max()), 4),
+                "p95_fraction": round(float(np.percentile(sink_frac_arr, 95)), 4),
+                "over_drape_bound_m": int((sink_arr > DRAPE_REPORT_BOUND_M).sum()),
+                "drape_bound_m": DRAPE_REPORT_BOUND_M,
+            }
+            if sink_arr.size
             else None
         ),
         "file": f"{level_url}/forest/{forest_file.name}",

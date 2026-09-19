@@ -651,18 +651,54 @@ CLIFFS = {
     "joint_m": 4.5,
     "relief_m": 0.95,
     "buttress_m": 1.8,
-    "tile_m": 3.0,
+    # A 12 m tile, not 3 m, so the face carries a RHYTHM of beds instead of one.
+    # `beds_per_tile` is `round(tile_m / bed_m)`, and at 3 m that is a single bed per
+    # tile against this map's 2.4 m bedding - which draws as a broad light-and-dark
+    # gradient rather than as layers. At 12 m it is exactly 5 beds of exactly 2.4 m,
+    # the thickness declared below, and the wall reads as stratified rock.
+    #
+    # The cost is texel density: 1024 px over 12 m is 85 px/m against 341 at 3 m, so
+    # the pebbles and pits blur. `size` 2048 buys half of that back at 171 px/m, which
+    # is the right trade for a wall read from a road at ten to fifty metres - the
+    # bedding rhythm is what makes it rock, and a 5 cm pit is not.
+    #
+    # 12 m is already this map's own scale for rock: bb_cliff_rock above is authored
+    # on a 12 m tile for the same reason.
+    "tile_m": 12.0,
     # The pack's biggest map and its steepest: the budget is the one place this stage
     # can cost a level its frame rate, so it is named here rather than defaulted.
     "max_triangles": 520000,
     "materials": {
         # The charcoal tuff of the reference photographs, at the palette's own base for
         # bb_cliff_rock so the modelled wall and the ground it stands on are one rock.
-        # Strata 0.45 rather than the tile's full bedding: the mesh has taken the beds,
-        # and what is left for the texture is the partings inside one. Alpine walls
-        # carry lichen, but only a fifth of what the talus below them does - a face this
-        # steep sheds.
-        "cliff_tuff": {"colour": [0.36, 0.35, 0.34], "strata": 0.45, "lichen": 0.12},
+        # Strata back to the tile's full bedding. This was 0.45 on the reasoning that
+        # "the mesh has taken the beds, and what is left for the texture is the
+        # partings inside one" - DELIBERATE, and wrong, so it is restored here with
+        # the reason rather than quietly.
+        #
+        # The mesh never took them. This map's DEM is 2 m per sample and its cliffs
+        # declare no face_step_m, so `max(1, round(1.5 / 2.0))` puts the face lattice
+        # at ONE DEM cell, 2.0 m, against a 2.4 m bed: about 1.0 samples per bed where
+        # two is the floor for a layer to survive sampling at all. The beds aliased
+        # into noise in the geometry, and the texture had been turned down because the
+        # geometry was believed to be carrying them, so this wall was getting NEITHER.
+        # `samples_per_bed_p50` and `face_step_is_one_dem_cell` now ship in the handoff
+        # so this is checkable rather than a matter of opinion.
+        #
+        # A bigger triangle budget cannot fix it either: a lattice already at one DEM
+        # cell has run out of elevation data, not triangles. The texture is the only
+        # place the bedding can live on this map, which is exactly why it gets it.
+        #
+        # Alpine walls carry lichen, but only a fifth of what the talus below them
+        # does - a face this steep sheds.
+        "cliff_tuff": {
+            "colour": [0.36, 0.35, 0.34],
+            "strata": 0.6,
+            "lichen": 0.12,
+            # 2048 rather than the default 1024, to hold surface detail at the 12 m
+            # tile this map's bedding needs. See `tile_m` above.
+            "size": 2048,
+        },
     },
 }
 

@@ -1215,6 +1215,15 @@ def level(spec, example_root: Path) -> dict:
             f"  forest: {forest.get('instances', 0)} instances ({forest.get('rocks', 0)} rocks, "
             f"{forest.get('shrubs', 0)} shrubs, {forest.get('trees', 0)} trees)"
         )
+        # Into the log, because this is what tells a red drape gate apart from a
+        # seating defect and the handoff only leaves the runner when the gates pass.
+        sink = forest.get("rock_sink_m")
+        if sink:
+            _log(
+                f"    rock seating: sunk p95 {sink['p95']} m / max {sink['max']} m, "
+                f"max {sink['max_fraction']} of height, "
+                f"{sink['over_drape_bound_m']} past the {sink['drape_bound_m']} m drape bound"
+            )
     _log(
         f"  roads: {report['roads']['roads']} decal roads, "
         f"{report['roads']['length_m'] / 1000:.1f} km"

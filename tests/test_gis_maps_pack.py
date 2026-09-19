@@ -3042,6 +3042,173 @@ def test_base_colour_has_no_black_holes(map_key: str) -> None:
         )
 
 
+# Mirrors of what `scene_objects` declares, as literals rather than imports: a gate that
+# reads its threshold out of the code it gates cannot fail. The first test below is what
+# keeps the mirror honest, so neither side can drift quietly.
+MAX_SINK_FRACTION = 0.5
+DRAPE_BOUND_M = 3.5
+
+
+def test_the_seating_limit_and_the_drape_bound_are_the_numbers_the_stage_reports_against() -> None:
+    """`scene_objects` mirrors the drape gate's metre bound so it can report how many
+    blocks it sank past it on purpose. A mirror nobody checks is just a second copy that
+    drifts, and this pack has already paid for one: `a7691cb` calibrated a bound in the
+    same commit that changed the behaviour it measured, and the stale copy went red on
+    its first real build.
+    """
+
+    load_maplib()
+    from maplib import scene_objects
+
+    assert scene_objects.MAX_SINK_FRACTION == MAX_SINK_FRACTION
+    assert scene_objects.DRAPE_REPORT_BOUND_M == DRAPE_BOUND_M, (
+        "the stage reports its sink against a different bound than the drape gate "
+        "asserts, so its over_drape_bound_m count no longer means what it says"
+    )
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_the_texture_draws_the_bedding_the_spec_asked_for(map_key: str) -> None:
+    """The cliff texture's bedding pitch used to answer to nothing at all.
+
+    `rock_set` counted 7 beds per tile HEIGHT, hardcoded, while the face's v runs
+    `z / tile_m` - so every map drew a bed every `tile_m / 7` metres whatever its spec
+    said. black_bear_pass asked for 2.4 m beds and got 0.43 m, 5.6x too fine; meteor
+    crater asked for 3.2 m and got the same 0.43 m, 7.5x too fine. Bedding that fine
+    reads as grain, not as layers, which is half of why these walls did not look like
+    sedimentary rock - and the other half was that the geometry could not carry them
+    either.
+
+    The count has to stay a whole number or the tile seams at every boundary up the
+    wall, so the drawn bed need not be exactly the declared one. This bounds the ratio
+    rather than demanding equality: a factor of two either way passes, and the
+    hardcoded 7 fails every map in the pack at 0.13 to 0.18. It is a regression gate on
+    the link existing, not a tightening - every map happens to sit at 1.00 today
+    because each `tile_m` is now a whole multiple of its own `bed_m`, and a map is free
+    to stop being exact without failing here.
+    """
+
+    spec = load_spec(map_key)
+    if not (getattr(spec, "CLIFFS", None) or {}):
+        pytest.skip(f"{map_key}: declares no CLIFFS")
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    cliffs = handoff.get("cliffs") or {}
+    drawn = cliffs.get("texture_bed_m")
+    if drawn is None:
+        pytest.skip(f"{map_key}: no cliff bands were modelled")
+    asked = float(spec.CLIFFS.get("bed_m", 2.2))
+    ratio = float(drawn) / asked
+    assert 0.5 <= ratio <= 2.0, (
+        map_key,
+        f"the texture draws a bed every {drawn} m against the {asked} m the spec "
+        f"declares ({ratio:.2f}x), so the bedding answers to something other than "
+        "bed_m",
+        cliffs.get("texture_beds_per_tile"),
+    )
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_a_cliff_tile_carries_at_least_two_beds(map_key: str) -> None:
+    """Correct bed thickness and no visible beds is a worse wall than wrong thickness.
+
+    Tying the texture's bed count to `bed_m` fixed the pitch, and on any map whose
+    `tile_m` was thinner than about one and a half beds it set that count to 1 - which
+    looks fine in the handoff and draws a wall with no layers in it. `rock_set` tints
+    each bed from a seven-tone palette indexed by `floor(bed_phase)`, and at one bed
+    per tile that index never advances: 100% of the card takes a single tone, against
+    20% at five beds, and the only thing still varying down the wall is the sine that
+    parts one bed from the next. Measured on the cards rock_set really writes, the tile
+    seam then runs 23x the typical interior row step, against 6.5x at five beds - the
+    boundary is the only edge left.
+
+    That caught black_bear_pass (2.4 m beds in a 3 m tile) and meteor_crater (3.2 m
+    beds in a 3 m tile, a tile thinner than one bed), which are exactly the two maps
+    the thickness fix would otherwise have made flatter than it found them. This reads
+    the spec, not a build, so it fails at authoring time. Two is the floor; the pack
+    runs at four and five.
+    """
+
+    spec = load_spec(map_key)
+    cliffs = getattr(spec, "CLIFFS", None) or {}
+    if not cliffs:
+        pytest.skip(f"{map_key}: declares no CLIFFS")
+    tile_m = max(0.25, float(cliffs["tile_m"]))
+    bed_m = float(cliffs.get("bed_m", 2.2))
+    beds_per_tile = max(1, round(tile_m / max(bed_m, 1e-6)))
+    assert beds_per_tile >= 2, (
+        map_key,
+        f"a {tile_m} m tile against {bed_m} m beds puts {beds_per_tile} bed on the "
+        "tile, so every bed on the wall takes the same tone and the face draws as one "
+        f"gradient; widen tile_m to a whole multiple of bed_m ({2 * bed_m} m or more)",
+    )
+    # The other end of the same palette. `bed_id` is taken modulo 7 because the tone
+    # table is 7 wide, and that draw stays 7 wide on purpose: `rock_set` makes a dozen
+    # later draws from the same generator - lichen colonies, fbm, stains, streaks - so
+    # resizing it would re-weather every map in the pack, including ones nobody touched.
+    # Past 7 beds the tone therefore repeats WITHIN one tile and stops telling beds
+    # apart. Nothing in the pack is near this today; it is here so the rule the specs
+    # are written to ("bed_m times a whole count, at most five") cannot be quietly
+    # exceeded by a later tile_m.
+    assert beds_per_tile <= 7, (
+        map_key,
+        f"a {tile_m} m tile against {bed_m} m beds puts {beds_per_tile} beds on the "
+        "tile, past the 7-tone palette rock_set indexes with, so bed tones repeat "
+        "within a single tile",
+    )
+
+
+@pytest.mark.parametrize("map_key", MAP_KEYS)
+def test_a_seated_block_is_never_buried_deeper_than_the_stage_declares(map_key: str) -> None:
+    """The seating rules are written in fractions of an object's height. The drape gate
+    bounds absolute metres. Those are different units, so neither can police the other,
+    and on run 77 nobody could say which of the two a red drape gate meant.
+
+    `emit` seats a block up to 0.25 of its height under the footprint's mean ground, 0.4
+    under the ground at its centre, and 0.5 once it is being pushed down to close the gap
+    under its base. A block is therefore MEANT to be underground, by an amount that
+    scales with how big it is, while `abs(z - z_at(x, y)) < 3.5` adds that intended
+    burial to any unintended float and bounds the sum in metres. A tall enough block
+    breaches it having done nothing wrong - black_bear_pass ships lidar pinnacles, and
+    anything over 7 m tall can exceed 3.5 m by design alone.
+
+    This gate is the fraction, in the units the rules are written in, so it fails only
+    when a block is buried deeper than the stage ever meant to bury it.
+
+    It deliberately does NOT re-assert the drape bound. `over_drape_bound_m` rides in the
+    handoff so a red drape gate can be EXPLAINED instead of guessed at; two gates going
+    red over one physical fact would only be noise, and the repair for a genuine
+    conflict is the drape gate bounding this fraction, never a looser metre bound.
+    """
+
+    spec = load_spec(map_key)
+    require_built(map_key)
+    handoff = json.loads(
+        (PACK_ROOT / map_key / "authoring" / f"{spec.MOD_ID}.handoff.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    sink = (handoff.get("forest") or {}).get("rock_sink_m")
+    if sink is None:
+        # Only blocks seated onto the ground plane have a sink at all; a map with no
+        # tilt-seated rocks reports nothing rather than a misleading zero.
+        assert not (getattr(spec, "OBJECTS", None) or {}).get("scatter"), (
+            f"{map_key}: the spec scatters rocks but the stage reported no seating depth"
+        )
+        pytest.skip(f"{map_key}: no seated rocks")
+    assert sink["max_fraction"] <= MAX_SINK_FRACTION, (
+        map_key,
+        f"a block is buried {sink['max_fraction']} of its own height against the "
+        f"{MAX_SINK_FRACTION} the seating rules allow, so something seated it past "
+        "every branch that is supposed to bound it",
+        sink,
+    )
+
+
 @pytest.mark.parametrize("map_key", MAP_KEYS)
 def test_refills_carry_their_rings_grain(map_key: str) -> None:
     """Where the spec matches every refilled field to its ring, the fields' 2-8 m grain
