@@ -1490,9 +1490,7 @@ def _dae_triangle_soup(path: Path) -> tuple:
         inputs = re.findall(r'<input semantic="([^"]+)" source="#([^"]+)" offset="(\d+)"', body)
         stride = max(int(offset) for _semantic, _source, offset in inputs) + 1
         vertex_inputs = [
-            (source, int(offset))
-            for semantic, source, offset in inputs
-            if semantic == "VERTEX"
+            (source, int(offset)) for semantic, source, offset in inputs if semantic == "VERTEX"
         ]
         assert len(vertex_inputs) == 1, (path.name, material)
         source_id, offset = vertex_inputs[0]
@@ -1660,9 +1658,7 @@ def _same_winding_double_cover(positions: numpy.ndarray, blocks: list) -> list[d
                     overlap = _clip_overlap_area(flat[second], flat[first])
                     if overlap > _PAIR_OVERLAP_FLOOR:
                         total += overlap
-                        pairs.append(
-                            (int(live_index[first]), int(live_index[second]), overlap)
-                        )
+                        pairs.append((int(live_index[first]), int(live_index[second]), overlap))
             if pairs:
                 findings.append(
                     {

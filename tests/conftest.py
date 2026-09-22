@@ -48,6 +48,9 @@ _GENERATED_PATTERNS = (
         r"[\\/]examples[\\/]giant_props[\\/][^\\/]+[\\/]authoring[\\/](review|listing|verify)[\\/]"
     ),
     re.compile(r"[\\/]dist[\\/]"),
+    # The GIS maps pack (.gitignore, gis_maps block): fetched public data and the
+    # generated level tree are build output; specs, handoffs and thumbnails are tracked.
+    re.compile(r"[\\/]examples[\\/]gis_maps[\\/][^\\/]+[\\/](data|mod|textures)[\\/]"),
 )
 
 

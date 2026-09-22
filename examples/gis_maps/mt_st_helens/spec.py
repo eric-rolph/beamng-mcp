@@ -1,0 +1,172 @@
+"""Mount St. Helens crater and Pumice Plain - authored constants for the generator and level.
+
+The 1980 amphitheater: the horseshoe crater and its 2,000 ft headwall, the lava dome, and
+the Pumice Plain's braided ash canyons running north toward Spirit Lake. A 4096-sample
+terrain at 1.5 m per sample gives a 6144 m square that holds the whole amphitheater.
+"""
+
+MOD_ID = "ericrolph_mt_st_helens"
+DISPLAY_NAME = "Mount St. Helens Pumice Plain"
+ZIP_BASENAME = "mt_st_helens_ericrolph.zip"
+AUTHOR = "ericrolph"
+
+SITE = {
+    "place": "Skamania County, Washington, USA",
+    "center_lat": 46.222,
+    "center_lon": -122.190,
+    "epsg": 32610,
+    "size_px": 4096,
+    "square_size_m": 1.5,  # 6144 m footprint
+    # 4096 px over 6144 m is 1.5 m per texel, against the 3 m the module default of 2048
+    # left - flat colour from the driver's seat. 4096 is the ceiling, not a budget:
+    # conditioned_colour mosaics NAIP at the DEM sample count, so anything above size_px
+    # is a LANCZOS upsample of an array that holds no more detail - and it is not free,
+    # 8192 peaks build_base_set at 8.18 GB against 2.11 GB here.
+    "base_tex_px": 4096,
+}
+
+SOURCES = {
+    "elevation": [
+        {
+            "kind": "usgs_3dep",
+            "resolution": 1.0,
+            "citation": (
+                "WA_FEMAHQ_2018_D18 lidar via USGS 3DEP (post-eruption surface incl. the lava dome)"
+            ),
+        },
+    ],
+    "imagery": {"kind": "usgs_naip", "resolution": 1.0},
+    "roads": {"kind": "osm_overpass"},
+}
+
+TERRAIN = {
+    "materials": [
+        "sh_pumice_plain",
+        "sh_ash_gully",
+        "sh_crater_wall",
+        "sh_debris_slope",
+        "sh_snow_ice",
+    ],
+    "classify": {
+        "rules": [
+            {"min_elevation_frac": 0.86, "min_slope": 20.0, "material": "sh_snow_ice"},
+            {"min_slope": 34.0, "material": "sh_crater_wall"},
+            {"min_slope": 16.0, "material": "sh_debris_slope"},
+            {"min_slope": 5.0, "material": "sh_ash_gully"},
+        ],
+        "default": "sh_pumice_plain",
+    },
+    "smooth_sigma_px": 0.0,
+}
+
+PALETTE = {
+    "sh_pumice_plain": {"family": "gravel", "seed": 401, "size": 1024, "base": [0.55, 0.52, 0.48]},
+    "sh_ash_gully": {
+        "family": "volcanic_ash",
+        "seed": 402,
+        "size": 1024,
+        "base": [0.40, 0.38, 0.36],
+    },
+    "sh_crater_wall": {
+        "family": "rock_strata",
+        "seed": 403,
+        "size": 1024,
+        "base": [0.42, 0.38, 0.35],
+    },
+    "sh_debris_slope": {"family": "scree", "seed": 404, "size": 1024, "base": [0.36, 0.34, 0.33]},
+    "sh_snow_ice": {"family": "snow", "seed": 405, "size": 1024, "base": [0.88, 0.90, 0.93]},
+}
+
+IMAGERY = {
+    # First pass: the de-lighting is turned on, nothing is tuned. Every value below is
+    # bounded by something already measured in this tree; the site-specific work
+    # (the snowfields, chroma pulls, flat-fields) belongs in a critic round with sheets
+    # to look at, against the reference stations.
+    "delight": True,
+    # The floor was 45, from a near-solar-noon reading of NAIP's flight window at
+    # 46.22 N. The first build fitted the sun at exactly 45 degrees, correlation
+    # 0.495 - pinned on the bound, as all four of these maps were, so the bound was
+    # the answer rather than the data. 30 is the acquisition minimum NAIP is specified
+    # to and the floor Meteor Crater already carries, where the fit settles at 56 in the
+    # interior, so a wide range is not a runaway. The ceiling is unchanged.
+    #
+    # Measured afterwards: it did not work here either. The fit came back at exactly 30.0, so
+    # the bound is still the answer. It freed factory_butte (54.0) and wallace_creek (31.0)
+    # and re-pinned this map and bingham_canyon, where the lower sun took
+    # cast_shadow_fraction from 0.0126 to 0.1620.
+    #
+    # The floor is NOT being raised yet, for the reason written out in bingham_canyon's spec:
+    # that map took the same drop and the same re-pin and also shipped near-black patches,
+    # this one shipped none, so the floor is not the mechanism and the hunt goes first. Here
+    # too, reverting is not a way out of the gate - 45.0 was itself a pinned answer, so a fit
+    # free of both bounds needs a floor below the optimum, around 38.0.
+    #
+    # The pin is DECLARED in `SUN_FIT_PIN_ACCEPTED` in tests/test_gis_maps_pack.py rather than
+    # by a key here, because that entry is asserted live and a key in this dict would be inert
+    # in both directions. 30.0 is NAIP's specified acquisition minimum, not a claim about
+    # this flight.
+    "sun_altitude_range": [30.0, 68.0],
+    "sun_azimuth_hint": 180.0,
+    "sun_azimuth_window": 50.0,
+    "strength": 1.0,
+    "tint_from_imagery": 0.6,
+    # Slope mean 22.8, p95 43.5 deg, 31.9 % over 30: the crater headwall and the
+    # canyon walls are turned right away from the flight's sun and need more than the
+    # 2.2 default to come back to the same ash as their lit neighbours. The cap follows
+    # this map's own crater-wall rule at 34 degrees.
+    "max_gain": 4.0,
+    "steep_deg": 34.0,
+    "steep_feather_deg": 8.0,
+    "steep_cap": True,
+    # NOT YET MODELLED: the flight's snowfields on the north faces and in the crater
+    # are bright colourless cells that will survive the de-lighting as permanent white
+    # ground under an August sky. Black Bear Pass solves this with an IMAGERY["snow"]
+    # block; that block is site-tuned and wants a build to fit against, so it is the
+    # first finding this map's critic round should close.
+}
+
+ROADS = {
+    "include": [
+        "primary",
+        "secondary",
+        "tertiary",
+        "unclassified",
+        "residential",
+        "service",
+        "track",
+    ],
+    "widths": {
+        "primary": 8.0,
+        "secondary": 7.0,
+        "tertiary": 6.0,
+        "unclassified": 5.0,
+        "residential": 5.0,
+        "service": 4.0,
+        "track": 3.5,
+    },
+    "material": {
+        "name": "road_gravel",
+        "family": "gravel",
+        "seed": 900,
+        "base": [0.60, 0.55, 0.47],
+    },
+}
+
+SPAWNS = [
+    {"name": "pumice_plain", "lat": 46.238, "lon": -122.190, "heading_deg": 180.0, "default": True},
+    {"name": "crater_mouth", "lat": 46.215, "lon": -122.190, "heading_deg": 180.0},
+    {"name": "toutle_hummocks", "lat": 46.245, "lon": -122.215, "heading_deg": 135.0},
+]
+
+SKY = {"time": 0.90, "utc_offset": "-7", "year": 2026, "month": 8, "day": 1}
+
+BIOME = "Volcanic ash plain"
+FEATURES = "1980 crater headwall, lava dome, braided ash canyons of the Pumice Plain"
+SUITABLE_FOR = "Technical wash navigation, crawling over volcanic debris, big drops"
+ROADS_TEXT = "No roads: hiking trails only; expect to drive the washes"
+
+DESCRIPTION = (
+    "Mount St. Helens' 1980 crater and the Pumice Plain, rebuilt from USGS 3DEP 1 m lidar. "
+    "A 6 km square at 1.5 m per sample: the 600 m crater headwall, the lava dome, and the "
+    "sheer-walled braided canyons cut through ash and pumice on the way down to Spirit Lake."
+)
