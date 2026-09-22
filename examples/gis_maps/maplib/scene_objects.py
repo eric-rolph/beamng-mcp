@@ -461,6 +461,17 @@ def write_forest(
             # centre (a block on a lip would otherwise seat in the cliff below).
             seat = max(mean_ground - 0.25 * height_m, centre - 0.4 * max(height_m, 0.1))
             seat = min(seat, centre)
+            # THIS DISCARDS THE CALLER'S `z`. With a DEM the seating is the authority on
+            # a block's height and nothing above reads the `z` parameter, so whatever a
+            # scatter or a detector computed is overwritten here. The caller's value is
+            # the fallback for `dem is None` only.
+            #
+            # Worth saying out loud because it has already cost a fix: #134 corrected the
+            # ground lookup in `objects.scatter_rocks`, and for rocks - the only kind that
+            # reaches this branch, `tilt=True` having exactly one call site - the corrected
+            # z never reached a forest file. Its tests asserted on `scatter_rocks`' return
+            # value, which for a rock is not what ships. `test_the_forest_file_seats_its_
+            # stones_on_the_surface_the_game_draws` reads the written file instead.
             z = seat - min_elevation
             # The base plane's height over the lowest ground under the footprint: a
             # tilted block's base follows the ground plane, so its downhill edge
