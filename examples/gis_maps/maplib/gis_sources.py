@@ -39,10 +39,16 @@ USGS_NAIP_EXPORT = (
     "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage"
 )
 OT_RASTER_BUCKET = "https://opentopography.s3.sdsc.edu/raster"
+# Tried in order, first success wins. `maps.mail.ru` used to lead this list and was
+# returning its own 504 as of 2026-09-18, so every OSM fetch opened by spending four
+# attempts and 14 s of backoff (2 + 4 + 8) on a dead host before falling through. The
+# cost was small; the confusion was not, because a fetch log that opens with a wall of
+# `retry 1/3 ... retry 3/3` reads as a broken fetch rather than a mirror being skipped.
+# It stays last rather than being deleted: it is a real Overpass mirror and may recover.
 OVERPASS_ENDPOINTS = (
-    "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
+    "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
 )
 USER_AGENT = "beamng-maps-pack/1.0 (public GIS to BeamNG terrain; eric-rolph)"
 
