@@ -697,13 +697,25 @@ CLIFFS = {
     "joint_m": 8.0,
     "relief_m": 1.1,
     "buttress_m": 1.6,
-    "tile_m": 3.0,
+    # `bed_m` times a whole bed count, per the rule in maplib/cliffs.py: four beds of
+    # exactly 3.2 m. At the old 3 m this map was the pack's worst case - a tile thinner
+    # than one declared bed, so `round(tile_m / bed_m)` was 1 and the rim drew as a
+    # gradient with no layers in it at all. Four rather than five because 2048 px over
+    # 16 m would fall to 128 px per metre; at 12.8 m it holds 160.
+    "tile_m": 12.8,
     "max_triangles": 380000,
     "materials": {
         # The rim's cream limestone at the palette's own base, so the modelled ledge and
         # the painted ledge under it are the same stone. No lichen: this is high desert
         # and the reference photographs have none on the rim.
-        "cliff_kaibab": {"colour": [0.72, 0.66, 0.56], "strata": 0.5, "lichen": 0.0},
+        "cliff_kaibab": {
+            "colour": [0.72, 0.66, 0.56],
+            "strata": 0.5,
+            "lichen": 0.0,
+            # 2048 rather than the default 1024, to hold surface detail across the wider
+            # tile this map's 3.2 m bedding needs. See `tile_m` above.
+            "size": 2048,
+        },
     },
 }
 

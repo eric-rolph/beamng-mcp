@@ -283,7 +283,11 @@ CLIFFS = {
     "joint_m": 3.5,
     "relief_m": 0.45,
     "buttress_m": 0.9,
-    "tile_m": 2.0,
+    # `bed_m` times a whole bed count, per the rule in maplib/cliffs.py: five beds of
+    # exactly 1.2 m. At the old 2 m the tile carried two beds of 1.0 m - a sixth thinner
+    # than the shale declares, and half the card on a single bed tone. 1024 px over 6 m
+    # is 171 per metre, so this one needs no larger texture.
+    "tile_m": 6.0,
     "max_triangles": 420000,
     "materials": {
         # The fin tile's own base. Shale splits along its bedding harder than any rock

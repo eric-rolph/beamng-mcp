@@ -517,6 +517,35 @@ def build(
         "cliff_rock": {"colour": [0.46, 0.44, 0.42], "strata": 0.6, "lichen": 0.15}
     }
     materials_json: dict = {}
+    # The texture's bedding is the SAME bedding the spec declares, at last. `rock_set`
+    # counts beds per tile HEIGHT and the face's v runs z / tile_m, so one bed is
+    # `tile_m / beds_per_tile` metres of wall. It was fixed at 7 and answered to nothing:
+    # every map in the pack was drawing beds 3x to 7.5x finer than it asked for, which
+    # reads as grain rather than as strata.
+    #
+    # Rounded to a whole number because v wraps every tile and a fractional count seams
+    # at every tile boundary, so the bed the wall actually gets is not always the bed
+    # the spec named - `texture_bed_m` below reports what was drawn, not what was asked
+    # for. That distinction is the one this stage keeps getting wrong.
+    #
+    # A TILE MUST CARRY AT LEAST TWO BEDS, and a spec that cannot is a spec to widen.
+    # `rock_set` tints each bed from a fixed seven-tone palette indexed by the floor of
+    # the phase; at one bed per tile that index never advances, so the per-bed tone is a
+    # single constant over the whole card and the only thing left varying down the wall
+    # is the sine that separates beds. The wall then draws as one broad light-to-dark
+    # gradient - correct bedding THICKNESS and no visible beds, which is a worse result
+    # than the 7-bed corduroy it replaced because it looks like nothing at all. Measured
+    # on the cards rock_set really writes: one bed per tile puts 100% of the card on a
+    # single tone and its tile seam runs 23x the typical interior step, against 20% and
+    # 6.5x at five beds.
+    #
+    # So each map's `tile_m` is now `bed_m` times a whole bed count, picked as the
+    # largest count (at most five) that still leaves about 150 px per metre of wall at
+    # that material's `size`. That makes the drawn bed EXACTLY the declared one on every
+    # map in the pack, with no rounding error left to report.
+    tile_m_cfg = max(0.25, float(cfg["tile_m"]))
+    beds_per_tile = max(1, round(tile_m_cfg / max(float(cfg["bed_m"]), 1e-6)))
+    texture_bed_m = tile_m_cfg / beds_per_tile
     for family in sorted(families):
         params = families[family]
         full = f"{mod_id}_{family}"
@@ -527,9 +556,19 @@ def build(
             # a different level on every build. See maplib/stable_seed.py.
             seed + 500 + (stable_hash(family) % 500),
             colour=tuple(params.get("colour", (0.46, 0.44, 0.42))),
-            # The mesh carries the beds now, so the tile's own strata are the partings
-            # inside a bed rather than the bedding itself: authored per material.
+            # `strata` is the AMPLITUDE of the bedding; `beds_per_tile` is its pitch.
+            # The old comment here said the mesh carried the beds so the tile's strata
+            # were only the partings inside one. That was false wherever the lattice is
+            # too coarse to resolve `bed_m` - see `samples_per_bed_*` below - and on
+            # those maps the wall got neither the geometric bedding nor the texture's.
             strata=float(params.get("strata", 0.6)),
+            beds_per_tile=beds_per_tile,
+            # A tile wide enough to carry several beds is also a tile whose texels are
+            # spread over more wall, so a map that widens `tile_m` to get its bedding
+            # rhythm can buy the surface detail back here instead of choosing between
+            # them. 1024 over 3 m is 341 px/m; over 12 m it is 85, and 2048 makes that
+            # 171.
+            size=int(params.get("size", 1024)),
             lichen_cover=float(params.get("lichen", 0.15)),
         )
         materials_json[full] = {
@@ -602,12 +641,60 @@ def build(
         newline="\n",
     )
     kept_relief = [r["relief_m"] for r in keep]
+    # Can the mesh actually CARRY the bedding it is asked for? `face_relief` puts the beds
+    # in the geometry (`phase = (z + warp) / bed_m`, metres of relief per vertex), and the
+    # tile's own `strata` was demoted to the partings inside a bed when that moved -- so
+    # the beds read as layers only if the vertices sample `bed_m` finely enough. Vertices
+    # sit on a world-XY lattice of spacing `face_step_m`, so their spacing ALONG Z, which
+    # is the axis the bedding varies on, is `face_step_m * tan(slope)`: coarser than the
+    # step on anything steeper than 45 degrees, and the walls here are steep by selection.
+    # Two samples per bed is the floor for a wavelength to survive sampling at all; under
+    # one, the beds alias into irregular noise on the face.
+    #
+    # Recorded rather than asserted, because the number is a spec-and-budget question and
+    # not something a build can fix: `max_triangles` coarsens `face_step_m` above what the
+    # spec asked for, so a map can declare beds its own budget forbids. Measured over the
+    # cells of the bands actually KEPT, at the step actually used.
+    wall_slope = slope_deg(dem, res)[mask] if mask.any() else np.zeros(1, dtype="float32")
+    bed_m = float(cfg["bed_m"])
+    # THE STEP THE MESH ACTUALLY USES, not the one the budget produced. `_skin` lays its
+    # vertices on WHOLE DEM cells - `step = max(1, round(face_step_m / res))` at line 299
+    # - so the lattice really used is that many cells wide, and `face_step_m` below is the
+    # pre-rounding float. Dividing by the float would make this metric the very thing it
+    # was written to catch: a stage recording what it INTENDED rather than what it did.
+    # On a 2 m DEM a declared 1.5 m step IS 2.0 m, so samples per bed computed from 1.5
+    # reads a third better than the mesh can deliver, and a map already at one DEM cell
+    # cannot be improved by any budget at all - it has run out of elevation data.
+    lattice_step_m = max(1, round(step_m / res)) * res
+
+    def _samples_per_bed(slope_percentile: float) -> float:
+        deg = float(np.percentile(wall_slope, slope_percentile))
+        # arctan keeps this under 90, but a near-vertical wall still wants a bound.
+        vertical_step = lattice_step_m * math.tan(math.radians(min(deg, 89.0)))
+        return bed_m / vertical_step if vertical_step > 1e-6 else float("inf")
+
     stats = {
         "bands": len(records),
         "bands_modelled": len(keep),
         "bands_over_budget": dropped,
         "tiles": len(items),
         "triangles": triangles,
+        # THE BUDGET IS PRICED ON THE FLOAT STEP; THE MESH IS STRIDED ON THE LATTICE.
+        # The loop above spends `area * 2 / step_m**2` per wall and stops at
+        # `max_triangles`, but `_skin` lays vertices on WHOLE DEM cells, so what is
+        # actually built costs `area * 2 / lattice_step_m**2`. Where rounding goes down
+        # the mesh is finer than the price and the map ships over its own budget by
+        # `(step_m / lattice_step_m) ** 2`, with nothing dropped and no warning - the
+        # decision to keep a wall was made against a number the wall does not cost.
+        #
+        # `triangles` above is the real count off the built mesh, so the three numbers
+        # together say which case a map is in without anyone re-deriving it. Recorded,
+        # not asserted: repricing the loop on the lattice would change which walls get
+        # dropped on every map at once, and that is a rebuild-and-look change rather
+        # than one to make blind.
+        "triangles_priced": round(spent),
+        "triangles_budget": budget,
+        "triangles_over_budget": round(triangles / max(budget, 1), 3),
         "face_step_m": round(step_m, 3),
         "bed_m": float(cfg["bed_m"]),
         "joint_m": float(cfg["joint_m"]),
@@ -618,6 +705,22 @@ def build(
         "found_area_m2": round(sum(r["area_m2"] for r in records), 1),
         "relief_p50_m": round(float(np.median(kept_relief)), 2),
         "relief_max_m": round(float(max(kept_relief)), 2),
+        # The lattice `_skin` really used, beside the pre-rounding float in
+        # `face_step_m`. When these differ the mesh is coarser than the budget thinks,
+        # and a map whose lattice is already one DEM cell cannot be helped by a bigger
+        # triangle budget - only by finer elevation data.
+        # What the TEXTURE draws a bed at, beside the `bed_m` the spec asked for. The
+        # two differ by the whole-number rounding that keeps the tile seamless.
+        "texture_bed_m": round(float(texture_bed_m), 3),
+        "texture_beds_per_tile": int(beds_per_tile),
+        "face_step_lattice_m": round(float(lattice_step_m), 3),
+        "face_step_is_one_dem_cell": bool(round(step_m / res) <= 1),
+        "wall_slope_p50_deg": round(float(np.median(wall_slope)), 1),
+        "wall_slope_p90_deg": round(float(np.percentile(wall_slope, 90)), 1),
+        # Beds per vertex along Z, at the median wall and at the steep tail. Under 2.0 the
+        # bedding is undersampled; under 1.0 it aliases into noise instead of layers.
+        "samples_per_bed_p50": round(_samples_per_bed(50.0), 2),
+        "samples_per_bed_steep": round(_samples_per_bed(90.0), 2),
         "materials": len(materials_json),
         "face_material": family,
         "collada_bytes": int(dae_bytes),
@@ -625,7 +728,10 @@ def build(
     }
     log(
         f"  {len(keep)} cliff bands modelled in {len(items)} tiles, "
-        f"{triangles / 1e3:.0f} k triangles at {step_m:.2f} m, "
+        f"{triangles / 1e3:.0f} k triangles at {step_m:.2f} m "
+        f"(priced {stats['triangles_priced'] / 1e3:.0f} k against a "
+        f"{budget / 1e3:.0f} k budget, {stats['triangles_over_budget']}x), "
+        f"lattice {lattice_step_m:.1f} m, "
         f"tallest {stats['relief_max_m']} m"
     )
     return {"items": items, "materials": materials_json, "mask": mask, "stats": stats}

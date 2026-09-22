@@ -156,7 +156,11 @@ CLIFFS = {
     "joint_m": 9.0,
     "relief_m": 0.3,
     "buttress_m": 0.7,
-    "tile_m": 2.0,
+    # `bed_m` times a whole bed count, per the rule in maplib/cliffs.py: five beds of
+    # exactly 0.9 m. At the old 2 m the tile carried two beds of 1.0 m, a ninth thicker
+    # than this scarp declares. 1024 px over 4.5 m is 228 per metre, the densest cliff
+    # texture in the pack, which suits a scarp a driver can get within a metre of.
+    "tile_m": 4.5,
     "max_triangles": 260000,
     "materials": {
         # The scarp palette's own base: dry alluvium cut through, not rock. Barely
