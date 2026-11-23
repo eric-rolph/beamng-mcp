@@ -103,7 +103,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=1.26,<3" },
     { name = "onnxruntime-gpu", marker = "extra == 'vision'", specifier = ">=1.22,<1.27" },
     { name = "opencv-python-headless", marker = "extra == 'vision'", specifier = ">=4.11,<5" },
-    { name = "pillow", specifier = ">=11.3,<13" },
+    { name = "pillow", specifier = ">=12.2,<13" },
     { name = "platformdirs", specifier = ">=4.3,<5" },
     { name = "pydantic", specifier = ">=2.10,<3" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3,<9" },
