@@ -51,8 +51,8 @@ dev = [
   # the author's machine.
   "lupa>=2.8,<3",
   "mypy>=1.15,<2",
-  "pytest>=8.3,<9",
-  "pytest-asyncio>=0.25,<1",
+  "pytest>=9.0.3,<10",
+  "pytest-asyncio>=0.25,<2",
   "pytest-cov>=6,<7",
   # Pinned to a formatter-stable minor: the format gate is only meaningful
   # when CI and every workstation resolve the SAME formatter. The open
