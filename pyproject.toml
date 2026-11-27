@@ -24,19 +24,19 @@ classifiers = [
 ]
 dependencies = [
   "anyio>=4.8,<5",
-  "beamngpy>=1.35.1,<1.36",
+  "beamngpy>=1.35.1,<1.38",
   "mcp[cli]>=1.28.1,<2",
   "numpy>=1.26,<3",
   "pillow>=12.2,<14",
   "platformdirs>=4.3,<5",
   "pydantic>=2.10,<3",
-  "websockets>=16.1,<17",
+  "websockets>=16.1,<18",
 ]
 
 [project.optional-dependencies]
 vision = [
-  "opencv-python-headless>=4.11,<5",
-  "onnxruntime-gpu>=1.22,<1.27",
+  "opencv-python-headless>=4.11,<6",
+  "onnxruntime-gpu>=1.22,<1.33",
   "torch>=2.8,<3",
   "transformers>=4.53,<6",
 ]
@@ -50,10 +50,10 @@ dev = [
   # that only the author happens to have installed is a gate that only runs on
   # the author's machine.
   "lupa>=2.8,<3",
-  "mypy>=1.15,<2",
+  "mypy>=1.15,<3",
   "pytest>=9.0.3,<10",
   "pytest-asyncio>=0.25,<2",
-  "pytest-cov>=6,<7",
+  "pytest-cov>=6,<8",
   # Pinned to a formatter-stable minor: the format gate is only meaningful
   # when CI and every workstation resolve the SAME formatter. The open
   # `<1` pin let CI pick up 0.16 the day it shipped, and its restyled
