@@ -1,0 +1,277 @@
+{
+  "map": "wallace_creek",
+  "every_m": 250.0,
+  "ring_m": null,
+  "stations": [
+    {
+      "n": 1,
+      "lat": 35.279953,
+      "lon": -119.836105,
+      "heading_deg": 178.88,
+      "level_xy": [
+        -1863.1,
+        2046.6
+      ],
+      "aerial": "https://www.google.com/maps/@35.279953,-119.836105,300a,35y,178.88h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.279953,-119.836105&heading=178.88&pitch=0&fov=80"
+    },
+    {
+      "n": 2,
+      "lat": 35.278001,
+      "lon": -119.83596,
+      "heading_deg": 140.28,
+      "level_xy": [
+        -1856.1,
+        1829.7
+      ],
+      "aerial": "https://www.google.com/maps/@35.278001,-119.835960,300a,35y,140.28h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.278001,-119.835960&heading=140.28&pitch=0&fov=80"
+    },
+    {
+      "n": 3,
+      "lat": 35.27572,
+      "lon": -119.835102,
+      "heading_deg": 156.1,
+      "level_xy": [
+        -1785.3,
+        1574.4
+      ],
+      "aerial": "https://www.google.com/maps/@35.275720,-119.835102,300a,35y,156.10h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.275720,-119.835102&heading=156.10&pitch=0&fov=80"
+    },
+    {
+      "n": 4,
+      "lat": 35.273843,
+      "lon": -119.834062,
+      "heading_deg": 158.13,
+      "level_xy": [
+        -1696.6,
+        1363.4
+      ],
+      "aerial": "https://www.google.com/maps/@35.273843,-119.834062,300a,35y,158.13h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.273843,-119.834062&heading=158.13&pitch=0&fov=80"
+    },
+    {
+      "n": 5,
+      "lat": 35.27202,
+      "lon": -119.832593,
+      "heading_deg": 135.93,
+      "level_xy": [
+        -1568.7,
+        1157.4
+      ],
+      "aerial": "https://www.google.com/maps/@35.272020,-119.832593,300a,35y,135.93h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.272020,-119.832593&heading=135.93&pitch=0&fov=80"
+    },
+    {
+      "n": 6,
+      "lat": 35.269544,
+      "lon": -119.829777,
+      "heading_deg": 127.64,
+      "level_xy": [
+        -1320.3,
+        875.3
+      ],
+      "aerial": "https://www.google.com/maps/@35.269544,-119.829777,300a,35y,127.64h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.269544,-119.829777&heading=127.64&pitch=0&fov=80"
+    },
+    {
+      "n": 7,
+      "lat": 35.26724,
+      "lon": -119.827203,
+      "heading_deg": 151.58,
+      "level_xy": [
+        -1093.4,
+        613.1
+      ],
+      "aerial": "https://www.google.com/maps/@35.267240,-119.827203,300a,35y,151.58h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.267240,-119.827203&heading=151.58&pitch=0&fov=80"
+    },
+    {
+      "n": 8,
+      "lat": 35.265642,
+      "lon": -119.825641,
+      "heading_deg": 139.23,
+      "level_xy": [
+        -956.4,
+        431.6
+      ],
+      "aerial": "https://www.google.com/maps/@35.265642,-119.825641,300a,35y,139.23h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.265642,-119.825641&heading=139.23&pitch=0&fov=80"
+    },
+    {
+      "n": 9,
+      "lat": 35.263557,
+      "lon": -119.824269,
+      "heading_deg": 154.3,
+      "level_xy": [
+        -838.1,
+        196.8
+      ],
+      "aerial": "https://www.google.com/maps/@35.263557,-119.824269,300a,35y,154.30h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.263557,-119.824269&heading=154.30&pitch=0&fov=80"
+    },
+    {
+      "n": 10,
+      "lat": 35.260608,
+      "lon": -119.821944,
+      "heading_deg": 134.42,
+      "level_xy": [
+        -635.9,
+        -136.4
+      ],
+      "aerial": "https://www.google.com/maps/@35.260608,-119.821944,300a,35y,134.42h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.260608,-119.821944&heading=134.42&pitch=0&fov=80"
+    },
+    {
+      "n": 11,
+      "lat": 35.258455,
+      "lon": -119.820329,
+      "heading_deg": 120.89,
+      "level_xy": [
+        -495.7,
+        -379.5
+      ],
+      "aerial": "https://www.google.com/maps/@35.258455,-119.820329,300a,35y,120.89h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.258455,-119.820329&heading=120.89&pitch=0&fov=80"
+    },
+    {
+      "n": 12,
+      "lat": 35.256606,
+      "lon": -119.818885,
+      "heading_deg": 154.21,
+      "level_xy": [
+        -370.1,
+        -588.3
+      ],
+      "aerial": "https://www.google.com/maps/@35.256606,-119.818885,300a,35y,154.21h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.256606,-119.818885&heading=154.21&pitch=0&fov=80"
+    },
+    {
+      "n": 13,
+      "lat": 35.254686,
+      "lon": -119.817548,
+      "heading_deg": 147.04,
+      "level_xy": [
+        -254.5,
+        -804.8
+      ],
+      "aerial": "https://www.google.com/maps/@35.254686,-119.817548,300a,35y,147.04h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.254686,-119.817548&heading=147.04&pitch=0&fov=80"
+    },
+    {
+      "n": 14,
+      "lat": 35.25284,
+      "lon": -119.815113,
+      "heading_deg": 130.04,
+      "level_xy": [
+        -38.7,
+        -1015.9
+      ],
+      "aerial": "https://www.google.com/maps/@35.252840,-119.815113,300a,35y,130.04h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.252840,-119.815113&heading=130.04&pitch=0&fov=80"
+    },
+    {
+      "n": 15,
+      "lat": 35.251472,
+      "lon": -119.812807,
+      "heading_deg": 129.78,
+      "level_xy": [
+        166.9,
+        -1173.6
+      ],
+      "aerial": "https://www.google.com/maps/@35.251472,-119.812807,300a,35y,129.78h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.251472,-119.812807&heading=129.78&pitch=0&fov=80"
+    },
+    {
+      "n": 16,
+      "lat": 35.249925,
+      "lon": -119.810316,
+      "heading_deg": 128.36,
+      "level_xy": [
+        388.7,
+        -1351.7
+      ],
+      "aerial": "https://www.google.com/maps/@35.249925,-119.810316,300a,35y,128.36h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.249925,-119.810316&heading=128.36&pitch=0&fov=80"
+    },
+    {
+      "n": 17,
+      "lat": 35.248956,
+      "lon": -119.808741,
+      "heading_deg": 132.18,
+      "level_xy": [
+        529.0,
+        -1463.3
+      ],
+      "aerial": "https://www.google.com/maps/@35.248956,-119.808741,300a,35y,132.18h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.248956,-119.808741&heading=132.18&pitch=0&fov=80"
+    },
+    {
+      "n": 18,
+      "lat": 35.247238,
+      "lon": -119.806516,
+      "heading_deg": 136.15,
+      "level_xy": [
+        726.1,
+        -1659.6
+      ],
+      "aerial": "https://www.google.com/maps/@35.247238,-119.806516,300a,35y,136.15h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.247238,-119.806516&heading=136.15&pitch=0&fov=80"
+    },
+    {
+      "n": 19,
+      "lat": 35.244554,
+      "lon": -119.80341,
+      "heading_deg": 136.34,
+      "level_xy": [
+        1000.4,
+        -1965.4
+      ],
+      "aerial": "https://www.google.com/maps/@35.244554,-119.803410,300a,35y,136.34h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.244554,-119.803410&heading=136.34&pitch=0&fov=80"
+    },
+    {
+      "n": 20,
+      "lat": 35.2717,
+      "lon": -119.8275,
+      "heading_deg": 135.0,
+      "level_xy": [
+        -1106.3,
+        1108.6
+      ],
+      "aerial": "https://www.google.com/maps/@35.271700,-119.827500,300a,35y,135.00h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.271700,-119.827500&heading=135.00&pitch=0&fov=80",
+      "spawn": "wallace_creek_offset",
+      "near": "wallace_creek_offset"
+    },
+    {
+      "n": 21,
+      "lat": 35.255,
+      "lon": -119.805,
+      "heading_deg": 315.0,
+      "level_xy": [
+        888.4,
+        -802.3
+      ],
+      "aerial": "https://www.google.com/maps/@35.255000,-119.805000,300a,35y,315.00h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.255000,-119.805000&heading=315.00&pitch=0&fov=80",
+      "spawn": "elkhorn_scarp",
+      "near": "elkhorn_scarp"
+    },
+    {
+      "n": 22,
+      "lat": 35.265,
+      "lon": -119.83,
+      "heading_deg": 90.0,
+      "level_xy": [
+        -1355.0,
+        371.7
+      ],
+      "aerial": "https://www.google.com/maps/@35.265000,-119.830000,300a,35y,90.00h,70t/data=!3m1!1e3",
+      "pano": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=35.265000,-119.830000&heading=90.00&pitch=0&fov=80",
+      "spawn": "plain_west",
+      "near": "plain_west"
+    }
+  ]
+}

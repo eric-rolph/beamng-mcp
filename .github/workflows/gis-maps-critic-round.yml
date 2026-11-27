@@ -1,0 +1,183 @@
+name: GIS maps critic round
+
+# Builds one or more maps on a runner, runs the static gates and renders the critic
+# sheets, then uploads the sheets as an artifact. The sheets are what a critic round
+# reads (see examples/gis_maps/critic_rubric.md); they are gitignored, so an artifact
+# is how they leave the runner.
+#
+# This job exists because the build cannot run anywhere else. The fetch stage needs
+# USGS 3DEP, the NAIP image service, the OpenTopography bucket and an Overpass mirror,
+# and the sandboxes the project's own sessions run in deny those hosts - so a session
+# can judge a round but cannot produce the sheets to judge. This is the other half.
+#
+# It does not judge. A round is closed by a session that downloads the artifact, reads
+# the sheets against the rubric, writes the verdict row into the map's DESIGN.md and
+# pushes the generator changes the findings name.
+
+on:
+  workflow_dispatch:
+    inputs:
+      maps:
+        description: "Space-separated map keys (empty = the four in autonomous development)"
+        required: false
+        default: ""
+      stages:
+        description: "One build stage, or all: fetch, terrain, level, dist, ledger"
+        required: false
+        default: "all"
+  push:
+    # `workflow_dispatch` resolves against the DEFAULT branch, so while this file lives
+    # on a feature branch it is the one trigger that cannot reach it - the same reason
+    # gis-maps-release.yml carries a branch push. A push here is therefore how a round
+    # is actually asked for until this reaches main.
+    #
+    # The prefix is deliberately NOT `claude/gis-maps**`: that is what the release
+    # workflow watches, and a branch matching it would fire a 36-minute six-map build
+    # alongside this one, on the same runners, for nothing.
+    branches:
+      - "claude/critic-round**"
+
+permissions:
+  contents: read
+
+concurrency:
+  # One round at a time per branch: two builds of the same map would race on
+  # <map>/data/ and on the level tree they both write.
+  group: gis-maps-critic-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  render-sheets:
+    runs-on: ubuntu-latest
+    # Black Bear Pass alone is about 430 M point returns and an hour; four maps with a
+    # cold cache is most of a working day. The release job's own cap is 340 minutes.
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install the pack's dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+          python -c "import rasterio; print('GDAL', rasterio.__gdal_version__)"
+          df -h / | tail -1
+
+      - name: Build the maps under review
+        env:
+          # Read as data, never interpolated into the shell: a dispatch input is
+          # whatever the person typed.
+          MAPS: ${{ github.event.inputs.maps }}
+          STAGES: ${{ github.event.inputs.stages }}
+          # The de-lighting is the pack's memory ceiling and prints RSS per phase
+          # with this set, which is the only profile a runner ever produces.
+          GIS_MAPS_MEM: "1"
+        run: |
+          # Actions runs a `run:` step as `bash -e {0}`, so -e is already on here and
+          # `set -uo pipefail` does not clear it. Without the +e the shell exits on the
+          # failing pipeline and the annotation below never runs - the trap 4037639 fell
+          # into on the release job.
+          set +e
+          set -uo pipefail
+          mkdir -p /tmp/round
+          keys="${MAPS:-}"
+          if [ -z "$keys" ]; then
+            keys="black_bear_pass meteor_crater factory_butte wallace_creek"
+          fi
+          echo "maps: $keys"
+          build() {
+            for key in $keys; do
+              python examples/gis_maps/build.py "$key" "${STAGES:-all}" || return $?
+            done
+          }
+          build 2>&1 | tee /tmp/round/build.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            { echo "--- stage: build"; echo "--- maps: $keys"; free -m; df -h / | tail -1; } > /tmp/round/build.env
+            python3 .github/scripts/build_failure_annotation.py \
+              "$status" /tmp/round/build.log /tmp/round/build.env
+            exit "$status"
+          fi
+          du -sh examples/gis_maps/*/dist 2>/dev/null || true
+          df -h / | tail -1
+
+      - name: Static gates on the built trees
+        # The gates are the pack's inventory: a skip names what a map has not got yet,
+        # so the report is read, not just the exit code. It is kept as a file because a
+        # session cannot read an Actions log at all - the round log artifact below is
+        # how both the skips and any failure leave the runner.
+        run: |
+          set +e
+          set -uo pipefail
+          python -m pytest -q -ra --tb=short tests/test_gis_maps_pack.py 2>&1 \
+            | tee /tmp/round/gates.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            echo "--- stage: static gates" > /tmp/round/gates.env
+            # --pytest, because without it this call raised the TAIL, and the tail of a
+            # -q run is the skip wall: round 3's annotation named which maps had no
+            # flat-field and never named the assertion that failed.
+            python3 .github/scripts/build_failure_annotation.py \
+              "$status" /tmp/round/gates.log /tmp/round/gates.env --pytest
+            exit "$status"
+          fi
+
+      - name: Render the critic sheets
+        env:
+          MAPS: ${{ github.event.inputs.maps }}
+        run: |
+          set +e
+          set -uo pipefail
+          keys="${MAPS:-}"
+          if [ -z "$keys" ]; then
+            keys="black_bear_pass meteor_crater factory_butte wallace_creek"
+          fi
+          render() {
+            for key in $keys; do
+              python examples/gis_maps/critic_sheets.py "$key" || return $?
+            done
+          }
+          render 2>&1 | tee /tmp/round/sheets.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            echo "--- stage: render sheets" > /tmp/round/sheets.env
+            python3 .github/scripts/build_failure_annotation.py \
+              "$status" /tmp/round/sheets.log /tmp/round/sheets.env
+            exit "$status"
+          fi
+          du -sh examples/gis_maps/*/authoring/critic 2>/dev/null || true
+
+      - name: Upload the round's logs
+        # `always()`, because the round a session most needs to read is the one that
+        # failed. The annotation carries only the last 60 lines; this carries the whole
+        # build, including the per-phase RSS the de-lighting prints under GIS_MAPS_MEM.
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: critic-round-logs-${{ github.sha }}
+          path: /tmp/round/*
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload the sheets for the round
+        uses: actions/upload-artifact@v7
+        with:
+          name: critic-sheets-${{ github.sha }}
+          path: examples/gis_maps/*/authoring/critic/**
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload the handoffs the sheets were rendered from
+        # A finding is written against numbers as well as pictures, and the handoff is
+        # the authoritative record of what the build measured.
+        uses: actions/upload-artifact@v7
+        with:
+          name: critic-handoffs-${{ github.sha }}
+          path: examples/gis_maps/*/authoring/*.handoff.json
+          if-no-files-found: error
+          retention-days: 30

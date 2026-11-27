@@ -2,7 +2,14 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # `claude/gis-maps-pack` is here because the maps pack is developed on it over
+    # weeks and merged into repeatedly, so its head needs checking on its own
+    # account. Today that only happens as a side effect of PR #89 being open: a
+    # `pull_request` run checks that PR's head, which IS this branch. #89 exists to
+    # be closed rather than merged, and the day it closes the branch would lose its
+    # coverage with nothing to say so. A branch that is merged into should not
+    # depend on a pull request nobody intends to merge.
+    branches: [main, claude/gis-maps-pack]
   pull_request:
   workflow_dispatch:
 
@@ -45,8 +52,28 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev]"
 
+      # The log this step writes cannot be read by the sessions that drive this pack:
+      # the Actions log endpoint redirects to blob storage their egress policy denies,
+      # and the check annotation a bare failure leaves behind is the single line
+      # "Process completed with exit code 1". A red leg on one matrix entry and green on
+      # the other two is then indistinguishable from a flake, which cost an afternoon.
+      # Annotations they CAN read, so the same digest the release workflow's gates step
+      # uses goes here - `--pytest` because `-q` ends in a wall of SKIPPED reasons and a
+      # blind tail names which maps opted out of which contract, never the assertion.
       - name: Run test suite
-        run: python -m pytest -q
+        shell: bash
+        run: |
+          set +e
+          set -uo pipefail
+          python -m pytest -q 2>&1 | tee /tmp/suite.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            echo "--- stage: test suite, Python ${{ matrix.python-version }}" > /tmp/suite.env
+            python .github/scripts/build_failure_annotation.py \
+              "$status" /tmp/suite.log /tmp/suite.env --pytest \
+              --title "Test suite failed on Python ${{ matrix.python-version }}"
+            exit "$status"
+          fi
 
       - name: Smoke-test command entry point
         run: python -m beamng_mcp --help
