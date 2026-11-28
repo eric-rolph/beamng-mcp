@@ -1,0 +1,7101 @@
+{
+ "terrain_source_hash": "0680eca31337f4ba",
+ "stones": [
+  {
+   "name": "hearth_stone_00",
+   "kind": "hearth",
+   "cluster": "N",
+   "bearing": 345.0,
+   "r_centre": 213.0,
+   "r_inner": 202.0,
+   "r_outer": 224.0,
+   "diam": 22.0,
+   "height": 15.0,
+   "asset": "namaqualand_boulder_04",
+   "yaw": 20.0,
+   "x": 794.872,
+   "y": -74.258,
+   "z_offset": -1.5,
+   "z": 98.5,
+   "keepout_r": 15.0,
+   "rp": 11.0,
+   "terrain_z": 100.0
+  },
+  {
+   "name": "hearth_stone_01",
+   "kind": "hearth",
+   "cluster": "N",
+   "bearing": 0.0,
+   "r_centre": 217.0,
+   "r_inner": 202.0,
+   "r_outer": 232.0,
+   "diam": 30.0,
+   "height": 21.0,
+   "asset": "boulder_01",
+   "yaw": 95.0,
+   "x": 850.0,
+   "y": -63.0,
+   "z_offset": -1.5,
+   "z": 98.515,
+   "keepout_r": 19.0,
+   "rp": 15.0,
+   "terrain_z": 100.015
+  },
+  {
+   "name": "hearth_stone_02",
+   "kind": "hearth",
+   "cluster": "N",
+   "bearing": 15.0,
+   "r_centre": 220.0,
+   "r_inner": 202.0,
+   "r_outer": 238.0,
+   "diam": 36.0,
+   "height": 26.0,
+   "asset": "rock_face_01",
+   "yaw": 0.0,
+   "x": 906.94,
+   "y": -67.496,
+   "z_offset": -1.5,
+   "z": 98.532,
+   "keepout_r": 22.0,
+   "rp": 18.0,
+   "terrain_z": 100.032
+  },
+  {
+   "name": "hearth_stone_03",
+   "kind": "hearth",
+   "cluster": "N",
+   "bearing": 30.0,
+   "r_centre": 216.0,
+   "r_inner": 202.0,
+   "r_outer": 230.0,
+   "diam": 28.0,
+   "height": 19.0,
+   "asset": "namaqualand_boulder_03",
+   "yaw": 140.0,
+   "x": 958.0,
+   "y": -92.939,
+   "z_offset": -1.5,
+   "z": 98.515,
+   "keepout_r": 18.0,
+   "rp": 14.0,
+   "terrain_z": 100.015
+  },
+  {
+   "name": "hearth_stone_04",
+   "kind": "hearth",
+   "cluster": "N",
+   "bearing": 45.0,
+   "r_centre": 212.0,
+   "r_inner": 202.0,
+   "r_outer": 222.0,
+   "diam": 20.0,
+   "height": 14.0,
+   "asset": "namaqualand_boulder_02",
+   "yaw": 60.0,
+   "x": 999.907,
+   "y": -130.093,
+   "z_offset": -1.5,
+   "z": 98.5,
+   "keepout_r": 14.0,
+   "rp": 10.0,
+   "terrain_z": 100.0
+  },
+  {
+   "name": "chock_stone_05",
+   "kind": "chock",
+   "cluster": "N",
+   "bearing": 7.0,
+   "r_centre": 230.0,
+   "r_inner": 225.0,
+   "r_outer": 235.0,
+   "diam": 10.0,
+   "height": 6.5,
+   "asset": "namaqualand_boulder_05",
+   "yaw": 185,
+   "x": 878.03,
+   "y": -51.714,
+   "z_offset": -0.8,
+   "z": 99.317,
+   "keepout_r": 9.0,
+   "rp": 5.0,
+   "terrain_z": 100.117
+  },
+  {
+   "name": "chock_stone_06",
+   "kind": "chock",
+   "cluster": "N",
+   "bearing": 23.0,
+   "r_centre": 230.0,
+   "r_inner": 225.0,
+   "r_outer": 235.0,
+   "diam": 10.0,
+   "height": 6.5,
+   "asset": "namaqualand_boulder_05",
+   "yaw": 222,
+   "x": 939.868,
+   "y": -68.284,
+   "z_offset": -0.8,
+   "z": 99.332,
+   "keepout_r": 9.0,
+   "rp": 5.0,
+   "terrain_z": 100.132
+  },
+  {
+   "name": "hearth_stone_07",
+   "kind": "hearth",
+   "cluster": "E",
+   "bearing": 75.0,
+   "r_centre": 213.0,
+   "r_inner": 202.0,
+   "r_outer": 224.0,
+   "diam": 22.0,
+   "height": 15.0,
+   "asset": "namaqualand_boulder_04",
+   "yaw": 20.0,
+   "x": 1055.742,
+   "y": -224.872,
+   "z_offset": -1.5,
+   "z": 98.504,
+   "keepout_r": 15.0,
+   "rp": 11.0,
+   "terrain_z": 100.004
+  },
+  {
+   "name": "hearth_stone_08",
+   "kind": "hearth",
+   "cluster": "E",
+   "bearing": 90.0,
+   "r_centre": 217.0,
+   "r_inner": 202.0,
+   "r_outer": 232.0,
+   "diam": 30.0,
+   "height": 21.0,
+   "asset": "boulder_01",
+   "yaw": 95.0,
+   "x": 1067.0,
+   "y": -280.0,
+   "z_offset": -1.5,
+   "z": 98.52,
+   "keepout_r": 19.0,
+   "rp": 15.0,
+   "terrain_z": 100.02
+  },
+  {
+   "name": "hearth_stone_09",
+   "kind": "hearth",
+   "cluster": "E",
+   "bearing": 105.0,
+   "r_centre": 220.0,
+   "r_inner": 202.0,
+   "r_outer": 238.0,
+   "diam": 36.0,
+   "height": 26.0,
+   "asset": "rock_face_01",
+   "yaw": 0.0,
+   "x": 1062.504,
+   "y": -336.94,
+   "z_offset": -1.5,
+   "z": 98.536,
+   "keepout_r": 22.0,
+   "rp": 18.0,
+   "terrain_z": 100.036
+  },
+  {
+   "name": "hearth_stone_10",
+   "kind": "hearth",
+   "cluster": "E",
+   "bearing": 120.0,
+   "r_centre": 216.0,
+   "r_inner": 202.0,
+   "r_outer": 230.0,
+   "diam": 28.0,
+   "height": 19.0,
+   "asset": "namaqualand_boulder_03",
+   "yaw": 140.0,
+   "x": 1037.061,
+   "y": -388.0,
+   "z_offset": -1.5,
+   "z": 98.515,
+   "keepout_r": 18.0,
+   "rp": 14.0,
+   "terrain_z": 100.015
+  },
+  {
+   "name": "hearth_stone_11",
+   "kind": "hearth",
+   "cluster": "E",
+   "bearing": 135.0,
+   "r_centre": 212.0,
+   "r_inner": 202.0,
+   "r_outer": 222.0,
+   "diam": 20.0,
+   "height": 14.0,
+   "asset": "namaqualand_boulder_02",
+   "yaw": 60.0,
+   "x": 999.907,
+   "y": -429.907,
+   "z_offset": -1.5,
+   "z": 98.5,
+   "keepout_r": 14.0,
+   "rp": 10.0,
+   "terrain_z": 100.0
+  },
+  {
+   "name": "chock_stone_12",
+   "kind": "chock",
+   "cluster": "E",
+   "bearing": 97.0,
+   "r_centre": 230.0,
+   "r_inner": 225.0,
+   "r_outer": 235.0,
+   "diam": 10.0,
+   "height": 6.5,
+   "asset": "namaqualand_boulder_05",
+   "yaw": 84,
+   "x": 1078.286,
+   "y": -308.03,
+   "z_offset": -0.8,
+   "z": 99.331,
+   "keepout_r": 9.0,
+   "rp": 5.0,
+   "terrain_z": 100.131
+  },
+  {
+   "name": "chock_stone_13",
+   "kind": "chock",
+   "cluster": "E",
+   "bearing": 113.0,
+   "r_centre": 230.0,
+   "r_inner": 225.0,
+   "r_outer": 235.0,
+   "diam": 10.0,
+   "height": 6.5,
+   "asset": "namaqualand_boulder_05",
+   "yaw": 121,
+   "x": 1061.716,
+   "y": -369.868,
+   "z_offset": -0.8,
+   "z": 99.333,
+   "keepout_r": 9.0,
+   "rp": 5.0,
+   "terrain_z": 100.133
+  },
+  {
+   "name": "hearth_stone_14",
+   "kind": "hearth",
+   "cluster": "S",
+   "bearing": 165.0,
+   "r_centre": 213.0,
+   "r_inner": 202.0,
+   "r_outer": 224.0,
+   "diam": 22.0,
+   "height": 15.0,
+   "asset": "namaqualand_boulder_04",
+   "yaw": 20.0,
+   "x": 905.128,
+   "y": -485.742,
+   "z_offset": -1.5,
+   "z": 98.504,
+   "keepout_r": 15.0,
+   "rp": 11.0,
+   "terrain_z": 100.004
+  },
+  {
+   "name": "hearth_stone_15",
+   "kind": "hearth",
+   "cluster": "S",
+   "bearing": 180.0,
+   "r_centre": 217.0,
+   "r_inner": 202.0,
+   "r_outer": 232.0,
+   "diam": 30.0,
+   "height": 21.0,
+   "asset": "boulder_01",
+   "yaw": 95.0,
+   "x": 850.0,
+   "y": -497.0,
+   "z_offset": -1.5,
+   "z": 98.52,
+   "keepout_r": 19.0,
+   "rp": 15.0,
+   "terrain_z": 100.02
+  },
+  {
+   "name": "hearth_stone_16",
+   "kind": "hearth",
+   "cluster": "S",
+   "bearing": 195.0,
+   "r_centre": 220.0,
+   "r_inner": 202.0,
+   "r_outer": 238.0,
+   "diam": 36.0,
+   "height": 26.0,
+   "asset": "rock_face_01",
+   "yaw": 0.0,
+   "x": 793.06,
+   "y": -492.504,
+   "z_offset": -1.5,
+   "z": 98.536,
+   "keepout_r": 22.0,
+   "rp": 18.0,
+   "terrain_z": 100.036
+  },
+  {
+   "name": "hearth_stone_17",
+   "kind": "hearth",
+   "cluster": "S",
+   "bearing": 210.0,
+   "r_centre": 216.0,
+   "r_inner": 202.0,
+   "r_outer": 230.0,
+   "diam": 28.0,
+   "height": 19.0,
+   "asset": "namaqualand_boulder_03",
+   "yaw": 140.0,
+   "x": 742.0,
+   "y": -467.061,
+   "z_offset": -1.5,
+   "z": 98.515,
+   "keepout_r": 18.0,
+   "rp": 14.0,
+   "terrain_z": 100.015
+  },
+  {
+   "name": "hearth_stone_18",
+   "kind": "hearth",
+   "cluster": "S",
+   "bearing": 225.0,
+   "r_centre": 212.0,
+   "r_inner": 202.0,
+   "r_outer": 222.0,
+   "diam": 20.0,
+   "height": 14.0,
+   "asset": "namaqualand_boulder_02",
+   "yaw": 60.0,
+   "x": 700.093,
+   "y": -429.907,
+   "z_offset": -1.5,
+   "z": 98.5,
+   "keepout_r": 14.0,
+   "rp": 10.0,
+   "terrain_z": 100.0
+  },
+  {
+   "name": "chock_stone_19",
+   "kind": "chock",
+   "cluster": "S",
+   "bearing": 187.0,
+   "r_centre": 230.0,
+   "r_inner": 225.0,
+   "r_outer": 235.0,
+   "diam": 10.0,
+   "height": 6.5,
+   "asset": "namaqualand_boulder_05",
+   "yaw": 343,
+   "x": 821.97,
+   "y": -508.286,
+   "z_offset": -0.8,
+   "z": 99.331,
+   "keepout_r": 9.0,
+   "rp": 5.0,
+   "terrain_z": 100.131
+  },
+  {
+   "name": "chock_stone_20",
+   "kind": "chock",
+   "cluster": "S",
+   "bearing": 203.0,
+   "r_centre": 230.0,
+   "r_inner": 225.0,
+   "r_outer": 235.0,
+   "diam": 10.0,
+   "height": 6.5,
+   "asset": "namaqualand_boulder_05",
+   "yaw": 20,
+   "x": 760.132,
+   "y": -491.716,
+   "z_offset": -0.8,
+   "z": 99.333,
+   "keepout_r": 9.0,
+   "rp": 5.0,
+   "terrain_z": 100.133
+  },
+  {
+   "name": "hearth_stone_21",
+   "kind": "hearth",
+   "cluster": "W",
+   "bearing": 255.0,
+   "r_centre": 213.0,
+   "r_inner": 202.0,
+   "r_outer": 224.0,
+   "diam": 22.0,
+   "height": 15.0,
+   "asset": "namaqualand_boulder_04",
+   "yaw": 20.0,
+   "x": 644.258,
+   "y": -335.128,
+   "z_offset": -1.5,
+   "z": 98.504,
+   "keepout_r": 15.0,
+   "rp": 11.0,
+   "terrain_z": 100.004
+  },
+  {
+   "name": "hearth_stone_22",
+   "kind": "hearth",
+   "cluster": "W",
+   "bearing": 270.0,
+   "r_centre": 217.0,
+   "r_inner": 202.0,
+   "r_outer": 232.0,
+   "diam": 30.0,
+   "height": 21.0,
+   "asset": "boulder_01",
+   "yaw": 95.0,
+   "x": 633.0,
+   "y": -280.0,
+   "z_offset": -1.5,
+   "z": 98.5,
+   "keepout_r": 19.0,
+   "rp": 15.0,
+   "terrain_z": 100.0
+  },
+  {
+   "name": "hearth_stone_23",
+   "kind": "hearth",
+   "cluster": "W",
+   "bearing": 285.0,
+   "r_centre": 220.0,
+   "r_inner": 202.0,
+   "r_outer": 238.0,
+   "diam": 36.0,
+   "height": 26.0,
+   "asset": "rock_face_01",
+   "yaw": 0.0,
+   "x": 637.496,
+   "y": -223.06,
+   "z_offset": -1.5,
+   "z": 98.464,
+   "keepout_r": 22.0,
+   "rp": 18.0,
+   "terrain_z": 99.964
+  },
+  {
+   "name": "hearth_stone_24",
+   "kind": "hearth",
+   "cluster": "W",
+   "bearing": 300.0,
+   "r_centre": 216.0,
+   "r_inner": 202.0,
+   "r_outer": 230.0,
+   "diam": 28.0,
+   "height": 19.0,
+   "asset": "namaqualand_boulder_03",
+   "yaw": 140.0,
+   "x": 662.939,
+   "y": -172.0,
+   "z_offset": -1.5,
+   "z": 98.475,
+   "keepout_r": 18.0,
+   "rp": 14.0,
+   "terrain_z": 99.975
+  },
+  {
+   "name": "hearth_stone_25",
+   "kind": "hearth",
+   "cluster": "W",
+   "bearing": 315.0,
+   "r_centre": 212.0,
+   "r_inner": 202.0,
+   "r_outer": 222.0,
+   "diam": 20.0,
+   "height": 14.0,
+   "asset": "namaqualand_boulder_02",
+   "yaw": 60.0,
+   "x": 700.093,
+   "y": -130.093,
+   "z_offset": -1.5,
+   "z": 98.496,
+   "keepout_r": 14.0,
+   "rp": 10.0,
+   "terrain_z": 99.996
+  },
+  {
+   "name": "chock_stone_26",
+   "kind": "chock",
+   "cluster": "W",
+   "bearing": 277.0,
+   "r_centre": 230.0,
+   "r_inner": 225.0,
+   "r_outer": 235.0,
+   "diam": 10.0,
+   "height": 6.5,
+   "asset": "namaqualand_boulder_05",
+   "yaw": 242,
+   "x": 621.714,
+   "y": -251.97,
+   "z_offset": -0.8,
+   "z": 99.176,
+   "keepout_r": 9.0,
+   "rp": 5.0,
+   "terrain_z": 99.976
+  },
+  {
+   "name": "chock_stone_27",
+   "kind": "chock",
+   "cluster": "W",
+   "bearing": 293.0,
+   "r_centre": 230.0,
+   "r_inner": 225.0,
+   "r_outer": 235.0,
+   "diam": 10.0,
+   "height": 6.5,
+   "asset": "namaqualand_boulder_05",
+   "yaw": 279,
+   "x": 638.284,
+   "y": -190.132,
+   "z_offset": -0.8,
+   "z": 99.06,
+   "keepout_r": 9.0,
+   "rp": 5.0,
+   "terrain_z": 99.86
+  }
+ ],
+ "logs": [
+  {
+   "name": "bench_log",
+   "bearing": 120.0,
+   "r_centre": 292.0,
+   "length": 100.0,
+   "diam": 7.0,
+   "orientation": "tangential",
+   "role": "multi-tier deck: split log, flat face up at +3.5 m, hewn wedge ramp at the E end",
+   "x": 1102.879,
+   "y": -426.0,
+   "z_ground": 101.506,
+   "z_offset": -0.0,
+   "z_axis": 105.006,
+   "span_bearings": [
+    110.1,
+    129.9
+   ],
+   "r_span": [
+    288.5,
+    295.5
+   ],
+   "heading_along_decreasing_bearing": 30.0,
+   "ends_xy": [
+    [
+     1127.879,
+     -382.699
+    ],
+    [
+     1077.879,
+     -469.301
+    ]
+   ],
+   "end_terrain_z": [
+    101.61,
+    101.609
+   ]
+  },
+  {
+   "name": "log_north",
+   "bearing": 30.0,
+   "r_centre": 264.0,
+   "length": 80.0,
+   "diam": 7.0,
+   "orientation": "tangential",
+   "role": "round, half-sunk 1.0 m; sightline breaker; a kindling fire at each end",
+   "x": 982.0,
+   "y": -51.369,
+   "z_ground": 100.792,
+   "z_offset": -1.0,
+   "z_axis": 103.292,
+   "span_bearings": [
+    21.3,
+    38.7
+   ],
+   "r_span": [
+    260.5,
+    267.5
+   ],
+   "heading_along_decreasing_bearing": 300.0,
+   "ends_xy": [
+    [
+     947.359,
+     -31.369
+    ],
+    [
+     1016.641,
+     -71.369
+    ]
+   ],
+   "end_terrain_z": [
+    100.856,
+    100.868
+   ]
+  },
+  {
+   "name": "log_south",
+   "bearing": 210.0,
+   "r_centre": 264.0,
+   "length": 70.0,
+   "diam": 6.5,
+   "orientation": "tangential",
+   "role": "round, half-sunk 1.0 m; sightline breaker; a kindling fire at each end",
+   "x": 718.0,
+   "y": -508.631,
+   "z_ground": 100.794,
+   "z_offset": -1.0,
+   "z_axis": 103.044,
+   "span_bearings": [
+    202.4,
+    217.6
+   ],
+   "r_span": [
+    260.75,
+    267.25
+   ],
+   "heading_along_decreasing_bearing": 120.0,
+   "ends_xy": [
+    [
+     748.311,
+     -526.131
+    ],
+    [
+     687.689,
+     -491.131
+    ]
+   ],
+   "end_terrain_z": [
+    100.854,
+    100.852
+   ]
+  },
+  {
+   "name": "leaner_log",
+   "bearing": 180.0,
+   "r_centre": 261.0,
+   "length": 66.8,
+   "diam": 6.0,
+   "orientation": "radial (leaning)",
+   "role": "the giant leaned the next log on hearth_stone_15: inner end on the stone's shoulder at z 112.0 (r 228, 4 m inside its outer face), outer end (the TSStatic origin) on the ground at r 294 (z 101.56); 15.8 % (9.0 deg); clears the track by 5.4 m; not drivable (round)",
+   "x": 850.0,
+   "y": -574.0,
+   "z_ground": 101.558,
+   "z_offset": 0.0,
+   "z_axis": null,
+   "span_bearings": null,
+   "r_span": [
+    228.0,
+    294.0
+   ],
+   "heading_along_decreasing_bearing": null,
+   "ends_xy": [
+    [
+     850.0,
+     -508.0
+    ],
+    [
+     850.0,
+     -574.0
+    ]
+   ],
+   "end_terrain_z": [
+    100.107,
+    101.558
+   ],
+   "inner_end_z": 112.0,
+   "hittable_from_r": 278.2
+  }
+ ],
+ "props": [
+  {
+   "name": "lantern_tripod",
+   "bearing": 40.0,
+   "r": 300.0,
+   "x": 1042.836,
+   "y": -50.187,
+   "z_ground": 101.698,
+   "z_offset": 0.0,
+   "geometry": "three 2.5 m poles x 70 m, feet on a 40 m circle, apex +62 m; hurricane lantern 16 m tall hung at +46 m",
+   "role": "night light source; landmark",
+   "feet": [
+    {
+     "x": 1052.836,
+     "y": -32.866,
+     "terrain_z": 102.11,
+     "bearing": 39.4,
+     "r": 319.7,
+     "rp": 1.3
+    },
+    {
+     "x": 1052.836,
+     "y": -67.508,
+     "terrain_z": 101.549,
+     "bearing": 43.7,
+     "r": 293.8,
+     "rp": 1.3
+    },
+    {
+     "x": 1022.836,
+     "y": -50.187,
+     "terrain_z": 101.39,
+     "bearing": 36.9,
+     "r": 287.6,
+     "rp": 1.3
+    }
+   ],
+   "rp": 1.3
+  },
+  {
+   "name": "enamel_pot",
+   "bearing": 170.0,
+   "r": 300.0,
+   "x": 902.094,
+   "y": -575.442,
+   "z_ground": 101.701,
+   "z_offset": 0.0,
+   "geometry": "pot_enamel_01 x 54 (14.0 x 9.7 x 9.7 m), upright, lid on",
+   "role": "trailhead landmark (dressing; an enterable pot would be a 1-exit alcove)",
+   "rp": 7.0
+  },
+  {
+   "name": "trail_sign",
+   "bearing": 151.5,
+   "r": 272.1,
+   "x": 979.938,
+   "y": -519.059,
+   "z_ground": 100.997,
+   "z_offset": 0.0,
+   "geometry": "generated wooden trail sign 2.4 m tall (human scale)",
+   "role": "signage family; reads GIANT'S HEARTH - HOT COALS; 7 m right of the trail at m 24",
+   "rp": 0.5
+  },
+  {
+   "name": "trail_cairn_0",
+   "bearing": 148.4,
+   "r": 252.1,
+   "x": 982.062,
+   "y": -494.738,
+   "z_ground": 100.519,
+   "z_offset": 0.0,
+   "geometry": "stacked-stone cairn 1.8 m (human scale)",
+   "role": "trail marker at the trailhead, left side",
+   "rp": 1.5
+  },
+  {
+   "name": "trail_cairn_1",
+   "bearing": 152.9,
+   "r": 938.7,
+   "x": 1277.169,
+   "y": -1115.865,
+   "z_ground": 143.324,
+   "z_offset": 0.0,
+   "geometry": "stacked-stone cairn 1.8 m",
+   "role": "trail marker at the Firewood Gap crest (trail m 744)",
+   "rp": 1.5
+  },
+  {
+   "name": "lantern_post_0",
+   "bearing": 15.0,
+   "r": 256.0,
+   "x": 916.258,
+   "y": -32.723,
+   "z_ground": 100.585,
+   "z_offset": 0.0,
+   "geometry": "2.6 m lantern post (human scale)",
+   "role": "track marker; carries track_lantern_<i>",
+   "rp": 0.3
+  },
+  {
+   "name": "lantern_post_1",
+   "bearing": 105.0,
+   "r": 256.0,
+   "x": 1097.277,
+   "y": -346.258,
+   "z_ground": 100.607,
+   "z_offset": 0.0,
+   "geometry": "2.6 m lantern post (human scale)",
+   "role": "track marker; carries track_lantern_<i>",
+   "rp": 0.3
+  },
+  {
+   "name": "lantern_post_2",
+   "bearing": 195.0,
+   "r": 256.0,
+   "x": 783.742,
+   "y": -527.277,
+   "z_ground": 100.607,
+   "z_offset": 0.0,
+   "geometry": "2.6 m lantern post (human scale)",
+   "role": "track marker; carries track_lantern_<i>",
+   "rp": 0.3
+  },
+  {
+   "name": "lantern_post_3",
+   "bearing": 285.0,
+   "r": 256.0,
+   "x": 602.723,
+   "y": -213.742,
+   "z_ground": 99.852,
+   "z_offset": 0.0,
+   "geometry": "2.6 m lantern post (human scale)",
+   "role": "track marker; carries track_lantern_<i>",
+   "rp": 0.3
+  }
+ ],
+ "fires": [
+  {
+   "name": "kindling_log_north_w",
+   "log": "log_north",
+   "x": 943.029,
+   "y": -28.869,
+   "r": 267.8,
+   "bearing": 20.3,
+   "terrain_z": 100.873,
+   "clear_of_log_capsule_m": 1.5
+  },
+  {
+   "name": "kindling_log_north_e",
+   "log": "log_north",
+   "x": 1020.971,
+   "y": -73.869,
+   "r": 267.8,
+   "bearing": 39.7,
+   "terrain_z": 100.89,
+   "clear_of_log_capsule_m": 1.5
+  },
+  {
+   "name": "kindling_log_south_w",
+   "log": "log_south",
+   "x": 752.641,
+   "y": -528.631,
+   "r": 267.0,
+   "bearing": 201.4,
+   "terrain_z": 100.869,
+   "clear_of_log_capsule_m": 1.75
+  },
+  {
+   "name": "kindling_log_south_e",
+   "log": "log_south",
+   "x": 683.359,
+   "y": -488.631,
+   "r": 267.0,
+   "bearing": 218.6,
+   "terrain_z": 100.866,
+   "clear_of_log_capsule_m": 1.75
+  }
+ ],
+ "night_lights": [
+  {
+   "name": "ember_light_00",
+   "class": "PointLight",
+   "x": 874.539,
+   "y": -93.608,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_01",
+   "class": "PointLight",
+   "x": 921.944,
+   "y": -106.311,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_02",
+   "class": "PointLight",
+   "x": 964.447,
+   "y": -130.85,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_03",
+   "class": "PointLight",
+   "x": 999.15,
+   "y": -165.553,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_04",
+   "class": "PointLight",
+   "x": 1023.689,
+   "y": -208.056,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_05",
+   "class": "PointLight",
+   "x": 1036.392,
+   "y": -255.461,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_06",
+   "class": "PointLight",
+   "x": 1036.392,
+   "y": -304.539,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_07",
+   "class": "PointLight",
+   "x": 1023.689,
+   "y": -351.944,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_08",
+   "class": "PointLight",
+   "x": 999.15,
+   "y": -394.447,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_09",
+   "class": "PointLight",
+   "x": 964.447,
+   "y": -429.15,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_10",
+   "class": "PointLight",
+   "x": 921.944,
+   "y": -453.689,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_11",
+   "class": "PointLight",
+   "x": 874.539,
+   "y": -466.392,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_12",
+   "class": "PointLight",
+   "x": 825.461,
+   "y": -466.392,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_13",
+   "class": "PointLight",
+   "x": 778.056,
+   "y": -453.689,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_14",
+   "class": "PointLight",
+   "x": 735.553,
+   "y": -429.15,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_15",
+   "class": "PointLight",
+   "x": 700.85,
+   "y": -394.447,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_16",
+   "class": "PointLight",
+   "x": 676.311,
+   "y": -351.944,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_17",
+   "class": "PointLight",
+   "x": 663.608,
+   "y": -304.539,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_18",
+   "class": "PointLight",
+   "x": 663.608,
+   "y": -255.461,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_19",
+   "class": "PointLight",
+   "x": 676.311,
+   "y": -208.056,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_20",
+   "class": "PointLight",
+   "x": 700.85,
+   "y": -165.553,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_21",
+   "class": "PointLight",
+   "x": 735.553,
+   "y": -130.85,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_22",
+   "class": "PointLight",
+   "x": 778.056,
+   "y": -106.311,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "ember_light_23",
+   "class": "PointLight",
+   "x": 825.461,
+   "y": -93.608,
+   "z_offset": 1.2,
+   "z": 101.2,
+   "radius": 34.0,
+   "intensity": 12000,
+   "color": [
+    1.0,
+    0.42,
+    0.1
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "kindling_log_north_w_light",
+   "class": "PointLight",
+   "x": 943.029,
+   "y": -28.869,
+   "z_offset": 4.0,
+   "z": 104.873,
+   "radius": 45.0,
+   "intensity": 30000,
+   "color": [
+    1.0,
+    0.55,
+    0.18
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.6
+  },
+  {
+   "name": "kindling_log_north_e_light",
+   "class": "PointLight",
+   "x": 1020.971,
+   "y": -73.869,
+   "z_offset": 4.0,
+   "z": 104.89,
+   "radius": 45.0,
+   "intensity": 30000,
+   "color": [
+    1.0,
+    0.55,
+    0.18
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.6
+  },
+  {
+   "name": "kindling_log_south_w_light",
+   "class": "PointLight",
+   "x": 752.641,
+   "y": -528.631,
+   "z_offset": 4.0,
+   "z": 104.869,
+   "radius": 45.0,
+   "intensity": 30000,
+   "color": [
+    1.0,
+    0.55,
+    0.18
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.6
+  },
+  {
+   "name": "kindling_log_south_e_light",
+   "class": "PointLight",
+   "x": 683.359,
+   "y": -488.631,
+   "z_offset": 4.0,
+   "z": 104.866,
+   "radius": 45.0,
+   "intensity": 30000,
+   "color": [
+    1.0,
+    0.55,
+    0.18
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.6
+  },
+  {
+   "name": "lantern_spot",
+   "class": "SpotLight",
+   "x": 1042.836,
+   "y": -50.187,
+   "z_offset": 44.0,
+   "z": 145.698,
+   "range": 90.0,
+   "innerAngle": 50,
+   "outerAngle": 80,
+   "intensity": 60000,
+   "color": [
+    1.0,
+    0.85,
+    0.6
+   ],
+   "castShadows": true,
+   "texSize": 512,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 1.0,
+   "aim": "down (-Z)"
+  },
+  {
+   "name": "lantern_point",
+   "class": "PointLight",
+   "x": 1042.836,
+   "y": -50.187,
+   "z_offset": 46.0,
+   "z": 147.698,
+   "radius": 120.0,
+   "intensity": 40000,
+   "color": [
+    1.0,
+    0.85,
+    0.6
+   ],
+   "castShadows": false,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 1.5
+  },
+  {
+   "name": "spout_key_0",
+   "class": "PointLight",
+   "x": 953.923,
+   "y": -220.0,
+   "z_offset": 3.0,
+   "z": 103.0,
+   "radius": 40.0,
+   "intensity": 15000,
+   "color": [
+    1.0,
+    0.5,
+    0.15
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "spout_key_1",
+   "class": "PointLight",
+   "x": 746.077,
+   "y": -340.0,
+   "z_offset": 3.0,
+   "z": 103.0,
+   "radius": 40.0,
+   "intensity": 15000,
+   "color": [
+    1.0,
+    0.5,
+    0.15
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.3
+  },
+  {
+   "name": "track_lantern_0",
+   "class": "PointLight",
+   "x": 916.258,
+   "y": -32.723,
+   "z_offset": 2.6,
+   "z": 103.185,
+   "radius": 18.0,
+   "intensity": 4000,
+   "color": [
+    1.0,
+    0.8,
+    0.5
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.4,
+   "mounted_on": "lantern_post_0"
+  },
+  {
+   "name": "track_lantern_1",
+   "class": "PointLight",
+   "x": 1097.277,
+   "y": -346.258,
+   "z_offset": 2.6,
+   "z": 103.207,
+   "radius": 18.0,
+   "intensity": 4000,
+   "color": [
+    1.0,
+    0.8,
+    0.5
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.4,
+   "mounted_on": "lantern_post_1"
+  },
+  {
+   "name": "track_lantern_2",
+   "class": "PointLight",
+   "x": 783.742,
+   "y": -527.277,
+   "z_offset": 2.6,
+   "z": 103.207,
+   "radius": 18.0,
+   "intensity": 4000,
+   "color": [
+    1.0,
+    0.8,
+    0.5
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.4,
+   "mounted_on": "lantern_post_2"
+  },
+  {
+   "name": "track_lantern_3",
+   "class": "PointLight",
+   "x": 602.723,
+   "y": -213.742,
+   "z_offset": 2.6,
+   "z": 102.452,
+   "radius": 18.0,
+   "intensity": 4000,
+   "color": [
+    1.0,
+    0.8,
+    0.5
+   ],
+   "castShadows": true,
+   "texSize": 256,
+   "nightLight": "1",
+   "flareType": "vehicleReverseLightFlare",
+   "flareScale": 0.4,
+   "mounted_on": "lantern_post_3"
+  }
+ ],
+ "emitters": [
+  {
+   "name": "ember_sparks_00",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_sparks",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 899.176,
+   "y": -96.474,
+   "z_offset": 0.3,
+   "z": 100.3,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock triple (B0 r2 recipe; records in particle_datablocks): ParticleData ember.png 5000 +-1500 ms, gravity -0.05, drag 0.5; emitter ejectionPeriodMS 40 +-20, velocity 0.75 +-0.35, thetaMax 60, phiVariance 360, ADDITIVE; node datablock"
+  },
+  {
+   "name": "ember_sparks_01",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_sparks",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 984.35,
+   "y": -145.65,
+   "z_offset": 0.3,
+   "z": 100.3,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock triple (B0 r2 recipe; records in particle_datablocks): ParticleData ember.png 5000 +-1500 ms, gravity -0.05, drag 0.5; emitter ejectionPeriodMS 40 +-20, velocity 0.75 +-0.35, thetaMax 60, phiVariance 360, ADDITIVE; node datablock"
+  },
+  {
+   "name": "ember_sparks_02",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_sparks",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 1033.526,
+   "y": -230.824,
+   "z_offset": 0.3,
+   "z": 100.3,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock triple (B0 r2 recipe; records in particle_datablocks): ParticleData ember.png 5000 +-1500 ms, gravity -0.05, drag 0.5; emitter ejectionPeriodMS 40 +-20, velocity 0.75 +-0.35, thetaMax 60, phiVariance 360, ADDITIVE; node datablock"
+  },
+  {
+   "name": "ember_sparks_03",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_sparks",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 1033.526,
+   "y": -329.176,
+   "z_offset": 0.3,
+   "z": 100.3,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock triple (B0 r2 recipe; records in particle_datablocks): ParticleData ember.png 5000 +-1500 ms, gravity -0.05, drag 0.5; emitter ejectionPeriodMS 40 +-20, velocity 0.75 +-0.35, thetaMax 60, phiVariance 360, ADDITIVE; node datablock"
+  },
+  {
+   "name": "ember_sparks_04",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_sparks",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 984.35,
+   "y": -414.35,
+   "z_offset": 0.3,
+   "z": 100.3,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock triple (B0 r2 recipe; records in particle_datablocks): ParticleData ember.png 5000 +-1500 ms, gravity -0.05, drag 0.5; emitter ejectionPeriodMS 40 +-20, velocity 0.75 +-0.35, thetaMax 60, phiVariance 360, ADDITIVE; node datablock"
+  },
+  {
+   "name": "ember_sparks_05",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_sparks",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 899.176,
+   "y": -463.526,
+   "z_offset": 0.3,
+   "z": 100.3,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock triple (B0 r2 recipe; records in particle_datablocks): ParticleData ember.png 5000 +-1500 ms, gravity -0.05, drag 0.5; emitter ejectionPeriodMS 40 +-20, velocity 0.75 +-0.35, thetaMax 60, phiVariance 360, ADDITIVE; node datablock"
+  },
+  {
+   "name": "ember_sparks_06",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_sparks",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 800.824,
+   "y": -463.526,
+   "z_offset": 0.3,
+   "z": 100.3,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock triple (B0 r2 recipe; records in particle_datablocks): ParticleData ember.png 5000 +-1500 ms, gravity -0.05, drag 0.5; emitter ejectionPeriodMS 40 +-20, velocity 0.75 +-0.35, thetaMax 60, phiVariance 360, ADDITIVE; node datablock"
+  },
+  {
+   "name": "ember_sparks_07",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_sparks",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 715.65,
+   "y": -414.35,
+   "z_offset": 0.3,
+   "z": 100.3,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock triple (B0 r2 recipe; records in particle_datablocks): ParticleData ember.png 5000 +-1500 ms, gravity -0.05, drag 0.5; emitter ejectionPeriodMS 40 +-20, velocity 0.75 +-0.35, thetaMax 60, phiVariance 360, ADDITIVE; node datablock"
+  },
+  {
+   "name": "ember_sparks_08",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_sparks",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 666.474,
+   "y": -329.176,
+   "z_offset": 0.3,
+   "z": 100.3,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock triple (B0 r2 recipe; records in particle_datablocks): ParticleData ember.png 5000 +-1500 ms, gravity -0.05, drag 0.5; emitter ejectionPeriodMS 40 +-20, velocity 0.75 +-0.35, thetaMax 60, phiVariance 360, ADDITIVE; node datablock"
+  },
+  {
+   "name": "ember_sparks_09",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_sparks",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 666.474,
+   "y": -230.824,
+   "z_offset": 0.3,
+   "z": 100.3,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock triple (B0 r2 recipe; records in particle_datablocks): ParticleData ember.png 5000 +-1500 ms, gravity -0.05, drag 0.5; emitter ejectionPeriodMS 40 +-20, velocity 0.75 +-0.35, thetaMax 60, phiVariance 360, ADDITIVE; node datablock"
+  },
+  {
+   "name": "ember_sparks_10",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_sparks",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 715.65,
+   "y": -145.65,
+   "z_offset": 0.3,
+   "z": 100.3,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock triple (B0 r2 recipe; records in particle_datablocks): ParticleData ember.png 5000 +-1500 ms, gravity -0.05, drag 0.5; emitter ejectionPeriodMS 40 +-20, velocity 0.75 +-0.35, thetaMax 60, phiVariance 360, ADDITIVE; node datablock"
+  },
+  {
+   "name": "ember_sparks_11",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_sparks",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 800.824,
+   "y": -96.474,
+   "z_offset": 0.3,
+   "z": 100.3,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock triple (B0 r2 recipe; records in particle_datablocks): ParticleData ember.png 5000 +-1500 ms, gravity -0.05, drag 0.5; emitter ejectionPeriodMS 40 +-20, velocity 0.75 +-0.35, thetaMax 60, phiVariance 360, ADDITIVE; node datablock"
+  },
+  {
+   "name": "kindling_log_north_w_fire",
+   "emitter": "BNGP_Fire_Huge",
+   "dataBlock": "lightExampleEmitterNodeData1",
+   "x": 943.029,
+   "y": -28.869,
+   "z_offset": 0.5,
+   "z": 101.373,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ]
+  },
+  {
+   "name": "kindling_log_north_w_smoke",
+   "emitter": "BNGP_6",
+   "dataBlock": "lightExampleEmitterNodeData1",
+   "x": 943.029,
+   "y": -28.869,
+   "z_offset": 6.0,
+   "z": 106.873,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ]
+  },
+  {
+   "name": "kindling_log_north_e_fire",
+   "emitter": "BNGP_Fire_Huge",
+   "dataBlock": "lightExampleEmitterNodeData1",
+   "x": 1020.971,
+   "y": -73.869,
+   "z_offset": 0.5,
+   "z": 101.39,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ]
+  },
+  {
+   "name": "kindling_log_north_e_smoke",
+   "emitter": "BNGP_6",
+   "dataBlock": "lightExampleEmitterNodeData1",
+   "x": 1020.971,
+   "y": -73.869,
+   "z_offset": 6.0,
+   "z": 106.89,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ]
+  },
+  {
+   "name": "kindling_log_south_w_fire",
+   "emitter": "BNGP_Fire_Huge",
+   "dataBlock": "lightExampleEmitterNodeData1",
+   "x": 752.641,
+   "y": -528.631,
+   "z_offset": 0.5,
+   "z": 101.369,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ]
+  },
+  {
+   "name": "kindling_log_south_w_smoke",
+   "emitter": "BNGP_6",
+   "dataBlock": "lightExampleEmitterNodeData1",
+   "x": 752.641,
+   "y": -528.631,
+   "z_offset": 6.0,
+   "z": 106.869,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ]
+  },
+  {
+   "name": "kindling_log_south_e_fire",
+   "emitter": "BNGP_Fire_Huge",
+   "dataBlock": "lightExampleEmitterNodeData1",
+   "x": 683.359,
+   "y": -488.631,
+   "z_offset": 0.5,
+   "z": 101.366,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ]
+  },
+  {
+   "name": "kindling_log_south_e_smoke",
+   "emitter": "BNGP_6",
+   "dataBlock": "lightExampleEmitterNodeData1",
+   "x": 683.359,
+   "y": -488.631,
+   "z_offset": 6.0,
+   "z": 106.866,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ]
+  },
+  {
+   "name": "ember_glow_0",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_glow",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 919.648,
+   "y": -111.854,
+   "z_offset": 0.2,
+   "z": 100.2,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock (B0 r2: BNGP_65 is a 20 ms flash, not a glow): the ember recipe on its own ParticleData with lifetimeMS 2500, velocity 0.2, 1.5 m additive sprites, no gravity (records in particle_datablocks)"
+  },
+  {
+   "name": "ember_glow_1",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_glow",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 1018.146,
+   "y": -210.352,
+   "z_offset": 0.2,
+   "z": 100.2,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock (B0 r2: BNGP_65 is a 20 ms flash, not a glow): the ember recipe on its own ParticleData with lifetimeMS 2500, velocity 0.2, 1.5 m additive sprites, no gravity (records in particle_datablocks)"
+  },
+  {
+   "name": "ember_glow_2",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_glow",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 1018.146,
+   "y": -349.648,
+   "z_offset": 0.2,
+   "z": 100.2,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock (B0 r2: BNGP_65 is a 20 ms flash, not a glow): the ember recipe on its own ParticleData with lifetimeMS 2500, velocity 0.2, 1.5 m additive sprites, no gravity (records in particle_datablocks)"
+  },
+  {
+   "name": "ember_glow_3",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_glow",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 919.648,
+   "y": -448.146,
+   "z_offset": 0.2,
+   "z": 100.2,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock (B0 r2: BNGP_65 is a 20 ms flash, not a glow): the ember recipe on its own ParticleData with lifetimeMS 2500, velocity 0.2, 1.5 m additive sprites, no gravity (records in particle_datablocks)"
+  },
+  {
+   "name": "ember_glow_4",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_glow",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 780.352,
+   "y": -448.146,
+   "z_offset": 0.2,
+   "z": 100.2,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock (B0 r2: BNGP_65 is a 20 ms flash, not a glow): the ember recipe on its own ParticleData with lifetimeMS 2500, velocity 0.2, 1.5 m additive sprites, no gravity (records in particle_datablocks)"
+  },
+  {
+   "name": "ember_glow_5",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_glow",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 681.854,
+   "y": -349.648,
+   "z_offset": 0.2,
+   "z": 100.2,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock (B0 r2: BNGP_65 is a 20 ms flash, not a glow): the ember recipe on its own ParticleData with lifetimeMS 2500, velocity 0.2, 1.5 m additive sprites, no gravity (records in particle_datablocks)"
+  },
+  {
+   "name": "ember_glow_6",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_glow",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 681.854,
+   "y": -210.352,
+   "z_offset": 0.2,
+   "z": 100.2,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock (B0 r2: BNGP_65 is a 20 ms flash, not a glow): the ember recipe on its own ParticleData with lifetimeMS 2500, velocity 0.2, 1.5 m additive sprites, no gravity (records in particle_datablocks)"
+  },
+  {
+   "name": "ember_glow_7",
+   "emitter": "ericrolph_hot_potato_arena_pe_ember_glow",
+   "dataBlock": "ericrolph_hot_potato_arena_pen_ember",
+   "x": 780.352,
+   "y": -111.854,
+   "z_offset": 0.2,
+   "z": 100.2,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "level datablock (B0 r2: BNGP_65 is a 20 ms flash, not a glow): the ember recipe on its own ParticleData with lifetimeMS 2500, velocity 0.2, 1.5 m additive sprites, no gravity (records in particle_datablocks)"
+  },
+  {
+   "name": "hearth_heat_wisp_0",
+   "emitter": "BNGP_24",
+   "dataBlock": "lightExampleEmitterNodeData1",
+   "x": 925.0,
+   "y": -150.096,
+   "z_offset": 0.2,
+   "z": 100.2,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "BNG_steam, low alpha: the heat-shimmer stand-in (no refraction particle exists in 0.38)"
+  },
+  {
+   "name": "hearth_heat_wisp_1",
+   "emitter": "BNGP_24",
+   "dataBlock": "lightExampleEmitterNodeData1",
+   "x": 1000.0,
+   "y": -280.0,
+   "z_offset": 0.2,
+   "z": 100.2,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "BNG_steam, low alpha: the heat-shimmer stand-in (no refraction particle exists in 0.38)"
+  },
+  {
+   "name": "hearth_heat_wisp_2",
+   "emitter": "BNGP_24",
+   "dataBlock": "lightExampleEmitterNodeData1",
+   "x": 925.0,
+   "y": -409.904,
+   "z_offset": 0.2,
+   "z": 100.2,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "BNG_steam, low alpha: the heat-shimmer stand-in (no refraction particle exists in 0.38)"
+  },
+  {
+   "name": "hearth_heat_wisp_3",
+   "emitter": "BNGP_24",
+   "dataBlock": "lightExampleEmitterNodeData1",
+   "x": 775.0,
+   "y": -409.904,
+   "z_offset": 0.2,
+   "z": 100.2,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "BNG_steam, low alpha: the heat-shimmer stand-in (no refraction particle exists in 0.38)"
+  },
+  {
+   "name": "hearth_heat_wisp_4",
+   "emitter": "BNGP_24",
+   "dataBlock": "lightExampleEmitterNodeData1",
+   "x": 700.0,
+   "y": -280.0,
+   "z_offset": 0.2,
+   "z": 100.2,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "BNG_steam, low alpha: the heat-shimmer stand-in (no refraction particle exists in 0.38)"
+  },
+  {
+   "name": "hearth_heat_wisp_5",
+   "emitter": "BNGP_24",
+   "dataBlock": "lightExampleEmitterNodeData1",
+   "x": 775.0,
+   "y": -150.096,
+   "z_offset": 0.2,
+   "z": 100.2,
+   "active": true,
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "note": "BNG_steam, low alpha: the heat-shimmer stand-in (no refraction particle exists in 0.38)"
+  }
+ ],
+ "sfx_emitters": [
+  {
+   "name": "sfx_fire_0",
+   "class": "SFXEmitter",
+   "track": "ericrolph_hot_potato_arena_sfx_fireloop1",
+   "x": 921.944,
+   "y": -106.311,
+   "z_offset": 1.0,
+   "z": 101.0,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 25.0,
+   "maxDistance": 160.0,
+   "volume": 0.8
+  },
+  {
+   "name": "sfx_fire_1",
+   "class": "SFXEmitter",
+   "track": "ericrolph_hot_potato_arena_sfx_fireloop2",
+   "x": 1023.689,
+   "y": -208.056,
+   "z_offset": 1.0,
+   "z": 101.0,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 25.0,
+   "maxDistance": 160.0,
+   "volume": 0.8
+  },
+  {
+   "name": "sfx_fire_2",
+   "class": "SFXEmitter",
+   "track": "ericrolph_hot_potato_arena_sfx_fireloop1",
+   "x": 1023.689,
+   "y": -351.944,
+   "z_offset": 1.0,
+   "z": 101.0,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 25.0,
+   "maxDistance": 160.0,
+   "volume": 0.8
+  },
+  {
+   "name": "sfx_fire_3",
+   "class": "SFXEmitter",
+   "track": "ericrolph_hot_potato_arena_sfx_fireloop2",
+   "x": 921.944,
+   "y": -453.689,
+   "z_offset": 1.0,
+   "z": 101.0,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 25.0,
+   "maxDistance": 160.0,
+   "volume": 0.8
+  },
+  {
+   "name": "sfx_fire_4",
+   "class": "SFXEmitter",
+   "track": "ericrolph_hot_potato_arena_sfx_fireloop1",
+   "x": 778.056,
+   "y": -453.689,
+   "z_offset": 1.0,
+   "z": 101.0,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 25.0,
+   "maxDistance": 160.0,
+   "volume": 0.8
+  },
+  {
+   "name": "sfx_fire_5",
+   "class": "SFXEmitter",
+   "track": "ericrolph_hot_potato_arena_sfx_fireloop2",
+   "x": 676.311,
+   "y": -351.944,
+   "z_offset": 1.0,
+   "z": 101.0,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 25.0,
+   "maxDistance": 160.0,
+   "volume": 0.8
+  },
+  {
+   "name": "sfx_fire_6",
+   "class": "SFXEmitter",
+   "track": "ericrolph_hot_potato_arena_sfx_fireloop1",
+   "x": 676.311,
+   "y": -208.056,
+   "z_offset": 1.0,
+   "z": 101.0,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 25.0,
+   "maxDistance": 160.0,
+   "volume": 0.8
+  },
+  {
+   "name": "sfx_fire_7",
+   "class": "SFXEmitter",
+   "track": "ericrolph_hot_potato_arena_sfx_fireloop2",
+   "x": 778.056,
+   "y": -106.311,
+   "z_offset": 1.0,
+   "z": 101.0,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 25.0,
+   "maxDistance": 160.0,
+   "volume": 0.8
+  },
+  {
+   "name": "sfx_windtrees_0",
+   "class": "SFXEmitter",
+   "track": "amb_windtrees_01",
+   "x": 915.986,
+   "y": 94.227,
+   "z_offset": 12.0,
+   "z": 114.162,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 60.0,
+   "maxDistance": 420.0,
+   "volume": 0.6
+  },
+  {
+   "name": "sfx_windtrees_1",
+   "class": "SFXEmitter",
+   "track": "amb_windtrees_01",
+   "x": 1207.083,
+   "y": -150.032,
+   "z_offset": 12.0,
+   "z": 115.046,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 60.0,
+   "maxDistance": 420.0,
+   "volume": 0.6
+  },
+  {
+   "name": "sfx_windtrees_2",
+   "class": "SFXEmitter",
+   "track": "amb_windtrees_01",
+   "x": 1141.097,
+   "y": -524.259,
+   "z_offset": 12.0,
+   "z": 114.779,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 60.0,
+   "maxDistance": 420.0,
+   "volume": 0.6
+  },
+  {
+   "name": "sfx_windtrees_3",
+   "class": "SFXEmitter",
+   "track": "amb_windtrees_01",
+   "x": 784.014,
+   "y": -654.227,
+   "z_offset": 12.0,
+   "z": 115.098,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 60.0,
+   "maxDistance": 420.0,
+   "volume": 0.6
+  },
+  {
+   "name": "sfx_windtrees_4",
+   "class": "SFXEmitter",
+   "track": "amb_windtrees_01",
+   "x": 492.917,
+   "y": -409.968,
+   "z_offset": 12.0,
+   "z": 114.099,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 60.0,
+   "maxDistance": 420.0,
+   "volume": 0.6
+  },
+  {
+   "name": "sfx_windtrees_5",
+   "class": "SFXEmitter",
+   "track": "amb_windtrees_01",
+   "x": 558.903,
+   "y": -35.741,
+   "z_offset": 12.0,
+   "z": 108.356,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 60.0,
+   "maxDistance": 420.0,
+   "volume": 0.6
+  },
+  {
+   "name": "sfx_birds_0",
+   "class": "SFXEmitter",
+   "track": "amb_birds_01",
+   "x": 1003.909,
+   "y": 142.862,
+   "z_offset": 8.0,
+   "z": 119.297,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 50.0,
+   "maxDistance": 320.0,
+   "volume": 0.5
+  },
+  {
+   "name": "sfx_birds_1",
+   "class": "SFXEmitter",
+   "track": "amb_birds_01",
+   "x": 1272.862,
+   "y": -433.909,
+   "z_offset": 8.0,
+   "z": 124.134,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 50.0,
+   "maxDistance": 320.0,
+   "volume": 0.5
+  },
+  {
+   "name": "sfx_birds_2",
+   "class": "SFXEmitter",
+   "track": "amb_birds_01",
+   "x": 696.091,
+   "y": -702.862,
+   "z_offset": 8.0,
+   "z": 118.607,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 50.0,
+   "maxDistance": 320.0,
+   "volume": 0.5
+  },
+  {
+   "name": "sfx_birds_3",
+   "class": "SFXEmitter",
+   "track": "amb_birds_01",
+   "x": 427.138,
+   "y": -126.091,
+   "z_offset": 8.0,
+   "z": 101.104,
+   "is3D": true,
+   "isLooping": true,
+   "playOnAdd": true,
+   "referenceDistance": 50.0,
+   "maxDistance": 320.0,
+   "volume": 0.5
+  }
+ ],
+ "sfx_spaces": [
+  {
+   "name": "sfxspace_bowl",
+   "x": 850.0,
+   "y": -280.0,
+   "z_offset": 12.0,
+   "z": 112.0,
+   "centre": [
+    850.0,
+    -280.0,
+    112.0
+   ],
+   "scale": [
+    152,
+    152,
+    40
+   ],
+   "soundAmbience": "Amb_IT_Mountain"
+  },
+  {
+   "name": "sfxspace_handle",
+   "x": 850.0,
+   "y": -340.0,
+   "z_offset": 6.0,
+   "z": 106.0,
+   "centre": [
+    850.0,
+    -340.0,
+    106.0
+   ],
+   "scale": [
+    16,
+    60,
+    12
+   ],
+   "soundAmbience": "Amb_IT_Mountain"
+  },
+  {
+   "name": "sfxspace_lake",
+   "x": 413.13082303752833,
+   "y": 37.40403623793537,
+   "z_offset": null,
+   "z": 108.0,
+   "centre": [
+    413.131,
+    37.404,
+    108.0
+   ],
+   "scale": [
+    520,
+    380,
+    40
+   ],
+   "soundAmbience": "Amb_IT_Ocean",
+   "note": "z is WaterPlane + 10 (the centre is over water; the bed is 12 m under it)"
+  },
+  {
+   "name": "sfxspace_spout_0",
+   "x": 929.674,
+   "y": -234.0,
+   "z_offset": 4.0,
+   "z": 104.0,
+   "centre": [
+    929.674,
+    -234.0,
+    104.0
+   ],
+   "scale": [
+    50,
+    50,
+    12
+   ],
+   "soundAmbience": "Amb_IT_Mountain"
+  },
+  {
+   "name": "sfxspace_spout_1",
+   "x": 770.326,
+   "y": -326.0,
+   "z_offset": 4.0,
+   "z": 104.0,
+   "centre": [
+    770.326,
+    -326.0,
+    104.0
+   ],
+   "scale": [
+    50,
+    50,
+    12
+   ],
+   "soundAmbience": "Amb_IT_Mountain"
+  },
+  {
+   "name": "sfxspace_hearth_0",
+   "x": 963.137,
+   "y": -166.863,
+   "z_offset": 8.0,
+   "z": 108.0,
+   "centre": [
+    963.137,
+    -166.863,
+    108.0
+   ],
+   "scale": [
+    110,
+    110,
+    20
+   ],
+   "soundAmbience": "Amb_UT_Roaring"
+  },
+  {
+   "name": "sfxspace_forest_0",
+   "x": 1217.696,
+   "y": 87.696,
+   "z_offset": 15.0,
+   "z": 145.816,
+   "centre": [
+    1217.696,
+    87.696,
+    145.816
+   ],
+   "scale": [
+    300,
+    300,
+    60
+   ],
+   "soundAmbience": "Amb_WC_Forest"
+  },
+  {
+   "name": "sfxspace_hearth_1",
+   "x": 963.137,
+   "y": -393.137,
+   "z_offset": 8.0,
+   "z": 108.0,
+   "centre": [
+    963.137,
+    -393.137,
+    108.0
+   ],
+   "scale": [
+    110,
+    110,
+    20
+   ],
+   "soundAmbience": "Amb_UT_Roaring"
+  },
+  {
+   "name": "sfxspace_forest_1",
+   "x": 1217.696,
+   "y": -647.696,
+   "z_offset": 15.0,
+   "z": 129.895,
+   "centre": [
+    1217.696,
+    -647.696,
+    129.895
+   ],
+   "scale": [
+    300,
+    300,
+    60
+   ],
+   "soundAmbience": "Amb_WC_Forest"
+  },
+  {
+   "name": "sfxspace_hearth_2",
+   "x": 736.863,
+   "y": -393.137,
+   "z_offset": 8.0,
+   "z": 108.0,
+   "centre": [
+    736.863,
+    -393.137,
+    108.0
+   ],
+   "scale": [
+    110,
+    110,
+    20
+   ],
+   "soundAmbience": "Amb_UT_Roaring"
+  },
+  {
+   "name": "sfxspace_forest_2",
+   "x": 482.304,
+   "y": -647.696,
+   "z_offset": 15.0,
+   "z": 134.107,
+   "centre": [
+    482.304,
+    -647.696,
+    134.107
+   ],
+   "scale": [
+    300,
+    300,
+    60
+   ],
+   "soundAmbience": "Amb_WC_Forest"
+  },
+  {
+   "name": "sfxspace_hearth_3",
+   "x": 736.863,
+   "y": -166.863,
+   "z_offset": 8.0,
+   "z": 108.0,
+   "centre": [
+    736.863,
+    -166.863,
+    108.0
+   ],
+   "scale": [
+    110,
+    110,
+    20
+   ],
+   "soundAmbience": "Amb_UT_Roaring"
+  },
+  {
+   "name": "sfxspace_forest_3",
+   "x": 482.304,
+   "y": 87.696,
+   "z_offset": 15.0,
+   "z": 100.967,
+   "centre": [
+    482.304,
+    87.696,
+    100.967
+   ],
+   "scale": [
+    300,
+    300,
+    60
+   ],
+   "soundAmbience": "Amb_WC_Forest"
+  }
+ ],
+ "sfx_profiles": [
+  {
+   "name": "ericrolph_hot_potato_arena_sfx_fireloop1",
+   "class": "SFXProfile",
+   "description": "AudioDefaultLoop3D",
+   "fileName": "art/sound/fireloop1.ogg",
+   "preload": "1",
+   "file": "levels/ericrolph_hot_potato_arena/art/datablocks/ericrolph_hot_potato_arena_sfx.datablocks.json",
+   "b0": "loop true measured on this exact form (level SFXProfile, AudioDefaultLoop3D, stock ogg by path); the object's maxDistance reads referenceDistance + 0.01 whatever is authored - the distances come from the description"
+  },
+  {
+   "name": "ericrolph_hot_potato_arena_sfx_fireloop2",
+   "class": "SFXProfile",
+   "description": "AudioDefaultLoop3D",
+   "fileName": "art/sound/fireloop2.ogg",
+   "preload": "1",
+   "file": "levels/ericrolph_hot_potato_arena/art/datablocks/ericrolph_hot_potato_arena_sfx.datablocks.json",
+   "b0": "loop true measured on this exact form (level SFXProfile, AudioDefaultLoop3D, stock ogg by path); the object's maxDistance reads referenceDistance + 0.01 whatever is authored - the distances come from the description"
+  }
+ ],
+ "particle_datablocks": [
+  {
+   "name": "ericrolph_hot_potato_arena_pd_ember",
+   "class": "ParticleData",
+   "file": "levels/ericrolph_hot_potato_arena/art/datablocks/ericrolph_hot_potato_arena_embers_particle.datablocks.json",
+   "textureName": "art/shapes/particles/ember.png",
+   "lifetimeMS": 5000,
+   "lifetimeVarianceMS": 1500,
+   "gravityCoefficient": -0.05,
+   "dragCoefficient": 0.5,
+   "sizes": [
+    0.05,
+    0.1,
+    0.08,
+    0.0
+   ],
+   "times": [
+    0.0,
+    0.2,
+    0.8,
+    1.0
+   ],
+   "colors": [
+    [
+     1.0,
+     0.55,
+     0.15,
+     1.0
+    ],
+    [
+     1.0,
+     0.4,
+     0.08,
+     1.0
+    ],
+    [
+     0.8,
+     0.2,
+     0.02,
+     0.6
+    ],
+    [
+     0.3,
+     0.05,
+     0.0,
+     0.0
+    ]
+   ],
+   "inheritedVelFactor": 0.0,
+   "constantAcceleration": 0.0,
+   "spinSpeed": 0.0,
+   "note": "the sparks"
+  },
+  {
+   "name": "ericrolph_hot_potato_arena_pd_ember_glow",
+   "class": "ParticleData",
+   "file": "levels/ericrolph_hot_potato_arena/art/datablocks/ericrolph_hot_potato_arena_embers_particle.datablocks.json",
+   "textureName": "art/shapes/particles/ember.png",
+   "lifetimeMS": 2500,
+   "lifetimeVarianceMS": 800,
+   "gravityCoefficient": 0.0,
+   "dragCoefficient": 0.5,
+   "sizes": [
+    1.5,
+    1.5,
+    1.2,
+    0.0
+   ],
+   "times": [
+    0.0,
+    0.3,
+    0.8,
+    1.0
+   ],
+   "colors": [
+    [
+     1.0,
+     0.35,
+     0.08,
+     0.35
+    ],
+    [
+     1.0,
+     0.3,
+     0.06,
+     0.3
+    ],
+    [
+     0.6,
+     0.12,
+     0.02,
+     0.15
+    ],
+    [
+     0.2,
+     0.03,
+     0.0,
+     0.0
+    ]
+   ],
+   "inheritedVelFactor": 0.0,
+   "constantAcceleration": 0.0,
+   "spinSpeed": 0.0,
+   "note": "the glow: the same recipe, 1.5 m additive sprites, no gravity"
+  },
+  {
+   "name": "ericrolph_hot_potato_arena_pe_ember_sparks",
+   "class": "ParticleEmitterData",
+   "file": "levels/ericrolph_hot_potato_arena/art/datablocks/ericrolph_hot_potato_arena_embers_particleemitter.datablocks.json",
+   "particles": "ericrolph_hot_potato_arena_pd_ember",
+   "ejectionPeriodMS": 40,
+   "periodVarianceMS": 20,
+   "ejectionVelocity": 0.75,
+   "velocityVariance": 0.35,
+   "ejectionOffset": 0.0,
+   "thetaMin": 0,
+   "thetaMax": 60,
+   "phiReferenceVel": 0,
+   "phiVariance": 360,
+   "blendStyle": "ADDITIVE",
+   "softnessDistance": 1.0,
+   "overrideAdvance": false,
+   "orientParticles": false,
+   "note": "12 nodes at r 190"
+  },
+  {
+   "name": "ericrolph_hot_potato_arena_pe_ember_glow",
+   "class": "ParticleEmitterData",
+   "file": "levels/ericrolph_hot_potato_arena/art/datablocks/ericrolph_hot_potato_arena_embers_particleemitter.datablocks.json",
+   "particles": "ericrolph_hot_potato_arena_pd_ember_glow",
+   "ejectionPeriodMS": 120,
+   "periodVarianceMS": 40,
+   "ejectionVelocity": 0.2,
+   "velocityVariance": 0.1,
+   "ejectionOffset": 0.0,
+   "thetaMin": 0,
+   "thetaMax": 30,
+   "phiReferenceVel": 0,
+   "phiVariance": 360,
+   "blendStyle": "ADDITIVE",
+   "softnessDistance": 1.5,
+   "overrideAdvance": false,
+   "orientParticles": false,
+   "note": "8 nodes at r 182"
+  },
+  {
+   "name": "ericrolph_hot_potato_arena_pen_ember",
+   "class": "ParticleEmitterNodeData",
+   "file": "levels/ericrolph_hot_potato_arena/art/datablocks/ericrolph_hot_potato_arena_embers_particleemitter.datablocks.json",
+   "timeMultiple": 1.0,
+   "note": "the node datablock every level ember node names"
+  }
+ ],
+ "decal_roads": {
+  "ai_ring": {
+   "material": "ericrolph_hot_potato_arena_road_invisible",
+   "closed": true,
+   "improvedSpline": true,
+   "drivability": 1,
+   "width": 8.0,
+   "nodes": [
+    {
+     "index": 0,
+     "x": 850.0,
+     "y": -110.0,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 1,
+     "x": 892.277,
+     "y": -115.341,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 2,
+     "x": 931.898,
+     "y": -131.028,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 3,
+     "x": 966.373,
+     "y": -156.075,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 4,
+     "x": 993.536,
+     "y": -188.909,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 5,
+     "x": 1011.68,
+     "y": -227.467,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 6,
+     "x": 1019.665,
+     "y": -269.326,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 7,
+     "x": 1016.989,
+     "y": -311.855,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 8,
+     "x": 1003.821,
+     "y": -352.382,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 9,
+     "x": 980.987,
+     "y": -388.362,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 10,
+     "x": 949.923,
+     "y": -417.533,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 11,
+     "x": 912.581,
+     "y": -438.062,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 12,
+     "x": 871.307,
+     "y": -448.659,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 13,
+     "x": 828.693,
+     "y": -448.659,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 14,
+     "x": 787.419,
+     "y": -438.062,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 15,
+     "x": 750.077,
+     "y": -417.533,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 16,
+     "x": 719.013,
+     "y": -388.362,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 17,
+     "x": 696.179,
+     "y": -352.382,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 18,
+     "x": 683.011,
+     "y": -311.855,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 19,
+     "x": 680.335,
+     "y": -269.326,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 20,
+     "x": 688.32,
+     "y": -227.467,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 21,
+     "x": 706.464,
+     "y": -188.909,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 22,
+     "x": 733.627,
+     "y": -156.075,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 23,
+     "x": 768.102,
+     "y": -131.028,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 24,
+     "x": 807.723,
+     "y": -115.341,
+     "z": 100.0,
+     "width": 8.0
+    }
+   ],
+   "gatedRoad": true,
+   "note": "kept from the scaffold (proven: span follows it within 1.24 m)"
+  },
+  "track_surface": {
+   "material": "ericrolph_hot_potato_arena_m_dirt_variation",
+   "closed": true,
+   "improvedSpline": true,
+   "drivability": 0.5,
+   "width": 8.0,
+   "nodes": [
+    {
+     "index": 0,
+     "x": 850.0,
+     "y": -32.0,
+     "z": 100.356,
+     "width": 8.0
+    },
+    {
+     "index": 1,
+     "x": 882.37,
+     "y": -34.122,
+     "z": 100.398,
+     "width": 8.0
+    },
+    {
+     "index": 2,
+     "x": 914.187,
+     "y": -40.45,
+     "z": 100.417,
+     "width": 8.0
+    },
+    {
+     "index": 3,
+     "x": 944.905,
+     "y": -50.878,
+     "z": 100.427,
+     "width": 8.0
+    },
+    {
+     "index": 4,
+     "x": 974.0,
+     "y": -65.226,
+     "z": 100.431,
+     "width": 8.0
+    },
+    {
+     "index": 5,
+     "x": 1000.973,
+     "y": -83.248,
+     "z": 100.434,
+     "width": 8.0
+    },
+    {
+     "index": 6,
+     "x": 1025.362,
+     "y": -104.638,
+     "z": 100.435,
+     "width": 8.0
+    },
+    {
+     "index": 7,
+     "x": 1046.752,
+     "y": -129.027,
+     "z": 100.435,
+     "width": 8.0
+    },
+    {
+     "index": 8,
+     "x": 1064.774,
+     "y": -156.0,
+     "z": 100.435,
+     "width": 8.0
+    },
+    {
+     "index": 9,
+     "x": 1079.122,
+     "y": -185.095,
+     "z": 100.436,
+     "width": 8.0
+    },
+    {
+     "index": 10,
+     "x": 1089.55,
+     "y": -215.813,
+     "z": 100.436,
+     "width": 8.0
+    },
+    {
+     "index": 11,
+     "x": 1095.878,
+     "y": -247.63,
+     "z": 100.434,
+     "width": 8.0
+    },
+    {
+     "index": 12,
+     "x": 1098.0,
+     "y": -280.0,
+     "z": 100.435,
+     "width": 8.0
+    },
+    {
+     "index": 13,
+     "x": 1095.878,
+     "y": -312.37,
+     "z": 100.434,
+     "width": 8.0
+    },
+    {
+     "index": 14,
+     "x": 1089.55,
+     "y": -344.187,
+     "z": 100.436,
+     "width": 8.0
+    },
+    {
+     "index": 15,
+     "x": 1079.122,
+     "y": -374.905,
+     "z": 100.436,
+     "width": 8.0
+    },
+    {
+     "index": 16,
+     "x": 1064.774,
+     "y": -404.0,
+     "z": 100.435,
+     "width": 8.0
+    },
+    {
+     "index": 17,
+     "x": 1046.752,
+     "y": -430.973,
+     "z": 100.435,
+     "width": 8.0
+    },
+    {
+     "index": 18,
+     "x": 1025.362,
+     "y": -455.362,
+     "z": 100.435,
+     "width": 8.0
+    },
+    {
+     "index": 19,
+     "x": 1000.973,
+     "y": -476.752,
+     "z": 100.435,
+     "width": 8.0
+    },
+    {
+     "index": 20,
+     "x": 974.0,
+     "y": -494.774,
+     "z": 100.435,
+     "width": 8.0
+    },
+    {
+     "index": 21,
+     "x": 944.905,
+     "y": -509.122,
+     "z": 100.436,
+     "width": 8.0
+    },
+    {
+     "index": 22,
+     "x": 914.187,
+     "y": -519.55,
+     "z": 100.436,
+     "width": 8.0
+    },
+    {
+     "index": 23,
+     "x": 882.37,
+     "y": -525.878,
+     "z": 100.434,
+     "width": 8.0
+    },
+    {
+     "index": 24,
+     "x": 850.0,
+     "y": -528.0,
+     "z": 100.435,
+     "width": 8.0
+    },
+    {
+     "index": 25,
+     "x": 817.63,
+     "y": -525.878,
+     "z": 100.434,
+     "width": 8.0
+    },
+    {
+     "index": 26,
+     "x": 785.813,
+     "y": -519.55,
+     "z": 100.436,
+     "width": 8.0
+    },
+    {
+     "index": 27,
+     "x": 755.095,
+     "y": -509.122,
+     "z": 100.436,
+     "width": 8.0
+    },
+    {
+     "index": 28,
+     "x": 726.0,
+     "y": -494.774,
+     "z": 100.435,
+     "width": 8.0
+    },
+    {
+     "index": 29,
+     "x": 699.027,
+     "y": -476.752,
+     "z": 100.434,
+     "width": 8.0
+    },
+    {
+     "index": 30,
+     "x": 674.638,
+     "y": -455.362,
+     "z": 100.431,
+     "width": 8.0
+    },
+    {
+     "index": 31,
+     "x": 653.248,
+     "y": -430.973,
+     "z": 100.426,
+     "width": 8.0
+    },
+    {
+     "index": 32,
+     "x": 635.226,
+     "y": -404.0,
+     "z": 100.412,
+     "width": 8.0
+    },
+    {
+     "index": 33,
+     "x": 620.878,
+     "y": -374.905,
+     "z": 100.383,
+     "width": 8.0
+    },
+    {
+     "index": 34,
+     "x": 610.45,
+     "y": -344.187,
+     "z": 100.336,
+     "width": 8.0
+    },
+    {
+     "index": 35,
+     "x": 604.122,
+     "y": -312.37,
+     "z": 100.259,
+     "width": 8.0
+    },
+    {
+     "index": 36,
+     "x": 602.0,
+     "y": -280.0,
+     "z": 100.151,
+     "width": 8.0
+    },
+    {
+     "index": 37,
+     "x": 604.122,
+     "y": -247.63,
+     "z": 100.012,
+     "width": 8.0
+    },
+    {
+     "index": 38,
+     "x": 610.45,
+     "y": -215.813,
+     "z": 99.862,
+     "width": 8.0
+    },
+    {
+     "index": 39,
+     "x": 620.878,
+     "y": -185.095,
+     "z": 99.727,
+     "width": 8.0
+    },
+    {
+     "index": 40,
+     "x": 635.226,
+     "y": -156.0,
+     "z": 99.64,
+     "width": 8.0
+    },
+    {
+     "index": 41,
+     "x": 653.248,
+     "y": -129.027,
+     "z": 99.617,
+     "width": 8.0
+    },
+    {
+     "index": 42,
+     "x": 674.638,
+     "y": -104.638,
+     "z": 99.668,
+     "width": 8.0
+    },
+    {
+     "index": 43,
+     "x": 699.027,
+     "y": -83.248,
+     "z": 99.777,
+     "width": 8.0
+    },
+    {
+     "index": 44,
+     "x": 726.0,
+     "y": -65.226,
+     "z": 99.922,
+     "width": 8.0
+    },
+    {
+     "index": 45,
+     "x": 755.095,
+     "y": -50.878,
+     "z": 100.07,
+     "width": 8.0
+    },
+    {
+     "index": 46,
+     "x": 785.813,
+     "y": -40.45,
+     "z": 100.198,
+     "width": 8.0
+    },
+    {
+     "index": 47,
+     "x": 817.63,
+     "y": -34.122,
+     "z": 100.296,
+     "width": 8.0
+    }
+   ],
+   "note": "the visible campsite loop; 32.5 m node spacing on a 248 m circle"
+  },
+  "ai_connector_60": {
+   "material": "ericrolph_hot_potato_arena_road_invisible",
+   "closed": false,
+   "improvedSpline": true,
+   "drivability": 1,
+   "width": 8.0,
+   "nodes": [
+    {
+     "index": 0,
+     "x": 997.224,
+     "y": -195.0,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 1,
+     "x": 1008.483,
+     "y": -188.5,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 2,
+     "x": 1019.741,
+     "y": -182.0,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 3,
+     "x": 1030.999,
+     "y": -175.5,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 4,
+     "x": 1042.258,
+     "y": -169.0,
+     "z": 100.05,
+     "width": 8.0
+    },
+    {
+     "index": 5,
+     "x": 1053.516,
+     "y": -162.5,
+     "z": 100.203,
+     "width": 8.0
+    },
+    {
+     "index": 6,
+     "x": 1064.774,
+     "y": -156.0,
+     "z": 100.435,
+     "width": 8.0
+    }
+   ],
+   "note": "ring node at 60 deg straight out to the track through the lane"
+  },
+  "ai_connector_150": {
+   "material": "ericrolph_hot_potato_arena_road_invisible",
+   "closed": false,
+   "improvedSpline": true,
+   "drivability": 1,
+   "width": 8.0,
+   "nodes": [
+    {
+     "index": 0,
+     "x": 935.0,
+     "y": -427.224,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 1,
+     "x": 941.5,
+     "y": -438.483,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 2,
+     "x": 948.0,
+     "y": -449.741,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 3,
+     "x": 954.5,
+     "y": -460.999,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 4,
+     "x": 961.0,
+     "y": -472.258,
+     "z": 100.05,
+     "width": 8.0
+    },
+    {
+     "index": 5,
+     "x": 967.5,
+     "y": -483.516,
+     "z": 100.203,
+     "width": 8.0
+    },
+    {
+     "index": 6,
+     "x": 974.0,
+     "y": -494.774,
+     "z": 100.435,
+     "width": 8.0
+    }
+   ],
+   "note": "ring node at 150 deg straight out to the track through the lane"
+  },
+  "ai_connector_240": {
+   "material": "ericrolph_hot_potato_arena_road_invisible",
+   "closed": false,
+   "improvedSpline": true,
+   "drivability": 1,
+   "width": 8.0,
+   "nodes": [
+    {
+     "index": 0,
+     "x": 702.776,
+     "y": -365.0,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 1,
+     "x": 691.517,
+     "y": -371.5,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 2,
+     "x": 680.259,
+     "y": -378.0,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 3,
+     "x": 669.001,
+     "y": -384.5,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 4,
+     "x": 657.742,
+     "y": -391.0,
+     "z": 100.045,
+     "width": 8.0
+    },
+    {
+     "index": 5,
+     "x": 646.484,
+     "y": -397.5,
+     "z": 100.189,
+     "width": 8.0
+    },
+    {
+     "index": 6,
+     "x": 635.226,
+     "y": -404.0,
+     "z": 100.412,
+     "width": 8.0
+    }
+   ],
+   "note": "ring node at 240 deg straight out to the track through the lane"
+  },
+  "ai_connector_330": {
+   "material": "ericrolph_hot_potato_arena_road_invisible",
+   "closed": false,
+   "improvedSpline": true,
+   "drivability": 1,
+   "width": 8.0,
+   "nodes": [
+    {
+     "index": 0,
+     "x": 765.0,
+     "y": -132.776,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 1,
+     "x": 758.5,
+     "y": -121.517,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 2,
+     "x": 752.0,
+     "y": -110.259,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 3,
+     "x": 745.5,
+     "y": -99.001,
+     "z": 100.0,
+     "width": 8.0
+    },
+    {
+     "index": 4,
+     "x": 739.0,
+     "y": -87.742,
+     "z": 99.965,
+     "width": 8.0
+    },
+    {
+     "index": 5,
+     "x": 732.5,
+     "y": -76.484,
+     "z": 99.929,
+     "width": 8.0
+    },
+    {
+     "index": 6,
+     "x": 726.0,
+     "y": -65.226,
+     "z": 99.922,
+     "width": 8.0
+    }
+   ],
+   "note": "ring node at 330 deg straight out to the track through the lane"
+  },
+  "trail_surface": {
+   "material": "ericrolph_hot_potato_arena_m_dirt_variation",
+   "closed": false,
+   "improvedSpline": true,
+   "drivability": 0.3,
+   "width": 6.0,
+   "nodes": [
+    {
+     "index": 0,
+     "x": 974.0,
+     "y": -494.774,
+     "z": 100.435,
+     "width": 6.0,
+     "kind": "end",
+     "m_along": 0.0
+    },
+    {
+     "index": 1,
+     "x": 980.25,
+     "y": -505.6,
+     "z": 100.712,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 12.5
+    },
+    {
+     "index": 2,
+     "x": 986.5,
+     "y": -516.425,
+     "z": 101.02,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 25.0
+    },
+    {
+     "index": 3,
+     "x": 992.75,
+     "y": -527.25,
+     "z": 101.341,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 37.5
+    },
+    {
+     "index": 4,
+     "x": 999.0,
+     "y": -538.076,
+     "z": 101.652,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 50.0
+    },
+    {
+     "index": 5,
+     "x": 1005.25,
+     "y": -548.901,
+     "z": 101.934,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 62.5
+    },
+    {
+     "index": 6,
+     "x": 1011.5,
+     "y": -559.726,
+     "z": 102.166,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 75.0
+    },
+    {
+     "index": 7,
+     "x": 1017.75,
+     "y": -570.552,
+     "z": 102.328,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 87.5
+    },
+    {
+     "index": 8,
+     "x": 1024.0,
+     "y": -581.377,
+     "z": 102.397,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 100.0
+    },
+    {
+     "index": 9,
+     "x": 1030.25,
+     "y": -592.202,
+     "z": 102.408,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 112.5
+    },
+    {
+     "index": 10,
+     "x": 1036.5,
+     "y": -603.027,
+     "z": 102.488,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 125.0
+    },
+    {
+     "index": 11,
+     "x": 1042.75,
+     "y": -613.853,
+     "z": 102.691,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 137.5
+    },
+    {
+     "index": 12,
+     "x": 1049.0,
+     "y": -624.678,
+     "z": 103.052,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 150.0
+    },
+    {
+     "index": 13,
+     "x": 1055.25,
+     "y": -635.503,
+     "z": 103.566,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 162.5
+    },
+    {
+     "index": 14,
+     "x": 1063.073,
+     "y": -645.187,
+     "z": 104.191,
+     "width": 6.0,
+     "kind": "arc",
+     "m_along": 174.9
+    },
+    {
+     "index": 15,
+     "x": 1073.24,
+     "y": -652.435,
+     "z": 104.843,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 187.4
+    },
+    {
+     "index": 16,
+     "x": 1083.684,
+     "y": -659.302,
+     "z": 105.492,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 199.9
+    },
+    {
+     "index": 17,
+     "x": 1094.129,
+     "y": -666.169,
+     "z": 106.095,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 212.4
+    },
+    {
+     "index": 18,
+     "x": 1104.574,
+     "y": -673.035,
+     "z": 106.738,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 224.9
+    },
+    {
+     "index": 19,
+     "x": 1115.019,
+     "y": -679.902,
+     "z": 107.438,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 237.4
+    },
+    {
+     "index": 20,
+     "x": 1125.464,
+     "y": -686.769,
+     "z": 108.19,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 249.9
+    },
+    {
+     "index": 21,
+     "x": 1135.909,
+     "y": -693.636,
+     "z": 109.001,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 262.4
+    },
+    {
+     "index": 22,
+     "x": 1146.354,
+     "y": -700.503,
+     "z": 109.871,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 274.9
+    },
+    {
+     "index": 23,
+     "x": 1156.799,
+     "y": -707.37,
+     "z": 110.8,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 287.4
+    },
+    {
+     "index": 24,
+     "x": 1167.244,
+     "y": -714.237,
+     "z": 111.794,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 299.9
+    },
+    {
+     "index": 25,
+     "x": 1177.622,
+     "y": -721.199,
+     "z": 112.844,
+     "width": 6.0,
+     "kind": "arc",
+     "m_along": 312.4
+    },
+    {
+     "index": 26,
+     "x": 1186.167,
+     "y": -730.253,
+     "z": 113.866,
+     "width": 6.0,
+     "kind": "arc",
+     "m_along": 324.9
+    },
+    {
+     "index": 27,
+     "x": 1191.525,
+     "y": -741.491,
+     "z": 114.711,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 337.3
+    },
+    {
+     "index": 28,
+     "x": 1195.295,
+     "y": -753.409,
+     "z": 115.455,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 349.8
+    },
+    {
+     "index": 29,
+     "x": 1199.065,
+     "y": -765.327,
+     "z": 116.215,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 362.3
+    },
+    {
+     "index": 30,
+     "x": 1202.835,
+     "y": -777.245,
+     "z": 116.987,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 374.8
+    },
+    {
+     "index": 31,
+     "x": 1206.605,
+     "y": -789.163,
+     "z": 117.777,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 387.3
+    },
+    {
+     "index": 32,
+     "x": 1210.374,
+     "y": -801.081,
+     "z": 118.581,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 399.8
+    },
+    {
+     "index": 33,
+     "x": 1214.144,
+     "y": -812.999,
+     "z": 119.402,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 412.3
+    },
+    {
+     "index": 34,
+     "x": 1217.914,
+     "y": -824.917,
+     "z": 120.243,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 424.8
+    },
+    {
+     "index": 35,
+     "x": 1221.684,
+     "y": -836.835,
+     "z": 121.099,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 437.3
+    },
+    {
+     "index": 36,
+     "x": 1225.454,
+     "y": -848.753,
+     "z": 121.974,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 449.8
+    },
+    {
+     "index": 37,
+     "x": 1229.178,
+     "y": -860.684,
+     "z": 122.865,
+     "width": 6.0,
+     "kind": "arc",
+     "m_along": 462.3
+    },
+    {
+     "index": 38,
+     "x": 1230.438,
+     "y": -873.069,
+     "z": 123.602,
+     "width": 6.0,
+     "kind": "arc",
+     "m_along": 474.8
+    },
+    {
+     "index": 39,
+     "x": 1229.034,
+     "y": -885.489,
+     "z": 124.177,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 487.3
+    },
+    {
+     "index": 40,
+     "x": 1227.543,
+     "y": -897.899,
+     "z": 124.806,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 499.8
+    },
+    {
+     "index": 41,
+     "x": 1226.052,
+     "y": -910.31,
+     "z": 125.497,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 512.3
+    },
+    {
+     "index": 42,
+     "x": 1224.561,
+     "y": -922.721,
+     "z": 126.251,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 524.8
+    },
+    {
+     "index": 43,
+     "x": 1223.07,
+     "y": -935.132,
+     "z": 127.069,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 537.3
+    },
+    {
+     "index": 44,
+     "x": 1221.579,
+     "y": -947.542,
+     "z": 127.954,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 549.8
+    },
+    {
+     "index": 45,
+     "x": 1220.088,
+     "y": -959.953,
+     "z": 128.905,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 562.3
+    },
+    {
+     "index": 46,
+     "x": 1218.597,
+     "y": -972.364,
+     "z": 129.922,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 574.8
+    },
+    {
+     "index": 47,
+     "x": 1217.106,
+     "y": -984.774,
+     "z": 131.007,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 587.3
+    },
+    {
+     "index": 48,
+     "x": 1215.614,
+     "y": -997.185,
+     "z": 132.161,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 599.8
+    },
+    {
+     "index": 49,
+     "x": 1214.123,
+     "y": -1009.596,
+     "z": 133.383,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 612.3
+    },
+    {
+     "index": 50,
+     "x": 1212.632,
+     "y": -1022.007,
+     "z": 134.672,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 624.8
+    },
+    {
+     "index": 51,
+     "x": 1211.553,
+     "y": -1034.447,
+     "z": 136.037,
+     "width": 6.0,
+     "kind": "arc",
+     "m_along": 637.3
+    },
+    {
+     "index": 52,
+     "x": 1213.779,
+     "y": -1046.695,
+     "z": 137.421,
+     "width": 6.0,
+     "kind": "arc",
+     "m_along": 649.7
+    },
+    {
+     "index": 53,
+     "x": 1219.663,
+     "y": -1057.666,
+     "z": 138.659,
+     "width": 6.0,
+     "kind": "arc",
+     "m_along": 662.2
+    },
+    {
+     "index": 54,
+     "x": 1228.551,
+     "y": -1066.405,
+     "z": 139.642,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 674.6
+    },
+    {
+     "index": 55,
+     "x": 1238.168,
+     "y": -1074.389,
+     "z": 140.562,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 687.1
+    },
+    {
+     "index": 56,
+     "x": 1247.786,
+     "y": -1082.374,
+     "z": 141.511,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 699.6
+    },
+    {
+     "index": 57,
+     "x": 1257.403,
+     "y": -1090.358,
+     "z": 142.361,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 712.1
+    },
+    {
+     "index": 58,
+     "x": 1267.021,
+     "y": -1098.343,
+     "z": 142.933,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 724.6
+    },
+    {
+     "index": 59,
+     "x": 1276.639,
+     "y": -1106.327,
+     "z": 143.226,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 737.1
+    },
+    {
+     "index": 60,
+     "x": 1286.256,
+     "y": -1114.312,
+     "z": 143.227,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 749.6
+    },
+    {
+     "index": 61,
+     "x": 1295.874,
+     "y": -1122.296,
+     "z": 142.93,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 762.1
+    },
+    {
+     "index": 62,
+     "x": 1305.492,
+     "y": -1130.28,
+     "z": 142.324,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 774.6
+    },
+    {
+     "index": 63,
+     "x": 1315.109,
+     "y": -1138.265,
+     "z": 141.401,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 787.1
+    },
+    {
+     "index": 64,
+     "x": 1324.727,
+     "y": -1146.249,
+     "z": 140.18,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 799.6
+    },
+    {
+     "index": 65,
+     "x": 1334.335,
+     "y": -1154.245,
+     "z": 138.904,
+     "width": 6.0,
+     "kind": "arc",
+     "m_along": 812.1
+    },
+    {
+     "index": 66,
+     "x": 1343.393,
+     "y": -1162.857,
+     "z": 137.577,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 824.6
+    },
+    {
+     "index": 67,
+     "x": 1352.412,
+     "y": -1171.512,
+     "z": 136.248,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 837.1
+    },
+    {
+     "index": 68,
+     "x": 1361.431,
+     "y": -1180.167,
+     "z": 134.921,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 849.6
+    },
+    {
+     "index": 69,
+     "x": 1370.45,
+     "y": -1188.822,
+     "z": 133.597,
+     "width": 6.0,
+     "kind": "straight",
+     "m_along": 862.1
+    },
+    {
+     "index": 70,
+     "x": 1380.0,
+     "y": -1197.987,
+     "z": 132.199,
+     "width": 6.0,
+     "kind": "end",
+     "m_along": 875.4
+    }
+   ],
+   "spacing_m": 12.5,
+   "geometry_check": {
+    "nodes": 71,
+    "reference_step_m": 0.1,
+    "node_spacing_max_m": 13.235990603564971,
+    "node_polyline_dev_max_m": 0.48862170877648325,
+    "spline_dev_max_m": 0.16730278554120784,
+    "spline_dev_cr_to_ref_m": 0.1659543842026398,
+    "spline_dev_ref_to_cr_m": 0.16730278554120784,
+    "spline_vs_polyline_dev_max_m": 4.812828604884278,
+    "spline_len_m": 875.6590629524536,
+    "spline_grade_max_pct": 11.402881794771247,
+    "spline_dgrade_max_mm": 6.58285515341106,
+    "spline_cells_over_law": 0,
+    "rounded_vs_polyline_dev_max_m": 4.865454939170697,
+    "rounded_vs_polyline_apex_max_m": 4.8726716327203645
+   },
+   "layers_on_these_nodes": [
+    "trail_flows_<n>",
+    "trail_gravel_<n>",
+    "trail_rut_<l|r> (offset +-1.2 m)",
+    "trail_verge_<in|out> (offset +-3.5 m)",
+    "trail_cracks_<n>",
+    "trail_puddle_<n>",
+    "trail_dust",
+    "trail_litter_<n>"
+   ],
+   "note": "the corner-rounded centreline the terrain model builds the paint / noise band / relief mask from, sampled every 12.5 m; a uniform Catmull-Rom through these nodes stays within geometry_check.spline_dev_max_m of it"
+  }
+ },
+ "cameras": [
+  {
+   "name": "S1_sunset_lane",
+   "position": [
+    750.5,
+    -107.66,
+    102.4
+   ],
+   "look_at": [
+    413.13,
+    37.4,
+    102.0
+   ],
+   "clock_T": 0.3,
+   "must_show": "from a car's roof at the 330 lane's mouth (r 199, 3 m inside the ring's faces) aimed at the lake: hearth_stone_25 at the frame's left edge, the track, the lake shelf, the whole lake with its centre 294 deg from the eye = under the measured sun, the outlet notch and backdrop peaks; >= 60 % of the water surface visible by ray test (terrain_summary); no solid between the eye and any part of the water (R6)"
+  },
+  {
+   "name": "S2_trailhead_to_pan",
+   "position": [
+    981.0,
+    -506.9,
+    103.75
+   ],
+   "look_at": [
+    850.0,
+    -280.0,
+    106.0
+   ],
+   "clock_T": 0.3,
+   "must_show": "from the trail at m 14: the skillet bedded in coals, ember crust, scorch decals, the S/E stone clusters, the handle end-on, the pan wall and rim plate in golden light; the sign and cairn at the frame edges"
+  },
+  {
+   "name": "S3_crest_to_basin",
+   "position": [
+    804.3,
+    -200.84,
+    107.5
+   ],
+   "look_at": [
+    407.3,
+    486.79,
+    220.01
+   ],
+   "clock_T": 0.3,
+   "must_show": "from the pan crest at 330: glacis, hearth slab, ash bed, the 330 lane between hearth_stone_25 and _00 with the chocks behind, the meadow, the forest climbing the NW wall to the rounded crest, cloud layer, three haze steps"
+  },
+  {
+   "name": "S4_driver_ash_band",
+   "position": [
+    1033.17,
+    -312.3,
+    101.2
+   ],
+   "look_at": [
+    1026.16,
+    -351.18,
+    102.0
+   ],
+   "clock_T": 0.3,
+   "must_show": "driver's eye on the ash band: ember plates 2-10 m, sparks/glow particles, hearth_stone_09 (36 m) at 30 m with 4K-class texel density, ash-drift decals"
+  },
+  {
+   "name": "S5_lantern_night",
+   "position": [
+    1061.19,
+    -115.0,
+    103.09
+   ],
+   "look_at": [
+    1042.84,
+    -50.19,
+    141.7
+   ],
+   "clock_T": 0.5,
+   "must_show": "night: the lantern spot pool on the meadow, the tripod poles, log_north's east-end kindling fire beside the tripod (24 m from its nearest foot) and its light on the N cluster's outer faces, 30+ night lights on; the sky is whatever core_celestial renders for the record's date/lat at clock 0.50 (sun -19.7 deg; its moon/star field is unmeasured and its enableChrome overrides the ScatterSky's authored night keys - B0 r3), so the sky is recorded, not a pass criterion"
+  },
+  {
+   "name": "S6_handle_night",
+   "position": [
+    850.0,
+    -342.0,
+    105.2
+   ],
+   "look_at": [
+    982.0,
+    -51.37,
+    103.79
+   ],
+   "clock_T": 0.5,
+   "must_show": "night from the handle deck across the pan: the ember ring glowing beyond the crest, the two north kindling fires seen through the N cluster's gaps (16.5 and 32.5 deg from the camera, between stones 02/03 and 03/04; margins in checks R11), heat wisps, rim plate lit by ember lights; the sky as core_celestial renders it (recorded, not a pass criterion)"
+  },
+  {
+   "name": "S7_forest_floor",
+   "position": [
+    997.07,
+    124.07,
+    108.73
+   ],
+   "look_at": [
+    1041.17,
+    149.37,
+    119.23
+   ],
+   "clock_T": 0.3,
+   "must_show": "forest interior: needle litter, ferns, deadfall clusters, bark 2-20 m, sub-surface backlit twig cards, 3 LODs visible at 20/60/150 m"
+  },
+  {
+   "name": "S8_trail_switchback",
+   "position": [
+    1225.16,
+    -917.76,
+    127.34
+   ],
+   "look_at": [
+    850.0,
+    -280.0,
+    108.0
+   ],
+   "clock_T": 0.3,
+   "must_show": "trail m 520: the decal stack (surface/flows/gravel/tiretracks/edge/cracks/puddles/dust), split-rail fence, scree, the whole hearth below with the forest as imposters"
+  },
+  {
+   "name": "S9_lakeshore",
+   "position": [
+    461.02,
+    -153.61,
+    100.43
+   ],
+   "look_at": [
+    413.13,
+    37.4,
+    98.0
+   ],
+   "clock_T": 0.3,
+   "must_show": "shore pebbles/sand, reeds, water ripple + foam, sky reflection, the WNW outlet notch"
+  },
+  {
+   "name": "S10_ridge_crest",
+   "position": [
+    1452.13,
+    437.59,
+    284.41
+   ],
+   "look_at": [
+    850.0,
+    -280.0,
+    100.0
+   ],
+   "clock_T": 0.3,
+   "must_show": "from 6 m inside the crest at bearing 40 (in front of it, inside the basin): the whole basin, skillet, hearth, four lanes, track ring, lake, forest zones, backdrop ring; the far-field test frame"
+  },
+  {
+   "name": "AERIAL_300m",
+   "position": [
+    850.0,
+    -280.0,
+    400.0
+   ],
+   "look_at": [
+    850.0,
+    -280.0,
+    100.0
+   ],
+   "clock_T": 0.3,
+   "must_show": "straight down: pan, hearth slab, ash bed, 20 stones + 8 chocks, four lanes, track, logs, tripod, pot"
+  }
+ ],
+ "spawns": [
+  {
+   "name": "_spawn_trailhead",
+   "x": 978.0,
+   "y": -501.7,
+   "z": 100.609,
+   "facing_deg": 330.0,
+   "layer": "trail",
+   "note": "trail m 8 (r ~256), facing the pan"
+  },
+  {
+   "name": "_spawn_lakeshore",
+   "x": 466.72,
+   "y": -155.47,
+   "z": 98.929,
+   "facing_deg": 288.0,
+   "layer": "shore",
+   "note": "bearing 288, r 403, on the shore band 3 m back from where the ground is 0.8 m over the water, facing the water"
+  },
+  {
+   "name": "_spawn_firewood_gap",
+   "x": 1281.64,
+   "y": -1110.48,
+   "z": 143.263,
+   "facing_deg": 330.0,
+   "layer": "trail",
+   "note": "trail m 744 = the saddle crest (z 143.3), facing the pan; inside the basin by construction"
+  }
+ ],
+ "registry_full": [
+  {
+   "name": "hearth_stone_00",
+   "x": 794.872,
+   "y": -74.258,
+   "r": 15.0,
+   "rp": 11.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "hearth_stone_01",
+   "x": 850.0,
+   "y": -63.0,
+   "r": 19.0,
+   "rp": 15.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "hearth_stone_02",
+   "x": 906.94,
+   "y": -67.496,
+   "r": 22.0,
+   "rp": 18.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "hearth_stone_03",
+   "x": 958.0,
+   "y": -92.939,
+   "r": 18.0,
+   "rp": 14.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "hearth_stone_04",
+   "x": 999.907,
+   "y": -130.093,
+   "r": 14.0,
+   "rp": 10.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "chock_stone_05",
+   "x": 878.03,
+   "y": -51.714,
+   "r": 9.0,
+   "rp": 5.0,
+   "why": "chock"
+  },
+  {
+   "name": "chock_stone_06",
+   "x": 939.868,
+   "y": -68.284,
+   "r": 9.0,
+   "rp": 5.0,
+   "why": "chock"
+  },
+  {
+   "name": "hearth_stone_07",
+   "x": 1055.742,
+   "y": -224.872,
+   "r": 15.0,
+   "rp": 11.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "hearth_stone_08",
+   "x": 1067.0,
+   "y": -280.0,
+   "r": 19.0,
+   "rp": 15.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "hearth_stone_09",
+   "x": 1062.504,
+   "y": -336.94,
+   "r": 22.0,
+   "rp": 18.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "hearth_stone_10",
+   "x": 1037.061,
+   "y": -388.0,
+   "r": 18.0,
+   "rp": 14.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "hearth_stone_11",
+   "x": 999.907,
+   "y": -429.907,
+   "r": 14.0,
+   "rp": 10.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "chock_stone_12",
+   "x": 1078.286,
+   "y": -308.03,
+   "r": 9.0,
+   "rp": 5.0,
+   "why": "chock"
+  },
+  {
+   "name": "chock_stone_13",
+   "x": 1061.716,
+   "y": -369.868,
+   "r": 9.0,
+   "rp": 5.0,
+   "why": "chock"
+  },
+  {
+   "name": "hearth_stone_14",
+   "x": 905.128,
+   "y": -485.742,
+   "r": 15.0,
+   "rp": 11.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "hearth_stone_15",
+   "x": 850.0,
+   "y": -497.0,
+   "r": 19.0,
+   "rp": 15.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "hearth_stone_16",
+   "x": 793.06,
+   "y": -492.504,
+   "r": 22.0,
+   "rp": 18.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "hearth_stone_17",
+   "x": 742.0,
+   "y": -467.061,
+   "r": 18.0,
+   "rp": 14.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "hearth_stone_18",
+   "x": 700.093,
+   "y": -429.907,
+   "r": 14.0,
+   "rp": 10.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "chock_stone_19",
+   "x": 821.97,
+   "y": -508.286,
+   "r": 9.0,
+   "rp": 5.0,
+   "why": "chock"
+  },
+  {
+   "name": "chock_stone_20",
+   "x": 760.132,
+   "y": -491.716,
+   "r": 9.0,
+   "rp": 5.0,
+   "why": "chock"
+  },
+  {
+   "name": "hearth_stone_21",
+   "x": 644.258,
+   "y": -335.128,
+   "r": 15.0,
+   "rp": 11.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "hearth_stone_22",
+   "x": 633.0,
+   "y": -280.0,
+   "r": 19.0,
+   "rp": 15.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "hearth_stone_23",
+   "x": 637.496,
+   "y": -223.06,
+   "r": 22.0,
+   "rp": 18.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "hearth_stone_24",
+   "x": 662.939,
+   "y": -172.0,
+   "r": 18.0,
+   "rp": 14.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "hearth_stone_25",
+   "x": 700.093,
+   "y": -130.093,
+   "r": 14.0,
+   "rp": 10.0,
+   "why": "hearth stone"
+  },
+  {
+   "name": "chock_stone_26",
+   "x": 621.714,
+   "y": -251.97,
+   "r": 9.0,
+   "rp": 5.0,
+   "why": "chock"
+  },
+  {
+   "name": "chock_stone_27",
+   "x": 638.284,
+   "y": -190.132,
+   "r": 9.0,
+   "rp": 5.0,
+   "why": "chock"
+  },
+  {
+   "name": "bench_log_00",
+   "x": 1127.879,
+   "y": -382.699,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)"
+  },
+  {
+   "name": "bench_log_01",
+   "x": 1122.323,
+   "y": -392.321,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)"
+  },
+  {
+   "name": "bench_log_02",
+   "x": 1116.768,
+   "y": -401.944,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)"
+  },
+  {
+   "name": "bench_log_03",
+   "x": 1111.212,
+   "y": -411.566,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)"
+  },
+  {
+   "name": "bench_log_04",
+   "x": 1105.657,
+   "y": -421.189,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)"
+  },
+  {
+   "name": "bench_log_05",
+   "x": 1100.101,
+   "y": -430.811,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)"
+  },
+  {
+   "name": "bench_log_06",
+   "x": 1094.546,
+   "y": -440.434,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)"
+  },
+  {
+   "name": "bench_log_07",
+   "x": 1088.99,
+   "y": -450.056,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)"
+  },
+  {
+   "name": "bench_log_08",
+   "x": 1083.435,
+   "y": -459.679,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)"
+  },
+  {
+   "name": "bench_log_09",
+   "x": 1077.879,
+   "y": -469.301,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)"
+  },
+  {
+   "name": "log_north_00",
+   "x": 947.359,
+   "y": -31.369,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.4 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.9 >= rp 3.5)"
+  },
+  {
+   "name": "log_north_01",
+   "x": 957.256,
+   "y": -37.083,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.4 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.9 >= rp 3.5)"
+  },
+  {
+   "name": "log_north_02",
+   "x": 967.154,
+   "y": -42.798,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.4 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.9 >= rp 3.5)"
+  },
+  {
+   "name": "log_north_03",
+   "x": 977.051,
+   "y": -48.512,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.4 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.9 >= rp 3.5)"
+  },
+  {
+   "name": "log_north_04",
+   "x": 986.949,
+   "y": -54.226,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.4 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.9 >= rp 3.5)"
+  },
+  {
+   "name": "log_north_05",
+   "x": 996.846,
+   "y": -59.94,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.4 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.9 >= rp 3.5)"
+  },
+  {
+   "name": "log_north_06",
+   "x": 1006.744,
+   "y": -65.655,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.4 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.9 >= rp 3.5)"
+  },
+  {
+   "name": "log_north_07",
+   "x": 1016.641,
+   "y": -71.369,
+   "r": 7.5,
+   "rp": 3.5,
+   "why": "log chain, pitch 11.4 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.9 >= rp 3.5)"
+  },
+  {
+   "name": "log_south_00",
+   "x": 748.311,
+   "y": -526.131,
+   "r": 7.25,
+   "rp": 3.25,
+   "why": "log chain, pitch 11.7 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.3 >= rp 3.25)"
+  },
+  {
+   "name": "log_south_01",
+   "x": 738.207,
+   "y": -520.298,
+   "r": 7.25,
+   "rp": 3.25,
+   "why": "log chain, pitch 11.7 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.3 >= rp 3.25)"
+  },
+  {
+   "name": "log_south_02",
+   "x": 728.104,
+   "y": -514.464,
+   "r": 7.25,
+   "rp": 3.25,
+   "why": "log chain, pitch 11.7 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.3 >= rp 3.25)"
+  },
+  {
+   "name": "log_south_03",
+   "x": 718.0,
+   "y": -508.631,
+   "r": 7.25,
+   "rp": 3.25,
+   "why": "log chain, pitch 11.7 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.3 >= rp 3.25)"
+  },
+  {
+   "name": "log_south_04",
+   "x": 707.896,
+   "y": -502.798,
+   "r": 7.25,
+   "rp": 3.25,
+   "why": "log chain, pitch 11.7 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.3 >= rp 3.25)"
+  },
+  {
+   "name": "log_south_05",
+   "x": 697.793,
+   "y": -496.964,
+   "r": 7.25,
+   "rp": 3.25,
+   "why": "log chain, pitch 11.7 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.3 >= rp 3.25)"
+  },
+  {
+   "name": "log_south_06",
+   "x": 687.689,
+   "y": -491.131,
+   "r": 7.25,
+   "rp": 3.25,
+   "why": "log chain, pitch 11.7 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.3 >= rp 3.25)"
+  },
+  {
+   "name": "leaner_log_r294",
+   "x": 850.0,
+   "y": -574.0,
+   "r": 7.0,
+   "rp": 3.0,
+   "why": "leaner foot (underside < 2.5 m)"
+  },
+  {
+   "name": "leaner_log_r286",
+   "x": 850.0,
+   "y": -566.0,
+   "r": 7.0,
+   "rp": 3.0,
+   "why": "leaner foot (underside < 2.5 m)"
+  },
+  {
+   "name": "leaner_log_r278",
+   "x": 850.0,
+   "y": -558.2,
+   "r": 7.0,
+   "rp": 3.0,
+   "why": "leaner foot (underside < 2.5 m)"
+  },
+  {
+   "name": "tripod_foot_0",
+   "x": 1052.836,
+   "y": -32.866,
+   "r": 4.0,
+   "rp": 1.3,
+   "why": "2.5 m pole"
+  },
+  {
+   "name": "tripod_foot_1",
+   "x": 1052.836,
+   "y": -67.508,
+   "r": 4.0,
+   "rp": 1.3,
+   "why": "2.5 m pole"
+  },
+  {
+   "name": "tripod_foot_2",
+   "x": 1022.836,
+   "y": -50.187,
+   "r": 4.0,
+   "rp": 1.3,
+   "why": "2.5 m pole"
+  },
+  {
+   "name": "enamel_pot",
+   "x": 902.094,
+   "y": -575.442,
+   "r": 11.0,
+   "rp": 7.0,
+   "why": "prop"
+  },
+  {
+   "name": "trail_sign",
+   "x": 979.938,
+   "y": -519.059,
+   "r": 4.5,
+   "rp": 0.5,
+   "why": "prop"
+  },
+  {
+   "name": "trail_cairn_0",
+   "x": 982.062,
+   "y": -494.738,
+   "r": 5.5,
+   "rp": 1.5,
+   "why": "prop"
+  },
+  {
+   "name": "trail_cairn_1",
+   "x": 1277.169,
+   "y": -1115.865,
+   "r": 5.5,
+   "rp": 1.5,
+   "why": "prop"
+  },
+  {
+   "name": "lantern_post_0",
+   "x": 916.258,
+   "y": -32.723,
+   "r": 4.3,
+   "rp": 0.3,
+   "why": "prop"
+  },
+  {
+   "name": "lantern_post_1",
+   "x": 1097.277,
+   "y": -346.258,
+   "r": 4.3,
+   "rp": 0.3,
+   "why": "prop"
+  },
+  {
+   "name": "lantern_post_2",
+   "x": 783.742,
+   "y": -527.277,
+   "r": 4.3,
+   "rp": 0.3,
+   "why": "prop"
+  },
+  {
+   "name": "lantern_post_3",
+   "x": 602.723,
+   "y": -213.742,
+   "r": 4.3,
+   "rp": 0.3,
+   "why": "prop"
+  }
+ ],
+ "registry_fallback": [
+  {
+   "name": "hearth_stone_00",
+   "x": 794.872,
+   "y": -74.258,
+   "r": 15.0,
+   "rp": 11.0,
+   "why": "lane flank: the stone a car leaving through a lane passes nearest"
+  },
+  {
+   "name": "hearth_stone_04",
+   "x": 999.907,
+   "y": -130.093,
+   "r": 14.0,
+   "rp": 10.0,
+   "why": "lane flank: the stone a car leaving through a lane passes nearest"
+  },
+  {
+   "name": "hearth_stone_07",
+   "x": 1055.742,
+   "y": -224.872,
+   "r": 15.0,
+   "rp": 11.0,
+   "why": "lane flank: the stone a car leaving through a lane passes nearest"
+  },
+  {
+   "name": "hearth_stone_11",
+   "x": 999.907,
+   "y": -429.907,
+   "r": 14.0,
+   "rp": 10.0,
+   "why": "lane flank: the stone a car leaving through a lane passes nearest"
+  },
+  {
+   "name": "hearth_stone_14",
+   "x": 905.128,
+   "y": -485.742,
+   "r": 15.0,
+   "rp": 11.0,
+   "why": "lane flank: the stone a car leaving through a lane passes nearest"
+  },
+  {
+   "name": "hearth_stone_18",
+   "x": 700.093,
+   "y": -429.907,
+   "r": 14.0,
+   "rp": 10.0,
+   "why": "lane flank: the stone a car leaving through a lane passes nearest"
+  },
+  {
+   "name": "hearth_stone_21",
+   "x": 644.258,
+   "y": -335.128,
+   "r": 15.0,
+   "rp": 11.0,
+   "why": "lane flank: the stone a car leaving through a lane passes nearest"
+  },
+  {
+   "name": "hearth_stone_25",
+   "x": 700.093,
+   "y": -130.093,
+   "r": 14.0,
+   "rp": 10.0,
+   "why": "lane flank: the stone a car leaving through a lane passes nearest"
+  },
+  {
+   "name": "hearth_stone_02",
+   "x": 906.94,
+   "y": -67.496,
+   "r": 22.0,
+   "rp": 18.0,
+   "why": "cluster-centre giant (36 m): the head-on target of a car crossing the ash bed"
+  },
+  {
+   "name": "hearth_stone_09",
+   "x": 1062.504,
+   "y": -336.94,
+   "r": 22.0,
+   "rp": 18.0,
+   "why": "cluster-centre giant (36 m): the head-on target of a car crossing the ash bed"
+  },
+  {
+   "name": "hearth_stone_16",
+   "x": 793.06,
+   "y": -492.504,
+   "r": 22.0,
+   "rp": 18.0,
+   "why": "cluster-centre giant (36 m): the head-on target of a car crossing the ash bed"
+  },
+  {
+   "name": "hearth_stone_23",
+   "x": 637.496,
+   "y": -223.06,
+   "r": 22.0,
+   "rp": 18.0,
+   "why": "cluster-centre giant (36 m): the head-on target of a car crossing the ash bed"
+  },
+  {
+   "name": "hearth_stone_03",
+   "x": 958.0,
+   "y": -92.939,
+   "r": 18.0,
+   "rp": 14.0,
+   "why": "next to the spout lanes 60/240 (the most-used exits)"
+  },
+  {
+   "name": "hearth_stone_08",
+   "x": 1067.0,
+   "y": -280.0,
+   "r": 19.0,
+   "rp": 15.0,
+   "why": "next to the spout lanes 60/240 (the most-used exits)"
+  },
+  {
+   "name": "hearth_stone_17",
+   "x": 742.0,
+   "y": -467.061,
+   "r": 18.0,
+   "rp": 14.0,
+   "why": "next to the spout lanes 60/240 (the most-used exits)"
+  },
+  {
+   "name": "hearth_stone_22",
+   "x": 633.0,
+   "y": -280.0,
+   "r": 19.0,
+   "rp": 15.0,
+   "why": "next to the spout lanes 60/240 (the most-used exits)"
+  },
+  {
+   "name": "bench_log_fb0",
+   "x": 1115.379,
+   "y": -404.35,
+   "r": 30.0,
+   "rp": 3.5,
+   "why": "the only drivable outside solid: two r 30 discs cover the 100 m deck (a coarse dodge corridor)"
+  },
+  {
+   "name": "bench_log_fb1",
+   "x": 1090.379,
+   "y": -447.65,
+   "r": 30.0,
+   "rp": 3.5,
+   "why": "the only drivable outside solid: two r 30 discs cover the 100 m deck (a coarse dodge corridor)"
+  }
+ ],
+ "registry_left_out": [
+  "hearth_stone_01",
+  "chock_stone_05",
+  "chock_stone_06",
+  "hearth_stone_10",
+  "chock_stone_12",
+  "chock_stone_13",
+  "hearth_stone_15",
+  "chock_stone_19",
+  "chock_stone_20",
+  "hearth_stone_24",
+  "chock_stone_26",
+  "chock_stone_27",
+  "log_north_00",
+  "log_north_01",
+  "log_north_02",
+  "log_north_03",
+  "log_north_04",
+  "log_north_05",
+  "log_north_06",
+  "log_north_07",
+  "log_south_00",
+  "log_south_01",
+  "log_south_02",
+  "log_south_03",
+  "log_south_04",
+  "log_south_05",
+  "log_south_06",
+  "leaner_log_r294",
+  "leaner_log_r286",
+  "leaner_log_r278",
+  "tripod_foot_0",
+  "tripod_foot_1",
+  "tripod_foot_2",
+  "enamel_pot",
+  "trail_sign",
+  "trail_cairn_0",
+  "trail_cairn_1",
+  "lantern_post_0",
+  "lantern_post_1",
+  "lantern_post_2",
+  "lantern_post_3"
+ ],
+ "z_table": [
+  {
+   "object": "S1_sunset_lane",
+   "class": "camera",
+   "x": 750.5,
+   "y": -107.66,
+   "z": 102.4,
+   "terrain_z": 100.0,
+   "dz": 2.4,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S1_sunset_lane (look-at)",
+   "class": "camera look-at",
+   "x": 413.13,
+   "y": 37.4,
+   "z": 102.0,
+   "terrain_z": 85.962,
+   "dz": 16.038,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S2_trailhead_to_pan",
+   "class": "camera",
+   "x": 981.0,
+   "y": -506.9,
+   "z": 103.75,
+   "terrain_z": 100.745,
+   "dz": 3.005,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S2_trailhead_to_pan (look-at)",
+   "class": "camera look-at",
+   "x": 850.0,
+   "y": -280.0,
+   "z": 106.0,
+   "terrain_z": 100.0,
+   "dz": 6.0,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S3_crest_to_basin",
+   "class": "camera",
+   "x": 804.3,
+   "y": -200.84,
+   "z": 107.5,
+   "terrain_z": 100.0,
+   "dz": 7.5,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S3_crest_to_basin (look-at)",
+   "class": "camera look-at",
+   "x": 407.3,
+   "y": 486.79,
+   "z": 220.01,
+   "terrain_z": 210.008,
+   "dz": 10.002,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S4_driver_ash_band",
+   "class": "camera",
+   "x": 1033.17,
+   "y": -312.3,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S4_driver_ash_band (look-at)",
+   "class": "camera look-at",
+   "x": 1026.16,
+   "y": -351.18,
+   "z": 102.0,
+   "terrain_z": 100.0,
+   "dz": 2.0,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S5_lantern_night",
+   "class": "camera",
+   "x": 1061.19,
+   "y": -115.0,
+   "z": 103.09,
+   "terrain_z": 100.892,
+   "dz": 2.198,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S5_lantern_night (look-at)",
+   "class": "camera look-at",
+   "x": 1042.84,
+   "y": -50.19,
+   "z": 141.7,
+   "terrain_z": 101.698,
+   "dz": 40.002,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S6_handle_night",
+   "class": "camera",
+   "x": 850.0,
+   "y": -342.0,
+   "z": 105.2,
+   "terrain_z": 100.0,
+   "dz": 5.2,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S6_handle_night (look-at)",
+   "class": "camera look-at",
+   "x": 982.0,
+   "y": -51.37,
+   "z": 103.79,
+   "terrain_z": 100.792,
+   "dz": 2.998,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S7_forest_floor",
+   "class": "camera",
+   "x": 997.07,
+   "y": 124.07,
+   "z": 108.73,
+   "terrain_z": 107.128,
+   "dz": 1.602,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S7_forest_floor (look-at)",
+   "class": "camera look-at",
+   "x": 1041.17,
+   "y": 149.37,
+   "z": 119.23,
+   "terrain_z": 116.23,
+   "dz": 3.0,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S8_trail_switchback",
+   "class": "camera",
+   "x": 1225.16,
+   "y": -917.76,
+   "z": 127.34,
+   "terrain_z": 125.944,
+   "dz": 1.396,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S8_trail_switchback (look-at)",
+   "class": "camera look-at",
+   "x": 850.0,
+   "y": -280.0,
+   "z": 108.0,
+   "terrain_z": 100.0,
+   "dz": 8.0,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S9_lakeshore",
+   "class": "camera",
+   "x": 461.02,
+   "y": -153.61,
+   "z": 100.43,
+   "terrain_z": 98.627,
+   "dz": 1.803,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S9_lakeshore (look-at)",
+   "class": "camera look-at",
+   "x": 413.13,
+   "y": 37.4,
+   "z": 98.0,
+   "terrain_z": 85.962,
+   "dz": 12.038,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S10_ridge_crest",
+   "class": "camera",
+   "x": 1452.13,
+   "y": 437.59,
+   "z": 284.41,
+   "terrain_z": 272.415,
+   "dz": 11.995,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "S10_ridge_crest (look-at)",
+   "class": "camera look-at",
+   "x": 850.0,
+   "y": -280.0,
+   "z": 100.0,
+   "terrain_z": 100.0,
+   "dz": 0.0,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "AERIAL_300m",
+   "class": "camera",
+   "x": 850.0,
+   "y": -280.0,
+   "z": 400.0,
+   "terrain_z": 100.0,
+   "dz": 300.0,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "AERIAL_300m (look-at)",
+   "class": "camera look-at",
+   "x": 850.0,
+   "y": -280.0,
+   "z": 100.0,
+   "terrain_z": 100.0,
+   "dz": 0.0,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "_spawn_trailhead",
+   "class": "spawn",
+   "x": 978.0,
+   "y": -501.7,
+   "z": 100.609,
+   "terrain_z": 100.609,
+   "dz": -0.0,
+   "offset": 0.0,
+   "ok": true
+  },
+  {
+   "object": "_spawn_lakeshore",
+   "class": "spawn",
+   "x": 466.72,
+   "y": -155.47,
+   "z": 98.929,
+   "terrain_z": 98.929,
+   "dz": 0.0,
+   "offset": 0.0,
+   "ok": true
+  },
+  {
+   "object": "_spawn_firewood_gap",
+   "class": "spawn",
+   "x": 1281.64,
+   "y": -1110.48,
+   "z": 143.263,
+   "terrain_z": 143.263,
+   "dz": -0.0,
+   "offset": 0.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_fire_0",
+   "class": "SFXEmitter",
+   "x": 921.94,
+   "y": -106.31,
+   "z": 101.0,
+   "terrain_z": 100.0,
+   "dz": 1.0,
+   "offset": 1.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_fire_1",
+   "class": "SFXEmitter",
+   "x": 1023.69,
+   "y": -208.06,
+   "z": 101.0,
+   "terrain_z": 100.0,
+   "dz": 1.0,
+   "offset": 1.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_fire_2",
+   "class": "SFXEmitter",
+   "x": 1023.69,
+   "y": -351.94,
+   "z": 101.0,
+   "terrain_z": 100.0,
+   "dz": 1.0,
+   "offset": 1.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_fire_3",
+   "class": "SFXEmitter",
+   "x": 921.94,
+   "y": -453.69,
+   "z": 101.0,
+   "terrain_z": 100.0,
+   "dz": 1.0,
+   "offset": 1.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_fire_4",
+   "class": "SFXEmitter",
+   "x": 778.06,
+   "y": -453.69,
+   "z": 101.0,
+   "terrain_z": 100.0,
+   "dz": 1.0,
+   "offset": 1.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_fire_5",
+   "class": "SFXEmitter",
+   "x": 676.31,
+   "y": -351.94,
+   "z": 101.0,
+   "terrain_z": 100.0,
+   "dz": 1.0,
+   "offset": 1.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_fire_6",
+   "class": "SFXEmitter",
+   "x": 676.31,
+   "y": -208.06,
+   "z": 101.0,
+   "terrain_z": 100.0,
+   "dz": 1.0,
+   "offset": 1.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_fire_7",
+   "class": "SFXEmitter",
+   "x": 778.06,
+   "y": -106.31,
+   "z": 101.0,
+   "terrain_z": 100.0,
+   "dz": 1.0,
+   "offset": 1.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_windtrees_0",
+   "class": "SFXEmitter",
+   "x": 915.99,
+   "y": 94.23,
+   "z": 114.162,
+   "terrain_z": 102.162,
+   "dz": 12.0,
+   "offset": 12.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_windtrees_1",
+   "class": "SFXEmitter",
+   "x": 1207.08,
+   "y": -150.03,
+   "z": 115.046,
+   "terrain_z": 103.046,
+   "dz": 12.0,
+   "offset": 12.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_windtrees_2",
+   "class": "SFXEmitter",
+   "x": 1141.1,
+   "y": -524.26,
+   "z": 114.779,
+   "terrain_z": 102.779,
+   "dz": 12.0,
+   "offset": 12.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_windtrees_3",
+   "class": "SFXEmitter",
+   "x": 784.01,
+   "y": -654.23,
+   "z": 115.098,
+   "terrain_z": 103.098,
+   "dz": 12.0,
+   "offset": 12.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_windtrees_4",
+   "class": "SFXEmitter",
+   "x": 492.92,
+   "y": -409.97,
+   "z": 114.099,
+   "terrain_z": 102.099,
+   "dz": 12.0,
+   "offset": 12.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_windtrees_5",
+   "class": "SFXEmitter",
+   "x": 558.9,
+   "y": -35.74,
+   "z": 108.356,
+   "terrain_z": 96.356,
+   "dz": 12.0,
+   "offset": 12.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_birds_0",
+   "class": "SFXEmitter",
+   "x": 1003.91,
+   "y": 142.86,
+   "z": 119.297,
+   "terrain_z": 111.297,
+   "dz": 8.0,
+   "offset": 8.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_birds_1",
+   "class": "SFXEmitter",
+   "x": 1272.86,
+   "y": -433.91,
+   "z": 124.134,
+   "terrain_z": 116.134,
+   "dz": 8.0,
+   "offset": 8.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_birds_2",
+   "class": "SFXEmitter",
+   "x": 696.09,
+   "y": -702.86,
+   "z": 118.607,
+   "terrain_z": 110.607,
+   "dz": 8.0,
+   "offset": 8.0,
+   "ok": true
+  },
+  {
+   "object": "sfx_birds_3",
+   "class": "SFXEmitter",
+   "x": 427.14,
+   "y": -126.09,
+   "z": 101.104,
+   "terrain_z": 93.104,
+   "dz": 8.0,
+   "offset": 8.0,
+   "ok": true
+  },
+  {
+   "object": "sfxspace_bowl",
+   "class": "SFXSpace centre",
+   "x": 850.0,
+   "y": -280.0,
+   "z": 112.0,
+   "terrain_z": 100.0,
+   "dz": 12.0,
+   "offset": 12.0,
+   "ok": true
+  },
+  {
+   "object": "sfxspace_handle",
+   "class": "SFXSpace centre",
+   "x": 850.0,
+   "y": -340.0,
+   "z": 106.0,
+   "terrain_z": 100.0,
+   "dz": 6.0,
+   "offset": 6.0,
+   "ok": true
+  },
+  {
+   "object": "sfxspace_lake",
+   "class": "SFXSpace centre",
+   "x": 413.13,
+   "y": 37.4,
+   "z": 108.0,
+   "terrain_z": 85.962,
+   "dz": 22.038,
+   "offset": null,
+   "ok": true
+  },
+  {
+   "object": "sfxspace_spout_0",
+   "class": "SFXSpace centre",
+   "x": 929.67,
+   "y": -234.0,
+   "z": 104.0,
+   "terrain_z": 100.0,
+   "dz": 4.0,
+   "offset": 4.0,
+   "ok": true
+  },
+  {
+   "object": "sfxspace_spout_1",
+   "class": "SFXSpace centre",
+   "x": 770.33,
+   "y": -326.0,
+   "z": 104.0,
+   "terrain_z": 100.0,
+   "dz": 4.0,
+   "offset": 4.0,
+   "ok": true
+  },
+  {
+   "object": "sfxspace_hearth_0",
+   "class": "SFXSpace centre",
+   "x": 963.14,
+   "y": -166.86,
+   "z": 108.0,
+   "terrain_z": 100.0,
+   "dz": 8.0,
+   "offset": 8.0,
+   "ok": true
+  },
+  {
+   "object": "sfxspace_forest_0",
+   "class": "SFXSpace centre",
+   "x": 1217.7,
+   "y": 87.7,
+   "z": 145.816,
+   "terrain_z": 130.816,
+   "dz": 15.0,
+   "offset": 15.0,
+   "ok": true
+  },
+  {
+   "object": "sfxspace_hearth_1",
+   "class": "SFXSpace centre",
+   "x": 963.14,
+   "y": -393.14,
+   "z": 108.0,
+   "terrain_z": 100.0,
+   "dz": 8.0,
+   "offset": 8.0,
+   "ok": true
+  },
+  {
+   "object": "sfxspace_forest_1",
+   "class": "SFXSpace centre",
+   "x": 1217.7,
+   "y": -647.7,
+   "z": 129.895,
+   "terrain_z": 114.895,
+   "dz": 15.0,
+   "offset": 15.0,
+   "ok": true
+  },
+  {
+   "object": "sfxspace_hearth_2",
+   "class": "SFXSpace centre",
+   "x": 736.86,
+   "y": -393.14,
+   "z": 108.0,
+   "terrain_z": 100.0,
+   "dz": 8.0,
+   "offset": 8.0,
+   "ok": true
+  },
+  {
+   "object": "sfxspace_forest_2",
+   "class": "SFXSpace centre",
+   "x": 482.3,
+   "y": -647.7,
+   "z": 134.107,
+   "terrain_z": 119.107,
+   "dz": 15.0,
+   "offset": 15.0,
+   "ok": true
+  },
+  {
+   "object": "sfxspace_hearth_3",
+   "class": "SFXSpace centre",
+   "x": 736.86,
+   "y": -166.86,
+   "z": 108.0,
+   "terrain_z": 100.0,
+   "dz": 8.0,
+   "offset": 8.0,
+   "ok": true
+  },
+  {
+   "object": "sfxspace_forest_3",
+   "class": "SFXSpace centre",
+   "x": 482.3,
+   "y": 87.7,
+   "z": 100.967,
+   "terrain_z": 85.967,
+   "dz": 15.0,
+   "offset": 15.0,
+   "ok": true
+  },
+  {
+   "object": "ember_light_00",
+   "class": "PointLight",
+   "x": 874.54,
+   "y": -93.61,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_01",
+   "class": "PointLight",
+   "x": 921.94,
+   "y": -106.31,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_02",
+   "class": "PointLight",
+   "x": 964.45,
+   "y": -130.85,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_03",
+   "class": "PointLight",
+   "x": 999.15,
+   "y": -165.55,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_04",
+   "class": "PointLight",
+   "x": 1023.69,
+   "y": -208.06,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_05",
+   "class": "PointLight",
+   "x": 1036.39,
+   "y": -255.46,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_06",
+   "class": "PointLight",
+   "x": 1036.39,
+   "y": -304.54,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_07",
+   "class": "PointLight",
+   "x": 1023.69,
+   "y": -351.94,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_08",
+   "class": "PointLight",
+   "x": 999.15,
+   "y": -394.45,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_09",
+   "class": "PointLight",
+   "x": 964.45,
+   "y": -429.15,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_10",
+   "class": "PointLight",
+   "x": 921.94,
+   "y": -453.69,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_11",
+   "class": "PointLight",
+   "x": 874.54,
+   "y": -466.39,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_12",
+   "class": "PointLight",
+   "x": 825.46,
+   "y": -466.39,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_13",
+   "class": "PointLight",
+   "x": 778.06,
+   "y": -453.69,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_14",
+   "class": "PointLight",
+   "x": 735.55,
+   "y": -429.15,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_15",
+   "class": "PointLight",
+   "x": 700.85,
+   "y": -394.45,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_16",
+   "class": "PointLight",
+   "x": 676.31,
+   "y": -351.94,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_17",
+   "class": "PointLight",
+   "x": 663.61,
+   "y": -304.54,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_18",
+   "class": "PointLight",
+   "x": 663.61,
+   "y": -255.46,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_19",
+   "class": "PointLight",
+   "x": 676.31,
+   "y": -208.06,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_20",
+   "class": "PointLight",
+   "x": 700.85,
+   "y": -165.55,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_21",
+   "class": "PointLight",
+   "x": 735.55,
+   "y": -130.85,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_22",
+   "class": "PointLight",
+   "x": 778.06,
+   "y": -106.31,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "ember_light_23",
+   "class": "PointLight",
+   "x": 825.46,
+   "y": -93.61,
+   "z": 101.2,
+   "terrain_z": 100.0,
+   "dz": 1.2,
+   "offset": 1.2,
+   "ok": true
+  },
+  {
+   "object": "kindling_log_north_w_light",
+   "class": "PointLight",
+   "x": 943.03,
+   "y": -28.87,
+   "z": 104.873,
+   "terrain_z": 100.873,
+   "dz": 4.0,
+   "offset": 4.0,
+   "ok": true
+  },
+  {
+   "object": "kindling_log_north_e_light",
+   "class": "PointLight",
+   "x": 1020.97,
+   "y": -73.87,
+   "z": 104.89,
+   "terrain_z": 100.89,
+   "dz": 4.0,
+   "offset": 4.0,
+   "ok": true
+  },
+  {
+   "object": "kindling_log_south_w_light",
+   "class": "PointLight",
+   "x": 752.64,
+   "y": -528.63,
+   "z": 104.869,
+   "terrain_z": 100.869,
+   "dz": 4.0,
+   "offset": 4.0,
+   "ok": true
+  },
+  {
+   "object": "kindling_log_south_e_light",
+   "class": "PointLight",
+   "x": 683.36,
+   "y": -488.63,
+   "z": 104.866,
+   "terrain_z": 100.866,
+   "dz": 4.0,
+   "offset": 4.0,
+   "ok": true
+  },
+  {
+   "object": "lantern_spot",
+   "class": "SpotLight",
+   "x": 1042.84,
+   "y": -50.19,
+   "z": 145.698,
+   "terrain_z": 101.698,
+   "dz": 44.0,
+   "offset": 44.0,
+   "ok": true
+  },
+  {
+   "object": "lantern_point",
+   "class": "PointLight",
+   "x": 1042.84,
+   "y": -50.19,
+   "z": 147.698,
+   "terrain_z": 101.698,
+   "dz": 46.0,
+   "offset": 46.0,
+   "ok": true
+  },
+  {
+   "object": "spout_key_0",
+   "class": "PointLight",
+   "x": 953.92,
+   "y": -220.0,
+   "z": 103.0,
+   "terrain_z": 100.0,
+   "dz": 3.0,
+   "offset": 3.0,
+   "ok": true
+  },
+  {
+   "object": "spout_key_1",
+   "class": "PointLight",
+   "x": 746.08,
+   "y": -340.0,
+   "z": 103.0,
+   "terrain_z": 100.0,
+   "dz": 3.0,
+   "offset": 3.0,
+   "ok": true
+  },
+  {
+   "object": "track_lantern_0",
+   "class": "PointLight",
+   "x": 916.26,
+   "y": -32.72,
+   "z": 103.185,
+   "terrain_z": 100.585,
+   "dz": 2.6,
+   "offset": 2.6,
+   "ok": true
+  },
+  {
+   "object": "track_lantern_1",
+   "class": "PointLight",
+   "x": 1097.28,
+   "y": -346.26,
+   "z": 103.207,
+   "terrain_z": 100.607,
+   "dz": 2.6,
+   "offset": 2.6,
+   "ok": true
+  },
+  {
+   "object": "track_lantern_2",
+   "class": "PointLight",
+   "x": 783.74,
+   "y": -527.28,
+   "z": 103.207,
+   "terrain_z": 100.607,
+   "dz": 2.6,
+   "offset": 2.6,
+   "ok": true
+  },
+  {
+   "object": "track_lantern_3",
+   "class": "PointLight",
+   "x": 602.72,
+   "y": -213.74,
+   "z": 102.452,
+   "terrain_z": 99.852,
+   "dz": 2.6,
+   "offset": 2.6,
+   "ok": true
+  },
+  {
+   "object": "ember_sparks_00",
+   "class": "ParticleEmitterNode",
+   "x": 899.18,
+   "y": -96.47,
+   "z": 100.3,
+   "terrain_z": 100.0,
+   "dz": 0.3,
+   "offset": 0.3,
+   "ok": true
+  },
+  {
+   "object": "ember_sparks_01",
+   "class": "ParticleEmitterNode",
+   "x": 984.35,
+   "y": -145.65,
+   "z": 100.3,
+   "terrain_z": 100.0,
+   "dz": 0.3,
+   "offset": 0.3,
+   "ok": true
+  },
+  {
+   "object": "ember_sparks_02",
+   "class": "ParticleEmitterNode",
+   "x": 1033.53,
+   "y": -230.82,
+   "z": 100.3,
+   "terrain_z": 100.0,
+   "dz": 0.3,
+   "offset": 0.3,
+   "ok": true
+  },
+  {
+   "object": "ember_sparks_03",
+   "class": "ParticleEmitterNode",
+   "x": 1033.53,
+   "y": -329.18,
+   "z": 100.3,
+   "terrain_z": 100.0,
+   "dz": 0.3,
+   "offset": 0.3,
+   "ok": true
+  },
+  {
+   "object": "ember_sparks_04",
+   "class": "ParticleEmitterNode",
+   "x": 984.35,
+   "y": -414.35,
+   "z": 100.3,
+   "terrain_z": 100.0,
+   "dz": 0.3,
+   "offset": 0.3,
+   "ok": true
+  },
+  {
+   "object": "ember_sparks_05",
+   "class": "ParticleEmitterNode",
+   "x": 899.18,
+   "y": -463.53,
+   "z": 100.3,
+   "terrain_z": 100.0,
+   "dz": 0.3,
+   "offset": 0.3,
+   "ok": true
+  },
+  {
+   "object": "ember_sparks_06",
+   "class": "ParticleEmitterNode",
+   "x": 800.82,
+   "y": -463.53,
+   "z": 100.3,
+   "terrain_z": 100.0,
+   "dz": 0.3,
+   "offset": 0.3,
+   "ok": true
+  },
+  {
+   "object": "ember_sparks_07",
+   "class": "ParticleEmitterNode",
+   "x": 715.65,
+   "y": -414.35,
+   "z": 100.3,
+   "terrain_z": 100.0,
+   "dz": 0.3,
+   "offset": 0.3,
+   "ok": true
+  },
+  {
+   "object": "ember_sparks_08",
+   "class": "ParticleEmitterNode",
+   "x": 666.47,
+   "y": -329.18,
+   "z": 100.3,
+   "terrain_z": 100.0,
+   "dz": 0.3,
+   "offset": 0.3,
+   "ok": true
+  },
+  {
+   "object": "ember_sparks_09",
+   "class": "ParticleEmitterNode",
+   "x": 666.47,
+   "y": -230.82,
+   "z": 100.3,
+   "terrain_z": 100.0,
+   "dz": 0.3,
+   "offset": 0.3,
+   "ok": true
+  },
+  {
+   "object": "ember_sparks_10",
+   "class": "ParticleEmitterNode",
+   "x": 715.65,
+   "y": -145.65,
+   "z": 100.3,
+   "terrain_z": 100.0,
+   "dz": 0.3,
+   "offset": 0.3,
+   "ok": true
+  },
+  {
+   "object": "ember_sparks_11",
+   "class": "ParticleEmitterNode",
+   "x": 800.82,
+   "y": -96.47,
+   "z": 100.3,
+   "terrain_z": 100.0,
+   "dz": 0.3,
+   "offset": 0.3,
+   "ok": true
+  },
+  {
+   "object": "kindling_log_north_w_fire",
+   "class": "ParticleEmitterNode",
+   "x": 943.03,
+   "y": -28.87,
+   "z": 101.373,
+   "terrain_z": 100.873,
+   "dz": 0.5,
+   "offset": 0.5,
+   "ok": true
+  },
+  {
+   "object": "kindling_log_north_w_smoke",
+   "class": "ParticleEmitterNode",
+   "x": 943.03,
+   "y": -28.87,
+   "z": 106.873,
+   "terrain_z": 100.873,
+   "dz": 6.0,
+   "offset": 6.0,
+   "ok": true
+  },
+  {
+   "object": "kindling_log_north_e_fire",
+   "class": "ParticleEmitterNode",
+   "x": 1020.97,
+   "y": -73.87,
+   "z": 101.39,
+   "terrain_z": 100.89,
+   "dz": 0.5,
+   "offset": 0.5,
+   "ok": true
+  },
+  {
+   "object": "kindling_log_north_e_smoke",
+   "class": "ParticleEmitterNode",
+   "x": 1020.97,
+   "y": -73.87,
+   "z": 106.89,
+   "terrain_z": 100.89,
+   "dz": 6.0,
+   "offset": 6.0,
+   "ok": true
+  },
+  {
+   "object": "kindling_log_south_w_fire",
+   "class": "ParticleEmitterNode",
+   "x": 752.64,
+   "y": -528.63,
+   "z": 101.369,
+   "terrain_z": 100.869,
+   "dz": 0.5,
+   "offset": 0.5,
+   "ok": true
+  },
+  {
+   "object": "kindling_log_south_w_smoke",
+   "class": "ParticleEmitterNode",
+   "x": 752.64,
+   "y": -528.63,
+   "z": 106.869,
+   "terrain_z": 100.869,
+   "dz": 6.0,
+   "offset": 6.0,
+   "ok": true
+  },
+  {
+   "object": "kindling_log_south_e_fire",
+   "class": "ParticleEmitterNode",
+   "x": 683.36,
+   "y": -488.63,
+   "z": 101.366,
+   "terrain_z": 100.866,
+   "dz": 0.5,
+   "offset": 0.5,
+   "ok": true
+  },
+  {
+   "object": "kindling_log_south_e_smoke",
+   "class": "ParticleEmitterNode",
+   "x": 683.36,
+   "y": -488.63,
+   "z": 106.866,
+   "terrain_z": 100.866,
+   "dz": 6.0,
+   "offset": 6.0,
+   "ok": true
+  },
+  {
+   "object": "ember_glow_0",
+   "class": "ParticleEmitterNode",
+   "x": 919.65,
+   "y": -111.85,
+   "z": 100.2,
+   "terrain_z": 100.0,
+   "dz": 0.2,
+   "offset": 0.2,
+   "ok": true
+  },
+  {
+   "object": "ember_glow_1",
+   "class": "ParticleEmitterNode",
+   "x": 1018.15,
+   "y": -210.35,
+   "z": 100.2,
+   "terrain_z": 100.0,
+   "dz": 0.2,
+   "offset": 0.2,
+   "ok": true
+  },
+  {
+   "object": "ember_glow_2",
+   "class": "ParticleEmitterNode",
+   "x": 1018.15,
+   "y": -349.65,
+   "z": 100.2,
+   "terrain_z": 100.0,
+   "dz": 0.2,
+   "offset": 0.2,
+   "ok": true
+  },
+  {
+   "object": "ember_glow_3",
+   "class": "ParticleEmitterNode",
+   "x": 919.65,
+   "y": -448.15,
+   "z": 100.2,
+   "terrain_z": 100.0,
+   "dz": 0.2,
+   "offset": 0.2,
+   "ok": true
+  },
+  {
+   "object": "ember_glow_4",
+   "class": "ParticleEmitterNode",
+   "x": 780.35,
+   "y": -448.15,
+   "z": 100.2,
+   "terrain_z": 100.0,
+   "dz": 0.2,
+   "offset": 0.2,
+   "ok": true
+  },
+  {
+   "object": "ember_glow_5",
+   "class": "ParticleEmitterNode",
+   "x": 681.85,
+   "y": -349.65,
+   "z": 100.2,
+   "terrain_z": 100.0,
+   "dz": 0.2,
+   "offset": 0.2,
+   "ok": true
+  },
+  {
+   "object": "ember_glow_6",
+   "class": "ParticleEmitterNode",
+   "x": 681.85,
+   "y": -210.35,
+   "z": 100.2,
+   "terrain_z": 100.0,
+   "dz": 0.2,
+   "offset": 0.2,
+   "ok": true
+  },
+  {
+   "object": "ember_glow_7",
+   "class": "ParticleEmitterNode",
+   "x": 780.35,
+   "y": -111.85,
+   "z": 100.2,
+   "terrain_z": 100.0,
+   "dz": 0.2,
+   "offset": 0.2,
+   "ok": true
+  },
+  {
+   "object": "hearth_heat_wisp_0",
+   "class": "ParticleEmitterNode",
+   "x": 925.0,
+   "y": -150.1,
+   "z": 100.2,
+   "terrain_z": 100.0,
+   "dz": 0.2,
+   "offset": 0.2,
+   "ok": true
+  },
+  {
+   "object": "hearth_heat_wisp_1",
+   "class": "ParticleEmitterNode",
+   "x": 1000.0,
+   "y": -280.0,
+   "z": 100.2,
+   "terrain_z": 100.0,
+   "dz": 0.2,
+   "offset": 0.2,
+   "ok": true
+  },
+  {
+   "object": "hearth_heat_wisp_2",
+   "class": "ParticleEmitterNode",
+   "x": 925.0,
+   "y": -409.9,
+   "z": 100.2,
+   "terrain_z": 100.0,
+   "dz": 0.2,
+   "offset": 0.2,
+   "ok": true
+  },
+  {
+   "object": "hearth_heat_wisp_3",
+   "class": "ParticleEmitterNode",
+   "x": 775.0,
+   "y": -409.9,
+   "z": 100.2,
+   "terrain_z": 100.0,
+   "dz": 0.2,
+   "offset": 0.2,
+   "ok": true
+  },
+  {
+   "object": "hearth_heat_wisp_4",
+   "class": "ParticleEmitterNode",
+   "x": 700.0,
+   "y": -280.0,
+   "z": 100.2,
+   "terrain_z": 100.0,
+   "dz": 0.2,
+   "offset": 0.2,
+   "ok": true
+  },
+  {
+   "object": "hearth_heat_wisp_5",
+   "class": "ParticleEmitterNode",
+   "x": 775.0,
+   "y": -150.1,
+   "z": 100.2,
+   "terrain_z": 100.0,
+   "dz": 0.2,
+   "offset": 0.2,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_00",
+   "class": "TSStatic stone",
+   "x": 794.87,
+   "y": -74.26,
+   "z": 98.5,
+   "terrain_z": 100.0,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_01",
+   "class": "TSStatic stone",
+   "x": 850.0,
+   "y": -63.0,
+   "z": 98.515,
+   "terrain_z": 100.015,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_02",
+   "class": "TSStatic stone",
+   "x": 906.94,
+   "y": -67.5,
+   "z": 98.532,
+   "terrain_z": 100.032,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_03",
+   "class": "TSStatic stone",
+   "x": 958.0,
+   "y": -92.94,
+   "z": 98.515,
+   "terrain_z": 100.015,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_04",
+   "class": "TSStatic stone",
+   "x": 999.91,
+   "y": -130.09,
+   "z": 98.5,
+   "terrain_z": 100.0,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "chock_stone_05",
+   "class": "TSStatic stone",
+   "x": 878.03,
+   "y": -51.71,
+   "z": 99.317,
+   "terrain_z": 100.117,
+   "dz": -0.8,
+   "offset": -0.8,
+   "ok": true
+  },
+  {
+   "object": "chock_stone_06",
+   "class": "TSStatic stone",
+   "x": 939.87,
+   "y": -68.28,
+   "z": 99.332,
+   "terrain_z": 100.132,
+   "dz": -0.8,
+   "offset": -0.8,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_07",
+   "class": "TSStatic stone",
+   "x": 1055.74,
+   "y": -224.87,
+   "z": 98.504,
+   "terrain_z": 100.004,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_08",
+   "class": "TSStatic stone",
+   "x": 1067.0,
+   "y": -280.0,
+   "z": 98.52,
+   "terrain_z": 100.02,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_09",
+   "class": "TSStatic stone",
+   "x": 1062.5,
+   "y": -336.94,
+   "z": 98.536,
+   "terrain_z": 100.036,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_10",
+   "class": "TSStatic stone",
+   "x": 1037.06,
+   "y": -388.0,
+   "z": 98.515,
+   "terrain_z": 100.015,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_11",
+   "class": "TSStatic stone",
+   "x": 999.91,
+   "y": -429.91,
+   "z": 98.5,
+   "terrain_z": 100.0,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "chock_stone_12",
+   "class": "TSStatic stone",
+   "x": 1078.29,
+   "y": -308.03,
+   "z": 99.331,
+   "terrain_z": 100.131,
+   "dz": -0.8,
+   "offset": -0.8,
+   "ok": true
+  },
+  {
+   "object": "chock_stone_13",
+   "class": "TSStatic stone",
+   "x": 1061.72,
+   "y": -369.87,
+   "z": 99.333,
+   "terrain_z": 100.133,
+   "dz": -0.8,
+   "offset": -0.8,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_14",
+   "class": "TSStatic stone",
+   "x": 905.13,
+   "y": -485.74,
+   "z": 98.504,
+   "terrain_z": 100.004,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_15",
+   "class": "TSStatic stone",
+   "x": 850.0,
+   "y": -497.0,
+   "z": 98.52,
+   "terrain_z": 100.02,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_16",
+   "class": "TSStatic stone",
+   "x": 793.06,
+   "y": -492.5,
+   "z": 98.536,
+   "terrain_z": 100.036,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_17",
+   "class": "TSStatic stone",
+   "x": 742.0,
+   "y": -467.06,
+   "z": 98.515,
+   "terrain_z": 100.015,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_18",
+   "class": "TSStatic stone",
+   "x": 700.09,
+   "y": -429.91,
+   "z": 98.5,
+   "terrain_z": 100.0,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "chock_stone_19",
+   "class": "TSStatic stone",
+   "x": 821.97,
+   "y": -508.29,
+   "z": 99.331,
+   "terrain_z": 100.131,
+   "dz": -0.8,
+   "offset": -0.8,
+   "ok": true
+  },
+  {
+   "object": "chock_stone_20",
+   "class": "TSStatic stone",
+   "x": 760.13,
+   "y": -491.72,
+   "z": 99.333,
+   "terrain_z": 100.133,
+   "dz": -0.8,
+   "offset": -0.8,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_21",
+   "class": "TSStatic stone",
+   "x": 644.26,
+   "y": -335.13,
+   "z": 98.504,
+   "terrain_z": 100.004,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_22",
+   "class": "TSStatic stone",
+   "x": 633.0,
+   "y": -280.0,
+   "z": 98.5,
+   "terrain_z": 100.0,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_23",
+   "class": "TSStatic stone",
+   "x": 637.5,
+   "y": -223.06,
+   "z": 98.464,
+   "terrain_z": 99.964,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_24",
+   "class": "TSStatic stone",
+   "x": 662.94,
+   "y": -172.0,
+   "z": 98.475,
+   "terrain_z": 99.975,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "hearth_stone_25",
+   "class": "TSStatic stone",
+   "x": 700.09,
+   "y": -130.09,
+   "z": 98.496,
+   "terrain_z": 99.996,
+   "dz": -1.5,
+   "offset": -1.5,
+   "ok": true
+  },
+  {
+   "object": "chock_stone_26",
+   "class": "TSStatic stone",
+   "x": 621.71,
+   "y": -251.97,
+   "z": 99.176,
+   "terrain_z": 99.976,
+   "dz": -0.8,
+   "offset": -0.8,
+   "ok": true
+  },
+  {
+   "object": "chock_stone_27",
+   "class": "TSStatic stone",
+   "x": 638.28,
+   "y": -190.13,
+   "z": 99.06,
+   "terrain_z": 99.86,
+   "dz": -0.8,
+   "offset": -0.8,
+   "ok": true
+  },
+  {
+   "object": "bench_log",
+   "class": "TSStatic log (base)",
+   "x": 1102.88,
+   "y": -426.0,
+   "z": 101.506,
+   "terrain_z": 101.506,
+   "dz": 0.0,
+   "offset": -0.0,
+   "ok": true
+  },
+  {
+   "object": "log_north",
+   "class": "TSStatic log (base)",
+   "x": 982.0,
+   "y": -51.37,
+   "z": 99.792,
+   "terrain_z": 100.792,
+   "dz": -1.0,
+   "offset": -1.0,
+   "ok": true
+  },
+  {
+   "object": "log_south",
+   "class": "TSStatic log (base)",
+   "x": 718.0,
+   "y": -508.63,
+   "z": 99.794,
+   "terrain_z": 100.794,
+   "dz": -1.0,
+   "offset": -1.0,
+   "ok": true
+  },
+  {
+   "object": "leaner_log",
+   "class": "TSStatic log (base)",
+   "x": 850.0,
+   "y": -574.0,
+   "z": 101.558,
+   "terrain_z": 101.558,
+   "dz": 0.0,
+   "offset": 0.0,
+   "ok": true
+  },
+  {
+   "object": "lantern_tripod",
+   "class": "TSStatic prop",
+   "x": 1042.84,
+   "y": -50.19,
+   "z": 101.698,
+   "terrain_z": 101.698,
+   "dz": -0.0,
+   "offset": 0.0,
+   "ok": true
+  },
+  {
+   "object": "enamel_pot",
+   "class": "TSStatic prop",
+   "x": 902.09,
+   "y": -575.44,
+   "z": 101.701,
+   "terrain_z": 101.701,
+   "dz": 0.0,
+   "offset": 0.0,
+   "ok": true
+  },
+  {
+   "object": "trail_sign",
+   "class": "TSStatic prop",
+   "x": 979.94,
+   "y": -519.06,
+   "z": 100.997,
+   "terrain_z": 100.997,
+   "dz": 0.0,
+   "offset": 0.0,
+   "ok": true
+  },
+  {
+   "object": "trail_cairn_0",
+   "class": "TSStatic prop",
+   "x": 982.06,
+   "y": -494.74,
+   "z": 100.519,
+   "terrain_z": 100.519,
+   "dz": -0.0,
+   "offset": 0.0,
+   "ok": true
+  },
+  {
+   "object": "trail_cairn_1",
+   "class": "TSStatic prop",
+   "x": 1277.17,
+   "y": -1115.87,
+   "z": 143.324,
+   "terrain_z": 143.324,
+   "dz": 0.0,
+   "offset": 0.0,
+   "ok": true
+  },
+  {
+   "object": "lantern_post_0",
+   "class": "TSStatic prop",
+   "x": 916.26,
+   "y": -32.72,
+   "z": 100.585,
+   "terrain_z": 100.585,
+   "dz": -0.0,
+   "offset": 0.0,
+   "ok": true
+  },
+  {
+   "object": "lantern_post_1",
+   "class": "TSStatic prop",
+   "x": 1097.28,
+   "y": -346.26,
+   "z": 100.607,
+   "terrain_z": 100.607,
+   "dz": -0.0,
+   "offset": 0.0,
+   "ok": true
+  },
+  {
+   "object": "lantern_post_2",
+   "class": "TSStatic prop",
+   "x": 783.74,
+   "y": -527.28,
+   "z": 100.607,
+   "terrain_z": 100.607,
+   "dz": -0.0,
+   "offset": 0.0,
+   "ok": true
+  },
+  {
+   "object": "lantern_post_3",
+   "class": "TSStatic prop",
+   "x": 602.72,
+   "y": -213.74,
+   "z": 99.852,
+   "terrain_z": 99.852,
+   "dz": -0.0,
+   "offset": 0.0,
+   "ok": true
+  }
+ ],
+ "checks": {
+  "R1_min_inner_face_r": 202.0,
+  "R2_lane_60": 89.00275481095915,
+  "R2_lane_150": 89.00275481095917,
+  "R2_lane_240": 89.00275481095912,
+  "R2_lane_330": 89.00275481095916,
+  "chock_min_clearance": 9.937207289021899,
+  "R5_ring_clearance": 32.0,
+  "R5_track_clearance": 6.0,
+  "bench_deck_z": 105.006,
+  "R3_runoff": {
+   "west_end_drop": 143.0,
+   "ramp_foot_(E_end)": 242.0,
+   "inner_flank_drop_(toward_C)": 51.94559551694474,
+   "outer_flank_drop_(away_from_C)": 51.0
+  },
+  "R3_min": 51.0,
+  "R6_blocked_by": {},
+  "R6_whole_lake_clear_from_r": 194,
+  "tripod_feet_in_lane_sector": [],
+  "pot_nearest_edge_bearing": 168.66334102167087,
+  "sign_to_trailhead_spawn_m": 17.466846452637043,
+  "R7_offenders": [],
+  "R7_min_clearance": [
+   1.4998899987900085,
+   "night_light:kindling_log_north_w_light"
+  ],
+  "R8_bad": [],
+  "R9_full_rows": 67,
+  "R9_fallback_rows": 18,
+  "R10_unresolved": [],
+  "R11_s6_margins": [
+   {
+    "fire": "kindling_log_north_w",
+    "bearing_from_S6": 16.55,
+    "distance_m": 326.7,
+    "nearest_edge": "chock_stone_06",
+    "margin_deg": 0.64,
+    "margin_m_at_fire": 3.62,
+    "hidden": false
+   },
+   {
+    "fire": "kindling_log_north_e",
+    "bearing_from_S6": 32.52,
+    "distance_m": 318.0,
+    "nearest_edge": "hearth_stone_04",
+    "margin_deg": 0.55,
+    "margin_m_at_fire": 3.03,
+    "hidden": false
+   }
+  ]
+ }
+}

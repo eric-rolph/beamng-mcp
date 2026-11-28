@@ -15,6 +15,7 @@ from pydantic import TypeAdapter
 from . import __version__
 from .adapters.beamngpy_adapter import BeamNGpyAdapter
 from .adapters.lua_bridge import LuaBridgeClient
+from .adapters.native_mcp import NATIVE_TOOL_NAMES, NativeMCPClient
 from .autodetect import Installation, detect_installation
 from .config import Settings
 from .errors import SafetyInterlockError
@@ -156,6 +157,7 @@ class Runtime:
             extensions=["beamng_mcp/bridge"] if self.settings.lua.token is not None else None,
         )
         self.lua = LuaBridgeClient(self.settings.lua)
+        self.native = NativeMCPClient(self.settings.native_mcp)
         self.mods = ModWorkspace(self.settings.workspace)
         self.structural = StructuralModService(self.mods)
         self.jobs = JobManager()
@@ -261,6 +263,11 @@ class Runtime:
             )
         if not simulator_status.connected:
             limitations.append("BeamNGpy tools require simulator_connect")
+        limitations.append(
+            "Native tools use the running game's official MCP independently of BeamNGpy/Lua "
+            "connection mode; call native_status to probe that endpoint. Retail builds without "
+            "tech_techCore cannot use the BeamNGpy launch path."
+        )
         if not lua_status.connected:
             limitations.append("Live map mutations require the installed and loaded GELua bridge")
         if not self.settings.workspace.allow_persistent_map_edits:
@@ -297,7 +304,7 @@ class Runtime:
             beamngpy_connected=simulator_status.connected,
             lua_connected=lua_status.connected,
             beamngpy_officially_supported=simulator_status.tech_enabled is True,
-            tools=TOOL_NAMES,
+            tools=TOOL_NAMES + NATIVE_TOOL_NAMES,
             limitations=limitations,
         )
 

@@ -1,0 +1,635 @@
+{
+ "by_directory": {
+  "art/shapes/deadwood": 9,
+  "art/shapes/groundcover": 9,
+  "art/shapes/props": 12,
+  "art/shapes/rocks": 20,
+  "art/shapes/trees": 18,
+  "art/shapes/undergrowth": 7
+ },
+ "files": {
+  "art/shapes/deadwood/ericrolph_hot_potato_arena_f_bark_debris.cdae": {
+   "bytes": 46522,
+   "harvested_from": "b3r11harvest",
+   "sha256": "032c3d78dec166c8ce2ad1bffe8bc63c4f7032852fba522810f98e53a8d25917",
+   "source": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_bark_debris.dae",
+   "source_sha256": "aba17fb14b63fd2842718f3d43197a47a2611aa637f97bd111aa9498e234ad32"
+  },
+  "art/shapes/deadwood/ericrolph_hot_potato_arena_f_branch_pile.cdae": {
+   "bytes": 41885,
+   "harvested_from": "b3r11harvest",
+   "sha256": "7d03f0a454b5ee4f071fca1e1af1c8a88dde23a780ee46df13ecc2f182ccbb2f",
+   "source": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_branch_pile.dae",
+   "source_sha256": "308a2eb9d8f227f357ff6b724c8d8a89934a3f686447f77e4ab8ed60ed667a5b"
+  },
+  "art/shapes/deadwood/ericrolph_hot_potato_arena_f_fallen_log_a.cdae": {
+   "bytes": 315015,
+   "harvested_from": "b3r11harvest",
+   "sha256": "aab30fbeb0d5c039d316799978b48405e221bc68548521c58eeb59f35b373ba1",
+   "source": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_fallen_log_a.dae",
+   "source_sha256": "231f177fd017876c0ccd2dde8b28661864af85d06af9ae6dc3d5ab150d35214f"
+  },
+  "art/shapes/deadwood/ericrolph_hot_potato_arena_f_fallen_log_b.cdae": {
+   "bytes": 315015,
+   "harvested_from": "b3r11harvest",
+   "sha256": "b1fc170c81ba3d7d00294e2ad36b1fbfde7b8995a95de4bea0d776376150fb61",
+   "source": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_fallen_log_b.dae",
+   "source_sha256": "8d9e6dab2d07884cd04cbc37bc63b3715cf02546e647197c9be180b3be97b8dd"
+  },
+  "art/shapes/deadwood/ericrolph_hot_potato_arena_f_fallen_log_c.cdae": {
+   "bytes": 315015,
+   "harvested_from": "b3r11harvest",
+   "sha256": "201a5bab034c3e07d4a73966c8f250c155839174e35317548dc37aba0061ffbb",
+   "source": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_fallen_log_c.dae",
+   "source_sha256": "4159b8d285a871117cdfce7e418d46e862162c1b1703c75834145144f75e763a"
+  },
+  "art/shapes/deadwood/ericrolph_hot_potato_arena_f_root_cluster.cdae": {
+   "bytes": 241111,
+   "harvested_from": "b3r11harvest",
+   "sha256": "1fdf7bbcc41ffb0d141530f0f98d716f7dfe99824686cbc7a5a5a5f14376b489",
+   "source": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_root_cluster.dae",
+   "source_sha256": "d1c7c06875b8b5fca20f770ae2d59a715c3c1e7439ff29837c215fec769c1bdb"
+  },
+  "art/shapes/deadwood/ericrolph_hot_potato_arena_f_stump_a.cdae": {
+   "bytes": 185852,
+   "harvested_from": "b3r11harvest",
+   "sha256": "851c8f70e65ca02433666313d009bf3c6bd00fb9abcb3088c1ebc798b07ce541",
+   "source": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_stump_a.dae",
+   "source_sha256": "440b3e19bd135376560068b40ab5ed4598140a08a08ed436760bf30ba4e50969"
+  },
+  "art/shapes/deadwood/ericrolph_hot_potato_arena_f_stump_b.cdae": {
+   "bytes": 185852,
+   "harvested_from": "b3r11harvest",
+   "sha256": "dbd18d2c7eaf0120b9e1fe9c16edb1ff08a402946a2a227f7797b0cec8908f97",
+   "source": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_stump_b.dae",
+   "source_sha256": "1f93f893bf1b32cab7613fd3dda3cc0a0f38cca7375f17427e46c8dadd0b88b1"
+  },
+  "art/shapes/deadwood/ericrolph_hot_potato_arena_f_windthrow_roots.cdae": {
+   "bytes": 625212,
+   "harvested_from": "b3r11harvest",
+   "sha256": "c4bd8f07df5442eac275d7fe4a775eeaed2e6d801b0be4461737c07ba3e88c6f",
+   "source": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_windthrow_roots.dae",
+   "source_sha256": "2c0948c071fb6fd1198b1f9675c189deb426390a1c7a0c88092104fe73b7edb4"
+  },
+  "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_ash_lump_a.cdae": {
+   "bytes": 13211,
+   "harvested_from": "b3r11harvest",
+   "sha256": "f9db197b121e9ca61b5f264a027797d197c2f9f12858bbdd591f3f2fde6be126",
+   "source": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_ash_lump_a.dae",
+   "source_sha256": "90e1c84c4d5ce974133c7f722e64477a8158ff36aa858c0832465693c1b77b1c"
+  },
+  "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_ash_lump_b.cdae": {
+   "bytes": 13211,
+   "harvested_from": "b3r11harvest",
+   "sha256": "ee8058039063ab8dc6c3066120d7d041cc1a232640d2916c1dd0b80ce7fba122",
+   "source": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_ash_lump_b.dae",
+   "source_sha256": "987c3f0b05498753addc07e4e91689f4c36fffa345558e2fe4965133ae13b7e1"
+  },
+  "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_bark_chip.cdae": {
+   "bytes": 8802,
+   "harvested_from": "b3r11harvest",
+   "sha256": "259d86783d77979a2c604cc53a8d7e6a9d6db371affc822bf2c1aaec9fd58dee",
+   "source": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_bark_chip.dae",
+   "source_sha256": "c4bee0404bf6b9267eb93892eab491615a238f5713ea922ce05e19f6c27ec77d"
+  },
+  "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_cinder.cdae": {
+   "bytes": 11034,
+   "harvested_from": "b3r11harvest",
+   "sha256": "9aac7df9bcaf4f278227eca95476499203d58ba6c8d4397c2170b24d6ce5756f",
+   "source": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_cinder.dae",
+   "source_sha256": "4977e1c3e06275f8d3fdd505f1c251f8be6862e16e38710582e873d47dcbdcc3"
+  },
+  "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_cone.cdae": {
+   "bytes": 11017,
+   "harvested_from": "b3r11harvest",
+   "sha256": "19f4343f74cee77f28950572a0b28e85621b3d668b756c22695c8fd424bbb349",
+   "source": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_cone.dae",
+   "source_sha256": "5fb538fd416d865afc8627214d00c299b9efad75a85553325cc7b997ab2ac5f9"
+  },
+  "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_pebble_a.cdae": {
+   "bytes": 9566,
+   "harvested_from": "b3r11harvest",
+   "sha256": "9379ad9d1f3b95d2f226a6f98f35bc0f1fc5782212d4a85fb117e8e503795290",
+   "source": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_pebble_a.dae",
+   "source_sha256": "0e50c82d204d39feabdbbaedb1084a604f489cd4fb26ecee13376acd7dd54d5d"
+  },
+  "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_pebble_b.cdae": {
+   "bytes": 8809,
+   "harvested_from": "b3r11harvest",
+   "sha256": "c550e7fd91d12c72e9f566520e96d2bc8e5de99e2f466a03dfe2c82b2e58484d",
+   "source": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_pebble_b.dae",
+   "source_sha256": "c38411144ada4bda80357781101ca74e8a07bdfe9f18ebdf1fb1dabd8bb267fa"
+  },
+  "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_pebble_c.cdae": {
+   "bytes": 9384,
+   "harvested_from": "b3r11harvest",
+   "sha256": "c67384c8035d94533f07433ece61629f99e0b03de7e9d818d1f500fcb1c8636b",
+   "source": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_pebble_c.dae",
+   "source_sha256": "c6ab6df3488dcfee89e30caaac56b3557a68f9806d2b9714d284a74c01cadf13"
+  },
+  "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_twig.cdae": {
+   "bytes": 8772,
+   "harvested_from": "b3r11harvest",
+   "sha256": "41923f9fe7b0d6d9556498792c163e45767295f59970d789c3ad59c7af18e97b",
+   "source": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_twig.dae",
+   "source_sha256": "0a95bcbd62cfeee06fdf8193bb9f05f214ea0454811c91017ff9cc8467cfae5e"
+  },
+  "art/shapes/props/ericrolph_hot_potato_arena_p_bench_log.cdae": {
+   "bytes": 1640909,
+   "harvested_from": "b4r4harvest2",
+   "sha256": "62dc1aabd9b1555c4598d7bda76f741ab4138b224fec5a49dd72ecb75f1c8f62",
+   "source": "art/shapes/props/ericrolph_hot_potato_arena_p_bench_log.dae",
+   "source_sha256": "b8a32deebd55678fbfc9b53f23328528178f1f116d710d7cb9cf4ed777702209"
+  },
+  "art/shapes/props/ericrolph_hot_potato_arena_p_enamel_pot.cdae": {
+   "bytes": 222912,
+   "harvested_from": "b4r4harvest2",
+   "sha256": "747835c8bde685f94ab82487d8edbc013a14a30012c8489c0f230f33abc1b15a",
+   "source": "art/shapes/props/ericrolph_hot_potato_arena_p_enamel_pot.dae",
+   "source_sha256": "9c6a35fb1734467d6ea8ef21b1342487bdf7dbf835278d33809ae3cac35273f1"
+  },
+  "art/shapes/props/ericrolph_hot_potato_arena_p_fence_post.cdae": {
+   "bytes": 16670,
+   "harvested_from": "b4r4harvest2",
+   "sha256": "82c8b9694b340b2fae2bd128272b2858a9a8b8476d4c1240112af3eb3ff22d3c",
+   "source": "art/shapes/props/ericrolph_hot_potato_arena_p_fence_post.dae",
+   "source_sha256": "9c51860ec478979f7d9a1f65db1abbf8c42189f8003ed6d5f46960761b515103"
+  },
+  "art/shapes/props/ericrolph_hot_potato_arena_p_fence_rail.cdae": {
+   "bytes": 12249,
+   "harvested_from": "b4r4harvest2",
+   "sha256": "ca1a29d5e071cda433d7643733d7178efcec0dc7eeec480dea65225feabd0d08",
+   "source": "art/shapes/props/ericrolph_hot_potato_arena_p_fence_rail.dae",
+   "source_sha256": "d462d340807cc4c5cacad38b0100ebd2a5518f83f55836047e675e9a5c869e91"
+  },
+  "art/shapes/props/ericrolph_hot_potato_arena_p_giant_lantern.cdae": {
+   "bytes": 186534,
+   "harvested_from": "b4r4harvest2",
+   "sha256": "f375756afcca676a300257d199a1f949258a6f05d9116ad128d11cf67902c340",
+   "source": "art/shapes/props/ericrolph_hot_potato_arena_p_giant_lantern.dae",
+   "source_sha256": "fcf4c94a8dd0f89ac0d2b5c43cad4c96df414c7328792572ec476bf7136d52df"
+  },
+  "art/shapes/props/ericrolph_hot_potato_arena_p_lantern_post.cdae": {
+   "bytes": 33088,
+   "harvested_from": "b4r4harvest2",
+   "sha256": "0b27f6ef317630d684a1e21316c55562feef5758790294865259e33e23b690bb",
+   "source": "art/shapes/props/ericrolph_hot_potato_arena_p_lantern_post.dae",
+   "source_sha256": "ada7f8a1cff45a92e3680c25804a28639575c73871579f6c5976f364c91ec003"
+  },
+  "art/shapes/props/ericrolph_hot_potato_arena_p_lantern_tripod.cdae": {
+   "bytes": 229844,
+   "harvested_from": "b4r4harvest2",
+   "sha256": "f9b3b0b2e8bcbeef6a992dfc3d4513dbced30e714e46b36e3553027df139f7d3",
+   "source": "art/shapes/props/ericrolph_hot_potato_arena_p_lantern_tripod.dae",
+   "source_sha256": "c97201d0053a310ce328fe330a13c481559e4cc4ef0a37f9418aee447b808120"
+  },
+  "art/shapes/props/ericrolph_hot_potato_arena_p_leaner_log.cdae": {
+   "bytes": 301658,
+   "harvested_from": "b4r4harvest2",
+   "sha256": "0ab5bd02096e82ae167e080f6135769379cee1f080568b446e6091c0644d1c91",
+   "source": "art/shapes/props/ericrolph_hot_potato_arena_p_leaner_log.dae",
+   "source_sha256": "c4dcb20247f9ceb1e0a3d2e3cd5455eebe00bf691288fa920a900e431813384b"
+  },
+  "art/shapes/props/ericrolph_hot_potato_arena_p_log_north.cdae": {
+   "bytes": 376131,
+   "harvested_from": "b4r4harvest2",
+   "sha256": "058cf2122783f9e698bb2838ead43b32c76ff88fadcf750182b2f3230ce0f0e4",
+   "source": "art/shapes/props/ericrolph_hot_potato_arena_p_log_north.dae",
+   "source_sha256": "637fd498e38053fa116e1e6ed47455737c5245eb91bd149c037a1eebdf982710"
+  },
+  "art/shapes/props/ericrolph_hot_potato_arena_p_log_south.cdae": {
+   "bytes": 331007,
+   "harvested_from": "b4r4harvest2",
+   "sha256": "635cd51db1d4286bd49028253e1481625353541ec12cf2eb13b34f9731a56d84",
+   "source": "art/shapes/props/ericrolph_hot_potato_arena_p_log_south.dae",
+   "source_sha256": "3bb3df98e7bed73dabea9f8176c122efc7cd49dd07e46d5d4cec4d2928c5b8dd"
+  },
+  "art/shapes/props/ericrolph_hot_potato_arena_p_trail_cairn.cdae": {
+   "bytes": 51392,
+   "harvested_from": "b4r4harvest2",
+   "sha256": "e18a396189fc77475a44811936e1ec3a6c6a4526451fbae5c6ca8b0c5310415b",
+   "source": "art/shapes/props/ericrolph_hot_potato_arena_p_trail_cairn.dae",
+   "source_sha256": "fc36de51975dbbcad9204dfa5e87f116e46c92d38fab141a58b04f15f9c681b5"
+  },
+  "art/shapes/props/ericrolph_hot_potato_arena_p_trail_sign.cdae": {
+   "bytes": 42030,
+   "harvested_from": "b4r4harvest2",
+   "sha256": "d3f00bdf44b9cf4adec3637b49a6f833451647365c338b9910f51e6b224ace0e",
+   "source": "art/shapes/props/ericrolph_hot_potato_arena_p_trail_sign.dae",
+   "source_sha256": "1f1d9a932e5ee526f085987d6ac19fafd571727b09b1342cc91da609e17d6e02"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_boulder_forest_a.cdae": {
+   "bytes": 499446,
+   "harvested_from": "b3r11harvest",
+   "sha256": "44bc43974914d4486764d30174e6b598b2399a9bc98ac40652f78dd5a6f47aa8",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_boulder_forest_a.dae",
+   "source_sha256": "8735f8ab4ad8de53cd73fc937ea1e20433150b3644112f1687083676e1ffc52b"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_boulder_forest_b.cdae": {
+   "bytes": 499134,
+   "harvested_from": "b3r11harvest",
+   "sha256": "bdf5ab1f601fbc1ce70a104eb14594c93c285ebdc9b41b9acf247d39c6cc1cb6",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_boulder_forest_b.dae",
+   "source_sha256": "a883787117af790d7b00336cfbe9bae55f7230d763f2a1bdf2aecfd76cafe61c"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_cliff_outcrop_a.cdae": {
+   "bytes": 2275668,
+   "harvested_from": "d7harvest",
+   "sha256": "476f37d63f3c79eb33bdf23ba494dce79040242d83b718ad5594ba01345b69f8",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_cliff_outcrop_a.dae",
+   "source_sha256": "e4c2877c51bf83abf1ad98b622cd772ab553cecadc90b51bff8ce9d6377aa7f5"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_cliff_outcrop_b.cdae": {
+   "bytes": 2275668,
+   "harvested_from": "d7harvest",
+   "sha256": "c0b1805bcfb6f942c5b90b9338d56ee17a0612ea80381020e6ddd185bbd25f73",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_cliff_outcrop_b.dae",
+   "source_sha256": "47d4f7394c7dae8e866763780d4b557fff1b55cdacde0cc77fade731caf59dde"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_crag.cdae": {
+   "bytes": 2091815,
+   "harvested_from": "d7harvest",
+   "sha256": "c8f7d9265fa8ce59cf9a54527f2b667d4ea3036142c66e1aae5ee61dea881391",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_crag.dae",
+   "source_sha256": "f020f3afa96017a359ea79aa684697100e0e8c5b84790e672e64c1252accb5d7"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_driftwood.cdae": {
+   "bytes": 218002,
+   "harvested_from": "b3r11harvest",
+   "sha256": "3bfd83c7ce4eb165f83627595c4949871d68a132bbfd1d5af69291fc6bd26412",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_driftwood.dae",
+   "source_sha256": "151abc6949f7fa613326407566483553f8e446f7d2279545bae1aed91644bce5"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_lichen_boulder.cdae": {
+   "bytes": 382422,
+   "harvested_from": "b3r11harvest",
+   "sha256": "f8407170f1d781689c0cd55aed6f406f9c1284f304485e028733626b99bbb1bf",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_lichen_boulder.dae",
+   "source_sha256": "c84169a0720a619646110704cf236b5ec01224566115d4f7aee889ab7086dd49"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_mossy_rock_a.cdae": {
+   "bytes": 382406,
+   "harvested_from": "b3r11harvest",
+   "sha256": "5d5bbaa5b1e75e504d7524a8a02f981093a0228353d6b68f60c12e00deb2ab63",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_mossy_rock_a.dae",
+   "source_sha256": "815602301fce49cb8ec72915a36e213d84bf6ddfd39a1f08597d10c5575b9f45"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_mossy_rock_b.cdae": {
+   "bytes": 382406,
+   "harvested_from": "b3r11harvest",
+   "sha256": "47d0b0e74148c75635bd238651566103222a32a1e5efd693931574a0364211f8",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_mossy_rock_b.dae",
+   "source_sha256": "cfaf6f20f79a81d22348eb84be3c3efa727a2f5641d43731915f13079da81e51"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_mossy_rock_c.cdae": {
+   "bytes": 382406,
+   "harvested_from": "b3r11harvest",
+   "sha256": "314ffc9e58a638284a708c4d2692db131ea398431893f3c8ea94b686d6b4f4ff",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_mossy_rock_c.dae",
+   "source_sha256": "a6b64d5319bcfb1781f4126e67f5515bacc25df603dec66579b0d46c6683e418"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_mossy_rock_d.cdae": {
+   "bytes": 382406,
+   "harvested_from": "b3r11harvest",
+   "sha256": "b848c3caaf4a536213e0c6b8b4436e22749ee704a55c66e2c196b540585a5f7f",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_mossy_rock_d.dae",
+   "source_sha256": "4665bedcd7e02d639320e04f9370bc4538e031c4c5e0693ceff5c219a9f38735"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_mossy_rock_e.cdae": {
+   "bytes": 382406,
+   "harvested_from": "b3r11harvest",
+   "sha256": "a9f143b207da4b0fce5935346316826be2387560d8d481228c9e28fdfacc0485",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_mossy_rock_e.dae",
+   "source_sha256": "c3c729ccc9a27ae331ab8e637c13e3998b127e5f02f59edc0e15b01b2de5ad86"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_nq_boulder_02.cdae": {
+   "bytes": 499426,
+   "harvested_from": "b3r11harvest",
+   "sha256": "59c4931fc9711d896945b408e70b564b4eb7e0e9cc5070698018c006a5e9cf67",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_nq_boulder_02.dae",
+   "source_sha256": "b4145d3323a98a17ea7b800fbbbc1455db05029af944c9977d7192b8b3e851c6"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_nq_boulder_03.cdae": {
+   "bytes": 499426,
+   "harvested_from": "b3r11harvest",
+   "sha256": "db74004d0e3c5b9850433aa4244ba7e4d18dedafaf4d2aedd24db1c730d662ea",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_nq_boulder_03.dae",
+   "source_sha256": "ab43dc35fa859536493352bff182701c811adf91a311411b99fd4da4c110e612"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_nq_boulder_04.cdae": {
+   "bytes": 499426,
+   "harvested_from": "b3r11harvest",
+   "sha256": "0a165f36585c6890a544fb7a44c20258f4f62e856da7e25f02862c55c6c25d30",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_nq_boulder_04.dae",
+   "source_sha256": "53c4f7a9e9df99a373cb16a996f507dec649dd8d8d08ff6e2b3cc8b134220013"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_nq_boulder_05.cdae": {
+   "bytes": 499426,
+   "harvested_from": "b3r11harvest",
+   "sha256": "0ca595ee293ddd9e6c9ea616e9028b2f88a69851d644058b6e2362fe89e43b49",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_nq_boulder_05.dae",
+   "source_sha256": "42b91459ec04a3a3c920e44a5c2f68b1ad0d881d7ca52211276d0d9167b300a5"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_nq_boulder_06.cdae": {
+   "bytes": 499426,
+   "harvested_from": "b3r11harvest",
+   "sha256": "2c9c37eeb6e79039783250a8adf0d90aebb28ea35b73e95c15f1837bb1df68c4",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_nq_boulder_06.dae",
+   "source_sha256": "fc63feef80d4debf5765d06fc5e233de0a1a3227f7f9f3ae151536264c23fe88"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_pebble_cluster.cdae": {
+   "bytes": 136596,
+   "harvested_from": "b3r11harvest",
+   "sha256": "911b7210e0f9ebd920f3db8b20cbfdecf2fb85d4ef279887fd2aa1724649e76f",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_pebble_cluster.dae",
+   "source_sha256": "7ecce22b92dda09aab721d544d6d42fd38c3079ba6bb1921c8a0552a2e903121"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_scree_rock_a.cdae": {
+   "bytes": 336270,
+   "harvested_from": "b3r11harvest",
+   "sha256": "49100e1a9a8b2ba80dc10f0ab698bc4858891a4e57c84645a810235e8fb5487c",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_scree_rock_a.dae",
+   "source_sha256": "b8d5402710f23f9c04ca55339ade23b039a48017904e70c26d28d7d6cd3cf624"
+  },
+  "art/shapes/rocks/ericrolph_hot_potato_arena_f_scree_rock_b.cdae": {
+   "bytes": 142828,
+   "harvested_from": "b3r11harvest",
+   "sha256": "e9f4d24a6c6c08392b230cb7321a30f5ff872664e71dc665d766e60042131459",
+   "source": "art/shapes/rocks/ericrolph_hot_potato_arena_f_scree_rock_b.dae",
+   "source_sha256": "8ca3e801ff67072fd925cdeb5f94fe36cb7bf85452df38132aaa8a4844a46df4"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_dwarf_pine_alpine.cdae": {
+   "bytes": 241509,
+   "harvested_from": "b3r11harvest",
+   "sha256": "1559de75349e3579e91bfeb20c4d14fd8403ef4487363e59333e52575280292c",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_dwarf_pine_alpine.dae",
+   "source_sha256": "d9e16e354b1505b6935171ec77fa829165108c06e92db0fffe51f2db666132fb"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_mid_a.cdae": {
+   "bytes": 1348766,
+   "harvested_from": "b3r11harvest",
+   "sha256": "bee5e3cd6c650b78e4ca66088404da0bd2cbe112e49e219bc242103b298c4e26",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_mid_a.dae",
+   "source_sha256": "b54ef3e684db7b70f0b515163185a7478e1d7ca460138276e3b2470b7e54ad28"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_mid_b.cdae": {
+   "bytes": 1341318,
+   "harvested_from": "b3r11harvest",
+   "sha256": "5d90be79f287b70e8f1b4c8a9fcc36bed0faf2d0746aa35db17830e92ed43f36",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_mid_b.dae",
+   "source_sha256": "8c4da108ef64ca1a7d910e18ee43e99e361e0f5e4764090b7fec2f961a1283b4"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_sapling_a.cdae": {
+   "bytes": 294185,
+   "harvested_from": "b3r11harvest",
+   "sha256": "529b485e65fa988f6d6ac85272d6eb60e0fb4a7a428fa3aaa4962cb072a0f1ad",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_sapling_a.dae",
+   "source_sha256": "4dfaed1f673f05d22fa33eb3e9935f6ee2de86d917bfed8af81c3748baaa7f83"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_sapling_b.cdae": {
+   "bytes": 279161,
+   "harvested_from": "b3r11harvest",
+   "sha256": "1c6d4396c1781bdb66e61c947dff195621d58043633b3b545b9d75a50bb0e78b",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_sapling_b.dae",
+   "source_sha256": "981f9311103e2e60dbc057ac0a710e2279159f9f78d3539b2e1116e92f25ff21"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_tall_a.cdae": {
+   "bytes": 2152625,
+   "harvested_from": "b3r11harvest",
+   "sha256": "57646cc029ee5c6e20f572da930aa3185066a782cd53ec8e8910a2009878929b",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_tall_a.dae",
+   "source_sha256": "619f5fbe00211bbcd1238c3ab157a8320be7b49d9dde0f8049990e9b09269eeb"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_tall_b.cdae": {
+   "bytes": 2143889,
+   "harvested_from": "b3r11harvest",
+   "sha256": "87056f2b55b44fc3cbd320c2b114449d135634cdf7865cd11a6692c14794219f",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_tall_b.dae",
+   "source_sha256": "e1c591d06ff7da17a441a3fc14cb007cb732ebe4993ce551ed6d9a9f2632af7c"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_tall_c.cdae": {
+   "bytes": 2128433,
+   "harvested_from": "b3r11harvest",
+   "sha256": "c4d94b41cae975a40ff5876ecc3b69e2ef78d70e79fb22ff1336d62e1cf2bdaa",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_tall_c.dae",
+   "source_sha256": "e7c69fc868960c8c4400294122ac316b4bf6fdc2d1c3029fba532948d3925bc5"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_mid_a.cdae": {
+   "bytes": 1522250,
+   "harvested_from": "b3r11harvest",
+   "sha256": "d3bd86a97752ae2173f173c97fc4f72cfc4a855445f670f49d8a64ee89acef1e",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_mid_a.dae",
+   "source_sha256": "9a8b8d21f59de0be19e2d5484796dd184c651992893952e092202d1773177113"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_mid_b.cdae": {
+   "bytes": 1494986,
+   "harvested_from": "b3r11harvest",
+   "sha256": "a819d5ed3761dcac7bdb17fea73feafc669f15b100c4cf00840a35c6e234160f",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_mid_b.dae",
+   "source_sha256": "b9407e7d2263ee2512731f14325c62ac5df1f1f7162a0404162d64c0f0cba2e8"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_sapling_a.cdae": {
+   "bytes": 310502,
+   "harvested_from": "b3r11harvest",
+   "sha256": "417ee34afd82e786a3db6d2e805cfa4448b0f266f74edfb41bb2c8fbb932cc57",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_sapling_a.dae",
+   "source_sha256": "d8a463488bd4819853c1edd2e89a4d391048f92d28bc90b925adb60ded4c8e30"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_sapling_b.cdae": {
+   "bytes": 297278,
+   "harvested_from": "b3r11harvest",
+   "sha256": "6fca986247578af0e0c40e0fa69743dab32c36c1527cac860a0221e708c2d7ad",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_sapling_b.dae",
+   "source_sha256": "3256aff8abbf2f6cef542ecfaa717887c109af30cf80df121f7e1181e1ca5519"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_sapling_c.cdae": {
+   "bytes": 314294,
+   "harvested_from": "b3r11harvest",
+   "sha256": "8ccc7dcda640ae4e605b214415d36eb46ac0404e06191d7da3bb5cddb2d1613d",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_sapling_c.dae",
+   "source_sha256": "335f11b5c5ad1f63498fa7cd47372036f7c487c3c4c2d492035e1d5ff44e7ed6"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_tall_a.cdae": {
+   "bytes": 3474277,
+   "harvested_from": "b3r11harvest",
+   "sha256": "21e0c2d9838096aa5eacb4a099cb077922ca3d28d601557bf4aed9106ae0ecee",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_tall_a.dae",
+   "source_sha256": "0a04ae7e221eadff6d9500f16703ec8f245f2abea898be997c5425ae2e97c88f"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_tall_b.cdae": {
+   "bytes": 3506577,
+   "harvested_from": "b3r11harvest",
+   "sha256": "9e68f5c34ea7e9056e1c7bbba041eccc9395da0794de357fa4dc3ca0cf7e0b3a",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_tall_b.dae",
+   "source_sha256": "dc42b55add1a1353ea3ab397bfb25ca09f46b9a1e637c791337a269b76c4082e"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_tall_c.cdae": {
+   "bytes": 3456853,
+   "harvested_from": "b3r11harvest",
+   "sha256": "f30304bd4a6b13f47a1d38dc2bed33de7d02db8770ae646902d6e8993c850629",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_tall_c.dae",
+   "source_sha256": "fd4aa4ca46b3f4cdd80451b39692a8a60678c1a03f30ff927d9499577b596207"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_snag_a.cdae": {
+   "bytes": 109540,
+   "harvested_from": "b3r11harvest",
+   "sha256": "031eecbb72f2a44e9760855c1604ab4b56f6319b021cee6d8c41b23b99b400c7",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_snag_a.dae",
+   "source_sha256": "66bfa76246b9253c8f53778f43b7a28d876be3ce48416a5a50d63aa035aa27f7"
+  },
+  "art/shapes/trees/ericrolph_hot_potato_arena_f_snag_b.cdae": {
+   "bytes": 109156,
+   "harvested_from": "b3r11harvest",
+   "sha256": "7a13d44ed74c860f27a10ac712c6debd51f2a64bbff84f42e109ce7596744fe7",
+   "source": "art/shapes/trees/ericrolph_hot_potato_arena_f_snag_b.dae",
+   "source_sha256": "b0b1e2f68bbb9b7b4a39ddf0fa3d757df898281d2b67219ffc4355f4e1fa7000"
+  },
+  "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_fern_a.cdae": {
+   "bytes": 77844,
+   "harvested_from": "b3r11harvest",
+   "sha256": "f6e3b8d23c27dbcede45c2b7a373d22a89d36788f4570df2152fd1eab4e2edb2",
+   "source": "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_fern_a.dae",
+   "source_sha256": "bb47e92e97e5ed93f17bc5314f3c38a328c210a6189e27267574a98a8625f678"
+  },
+  "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_fern_b.cdae": {
+   "bytes": 77556,
+   "harvested_from": "b3r11harvest",
+   "sha256": "7fdc30e3561858a75871332a5b98bc05c58e5f871e720bab2069b93dd0cd5f55",
+   "source": "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_fern_b.dae",
+   "source_sha256": "4555603013d55f86409aa25ecbef9a4f0a1ea118b01afbaf4c900cab58afa384"
+  },
+  "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_reed_clump.cdae": {
+   "bytes": 30403,
+   "harvested_from": "b3r11harvest",
+   "sha256": "e29c74d971bf71be7b1e78589fe94c836bc9e74081713bd32500d72ef5a1765b",
+   "source": "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_reed_clump.dae",
+   "source_sha256": "5021745e09a52c56b82b996156966733ccde3562dbede85781246cacf55f3d19"
+  },
+  "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_01.cdae": {
+   "bytes": 164534,
+   "harvested_from": "d7harvest",
+   "sha256": "ed55b06393b34720093f1be34db93e41c7cd06a0c88faa107ff6a8bca41376f6",
+   "source": "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_01.dae",
+   "source_sha256": "e8c3f9b8b263014b6106856bbf592bffbcfb75ff9d5afdb278baa66b8e01b547"
+  },
+  "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_02.cdae": {
+   "bytes": 164630,
+   "harvested_from": "d7harvest",
+   "sha256": "8e7c7d8c3c1a62c8d7fb1df8c2bc2d24aea926d34b749c540e16ede0ebe955a9",
+   "source": "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_02.dae",
+   "source_sha256": "eb56d75a902d54fbd7a7a52dabec4f9ded1cac6b3ef01447058e12f1a86349a3"
+  },
+  "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_03.cdae": {
+   "bytes": 163766,
+   "harvested_from": "d7harvest",
+   "sha256": "fddad1e6df8de687fa78c8791047ffec0ecc18e35fda198d6a6b2ba371742a12",
+   "source": "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_03.dae",
+   "source_sha256": "4aa823dcf70c670ce9d7346e5f7f75a0a474fbf70d815502e921e3f991d11d8f"
+  },
+  "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_04.cdae": {
+   "bytes": 164534,
+   "harvested_from": "d7harvest",
+   "sha256": "6ad24909b1f0325fb0852a97cb0c25616fe657f8feb23c1bb1047340daeb541a",
+   "source": "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_04.dae",
+   "source_sha256": "8e11769fc854c000611849f30338cc23ead4ac23c67791518e4c0b4ee3efe2c1"
+  }
+ },
+ "harvested_from": "d7harvest for the rows that name it; the rest as before (see harvests and each row's harvested_from)",
+ "harvests": {
+  "b3r10harvest": {
+   "already_current": 42,
+   "cut": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b3\\recut_r10\\harvest\\hot_potato_arena_level_ericrolph.zip",
+   "rows_now": 63,
+   "source_dir": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b3\\r10\\evidence_r10\\harvest",
+   "staged": 21
+  },
+  "b3r11harvest": {
+   "already_current": 47,
+   "cut": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b3\\recut_r11\\harvest\\hot_potato_arena_level_ericrolph.zip",
+   "rows_now": 63,
+   "source_dir": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b3\\r11\\evidence_r11\\harvest",
+   "staged": 16
+  },
+  "b3r12harvest": {
+   "already_current": 0,
+   "cut": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b3\\r12\\harvest\\hot_potato_arena_level_ericrolph.zip",
+   "rows_now": 3,
+   "source_dir": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b3\\r12\\evidence_r12\\harvest_shrubs",
+   "staged": 3
+  },
+  "b3r13harvest": {
+   "already_current": 0,
+   "cut": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b3\\r13\\harvest\\hot_potato_arena_level_ericrolph.zip",
+   "rows_now": 4,
+   "source_dir": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b3\\r13\\evidence_r13\\harvest_shrubs",
+   "staged": 4
+  },
+  "b3r9harvest": {
+   "already_current": 52,
+   "cut": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b3\\recut_r9\\harvest\\hot_potato_arena_level_ericrolph.zip",
+   "rows_now": 63,
+   "source_dir": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b3\\r9\\evidence_r9\\harvest",
+   "staged": 11
+  },
+  "b4r3cert": {
+   "rows_now": 63,
+   "source_dir": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b4\\r3\\evidence\\harvest"
+  },
+  "b4r4harvest": {
+   "already_current": 8,
+   "cut": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b4\\r4\\recut_harvest\\hot_potato_arena_level_ericrolph.zip",
+   "rows_now": 12,
+   "source_dir": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b4\\r4\\evidence_harvest\\main\\harvest",
+   "staged": 4
+  },
+  "b4r4harvest for the rows that name it; the rest as before (see harvests and each row's harvested_from)": {
+   "rows_now": 63,
+   "source_dir": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b4\\r4\\evidence_harvest\\main\\harvest"
+  },
+  "b4r4harvest2": {
+   "already_current": 6,
+   "cut": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b4\\r4\\recut_harvest\\hot_potato_arena_level_ericrolph.zip",
+   "rows_now": 12,
+   "source_dir": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b4\\r4\\evidence_harvest\\main\\harvest",
+   "staged": 6
+  },
+  "b7cliffsharvest": {
+   "already_current": 0,
+   "cut": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b7\\bake\\harvest\\hot_potato_arena_level_ericrolph.zip",
+   "rows_now": 3,
+   "source_dir": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\ac9b4832-415d-4129-bdeb-dfb93bf81de5\\scratchpad\\level_round\\b7\\bake\\evidence_cliffs\\harvest_shrubs",
+   "staged": 3
+  },
+  "d7harvest": {
+   "already_current": 7,
+   "cut": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\92e3cb19-6fed-459d-9517-dc630f60b19f\\scratchpad\\d7\\harvest\\hot_potato_arena_level_ericrolph.zip",
+   "rows_now": 7,
+   "source_dir": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\92e3cb19-6fed-459d-9517-dc630f60b19f\\scratchpad\\d7\\evidence_d7\\harvest_all",
+   "staged": 0
+  }
+ },
+ "history": [
+  {
+   "dropped_because_the_source_dae_changed": [
+    "art/shapes/props/ericrolph_hot_potato_arena_p_lantern_post.cdae",
+    "art/shapes/props/ericrolph_hot_potato_arena_p_lantern_tripod.cdae"
+   ],
+   "restored_by": "b4r4harvest"
+  },
+  {
+   "dropped_because_the_source_dae_changed": [
+    "art/shapes/props/ericrolph_hot_potato_arena_p_enamel_pot.cdae",
+    "art/shapes/props/ericrolph_hot_potato_arena_p_lantern_post.cdae",
+    "art/shapes/props/ericrolph_hot_potato_arena_p_leaner_log.cdae",
+    "art/shapes/props/ericrolph_hot_potato_arena_p_log_north.cdae",
+    "art/shapes/props/ericrolph_hot_potato_arena_p_log_south.cdae",
+    "art/shapes/props/ericrolph_hot_potato_arena_p_trail_sign.cdae"
+   ],
+   "restored_by": "b4r4harvest2"
+  }
+ ],
+ "level_id": "ericrolph_hot_potato_arena",
+ "source_dir": "C:\\Users\\ericr\\AppData\\Local\\Temp\\claude\\C--Users-ericr-beamng-mcp\\92e3cb19-6fed-459d-9517-dc630f60b19f\\scratchpad\\d7\\evidence_d7\\harvest_all",
+ "total_bytes": 44445584,
+ "what": "the engine's own collision/render bake, one .cdae per shipped DAE (QB-8). Each row pins its SOURCE DAE's sha256: a bake is only valid for the mesh it was baked from, and the engine prefers the .cdae over the .dae beside it."
+}

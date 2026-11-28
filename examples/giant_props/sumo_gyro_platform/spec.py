@@ -1605,15 +1605,19 @@ local NET_SNAPSHOT_SECONDS = 0.20
 local NET_HELLO_SECONDS = 1.0
 local NET_WARN_SECONDS = 3.0
 
+-- rawget only: `extensions.<name>` for an unloaded extension makes the
+-- engine try to load it and log "extension unavailable" on every miss.
 local function mpSessionActive()
-  local core = extensions and extensions.MPCoreNetwork
+  local core = extensions and rawget(extensions, "MPCoreNetwork")
+  core = core or rawget(_G, "MPCoreNetwork")
   if not core or type(core.isMPSession) ~= "function" then return false end
   local ok, active = pcall(core.isMPSession)
   return ok and active and true or false
 end
 
 local function mpVehicles()
-  local module = extensions and extensions.MPVehicleGE
+  local module = extensions and rawget(extensions, "MPVehicleGE")
+  module = module or rawget(_G, "MPVehicleGE")
   if type(module) ~= "table" then return nil end
   return module
 end

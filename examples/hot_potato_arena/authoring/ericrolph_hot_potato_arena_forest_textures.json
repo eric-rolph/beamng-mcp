@@ -1,0 +1,1614 @@
+{
+  "albedo": {
+    "f_dwarf_pine": {
+      "alphaRef": 46,
+      "coverage": 0.2487,
+      "green_minus_red_mean": 0.066,
+      "hue_deg_mean": 86.2,
+      "luma_srgb_mean": 0.2292,
+      "mean_rgb": [
+        0.1877,
+        0.2537,
+        0.1086
+      ],
+      "roughness_mean": 0.8229,
+      "saturation_mean": 0.5802
+    },
+    "f_fern": {
+      "alphaRef": 34,
+      "coverage": 0.0963,
+      "green_minus_red_mean": 0.0852,
+      "hue_deg_mean": 92.0,
+      "luma_srgb_mean": 0.258,
+      "mean_rgb": [
+        0.2024,
+        0.2876,
+        0.1283
+      ],
+      "roughness_mean": 0.8328,
+      "saturation_mean": 0.5536
+    },
+    "f_fir_twig_a": {
+      "alphaRef": 63,
+      "coverage": 0.3691,
+      "green_minus_red_mean": 0.0574,
+      "hue_deg_mean": 84.0,
+      "luma_srgb_mean": 0.233,
+      "mean_rgb": [
+        0.1979,
+        0.2553,
+        0.1163
+      ],
+      "roughness_mean": 0.8229,
+      "saturation_mean": 0.5493
+    },
+    "f_fir_twig_b": {
+      "alphaRef": 47,
+      "coverage": 0.2887,
+      "green_minus_red_mean": 0.064,
+      "hue_deg_mean": 88.0,
+      "luma_srgb_mean": 0.233,
+      "mean_rgb": [
+        0.1922,
+        0.2562,
+        0.1241
+      ],
+      "roughness_mean": 0.823,
+      "saturation_mean": 0.5242
+    },
+    "f_pine_twig_a": {
+      "alphaRef": 71,
+      "coverage": 0.2872,
+      "green_minus_red_mean": 0.036,
+      "hue_deg_mean": 78.0,
+      "luma_srgb_mean": 0.238,
+      "mean_rgb": [
+        0.2207,
+        0.2567,
+        0.1044
+      ],
+      "roughness_mean": 0.8203,
+      "saturation_mean": 0.5844
+    },
+    "f_pine_twig_b": {
+      "alphaRef": 60,
+      "coverage": 0.2921,
+      "green_minus_red_mean": 0.0267,
+      "hue_deg_mean": 74.0,
+      "luma_srgb_mean": 0.238,
+      "mean_rgb": [
+        0.2282,
+        0.2549,
+        0.1
+      ],
+      "roughness_mean": 0.8202,
+      "saturation_mean": 0.6045
+    },
+    "f_reed": {
+      "alphaRef": 31,
+      "coverage": 0.1188,
+      "green_minus_red_mean": -0.0464,
+      "hue_deg_mean": 51.0,
+      "luma_srgb_mean": 0.5147,
+      "mean_rgb": [
+        0.5654,
+        0.519,
+        0.323
+      ],
+      "roughness_mean": 0.8196,
+      "saturation_mean": 0.445
+    },
+    "f_sapling_twig": {
+      "alphaRef": 60,
+      "coverage": 0.283,
+      "green_minus_red_mean": 0.038,
+      "hue_deg_mean": 78.0,
+      "luma_srgb_mean": 0.253,
+      "mean_rgb": [
+        0.2348,
+        0.2728,
+        0.1111
+      ],
+      "roughness_mean": 0.8203,
+      "saturation_mean": 0.5842
+    },
+    "f_shrub_leaf_01": {
+      "alphaRef": 28,
+      "ao_p05": 0.5765,
+      "coverage": 0.447,
+      "green_minus_red_mean": 0.017,
+      "hue_deg_mean": 67.0,
+      "luma_srgb_mean": 0.248,
+      "mean_rgb": [
+        0.2457,
+        0.2627,
+        0.1098
+      ],
+      "roughness_mean": 0.8196,
+      "saturation_mean": 0.5844
+    },
+    "f_shrub_leaf_02": {
+      "alphaRef": 28,
+      "ao_p05": 0.8863,
+      "coverage": 0.2228,
+      "green_minus_red_mean": 0.0258,
+      "hue_deg_mean": 72.0,
+      "luma_srgb_mean": 0.248,
+      "mean_rgb": [
+        0.2373,
+        0.2631,
+        0.1309
+      ],
+      "roughness_mean": 0.8196,
+      "saturation_mean": 0.5037
+    },
+    "f_shrub_leaf_03": {
+      "alphaRef": 70,
+      "ao_p05": 0.9098,
+      "coverage": 0.2577,
+      "green_minus_red_mean": 0.0182,
+      "hue_deg_mean": 67.0,
+      "luma_srgb_mean": 0.248,
+      "mean_rgb": [
+        0.2448,
+        0.263,
+        0.1094
+      ],
+      "roughness_mean": 0.8196,
+      "saturation_mean": 0.5851
+    },
+    "f_shrub_leaf_04": {
+      "alphaRef": 68,
+      "coverage": 0.3452,
+      "green_minus_red_mean": 0.0241,
+      "hue_deg_mean": 69.1,
+      "luma_srgb_mean": 0.5155,
+      "mean_rgb": [
+        0.5085,
+        0.5326,
+        0.3665
+      ],
+      "roughness_mean": 0.8196,
+      "saturation_mean": 0.3133
+    },
+    "gc_alpine": {
+      "alphaRef": 51,
+      "coverage": 0.1934,
+      "green_minus_red_mean": 0.0255,
+      "hue_deg_mean": 69.1,
+      "luma_srgb_mean": 0.3072,
+      "mean_rgb": [
+        0.2999,
+        0.3254,
+        0.1486
+      ],
+      "roughness_mean": 0.8343,
+      "saturation_mean": 0.5571
+    },
+    "gc_litter": {
+      "alphaRef": 54,
+      "coverage": 0.2051,
+      "green_minus_red_mean": -0.0167,
+      "hue_deg_mean": 53.5,
+      "luma_srgb_mean": 0.268,
+      "mean_rgb": [
+        0.2891,
+        0.2723,
+        0.1636
+      ],
+      "roughness_mean": 0.8244,
+      "saturation_mean": 0.4639
+    },
+    "gc_meadow": {
+      "alphaRef": 52,
+      "coverage": 0.1962,
+      "green_minus_red_mean": 0.0062,
+      "hue_deg_mean": 62.0,
+      "luma_srgb_mean": 0.3804,
+      "mean_rgb": [
+        0.3916,
+        0.3977,
+        0.176
+      ],
+      "roughness_mean": 0.8199,
+      "saturation_mean": 0.5854
+    },
+    "gc_reeds": {
+      "alphaRef": 25,
+      "coverage": 0.0975,
+      "green_minus_red_mean": 0.0077,
+      "hue_deg_mean": 63.3,
+      "luma_srgb_mean": 0.4487,
+      "mean_rgb": [
+        0.4579,
+        0.4656,
+        0.2536
+      ],
+      "roughness_mean": 0.8196,
+      "saturation_mean": 0.5038
+    },
+    "gc_stubble": {
+      "alphaRef": 41,
+      "coverage": 0.1532,
+      "green_minus_red_mean": -0.0823,
+      "hue_deg_mean": 39.2,
+      "luma_srgb_mean": 0.3103,
+      "mean_rgb": [
+        0.3836,
+        0.3012,
+        0.1847
+      ],
+      "roughness_mean": 0.8198,
+      "saturation_mean": 0.5389
+    }
+  },
+  "bytes": 98902201,
+  "files": {
+    "art/shapes/deadwood/ericrolph_hot_potato_arena_f_deadwood_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_deadwood",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "7ec3068f03d458aaf82101ffa989901c49f4b1f7d58a06fe7e5c41fbdc5d6336",
+      "size": 765841
+    },
+    "art/shapes/deadwood/ericrolph_hot_potato_arena_f_deadwood_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_deadwood",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "8481a1627c20066e3c9f79e1d00ea9ee9c150fa881f0c5830b9e56e46f6da947",
+      "size": 1831242
+    },
+    "art/shapes/deadwood/ericrolph_hot_potato_arena_f_deadwood_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_deadwood",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "1584da322a95f7bef956d9f26bd904816497832c3c26a5104f915fffbe72e547",
+      "size": 2504350
+    },
+    "art/shapes/deadwood/ericrolph_hot_potato_arena_f_deadwood_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_deadwood",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "92d103ae3b35360d5c817ca0287ddaf222ce4889a230003c99128f0c56eef900",
+      "size": 3157
+    },
+    "art/shapes/deadwood/ericrolph_hot_potato_arena_f_deadwood_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_deadwood",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "ce7883a6c1d0f55fd6fe6ee4f00b110ede0701d63b5529a50f8a1ca9c3002daf",
+      "size": 578340
+    },
+    "art/shapes/deadwood/ericrolph_hot_potato_arena_f_kindling_bark_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_kindling_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "7ec3068f03d458aaf82101ffa989901c49f4b1f7d58a06fe7e5c41fbdc5d6336",
+      "size": 765841
+    },
+    "art/shapes/deadwood/ericrolph_hot_potato_arena_f_kindling_bark_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_kindling_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "1ac59f6e77802201cc56243674a0716624063134b9a5142a219427fb17122dc6",
+      "size": 1692564
+    },
+    "art/shapes/deadwood/ericrolph_hot_potato_arena_f_kindling_bark_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_kindling_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "1584da322a95f7bef956d9f26bd904816497832c3c26a5104f915fffbe72e547",
+      "size": 2504350
+    },
+    "art/shapes/deadwood/ericrolph_hot_potato_arena_f_kindling_bark_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_kindling_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "92d103ae3b35360d5c817ca0287ddaf222ce4889a230003c99128f0c56eef900",
+      "size": 3157
+    },
+    "art/shapes/deadwood/ericrolph_hot_potato_arena_f_kindling_bark_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_kindling_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "ce7883a6c1d0f55fd6fe6ee4f00b110ede0701d63b5529a50f8a1ca9c3002daf",
+      "size": 578340
+    },
+    "art/shapes/deadwood/ericrolph_hot_potato_arena_f_knotted_bark_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_knotted_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "7ec3068f03d458aaf82101ffa989901c49f4b1f7d58a06fe7e5c41fbdc5d6336",
+      "size": 765841
+    },
+    "art/shapes/deadwood/ericrolph_hot_potato_arena_f_knotted_bark_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_knotted_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "0f19757fde919af105e6eee4d6f93bc997ae1906cfa4f742b93626025a637df4",
+      "size": 1935894
+    },
+    "art/shapes/deadwood/ericrolph_hot_potato_arena_f_knotted_bark_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_knotted_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "1584da322a95f7bef956d9f26bd904816497832c3c26a5104f915fffbe72e547",
+      "size": 2504350
+    },
+    "art/shapes/deadwood/ericrolph_hot_potato_arena_f_knotted_bark_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_knotted_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "92d103ae3b35360d5c817ca0287ddaf222ce4889a230003c99128f0c56eef900",
+      "size": 3157
+    },
+    "art/shapes/deadwood/ericrolph_hot_potato_arena_f_knotted_bark_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_knotted_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "ce7883a6c1d0f55fd6fe6ee4f00b110ede0701d63b5529a50f8a1ca9c3002daf",
+      "size": 578340
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_alpine_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_gc_alpine",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "0b788717859116fe265aac973649c6ad88c47ac749fc8d75d2e59fc4943ea06f",
+      "size": 284298
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_alpine_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_gc_alpine",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "2b0559b1dd4f9e7fd1154d399a02886597c332f6385c3858f05a9912704b0523",
+      "size": 972327
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_alpine_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_gc_alpine",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "053394cb137842ff3be7dde0c31bb15ad893849177d7585712d6f5889fd041e8",
+      "size": 850491
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_alpine_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_gc_alpine",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "70f8eb2b9ed46d07760a14e3992f8c470dae8f668ea46114b604d4d0ca6e078e",
+      "size": 305942
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_alpine_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_gc_alpine",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "8a98aafe00e2228422ba2b7b67edb4d06784f77bbee8af04e1609d389d17f353",
+      "size": 99500
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_litter_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_gc_litter",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "924997608d134c3e8e3be7118e799d80b4afb9e1547c9598e7bb7eabd683351a",
+      "size": 263344
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_litter_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_gc_litter",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "27338afc6c82eccabaebb5ab7ebf3dc1ee370356fec81958ffa7a67b45d9c5bf",
+      "size": 759683
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_litter_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_gc_litter",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "3f822617d7c2dfda303574081a09398cb085c6d58de4a85d08e7ca13449d7557",
+      "size": 751633
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_litter_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_gc_litter",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "bd60aa27cd25c8feda1d4f0f2a7e13111b0367ed4fa42b88fa684fc11dec7bb2",
+      "size": 257780
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_litter_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_gc_litter",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "81e4693aff03c8d1622dbbb1f2ef71807a5a982b34c11d6ad31e106c89c656df",
+      "size": 83899
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_meadow_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_gc_meadow",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "52a0530075361754efdec5c055b895f2235a5eb63dce5cd6a84c80049b465bbf",
+      "size": 282937
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_meadow_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_gc_meadow",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "11c597de89222560d1f5478432dcbe5733b97d1e4519175453e4fdb5af2b8908",
+      "size": 1041847
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_meadow_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_gc_meadow",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "f9bd30f4cca6c8d6f1269a9085042fecc516fcf793a465c75f8bfdd20ade294c",
+      "size": 838198
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_meadow_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_gc_meadow",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "2263ab750686d98345644811695608facff0960be1e8a4e598367bfbd6949bb7",
+      "size": 289984
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_meadow_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_gc_meadow",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "765fad362db2c032a06b3f1ba3fbb25edc0087a6e0ccd6a10e184ce78a0ad8f3",
+      "size": 69388
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_reeds_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_gc_reeds",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "3c73f8639c9f04d5bc7077aa33fd08f85e1498dbdae7fd5a3f69bc3189a9545c",
+      "size": 129095
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_reeds_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_gc_reeds",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "a0e5390d5612be15be6aaa4f4ca513ea81fc0f6c0caad20ea5e889d722735f54",
+      "size": 603853
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_reeds_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_gc_reeds",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "bf3eae4ccdb1a5be92afb72b3231d599cb4a79cd892b3e456003267fba75c4e7",
+      "size": 364106
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_reeds_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_gc_reeds",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "d4a829eaa0ec6bcb2a82574aa0282ed51cd97519f1031f164ff053207a770fff",
+      "size": 130982
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_reeds_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_gc_reeds",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "98ee26c71e4cd296acdde203f748891e5fe72e2ee0e6f2a5494cfce31c30090e",
+      "size": 36072
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_stubble_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_gc_stubble",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "fd9b2504f17a18123bef35fb2c424b954bb26fa4e27d3c05f234083601a2b7b6",
+      "size": 236920
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_stubble_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_gc_stubble",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "74d287843e896e150508c77628f06f57990b65a0a5fbc4b64a06ca9501682242",
+      "size": 763154
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_stubble_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_gc_stubble",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "d44510e9b64d5b1ec2f695c7ba924666b2a4dd7822feef49704b1eed7fe6f731",
+      "size": 630751
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_stubble_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_gc_stubble",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "d9d9852dcd892d3f256b4449b8d618b88529bd9602f74a3e3955aaea717ae5ff",
+      "size": 255225
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gc_stubble_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_gc_stubble",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "52748c9fdc8984294082de84a1828f184719a83893b3fe53bbdcc1d8fd91b3da",
+      "size": 55496
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_ash_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_gcs_ash",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "9c5a2947d900c80c014f384f2aba47ec9ab8588252667353370ca390a821b1d9",
+      "size": 216917
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_ash_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_gcs_ash",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "5b8590465489c35c8195d6da618080e71fa94650d25480171c09acdfc2b47a96",
+      "size": 663193
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_ash_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_gcs_ash",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "29d7f096cf7209fd1cf2552a4dbd0e31ecd0d1a316d902c505e1ac642c975060",
+      "size": 582937
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_ash_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_gcs_ash",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "432cde2c18f981e27b3f463ae27855fc476161d891fe94796828b6d8ef7a7883",
+      "size": 155232
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_debris_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_gcs_debris",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "553dba030e9183d6b4ef0b829713858b8ccc49e5813b5f6bac0f780035ecf7a1",
+      "size": 196434
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_debris_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_gcs_debris",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "094b8d69d1e9320fa23ab392c1df103224d54243789618f969fb507024959084",
+      "size": 493756
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_debris_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_gcs_debris",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "c8226a579132ecd5ac682f3bea2432755e79d0fcade13e923fe62c7a4a746d22",
+      "size": 637999
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_debris_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_gcs_debris",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "c096432ef9ae120489b282c51f4f85c88a8fbbff9d0be135d168143793f9a125",
+      "size": 141152
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_pebble_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_gcs_pebble",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "3464cc15f5c5a54e145be68ba169e914f9a7d9ec9e349acebf4fc06300f8df08",
+      "size": 118273
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_pebble_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_gcs_pebble",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "859547d25e49100ccdfcc4f3dee344a0c356d630c40d4c89ca0fa428560185f9",
+      "size": 366771
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_pebble_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_gcs_pebble",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "1aae222ed84197ad528f4b280bcd9e5aeaf9884f5c48fc0d1e3ce286fa14d920",
+      "size": 435445
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_pebble_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_gcs_pebble",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "b4b952da395d92db380b863ca990debc6c14997328859776e782f0d1b4779556",
+      "size": 44118
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_boulder_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_r_boulder",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "9e6f7025b0df841674359b0d89fe98c0d01edd7fa41785117f6b2cc5768a8ca3",
+      "size": 557923
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_boulder_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_r_boulder",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "135c1c3400faf351c3c492f3f508fdb3b568c3ee71416b9ecb63a3f2b332a560",
+      "size": 2116127
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_boulder_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_r_boulder",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "f40789b2d800345c96007654a83fbe1c6c708c48f1bd616d28dcc261845a0a06",
+      "size": 2254658
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_boulder_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_r_boulder",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "7ff8a0eca3d9d818d5f0cb8995ccb7b6243c65a0e34245e1bddb94ce7432850c",
+      "size": 519546
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_cliff_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_r_cliff",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "645376e9816e22a4cef9e213526892edd9a7dc4bc73fe6f687c2d231be071fd5",
+      "size": 578237
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_cliff_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_r_cliff",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "ed48da4a9adf4e61669fe6071c8d1fc85f6052e731bbc287e1b1ea560cec58e4",
+      "size": 1900223
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_cliff_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_r_cliff",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "3288b96cf33772cddffb9cf60f93255d9f9ab632db17b1f2e952e4a8d22dc098",
+      "size": 2042711
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_cliff_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_r_cliff",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "cce1d8cbef1e2f05c9ab0d0997d0a26308b0a1ef38337c3fc92bd30089f0dbd4",
+      "size": 473875
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_crag_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_r_crag",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "ed7d60d858a50e3bf23348716d1c4f6e83ba509f462cea36ba5d95071a071836",
+      "size": 681501
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_crag_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_r_crag",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "2756deb4849cc9fa4ec9fad2737d9d17d8a8557dabd22c91bc63e69dc2ae6fc3",
+      "size": 2090425
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_crag_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_r_crag",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "d6fc9f7b5f67a37f7fe491f308bfa97f0e827d95e1c639c62f059c93a8a3bd2f",
+      "size": 2341962
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_crag_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_r_crag",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "9237e70ad6effbbb877c795e7d32cf88550347ca4943af15aa0d30d81d4dccff",
+      "size": 533277
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_mossy_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_r_mossy",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "1a937e009d5c35007186a1023044cdfaeed24fc1af6d63b1849c56fd6064bdc1",
+      "size": 355814
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_mossy_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_r_mossy",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "4cf26235cf132e7f268525d4bb247f72b673e2171eb9b13797e695061e278b4c",
+      "size": 1220138
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_mossy_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_r_mossy",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "207556aa5ce3b9a728a9dfd49642e20fa07ca4d538b787bcb36a0f65e9f19f58",
+      "size": 1439187
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_mossy_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_r_mossy",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "510e997d4ada9a2e7c4fa5761216046bb30310d8101879c5faf40b1ea19422c6",
+      "size": 313591
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_namaqualand_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_r_namaqualand",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "f934910f8bdfffac04e72ae83498243b3af0caea56b9f4e58938ad81c55652c2",
+      "size": 509010
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_namaqualand_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_r_namaqualand",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "b87c00e5ed262fa23b3fe4b48c276ef0fb61e952c51fa821444eaf0d1e8482c2",
+      "size": 1910717
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_namaqualand_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_r_namaqualand",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "7d28168d3364720537c855e71af5cdbe8d926b52582355676d2c5f35ae3ea481",
+      "size": 1772816
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_namaqualand_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_r_namaqualand",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "6b6860e3a5f49eaff78b79442557baee4f8af201376e4ba411134e0b3e2b18ed",
+      "size": 519278
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_scree_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_r_scree",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "3ab16be49b5fc3fc6c55f996681c258d14674ad3d4f2d4488ddf0cc55fd514da",
+      "size": 115359
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_scree_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_r_scree",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "b258e4f01aa19c64ef176b98f9c71bfd1103d55ff22f68d7fa24fcfdd18c6211",
+      "size": 401911
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_scree_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_r_scree",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "16d790b26da8f38a012f2b3a592c78a06406c7fd4046c1b248ef3f7f62f155c4",
+      "size": 431550
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_r_scree_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_r_scree",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "d8c647b1d6aef0b0110b47b4c358a645f61a124cb71770ceea294cdd1dc7243c",
+      "size": 43384
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_branches_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_branches",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "553dba030e9183d6b4ef0b829713858b8ccc49e5813b5f6bac0f780035ecf7a1",
+      "size": 196434
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_branches_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_branches",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "475fd032765b5d43475fce2877068a3f65b435eab76b6b53ba3d827b73928ef9",
+      "size": 439656
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_branches_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_branches",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "c8226a579132ecd5ac682f3bea2432755e79d0fcade13e923fe62c7a4a746d22",
+      "size": 637999
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_branches_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_branches",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "d8acccafa1fdcf03f3bb9112f5f2f30ad1558e446d5c12ec5644fc0d53c1e58b",
+      "size": 1301
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_branches_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_branches",
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "c096432ef9ae120489b282c51f4f85c88a8fbbff9d0be135d168143793f9a125",
+      "size": 141152
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_dwarf_pine_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_dwarf_pine",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "91373d10f599d91e4aea1e4f0647279836b99a8dc038ff19c2a9cbce1b4f2006",
+      "size": 321682
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_dwarf_pine_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_dwarf_pine",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "5df48e3d6d46b6d8c14d911c1cec972f3adb85b8e501c33955f6832dc192400d",
+      "size": 960007
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_dwarf_pine_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_dwarf_pine",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "7cf14e867089fbd54a5f6d3b31f9345e6a3a4cf2ddc2d4aa7fcf00007039922e",
+      "size": 891374
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_dwarf_pine_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_dwarf_pine",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "a17ba7790da869701630928a7122fd843b2359a7ac51fec22571497993ea8fec",
+      "size": 349178
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_dwarf_pine_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_dwarf_pine",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "cc27718344f1564406665330f94874956cda925cc4f49fdf02a684c7ed845ec9",
+      "size": 114789
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_bark_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_fir_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "f826c6b9738ca8c0b7e1cb3c24d3efa1de3202e702bab479aa3613282871f91a",
+      "size": 766426
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_bark_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_fir_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "253ca171ea6e982db0e0f50aea7fcd3c3b812ff406913d14a71a247ea787ca0b",
+      "size": 2266957
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_bark_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_fir_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "d0d3b28527118392a2dcb9cf361d43efb8447bee70e43551a6f028870ed22d72",
+      "size": 2289511
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_bark_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_fir_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "92d103ae3b35360d5c817ca0287ddaf222ce4889a230003c99128f0c56eef900",
+      "size": 3157
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_bark_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_fir_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "f92efdea4a7dde298254f0f948966639cb82b4387612adf699a6da0e3f9d2643",
+      "size": 640535
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_twig_a_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_fir_twig_a",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "745c96f80aa3ea01ad52aa1689c4d70debf8771ec4130c69df9df8704591ae89",
+      "size": 464810
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_twig_a_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_fir_twig_a",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "87c554e48003161993f9cc20cae56dd3d68effcb636e5b2526780c9bed2edb0f",
+      "size": 1245243
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_twig_a_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_fir_twig_a",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "13aa664b07f672a5b841462201ee90a16f2ea05a0912f2e10380f01dd2cc09d8",
+      "size": 1317046
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_twig_a_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_fir_twig_a",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "a1f615e5dc7d0cf3963dde0243ab38a6632167873c8f429a3372c6e99784aa23",
+      "size": 499681
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_twig_a_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_fir_twig_a",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "3054451af605e9d1d705da50b13fd7ed6ad4acef4b0975c37b012a88265cdd8a",
+      "size": 162841
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_twig_b_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_fir_twig_b",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "9409ab46527e6831ffd62289b576ea55755818cb776bfe58b4c15bd4f95e464b",
+      "size": 360559
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_twig_b_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_fir_twig_b",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "a23b483d56029a1504982283428cdd624a5ea0330856dc49ad79fe47c08ec005",
+      "size": 1049073
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_twig_b_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_fir_twig_b",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "f57702c7f7334f5f4c8e3d793cea4b3037bddcfc07454ac4a9142d021a2fb5e9",
+      "size": 1001934
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_twig_b_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_fir_twig_b",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "ef20e4510ef6083266c2ea96ba95581098817988afbdec69f84a9e32daa706fc",
+      "size": 389292
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_twig_b_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_fir_twig_b",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "ab1bdd0081d82c7e625040f841a6ad9bcb4394cd2987905f10d55be3b4726ee2",
+      "size": 125005
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_bark_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_pine_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "4f5bc3fd96323004e0d7dfb2dc7f2615410932dbdf08a870b458488786cbced4",
+      "size": 720374
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_bark_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_pine_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "99c1c3b394cf8f747b601d49960e170b41c6520013dba38e503c269782807a1a",
+      "size": 1897208
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_bark_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_pine_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "faa2b2aa4a31f211c9198b199d226343d675578e4c4c2c61dcbbdecce0d6ccea",
+      "size": 2289454
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_bark_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_pine_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "92d103ae3b35360d5c817ca0287ddaf222ce4889a230003c99128f0c56eef900",
+      "size": 3157
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_bark_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_pine_bark",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "51b70c27210d615787f5b48599242fbe1ec8149e0997f4619ea5f495071b8d2b",
+      "size": 553084
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_twig_a_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_pine_twig_a",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "92071c5a9f524d16dff7478e8ac211f3db69532cf4c60238a413a3b59c674ad5",
+      "size": 373786
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_twig_a_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_pine_twig_a",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "6b539f9f0ed1d4b436ad01ee928cf29da47bffeba7b25dbf9fe28ce724993905",
+      "size": 1237425
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_twig_a_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_pine_twig_a",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "38de4a28a50c63c430afc3ab2b2c804c7ca85fcb769ace008eabf485572dc6a2",
+      "size": 1219084
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_twig_a_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_pine_twig_a",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "fe24934737d6a66be090afbab89ef72b616970ac278c0fc60a851e067245e7ec",
+      "size": 368635
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_twig_a_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_pine_twig_a",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "397b116870f4b294e36fe751ca5aa769bec6007306ba5465e56d1572a60fb785",
+      "size": 82988
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_twig_b_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_pine_twig_b",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "fc3e0b41550c01ce61bcdc1f37becddf73bd9f819a80913da9ab3b276f3e5094",
+      "size": 360578
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_twig_b_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_pine_twig_b",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "fb832175c06aa0f75af14323a715f677624cc4258af532d79dc262b61b20777f",
+      "size": 1177896
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_twig_b_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_pine_twig_b",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "e156c30dab54754e859a5e29e521eafcc281927d389f30084e0aed519de34701",
+      "size": 1182735
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_twig_b_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_pine_twig_b",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "dcc5612c4088399bde9a699913bac2ac1d181d2586071c160289dc9a72ae334a",
+      "size": 363936
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_twig_b_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_pine_twig_b",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "e7981b077d0725f43f129a499a3f0b713127ed39b610db2e712c984d4be591f7",
+      "size": 77808
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_sapling_twig_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_sapling_twig",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "b4802f7575c0fb304d12e7934428ba0c5da4286a3aba7b471c0e2572360e2f50",
+      "size": 360360
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_sapling_twig_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_sapling_twig",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "c91f01c9f5760a0105ab741a65c4babba2ab0163686434ebce85d04468fa1576",
+      "size": 1210832
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_sapling_twig_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_sapling_twig",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "360c67c1e92141d55a7e62008e21cbf7b10b4d0a0c0ce43b85ca3935cbe161d4",
+      "size": 1178462
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_sapling_twig_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_sapling_twig",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "ef463e5aaa907a61e757824a43dde466bea812f1762b5e956e4f8d9ffe144d46",
+      "size": 366009
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_f_sapling_twig_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_sapling_twig",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "7a8dd9a0abf4377f9b1c8489a618b47e8c2f98e6ee11abf64820d8a1d3d1cf0a",
+      "size": 81115
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_fern_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_fern",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "e0a8ec7edf824e8315065be2fd1925de5f7975c0c68453857fe47f9b7555abea",
+      "size": 120861
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_fern_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_fern",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "bedd1b24cd73f6e949117f003212f43d991d2fdcec712822ededdcd5a82ce180",
+      "size": 408382
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_fern_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_fern",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "8074d2351bd36471fe42f40f7077cda8a5b6428004193add1e8a243a1e721aa7",
+      "size": 381388
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_fern_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_fern",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "a4d0bbe39b24b8c7da38052c1a3008b0fe7da50b1ec4dd12458e419a1d4cb067",
+      "size": 156144
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_fern_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_fern",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "91433e9e79381851c608190382edd60f581b7c399e152a73da32f418a6bc9a1c",
+      "size": 51505
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_reed_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_reed",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "999df4aa9e41583be2e55e7aaf7d08afb6fd6570350c36c2ccc595d9a814d18f",
+      "size": 119094
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_reed_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_reed",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "11d97c9d10f2160b12f4dfc51d88dfb82d7de148c8a9f9617bbe8dedf2bbd079",
+      "size": 581269
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_reed_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_reed",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "6d757de159685397dce17f2e5c3b80ff3ff8dbf94f782be6b9e3e02c11402f56",
+      "size": 326777
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_reed_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_reed",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "765a138fd0f20e29647f71c118f0f656ea7a02d3595f99ad0912bcbf5a1afa78",
+      "size": 106754
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_reed_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_reed",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "4ee9c2e57b43604c43ee49fb290383097f517c3faec08ef217bbf810969f6860",
+      "size": 25542
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_01_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_01",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "cf3a92be4679fa606cb7940b144821b15093b14cce8a279d806b0adf6f061419",
+      "size": 350786
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_01_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_01",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "ea8ec7fa71fc571d0d01f1bfdd7cc525bdb83dfb56b4d80feb67aec6ddec6602",
+      "size": 692856
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_01_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_01",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "7bdd4a934afd28fd1a42bfa910d109cf8ce0dbaeba29543e9bd15b1b9867984f",
+      "size": 1079181
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_01_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_01",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "3b3ddf61c3af62855435f2632b4c615e6e6c1d782d75b1f434df027ac5be24f8",
+      "size": 351060
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_01_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_01",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "48df20d171d08149b0bc82684ed5ada6369cb78c3ae37a1573350e72f800c955",
+      "size": 45895
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_02_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_02",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "f3c95baf1bfb455111d0ffafe605a924021c7d28f88e18b3835d1031c00d2661",
+      "size": 208432
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_02_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_02",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "e70fa61fa880bef47ff67423536d06f4c88fe5f9214f6b89bb2138adc57101fb",
+      "size": 635109
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_02_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_02",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "ba49177f5d96a4c5d94c8e9c2a3963b9f74b2c27a2959aa42e03dc2a6e1d1890",
+      "size": 645961
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_02_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_02",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "f48e39f7d2809a78fe2f778cae84db1299a90a73da3659b4ea05a37cfd56655f",
+      "size": 309726
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_02_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_02",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "06f76ec687276d02bcbd0988fc29d59c719fbab36dc0c3184bf324588e89578e",
+      "size": 56105
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_03_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_03",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "14d94ccc891d36d759cfe3fd59de494e819698819067ad7016ee890a424fa1ce",
+      "size": 215413
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_03_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_03",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "ad699e1eec6a88d973a8de5dc3a035c5b7e3be608fe141259ffce4d9bb2fcbc2",
+      "size": 549759
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_03_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_03",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "aa19dbfef6606ed1145f6efa4ccce6b9c62c08ec9abc49bf1564c16dfba2b4a3",
+      "size": 783333
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_03_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_03",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "c03effd6a49b81d6aeaa1e2d2c20242fde0a71ffb18075b196fd97d4894a84fa",
+      "size": 318843
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_03_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_03",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "5a681596007efbc9a6a4314c43122e44905029767000748d39e7f537c1bba984",
+      "size": 57609
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_04_ao.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_04",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "6912647f21250252d6af9aeddf92a946819a23a77a4307ea277b96cc0a26f258",
+      "size": 219273
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_04_b.color.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_04",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "eb0706af477eca79c7fc1ed2198f03291df5759b1c9ddbc893fa4b22f6fe482b",
+      "size": 805095
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_04_nm.normal.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_04",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "2cae87495b7ab122134b8f410b6316edac09a65db1cdf7d884e827963acb0b2e",
+      "size": 755695
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_04_o.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_04",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "951a666600a34aa59cc79ae47e1d65ebae3b21e615902f0ad23cb2bc97e47aee",
+      "size": 226979
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_leaf_04_r.data.png": {
+      "material": "ericrolph_hot_potato_arena_f_shrub_leaf_04",
+      "resolution": [
+        1024,
+        1024
+      ],
+      "sha256": "a18e8a76369dd499a93e10ac5826167e298a302614051172660d628f9af7fdc8",
+      "size": 29691
+    }
+  },
+  "level_id": "ericrolph_hot_potato_arena",
+  "merged_into_an_existing_manifest": [
+    "f_shrub_leaf_01"
+  ],
+  "rejected_islands": [],
+  "seconds": 10.7,
+  "texture_seed": 1413830739
+}

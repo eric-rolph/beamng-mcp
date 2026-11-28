@@ -43,3 +43,12 @@ examples/giant_props/**/__pycache__/
 
 # local diagnostics, not source
 .codex-diagnostics/
+
+# Hot Potato arena: CC0 source downloads (re-fetchable from the tracked provenance ledger)
+examples/hot_potato_arena/cc0_cache/
+examples/hot_potato_arena/textures_cooked_level/
+examples/hot_potato_arena/dist_level/
+examples/hot_potato_arena/mod/
+examples/hot_potato_arena/dist/
+examples/hot_potato_arena/authoring/round_records/
+examples/hot_potato_arena/level/_terrain_cache.npz

@@ -1,0 +1,203 @@
+{
+  "arena_id": "ericrolph_hot_potato_arena",
+  "baseline": {
+    "changed_dae": [
+      "floor_skin_quadrant",
+      "merge_fillet",
+      "trim_ring"
+    ],
+    "changed_dae_before": {
+      "floor_skin_quadrant": "7a12c129724ba0d9ddd31b004d3cb0b8b24fdf4edf3719a934131095843cb127",
+      "merge_fillet": "5e76c1916d2b557bfa9a6611ea344ed8170af45072872fcf01507fc426e5af4a",
+      "trim_ring": "1125dc28e9353e7dab5473adcd70c86d51637d676bf301dab462e6c830733ae1"
+    },
+    "changed_textures": [],
+    "file": "ericrolph_hot_potato_arena.hashes.r3.json",
+    "materials_json_changed": false,
+    "missing_vs_baseline": [],
+    "round": "r3",
+    "unchanged_dae": [
+      "butter_pool",
+      "geyser_tower",
+      "grinder_pillar",
+      "handle",
+      "handle_ramp_e",
+      "handle_ramp_w",
+      "masher_pillar",
+      "salt_arc",
+      "wall_arc_45",
+      "wall_arc_spout"
+    ]
+  },
+  "dae": {
+    "butter_pool": {
+      "file": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_butter_pool.dae",
+      "sha256": "89fcb57397b74dfa4097601bbd86e71943e89dd2726bc0d72c2d9e228c5ad7b5",
+      "size": 21645,
+      "tris": 140
+    },
+    "floor_skin_quadrant": {
+      "file": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_floor_skin_quadrant.dae",
+      "sha256": "8c07300586db13ae99fedc63381553c78919ccbf25e5a53c93ebaa5fbdf2618c",
+      "size": 110715,
+      "tris": 432
+    },
+    "geyser_tower": {
+      "file": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_geyser_tower.dae",
+      "sha256": "1f440e0e09872dcd799d50a28759c66614a94a9e44c84b46c75211a6a7bfbf33",
+      "size": 43379,
+      "tris": 418
+    },
+    "grinder_pillar": {
+      "file": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_grinder_pillar.dae",
+      "sha256": "6d649b89501d68ba228f19429a8bc18e769170f9f31f6dafe21e73a93749ce0f",
+      "size": 46758,
+      "tris": 304
+    },
+    "handle": {
+      "file": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_handle.dae",
+      "sha256": "3dac6cd3aec5227d53030813e1b6230c7c8567718e05096ea2efac37c90767a9",
+      "size": 234333,
+      "tris": 2022
+    },
+    "handle_ramp_e": {
+      "file": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_handle_ramp_e.dae",
+      "sha256": "dfce2a12618272a9146190fa0b7d9002a604a6e775aeb7a6982b6d166c7f7a16",
+      "size": 103391,
+      "tris": 720
+    },
+    "handle_ramp_w": {
+      "file": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_handle_ramp_w.dae",
+      "sha256": "f708d4b4625ff4298fc1541fb01a8c2f13d86397b46fe75f99d8f3445b6e890d",
+      "size": 105995,
+      "tris": 720
+    },
+    "masher_pillar": {
+      "file": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_masher_pillar.dae",
+      "sha256": "ddd05f4f9daabd26e19e054af56b71c961acce864c5044ab2f1d9274348f2ead",
+      "size": 58006,
+      "tris": 456
+    },
+    "merge_fillet": {
+      "file": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_merge_fillet.dae",
+      "sha256": "3a291f03cdf689ab73ca0b0286b3e5dacdbfd19863b8da06a9860eb935d85027",
+      "size": 18015,
+      "tris": 98
+    },
+    "salt_arc": {
+      "file": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_salt_arc.dae",
+      "sha256": "5c3222f64c1926acc90885a05f70ad9f1b673c8905240efcff564ab14e8d2f9a",
+      "size": 24230,
+      "tris": 160
+    },
+    "trim_ring": {
+      "file": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_trim_ring.dae",
+      "sha256": "195708a6391fab07a3725749aabc6359433236b3636e6161be545007ed8fdb62",
+      "size": 71064,
+      "tris": 480
+    },
+    "wall_arc_45": {
+      "file": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_wall_arc_45.dae",
+      "sha256": "c587f18fe739a0695cf6878ecb31f73d633e33beab2fec4d7d00d096110828a4",
+      "size": 139161,
+      "tris": 960
+    },
+    "wall_arc_spout": {
+      "file": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_wall_arc_spout.dae",
+      "sha256": "989b319d78206d37ab7caf56188b82d39c43bdb9021fb5a7a0748b9464d67ea6",
+      "size": 142979,
+      "tris": 1072
+    }
+  },
+  "exported_this_build": [
+    "floor_skin_quadrant",
+    "merge_fillet",
+    "trim_ring"
+  ],
+  "generator": {
+    "blender": "4.5.4 LTS",
+    "script": "examples/hot_potato_arena/blender/create_arena.py",
+    "sha256": "c79b160899bc9622dc4ee968dc8c6aa687aecb2f4ceb0568c3881207031abb4d"
+  },
+  "materials_json": {
+    "file": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena.materials.json",
+    "sha256": "b584e1d4f4034e9cf0e3c53da1760b302bf2083b98a86f7db797f22443b2fd9d",
+    "size": 6861
+  },
+  "round": "v3.1",
+  "schema": "ericrolph-hot-potato-arena-hashes-v1",
+  "textures": {
+    "ericrolph_hot_potato_arena_butter.color.png": {
+      "sha256": "851a1f7b89a8b8c1fd8a3b27bdc0a68c7930901ad4971196eb664a146a9abbae",
+      "size": 85644
+    },
+    "ericrolph_hot_potato_arena_butter.normal.png": {
+      "sha256": "0934a5c0319be7b114c1d9b54b152ff3a690bc24fa8a53aaded1da1e94a260ad",
+      "size": 16940
+    },
+    "ericrolph_hot_potato_arena_butter_roughness.data.png": {
+      "sha256": "dffb0b6764d869def57289817bc2f7cac9a6dc649ba332dfa933d44b176e95cb",
+      "size": 30146
+    },
+    "ericrolph_hot_potato_arena_cast_iron.color.png": {
+      "sha256": "dce75381073f455fbbec5b3c9b27b4cfab9d3e10945862dec6e643c23a4a3a9e",
+      "size": 480341
+    },
+    "ericrolph_hot_potato_arena_cast_iron.normal.png": {
+      "sha256": "ce05e08ea01da1687f72ed6eddf54c3ff9b9b814f6acf67720e950051a73bda4",
+      "size": 1322166
+    },
+    "ericrolph_hot_potato_arena_cast_iron_roughness.data.png": {
+      "sha256": "38a4487fca651d3e47c6903a3bfb05de927182575821cf9a6b388e05970042d0",
+      "size": 438404
+    },
+    "ericrolph_hot_potato_arena_handle_wood.color.png": {
+      "sha256": "f25215cd8ddb14f93dd243c7c43e29b06d095e0bc7d014b02bf65b3b482f0891",
+      "size": 420574
+    },
+    "ericrolph_hot_potato_arena_handle_wood.normal.png": {
+      "sha256": "6f5c6d88e36380cfdfcf55d39dde23e340d177edd14a318a3e445a4f456f90c5",
+      "size": 579179
+    },
+    "ericrolph_hot_potato_arena_handle_wood_roughness.data.png": {
+      "sha256": "1d523fce9a15a065187e1052e461b5fbf4997cfe2778a81d7d691cc912202322",
+      "size": 107586
+    },
+    "ericrolph_hot_potato_arena_rim.color.png": {
+      "sha256": "668903790e4bf6aa1babbf45aa45e50d11ae4ef3e66c126b87100272d19bbe93",
+      "size": 364004
+    },
+    "ericrolph_hot_potato_arena_rim.normal.png": {
+      "sha256": "d91b792bb29af2a39afdab1257d99e7cd9f585c67c2a2100c480a36bd8a1da52",
+      "size": 1069808
+    },
+    "ericrolph_hot_potato_arena_rim_roughness.data.png": {
+      "sha256": "a20428acbc62e0ca469826852ec919fe73dbf057fa427e154bfab30477e864bf",
+      "size": 118615
+    },
+    "ericrolph_hot_potato_arena_salt.color.png": {
+      "sha256": "82a396f8b214a91b8ef3708debc6c363180010afa83658fe7f6e7e7aac22cd02",
+      "size": 306000
+    },
+    "ericrolph_hot_potato_arena_salt.normal.png": {
+      "sha256": "73f14bfc61f6c1d1c7733a6a179f70010cbac913f744524e4d7482667ae67874",
+      "size": 464244
+    },
+    "ericrolph_hot_potato_arena_salt_roughness.data.png": {
+      "sha256": "8b5e81bff552d984c71f0524c48f0388ebe928e1ec36c760302957ca4b549429",
+      "size": 124869
+    },
+    "ericrolph_hot_potato_arena_skillet_steel.color.png": {
+      "sha256": "86747ebf886ef9bd969956bd9233160df1e1a252d73a6b77cd1a5232a37f97c5",
+      "size": 488513
+    },
+    "ericrolph_hot_potato_arena_skillet_steel.normal.png": {
+      "sha256": "5cf3365adb41bcfadbf412b615fd6abc586d76b3cba308a1a6055a0ffba6a47c",
+      "size": 358804
+    },
+    "ericrolph_hot_potato_arena_skillet_steel_roughness.data.png": {
+      "sha256": "dfbceb4d05ce095520ef4b4a52b2721d7fbd10274042ad41050b349333f43a34",
+      "size": 178892
+    }
+  }
+}

@@ -19,7 +19,7 @@ async def test_mcp_exposes_curated_typed_surface(tmp_path: Path) -> None:
     mcp, runtime = create_mcp_server(settings)
     tools = await mcp.list_tools()
     names = {tool.name for tool in tools}
-    assert len(tools) == 57
+    assert len(tools) == 66
     assert {
         "simulator_connect",
         "mod_validate",

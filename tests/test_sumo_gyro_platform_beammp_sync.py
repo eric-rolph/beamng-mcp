@@ -57,7 +57,11 @@ def test_runtime_pins_protocol_authority_and_full_snapshot_contract():
     for field in ("v", "game", "arena", "kind", "epoch", "seq", "revision", "body"):
         assert f"{field} =" in behavior
     assert 'local NET_GAME = "sumo"' in behavior
-    assert "extensions.MPCoreNetwork" in behavior
+    # rawget only: `extensions.MPCoreNetwork` on an unloaded extension makes
+    # the engine try to load it and log "extension unavailable" every frame.
+    assert 'rawget(extensions, "MPCoreNetwork")' in behavior
+    assert "extensions.MPCoreNetwork" not in behavior
+    assert "extensions.MPVehicleGE" not in behavior
     assert "getServerVehicleID" in behavior
     assert "getGameVehicleID" in behavior
     assert "localOwnsVehicle(state.propId)" in behavior

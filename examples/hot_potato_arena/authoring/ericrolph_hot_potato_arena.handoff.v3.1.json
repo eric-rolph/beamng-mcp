@@ -1,0 +1,1454 @@
+{
+  "arena_id": "ericrolph_hot_potato_arena",
+  "center_world": [
+    850.0,
+    -280.0,
+    100.0
+  ],
+  "crest_radius_m": 91.4,
+  "crest_z_m": 5.5,
+  "design": "arena_design_v3.md + v3.1 amendment (geometry round 2)",
+  "floor_skin_lod": {
+    "bounding_radius_m": 64.62,
+    "convention": "stock _a<pixel size> detail nodes under base00/start01; nulldetail<N> under base00 as a SIBLING of start01 (verified in gridmap_v2.zip: 90/91 DAEs, 1 at the scene root, 0 under start01; s_gm_groundplane_64m = base00 -> {collision-1, nulldetail10, start01 -> {_a150, Colmesh, _a15}}; banked_turn45 _a6000/_a3000/_a700/_a350)",
+    "cull_distance_m_at_1080p_65fov": 5477.1,
+    "dae_tris_total": 864,
+    "far_detail_px": 70,
+    "far_lift_m": 0.05,
+    "near_detail_px": 290,
+    "note": "tris/budget count the near detail only; the far detail is the same mesh +50 mm, no collision either way (medallion law)",
+    "null_detail_px": 10,
+    "switch_distance_m_at_1080p_65fov": 188.9
+  },
+  "glacis_toe_r_m": 113.0,
+  "groundtype": {
+    "butter": "ICE",
+    "field": "groundtype",
+    "note": "single-point toggle lives in create_arena.py (pending probe P1)",
+    "salt": "SAND"
+  },
+  "hash_manifest": {
+    "baseline": "ericrolph_hot_potato_arena.hashes.r3.json",
+    "changed_dae_vs_baseline": [
+      "floor_skin_quadrant",
+      "merge_fillet",
+      "trim_ring"
+    ],
+    "changed_textures_vs_baseline": [],
+    "file": "ericrolph_hot_potato_arena.hashes.json",
+    "round": "v3.1",
+    "rule": "written on every build (sha256 + size per DAE, staged texture and the materials json, diffed against the previous round's snapshot beside it); an 'unchanged' claim cites equal hashes, and shapes.<name>.sha256 above is the same digest"
+  },
+  "instances": [
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_wall_arc_45.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_wall_015",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        0.965925826,
+        -0.258819045,
+        0.0,
+        0.258819045,
+        0.965925826,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": -15.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "wall_arc_45"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_wall_arc_45.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_wall_105",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        -0.258819045,
+        -0.965925826,
+        0.0,
+        0.965925826,
+        -0.258819045,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": -105.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "wall_arc_45"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_wall_arc_45.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_wall_150",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        -0.866025404,
+        -0.5,
+        0.0,
+        0.5,
+        -0.866025404,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": -150.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "wall_arc_45"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_wall_arc_45.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_wall_195",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        -0.965925826,
+        0.258819045,
+        0.0,
+        -0.258819045,
+        -0.965925826,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 165.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "wall_arc_45"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_wall_arc_45.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_wall_285",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        0.258819045,
+        0.965925826,
+        0.0,
+        -0.965925826,
+        0.258819045,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 75.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "wall_arc_45"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_wall_arc_45.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_wall_330",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        0.866025404,
+        0.5,
+        0.0,
+        -0.5,
+        0.866025404,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 30.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "wall_arc_45"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_wall_arc_spout.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_wall_spout_060",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        0.5,
+        -0.866025404,
+        0.0,
+        0.866025404,
+        0.5,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": -60.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "wall_arc_spout"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_wall_arc_spout.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_wall_spout_240",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        -0.5,
+        0.866025404,
+        0.0,
+        -0.866025404,
+        -0.5,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 120.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "wall_arc_spout"
+    },
+    {
+      "collision": "none",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_floor_skin_quadrant.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_floor_045",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        0.707106781,
+        -0.707106781,
+        0.0,
+        0.707106781,
+        0.707106781,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": -45.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "floor_skin_quadrant"
+    },
+    {
+      "collision": "none",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_floor_skin_quadrant.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_floor_135",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        -0.707106781,
+        -0.707106781,
+        0.0,
+        0.707106781,
+        -0.707106781,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": -135.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "floor_skin_quadrant"
+    },
+    {
+      "collision": "none",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_floor_skin_quadrant.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_floor_225",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        -0.707106781,
+        0.707106781,
+        0.0,
+        -0.707106781,
+        -0.707106781,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 135.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "floor_skin_quadrant"
+    },
+    {
+      "collision": "none",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_floor_skin_quadrant.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_floor_315",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        0.707106781,
+        0.707106781,
+        0.0,
+        -0.707106781,
+        0.707106781,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 45.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "floor_skin_quadrant"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_handle.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_handle",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "handle"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_handle_ramp_e.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_handle_ramp_e",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "handle_ramp_e"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_handle_ramp_w.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_handle_ramp_w",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "handle_ramp_w"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_trim_ring.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_trim_ring",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "trim_ring"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_merge_fillet.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_merge_fillet",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "merge_fillet"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_masher_pillar.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_masher_ne",
+      "position": [
+        883.941,
+        -246.059,
+        100.0
+      ],
+      "rotationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "masher_pillar"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_masher_pillar.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_masher_se",
+      "position": [
+        883.941,
+        -313.941,
+        100.0
+      ],
+      "rotationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "masher_pillar"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_masher_pillar.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_masher_sw",
+      "position": [
+        816.059,
+        -313.941,
+        100.0
+      ],
+      "rotationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "masher_pillar"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_masher_pillar.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_masher_nw",
+      "position": [
+        816.059,
+        -246.059,
+        100.0
+      ],
+      "rotationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "masher_pillar"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_grinder_pillar.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_grinder_ne",
+      "position": [
+        868.385,
+        -261.615,
+        100.0
+      ],
+      "rotationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "grinder_pillar"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_grinder_pillar.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_grinder_se",
+      "position": [
+        868.385,
+        -298.385,
+        100.0
+      ],
+      "rotationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "grinder_pillar"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_grinder_pillar.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_grinder_sw",
+      "position": [
+        831.615,
+        -298.385,
+        100.0
+      ],
+      "rotationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "grinder_pillar"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_grinder_pillar.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_grinder_nw",
+      "position": [
+        831.615,
+        -261.615,
+        100.0
+      ],
+      "rotationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "grinder_pillar"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_geyser_tower.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_geyser_tower_l",
+      "position": [
+        843.937,
+        -222.318,
+        100.0
+      ],
+      "rotationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "geyser_tower"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_geyser_tower.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_geyser_tower_r",
+      "position": [
+        856.063,
+        -222.318,
+        100.0
+      ],
+      "rotationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "geyser_tower"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_butter_pool.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_butter_pool_1",
+      "position": [
+        883.0,
+        -222.842,
+        100.0
+      ],
+      "rotationMatrix": [
+        0.866025404,
+        -0.5,
+        0.0,
+        0.5,
+        0.866025404,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": -30.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "butter_pool"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_butter_pool.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_butter_pool_2",
+      "position": [
+        800.952,
+        -324.163,
+        100.0
+      ],
+      "rotationMatrix": [
+        -0.669130606,
+        0.743144825,
+        0.0,
+        -0.743144825,
+        -0.669130606,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 132.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "butter_pool"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_butter_pool.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_butter_pool_3",
+      "position": [
+        792.842,
+        -247.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        0.5,
+        0.866025404,
+        0.0,
+        -0.866025404,
+        0.5,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 60.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "butter_pool"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_salt_arc.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_salt_arc_e",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        0.0,
+        -1.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": -90.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "salt_arc"
+    },
+    {
+      "collision": "visible-mesh",
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_salt_arc.dae",
+      "matrix_convention": "rows-are-local-axes",
+      "name": "ericrolph_hot_potato_arena_salt_arc_w",
+      "position": [
+        850.0,
+        -280.0,
+        100.0
+      ],
+      "rotationMatrix": [
+        0.0,
+        1.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_ccw_deg_z": 90.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shape": "salt_arc"
+    }
+  ],
+  "materials_json": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena.materials.json",
+  "matrix_convention": "rows-are-local-axes: row i = the instance's local axis i expressed in world (BeamNG prefab convention, measured live by the scenario worker 2026-09-01); this is the TRANSPOSE of the textbook column-major Rz. rotation_ccw_deg_z is the authoritative field; the matrix is derived from it.",
+  "max_grade": 0.7,
+  "notes": [
+    "positions are world meters on gridmap_v2; grade z = 100",
+    "rotation_ccw_deg_z is right-handed about +Z; rotationMatrix is row-major 3x3",
+    "floor_skin_quadrant instances ship collision='none' (medallion-law 12 mm inlay)",
+    "handle_ramp_w is the MIRROR of handle_ramp_e (an arc ramp is chiral; a 180-deg rotation cannot place it)",
+    "v3 (geometry round 3): merge_fillet is a NEW 13th shape / 32nd instance (both merge-corner fillets, arena frame at C, rotation 0, wood) -- the ramp and handle DAEs are unchanged from round 2",
+    "obstacle table generated to satisfy A13 coverage: 28 amendment points + 8 deck flank points + 4 jamb outer-face points + 2 far-jamb noses = 42 (cap 64) -- see the report ledger",
+    "v3.1 (round-3 errata): floor_skin_quadrant re-exported with nulldetail10 under base00 as a sibling of start01 (stock 90/91); trim_ring re-exported with the name-plate uphill skirt wound face-up (A4c); merge_fillet re-exported with a UV-only remap of its round wall (cosmetic); every other DAE and every texture is hash-equal to round 3 -- see hash_manifest"
+  ],
+  "obstacles": [
+    {
+      "name": "masher_ne",
+      "r_keepout": 6.5,
+      "x": 883.941,
+      "y": -246.059
+    },
+    {
+      "name": "masher_se",
+      "r_keepout": 6.5,
+      "x": 883.941,
+      "y": -313.941
+    },
+    {
+      "name": "masher_sw",
+      "r_keepout": 6.5,
+      "x": 816.059,
+      "y": -313.941
+    },
+    {
+      "name": "masher_nw",
+      "r_keepout": 6.5,
+      "x": 816.059,
+      "y": -246.059
+    },
+    {
+      "name": "grinder_ne",
+      "r_keepout": 6.5,
+      "x": 868.385,
+      "y": -261.615
+    },
+    {
+      "name": "grinder_se",
+      "r_keepout": 6.5,
+      "x": 868.385,
+      "y": -298.385
+    },
+    {
+      "name": "grinder_sw",
+      "r_keepout": 6.5,
+      "x": 831.615,
+      "y": -298.385
+    },
+    {
+      "name": "grinder_nw",
+      "r_keepout": 6.5,
+      "x": 831.615,
+      "y": -261.615
+    },
+    {
+      "name": "geyser_tower_l",
+      "r_keepout": 6.5,
+      "x": 843.937,
+      "y": -222.318
+    },
+    {
+      "name": "geyser_tower_r",
+      "r_keepout": 6.5,
+      "x": 856.063,
+      "y": -222.318
+    },
+    {
+      "name": "handle_nose_e",
+      "r_keepout": 8.0,
+      "x": 857.0,
+      "y": -310.0
+    },
+    {
+      "name": "handle_nose_w",
+      "r_keepout": 8.0,
+      "x": 843.0,
+      "y": -310.0
+    },
+    {
+      "name": "handle_rear_e",
+      "r_keepout": 8.0,
+      "x": 857.0,
+      "y": -368.223
+    },
+    {
+      "name": "handle_rear_w",
+      "r_keepout": 8.0,
+      "x": 843.0,
+      "y": -368.223
+    },
+    {
+      "name": "handle_flank_e_1",
+      "r_keepout": 8.0,
+      "x": 857.0,
+      "y": -322.5
+    },
+    {
+      "name": "handle_flank_e_2",
+      "r_keepout": 8.0,
+      "x": 857.0,
+      "y": -335.0
+    },
+    {
+      "name": "handle_flank_e_3",
+      "r_keepout": 8.0,
+      "x": 857.0,
+      "y": -347.5
+    },
+    {
+      "name": "handle_flank_e_4",
+      "r_keepout": 8.0,
+      "x": 857.0,
+      "y": -360.0
+    },
+    {
+      "name": "handle_flank_w_1",
+      "r_keepout": 8.0,
+      "x": 843.0,
+      "y": -322.5
+    },
+    {
+      "name": "handle_flank_w_2",
+      "r_keepout": 8.0,
+      "x": 843.0,
+      "y": -335.0
+    },
+    {
+      "name": "handle_flank_w_3",
+      "r_keepout": 8.0,
+      "x": 843.0,
+      "y": -347.5
+    },
+    {
+      "name": "handle_flank_w_4",
+      "r_keepout": 8.0,
+      "x": 843.0,
+      "y": -360.0
+    },
+    {
+      "name": "spout_e_jamb",
+      "r_keepout": 6.5,
+      "x": 904.945,
+      "y": -227.493
+    },
+    {
+      "name": "spout_w_jamb",
+      "r_keepout": 6.5,
+      "x": 795.055,
+      "y": -332.507
+    },
+    {
+      "name": "spout_e_jamb_far",
+      "r_keepout": 6.5,
+      "x": 922.945,
+      "y": -258.67
+    },
+    {
+      "name": "spout_w_jamb_far",
+      "r_keepout": 6.5,
+      "x": 777.055,
+      "y": -301.33
+    },
+    {
+      "name": "jamb_60_gate_mid",
+      "r_keepout": 8.0,
+      "x": 912.852,
+      "y": -216.303
+    },
+    {
+      "name": "jamb_60_gate_out",
+      "r_keepout": 8.0,
+      "x": 923.899,
+      "y": -206.841
+    },
+    {
+      "name": "jamb_60_far_mid",
+      "r_keepout": 8.0,
+      "x": 936.589,
+      "y": -257.417
+    },
+    {
+      "name": "jamb_60_far_out",
+      "r_keepout": 8.0,
+      "x": 950.307,
+      "y": -252.581
+    },
+    {
+      "name": "jamb_240_gate_mid",
+      "r_keepout": 8.0,
+      "x": 787.148,
+      "y": -343.697
+    },
+    {
+      "name": "jamb_240_gate_out",
+      "r_keepout": 8.0,
+      "x": 776.101,
+      "y": -353.159
+    },
+    {
+      "name": "jamb_240_far_mid",
+      "r_keepout": 8.0,
+      "x": 763.411,
+      "y": -302.583
+    },
+    {
+      "name": "jamb_240_far_out",
+      "r_keepout": 8.0,
+      "x": 749.693,
+      "y": -307.419
+    },
+    {
+      "name": "ramp_e_face_1",
+      "r_keepout": 6.5,
+      "x": 883.809,
+      "y": -352.505
+    },
+    {
+      "name": "ramp_e_face_2",
+      "r_keepout": 6.5,
+      "x": 876.045,
+      "y": -355.641
+    },
+    {
+      "name": "ramp_e_face_3",
+      "r_keepout": 6.5,
+      "x": 867.996,
+      "y": -357.95
+    },
+    {
+      "name": "ramp_e_face_4",
+      "r_keepout": 6.5,
+      "x": 859.75,
+      "y": -359.404
+    },
+    {
+      "name": "ramp_w_face_1",
+      "r_keepout": 6.5,
+      "x": 816.191,
+      "y": -352.505
+    },
+    {
+      "name": "ramp_w_face_2",
+      "r_keepout": 6.5,
+      "x": 823.955,
+      "y": -355.641
+    },
+    {
+      "name": "ramp_w_face_3",
+      "r_keepout": 6.5,
+      "x": 832.004,
+      "y": -357.95
+    },
+    {
+      "name": "ramp_w_face_4",
+      "r_keepout": 6.5,
+      "x": 840.25,
+      "y": -359.404
+    }
+  ],
+  "ramp": {
+    "ease_m": 3.0,
+    "flat_m": 4.0,
+    "merge_bearing_e_r80": 174.98,
+    "r_in": 80.0,
+    "r_out": 88.0,
+    "slope_arc_deg": 23.115,
+    "toe_bearing_e": 149.0,
+    "toe_bearing_w": 211.0
+  },
+  "scene_budget": 18360,
+  "scene_tris": 18288,
+  "schema": "ericrolph-hot-potato-arena-handoff-v2",
+  "shapes": {
+    "butter_pool": {
+      "budget": 120,
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_butter_pool.dae",
+      "materials": [
+        "ericrolph_hot_potato_arena_butter"
+      ],
+      "sha256": "89fcb57397b74dfa4097601bbd86e71943e89dd2726bc0d72c2d9e228c5ad7b5",
+      "size": 21645,
+      "tris": 140
+    },
+    "floor_skin_quadrant": {
+      "budget": 350,
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_floor_skin_quadrant.dae",
+      "lod": {
+        "bounding_radius_m": 64.62,
+        "convention": "stock _a<pixel size> detail nodes under base00/start01; nulldetail<N> under base00 as a SIBLING of start01 (verified in gridmap_v2.zip: 90/91 DAEs, 1 at the scene root, 0 under start01; s_gm_groundplane_64m = base00 -> {collision-1, nulldetail10, start01 -> {_a150, Colmesh, _a15}}; banked_turn45 _a6000/_a3000/_a700/_a350)",
+        "cull_distance_m_at_1080p_65fov": 5477.1,
+        "dae_tris_total": 864,
+        "far_detail_px": 70,
+        "far_lift_m": 0.05,
+        "near_detail_px": 290,
+        "note": "tris/budget count the near detail only; the far detail is the same mesh +50 mm, no collision either way (medallion law)",
+        "null_detail_px": 10,
+        "switch_distance_m_at_1080p_65fov": 188.9
+      },
+      "materials": [
+        "ericrolph_hot_potato_arena_cast_iron",
+        "ericrolph_hot_potato_arena_cast_iron_matte"
+      ],
+      "node_parents": {
+        "base00": null,
+        "ericrolph_hot_potato_arena_floor_skin_quadrant_a290": "start01",
+        "ericrolph_hot_potato_arena_floor_skin_quadrant_a70": "start01",
+        "nulldetail10": "base00",
+        "start01": "base00"
+      },
+      "nodes": [
+        "base00",
+        "start01",
+        "ericrolph_hot_potato_arena_floor_skin_quadrant_a70",
+        "nulldetail10"
+      ],
+      "sha256": "8c07300586db13ae99fedc63381553c78919ccbf25e5a53c93ebaa5fbdf2618c",
+      "size": 110715,
+      "tris": 432
+    },
+    "geyser_tower": {
+      "budget": 500,
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_geyser_tower.dae",
+      "materials": [
+        "ericrolph_hot_potato_arena_skillet_steel"
+      ],
+      "sha256": "1f440e0e09872dcd799d50a28759c66614a94a9e44c84b46c75211a6a7bfbf33",
+      "size": 43379,
+      "tris": 418
+    },
+    "grinder_pillar": {
+      "budget": 300,
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_grinder_pillar.dae",
+      "materials": [
+        "ericrolph_hot_potato_arena_handle_wood",
+        "ericrolph_hot_potato_arena_skillet_steel"
+      ],
+      "sha256": "6d649b89501d68ba228f19429a8bc18e769170f9f31f6dafe21e73a93749ce0f",
+      "size": 46758,
+      "tris": 304
+    },
+    "handle": {
+      "budget": 1800,
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_handle.dae",
+      "materials": [
+        "ericrolph_hot_potato_arena_handle_wood"
+      ],
+      "sha256": "3dac6cd3aec5227d53030813e1b6230c7c8567718e05096ea2efac37c90767a9",
+      "size": 234333,
+      "tris": 2022
+    },
+    "handle_ramp_e": {
+      "budget": 700,
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_handle_ramp_e.dae",
+      "materials": [
+        "ericrolph_hot_potato_arena_handle_wood"
+      ],
+      "sha256": "dfce2a12618272a9146190fa0b7d9002a604a6e775aeb7a6982b6d166c7f7a16",
+      "size": 103391,
+      "tris": 720
+    },
+    "handle_ramp_w": {
+      "budget": 700,
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_handle_ramp_w.dae",
+      "materials": [
+        "ericrolph_hot_potato_arena_handle_wood"
+      ],
+      "sha256": "f708d4b4625ff4298fc1541fb01a8c2f13d86397b46fe75f99d8f3445b6e890d",
+      "size": 105995,
+      "tris": 720
+    },
+    "masher_pillar": {
+      "budget": 400,
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_masher_pillar.dae",
+      "materials": [
+        "ericrolph_hot_potato_arena_skillet_steel"
+      ],
+      "sha256": "ddd05f4f9daabd26e19e054af56b71c961acce864c5044ab2f1d9274348f2ead",
+      "size": 58006,
+      "tris": 456
+    },
+    "merge_fillet": {
+      "budget": 120,
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_merge_fillet.dae",
+      "materials": [
+        "ericrolph_hot_potato_arena_handle_wood"
+      ],
+      "sha256": "3a291f03cdf689ab73ca0b0286b3e5dacdbfd19863b8da06a9860eb935d85027",
+      "size": 18015,
+      "tris": 98
+    },
+    "salt_arc": {
+      "budget": 150,
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_salt_arc.dae",
+      "materials": [
+        "ericrolph_hot_potato_arena_salt"
+      ],
+      "sha256": "5c3222f64c1926acc90885a05f70ad9f1b673c8905240efcff564ab14e8d2f9a",
+      "size": 24230,
+      "tris": 160
+    },
+    "trim_ring": {
+      "budget": 500,
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_trim_ring.dae",
+      "materials": [
+        "ericrolph_hot_potato_arena_rim",
+        "ericrolph_hot_potato_arena_skillet_steel"
+      ],
+      "sha256": "195708a6391fab07a3725749aabc6359433236b3636e6161be545007ed8fdb62",
+      "size": 71064,
+      "tris": 480
+    },
+    "wall_arc_45": {
+      "budget": 1000,
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_wall_arc_45.dae",
+      "materials": [
+        "ericrolph_hot_potato_arena_cast_iron_matte",
+        "ericrolph_hot_potato_arena_rim"
+      ],
+      "sha256": "c587f18fe739a0695cf6878ecb31f73d633e33beab2fec4d7d00d096110828a4",
+      "size": 139161,
+      "tris": 960
+    },
+    "wall_arc_spout": {
+      "budget": 1400,
+      "dae": "levels/gridmap_v2/art/shapes/hot_potato_arena/ericrolph_hot_potato_arena_wall_arc_spout.dae",
+      "materials": [
+        "ericrolph_hot_potato_arena_cast_iron_matte",
+        "ericrolph_hot_potato_arena_rim"
+      ],
+      "sha256": "989b319d78206d37ab7caf56188b82d39c43bdb9021fb5a7a0748b9464d67ea6",
+      "size": 142979,
+      "tris": 1072
+    }
+  },
+  "texture_families": [
+    "ericrolph_hot_potato_arena_butter",
+    "ericrolph_hot_potato_arena_cast_iron",
+    "ericrolph_hot_potato_arena_handle_wood",
+    "ericrolph_hot_potato_arena_rim",
+    "ericrolph_hot_potato_arena_salt",
+    "ericrolph_hot_potato_arena_skillet_steel"
+  ],
+  "wall_stations": [
+    76.0,
+    77.0,
+    78.0,
+    80.0,
+    81.0,
+    82.0,
+    84.0,
+    85.0,
+    86.0,
+    88.0,
+    88.5,
+    88.875,
+    89.25,
+    90.0,
+    90.35,
+    90.7,
+    91.05,
+    91.4,
+    92.2,
+    93.0,
+    93.6156,
+    94.2313,
+    95.4625,
+    97.925,
+    100.3875,
+    102.85,
+    105.3125,
+    107.775,
+    110.2375,
+    112.7,
+    113.0
+  ]
+}

@@ -1,0 +1,5887 @@
+{
+  "base_px": 4096,
+  "cc0_manifest": "b1_terrain.json",
+  "detail_px": 1024,
+  "file_count": 170,
+  "files": {
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_bank_erosion_ao.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 633907,
+      "cc0_assets": [
+        "brown_mud_rocks_01"
+      ],
+      "cc0_files": [
+        "brown_mud_rocks_01/brown_mud_rocks_01_ao_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_diff_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_disp_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_nor_gl_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.3,
+      "opacity": [
+        "edge_fade",
+        0.85
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            72.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "b6e9c89998be6a4fcd416db6e2fb29be3b8a8705c9724cbfd30302595733c3fe"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_bank_erosion_b.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 2482608,
+      "cc0_assets": [
+        "brown_mud_rocks_01"
+      ],
+      "cc0_files": [
+        "brown_mud_rocks_01/brown_mud_rocks_01_ao_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_diff_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_disp_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_nor_gl_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.3,
+      "opacity": [
+        "edge_fade",
+        0.85
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            72.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "006a5bc1d69224ebe325223a674663b2dd933f751dd6578661bdf12b00fceafd"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_bank_erosion_nm.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 2502444,
+      "cc0_assets": [
+        "brown_mud_rocks_01"
+      ],
+      "cc0_files": [
+        "brown_mud_rocks_01/brown_mud_rocks_01_ao_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_diff_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_disp_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_nor_gl_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.3,
+      "opacity": [
+        "edge_fade",
+        0.85
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            72.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "3a6d32fb9bbdf85a34f0e35f7ea2142afafd0157a3634bf1bab4dd93961a4041"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_bank_erosion_o.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 179810,
+      "cc0_assets": [
+        "brown_mud_rocks_01"
+      ],
+      "cc0_files": [
+        "brown_mud_rocks_01/brown_mud_rocks_01_ao_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_diff_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_disp_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_nor_gl_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.3,
+      "opacity": [
+        "edge_fade",
+        0.85
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            72.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "42b6cf6ec78232354204008d1440c48218253609b2f30e2fc4ff09c7c4ec68aa"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_bank_erosion_r.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 945946,
+      "cc0_assets": [
+        "brown_mud_rocks_01"
+      ],
+      "cc0_files": [
+        "brown_mud_rocks_01/brown_mud_rocks_01_ao_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_diff_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_disp_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_nor_gl_2k.jpg",
+        "brown_mud_rocks_01/brown_mud_rocks_01_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.3,
+      "opacity": [
+        "edge_fade",
+        0.85
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            72.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "1f9db6c1ba02c184f96b0498f84decfd22722a1119eed0207c937846ef195d1b"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_flows_ao.png": {
+      "authored_tile_m": 8.0,
+      "bytes": 847380,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 4.0,
+      "opacity": [
+        "channels",
+        0.62
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            9.0,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "be0fe6f6fff7670d4ce940586847f544900c61dd67328ab5382773798b483a6c"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_flows_b.png": {
+      "authored_tile_m": 8.0,
+      "bytes": 2491823,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 4.0,
+      "opacity": [
+        "channels",
+        0.62
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            9.0,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "2bb9209a50f5e867202d0c4d86952c4b097c5469f5e4087ae7e6e3316916562e"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_flows_nm.png": {
+      "authored_tile_m": 8.0,
+      "bytes": 2505562,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 4.0,
+      "opacity": [
+        "channels",
+        0.62
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            9.0,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "b9fbcf303b6fa3236c06a63d29040b27a6fb8acdff7ca77abba2399b34a4e654"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_flows_o.png": {
+      "authored_tile_m": 8.0,
+      "bytes": 501227,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 4.0,
+      "opacity": [
+        "channels",
+        0.62
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            9.0,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "7fa5d2282ad3696aa79687d7cc6cb176f36e59aae0790d9da7934476c6058aea"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_flows_r.png": {
+      "authored_tile_m": 8.0,
+      "bytes": 722147,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 4.0,
+      "opacity": [
+        "channels",
+        0.62
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            9.0,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "1e04aecfac2ff4aa646851a9bae2c8167e9f2f44ac9cf7e333dbc1ac83d3189c"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_gravel_ao.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 444324,
+      "cc0_assets": [
+        "gravel_road"
+      ],
+      "cc0_files": [
+        "gravel_road/gravel_road_ao_2k.jpg",
+        "gravel_road/gravel_road_diff_2k.jpg",
+        "gravel_road/gravel_road_disp_2k.jpg",
+        "gravel_road/gravel_road_nor_gl_2k.jpg",
+        "gravel_road/gravel_road_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "luma",
+        0.55
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            8.0,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "7d9949605b686693c24574ccf3437dd49c2683c65c1b35fa03ba745e1dea34d6"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_gravel_b.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 1401648,
+      "cc0_assets": [
+        "gravel_road"
+      ],
+      "cc0_files": [
+        "gravel_road/gravel_road_ao_2k.jpg",
+        "gravel_road/gravel_road_diff_2k.jpg",
+        "gravel_road/gravel_road_disp_2k.jpg",
+        "gravel_road/gravel_road_nor_gl_2k.jpg",
+        "gravel_road/gravel_road_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "luma",
+        0.55
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            8.0,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "db80dcf2fdeb13dbcfe969a5608ef5798f1a7afee92ccb641f6a6fe1e62ca10f"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_gravel_nm.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 1863318,
+      "cc0_assets": [
+        "gravel_road"
+      ],
+      "cc0_files": [
+        "gravel_road/gravel_road_ao_2k.jpg",
+        "gravel_road/gravel_road_diff_2k.jpg",
+        "gravel_road/gravel_road_disp_2k.jpg",
+        "gravel_road/gravel_road_nor_gl_2k.jpg",
+        "gravel_road/gravel_road_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "luma",
+        0.55
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            8.0,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "50a54908e00bebc0d1a8116d85a9659ac410c3ddb7d6a36123fe9bfd02d17a97"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_gravel_o.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 458614,
+      "cc0_assets": [
+        "gravel_road"
+      ],
+      "cc0_files": [
+        "gravel_road/gravel_road_ao_2k.jpg",
+        "gravel_road/gravel_road_diff_2k.jpg",
+        "gravel_road/gravel_road_disp_2k.jpg",
+        "gravel_road/gravel_road_nor_gl_2k.jpg",
+        "gravel_road/gravel_road_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "luma",
+        0.55
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            8.0,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "ebe60468f116d8d018dfd72de14c370bf2950c973b074d1a53306e0e97e69951"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_gravel_r.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 398004,
+      "cc0_assets": [
+        "gravel_road"
+      ],
+      "cc0_files": [
+        "gravel_road/gravel_road_ao_2k.jpg",
+        "gravel_road/gravel_road_diff_2k.jpg",
+        "gravel_road/gravel_road_disp_2k.jpg",
+        "gravel_road/gravel_road_nor_gl_2k.jpg",
+        "gravel_road/gravel_road_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "luma",
+        0.55
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            8.0,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "ca03b944f9357621d481dee4f4ab6c0ff14b64a5f9223aaaf51cc1650801ee95"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_tiretracks_ao.png": {
+      "authored_tile_m": 3.5,
+      "bytes": 680466,
+      "cc0_assets": [
+        "aerial_mud_1"
+      ],
+      "cc0_files": [
+        "aerial_mud_1/aerial_mud_1_ao_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_diff_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_disp_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_nor_gl_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_rough_2k.jpg"
+      ],
+      "native_tile_m": 8.0,
+      "opacity": [
+        "ruts",
+        0.9
+      ],
+      "ops": [
+        [
+          "darken",
+          0.25
+        ],
+        [
+          "grade",
+          [
+            8.0,
+            66.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "c4443fb6ec55ea5ee277f9557ce222bf98124698ddcae1ad541f1fead864a700"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_tiretracks_b.png": {
+      "authored_tile_m": 3.5,
+      "bytes": 1238333,
+      "cc0_assets": [
+        "aerial_mud_1"
+      ],
+      "cc0_files": [
+        "aerial_mud_1/aerial_mud_1_ao_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_diff_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_disp_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_nor_gl_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_rough_2k.jpg"
+      ],
+      "native_tile_m": 8.0,
+      "opacity": [
+        "ruts",
+        0.9
+      ],
+      "ops": [
+        [
+          "darken",
+          0.25
+        ],
+        [
+          "grade",
+          [
+            8.0,
+            66.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "6b0e96c3ce268d52d6a3f645c124af1b362f04b8a5ba7cf507cbbd4a7caab3e5"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_tiretracks_nm.png": {
+      "authored_tile_m": 3.5,
+      "bytes": 1940541,
+      "cc0_assets": [
+        "aerial_mud_1"
+      ],
+      "cc0_files": [
+        "aerial_mud_1/aerial_mud_1_ao_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_diff_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_disp_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_nor_gl_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_rough_2k.jpg"
+      ],
+      "native_tile_m": 8.0,
+      "opacity": [
+        "ruts",
+        0.9
+      ],
+      "ops": [
+        [
+          "darken",
+          0.25
+        ],
+        [
+          "grade",
+          [
+            8.0,
+            66.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "6e2d4e83aa6ff464706058d8a2a4881d99af4daf33ea2aeca6ff1cb0c8744697"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_tiretracks_o.png": {
+      "authored_tile_m": 3.5,
+      "bytes": 128916,
+      "cc0_assets": [
+        "aerial_mud_1"
+      ],
+      "cc0_files": [
+        "aerial_mud_1/aerial_mud_1_ao_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_diff_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_disp_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_nor_gl_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_rough_2k.jpg"
+      ],
+      "native_tile_m": 8.0,
+      "opacity": [
+        "ruts",
+        0.9
+      ],
+      "ops": [
+        [
+          "darken",
+          0.25
+        ],
+        [
+          "grade",
+          [
+            8.0,
+            66.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "851326842dd3d715bcb712cdcd5eadceae346cb36102108794ecd827d0bdc7c2"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_tiretracks_r.png": {
+      "authored_tile_m": 3.5,
+      "bytes": 569897,
+      "cc0_assets": [
+        "aerial_mud_1"
+      ],
+      "cc0_files": [
+        "aerial_mud_1/aerial_mud_1_ao_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_diff_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_disp_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_nor_gl_2k.jpg",
+        "aerial_mud_1/aerial_mud_1_rough_2k.jpg"
+      ],
+      "native_tile_m": 8.0,
+      "opacity": [
+        "ruts",
+        0.9
+      ],
+      "ops": [
+        [
+          "darken",
+          0.25
+        ],
+        [
+          "grade",
+          [
+            8.0,
+            66.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "d65352ca1c89745be6562ea6fb34b59ae7dddf72b7e9f0c2f01db1c0b915067f"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_variation_ao.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 3050658,
+      "cc0_assets": [
+        "dirt_floor",
+        "rocky_trail"
+      ],
+      "cc0_files": [
+        "dirt_floor/dirt_floor_ao_2k.jpg",
+        "dirt_floor/dirt_floor_diff_2k.jpg",
+        "dirt_floor/dirt_floor_disp_2k.jpg",
+        "dirt_floor/dirt_floor_nor_gl_2k.jpg",
+        "dirt_floor/dirt_floor_rough_2k.jpg",
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "flat",
+        0.7
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            11.0,
+            68.0
+          ]
+        ]
+      ],
+      "px": 2048,
+      "resolution": "2k",
+      "sha256": "9c59a2c9694747da5ce9b900ecb0f20cd3ca4b704b8ec821d2f62c3d84052928"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_variation_b.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 7489946,
+      "cc0_assets": [
+        "dirt_floor",
+        "rocky_trail"
+      ],
+      "cc0_files": [
+        "dirt_floor/dirt_floor_ao_2k.jpg",
+        "dirt_floor/dirt_floor_diff_2k.jpg",
+        "dirt_floor/dirt_floor_disp_2k.jpg",
+        "dirt_floor/dirt_floor_nor_gl_2k.jpg",
+        "dirt_floor/dirt_floor_rough_2k.jpg",
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "flat",
+        0.7
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            11.0,
+            68.0
+          ]
+        ]
+      ],
+      "px": 2048,
+      "resolution": "2k",
+      "sha256": "a9e25182bf94330edc02391eef0886ed67f0c1db1611f4faa7d3556baf4f7371"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_variation_nm.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 9597533,
+      "cc0_assets": [
+        "dirt_floor",
+        "rocky_trail"
+      ],
+      "cc0_files": [
+        "dirt_floor/dirt_floor_ao_2k.jpg",
+        "dirt_floor/dirt_floor_diff_2k.jpg",
+        "dirt_floor/dirt_floor_disp_2k.jpg",
+        "dirt_floor/dirt_floor_nor_gl_2k.jpg",
+        "dirt_floor/dirt_floor_rough_2k.jpg",
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "flat",
+        0.7
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            11.0,
+            68.0
+          ]
+        ]
+      ],
+      "px": 2048,
+      "resolution": "2k",
+      "sha256": "3d2ca255f787e312702b77ab1e8b22957b041ac210c1b3422bdf88fadf479d43"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_variation_o.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 315380,
+      "cc0_assets": [
+        "dirt_floor",
+        "rocky_trail"
+      ],
+      "cc0_files": [
+        "dirt_floor/dirt_floor_ao_2k.jpg",
+        "dirt_floor/dirt_floor_diff_2k.jpg",
+        "dirt_floor/dirt_floor_disp_2k.jpg",
+        "dirt_floor/dirt_floor_nor_gl_2k.jpg",
+        "dirt_floor/dirt_floor_rough_2k.jpg",
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "flat",
+        0.7
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            11.0,
+            68.0
+          ]
+        ]
+      ],
+      "px": 2048,
+      "resolution": "2k",
+      "sha256": "715574034e0b1a3f68308ad00bac60ee0d704b2b92142fb5c54b49d52f7ee47b"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_dirt_variation_r.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 2505274,
+      "cc0_assets": [
+        "dirt_floor",
+        "rocky_trail"
+      ],
+      "cc0_files": [
+        "dirt_floor/dirt_floor_ao_2k.jpg",
+        "dirt_floor/dirt_floor_diff_2k.jpg",
+        "dirt_floor/dirt_floor_disp_2k.jpg",
+        "dirt_floor/dirt_floor_nor_gl_2k.jpg",
+        "dirt_floor/dirt_floor_rough_2k.jpg",
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "flat",
+        0.7
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            11.0,
+            68.0
+          ]
+        ]
+      ],
+      "px": 2048,
+      "resolution": "2k",
+      "sha256": "159d8e88df7597ba1142466f27a95b0650e40aea5c02795bf54e4b90947cf805"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_mud_cracks_ao.png": {
+      "authored_tile_m": 3.0,
+      "bytes": 804870,
+      "cc0_assets": [
+        "mud_cracked_dry_riverbed_002"
+      ],
+      "cc0_files": [
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_ao_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_diff_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_disp_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_nor_gl_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "cracks",
+        0.75
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            74.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "48ca8eb45ac32ea8b8f381a1e1746feb49c3a2ac2648189f5a9da007510872ad"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_mud_cracks_b.png": {
+      "authored_tile_m": 3.0,
+      "bytes": 1623749,
+      "cc0_assets": [
+        "mud_cracked_dry_riverbed_002"
+      ],
+      "cc0_files": [
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_ao_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_diff_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_disp_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_nor_gl_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "cracks",
+        0.75
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            74.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "e9b61ea69c0b45830d65cca4b18e15d6c89be6defd60a49e46cf7226d9bc197f"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_mud_cracks_nm.png": {
+      "authored_tile_m": 3.0,
+      "bytes": 2422170,
+      "cc0_assets": [
+        "mud_cracked_dry_riverbed_002"
+      ],
+      "cc0_files": [
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_ao_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_diff_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_disp_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_nor_gl_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "cracks",
+        0.75
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            74.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "2ecba25b51d577c4c0a3c9898981e190c46062c8c6a7dfa2ef4c8f2fcc2368ec"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_mud_cracks_o.png": {
+      "authored_tile_m": 3.0,
+      "bytes": 257459,
+      "cc0_assets": [
+        "mud_cracked_dry_riverbed_002"
+      ],
+      "cc0_files": [
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_ao_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_diff_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_disp_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_nor_gl_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "cracks",
+        0.75
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            74.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "b9538d82704ebfb96d4abb410d1a7821007db1596bf7a62d72b7139cf39f7a42"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_mud_cracks_r.png": {
+      "authored_tile_m": 3.0,
+      "bytes": 380716,
+      "cc0_assets": [
+        "mud_cracked_dry_riverbed_002"
+      ],
+      "cc0_files": [
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_ao_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_diff_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_disp_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_nor_gl_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "cracks",
+        0.75
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            74.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "7426ceac18bb9a3149270f1d4559a915b3074041ceda437875f34a94632652cf"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_needle_litter_ao.png": {
+      "authored_tile_m": 2.5,
+      "bytes": 853330,
+      "cc0_assets": [
+        "forest_leaves_04"
+      ],
+      "cc0_files": [
+        "forest_leaves_04/forest_leaves_04_ao_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_diff_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_disp_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_nor_gl_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.5,
+      "opacity": [
+        "luma",
+        0.6
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            12.0,
+            96.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "b2b3015280a2d6352cebf6d081a34285f8ca6f0cd68bc855dfe2a1821b96f3ae"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_needle_litter_b.png": {
+      "authored_tile_m": 2.5,
+      "bytes": 2449419,
+      "cc0_assets": [
+        "forest_leaves_04"
+      ],
+      "cc0_files": [
+        "forest_leaves_04/forest_leaves_04_ao_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_diff_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_disp_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_nor_gl_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.5,
+      "opacity": [
+        "luma",
+        0.6
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            12.0,
+            96.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "74019423afc0386a51ed809291e674966a031100c7eb2f3778ab7c0e837adfac"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_needle_litter_nm.png": {
+      "authored_tile_m": 2.5,
+      "bytes": 2622187,
+      "cc0_assets": [
+        "forest_leaves_04"
+      ],
+      "cc0_files": [
+        "forest_leaves_04/forest_leaves_04_ao_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_diff_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_disp_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_nor_gl_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.5,
+      "opacity": [
+        "luma",
+        0.6
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            12.0,
+            96.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "65c5292398dd0bb2f819394ac0b299c99ca2a9f2a75db2e29bb64f1825df80d3"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_needle_litter_o.png": {
+      "authored_tile_m": 2.5,
+      "bytes": 744098,
+      "cc0_assets": [
+        "forest_leaves_04"
+      ],
+      "cc0_files": [
+        "forest_leaves_04/forest_leaves_04_ao_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_diff_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_disp_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_nor_gl_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.5,
+      "opacity": [
+        "luma",
+        0.6
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            12.0,
+            96.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "9e656c4f8c5c11c5a407e691c390f2ae374186f9cb85260d68443820e624193d"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_needle_litter_r.png": {
+      "authored_tile_m": 2.5,
+      "bytes": 769951,
+      "cc0_assets": [
+        "forest_leaves_04"
+      ],
+      "cc0_files": [
+        "forest_leaves_04/forest_leaves_04_ao_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_diff_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_disp_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_nor_gl_2k.jpg",
+        "forest_leaves_04/forest_leaves_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.5,
+      "opacity": [
+        "luma",
+        0.6
+      ],
+      "ops": [
+        [
+          "grade",
+          [
+            12.0,
+            96.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "fe0ec5173301d4c4a0204fca5d5b8ee015dadc16feafbe4e57da67874137f092"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_puddle_wet_ao.png": {
+      "authored_tile_m": 3.0,
+      "bytes": 645911,
+      "cc0_assets": [
+        "dirt_floor"
+      ],
+      "cc0_files": [
+        "dirt_floor/dirt_floor_ao_2k.jpg",
+        "dirt_floor/dirt_floor_diff_2k.jpg",
+        "dirt_floor/dirt_floor_disp_2k.jpg",
+        "dirt_floor/dirt_floor_nor_gl_2k.jpg",
+        "dirt_floor/dirt_floor_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.07,
+      "opacity": [
+        "blob",
+        0.95
+      ],
+      "ops": [
+        [
+          "darken",
+          0.55
+        ],
+        [
+          "grade",
+          [
+            11.0,
+            68.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "cf704bafc32fa9b464f1573eb666eb28b68b79ec7056532d9922a5dd93a182ec"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_puddle_wet_b.png": {
+      "authored_tile_m": 3.0,
+      "bytes": 1513490,
+      "cc0_assets": [
+        "dirt_floor"
+      ],
+      "cc0_files": [
+        "dirt_floor/dirt_floor_ao_2k.jpg",
+        "dirt_floor/dirt_floor_diff_2k.jpg",
+        "dirt_floor/dirt_floor_disp_2k.jpg",
+        "dirt_floor/dirt_floor_nor_gl_2k.jpg",
+        "dirt_floor/dirt_floor_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.07,
+      "opacity": [
+        "blob",
+        0.95
+      ],
+      "ops": [
+        [
+          "darken",
+          0.55
+        ],
+        [
+          "grade",
+          [
+            11.0,
+            68.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "2f7ee4d87a3d286b964690af9b52c52ec7e265cb6bdd4b55bd67230d546fce2c"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_puddle_wet_nm.png": {
+      "authored_tile_m": 3.0,
+      "bytes": 2206915,
+      "cc0_assets": [
+        "dirt_floor"
+      ],
+      "cc0_files": [
+        "dirt_floor/dirt_floor_ao_2k.jpg",
+        "dirt_floor/dirt_floor_diff_2k.jpg",
+        "dirt_floor/dirt_floor_disp_2k.jpg",
+        "dirt_floor/dirt_floor_nor_gl_2k.jpg",
+        "dirt_floor/dirt_floor_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.07,
+      "opacity": [
+        "blob",
+        0.95
+      ],
+      "ops": [
+        [
+          "darken",
+          0.55
+        ],
+        [
+          "grade",
+          [
+            11.0,
+            68.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "763eb35a104ee00f16bde9b2e8b76724cd3bcd8e0745cbdc44cbf057549fb247"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_puddle_wet_o.png": {
+      "authored_tile_m": 3.0,
+      "bytes": 66657,
+      "cc0_assets": [
+        "dirt_floor"
+      ],
+      "cc0_files": [
+        "dirt_floor/dirt_floor_ao_2k.jpg",
+        "dirt_floor/dirt_floor_diff_2k.jpg",
+        "dirt_floor/dirt_floor_disp_2k.jpg",
+        "dirt_floor/dirt_floor_nor_gl_2k.jpg",
+        "dirt_floor/dirt_floor_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.07,
+      "opacity": [
+        "blob",
+        0.95
+      ],
+      "ops": [
+        [
+          "darken",
+          0.55
+        ],
+        [
+          "grade",
+          [
+            11.0,
+            68.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "0ff0c55fad7c0bf585f08708d7e34d77845b79d7c105638b3703c7d208395c05"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_puddle_wet_r.png": {
+      "authored_tile_m": 3.0,
+      "bytes": 210225,
+      "cc0_assets": [
+        "dirt_floor"
+      ],
+      "cc0_files": [
+        "dirt_floor/dirt_floor_ao_2k.jpg",
+        "dirt_floor/dirt_floor_diff_2k.jpg",
+        "dirt_floor/dirt_floor_disp_2k.jpg",
+        "dirt_floor/dirt_floor_nor_gl_2k.jpg",
+        "dirt_floor/dirt_floor_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.07,
+      "opacity": [
+        "blob",
+        0.95
+      ],
+      "ops": [
+        [
+          "darken",
+          0.55
+        ],
+        [
+          "grade",
+          [
+            11.0,
+            68.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "4ea4fd1a4d4f3ab5f1993323131cd58d133c2180a2c63b6d59c9e79646adee55"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_skid_arc_ao.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 3050658,
+      "cc0_assets": [
+        "rocky_trail"
+      ],
+      "cc0_files": [
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "ruts",
+        0.8
+      ],
+      "ops": [
+        [
+          "darken",
+          0.18
+        ],
+        [
+          "grade",
+          [
+            4.5,
+            72.0
+          ]
+        ]
+      ],
+      "px": 2048,
+      "resolution": "2k",
+      "sha256": "9c59a2c9694747da5ce9b900ecb0f20cd3ca4b704b8ec821d2f62c3d84052928"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_skid_arc_b.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 4495634,
+      "cc0_assets": [
+        "rocky_trail"
+      ],
+      "cc0_files": [
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "ruts",
+        0.8
+      ],
+      "ops": [
+        [
+          "darken",
+          0.18
+        ],
+        [
+          "grade",
+          [
+            4.5,
+            72.0
+          ]
+        ]
+      ],
+      "px": 2048,
+      "resolution": "2k",
+      "sha256": "4baf36d5a359eb027e127e27030c15a84923d7e7f08508ad53b23e499f9d995e"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_skid_arc_nm.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 9597533,
+      "cc0_assets": [
+        "rocky_trail"
+      ],
+      "cc0_files": [
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "ruts",
+        0.8
+      ],
+      "ops": [
+        [
+          "darken",
+          0.18
+        ],
+        [
+          "grade",
+          [
+            4.5,
+            72.0
+          ]
+        ]
+      ],
+      "px": 2048,
+      "resolution": "2k",
+      "sha256": "3d2ca255f787e312702b77ab1e8b22957b041ac210c1b3422bdf88fadf479d43"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_skid_arc_o.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 320920,
+      "cc0_assets": [
+        "rocky_trail"
+      ],
+      "cc0_files": [
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "ruts",
+        0.8
+      ],
+      "ops": [
+        [
+          "darken",
+          0.18
+        ],
+        [
+          "grade",
+          [
+            4.5,
+            72.0
+          ]
+        ]
+      ],
+      "px": 2048,
+      "resolution": "2k",
+      "sha256": "f1619a45c02fbd92aa63f7ac4003ad49fcc427ea2ba0e14d6e035a306313a0aa"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_skid_arc_r.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 1616243,
+      "cc0_assets": [
+        "rocky_trail"
+      ],
+      "cc0_files": [
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "opacity": [
+        "ruts",
+        0.8
+      ],
+      "ops": [
+        [
+          "darken",
+          0.18
+        ],
+        [
+          "grade",
+          [
+            4.5,
+            72.0
+          ]
+        ]
+      ],
+      "px": 2048,
+      "resolution": "2k",
+      "sha256": "f1c3e86527bf8b3049253c076e078e9370ee15d17897b11de04bbe669bd772db"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_track_dust_overlay_ao.png": {
+      "authored_tile_m": 12.0,
+      "bytes": 645911,
+      "cc0_assets": [
+        "dirt_floor"
+      ],
+      "cc0_files": [
+        "dirt_floor/dirt_floor_ao_2k.jpg",
+        "dirt_floor/dirt_floor_diff_2k.jpg",
+        "dirt_floor/dirt_floor_disp_2k.jpg",
+        "dirt_floor/dirt_floor_nor_gl_2k.jpg",
+        "dirt_floor/dirt_floor_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.07,
+      "opacity": [
+        "flat",
+        0.35
+      ],
+      "ops": [
+        [
+          "dust",
+          0.5
+        ],
+        [
+          "grade",
+          [
+            5.0,
+            80.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "cf704bafc32fa9b464f1573eb666eb28b68b79ec7056532d9922a5dd93a182ec"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_track_dust_overlay_b.png": {
+      "authored_tile_m": 12.0,
+      "bytes": 1219542,
+      "cc0_assets": [
+        "dirt_floor"
+      ],
+      "cc0_files": [
+        "dirt_floor/dirt_floor_ao_2k.jpg",
+        "dirt_floor/dirt_floor_diff_2k.jpg",
+        "dirt_floor/dirt_floor_disp_2k.jpg",
+        "dirt_floor/dirt_floor_nor_gl_2k.jpg",
+        "dirt_floor/dirt_floor_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.07,
+      "opacity": [
+        "flat",
+        0.35
+      ],
+      "ops": [
+        [
+          "dust",
+          0.5
+        ],
+        [
+          "grade",
+          [
+            5.0,
+            80.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "a2160bd767e53c6b7930c7c0b474335b82920e55824658ab5a7525d8ca2f3eae"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_track_dust_overlay_nm.png": {
+      "authored_tile_m": 12.0,
+      "bytes": 2206915,
+      "cc0_assets": [
+        "dirt_floor"
+      ],
+      "cc0_files": [
+        "dirt_floor/dirt_floor_ao_2k.jpg",
+        "dirt_floor/dirt_floor_diff_2k.jpg",
+        "dirt_floor/dirt_floor_disp_2k.jpg",
+        "dirt_floor/dirt_floor_nor_gl_2k.jpg",
+        "dirt_floor/dirt_floor_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.07,
+      "opacity": [
+        "flat",
+        0.35
+      ],
+      "ops": [
+        [
+          "dust",
+          0.5
+        ],
+        [
+          "grade",
+          [
+            5.0,
+            80.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "763eb35a104ee00f16bde9b2e8b76724cd3bcd8e0745cbdc44cbf057549fb247"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_track_dust_overlay_o.png": {
+      "authored_tile_m": 12.0,
+      "bytes": 93020,
+      "cc0_assets": [
+        "dirt_floor"
+      ],
+      "cc0_files": [
+        "dirt_floor/dirt_floor_ao_2k.jpg",
+        "dirt_floor/dirt_floor_diff_2k.jpg",
+        "dirt_floor/dirt_floor_disp_2k.jpg",
+        "dirt_floor/dirt_floor_nor_gl_2k.jpg",
+        "dirt_floor/dirt_floor_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.07,
+      "opacity": [
+        "flat",
+        0.35
+      ],
+      "ops": [
+        [
+          "dust",
+          0.5
+        ],
+        [
+          "grade",
+          [
+            5.0,
+            80.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "fbe45f68a44406f102e58c02d0e831ec860488481437f796f6bdf1a2c4abe018"
+    },
+    "art/decalroad/ericrolph_hot_potato_arena_t_m_track_dust_overlay_r.png": {
+      "authored_tile_m": 12.0,
+      "bytes": 341592,
+      "cc0_assets": [
+        "dirt_floor"
+      ],
+      "cc0_files": [
+        "dirt_floor/dirt_floor_ao_2k.jpg",
+        "dirt_floor/dirt_floor_diff_2k.jpg",
+        "dirt_floor/dirt_floor_disp_2k.jpg",
+        "dirt_floor/dirt_floor_nor_gl_2k.jpg",
+        "dirt_floor/dirt_floor_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.07,
+      "opacity": [
+        "flat",
+        0.35
+      ],
+      "ops": [
+        [
+          "dust",
+          0.5
+        ],
+        [
+          "grade",
+          [
+            5.0,
+            80.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "5658601feccdf3cae1e4d8d4c4833a8b3150455342fd7e077955886121908b93"
+    },
+    "art/shapes/hot_potato_arena_backdrop/ericrolph_hot_potato_arena_backdrop.color.png": {
+      "authored_tile_m": null,
+      "bytes": 34723517,
+      "cc0_assets": [
+        "aerial_rocks_04",
+        "snow_field_aerial"
+      ],
+      "cc0_files": [
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_ao_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_col_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_height_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_nor_gl_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_rough_2k.jpg"
+      ],
+      "native_tile_m": 80.0,
+      "ops": [
+        [
+          "backdrop_atlas",
+          "design v4 2.6, r2 three haze bands"
+        ]
+      ],
+      "px": [
+        8192,
+        2048
+      ],
+      "resolution": "2k",
+      "sha256": "3bb0563ba7cbfe0ca6b2d3d4a6d9ad291a9a44a7efd2221ed8c84b4ad2e3724c"
+    },
+    "art/shapes/hot_potato_arena_backdrop/ericrolph_hot_potato_arena_backdrop.normal.png": {
+      "authored_tile_m": null,
+      "bytes": 8752677,
+      "cc0_assets": [
+        "aerial_rocks_04",
+        "snow_field_aerial"
+      ],
+      "cc0_files": [
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_ao_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_col_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_height_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_nor_gl_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_rough_2k.jpg"
+      ],
+      "native_tile_m": 80.0,
+      "ops": [
+        [
+          "backdrop_atlas",
+          "design v4 2.6, r2 three haze bands"
+        ]
+      ],
+      "px": [
+        4096,
+        1024
+      ],
+      "resolution": "2k",
+      "sha256": "91124e0a3d2233c4efba45f2ff7acd3cc36ea3cfb80901525ecfb80f05fa9ab8"
+    },
+    "art/shapes/hot_potato_arena_backdrop/ericrolph_hot_potato_arena_backdrop_detail_b.png": {
+      "authored_tile_m": 29.28,
+      "bytes": 27025501,
+      "cc0_assets": [
+        "cliff_side"
+      ],
+      "cc0_files": [
+        "cliff_side/cliff_side_ao_2k.jpg",
+        "cliff_side/cliff_side_diff_2k.jpg",
+        "cliff_side/cliff_side_disp_2k.jpg",
+        "cliff_side/cliff_side_nor_gl_2k.jpg",
+        "cliff_side/cliff_side_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.83,
+      "ops": [
+        [
+          "grade",
+          [
+            7.0,
+            78.0
+          ]
+        ],
+        [
+          "stochastic_tile",
+          "4x4 hash-offset, hash-flipped reads of the 7.32 m scan, nine-tap B-spline blend, cells modulo 4 so the tile wraps, salt 0xb15a17 (r15 / B14-1)"
+        ]
+      ],
+      "px": [
+        4096,
+        4096
+      ],
+      "resolution": "2k",
+      "sha256": "ce1c94957479970fc917f03802e4e7057ce795ec11d249093864fa493b215a65"
+    },
+    "art/shapes/hot_potato_arena_backdrop/ericrolph_hot_potato_arena_backdrop_detail_nm.png": {
+      "authored_tile_m": 29.28,
+      "bytes": 31933565,
+      "cc0_assets": [
+        "cliff_side"
+      ],
+      "cc0_files": [
+        "cliff_side/cliff_side_ao_2k.jpg",
+        "cliff_side/cliff_side_diff_2k.jpg",
+        "cliff_side/cliff_side_disp_2k.jpg",
+        "cliff_side/cliff_side_nor_gl_2k.jpg",
+        "cliff_side/cliff_side_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.83,
+      "ops": [
+        [
+          "grade",
+          [
+            7.0,
+            78.0
+          ]
+        ],
+        [
+          "stochastic_tile",
+          "4x4 hash-offset, hash-flipped reads of the 7.32 m scan, nine-tap B-spline blend, cells modulo 4 so the tile wraps, salt 0xb15a17 (r15 / B14-1)"
+        ]
+      ],
+      "px": [
+        4096,
+        4096
+      ],
+      "resolution": "2k",
+      "sha256": "5d48aacc0e21ff2e7231bc982ed0cff84c8010bf17d9e1e54299a8a53835f999"
+    },
+    "art/shapes/hot_potato_arena_backdrop/ericrolph_hot_potato_arena_backdrop_roughness.data.png": {
+      "authored_tile_m": null,
+      "bytes": 487933,
+      "cc0_assets": [
+        "aerial_rocks_04",
+        "snow_field_aerial"
+      ],
+      "cc0_files": [
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_ao_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_col_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_height_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_nor_gl_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_rough_2k.jpg"
+      ],
+      "native_tile_m": 80.0,
+      "ops": [
+        [
+          "backdrop_atlas",
+          "design v4 2.6, r2 three haze bands"
+        ]
+      ],
+      "px": [
+        4096,
+        1024
+      ],
+      "resolution": "2k",
+      "sha256": "0a95f0f75af398f2cf47d4df575178acbde1aca7240e0b79e0f10051f92d39bd"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_alpine_detail_ao.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 852559,
+      "cc0_assets": [
+        "sparse_grass"
+      ],
+      "cc0_files": [
+        "sparse_grass/sparse_grass_ao_2k.jpg",
+        "sparse_grass/sparse_grass_diff_2k.jpg",
+        "sparse_grass/sparse_grass_disp_2k.jpg",
+        "sparse_grass/sparse_grass_nor_gl_2k.jpg",
+        "sparse_grass/sparse_grass_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "lichen_speckle",
+          0.18
+        ],
+        [
+          "grade",
+          [
+            9.0,
+            104.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "de8bc742e6d4fb64a4dd6d30588a07020bf5358a7ad61abc34f28ed4679f1e2f"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_alpine_detail_b.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 1885666,
+      "cc0_assets": [
+        "sparse_grass"
+      ],
+      "cc0_files": [
+        "sparse_grass/sparse_grass_ao_2k.jpg",
+        "sparse_grass/sparse_grass_diff_2k.jpg",
+        "sparse_grass/sparse_grass_disp_2k.jpg",
+        "sparse_grass/sparse_grass_nor_gl_2k.jpg",
+        "sparse_grass/sparse_grass_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "lichen_speckle",
+          0.18
+        ],
+        [
+          "grade",
+          [
+            9.0,
+            104.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "2be6fb2afaff15a2e4872ae0d80b57da9d89351861d4b561ae256bda06b47966"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_alpine_detail_h.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 640851,
+      "cc0_assets": [
+        "sparse_grass"
+      ],
+      "cc0_files": [
+        "sparse_grass/sparse_grass_ao_2k.jpg",
+        "sparse_grass/sparse_grass_diff_2k.jpg",
+        "sparse_grass/sparse_grass_disp_2k.jpg",
+        "sparse_grass/sparse_grass_nor_gl_2k.jpg",
+        "sparse_grass/sparse_grass_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "lichen_speckle",
+          0.18
+        ],
+        [
+          "grade",
+          [
+            9.0,
+            104.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "a50200883e0bc3bbeada03d68fa3f3b403d8d079e4e7105ddf8b7a40c1d62654"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_alpine_detail_nm.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 2542031,
+      "cc0_assets": [
+        "sparse_grass"
+      ],
+      "cc0_files": [
+        "sparse_grass/sparse_grass_ao_2k.jpg",
+        "sparse_grass/sparse_grass_diff_2k.jpg",
+        "sparse_grass/sparse_grass_disp_2k.jpg",
+        "sparse_grass/sparse_grass_nor_gl_2k.jpg",
+        "sparse_grass/sparse_grass_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "lichen_speckle",
+          0.18
+        ],
+        [
+          "grade",
+          [
+            9.0,
+            104.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "360d64b04dbd376543a272fa1bdcac73aca0b0c4d14b8a5ff0b9c9fb547addda"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_alpine_detail_r.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 465289,
+      "cc0_assets": [
+        "sparse_grass"
+      ],
+      "cc0_files": [
+        "sparse_grass/sparse_grass_ao_2k.jpg",
+        "sparse_grass/sparse_grass_diff_2k.jpg",
+        "sparse_grass/sparse_grass_disp_2k.jpg",
+        "sparse_grass/sparse_grass_nor_gl_2k.jpg",
+        "sparse_grass/sparse_grass_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "lichen_speckle",
+          0.18
+        ],
+        [
+          "grade",
+          [
+            9.0,
+            104.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "7cfdd96ab50fba865ba5ace4ee13de033601013a59007ece1803e9d62b821a2f"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_alpine_macro_ao.png": {
+      "authored_tile_m": 80.0,
+      "bytes": 480237,
+      "cc0_assets": [
+        "snow_field_aerial"
+      ],
+      "cc0_files": [
+        "snow_field_aerial/snow_field_aerial_ao_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_col_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_height_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_nor_gl_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_rough_2k.jpg"
+      ],
+      "native_tile_m": 80.0,
+      "ops": [
+        [
+          "tint_turf",
+          0.62
+        ],
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            9.0,
+            104.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "7968e4e1e236beb1e7e73cefc4dbd4a6195f58e290dd9e1ef0959abe735e4c3c"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_alpine_macro_b.png": {
+      "authored_tile_m": 80.0,
+      "bytes": 1350196,
+      "cc0_assets": [
+        "snow_field_aerial"
+      ],
+      "cc0_files": [
+        "snow_field_aerial/snow_field_aerial_ao_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_col_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_height_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_nor_gl_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_rough_2k.jpg"
+      ],
+      "native_tile_m": 80.0,
+      "ops": [
+        [
+          "tint_turf",
+          0.62
+        ],
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            9.0,
+            104.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "0363f70bbe1bab8154d1b7d3c75317338476f3a25d538de37333a8ee81895683"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_alpine_macro_h.png": {
+      "authored_tile_m": 80.0,
+      "bytes": 369938,
+      "cc0_assets": [
+        "snow_field_aerial"
+      ],
+      "cc0_files": [
+        "snow_field_aerial/snow_field_aerial_ao_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_col_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_height_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_nor_gl_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_rough_2k.jpg"
+      ],
+      "native_tile_m": 80.0,
+      "ops": [
+        [
+          "tint_turf",
+          0.62
+        ],
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            9.0,
+            104.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "ffe19c2ebc297b418a0d6d4c058eee5a6a83ef65c4d517c6a76b5f8cbda51c96"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_alpine_macro_nm.png": {
+      "authored_tile_m": 80.0,
+      "bytes": 1788237,
+      "cc0_assets": [
+        "snow_field_aerial"
+      ],
+      "cc0_files": [
+        "snow_field_aerial/snow_field_aerial_ao_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_col_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_height_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_nor_gl_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_rough_2k.jpg"
+      ],
+      "native_tile_m": 80.0,
+      "ops": [
+        [
+          "tint_turf",
+          0.62
+        ],
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            9.0,
+            104.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "9c1122165123b251d980569cc461fd50cf2bf7e7cd0ec06de6f828e1e1e2b81d"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_alpine_macro_r.png": {
+      "authored_tile_m": 80.0,
+      "bytes": 544327,
+      "cc0_assets": [
+        "snow_field_aerial"
+      ],
+      "cc0_files": [
+        "snow_field_aerial/snow_field_aerial_ao_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_col_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_height_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_nor_gl_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_rough_2k.jpg"
+      ],
+      "native_tile_m": 80.0,
+      "ops": [
+        [
+          "tint_turf",
+          0.62
+        ],
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            9.0,
+            104.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "0af28909226308c862293742da9ea1fa6bf93f60f00982a4f89474ff8b21781a"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_ash_detail_ao.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 430146,
+      "cc0_assets": [
+        "burned_ground_01",
+        "snow_02"
+      ],
+      "cc0_files": [
+        "burned_ground_01/burned_ground_01_ao_4k.jpg",
+        "burned_ground_01/burned_ground_01_diff_4k.jpg",
+        "burned_ground_01/burned_ground_01_disp_4k.jpg",
+        "burned_ground_01/burned_ground_01_nor_gl_4k.jpg",
+        "burned_ground_01/burned_ground_01_rough_4k.jpg",
+        "snow_02/snow_02_ao_2k.jpg",
+        "snow_02/snow_02_diff_2k.jpg",
+        "snow_02/snow_02_disp_2k.jpg",
+        "snow_02/snow_02_nor_gl_2k.jpg",
+        "snow_02/snow_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.0,
+      "ops": [
+        [
+          "repeat",
+          2
+        ],
+        [
+          "desaturate",
+          0.35
+        ],
+        [
+          "brighten",
+          1.06
+        ],
+        [
+          "grade",
+          [
+            2.6,
+            80.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "4k",
+      "sha256": "5d6aa581a9b7264171945b36a7d576ff146cb089e488f2a522726a69583c421c"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_ash_detail_b.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 1336863,
+      "cc0_assets": [
+        "burned_ground_01",
+        "snow_02"
+      ],
+      "cc0_files": [
+        "burned_ground_01/burned_ground_01_ao_4k.jpg",
+        "burned_ground_01/burned_ground_01_diff_4k.jpg",
+        "burned_ground_01/burned_ground_01_disp_4k.jpg",
+        "burned_ground_01/burned_ground_01_nor_gl_4k.jpg",
+        "burned_ground_01/burned_ground_01_rough_4k.jpg",
+        "snow_02/snow_02_ao_2k.jpg",
+        "snow_02/snow_02_diff_2k.jpg",
+        "snow_02/snow_02_disp_2k.jpg",
+        "snow_02/snow_02_nor_gl_2k.jpg",
+        "snow_02/snow_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.0,
+      "ops": [
+        [
+          "repeat",
+          2
+        ],
+        [
+          "desaturate",
+          0.35
+        ],
+        [
+          "brighten",
+          1.06
+        ],
+        [
+          "grade",
+          [
+            2.6,
+            80.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "4k",
+      "sha256": "3f69578a6f3018d6b757efb13023242f93b4495a378f8525995f3073a20a958c"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_ash_detail_h.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 252718,
+      "cc0_assets": [
+        "burned_ground_01",
+        "snow_02"
+      ],
+      "cc0_files": [
+        "burned_ground_01/burned_ground_01_ao_4k.jpg",
+        "burned_ground_01/burned_ground_01_diff_4k.jpg",
+        "burned_ground_01/burned_ground_01_disp_4k.jpg",
+        "burned_ground_01/burned_ground_01_nor_gl_4k.jpg",
+        "burned_ground_01/burned_ground_01_rough_4k.jpg",
+        "snow_02/snow_02_ao_2k.jpg",
+        "snow_02/snow_02_diff_2k.jpg",
+        "snow_02/snow_02_disp_2k.jpg",
+        "snow_02/snow_02_nor_gl_2k.jpg",
+        "snow_02/snow_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.0,
+      "ops": [
+        [
+          "repeat",
+          2
+        ],
+        [
+          "desaturate",
+          0.35
+        ],
+        [
+          "brighten",
+          1.06
+        ],
+        [
+          "grade",
+          [
+            2.6,
+            80.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "4k",
+      "sha256": "3a05152d39ec57b965d8a71396dda4a176a8fa19e7b4d01f6cd74840ffd6067b"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_ash_detail_nm.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 2066303,
+      "cc0_assets": [
+        "burned_ground_01",
+        "snow_02"
+      ],
+      "cc0_files": [
+        "burned_ground_01/burned_ground_01_ao_4k.jpg",
+        "burned_ground_01/burned_ground_01_diff_4k.jpg",
+        "burned_ground_01/burned_ground_01_disp_4k.jpg",
+        "burned_ground_01/burned_ground_01_nor_gl_4k.jpg",
+        "burned_ground_01/burned_ground_01_rough_4k.jpg",
+        "snow_02/snow_02_ao_2k.jpg",
+        "snow_02/snow_02_diff_2k.jpg",
+        "snow_02/snow_02_disp_2k.jpg",
+        "snow_02/snow_02_nor_gl_2k.jpg",
+        "snow_02/snow_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.0,
+      "ops": [
+        [
+          "repeat",
+          2
+        ],
+        [
+          "desaturate",
+          0.35
+        ],
+        [
+          "brighten",
+          1.06
+        ],
+        [
+          "grade",
+          [
+            2.6,
+            80.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "4k",
+      "sha256": "c17762fad7bbe80a3010b21653380685a30f968195fed07579841079f6ff8eed"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_ash_detail_r.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 287670,
+      "cc0_assets": [
+        "burned_ground_01",
+        "snow_02"
+      ],
+      "cc0_files": [
+        "burned_ground_01/burned_ground_01_ao_4k.jpg",
+        "burned_ground_01/burned_ground_01_diff_4k.jpg",
+        "burned_ground_01/burned_ground_01_disp_4k.jpg",
+        "burned_ground_01/burned_ground_01_nor_gl_4k.jpg",
+        "burned_ground_01/burned_ground_01_rough_4k.jpg",
+        "snow_02/snow_02_ao_2k.jpg",
+        "snow_02/snow_02_diff_2k.jpg",
+        "snow_02/snow_02_disp_2k.jpg",
+        "snow_02/snow_02_nor_gl_2k.jpg",
+        "snow_02/snow_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.0,
+      "ops": [
+        [
+          "repeat",
+          2
+        ],
+        [
+          "desaturate",
+          0.35
+        ],
+        [
+          "brighten",
+          1.06
+        ],
+        [
+          "grade",
+          [
+            2.6,
+            80.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "4k",
+      "sha256": "598b78f060d36e16403265b130abad303077ef219b4257f9f833a6b9d75ad46f"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_ash_macro_ao.png": {
+      "authored_tile_m": 20.0,
+      "bytes": 847380,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "darken",
+          0.4
+        ],
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            2.6,
+            80.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "be0fe6f6fff7670d4ce940586847f544900c61dd67328ab5382773798b483a6c"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_ash_macro_b.png": {
+      "authored_tile_m": 20.0,
+      "bytes": 1479240,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "darken",
+          0.4
+        ],
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            2.6,
+            80.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "577e66c62cfd22fc86b8fcf1a993cdd2068287b65912895f386124d263b8ff10"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_ash_macro_h.png": {
+      "authored_tile_m": 20.0,
+      "bytes": 501661,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "darken",
+          0.4
+        ],
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            2.6,
+            80.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "db221c02c5c51797c098a226d1970ddd3477445421062e72f343ce1ea32b824a"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_ash_macro_nm.png": {
+      "authored_tile_m": 20.0,
+      "bytes": 2461749,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "darken",
+          0.4
+        ],
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            2.6,
+            80.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "0a3506920a8c4422c2e36a88839ac128e08f088d9d8f6e08534d8587b1e75bf4"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_ash_macro_r.png": {
+      "authored_tile_m": 20.0,
+      "bytes": 586032,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "darken",
+          0.4
+        ],
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            2.6,
+            80.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "ed4d8e6db3646e919f6b5b306e02fc1df26415de8dcfed119cfbfe609a265e53"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_forest_floor_detail_ao.png": {
+      "authored_tile_m": 2.1,
+      "bytes": 705505,
+      "cc0_assets": [
+        "forest_floor"
+      ],
+      "cc0_files": [
+        "forest_floor/forest_floor_ao_2k.jpg",
+        "forest_floor/forest_floor_diff_2k.jpg",
+        "forest_floor/forest_floor_disp_2k.jpg",
+        "forest_floor/forest_floor_nor_gl_2k.jpg",
+        "forest_floor/forest_floor_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.14,
+      "ops": [
+        [
+          "grade",
+          [
+            12.0,
+            96.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "f4d854da849a8edb7c60c889d4644a342f8ff9219cb7d88e84c4de660e26803f"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_forest_floor_detail_b.png": {
+      "authored_tile_m": 2.1,
+      "bytes": 2545284,
+      "cc0_assets": [
+        "forest_floor"
+      ],
+      "cc0_files": [
+        "forest_floor/forest_floor_ao_2k.jpg",
+        "forest_floor/forest_floor_diff_2k.jpg",
+        "forest_floor/forest_floor_disp_2k.jpg",
+        "forest_floor/forest_floor_nor_gl_2k.jpg",
+        "forest_floor/forest_floor_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.14,
+      "ops": [
+        [
+          "grade",
+          [
+            12.0,
+            96.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "0cb8c3a0bc67cb26f346ba9752f1898deb4cdcd59f4621af81dc648141d2f07a"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_forest_floor_detail_h.png": {
+      "authored_tile_m": 2.1,
+      "bytes": 595197,
+      "cc0_assets": [
+        "forest_floor"
+      ],
+      "cc0_files": [
+        "forest_floor/forest_floor_ao_2k.jpg",
+        "forest_floor/forest_floor_diff_2k.jpg",
+        "forest_floor/forest_floor_disp_2k.jpg",
+        "forest_floor/forest_floor_nor_gl_2k.jpg",
+        "forest_floor/forest_floor_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.14,
+      "ops": [
+        [
+          "grade",
+          [
+            12.0,
+            96.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "b5cf7cc20b3aa5e86f579d1c4214903c576d24e37f0a52e34c6fba5fa88d28bb"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_forest_floor_detail_nm.png": {
+      "authored_tile_m": 2.1,
+      "bytes": 2472958,
+      "cc0_assets": [
+        "forest_floor"
+      ],
+      "cc0_files": [
+        "forest_floor/forest_floor_ao_2k.jpg",
+        "forest_floor/forest_floor_diff_2k.jpg",
+        "forest_floor/forest_floor_disp_2k.jpg",
+        "forest_floor/forest_floor_nor_gl_2k.jpg",
+        "forest_floor/forest_floor_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.14,
+      "ops": [
+        [
+          "grade",
+          [
+            12.0,
+            96.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "20d8b7ea2e4f87ae0493873e5705618ecd521fe0cb48a7fd82df3738bd4740a1"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_forest_floor_detail_r.png": {
+      "authored_tile_m": 2.1,
+      "bytes": 664343,
+      "cc0_assets": [
+        "forest_floor"
+      ],
+      "cc0_files": [
+        "forest_floor/forest_floor_ao_2k.jpg",
+        "forest_floor/forest_floor_diff_2k.jpg",
+        "forest_floor/forest_floor_disp_2k.jpg",
+        "forest_floor/forest_floor_nor_gl_2k.jpg",
+        "forest_floor/forest_floor_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.14,
+      "ops": [
+        [
+          "grade",
+          [
+            12.0,
+            96.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "ec0a325ac05fe1e7802f10e8210cb82a6acae63d0950813543c10142aa39c0db"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_forest_floor_macro_ao.png": {
+      "authored_tile_m": 30.0,
+      "bytes": 756603,
+      "cc0_assets": [
+        "aerial_grass_rock"
+      ],
+      "cc0_files": [
+        "aerial_grass_rock/aerial_grass_rock_ao_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_diff_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_disp_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_nor_gl_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_rough_2k.jpg"
+      ],
+      "native_tile_m": 15.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            12.0,
+            96.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "9e1c77b7494a2d2d6f241e06962e72b28e64517f8a618d0970e5326f45ab68f9"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_forest_floor_macro_b.png": {
+      "authored_tile_m": 30.0,
+      "bytes": 1576391,
+      "cc0_assets": [
+        "aerial_grass_rock"
+      ],
+      "cc0_files": [
+        "aerial_grass_rock/aerial_grass_rock_ao_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_diff_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_disp_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_nor_gl_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_rough_2k.jpg"
+      ],
+      "native_tile_m": 15.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            12.0,
+            96.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "3ff003e5dcf8180b734569b5cfd4df39a0c3b61645122cd1d5a03a0f52ca277c"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_forest_floor_macro_h.png": {
+      "authored_tile_m": 30.0,
+      "bytes": 380049,
+      "cc0_assets": [
+        "aerial_grass_rock"
+      ],
+      "cc0_files": [
+        "aerial_grass_rock/aerial_grass_rock_ao_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_diff_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_disp_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_nor_gl_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_rough_2k.jpg"
+      ],
+      "native_tile_m": 15.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            12.0,
+            96.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "a44fd24f85940c9dc6659d2c92968dbaac7995b0bd1d54f79668f2d2f06338e8"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_forest_floor_macro_nm.png": {
+      "authored_tile_m": 30.0,
+      "bytes": 2103639,
+      "cc0_assets": [
+        "aerial_grass_rock"
+      ],
+      "cc0_files": [
+        "aerial_grass_rock/aerial_grass_rock_ao_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_diff_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_disp_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_nor_gl_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_rough_2k.jpg"
+      ],
+      "native_tile_m": 15.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            12.0,
+            96.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "b9b214cf00cf374263f2262f5ba73e0daa6914f475dc5437a3159c3f367a3ba8"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_forest_floor_macro_r.png": {
+      "authored_tile_m": 30.0,
+      "bytes": 568623,
+      "cc0_assets": [
+        "aerial_grass_rock"
+      ],
+      "cc0_files": [
+        "aerial_grass_rock/aerial_grass_rock_ao_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_diff_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_disp_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_nor_gl_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_rough_2k.jpg"
+      ],
+      "native_tile_m": 15.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            12.0,
+            96.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "ff5f0e50c35f9027cbfbe731562fd18b4c1da241093bfeee612edba69fa1aec5"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_hearth_detail_ao.png": {
+      "authored_tile_m": 2.4,
+      "bytes": 497959,
+      "cc0_assets": [
+        "rock_face"
+      ],
+      "cc0_files": [
+        "rock_face/rock_face_ao_2k.jpg",
+        "rock_face/rock_face_diff_2k.jpg",
+        "rock_face/rock_face_disp_2k.jpg",
+        "rock_face/rock_face_nor_gl_2k.jpg",
+        "rock_face/rock_face_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.38,
+      "ops": [
+        [
+          "darken",
+          0.55
+        ],
+        [
+          "soot",
+          0.55
+        ],
+        [
+          "grade",
+          [
+            2.3,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "1e482911a09b402e14420e4ad35fd7063b673f4dbe44f7fa5d3f97864b1a880c"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_hearth_detail_b.png": {
+      "authored_tile_m": 2.4,
+      "bytes": 1064169,
+      "cc0_assets": [
+        "rock_face"
+      ],
+      "cc0_files": [
+        "rock_face/rock_face_ao_2k.jpg",
+        "rock_face/rock_face_diff_2k.jpg",
+        "rock_face/rock_face_disp_2k.jpg",
+        "rock_face/rock_face_nor_gl_2k.jpg",
+        "rock_face/rock_face_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.38,
+      "ops": [
+        [
+          "darken",
+          0.55
+        ],
+        [
+          "soot",
+          0.55
+        ],
+        [
+          "grade",
+          [
+            2.3,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "6c6159ab93f8e43252b215572045dcc42246fc22433e1f88839d4594657132b4"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_hearth_detail_h.png": {
+      "authored_tile_m": 2.4,
+      "bytes": 358735,
+      "cc0_assets": [
+        "rock_face"
+      ],
+      "cc0_files": [
+        "rock_face/rock_face_ao_2k.jpg",
+        "rock_face/rock_face_diff_2k.jpg",
+        "rock_face/rock_face_disp_2k.jpg",
+        "rock_face/rock_face_nor_gl_2k.jpg",
+        "rock_face/rock_face_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.38,
+      "ops": [
+        [
+          "darken",
+          0.55
+        ],
+        [
+          "soot",
+          0.55
+        ],
+        [
+          "grade",
+          [
+            2.3,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "eecd579690df6da80d0e64ea5a9f5243c7a97ea3a9f38c82b1806f3f1c73607e"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_hearth_detail_nm.png": {
+      "authored_tile_m": 2.4,
+      "bytes": 2098718,
+      "cc0_assets": [
+        "rock_face"
+      ],
+      "cc0_files": [
+        "rock_face/rock_face_ao_2k.jpg",
+        "rock_face/rock_face_diff_2k.jpg",
+        "rock_face/rock_face_disp_2k.jpg",
+        "rock_face/rock_face_nor_gl_2k.jpg",
+        "rock_face/rock_face_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.38,
+      "ops": [
+        [
+          "darken",
+          0.55
+        ],
+        [
+          "soot",
+          0.55
+        ],
+        [
+          "grade",
+          [
+            2.3,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "2519b76d249268c0d5c5f9dfe753a643703b95d8b5d05b56e144b64c10ed1604"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_hearth_detail_r.png": {
+      "authored_tile_m": 2.4,
+      "bytes": 298087,
+      "cc0_assets": [
+        "rock_face"
+      ],
+      "cc0_files": [
+        "rock_face/rock_face_ao_2k.jpg",
+        "rock_face/rock_face_diff_2k.jpg",
+        "rock_face/rock_face_disp_2k.jpg",
+        "rock_face/rock_face_nor_gl_2k.jpg",
+        "rock_face/rock_face_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.38,
+      "ops": [
+        [
+          "darken",
+          0.55
+        ],
+        [
+          "soot",
+          0.55
+        ],
+        [
+          "grade",
+          [
+            2.3,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "6d7e8154956617adc6cf3036795388ec77912a98e25bc2151fb912e12d0c4fbd"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_hearth_macro_ao.png": {
+      "authored_tile_m": 50.0,
+      "bytes": 636850,
+      "cc0_assets": [
+        "aerial_rocks_04"
+      ],
+      "cc0_files": [
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 50.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            2.3,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "840dbf2272e4ad28150e9d038edb7e0cfd4508049ec6520ac52d953de3492eca"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_hearth_macro_b.png": {
+      "authored_tile_m": 50.0,
+      "bytes": 1286482,
+      "cc0_assets": [
+        "aerial_rocks_04"
+      ],
+      "cc0_files": [
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 50.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            2.3,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "c6a54310d35e4d3a19deddc2e55d1c99b5f636495f885ee5a34d2a75d5d5f33e"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_hearth_macro_h.png": {
+      "authored_tile_m": 50.0,
+      "bytes": 254612,
+      "cc0_assets": [
+        "aerial_rocks_04"
+      ],
+      "cc0_files": [
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 50.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            2.3,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "c5460392a0a25ce61fc04379df7f73a3eab447ad0c1de36f5a4d5aa6aa87809b"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_hearth_macro_nm.png": {
+      "authored_tile_m": 50.0,
+      "bytes": 2279008,
+      "cc0_assets": [
+        "aerial_rocks_04"
+      ],
+      "cc0_files": [
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 50.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            2.3,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "66a9c9f0316890a5c270382ba98f146c677494c2d0f0a867da0da2a12944f47e"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_hearth_macro_r.png": {
+      "authored_tile_m": 50.0,
+      "bytes": 516923,
+      "cc0_assets": [
+        "aerial_rocks_04"
+      ],
+      "cc0_files": [
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 50.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            2.3,
+            70.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "0ac0e953fe3fcfc61c45aae4aa750c6bbbdd64c3ece2e345a86e7f8f62a129a8"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_lakebed_detail_ao.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 804870,
+      "cc0_assets": [
+        "mud_cracked_dry_riverbed_002"
+      ],
+      "cc0_files": [
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_ao_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_diff_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_disp_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_nor_gl_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            74.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "48ca8eb45ac32ea8b8f381a1e1746feb49c3a2ac2648189f5a9da007510872ad"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_lakebed_detail_b.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 1623749,
+      "cc0_assets": [
+        "mud_cracked_dry_riverbed_002"
+      ],
+      "cc0_files": [
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_ao_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_diff_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_disp_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_nor_gl_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            74.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "e9b61ea69c0b45830d65cca4b18e15d6c89be6defd60a49e46cf7226d9bc197f"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_lakebed_detail_h.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 491404,
+      "cc0_assets": [
+        "mud_cracked_dry_riverbed_002"
+      ],
+      "cc0_files": [
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_ao_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_diff_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_disp_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_nor_gl_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            74.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "af4fd48d62266692acc60a22583eeb4f8ebcaa2cbe3521bb3e4eefde2712d622"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_lakebed_detail_nm.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 2422170,
+      "cc0_assets": [
+        "mud_cracked_dry_riverbed_002"
+      ],
+      "cc0_files": [
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_ao_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_diff_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_disp_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_nor_gl_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            74.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "2ecba25b51d577c4c0a3c9898981e190c46062c8c6a7dfa2ef4c8f2fcc2368ec"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_lakebed_detail_r.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 380716,
+      "cc0_assets": [
+        "mud_cracked_dry_riverbed_002"
+      ],
+      "cc0_files": [
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_ao_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_diff_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_disp_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_nor_gl_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            74.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "7426ceac18bb9a3149270f1d4559a915b3074041ceda437875f34a94632652cf"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_lakebed_macro_ao.png": {
+      "authored_tile_m": 20.0,
+      "bytes": 693372,
+      "cc0_assets": [
+        "coast_land_rocks_01"
+      ],
+      "cc0_files": [
+        "coast_land_rocks_01/coast_land_rocks_01_ao_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_diff_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_disp_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_nor_gl_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            10.0,
+            74.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "ba568b450af0d3ded13c37a46794fae432b04db7ab3bc4623a8fb074935c1b67"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_lakebed_macro_b.png": {
+      "authored_tile_m": 20.0,
+      "bytes": 1841072,
+      "cc0_assets": [
+        "coast_land_rocks_01"
+      ],
+      "cc0_files": [
+        "coast_land_rocks_01/coast_land_rocks_01_ao_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_diff_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_disp_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_nor_gl_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            10.0,
+            74.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "e2a59895cc16bd61c59e7ce7f06476c2e131a2b450db9107935d27684c5345fc"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_lakebed_macro_h.png": {
+      "authored_tile_m": 20.0,
+      "bytes": 391017,
+      "cc0_assets": [
+        "coast_land_rocks_01"
+      ],
+      "cc0_files": [
+        "coast_land_rocks_01/coast_land_rocks_01_ao_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_diff_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_disp_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_nor_gl_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            10.0,
+            74.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "ad81687c7f44d88af417e374246a9752be120f4851058e2b1b519a0273982028"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_lakebed_macro_nm.png": {
+      "authored_tile_m": 20.0,
+      "bytes": 2236020,
+      "cc0_assets": [
+        "coast_land_rocks_01"
+      ],
+      "cc0_files": [
+        "coast_land_rocks_01/coast_land_rocks_01_ao_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_diff_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_disp_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_nor_gl_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            10.0,
+            74.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "1ee6f645a7d44d874f68b903e5bda2a6303eebc2c861dfd97a84e7934132f224"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_lakebed_macro_r.png": {
+      "authored_tile_m": 20.0,
+      "bytes": 573906,
+      "cc0_assets": [
+        "coast_land_rocks_01"
+      ],
+      "cc0_files": [
+        "coast_land_rocks_01/coast_land_rocks_01_ao_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_diff_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_disp_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_nor_gl_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            10.0,
+            74.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "27d43fa3c38a92f946f0896c639a852eab360941ecdf0dedf9e707fd2095d8ec"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_meadow_detail_ao.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 861933,
+      "cc0_assets": [
+        "leafy_grass"
+      ],
+      "cc0_files": [
+        "leafy_grass/leafy_grass_ao_2k.jpg",
+        "leafy_grass/leafy_grass_diff_2k.jpg",
+        "leafy_grass/leafy_grass_disp_2k.jpg",
+        "leafy_grass/leafy_grass_nor_gl_2k.jpg",
+        "leafy_grass/leafy_grass_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "grade",
+          [
+            16.0,
+            118.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "8aca654e97865372bdba3f5cf0b06dd66b87bd5cea66a742a4df4fbc30abdb58"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_meadow_detail_b.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 2279346,
+      "cc0_assets": [
+        "leafy_grass"
+      ],
+      "cc0_files": [
+        "leafy_grass/leafy_grass_ao_2k.jpg",
+        "leafy_grass/leafy_grass_diff_2k.jpg",
+        "leafy_grass/leafy_grass_disp_2k.jpg",
+        "leafy_grass/leafy_grass_nor_gl_2k.jpg",
+        "leafy_grass/leafy_grass_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "grade",
+          [
+            16.0,
+            118.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "4ac988ada137e4c6b0a960a1b1b6a10d060f53782646ead88cadb91a3f9b3317"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_meadow_detail_h.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 674974,
+      "cc0_assets": [
+        "leafy_grass"
+      ],
+      "cc0_files": [
+        "leafy_grass/leafy_grass_ao_2k.jpg",
+        "leafy_grass/leafy_grass_diff_2k.jpg",
+        "leafy_grass/leafy_grass_disp_2k.jpg",
+        "leafy_grass/leafy_grass_nor_gl_2k.jpg",
+        "leafy_grass/leafy_grass_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "grade",
+          [
+            16.0,
+            118.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "44cb0dd0788989e2d9aac386e792dc65ea7ed1ac9f955adb63c8d62512a4302f"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_meadow_detail_nm.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 2570870,
+      "cc0_assets": [
+        "leafy_grass"
+      ],
+      "cc0_files": [
+        "leafy_grass/leafy_grass_ao_2k.jpg",
+        "leafy_grass/leafy_grass_diff_2k.jpg",
+        "leafy_grass/leafy_grass_disp_2k.jpg",
+        "leafy_grass/leafy_grass_nor_gl_2k.jpg",
+        "leafy_grass/leafy_grass_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "grade",
+          [
+            16.0,
+            118.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "f4edd3204fb94185fae15e1741dc64262b596d5898cd88d8b793cc420ed2e6f5"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_meadow_detail_r.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 492196,
+      "cc0_assets": [
+        "leafy_grass"
+      ],
+      "cc0_files": [
+        "leafy_grass/leafy_grass_ao_2k.jpg",
+        "leafy_grass/leafy_grass_diff_2k.jpg",
+        "leafy_grass/leafy_grass_disp_2k.jpg",
+        "leafy_grass/leafy_grass_nor_gl_2k.jpg",
+        "leafy_grass/leafy_grass_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "grade",
+          [
+            16.0,
+            118.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "524aa77542f6c92fa7838b51c9627ad0ace1cd53c8efac11e2e4fd10d032d93f"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_meadow_macro_ao.png": {
+      "authored_tile_m": 90.0,
+      "bytes": 454868,
+      "cc0_assets": [
+        "rocky_terrain_02"
+      ],
+      "cc0_files": [
+        "rocky_terrain_02/rocky_terrain_02_ao_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_diff_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_disp_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_nor_gl_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 90.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            16.0,
+            118.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "bfd5b9a1d8ac90d57a46af47ab121fb2246139c0c76fc900c235d5a953b13535"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_meadow_macro_b.png": {
+      "authored_tile_m": 90.0,
+      "bytes": 1547786,
+      "cc0_assets": [
+        "rocky_terrain_02"
+      ],
+      "cc0_files": [
+        "rocky_terrain_02/rocky_terrain_02_ao_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_diff_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_disp_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_nor_gl_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 90.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            16.0,
+            118.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "abac6482d42ada976cddbfd3f68acca0421710662e4ed5894b7a54b351cf5862"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_meadow_macro_h.png": {
+      "authored_tile_m": 90.0,
+      "bytes": 284993,
+      "cc0_assets": [
+        "rocky_terrain_02"
+      ],
+      "cc0_files": [
+        "rocky_terrain_02/rocky_terrain_02_ao_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_diff_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_disp_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_nor_gl_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 90.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            16.0,
+            118.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "08e90762f9b33b957f9012f996d7105337f238b4d9b446f3f6fb08600ffc0e37"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_meadow_macro_nm.png": {
+      "authored_tile_m": 90.0,
+      "bytes": 1852596,
+      "cc0_assets": [
+        "rocky_terrain_02"
+      ],
+      "cc0_files": [
+        "rocky_terrain_02/rocky_terrain_02_ao_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_diff_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_disp_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_nor_gl_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 90.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            16.0,
+            118.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "a18f444fddf4a72af9e1998f036b569095f5ef8aa8fcc831112bde93fcae28da"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_meadow_macro_r.png": {
+      "authored_tile_m": 90.0,
+      "bytes": 453865,
+      "cc0_assets": [
+        "rocky_terrain_02"
+      ],
+      "cc0_files": [
+        "rocky_terrain_02/rocky_terrain_02_ao_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_diff_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_disp_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_nor_gl_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 90.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            16.0,
+            118.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "51510cb046ee49bee3a3005b1ca170e25d349ff3defeb0c3c17c3e04bd816d29"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_rock_detail_ao.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 388124,
+      "cc0_assets": [
+        "cliff_side"
+      ],
+      "cc0_files": [
+        "cliff_side/cliff_side_ao_2k.jpg",
+        "cliff_side/cliff_side_diff_2k.jpg",
+        "cliff_side/cliff_side_disp_2k.jpg",
+        "cliff_side/cliff_side_nor_gl_2k.jpg",
+        "cliff_side/cliff_side_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.83,
+      "ops": [
+        [
+          "grade",
+          [
+            7.0,
+            78.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "8119184dcf7b93568d123cdeb0258d02c6f89e804e6bca8423ffb9fb984d9b8a"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_rock_detail_b.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 1668123,
+      "cc0_assets": [
+        "cliff_side"
+      ],
+      "cc0_files": [
+        "cliff_side/cliff_side_ao_2k.jpg",
+        "cliff_side/cliff_side_diff_2k.jpg",
+        "cliff_side/cliff_side_disp_2k.jpg",
+        "cliff_side/cliff_side_nor_gl_2k.jpg",
+        "cliff_side/cliff_side_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.83,
+      "ops": [
+        [
+          "grade",
+          [
+            7.0,
+            78.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "c693c754d7026a3e2eac388765d124972ae0431b25f22da31b6d7cc24dc9d7a1"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_rock_detail_h.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 248699,
+      "cc0_assets": [
+        "cliff_side"
+      ],
+      "cc0_files": [
+        "cliff_side/cliff_side_ao_2k.jpg",
+        "cliff_side/cliff_side_diff_2k.jpg",
+        "cliff_side/cliff_side_disp_2k.jpg",
+        "cliff_side/cliff_side_nor_gl_2k.jpg",
+        "cliff_side/cliff_side_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.83,
+      "ops": [
+        [
+          "grade",
+          [
+            7.0,
+            78.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "7ed2cec7cba8fd4000a0cecec2545b552125d971774c58c0491402d7d428b41c"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_rock_detail_nm.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 1927341,
+      "cc0_assets": [
+        "cliff_side"
+      ],
+      "cc0_files": [
+        "cliff_side/cliff_side_ao_2k.jpg",
+        "cliff_side/cliff_side_diff_2k.jpg",
+        "cliff_side/cliff_side_disp_2k.jpg",
+        "cliff_side/cliff_side_nor_gl_2k.jpg",
+        "cliff_side/cliff_side_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.83,
+      "ops": [
+        [
+          "grade",
+          [
+            7.0,
+            78.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "56dc803e0ca85b7ba9f3e2a19d5ea22d86c66321bc0c63cb206437b945379d82"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_rock_detail_r.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 434237,
+      "cc0_assets": [
+        "cliff_side"
+      ],
+      "cc0_files": [
+        "cliff_side/cliff_side_ao_2k.jpg",
+        "cliff_side/cliff_side_diff_2k.jpg",
+        "cliff_side/cliff_side_disp_2k.jpg",
+        "cliff_side/cliff_side_nor_gl_2k.jpg",
+        "cliff_side/cliff_side_rough_2k.jpg"
+      ],
+      "native_tile_m": 1.83,
+      "ops": [
+        [
+          "grade",
+          [
+            7.0,
+            78.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "430153583fc57293ec7c8cfb0718496beab450e03ee03f2b803ef3679a7e0f0c"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_rock_macro_ao.png": {
+      "authored_tile_m": 80.0,
+      "bytes": 636850,
+      "cc0_assets": [
+        "aerial_rocks_04"
+      ],
+      "cc0_files": [
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 80.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            7.0,
+            78.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "840dbf2272e4ad28150e9d038edb7e0cfd4508049ec6520ac52d953de3492eca"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_rock_macro_b.png": {
+      "authored_tile_m": 80.0,
+      "bytes": 1354436,
+      "cc0_assets": [
+        "aerial_rocks_04"
+      ],
+      "cc0_files": [
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 80.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            7.0,
+            78.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "b8d6bb5dc96fa292202bc6c42132fcf0b6a55f92bf7eb98acd733254f2543e62"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_rock_macro_h.png": {
+      "authored_tile_m": 80.0,
+      "bytes": 254612,
+      "cc0_assets": [
+        "aerial_rocks_04"
+      ],
+      "cc0_files": [
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 80.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            7.0,
+            78.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "c5460392a0a25ce61fc04379df7f73a3eab447ad0c1de36f5a4d5aa6aa87809b"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_rock_macro_nm.png": {
+      "authored_tile_m": 80.0,
+      "bytes": 2279008,
+      "cc0_assets": [
+        "aerial_rocks_04"
+      ],
+      "cc0_files": [
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 80.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            7.0,
+            78.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "66a9c9f0316890a5c270382ba98f146c677494c2d0f0a867da0da2a12944f47e"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_rock_macro_r.png": {
+      "authored_tile_m": 80.0,
+      "bytes": 516923,
+      "cc0_assets": [
+        "aerial_rocks_04"
+      ],
+      "cc0_files": [
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 80.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            7.0,
+            78.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "0ac0e953fe3fcfc61c45aae4aa750c6bbbdd64c3ece2e345a86e7f8f62a129a8"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scorch_detail_ao.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 847380,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 4.0,
+      "ops": [
+        [
+          "darken",
+          0.45
+        ],
+        [
+          "char_speckle",
+          0.22
+        ],
+        [
+          "grade",
+          [
+            3.2,
+            72.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "be0fe6f6fff7670d4ce940586847f544900c61dd67328ab5382773798b483a6c"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scorch_detail_b.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 1793133,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 4.0,
+      "ops": [
+        [
+          "darken",
+          0.45
+        ],
+        [
+          "char_speckle",
+          0.22
+        ],
+        [
+          "grade",
+          [
+            3.2,
+            72.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "ad90709b49871745c90a981fb9f1b68a18889a2ba16835289bdfdb3a0d56c687"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scorch_detail_h.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 501661,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 4.0,
+      "ops": [
+        [
+          "darken",
+          0.45
+        ],
+        [
+          "char_speckle",
+          0.22
+        ],
+        [
+          "grade",
+          [
+            3.2,
+            72.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "db221c02c5c51797c098a226d1970ddd3477445421062e72f343ce1ea32b824a"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scorch_detail_nm.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 2505562,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 4.0,
+      "ops": [
+        [
+          "darken",
+          0.45
+        ],
+        [
+          "char_speckle",
+          0.22
+        ],
+        [
+          "grade",
+          [
+            3.2,
+            72.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "b9fbcf303b6fa3236c06a63d29040b27a6fb8acdff7ca77abba2399b34a4e654"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scorch_detail_r.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 722383,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 4.0,
+      "ops": [
+        [
+          "darken",
+          0.45
+        ],
+        [
+          "char_speckle",
+          0.22
+        ],
+        [
+          "grade",
+          [
+            3.2,
+            72.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "9b71ceb1aa754832fdf1b9fff67ccc909e550d25a0a9b1c7e66e51e8741751ff"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scorch_macro_ao.png": {
+      "authored_tile_m": 25.0,
+      "bytes": 847380,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            3.2,
+            72.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "be0fe6f6fff7670d4ce940586847f544900c61dd67328ab5382773798b483a6c"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scorch_macro_b.png": {
+      "authored_tile_m": 25.0,
+      "bytes": 1441747,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            3.2,
+            72.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "603383858808daffd956b623b3bd1d90f100cb5c6a495650921779eb10560539"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scorch_macro_h.png": {
+      "authored_tile_m": 25.0,
+      "bytes": 501661,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            3.2,
+            72.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "db221c02c5c51797c098a226d1970ddd3477445421062e72f343ce1ea32b824a"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scorch_macro_nm.png": {
+      "authored_tile_m": 25.0,
+      "bytes": 2461749,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            3.2,
+            72.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "0a3506920a8c4422c2e36a88839ac128e08f088d9d8f6e08534d8587b1e75bf4"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scorch_macro_r.png": {
+      "authored_tile_m": 25.0,
+      "bytes": 586032,
+      "cc0_assets": [
+        "dry_ground_rocks"
+      ],
+      "cc0_files": [
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            3.2,
+            72.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "ed4d8e6db3646e919f6b5b306e02fc1df26415de8dcfed119cfbfe609a265e53"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scree_detail_ao.png": {
+      "authored_tile_m": 3.0,
+      "bytes": 599913,
+      "cc0_assets": [
+        "rocks_ground_05"
+      ],
+      "cc0_files": [
+        "rocks_ground_05/rocks_ground_05_ao_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_diff_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_disp_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_nor_gl_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_rough_2k.jpg"
+      ],
+      "native_tile_m": 3.0,
+      "ops": [
+        [
+          "grade",
+          [
+            3.6,
+            84.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "d73ed0b642b8452039841cbd986f45791dd35ba69affac58047b91ec43d464b5"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scree_detail_b.png": {
+      "authored_tile_m": 3.0,
+      "bytes": 2360250,
+      "cc0_assets": [
+        "rocks_ground_05"
+      ],
+      "cc0_files": [
+        "rocks_ground_05/rocks_ground_05_ao_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_diff_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_disp_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_nor_gl_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_rough_2k.jpg"
+      ],
+      "native_tile_m": 3.0,
+      "ops": [
+        [
+          "grade",
+          [
+            3.6,
+            84.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "c7cca90b5de2aff02418050da3f598aaf5b3a0866878f1a76fa3fb5099ebd892"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scree_detail_h.png": {
+      "authored_tile_m": 3.0,
+      "bytes": 349959,
+      "cc0_assets": [
+        "rocks_ground_05"
+      ],
+      "cc0_files": [
+        "rocks_ground_05/rocks_ground_05_ao_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_diff_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_disp_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_nor_gl_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_rough_2k.jpg"
+      ],
+      "native_tile_m": 3.0,
+      "ops": [
+        [
+          "grade",
+          [
+            3.6,
+            84.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "3d22ac555aaf7ddcfe7aa2b9ed1c2bf22433ceea11a9b94d8e92532dc179f4dc"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scree_detail_nm.png": {
+      "authored_tile_m": 3.0,
+      "bytes": 2498559,
+      "cc0_assets": [
+        "rocks_ground_05"
+      ],
+      "cc0_files": [
+        "rocks_ground_05/rocks_ground_05_ao_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_diff_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_disp_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_nor_gl_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_rough_2k.jpg"
+      ],
+      "native_tile_m": 3.0,
+      "ops": [
+        [
+          "grade",
+          [
+            3.6,
+            84.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "5ca943ccb35262acdd2b1d220104cd30fd9defa7bce17eaadc7f409c8ec192af"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scree_detail_r.png": {
+      "authored_tile_m": 3.0,
+      "bytes": 743598,
+      "cc0_assets": [
+        "rocks_ground_05"
+      ],
+      "cc0_files": [
+        "rocks_ground_05/rocks_ground_05_ao_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_diff_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_disp_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_nor_gl_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_rough_2k.jpg"
+      ],
+      "native_tile_m": 3.0,
+      "ops": [
+        [
+          "grade",
+          [
+            3.6,
+            84.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "ac3cf9720174b2037505aaad5ecb8611b9d7d961c7bbbc25fc9f8361645c6009"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scree_macro_ao.png": {
+      "authored_tile_m": 50.0,
+      "bytes": 626072,
+      "cc0_assets": [
+        "aerial_rocks_02"
+      ],
+      "cc0_files": [
+        "aerial_rocks_02/aerial_rocks_02_ao_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_diff_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_disp_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_nor_gl_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 50.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            3.6,
+            84.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "95425eb015f9e0a6334ec4ed2606d1f586529712adef964cce6f241c60bd30c7"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scree_macro_b.png": {
+      "authored_tile_m": 50.0,
+      "bytes": 1190154,
+      "cc0_assets": [
+        "aerial_rocks_02"
+      ],
+      "cc0_files": [
+        "aerial_rocks_02/aerial_rocks_02_ao_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_diff_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_disp_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_nor_gl_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 50.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            3.6,
+            84.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "f554e705792a670612fcec5e1e506817137e4cfdfd0c279c07a4ac4e1b0805aa"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scree_macro_h.png": {
+      "authored_tile_m": 50.0,
+      "bytes": 254703,
+      "cc0_assets": [
+        "aerial_rocks_02"
+      ],
+      "cc0_files": [
+        "aerial_rocks_02/aerial_rocks_02_ao_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_diff_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_disp_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_nor_gl_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 50.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            3.6,
+            84.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "5fcb824575df2d1f746f5bdd6b5eda8a18ed0ff315a866c72d6f6c2babee339f"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scree_macro_nm.png": {
+      "authored_tile_m": 50.0,
+      "bytes": 2261681,
+      "cc0_assets": [
+        "aerial_rocks_02"
+      ],
+      "cc0_files": [
+        "aerial_rocks_02/aerial_rocks_02_ao_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_diff_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_disp_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_nor_gl_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 50.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            3.6,
+            84.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "2454a99cea4d5f2f199e88f11f17362886f0b9dbf505f4e81a2bf77d1ca3c1c9"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_scree_macro_r.png": {
+      "authored_tile_m": 50.0,
+      "bytes": 471982,
+      "cc0_assets": [
+        "aerial_rocks_02"
+      ],
+      "cc0_files": [
+        "aerial_rocks_02/aerial_rocks_02_ao_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_diff_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_disp_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_nor_gl_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 50.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            3.6,
+            84.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "6ca43918a161422b3fa13b674ac0d3334fd729109a285d4c3dfafe83cba8bd40"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_shore_detail_ao.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 821583,
+      "cc0_assets": [
+        "coast_sand_04"
+      ],
+      "cc0_files": [
+        "coast_sand_04/coast_sand_04_ao_2k.jpg",
+        "coast_sand_04/coast_sand_04_diff_2k.jpg",
+        "coast_sand_04/coast_sand_04_disp_2k.jpg",
+        "coast_sand_04/coast_sand_04_nor_gl_2k.jpg",
+        "coast_sand_04/coast_sand_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 3.94,
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            82.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "a3f3fa6fddc00fbb792fc07cd55dcee3aef0efc9040b9e1a5f877d37257ee16a"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_shore_detail_b.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 2271258,
+      "cc0_assets": [
+        "coast_sand_04"
+      ],
+      "cc0_files": [
+        "coast_sand_04/coast_sand_04_ao_2k.jpg",
+        "coast_sand_04/coast_sand_04_diff_2k.jpg",
+        "coast_sand_04/coast_sand_04_disp_2k.jpg",
+        "coast_sand_04/coast_sand_04_nor_gl_2k.jpg",
+        "coast_sand_04/coast_sand_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 3.94,
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            82.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "318b21e429d33774ffe94dd47cc8310be16909eed0344d8e532ad30ebd4cb1f7"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_shore_detail_h.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 444901,
+      "cc0_assets": [
+        "coast_sand_04"
+      ],
+      "cc0_files": [
+        "coast_sand_04/coast_sand_04_ao_2k.jpg",
+        "coast_sand_04/coast_sand_04_diff_2k.jpg",
+        "coast_sand_04/coast_sand_04_disp_2k.jpg",
+        "coast_sand_04/coast_sand_04_nor_gl_2k.jpg",
+        "coast_sand_04/coast_sand_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 3.94,
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            82.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "9bf9670b430a7d44edae76cfa75b535758b76eafe331e34d6d6ddfec133eac09"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_shore_detail_nm.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 2417864,
+      "cc0_assets": [
+        "coast_sand_04"
+      ],
+      "cc0_files": [
+        "coast_sand_04/coast_sand_04_ao_2k.jpg",
+        "coast_sand_04/coast_sand_04_diff_2k.jpg",
+        "coast_sand_04/coast_sand_04_disp_2k.jpg",
+        "coast_sand_04/coast_sand_04_nor_gl_2k.jpg",
+        "coast_sand_04/coast_sand_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 3.94,
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            82.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "a0413f6547e03f4751a3c95fc3f245f78d8079fa242ac7bec7a8a6309f75f5c7"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_shore_detail_r.png": {
+      "authored_tile_m": 4.0,
+      "bytes": 456471,
+      "cc0_assets": [
+        "coast_sand_04"
+      ],
+      "cc0_files": [
+        "coast_sand_04/coast_sand_04_ao_2k.jpg",
+        "coast_sand_04/coast_sand_04_diff_2k.jpg",
+        "coast_sand_04/coast_sand_04_disp_2k.jpg",
+        "coast_sand_04/coast_sand_04_nor_gl_2k.jpg",
+        "coast_sand_04/coast_sand_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 3.94,
+      "ops": [
+        [
+          "grade",
+          [
+            10.0,
+            82.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "fecf516261427df42585c745410622925bd9980554b09dce2115e323d85d8b5c"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_shore_macro_ao.png": {
+      "authored_tile_m": 30.0,
+      "bytes": 821583,
+      "cc0_assets": [
+        "coast_sand_04"
+      ],
+      "cc0_files": [
+        "coast_sand_04/coast_sand_04_ao_2k.jpg",
+        "coast_sand_04/coast_sand_04_diff_2k.jpg",
+        "coast_sand_04/coast_sand_04_disp_2k.jpg",
+        "coast_sand_04/coast_sand_04_nor_gl_2k.jpg",
+        "coast_sand_04/coast_sand_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 3.94,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            10.0,
+            82.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "a3f3fa6fddc00fbb792fc07cd55dcee3aef0efc9040b9e1a5f877d37257ee16a"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_shore_macro_b.png": {
+      "authored_tile_m": 30.0,
+      "bytes": 2263144,
+      "cc0_assets": [
+        "coast_sand_04"
+      ],
+      "cc0_files": [
+        "coast_sand_04/coast_sand_04_ao_2k.jpg",
+        "coast_sand_04/coast_sand_04_diff_2k.jpg",
+        "coast_sand_04/coast_sand_04_disp_2k.jpg",
+        "coast_sand_04/coast_sand_04_nor_gl_2k.jpg",
+        "coast_sand_04/coast_sand_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 3.94,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            10.0,
+            82.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "a040c283333009127d60464d96d2cd5116814bf1474b9b559c7c0bfad46cc7dc"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_shore_macro_h.png": {
+      "authored_tile_m": 30.0,
+      "bytes": 444901,
+      "cc0_assets": [
+        "coast_sand_04"
+      ],
+      "cc0_files": [
+        "coast_sand_04/coast_sand_04_ao_2k.jpg",
+        "coast_sand_04/coast_sand_04_diff_2k.jpg",
+        "coast_sand_04/coast_sand_04_disp_2k.jpg",
+        "coast_sand_04/coast_sand_04_nor_gl_2k.jpg",
+        "coast_sand_04/coast_sand_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 3.94,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            10.0,
+            82.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "9bf9670b430a7d44edae76cfa75b535758b76eafe331e34d6d6ddfec133eac09"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_shore_macro_nm.png": {
+      "authored_tile_m": 30.0,
+      "bytes": 2364759,
+      "cc0_assets": [
+        "coast_sand_04"
+      ],
+      "cc0_files": [
+        "coast_sand_04/coast_sand_04_ao_2k.jpg",
+        "coast_sand_04/coast_sand_04_diff_2k.jpg",
+        "coast_sand_04/coast_sand_04_disp_2k.jpg",
+        "coast_sand_04/coast_sand_04_nor_gl_2k.jpg",
+        "coast_sand_04/coast_sand_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 3.94,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            10.0,
+            82.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "fd8a724296b2fbfc31fb77691743054ed57a5d38495940bcdb0054c43ecb341f"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_shore_macro_r.png": {
+      "authored_tile_m": 30.0,
+      "bytes": 456471,
+      "cc0_assets": [
+        "coast_sand_04"
+      ],
+      "cc0_files": [
+        "coast_sand_04/coast_sand_04_ao_2k.jpg",
+        "coast_sand_04/coast_sand_04_diff_2k.jpg",
+        "coast_sand_04/coast_sand_04_disp_2k.jpg",
+        "coast_sand_04/coast_sand_04_nor_gl_2k.jpg",
+        "coast_sand_04/coast_sand_04_rough_2k.jpg"
+      ],
+      "native_tile_m": 3.94,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            10.0,
+            82.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "fecf516261427df42585c745410622925bd9980554b09dce2115e323d85d8b5c"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_terrain_base_ao.png": {
+      "authored_tile_m": 2048.0,
+      "bytes": 3817676,
+      "cc0_assets": [
+        "burned_ground_01",
+        "cliff_side",
+        "coast_sand_04",
+        "dry_ground_rocks",
+        "forest_floor",
+        "leafy_grass",
+        "mud_cracked_dry_riverbed_002",
+        "rock_face",
+        "rocks_ground_05",
+        "rocky_trail",
+        "sparse_grass"
+      ],
+      "cc0_files": [
+        "aerial_grass_rock/aerial_grass_rock_ao_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_diff_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_disp_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_nor_gl_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_rough_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_ao_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_diff_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_disp_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_nor_gl_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_rough_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg",
+        "burned_ground_01/burned_ground_01_ao_4k.jpg",
+        "burned_ground_01/burned_ground_01_diff_4k.jpg",
+        "burned_ground_01/burned_ground_01_disp_4k.jpg",
+        "burned_ground_01/burned_ground_01_nor_gl_4k.jpg",
+        "burned_ground_01/burned_ground_01_rough_4k.jpg",
+        "cliff_side/cliff_side_ao_2k.jpg",
+        "cliff_side/cliff_side_diff_2k.jpg",
+        "cliff_side/cliff_side_disp_2k.jpg",
+        "cliff_side/cliff_side_nor_gl_2k.jpg",
+        "cliff_side/cliff_side_rough_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_ao_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_diff_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_disp_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_nor_gl_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_rough_2k.jpg",
+        "coast_sand_04/coast_sand_04_ao_2k.jpg",
+        "coast_sand_04/coast_sand_04_diff_2k.jpg",
+        "coast_sand_04/coast_sand_04_disp_2k.jpg",
+        "coast_sand_04/coast_sand_04_nor_gl_2k.jpg",
+        "coast_sand_04/coast_sand_04_rough_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_ao_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_diff_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_disp_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_nor_gl_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_rough_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg",
+        "forest_floor/forest_floor_ao_2k.jpg",
+        "forest_floor/forest_floor_diff_2k.jpg",
+        "forest_floor/forest_floor_disp_2k.jpg",
+        "forest_floor/forest_floor_nor_gl_2k.jpg",
+        "forest_floor/forest_floor_rough_2k.jpg",
+        "leafy_grass/leafy_grass_ao_2k.jpg",
+        "leafy_grass/leafy_grass_diff_2k.jpg",
+        "leafy_grass/leafy_grass_disp_2k.jpg",
+        "leafy_grass/leafy_grass_nor_gl_2k.jpg",
+        "leafy_grass/leafy_grass_rough_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_ao_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_diff_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_disp_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_nor_gl_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_rough_2k.jpg",
+        "rock_face/rock_face_ao_2k.jpg",
+        "rock_face/rock_face_diff_2k.jpg",
+        "rock_face/rock_face_disp_2k.jpg",
+        "rock_face/rock_face_nor_gl_2k.jpg",
+        "rock_face/rock_face_rough_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_ao_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_diff_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_disp_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_nor_gl_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_rough_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_ao_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_diff_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_disp_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_nor_gl_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_rough_2k.jpg",
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg",
+        "snow_02/snow_02_ao_2k.jpg",
+        "snow_02/snow_02_diff_2k.jpg",
+        "snow_02/snow_02_disp_2k.jpg",
+        "snow_02/snow_02_nor_gl_2k.jpg",
+        "snow_02/snow_02_rough_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_ao_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_col_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_height_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_nor_gl_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_rough_2k.jpg",
+        "sparse_grass/sparse_grass_ao_2k.jpg",
+        "sparse_grass/sparse_grass_diff_2k.jpg",
+        "sparse_grass/sparse_grass_disp_2k.jpg",
+        "sparse_grass/sparse_grass_nor_gl_2k.jpg",
+        "sparse_grass/sparse_grass_rough_2k.jpg"
+      ],
+      "native_tile_m": null,
+      "ops": [
+        [
+          "base_set",
+          "design v4 2.5"
+        ]
+      ],
+      "px": 4096,
+      "resolution": "generated",
+      "sha256": "2843c0ef556f59903c8213ea42b072741f88da7c4c4f816b94309ced7c60b0e0"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_terrain_base_b.png": {
+      "authored_tile_m": 2048.0,
+      "bytes": 29222347,
+      "cc0_assets": [
+        "burned_ground_01",
+        "cliff_side",
+        "coast_sand_04",
+        "dry_ground_rocks",
+        "forest_floor",
+        "leafy_grass",
+        "mud_cracked_dry_riverbed_002",
+        "rock_face",
+        "rocks_ground_05",
+        "rocky_trail",
+        "sparse_grass"
+      ],
+      "cc0_files": [
+        "aerial_grass_rock/aerial_grass_rock_ao_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_diff_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_disp_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_nor_gl_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_rough_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_ao_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_diff_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_disp_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_nor_gl_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_rough_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg",
+        "burned_ground_01/burned_ground_01_ao_4k.jpg",
+        "burned_ground_01/burned_ground_01_diff_4k.jpg",
+        "burned_ground_01/burned_ground_01_disp_4k.jpg",
+        "burned_ground_01/burned_ground_01_nor_gl_4k.jpg",
+        "burned_ground_01/burned_ground_01_rough_4k.jpg",
+        "cliff_side/cliff_side_ao_2k.jpg",
+        "cliff_side/cliff_side_diff_2k.jpg",
+        "cliff_side/cliff_side_disp_2k.jpg",
+        "cliff_side/cliff_side_nor_gl_2k.jpg",
+        "cliff_side/cliff_side_rough_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_ao_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_diff_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_disp_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_nor_gl_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_rough_2k.jpg",
+        "coast_sand_04/coast_sand_04_ao_2k.jpg",
+        "coast_sand_04/coast_sand_04_diff_2k.jpg",
+        "coast_sand_04/coast_sand_04_disp_2k.jpg",
+        "coast_sand_04/coast_sand_04_nor_gl_2k.jpg",
+        "coast_sand_04/coast_sand_04_rough_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_ao_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_diff_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_disp_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_nor_gl_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_rough_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg",
+        "forest_floor/forest_floor_ao_2k.jpg",
+        "forest_floor/forest_floor_diff_2k.jpg",
+        "forest_floor/forest_floor_disp_2k.jpg",
+        "forest_floor/forest_floor_nor_gl_2k.jpg",
+        "forest_floor/forest_floor_rough_2k.jpg",
+        "leafy_grass/leafy_grass_ao_2k.jpg",
+        "leafy_grass/leafy_grass_diff_2k.jpg",
+        "leafy_grass/leafy_grass_disp_2k.jpg",
+        "leafy_grass/leafy_grass_nor_gl_2k.jpg",
+        "leafy_grass/leafy_grass_rough_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_ao_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_diff_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_disp_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_nor_gl_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_rough_2k.jpg",
+        "rock_face/rock_face_ao_2k.jpg",
+        "rock_face/rock_face_diff_2k.jpg",
+        "rock_face/rock_face_disp_2k.jpg",
+        "rock_face/rock_face_nor_gl_2k.jpg",
+        "rock_face/rock_face_rough_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_ao_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_diff_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_disp_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_nor_gl_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_rough_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_ao_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_diff_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_disp_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_nor_gl_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_rough_2k.jpg",
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg",
+        "snow_02/snow_02_ao_2k.jpg",
+        "snow_02/snow_02_diff_2k.jpg",
+        "snow_02/snow_02_disp_2k.jpg",
+        "snow_02/snow_02_nor_gl_2k.jpg",
+        "snow_02/snow_02_rough_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_ao_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_col_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_height_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_nor_gl_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_rough_2k.jpg",
+        "sparse_grass/sparse_grass_ao_2k.jpg",
+        "sparse_grass/sparse_grass_diff_2k.jpg",
+        "sparse_grass/sparse_grass_disp_2k.jpg",
+        "sparse_grass/sparse_grass_nor_gl_2k.jpg",
+        "sparse_grass/sparse_grass_rough_2k.jpg"
+      ],
+      "native_tile_m": null,
+      "ops": [
+        [
+          "base_set",
+          "design v4 2.5"
+        ]
+      ],
+      "px": 4096,
+      "resolution": "generated",
+      "sha256": "cdfdb7c02ee112718132b78c400bd6f732b0e84fa277d2f736ca011dd1ebfe29"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_terrain_base_h.png": {
+      "authored_tile_m": 2048.0,
+      "bytes": 612704,
+      "cc0_assets": [
+        "burned_ground_01",
+        "cliff_side",
+        "coast_sand_04",
+        "dry_ground_rocks",
+        "forest_floor",
+        "leafy_grass",
+        "mud_cracked_dry_riverbed_002",
+        "rock_face",
+        "rocks_ground_05",
+        "rocky_trail",
+        "sparse_grass"
+      ],
+      "cc0_files": [
+        "aerial_grass_rock/aerial_grass_rock_ao_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_diff_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_disp_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_nor_gl_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_rough_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_ao_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_diff_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_disp_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_nor_gl_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_rough_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg",
+        "burned_ground_01/burned_ground_01_ao_4k.jpg",
+        "burned_ground_01/burned_ground_01_diff_4k.jpg",
+        "burned_ground_01/burned_ground_01_disp_4k.jpg",
+        "burned_ground_01/burned_ground_01_nor_gl_4k.jpg",
+        "burned_ground_01/burned_ground_01_rough_4k.jpg",
+        "cliff_side/cliff_side_ao_2k.jpg",
+        "cliff_side/cliff_side_diff_2k.jpg",
+        "cliff_side/cliff_side_disp_2k.jpg",
+        "cliff_side/cliff_side_nor_gl_2k.jpg",
+        "cliff_side/cliff_side_rough_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_ao_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_diff_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_disp_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_nor_gl_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_rough_2k.jpg",
+        "coast_sand_04/coast_sand_04_ao_2k.jpg",
+        "coast_sand_04/coast_sand_04_diff_2k.jpg",
+        "coast_sand_04/coast_sand_04_disp_2k.jpg",
+        "coast_sand_04/coast_sand_04_nor_gl_2k.jpg",
+        "coast_sand_04/coast_sand_04_rough_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_ao_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_diff_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_disp_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_nor_gl_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_rough_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg",
+        "forest_floor/forest_floor_ao_2k.jpg",
+        "forest_floor/forest_floor_diff_2k.jpg",
+        "forest_floor/forest_floor_disp_2k.jpg",
+        "forest_floor/forest_floor_nor_gl_2k.jpg",
+        "forest_floor/forest_floor_rough_2k.jpg",
+        "leafy_grass/leafy_grass_ao_2k.jpg",
+        "leafy_grass/leafy_grass_diff_2k.jpg",
+        "leafy_grass/leafy_grass_disp_2k.jpg",
+        "leafy_grass/leafy_grass_nor_gl_2k.jpg",
+        "leafy_grass/leafy_grass_rough_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_ao_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_diff_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_disp_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_nor_gl_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_rough_2k.jpg",
+        "rock_face/rock_face_ao_2k.jpg",
+        "rock_face/rock_face_diff_2k.jpg",
+        "rock_face/rock_face_disp_2k.jpg",
+        "rock_face/rock_face_nor_gl_2k.jpg",
+        "rock_face/rock_face_rough_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_ao_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_diff_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_disp_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_nor_gl_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_rough_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_ao_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_diff_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_disp_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_nor_gl_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_rough_2k.jpg",
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg",
+        "snow_02/snow_02_ao_2k.jpg",
+        "snow_02/snow_02_diff_2k.jpg",
+        "snow_02/snow_02_disp_2k.jpg",
+        "snow_02/snow_02_nor_gl_2k.jpg",
+        "snow_02/snow_02_rough_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_ao_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_col_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_height_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_nor_gl_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_rough_2k.jpg",
+        "sparse_grass/sparse_grass_ao_2k.jpg",
+        "sparse_grass/sparse_grass_diff_2k.jpg",
+        "sparse_grass/sparse_grass_disp_2k.jpg",
+        "sparse_grass/sparse_grass_nor_gl_2k.jpg",
+        "sparse_grass/sparse_grass_rough_2k.jpg"
+      ],
+      "native_tile_m": null,
+      "ops": [
+        [
+          "base_set",
+          "design v4 2.5"
+        ]
+      ],
+      "px": 4096,
+      "resolution": "generated",
+      "sha256": "e68352e46d2acd5692a3aa00565c1cf52a5eafd7d5c9362b851ba7f466d28585"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_terrain_base_nm.png": {
+      "authored_tile_m": 2048.0,
+      "bytes": 28883416,
+      "cc0_assets": [
+        "burned_ground_01",
+        "cliff_side",
+        "coast_sand_04",
+        "dry_ground_rocks",
+        "forest_floor",
+        "leafy_grass",
+        "mud_cracked_dry_riverbed_002",
+        "rock_face",
+        "rocks_ground_05",
+        "rocky_trail",
+        "sparse_grass"
+      ],
+      "cc0_files": [
+        "aerial_grass_rock/aerial_grass_rock_ao_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_diff_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_disp_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_nor_gl_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_rough_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_ao_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_diff_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_disp_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_nor_gl_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_rough_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg",
+        "burned_ground_01/burned_ground_01_ao_4k.jpg",
+        "burned_ground_01/burned_ground_01_diff_4k.jpg",
+        "burned_ground_01/burned_ground_01_disp_4k.jpg",
+        "burned_ground_01/burned_ground_01_nor_gl_4k.jpg",
+        "burned_ground_01/burned_ground_01_rough_4k.jpg",
+        "cliff_side/cliff_side_ao_2k.jpg",
+        "cliff_side/cliff_side_diff_2k.jpg",
+        "cliff_side/cliff_side_disp_2k.jpg",
+        "cliff_side/cliff_side_nor_gl_2k.jpg",
+        "cliff_side/cliff_side_rough_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_ao_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_diff_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_disp_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_nor_gl_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_rough_2k.jpg",
+        "coast_sand_04/coast_sand_04_ao_2k.jpg",
+        "coast_sand_04/coast_sand_04_diff_2k.jpg",
+        "coast_sand_04/coast_sand_04_disp_2k.jpg",
+        "coast_sand_04/coast_sand_04_nor_gl_2k.jpg",
+        "coast_sand_04/coast_sand_04_rough_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_ao_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_diff_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_disp_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_nor_gl_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_rough_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg",
+        "forest_floor/forest_floor_ao_2k.jpg",
+        "forest_floor/forest_floor_diff_2k.jpg",
+        "forest_floor/forest_floor_disp_2k.jpg",
+        "forest_floor/forest_floor_nor_gl_2k.jpg",
+        "forest_floor/forest_floor_rough_2k.jpg",
+        "leafy_grass/leafy_grass_ao_2k.jpg",
+        "leafy_grass/leafy_grass_diff_2k.jpg",
+        "leafy_grass/leafy_grass_disp_2k.jpg",
+        "leafy_grass/leafy_grass_nor_gl_2k.jpg",
+        "leafy_grass/leafy_grass_rough_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_ao_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_diff_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_disp_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_nor_gl_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_rough_2k.jpg",
+        "rock_face/rock_face_ao_2k.jpg",
+        "rock_face/rock_face_diff_2k.jpg",
+        "rock_face/rock_face_disp_2k.jpg",
+        "rock_face/rock_face_nor_gl_2k.jpg",
+        "rock_face/rock_face_rough_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_ao_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_diff_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_disp_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_nor_gl_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_rough_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_ao_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_diff_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_disp_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_nor_gl_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_rough_2k.jpg",
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg",
+        "snow_02/snow_02_ao_2k.jpg",
+        "snow_02/snow_02_diff_2k.jpg",
+        "snow_02/snow_02_disp_2k.jpg",
+        "snow_02/snow_02_nor_gl_2k.jpg",
+        "snow_02/snow_02_rough_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_ao_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_col_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_height_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_nor_gl_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_rough_2k.jpg",
+        "sparse_grass/sparse_grass_ao_2k.jpg",
+        "sparse_grass/sparse_grass_diff_2k.jpg",
+        "sparse_grass/sparse_grass_disp_2k.jpg",
+        "sparse_grass/sparse_grass_nor_gl_2k.jpg",
+        "sparse_grass/sparse_grass_rough_2k.jpg"
+      ],
+      "native_tile_m": null,
+      "ops": [
+        [
+          "base_set",
+          "design v4 2.5"
+        ]
+      ],
+      "px": 4096,
+      "resolution": "generated",
+      "sha256": "349f6b63b7368ac75aec49895a405a382b2f90ca7189444e2e986312529fa57e"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_terrain_base_r.png": {
+      "authored_tile_m": 2048.0,
+      "bytes": 7409835,
+      "cc0_assets": [
+        "burned_ground_01",
+        "cliff_side",
+        "coast_sand_04",
+        "dry_ground_rocks",
+        "forest_floor",
+        "leafy_grass",
+        "mud_cracked_dry_riverbed_002",
+        "rock_face",
+        "rocks_ground_05",
+        "rocky_trail",
+        "sparse_grass"
+      ],
+      "cc0_files": [
+        "aerial_grass_rock/aerial_grass_rock_ao_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_diff_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_disp_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_nor_gl_2k.jpg",
+        "aerial_grass_rock/aerial_grass_rock_rough_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_ao_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_diff_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_disp_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_nor_gl_2k.jpg",
+        "aerial_rocks_02/aerial_rocks_02_rough_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_ao_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_diff_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_disp_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_nor_gl_2k.jpg",
+        "aerial_rocks_04/aerial_rocks_04_rough_2k.jpg",
+        "burned_ground_01/burned_ground_01_ao_4k.jpg",
+        "burned_ground_01/burned_ground_01_diff_4k.jpg",
+        "burned_ground_01/burned_ground_01_disp_4k.jpg",
+        "burned_ground_01/burned_ground_01_nor_gl_4k.jpg",
+        "burned_ground_01/burned_ground_01_rough_4k.jpg",
+        "cliff_side/cliff_side_ao_2k.jpg",
+        "cliff_side/cliff_side_diff_2k.jpg",
+        "cliff_side/cliff_side_disp_2k.jpg",
+        "cliff_side/cliff_side_nor_gl_2k.jpg",
+        "cliff_side/cliff_side_rough_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_ao_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_diff_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_disp_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_nor_gl_2k.jpg",
+        "coast_land_rocks_01/coast_land_rocks_01_rough_2k.jpg",
+        "coast_sand_04/coast_sand_04_ao_2k.jpg",
+        "coast_sand_04/coast_sand_04_diff_2k.jpg",
+        "coast_sand_04/coast_sand_04_disp_2k.jpg",
+        "coast_sand_04/coast_sand_04_nor_gl_2k.jpg",
+        "coast_sand_04/coast_sand_04_rough_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_ao_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_diff_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_disp_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_nor_gl_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_rough_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_ao_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_diff_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_disp_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_nor_gl_2k.jpg",
+        "dry_ground_rocks/dry_ground_rocks_rough_2k.jpg",
+        "forest_floor/forest_floor_ao_2k.jpg",
+        "forest_floor/forest_floor_diff_2k.jpg",
+        "forest_floor/forest_floor_disp_2k.jpg",
+        "forest_floor/forest_floor_nor_gl_2k.jpg",
+        "forest_floor/forest_floor_rough_2k.jpg",
+        "leafy_grass/leafy_grass_ao_2k.jpg",
+        "leafy_grass/leafy_grass_diff_2k.jpg",
+        "leafy_grass/leafy_grass_disp_2k.jpg",
+        "leafy_grass/leafy_grass_nor_gl_2k.jpg",
+        "leafy_grass/leafy_grass_rough_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_ao_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_diff_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_disp_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_nor_gl_2k.jpg",
+        "mud_cracked_dry_riverbed_002/mud_cracked_dry_riverbed_002_rough_2k.jpg",
+        "rock_face/rock_face_ao_2k.jpg",
+        "rock_face/rock_face_diff_2k.jpg",
+        "rock_face/rock_face_disp_2k.jpg",
+        "rock_face/rock_face_nor_gl_2k.jpg",
+        "rock_face/rock_face_rough_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_ao_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_diff_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_disp_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_nor_gl_2k.jpg",
+        "rocks_ground_05/rocks_ground_05_rough_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_ao_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_diff_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_disp_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_nor_gl_2k.jpg",
+        "rocky_terrain_02/rocky_terrain_02_rough_2k.jpg",
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg",
+        "snow_02/snow_02_ao_2k.jpg",
+        "snow_02/snow_02_diff_2k.jpg",
+        "snow_02/snow_02_disp_2k.jpg",
+        "snow_02/snow_02_nor_gl_2k.jpg",
+        "snow_02/snow_02_rough_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_ao_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_col_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_height_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_nor_gl_2k.jpg",
+        "snow_field_aerial/snow_field_aerial_rough_2k.jpg",
+        "sparse_grass/sparse_grass_ao_2k.jpg",
+        "sparse_grass/sparse_grass_diff_2k.jpg",
+        "sparse_grass/sparse_grass_disp_2k.jpg",
+        "sparse_grass/sparse_grass_nor_gl_2k.jpg",
+        "sparse_grass/sparse_grass_rough_2k.jpg"
+      ],
+      "native_tile_m": null,
+      "ops": [
+        [
+          "base_set",
+          "design v4 2.5"
+        ]
+      ],
+      "px": 4096,
+      "resolution": "generated",
+      "sha256": "83656b50019e76fa4d105352711df19bf11fcaff047aae644153ed5e1f66a916"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_trail_detail_ao.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 830446,
+      "cc0_assets": [
+        "rocky_trail"
+      ],
+      "cc0_files": [
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "grade",
+          [
+            11.0,
+            66.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "979488d53a0d49be731454ad8becb74007f7aa7fc98e4f6f42f0f6040091d419"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_trail_detail_b.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 2226959,
+      "cc0_assets": [
+        "rocky_trail"
+      ],
+      "cc0_files": [
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "grade",
+          [
+            11.0,
+            66.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "795dba2e0463c12a5d5917ef7a51e3ea92d7c6819e43ea0a7aa866dc5c1a1ae8"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_trail_detail_h.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 445833,
+      "cc0_assets": [
+        "rocky_trail"
+      ],
+      "cc0_files": [
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "grade",
+          [
+            11.0,
+            66.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "14a2cf6744732ee2a9316e1fd3f56ccd6197534dd8a9b528f56606a1fe076f56"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_trail_detail_nm.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 2458817,
+      "cc0_assets": [
+        "rocky_trail"
+      ],
+      "cc0_files": [
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "grade",
+          [
+            11.0,
+            66.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "c368703794795a30be41c9aa0f431cef06f6efc04d7771d6301ef0c697291816"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_trail_detail_r.png": {
+      "authored_tile_m": 2.0,
+      "bytes": 674318,
+      "cc0_assets": [
+        "rocky_trail"
+      ],
+      "cc0_files": [
+        "rocky_trail/rocky_trail_ao_2k.jpg",
+        "rocky_trail/rocky_trail_diff_2k.jpg",
+        "rocky_trail/rocky_trail_disp_2k.jpg",
+        "rocky_trail/rocky_trail_nor_gl_2k.jpg",
+        "rocky_trail/rocky_trail_rough_2k.jpg"
+      ],
+      "native_tile_m": 2.0,
+      "ops": [
+        [
+          "grade",
+          [
+            11.0,
+            66.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "9306e86117d1a7cfe81ae7c7bb964c992a10a4f0db3697093ff46e4db5864aea"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_trail_macro_ao.png": {
+      "authored_tile_m": 20.0,
+      "bytes": 732621,
+      "cc0_assets": [
+        "dirt_aerial_02"
+      ],
+      "cc0_files": [
+        "dirt_aerial_02/dirt_aerial_02_ao_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_diff_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_disp_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_nor_gl_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            11.0,
+            66.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "238ba94970474231f75aa0bb7a78a99959c3e49ac85b5a22aaad3c8c0be5aae1"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_trail_macro_b.png": {
+      "authored_tile_m": 20.0,
+      "bytes": 1123345,
+      "cc0_assets": [
+        "dirt_aerial_02"
+      ],
+      "cc0_files": [
+        "dirt_aerial_02/dirt_aerial_02_ao_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_diff_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_disp_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_nor_gl_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            11.0,
+            66.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "998369e8e7989df4419a0c310381338466031d8a393a338026b601683247dac3"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_trail_macro_h.png": {
+      "authored_tile_m": 20.0,
+      "bytes": 391601,
+      "cc0_assets": [
+        "dirt_aerial_02"
+      ],
+      "cc0_files": [
+        "dirt_aerial_02/dirt_aerial_02_ao_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_diff_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_disp_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_nor_gl_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            11.0,
+            66.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "ff189636fa24d0a9cf9f3d10fa584835589e917c5d50b0ac0a4a45ac2421beb9"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_trail_macro_nm.png": {
+      "authored_tile_m": 20.0,
+      "bytes": 1756025,
+      "cc0_assets": [
+        "dirt_aerial_02"
+      ],
+      "cc0_files": [
+        "dirt_aerial_02/dirt_aerial_02_ao_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_diff_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_disp_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_nor_gl_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            11.0,
+            66.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "c24e22964954f3611c989a13201b4567cf783093b902cd0fa1f60f9e559b46ff"
+    },
+    "art/terrains/ericrolph_hot_potato_arena_t_trail_macro_r.png": {
+      "authored_tile_m": 20.0,
+      "bytes": 456536,
+      "cc0_assets": [
+        "dirt_aerial_02"
+      ],
+      "cc0_files": [
+        "dirt_aerial_02/dirt_aerial_02_ao_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_diff_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_disp_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_nor_gl_2k.jpg",
+        "dirt_aerial_02/dirt_aerial_02_rough_2k.jpg"
+      ],
+      "native_tile_m": 20.0,
+      "ops": [
+        [
+          "macro_flatten",
+          0.85
+        ],
+        [
+          "grade",
+          [
+            11.0,
+            66.0
+          ]
+        ]
+      ],
+      "px": 1024,
+      "resolution": "2k",
+      "sha256": "cb9bc2bcad5ef4762810c93c5c633582c10b32a4048ad94dc817b5482690c489"
+    }
+  },
+  "level_id": "ericrolph_hot_potato_arena",
+  "macro_px": 1024,
+  "road_px": 1024,
+  "seed": 1128353104,
+  "terrain_model_source_hash": "338a20c06f0bf644",
+  "total_bytes": 382818291,
+  "written": [
+    "art/terrains/ericrolph_hot_potato_arena_t_terrain_base_ao.png",
+    "art/terrains/ericrolph_hot_potato_arena_t_terrain_base_b.png",
+    "art/terrains/ericrolph_hot_potato_arena_t_terrain_base_nm.png",
+    "art/terrains/ericrolph_hot_potato_arena_t_terrain_base_r.png"
+  ]
+}

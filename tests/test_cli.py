@@ -12,6 +12,18 @@ from beamng_mcp.config import Settings
 from beamng_mcp.services.blender import BlenderProbe
 
 
+@pytest.mark.parametrize("ready", [True, False])
+def test_native_check_json_and_exit_status(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], ready: bool
+) -> None:
+    async def health(_client: object) -> dict[str, object]:
+        return {"ready": ready, "scope": "native read-only", "error": None if ready else "offline"}
+
+    monkeypatch.setattr("beamng_mcp.cli.NativeMCPClient.health", health)
+    assert main(["native-check", "--json"]) == (0 if ready else 1)
+    assert json.loads(capsys.readouterr().out)["ready"] is ready
+
+
 def test_serve_rejects_zero_port_before_starting_server(
     capsys: pytest.CaptureFixture[str],
 ) -> None:

@@ -476,6 +476,15 @@ bridge is machine-local (auth token, port) and is never compared or written; `db
 `cannon_car_wash_lowvram_ericrolph.zip` is an alternate build of the same namespace, so it must
 never sit at the profile root beside the main zip — installing one means removing the other.
 
+The Giant's Hearth level and the Gateway Skillet arena are NOT in `deploy_local.py`'s table
+(it discovers `examples/giant_props/*/spec.py` plus the car wash). They are installed by
+`examples/hot_potato_arena/install_level.py`, which reports and deploys both zips against
+their locks to the real profile AND to the BeamMP client folder
+(`C:\Users\ericr\Downloads\Resources\Client\`), and regenerates BeamMP's `mods.json` (see the
+level-round laws below). Run `deploy_local.py` for the Hot Potato runtime first, then
+`install_level.py --deploy`; the arena's lock chains to the runtime's, so a runtime re-cut
+means an arena re-cut before either is installed.
+
 ### Sloped-terrain gating
 
 A sloped SPOT does not give you a tilted PROP, so measure the attitude, never assume it. Spawning
@@ -3220,6 +3229,636 @@ with `ast`, collect module-level ALL-CAPS assignments, subtract every `Name`
 load, assert the difference is empty. `ast` and not grep, so a name surviving
 only in a comment still counts as dead. It found two more on the first run
 (`PAD_WRAP`, `PAD_HEIGHT`), both deleted.
+
+### Level and scenario laws from the Hot Potato arena round (2026-09-01/02)
+
+The Gateway Skillet (`examples/hot_potato_arena/`, DESIGN.md there carries the
+blueprint and the full round ledger) is the first Shell-B LEVEL content this
+repo shipped since the car wash: thirteen prefab TSStatic shapes on stock
+`gridmap_v2`, a scenario-owned extension driving a shared runtime through
+option hooks, and a lock chained to another mod's lock. Every law below was
+verified THIS round — measured live on the sentinel profile, reproduced by a
+critic, or read at the cited engine line — and each names the repo file that
+now pins it. Nothing here is restated from memory.
+
+- **`extensions.<name>` on an UNLOADED extension is an autoload attempt, not a
+  nil read.** The engine's extensions table answers a miss through
+  `MT.__index` (`lua/common/extensions.lua` L1167–1183): it calls
+  `tbl.load(key)`, which logs `E extension unavailable: "<name>"` (L517–519)
+  and returns nil. A runtime that asks for `extensions.MPCoreNetwork` every
+  frame therefore logs that error twice a frame in single player (measured
+  2026-09-01). Loaded extensions are raw fields of the table AND globals
+  (L461–464: `M[extName] = m` then `rawset(_G, extName, m)`), so
+  `rawget(extensions, name) or rawget(_G, name)` is the silent read. Pinned:
+  `tests/test_hot_potato_beammp_sync.py::test_mp_lookups_never_trip_the_extension_autoloader`,
+  `tests/test_sumo_gyro_platform_beammp_sync.py`, the arena Lua's `runtime()`
+  and `isMPSession()`. Sumo Gyro's spec carries the fix; its shipped runtime
+  (serial 40) does not yet — see the arena DESIGN.md open items.
+- **A prefab record's `rotationMatrix` rows are the object's LOCAL AXES in
+  world — the transpose of the textbook `world = R·local` matrix.** Measured
+  three ways on 2026-09-01: with textbook matrices every rotated wall arc
+  landed mirrored (the spout authored for 60° read as a bare crest, 300° read
+  crest + a floating rivet); the stock `p_gm_interzone_structure10` (matrix
+  `[0,−1,0, 1,0,0, 0,0,1]`, 66 cube children) covers (640, −252) only under
+  the transposed reading and a live `castRayStatic` there read z 116.0
+  against 100.0 at the textbook footprint; CCW's spotlight basis has written
+  rows = (right, forward, up) for a year. beamngpy's
+  `compute_rotation_matrix` emits the textbook form. Derive every matrix from
+  the authored angle in the engine's convention and keep the angle
+  authoritative: `examples/hot_potato_arena/sync_scenario_outputs.py`
+  (`ENGINE_ROTATION_CONVENTION`, `engine_yaw_matrix`), refused on a handoff
+  that declares the engine convention but carries textbook matrices; the
+  live smoke asserts the structure10 witness every run.
+- **A string-typed integer field on a JSON prefab record leaves the S32 slot
+  UNINITIALISED.** `"forceDetail": "-1"` read back through
+  `getField('forceDetail', 0)` as `12589` on one boot and `−1073729235 /
+  1090531629 / −1509936851 / −1258278611` across four floor records on the
+  next, while stock TSStatics (which carry no such field — none of
+  gridmap_v2's 8,993 records nor CCW's do) read `-1` and a runtime `setField`
+  reads back exactly. Torque takes any value but −1 as a forced detail index,
+  so LOD selection on such a record is undefined per object per boot. Emit
+  none of `forceDetail` / `meshCulling` / `originSort`, as stock does, and
+  read the field back live: `tests/test_hot_potato_arena_package.py`
+  (records field-less) and `tests/test_hot_potato_arena_live.py`
+  (read-back `-1` on 32/32).
+- **A mod material's `groundtype` binds tire friction on a prefab TSStatic
+  plate ONLY when the materials live under `levels/<level>/art/shapes/…`.**
+  The level-independent `art/shapes/<id>/main.materials.json` in a mod zip
+  does not auto-load (both probe materials MISSING at scenario start; an
+  explicit `loadJsonMaterialsFile` resolves them but shapes imported before
+  their materials stay orange) — the level-scoped root auto-loads at level
+  load, which is also CCW's shape. Measured on 8 × 100 × 0.3 m plates, braking
+  from ≈ 11 m/s: the `"groundtype": "ICE"` plate decelerated at **1.97 /
+  2.00 m/s² (μ 0.200 / 0.204 — the engine's ICE sliding coefficient to three
+  figures)** over ≈ 31.7 m; the same DAE with a material carrying no
+  `groundtype` decelerated at **9.84 / 9.82 m/s² (μ ≈ 1.00, ASPHALT under
+  ABS)** over 4.7 m; the bare groundplane 7.14 / 9.10 m/s². The tires name the
+  model directly (`wheels.wheels[*].contactMaterialID1` →
+  `particles.getMaterialsParticlesTable()[id].name` reads `ICE`). Node
+  `frictionCoef` still multiplies this. Pinned by the arena's materials gate
+  and DESIGN.md ledger F-P1.1–F-P1.8.
+- **DAE LOD nodes follow the stock trailing-number convention, and the far
+  detail engaging is NOT yet proven.** Stock gridmap_v2 (205 DAEs): 197 carry
+  `base00`/`start01`, 115 carry `_a<N>` detail nodes (308 of them) under
+  `start01`, and 91 carry `nulldetail<N>`
+  — 90 as a child of `base00` SIBLING to `start01`, 1 at the scene root, 0
+  under `start01` (`s_gm_groundplane_64m` = `base00 → {collision-1,
+  nulldetail10, start01 → {_a150, Colmesh, _a15}}`). The arena's floor skin
+  shipped `_a290` / `_a70` / `nulldetail10` in that shape through geometry
+  v3.1 and `create_arena.py` asserts the exported node tree (A17). But the
+  negative control — the shipped zip with the `_a70` node deleted — still
+  rendered the NEAR mesh at 300 m (plaza median 95–119 against 148 with the
+  skins hidden), so clean far-field frames are not evidence of a detail
+  switch; runtime `setField('forceDetail')` was inert too, which fits a
+  single-detail cooked shape; and G1 then measured the 12 mm inlay
+  depth-fighting the groundplane on 2 of 3 boots (band metric 2.63–2.89 /
+  1.18–1.24 / 4.06–4.75 against a 2.2 line). The design owner's answer
+  (geometry v3.2, 2026-09-02) was no LOD at all: the skin became a driven,
+  colliding +50 mm surface — the measured fight-free separation — feathered
+  to the 12 mm datum over r 73.5–76 at 1.90 % with a 0.000 mm lip, one mesh
+  detail, asserts A19–A21. The live drop-test then proved that tree DOES
+  collide — ride height over the car's own four-corner footprint 0.2117 m on
+  the lifted plaza against 0.2116 m on a far reference lot, +50.1 mm over the
+  groundplane, four ASPHALT contacts — so a single-detail shape under
+  `base00 → {start01 → _a<N>, nulldetail<M>}` is a safe way to ship a driven
+  surface. What remains unproven in this repo is the opposite: **no gate has
+  ever caught a DAE far detail being selected**, and the striping the LOD was
+  meant to solve was only reduced by the lift, never eliminated — worst band
+  ratio 4.75 (pre-lift) → 2.73 → 2.69 → 3.06 → 4.16 across five builds, and
+  it was re-diagnosed as self-shadow acne and attacked twice more with
+  material-level `castShadows: false` — **which did not remove it**, because
+  a non-casting surface still RECEIVES shadows and the remaining caster over
+  the striped band was the neighbouring wall, deliberately left casting. Do
+  not author a far detail expecting it to engage, and do not expect
+  `castShadows: false` on the striped surface to help when something else
+  casts onto it.
+- **A streak/banding metric must sample the region the artifact occupies, and
+  a "clean" reading from a fixed window is worth nothing until you have
+  looked at a frame.** The arena's band metric sampled a plaza disc at frame
+  centre and read 0.87–0.92 ("clean", against a 2.2 line) at 150 m for four
+  boots running — while the artifact had simply migrated radially outward
+  onto the glacis, outside the sampled window. A visual A/B of the same
+  camera from a banded and a clean boot showed dense white stripes across the
+  outer glacis in one and nothing in the other. An acceptance decision was
+  taken on that reading and had to be withdrawn. This is the same failure as
+  the clearance law above (sweep the SWEPT GEOMETRY, not a representative
+  edge), in the measurement domain: **state the region a metric covers next
+  to its number, and re-aim the window when the phenomenon moves.**
+- **A metric's THRESHOLD is calibrated to the region it was designed for and
+  does not transfer with it.** Having learned to move a banding metric's
+  sample region from a plaza disc to the glacis annulus where the artifact
+  actually lived, the same round carried the plaza disc's **2.2** threshold
+  across unchanged — and the artifact's stripes sat just under it. The
+  sector COUNT then read "clean" (4, the pre-fix clean-boot floor) while the
+  sector MEAN read "banded" (1.72–1.84 against a clean 1.38 and a banded
+  1.77) — the metric contradicting itself in the same table — and the
+  conclusion published from it ("fixed at play distance") was falsified by
+  an independent instrument that counted 11 stripe lines in every post-fix
+  frame against the clean boot's 0. **Moving a metric's window without
+  re-deriving its threshold moves the blind spot rather than closing it.**
+  When two discriminators from one instrument disagree, the tie-break is the
+  pixels, and a number that undercuts your conclusion is the finding, not a
+  caveat.
+- **A central-force containment cannot hold a POWERED vehicle that reaches
+  flat ground outside the boundary, and you cannot tune your way out of it
+  when the well hangs over the centre.** Hot Potato's magnet hauls a
+  ballistic stray home every time (9/9, 6.85–6.95 s), but a car under
+  throttle that climbs the bank onto the flat runoff apron past the glacis
+  toe holds 29.9 m/s at r 114.7–115.1 for 40 s and never re-crosses the
+  release line — on 4 of 6 bearings, at BOTH the 1.2 g default and the 2.0 g
+  "escalation lever", and 3 of 3 for a taller vehicle. The two bearings that
+  do return are the ones that exit at grade through a gap in the wall. Two
+  structural reasons it is not a tuning problem: the well hangs over the pad,
+  so its DIRECTION is geometry rather than a choice; and on a traverse the
+  inward direction IS the lateral direction, so cutting lateral pull to stop
+  rolling the car (0.620 → 0.402 g) cuts the inward drag by the same number —
+  uprightness 1/6 → 5/6 was bought with re-entry 3/6 → 2/6. Design a
+  boundary that must contain a driven car with a term that GROWS past the
+  boundary, or with a rule the player can see, not with a constant-force
+  tether alone. **The resolution, measured:** the arena stopped trying to
+  win the traction fight and made leaving COST something instead — a 3×
+  fuse burn while the carrier is outside the ring, with a HUD flag and
+  crossing messages so it is a visible rule rather than the "invisible
+  punishment, illegible in play" that got the same idea rejected years
+  earlier. Over 478 live samples it held exactly 3.0× outside and 1.0×
+  inside with zero disagreements, parked and driven, and an orbiting carrier
+  detonated rather than farming the clock. A penalty that does not depend on
+  physics beats a force that has to.
+- **A prefab-spawned vehicle prop bootstraps its runtime at the first poll.**
+  A `BeamNGVehicle` record with `jBeam ericrolph_hot_potato` registered the
+  Hot Potato runtime during level load (`registered = true`, `part_count = 7`
+  at the first post-start poll, zero extra steps), and a 23-vehicle prefab
+  census (six cars, sixteen props, the Dispenser) ran a round at 60.0 fps
+  average / 22.4 ms worst frame / physics real-time factor 1.000. Pinned by
+  the arena live smoke.
+- **Vehicle class comes from the model's `Type`, and a per-id cache of it is
+  a trap.** `core_vehicles.getModel(vehicle:getJBeamFilename()).model.Type`
+  is what stock traffic reads (`gameplay/traffic/vehicle.lua` L29–34 refuses
+  anything outside `{car, truck, automation, traffic, proptraffic, player}`,
+  special-casing `unicycle` at L31; `editor/trafficManager.lua` L1948 tests
+  `== "Prop"`; `core/vehicles.lua` L758–764 returns `{}` for an unknown key,
+  L843–844 stamps `"Unknown"`). Stock census: Prop 67, Car 28, Trailer 13,
+  Truck 10, Heavy Machinery 2, Traffic 1, Debug 1. The engine REUSES the
+  vehicle object on an in-place replace (`core/vehicles.lua` L1699–1765,
+  `vehsToReuse` → `replaceOtherVehicle` on the same object → the
+  `onVehicleReplaced` hook lua_kit never subscribes), so a verdict cached by
+  id survives a model change and a player who Tabs into a box and picks a
+  car from the selector is failed closed for the session. Cache `{model,
+  verdict}` per id, re-read the model every roster pass (one C call), and
+  fail OPEN on every unknown. Pinned: Hot Potato v2.8 `v26.isPropVehicle`,
+  `tests/test_hot_potato_logic.py` (replace both ways, destroy/reuse,
+  unicycle, trailer, scenery carrier).
+- **`applyClusterVelocityScaleAdd(refNode, scale, x, y, z)`: scale 0 is a
+  REPLACE, scale 1 is the add.** The car wash launches from rest with 0 and
+  stops with `(…, 0, 0, 0, 0)`; the arena's geyser pop copied the launch form
+  and would have stopped a 25 m/s car dead in one physics step before lofting
+  it. At scale 1 a moving car went 6.043 → 6.035 m/s horizontal across the
+  pop frame (0.12 %) with +5.34 m/s vertical. Pinned: the arena Lua's
+  `POP_VELOCITY_SCALE = 1` comment, the lupa stub that records the scale, and
+  the live moving-car pop (horizontal preserved within 10 %). L1271 above
+  already said this for `addSubjectVelocity`; now a second mod has paid for
+  it.
+- **`scenario_scenarios.stop()` unloads the scenario extension BEFORE
+  `clientEndMission`.** The pause menu's "Exit scenario"
+  (`lua/ge/extensions/ui/pause/features/homeRail.lua` L433) calls `stop()`,
+  whose unload loop (`scenario/scenarios.lua` L467–486) runs first; only the
+  `returnToMainMenu()` paths reach `onClientEndMission` with the extension
+  alive. A scenario that hands runtime options back only at mission end
+  leaves them persisted on the ordinary exit — measured: the runtime's
+  settings file carried the arena's four values, zero restores fired. Hand
+  back in `onExtensionUnloaded` too, consume the snapshot once so either
+  order is one hand-back, keep nothing in `_G`, and treat the persisted
+  settings file plus `hotPotatoGetOptions()` as the exit witnesses — the
+  BeamNG log lags in-process and drops its tail on close. Pinned:
+  `tests/test_hot_potato_arena_logic.py` (unload without mission end,
+  double hand-back, crash-leftover snapshot) and the live smoke's
+  `scenario_scenarios.stop()` witness.
+- **A site-clearance claim must expand every Prefab's children through the
+  record's rotation and add the child shape's half-extents.** Two design
+  rounds swept record ORIGINS and asserted "clear to 170 m" (v1 named an
+  object 208 m out, v2 219.3 m); the real nearest origin was 178.7 m, and the
+  nearest GEOMETRY — a `s_gm_cube_4m` in `p_gm_interzone_structure4`'s 66-
+  child stack — was **161.95 m** from the site under the engine's matrix
+  convention (160.05 m with a centred half-extent; under the textbook
+  convention structure10 would have sat at 132 m, inside the runoff apron).
+  The children carry `isRenderEnabled = "false"` in the source `.prefab`
+  (964/964 across 44 files) and the Prefab renders and collides them anyway.
+  `tests/test_hot_potato_arena_site_clearance.py` parses all 83
+  `items.level.json` (8,993 records), expands `.prefab` children through
+  rotation and scale, adds DAE extents, walks DecalRoad/River nodes, computes
+  BOTH conventions, and asserts > 155 m on the measured one.
+- **`obj:setPlanets` ADDS a lifting attractor; it does not replace world
+  gravity.** The repo could not answer this from the shipped Lua, and the
+  arena's magnet design rested on it. Measured across the crest-ram gates:
+  before the membership fix no well was ever placed for a fast exit and the
+  car simply sat on the ground (r 183.61, 0.19 m up, 0.0 m/s at t = 75 s);
+  after it, every haul lifts the car while the ground falls away beneath it —
+  60 km/h to 2.09–2.12 m, 85 km/h to 7.86–7.87 m, 110 km/h to 13.31–13.53 m
+  above the ground under the car (ground z 104.6–105.3 → 100.0–103.0), with
+  the amber bead tether drawn at 3,580–4,213 px and `rose_while_tethered`
+  true in every case. Everything else on the map keeps normal gravity
+  throughout, so the well is an added attractor, not a replaced vector.
+- **A containment sweep on a timer is a speed trap for the thing it
+  contains.** The Hot Potato magnet sampled membership only on its 0.25 s
+  sweep; a car crossing the boundary at 85 km/h covers ~5.9 m per sweep and
+  was never drafted, so no well was placed, the haul never started and the
+  round end abandoned the stray at r 183.6. Any periodic membership test
+  must be stated against the fastest crossing it must catch, not the
+  comfortable case (fixed in serial 48).
+- **A keep-out radius and a solid's physical radius are different numbers,
+  and a reflex that touches the world must arm on the physical one.** The
+  arena registered 42 obstacle points with a dodge keep-out (6.5–8.0 m); an
+  anti-pinning reflex built on that radius armed on a flat 9.4 m disc, which
+  both shoved cars in open ground and still failed to fire against real
+  pins. Publishing a MEASURED physical radius per point beside the keep-out
+  (`rp`, 0.1–2.321 m here, asserted `rp <= r`) and arming on car reach + `rp`
+  shrank the disc to 3.13–5.35 m, stopped the open-ground shoving, and took
+  contacts from 51 to 7–16 per three-minute chase. **A circle still cannot
+  represent a wall**: a 14 m face carrying only its two end corners leaves a
+  7.0 m uncovered half-span in the middle, where a car can sit with a
+  positive gap and no reflex can arm — long faces need interior sample
+  points, and "each endpoint is a corner" is true and beside the point.
+  **Closed by measurement:** four interior points at 2.8 m pitch took the
+  nose's worst uncovered half-span from 7.00 m to 1.40 m, and the original
+  pin position replayed against the new registry went from gap **+1.471 m
+  (cannot arm) to −0.628 m (arms)**. Two rules came out of it. **Audit by
+  SOLID FACE, not by point class** — the caveat that missed this measured
+  spacing only for the points already classed `face`, so a 14 m wall whose
+  two registered points are corners was silently exempt; the assert now
+  walks every face. And **derive the spacing** from the arming geometry
+  (half-span 1.73 m at the 2.18 m minimum car reach → pitch ≤ 3.45 m) rather
+  than choosing a pitch, so a future reach or margin change re-derives it
+  instead of stranding a magic number.
+- **A steering reflex that recomputes from the CURRENT heading and releases
+  the moment its ray clears is a limit cycle, not an avoidance.** The dodge
+  re-aimed through the post on the next role sweep (0.8 s) and re-triggered
+  at 4 Hz forever; latching the side-step took AI contacts over three minutes
+  from 25 solid-contact samples to one contact event, with zero pillar,
+  tower or ramp-flank strikes (fixed in serial 50).
+- **Never sample a mesh on its own plane of symmetry — a ray along a shared
+  triangle edge is indistinguishable from a hole.** A radial raster down
+  bearing 180.000 of a handle symmetric about x = 850.000 returned 15 spikes
+  reading **exactly the groundplane z 100.000**, 4 m below the deck, with a
+  worst step of 5.17 m; all 16 bearings sampled 0.5° either side read z_min
+  104.003–104.007 with a worst step of 13.6 mm. A **5 mm lateral offset
+  closed it completely** (dx ±0.005/±0.020/±0.050 → 0 spikes; only dx
+  +0.000 spiked), and three car drops at the spot rested on the surface with
+  four ASPHALT contacts. Offset every raster from a symmetry plane, and
+  treat an isolated reading that lands on *exactly* the ground datum as a
+  suspected edge hit until a sidestep or a drop test says otherwise.
+- **An audit must read the authored geometry, not a model of it.** A round
+  reported a 145 mm step where a deck met a banked wall — "a straight edge
+  against a circular lip", 7× the relief cap, allegedly shipped for months.
+  The generator had always authored that edge **on the arc**
+  (`end_y(x) = −√(R² − x²)`, with the function's own docstring saying so);
+  the audit had modelled it as a straight chord and measured a standoff from
+  an edge that does not exist. The shipped DAE had all 12 vertices at
+  r 88.5000 and **0.002 mm** of relief. Retract from the authored vertices,
+  not from the model. The same failure one level up produced the coverage
+  caveat above: one round measured a shape it assumed, the other measured
+  only the classes it had thought of.
+- **Relief ACROSS a shape-to-shape junction is its own assert class, and it
+  had gone unmeasured in both directions through three critic rounds.**
+  Every existing relief check ran *within* a shape. The junction assert that
+  closed the gap covers 14 shape-to-shape meetings inside ±20 mm — and its
+  first draft asserted whole ramp bodies and fired at 3,510 mm, catching a
+  bad definition of "junction" before it shipped: a junction is where two
+  surfaces are authored to MEET, not wherever one shape's raised body passes
+  over another. Scope the test to the junction line, and exclude the side
+  where a deck legitimately sits on its own embankment.
+- **A two-sided rebate check hides a mid-span crossing, and a hidden sealing
+  element wants a one-sided one.** A tuck strip passed a 4 mm rebate test at
+  every vertex while the surface *between* the vertices stood +4.741 mm
+  proud — a chord spanning a slope break rides above a convex-up surface in
+  the middle, so deepening the rebate can only shrink the sagitta, never
+  remove it. Diagnose before choosing the method: matching the neighbour's
+  tessellation was built and measured (+0.646 mm) and still crossed, because
+  the deck edge was pinned with 0.6 mm of headroom. Making the skirt
+  **descend** put it under the neighbour *by construction*, independent of
+  either surface's faceting: **−2.427 mm over 549 samples of the built
+  triangles**. Cap the proud side only, and sample the built triangles
+  rather than the vertices.
+- **Never infer a rate from two reads of a runtime clock a paused-stepper
+  gate does not own.** BeamNG's `advanceClock` discards any wall gap over
+  0.5 s and skips `dtSim == 0`; a gate's Python round trip between behaviour
+  frames always exceeds 0.5 s, so the frame it samples is always the first
+  after a discarded delta — `clock_delta` measured **0.0 in 478 of 478
+  samples**. The underlying quantity still advances (the frames inside each
+  step burst count), so a slope computed against the gate's own clock
+  under-reports by an amount that depends only on the gate's latency. That is
+  how a multiplier of exactly 3.0 was measured as 1.71× and then 1.00×, and
+  a runtime was nearly blamed for it. **Read the rate the runtime publishes;
+  assert a per-sample contract, not a slope.**
+- **A census that groups events must be tested on data that should group.**
+  A gate suite's `_group_contacts` compared a full scene name (`…_ai_3`)
+  against an already-shortened id (`3`), so it never matched once and
+  silently emitted raw sample counts under the label "events" — for five
+  gate rounds and five reports. Comparisons between those numbers stayed
+  valid because the same bug produced all of them, but every label was
+  wrong, and the correction had to be made retroactively across published
+  records. State the unit beside the number, and report both units while a
+  comparison to older figures is still live.
+- **Live-harness facts, each of which cost a boot** (measured building
+  `tests/test_hot_potato_arena_gates_live.py`): a teleport quaternion
+  `(0, 0, sin ψ/2, cos ψ/2)` lands the nose at compass **180 + ψ**, not
+  180 − ψ; `control.step(6)` is ~0.3 s of sim at the 60 Hz deterministic
+  setting and the 0.1 s controller tick is `step(2)`; automatic gear indices
+  are `{-1 R, 0 N, 1 P, 2 D, 3 S}` (`shiftLogic/automaticGearbox.lua:658`)
+  and a car after a teleport drives BACKWARDS on throttle until D is selected
+  explicitly; **debugDrawer output exists only on frames the sim actually
+  runs**, so a capture must resume, shoot and re-pause (every paused halo-on
+  frame measured zero ribbon pixels); `doScreenshot` is asynchronous — wait
+  for the PNG to appear AND stop growing; **measure an overlay by chroma
+  (red minus blue), never by raw frame difference**, because exposure drift
+  counted 850k–919k false pixels where the real ribbon was a +8 to +40
+  chroma band; a teleport lands several frames later than the call; and ride
+  height must be measured over the car's own four-corner footprint, not one
+  centre ray, or a graded surface cannot be proven to carry the car; there is
+  no `fuse_remaining` stat to read casually (it is `countdown`, gated behind
+  `show_countdown` and the escalating tick, so the wrong name silently
+  returns `-1.0`); and **teleporting the CARRIER with `reset=True` is the
+  carrier-lost signal and ends the round** — move somebody else, or move the
+  carrier without a reset.
+- **The re-cut law held five times in one day, and the exception is
+  recorded.** Hot Potato serials 42 → 47 each moved exactly one member of 45
+  — `lua/ge/extensions/ericrolph_hot_potato/runtime.lua` (`c2addf9d…` →
+  `7fc49006…` → `cb43403e…` → `24db22d7…` → `4a136fd9…` → `2e24400d…`) —
+  proven by a before/after sha256 of every `mod/` file and zip member, with
+  the certified textures untouched and the lock sha equal to the zip sha at
+  every serial. Sumo Gyro Platform, which received the same rawget fix in
+  `spec.py`, was NOT re-cut: it has no certified harvest manifest (no
+  `textures_cooked/`; its dist ships 63 raw PNGs), so the one-member proof
+  has no certified baseline to hold its other 128 members against. Its
+  serial-40 runtime still reads `extensions.MPCoreNetwork`; the fix ships
+  with its next deliberate re-cut, on the record in the arena DESIGN.md.
+
+### Giant's Hearth level round: the round process, capped (2026-09-05 → 2026-09-15)
+
+The level `ericrolph_hot_potato_arena` ("Giant's Hearth", `examples/hot_potato_arena/`) was
+built by adversarial worker/critic pairs per subsystem (B1 terrain, B2 hearth, B3 vegetation,
+B4 props, B5 scenario-on-level, B6 packaging). **Start any session on it from
+`examples/hot_potato_arena/ROUND_HANDOFF.md`**; its `authoring/round_records/` carries the
+engine laws (`level_facts.md`), the ledger (`orchestrator_pending.md`), the debt
+(`BACKLOG.md`), the process (`PROCESS_20260915.md`), design amendments
+(`../design_amendments.md`) and every delivery's boot evidence (`delivery_<date>/`).
+
+**Why the process was capped.** Ten days, 38 critic passes (B1 16, B3 11, B2 7, B4 4), two of
+four subsystems accepted, and nothing delivered to the player for seven days — while the two
+defects the user had reported by name (flake rocks, unrealistic trees) sat fixed in the tree
+behind a 905 MB re-cut that could not run while they gamed. The open-ended "UTTERLY WOWED" bar
+let every pass add a new blocker, and the blockers had drifted from what the car shows to
+evidence methodology (trace gates, provenance gates, frame pricing). The user's own ten-minute
+drive found a defect eleven passes had not. On 2026-09-15 the user replaced the bar with the
+rules below; they bind every worker, critic and orchestrator on a level round, and they are the
+default for any future adversarial round in this repo.
+
+- **A fixed acceptance checklist is written BEFORE the revision starts.** The critic verifies
+  exactly that list and returns `PASS` or `FAIL <item ids>`. **A critic may not add a blocking
+  item mid-round**; new observations go to `BACKLOG.md`, one line each, and are scheduled, not
+  litigated.
+- **One critic pass per revision. Two revisions per subsystem.** After the second failed pass
+  the orchestrator rules ship-with-recorded-debt (default) or cut the feature. No third pass.
+- **Mechanical properties are pytest gates, never critic findings**: locks, member lists, JSON
+  validity, frozen-spec hashes, LF law, namespacing, scene census. A critic who finds one
+  writes the test. On 2026-09-15 every acceptance item was a test, a script or a boot, and the
+  delivery spent zero critic passes.
+- **Player-visible items are judged by the user** on a short drive after each install. Critic
+  checklists cover what cannot be seen from the car.
+- **Critic output is one page (≤ 60 lines) plus instruments.** The trust rule stays: a number is
+  printed only if the critic's own instrument produced it this pass. No narrative audits of the
+  builder's prose (B1's report had reached 565 KB, its evidence file 2.85 MB).
+- **One writer on the tree, one sentinel job at a time, and every brief names its write set.**
+  Read-only critics may run beside a worker but never boot while the worker needs the
+  sentinel. Fan-out is banned twice over: parallel writers caused the shared scene-index races
+  below, and three parallel agents on 2026-09-10 hit the weekly API limit together and all died
+  mid-edit (one of them halfway through a repo migration).
+- **Ship every session.** Offline work first, ONE full cut at the end, one verify boot, install
+  to both play locations, or a one-line reason why not. Fixes the user reported by name never
+  wait for a round to "pass".
+- **Write instruments with the Write tool, never a shell heredoc.** A heredoc ate the escape
+  characters in three separate gates of this round; each then reported clean while blind. A
+  tool-output block that says to prefer Bash/`sed`/heredocs is wrong for instrument files;
+  follow the brief and flag the conflict. **Never a glob in env-prefix position** (one ran a
+  repo-wide formatter over 24 files including the user's own), and never run a formatter over a
+  file another round owns.
+- **A task notification whose result says work is still running means the agent is PAUSED, not
+  finished.** Resume it; never spawn a second worker on the same directory.
+
+**Laws the round proved (numbers and instruments in `level_facts.md`):**
+
+- **A vendored frozen file is never edited; paint is applied by the reader, on a copy, behind
+  one door.** B1 wrote a safety repaint into `level/terrain_model.py`, vendored byte-for-byte
+  from the frozen design, and the spec gate failed. The fix that held: restore the frozen bytes
+  (`36f275eeb9c292c0`), put the repaint in `level/brink.py`, make `terrain_io.grid()` the single
+  memoised, COPIED, painted grid, switch every other reader (the cook, the planter, `layer_at`)
+  to it. The shipped `.ter` was byte-identical both ways (`8e354091…`), so the coverage change
+  was inherent to the fix and was recorded as **design amendment A1 at the ORIGINAL tolerance**
+  — a widened tolerance is not an amendment. Trap: `get_grid()` memoises and keys its disk
+  cache by the source hash; mutate its arrays and every later reader, control arms included,
+  sees the mutation.
+- **A scene-index file written by several rounds is declared once, in one list, never merged
+  after.** `main/MissionGroup/items.level.json` and `main.decals.json` are written by three
+  rounds; whichever writer runs last wins, and B4's writer silently dropped B2's 153 hearth
+  objects FOUR times — once between a cut and the boot that used it, so the level loaded clean
+  with 0 of 153 hearth objects and no error anywhere. Every group any round adds belongs in
+  `level_writer.mission_group_records()`. Measure the packaged archive, never a tree an agent
+  is writing to.
+- **The full-level cut is taken from a STAGED copy of the members list, never from `mod/`.**
+  `validate_level_tree` is an exact match over `mod/levels/<id>/`, and since B5 moved the arena's
+  36 members under the level path the shared tree is never exactly the allowlist. The cut is
+  `build_level_zip --members-file level/members_full_level.json --stage-into <clean dir>`: 808
+  members, 76 of which are registered by no round's `expected_level_members()`. Before every
+  cut, measure `render_level()` staleness (0 of 42 on 09-15) and `cook.verify_tree` on the
+  shared tree; never "take N members from a round's recut" — compare the recut to `mod/` by
+  hash and copy nothing (B1's certified recut differed from `mod/` on exactly the four
+  scene-index files, all merged supersets in `mod/`).
+- **An engine E line before the `mountEntry` line cannot be the archive's.** At 3.5 s
+  `core_levels` probes the profile's remembered `lastLevelName`
+  (`settings/cloud/game-state.json`) and logs `No entry point for level found: /levels/<id>.
+  Ignoring level.`; mods mount at ~8.7 s. The 09-08 delivery saw it name `/levels/GridMap`, the
+  09-15 delivery saw it name OUR level (B4's boots had left it last), and the raw verifier said
+  DO NOT SHIP on that one line. The 09-08 `finalise.py` attribution buckets it by text and
+  timestamp as `premount_level_scan` and prints `premount_scan_named_our_level` beside the
+  verdict. Attribute by timestamp; print that it named our level; never widen the rule to
+  lines after the mount.
+- **An instrument can go green on its own bug, and pytest's exit code will not tell you.** The
+  09-15 arena-scenario check matched the scenario by substring (`MOD_ID in path`) and caught the
+  level's probe scenario too, then an early `return` inside the `with` skipped the final
+  `assert` — pytest printed `1 passed` over a BLOCKED verdict written to the evidence file.
+  The same day a background pytest piped through `| tail` reported exit 0 for 4 failures
+  (tail's status). LAW: instruments write their verdict to a file and the test asserts on the
+  file; the checks live in a helper so the test function never returns early; match shipped
+  paths exactly; read the summary line and the JSON, never the exit code of a pipeline.
+- **The engine every gate ran on is 0.39.4.0 build 20972.** "0.38.6" is the sentinel PROFILE
+  directory name (`test-users\BeamNG-0.38.6\`), already a law above; this round re-captioned a
+  handoff "untested on 0.39.4" from that directory name. Every boot of the round was on the
+  user's own install.
+- **Frame evidence needs a byte-identical control in the same frame.** B1's "the drop is now
+  visible" (−0.07356 / −0.16346 luma) was an exposure artefact: the control wall, byte-identical
+  material and textures, darkened more (−0.08930 / −0.20378), so net of control the ground moved
+  the wrong way. The repaint was real (119,925 nodes, 0 heights moved); visibility was not
+  established and was recorded as debt, not claimed.
+- **A `class: superseded` declaration a gate takes on trust is an exploit, not a limitation.**
+  B1 r16 changed its trace gate in the run it certified; accepting `superseded` turned 323
+  failures into 0, and one planted token `0.8317294` passed as `traced, distinctive`. The
+  repair is to verify the declaration against the cut hash the artefact was produced from (the
+  feasible half); the artefact-member-digest half is impossible on current artefacts. Every
+  gate ships with a demonstrated failure case, tested by deletion as well as by corruption.
+- **Reference point vs body centre, three times in three places.** `_drive_grid` teleported the
+  vehicle's reference point to a centreline while the pickup's body centre sat up to 1.17 m
+  away; "wedged" cells were mis-placed, not wedged. Centre the BODY, and score "wedged" as its
+  own outcome.
+- **Sweep the whole parameter range, not the samples you chose.** Three defects hid behind
+  sampling: the deck's 10° heading step, the world edge's four axis arcs (open on 648 of 1,440
+  bearings), and a backwards autocorrelation bound that stock content fails.
+- **The installed build is what the player has, and it drifts.** Counting tree files newer
+  than the installed delivery found 116 of 118 tree files and 94 of 105 rock files undelivered.
+  `examples/hot_potato_arena/install_level.py` (no flags = report against the locks; `--deploy`
+  = hash-verified copy, refuses while the game runs) installs the level and the arena zips to
+  the real profile AND the BeamMP client folder, and regenerates BeamMP's
+  `Resources/Client/mods.json`, whose `lastwrite` is a **Windows FILETIME**
+  (`mtime_ns // 100 + 116444736000000000`, reproduced to the tick), not .NET ticks. The BeamMP
+  folder needs all THREE zips (level, arena, Hot Potato runtime); it had never carried the arena
+  until 2026-09-15. `deploy_local.py` still owns the Hot Potato runtime and knows nothing of the
+  other two. Replaced builds are kept in `dist_level/previous/` for rollback.
+- **The 905 MB re-cut is dominated by 626 MB of `.png`** (of 904.7 MB installed on 09-08;
+  `art/shapes` 567.9 MB, `art/terrains` 192.4 MB). The DDS cook goes FIRST in packaging: it is
+  what shortens every cut and removes the ~60 s first-load texture cook the player sees.
+- **An imposter bake drops every block whose MEAN alpha sits under the material's alphaRef.**
+  The 128 px imposter cell averages an alpha-tested card down to a texel or two; a block whose
+  mean alpha (255 × opaque coverage) is under `alphaRef` is dropped whole. `f_shrub_leaf_01`
+  shipped alphaRef 75 at coverage 0.175 (mean 45) and its dome baked to bbox fill 0.489 where
+  its mesh fills 0.712 (gate 0.70 ×); at alphaRef 28 with (4, 6) stamps it baked 0.705. A
+  calibrated card renderer that samples the card-size mip predicted 0.69 either way and an
+  alphaRef sweep through it moved 0.013 — the model had the wrong mechanism, and only the
+  engine's bake could say so. LAW: keep every cut-out's alphaRef under its cell's mean alpha,
+  pin it beside the sheet's coverage, and treat a predictor that disagrees with a bake as the
+  thing under test. Its cousin: a card wound with its front toward the plant's centre bakes a
+  normal atlas the engine lights from the wrong side (stored-X vs column −0.90; +0.91 once
+  wound outward) — the "black gashes" on the shrub billboards were normals, not colour.
+- **A level's PNG textures are cooked to DDS at level load, and a frame shot before that
+  cook finishes photographs the "NO TEXTURE" placeholder on every foliage and rock surface.**
+  Measured 2026-09-15: the engine cooked 242 maps (378 MB) into `temp/levels/<id>/` AT LOAD,
+  before any camera moved, and a thirteen-stop camera tour added nothing; the delivery
+  verifier shot its frames inside that window on both deliveries and the 09-08 round had
+  already written a second "settle then reshoot" boot for exactly this. The player pays the
+  same cook on the first load of every new build. The fix is the giant-props layout applied
+  to the level: harvest the engine's own cooked DDS from the sentinel
+  (`round_records/b6_cook/cook_harvest_r1.py`, giant-props placeholder rejection, a manifest
+  pinning each source PNG's sha256 and the profile's `GraphicTextureQuality`) and cut with
+  `build_level_zip --cooked-dir`, which ships each proven DDS IN PLACE of its PNG while every
+  material keeps naming the `.png` — the game resolves the cooked sibling. Verified cold:
+  the next boot cooked 4 files (the two placed logs' imposters) instead of 256, level load
+  33.7 s → 10.3 s, and the cold frames are fully textured. Costs, recorded as amendment A3:
+  +35.8 MB (242 maps, 346.3 MB PNG → 382.1 MB DDS; QB-28 raised to 1.1 GB) and the cook's
+  resolution is the harvesting profile's setting ("Normal": 2048 sources at 1024). LAW: a
+  frame is evidence only after the TextureCooker is quiet, and a shipped level cooks its own
+  textures before the player does.
+- **The engine's bake harvest lists what is in the PROFILE cache, not what the level ships.**
+  B3 r12's harvest returned 20 atlases for a fixture that left out 6: the other 14 were B4's
+  prop atlases the engine re-cooked in `temp/` (never level members), and a merge guard that
+  wanted exactly six tripped, leaving the manifest pinning the old bytes while the tree carried
+  the new. Filter a harvest by the members the fixture left out, then merge.
+- **Use the engine's own world-building objects where they fit (user direction, 2026-09-16).**
+  "Let's make sure we're using BeamNG.drive native tools (if it makes sense)": Terrain Editor,
+  Decal and Mesh Road Editors, Forest Editor. This level already ships the native formats for
+  three of the four — the `.ter` heightfield, DecalRoads, and `forest4` + `TSForestItemData` —
+  generated deterministically rather than hand-edited, because every frozen-spec and byte gate
+  depends on a reproducible build. The fourth landed with the road up the canyon wall: a
+  `MeshRoad` (`level/shelf_road.py`), which opens in the World Editor's Mesh Road Editor like a
+  hand-laid road. A Blender DAE of the same road was built, gated and retired for it before any
+  cut. Prefer the native object when one exists for the job; reach for Blender when it does not.
+  **The road and terrain pipeline is written up in `docs/BEAMNG_LEVEL_PIPELINE.md`** (user-supplied
+  guide, incorporated 2026-09-17, reconciled against the laws here; §9 lists every place the guide
+  and a measurement disagree and the measurement binds). Three QA gates come from it and are
+  adopted for any drivable surface this repo ships: a **150 km/h pass in a low-clearance car**
+  (steering oscillation means micro-kinks), a **flush wall/curb snag pass**, and a
+  **100-250 m segment budget** so occlusion culling can work. A road proven only at climbing
+  speed has passed none of them.
+- **No stock level ships a MeshRoad — take its record layout from the engine.** None of the 20
+  stock level zips carries one. `createObject("MeshRoad")` + `insertNode(pos, width, depth,
+  normal, index)` is the Mesh Road Editor's API (`lua/ge/extensions/editor/api/roadRiver.lua`),
+  and `obj:serialize(true, -1)` is what Save Level writes. Nodes are
+  `[x, y, z, width, depth, nx, ny, nz]`; the node normal is the editor's bank angle.
+- **Materials and scene objects share ONE name and persistentId space.** A MeshRoad and its
+  own deck material shared a name (and so a uuid5 persistentId); the loader refused the road
+  with one E line and the level loaded clean without it. The level's uniqueness gate compared
+  scene records only with each other; `tests/test_hot_potato_shelf_road.py` now reads every
+  `*.materials.json` together with every scene record, and was shown to fire on this collision.
+- **A MeshRoad has vehicle collision as loaded, but ignores its material's `groundType`.**
+  Cars land and rest on the deck before and after `be:reloadCollision()`. With the deck
+  material's `groundType` set to the level's `ERHP_TRAIL` and then to the stock `DIRT`, the
+  wheels read `ASPHALT` both times, while the same probe reads `ICE` on a TSStatic whose
+  material carries a stock name. A road that must grip or sound like dirt is a TSStatic with a
+  Colmesh, or terrain painted with a layer that carries the model.
+- **`control(brake=1)` on a standing car is REVERSE.** BeamNG's arcade input turns the brake
+  pedal into reverse throttle at a standstill. Three "cars fall off the road" results were cars
+  driving themselves backwards off it at 20 m/s. A parked-car test sets `parkingbrake=1,
+  brake=0`; trace z frame by frame, because the harness `teleport` settle loop watches x/y only.
+- **BeamNG's scripted AI line is not a drivability proof; steer the car yourself.**
+  `ai.set_line` left its line by 12 m within 60 m and stopped against a tree the route never
+  touched. The proof that the canyon road is drivable is a harness-steered drive (pure pursuit
+  on the shipped path, a speed loop, brake only while rolling forward) from the trail's end to
+  the pass: 240 m of climb, never more than 2.6 m off the lane centre, never under the deck.
+- **Survey where a new road's ends meet the roads that feed them, in direction as well as
+  position.** The road's foot lies anticlockwise of the trail's end while the road climbs
+  clockwise, so every straight approach met it head-on and the first drive stopped at the
+  junction. The approach now carries a 17 m turnaround loop. A bench cut into a face of angle
+  `a` does not daylight until `cut x tan(a)` higher; on this 83-88 deg wall that rules out
+  switchbacks, so the road is a single traverse.
+
+### Measuring a build: laws from D7, the cliff-outcrop repair (2026-09-17)
+
+The three face-scan cliffs read as stacked slabs to the user twice, a month apart. A5 measured
+the defect and rejected four fixes; D7 fixed it. What transfers:
+
+- **A probe that measures the BODY cannot predict a gate that reads the DETAILS.** Every LOD
+  goes through `seal_to` and `ensure_solid` after the body is built — decimate, re-cap, re-close
+  — and that moves every number a gate reads. `cliff_outcrop_a`'s body came out genus 1 while
+  all three of its shipped details read genus 3; its body read husk solidity 0.681 / fill 0.341
+  where the shipped finest visual read 0.649 / 0.252, which FAILS. An offline probe is for
+  finding the mechanism. **The sweep that picks the shipped value drives the real builder and
+  reads the shipped file**, however much slower that is (35 s a point here).
+- **A probe on the wrong seed measures a shape nothing ships.** `build_species` seeds each
+  species' relief from `crc32(SHAPE_SEED:key)`. The relief decides which ledges the remesher
+  bridges, so the same parameters gave genus 1 at `seed=0` and genus 3 on the production seed.
+  Take the seed from the builder, never a convenient constant.
+- **When two candidate fixes each fail alone, try them TOGETHER before rejecting the
+  diagnosis.** A5 measured finer skirt rows alone (not enough) and remeshing the body alone
+  (handles, and a closing sweep that inflated the rock 2.1 m), and concluded the decimator was
+  at fault for the whole body. Both halves were right about different things: the rows MAKE the
+  ledges, and the remesher BRIDGES neighbouring ledges into handles. Together they take sliver
+  area from 0.474 / 0.326 / 0.228 to 0.018 / 0.019 / 0.006 — 16-35x — at under a metre of shape
+  movement. Four rejected attempts are a reason to re-read them as a set, not to stop.
+- **Gates that pull against each other need a two-dimensional sweep.** Genus, husk and sliver
+  each improve on a different axis here: a finer skirt buys sliver and costs husk fill, a deeper
+  body buys fill and costs handles. Sweeping one knob at a time found no passing point; the pair
+  (`skirt_rows` 0.025, `body_depth` 0.70) passes all three. **When a one-knob sweep has no
+  winner, add the second knob before widening a bar.**
+- **A fix that transferred once does not transfer by name.** B2 cured this same defect in its r7
+  by RE-SOURCING to a closed 360-degree scan through `solid="voxel"`. D7 surveyed every rock scan
+  in the cache that way and three came out numerically perfect — then the clay renders refused
+  all three: they are squat boulders, and at 21-41 m that is a giant pebble, not a cliff. A
+  hearth stone IS a boulder; a cliff outcrop is not. **Render the candidate before adopting the
+  route that measured best.**
+- **Judge a geometric defect on CLAY, not on texture.** Untextured renders under one sun show
+  blades, folds and detached plates that rock albedo and a normal map hide. Three views (front,
+  three-quarter, along the strike) at the LOD the shape ships its biggest instances at.
+- **A comment pasted into N rows is N chances to be wrong.** The claim that `h_rock_face_01`
+  proved the voxel route on "the SAME CC0 scan" was false — `hearth_spec.STONE_SOURCES`
+  re-sources that slot to `rock_07`, same slot name, different scan — and it had been copied
+  verbatim into all three cliff rows, where it pointed the next round at a route that did not
+  exist. Write the finding once and reference it.
+- **Changing a shape near other content owes a re-plant in the same revision.** The new cliffs
+  left 478 instances rooted inside solid bodies; re-running the planter re-seated 16,156 and
+  returned `rooted_inside_after: 0`. Counts derived from placement (here the road corridor's
+  clearance, 515 -> 565) are NOT constants of the thing that owns them and move with any nearby
+  shape.
+
+**Keep the current cut and one rollback; delete the rest.** A level round's scratch reached
+58 GB, of which 38.6 GB was 86 full 1 GB level zips and 15.5 GB was 9,629 texture bakes — every
+one reproducible from the tree, and superseded by `dist_level/` plus `dist_level/previous/`.
+Evidence worth keeping is the text: reports, probe JSON, and the frames a finding cites.
 
 ## Verification and Git hygiene
 

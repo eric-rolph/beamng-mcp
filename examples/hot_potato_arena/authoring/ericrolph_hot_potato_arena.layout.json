@@ -1,0 +1,76 @@
+{
+  "schema": "ericrolph-hot-potato-arena-layout-v1",
+  "design": "arena_design_v3.md SS3.5 / SS5.1 / SS5.4 / SS6.2 with the v3.1 amendment (centre pantry stacks at 20/200)",
+  "notes": [
+    "Everything the scenario places that is NOT a geometry static: read by sync_scenario_outputs.py.",
+    "Bearings are compass degrees (0 = +Y, 90 = +X) about C = (850, -280); r in metres; grade z = 100.",
+    "If the geometry handoff grows a 'layout' section with this schema the generator prefers it (one file, one truth); until then this file is the placement table.",
+    "Geyser 'anchor' overrides bearing/r with the midpoint of the named handoff instances (the gate sits between its two authored towers).",
+    "Spout sites use the design table's r = 90 (build round 1 used the crest radius 91.4; recorded as a deviation and corrected here).",
+    "curtain_offsets / wisp_offsets are metres along the site tangent: wisp nodes stay active as the OFF tell, curtain nodes switch with the ON window."
+  ],
+  "grade_z": 100.0,
+  "car_spawn_z": 100.6,
+  "prop_spawn_z": 100.4,
+  "dispenser_z": 100.1,
+  "emitter_z": 100.2,
+  "spawn_ring_r": 40.0,
+  "cars": [
+    {"name": "player", "role": "player", "jbeam": "etk800", "bearing": 120.0, "licence": "SKILLET"},
+    {"name": "ai_1", "role": "ai", "jbeam": "covet", "bearing": 30.0, "licence": "SPUD 1"},
+    {"name": "ai_2", "role": "ai", "jbeam": "bx", "bearing": 150.0, "licence": "SPUD 2"},
+    {"name": "ai_3", "role": "ai", "jbeam": "etk800", "bearing": 210.0, "licence": "SPUD 3"},
+    {"name": "ai_4", "role": "ai", "jbeam": "barstow", "bearing": 270.0, "licence": "SPUD 4"},
+    {"name": "ai_5", "role": "ai", "jbeam": "bluebuck", "bearing": 330.0, "licence": "SPUD 5"}
+  ],
+  "box_walls": [
+    {"name": "boxwall_1", "jbeam": "cardboard_box", "bearing": 105.0, "r": 60.0, "count": 3, "pitch_m": 1.4},
+    {"name": "boxwall_2", "jbeam": "cardboard_box", "bearing": 255.0, "r": 60.0, "count": 3, "pitch_m": 1.4},
+    {"name": "boxwall_3", "jbeam": "cardboard_box", "bearing": 20.0, "r": 34.0, "count": 3, "pitch_m": 1.4},
+    {"name": "boxwall_4", "jbeam": "cardboard_box", "bearing": 200.0, "r": 34.0, "count": 3, "pitch_m": 1.4}
+  ],
+  "barrel_clusters": [
+    {"name": "barrels_1", "jbeam": "barrels", "bearing": 160.0, "r": 64.0, "count": 2, "pitch_m": 1.8},
+    {"name": "barrels_2", "jbeam": "barrels", "bearing": 200.0, "r": 64.0, "count": 2, "pitch_m": 1.8}
+  ],
+  "geyser_pop_mps": 5.5,
+  "geysers": [
+    {
+      "name": "gate",
+      "bearing": 0.0,
+      "r": 58.0,
+      "anchor": ["ericrolph_hot_potato_arena_geyser_tower_l", "ericrolph_hot_potato_arena_geyser_tower_r"],
+      "half_len": 4.55,
+      "half_wid": 1.5,
+      "off": 8.0,
+      "on": 4.0,
+      "phase": 0.0,
+      "wisp_offsets": [0.0],
+      "curtain_offsets": [-2.4, 2.4]
+    },
+    {
+      "name": "spout_e",
+      "bearing": 60.0,
+      "r": 90.0,
+      "half_len": 15.0,
+      "half_wid": 3.0,
+      "off": 9.0,
+      "on": 5.0,
+      "phase": 4.666667,
+      "wisp_offsets": [0.0],
+      "curtain_offsets": [-12.0, -4.0, 4.0, 12.0]
+    },
+    {
+      "name": "spout_w",
+      "bearing": 240.0,
+      "r": 90.0,
+      "half_len": 15.0,
+      "half_wid": 3.0,
+      "off": 9.0,
+      "on": 5.0,
+      "phase": 9.333333,
+      "wisp_offsets": [0.0],
+      "curtain_offsets": [-12.0, -4.0, 4.0, 12.0]
+    }
+  ]
+}

@@ -1,0 +1,797 @@
+{
+  "fallback_rows": [
+    {
+      "name": "hearth_stone_00",
+      "owner": "B2",
+      "r": 15.0,
+      "rp": 11.0,
+      "why": "lane flank: the stone a car leaving through a lane passes nearest",
+      "x": 794.872,
+      "y": -74.258
+    },
+    {
+      "name": "hearth_stone_04",
+      "owner": "B2",
+      "r": 14.0,
+      "rp": 10.0,
+      "why": "lane flank: the stone a car leaving through a lane passes nearest",
+      "x": 999.907,
+      "y": -130.093
+    },
+    {
+      "name": "hearth_stone_07",
+      "owner": "B2",
+      "r": 15.0,
+      "rp": 11.0,
+      "why": "lane flank: the stone a car leaving through a lane passes nearest",
+      "x": 1055.742,
+      "y": -224.872
+    },
+    {
+      "name": "hearth_stone_11",
+      "owner": "B2",
+      "r": 14.0,
+      "rp": 10.0,
+      "why": "lane flank: the stone a car leaving through a lane passes nearest",
+      "x": 999.907,
+      "y": -429.907
+    },
+    {
+      "name": "hearth_stone_14",
+      "owner": "B2",
+      "r": 15.0,
+      "rp": 11.0,
+      "why": "lane flank: the stone a car leaving through a lane passes nearest",
+      "x": 905.128,
+      "y": -485.742
+    },
+    {
+      "name": "hearth_stone_18",
+      "owner": "B2",
+      "r": 14.0,
+      "rp": 10.0,
+      "why": "lane flank: the stone a car leaving through a lane passes nearest",
+      "x": 700.093,
+      "y": -429.907
+    },
+    {
+      "name": "hearth_stone_21",
+      "owner": "B2",
+      "r": 15.0,
+      "rp": 11.0,
+      "why": "lane flank: the stone a car leaving through a lane passes nearest",
+      "x": 644.258,
+      "y": -335.128
+    },
+    {
+      "name": "hearth_stone_25",
+      "owner": "B2",
+      "r": 14.0,
+      "rp": 10.0,
+      "why": "lane flank: the stone a car leaving through a lane passes nearest",
+      "x": 700.093,
+      "y": -130.093
+    },
+    {
+      "name": "hearth_stone_02",
+      "owner": "B2",
+      "r": 22.0,
+      "rp": 18.0,
+      "why": "cluster-centre giant (36 m): the head-on target of a car crossing the ash bed",
+      "x": 906.94,
+      "y": -67.496
+    },
+    {
+      "name": "hearth_stone_09",
+      "owner": "B2",
+      "r": 22.0,
+      "rp": 18.0,
+      "why": "cluster-centre giant (36 m): the head-on target of a car crossing the ash bed",
+      "x": 1062.504,
+      "y": -336.94
+    },
+    {
+      "name": "hearth_stone_16",
+      "owner": "B2",
+      "r": 22.0,
+      "rp": 18.0,
+      "why": "cluster-centre giant (36 m): the head-on target of a car crossing the ash bed",
+      "x": 793.06,
+      "y": -492.504
+    },
+    {
+      "name": "hearth_stone_23",
+      "owner": "B2",
+      "r": 22.0,
+      "rp": 18.0,
+      "why": "cluster-centre giant (36 m): the head-on target of a car crossing the ash bed",
+      "x": 637.496,
+      "y": -223.06
+    },
+    {
+      "name": "hearth_stone_03",
+      "owner": "B2",
+      "r": 18.0,
+      "rp": 14.0,
+      "why": "next to the spout lanes 60/240 (the most-used exits)",
+      "x": 958.0,
+      "y": -92.939
+    },
+    {
+      "name": "hearth_stone_08",
+      "owner": "B2",
+      "r": 19.0,
+      "rp": 15.0,
+      "why": "next to the spout lanes 60/240 (the most-used exits)",
+      "x": 1067.0,
+      "y": -280.0
+    },
+    {
+      "name": "hearth_stone_17",
+      "owner": "B2",
+      "r": 18.0,
+      "rp": 14.0,
+      "why": "next to the spout lanes 60/240 (the most-used exits)",
+      "x": 742.0,
+      "y": -467.061
+    },
+    {
+      "name": "hearth_stone_22",
+      "owner": "B2",
+      "r": 19.0,
+      "rp": 15.0,
+      "why": "next to the spout lanes 60/240 (the most-used exits)",
+      "x": 633.0,
+      "y": -280.0
+    },
+    {
+      "name": "bench_log_fb0",
+      "owner": "B2",
+      "r": 30.0,
+      "rp": 3.5,
+      "why": "the only drivable outside solid: two r 30 discs cover the 100 m deck (a coarse dodge corridor)",
+      "x": 1115.379,
+      "y": -404.35
+    },
+    {
+      "name": "bench_log_fb1",
+      "owner": "B2",
+      "r": 30.0,
+      "rp": 3.5,
+      "why": "the only drivable outside solid: two r 30 discs cover the 100 m deck (a coarse dodge corridor)",
+      "x": 1090.379,
+      "y": -447.65
+    }
+  ],
+  "level_id": "ericrolph_hot_potato_arena",
+  "owners": {
+    "B2": 28,
+    "B4": 39
+  },
+  "rows": [
+    {
+      "name": "hearth_stone_00",
+      "owner": "B2",
+      "r": 15.0,
+      "rp": 11.0,
+      "why": "hearth stone",
+      "x": 794.872,
+      "y": -74.258
+    },
+    {
+      "name": "hearth_stone_01",
+      "owner": "B2",
+      "r": 19.0,
+      "rp": 15.0,
+      "why": "hearth stone",
+      "x": 850.0,
+      "y": -63.0
+    },
+    {
+      "name": "hearth_stone_02",
+      "owner": "B2",
+      "r": 22.0,
+      "rp": 18.0,
+      "why": "hearth stone",
+      "x": 906.94,
+      "y": -67.496
+    },
+    {
+      "name": "hearth_stone_03",
+      "owner": "B2",
+      "r": 18.0,
+      "rp": 14.0,
+      "why": "hearth stone",
+      "x": 958.0,
+      "y": -92.939
+    },
+    {
+      "name": "hearth_stone_04",
+      "owner": "B2",
+      "r": 14.0,
+      "rp": 10.0,
+      "why": "hearth stone",
+      "x": 999.907,
+      "y": -130.093
+    },
+    {
+      "name": "chock_stone_05",
+      "owner": "B2",
+      "r": 9.0,
+      "rp": 5.0,
+      "why": "chock",
+      "x": 878.03,
+      "y": -51.714
+    },
+    {
+      "name": "chock_stone_06",
+      "owner": "B2",
+      "r": 9.0,
+      "rp": 5.0,
+      "why": "chock",
+      "x": 939.868,
+      "y": -68.284
+    },
+    {
+      "name": "hearth_stone_07",
+      "owner": "B2",
+      "r": 15.0,
+      "rp": 11.0,
+      "why": "hearth stone",
+      "x": 1055.742,
+      "y": -224.872
+    },
+    {
+      "name": "hearth_stone_08",
+      "owner": "B2",
+      "r": 19.0,
+      "rp": 15.0,
+      "why": "hearth stone",
+      "x": 1067.0,
+      "y": -280.0
+    },
+    {
+      "name": "hearth_stone_09",
+      "owner": "B2",
+      "r": 22.0,
+      "rp": 18.0,
+      "why": "hearth stone",
+      "x": 1062.504,
+      "y": -336.94
+    },
+    {
+      "name": "hearth_stone_10",
+      "owner": "B2",
+      "r": 18.0,
+      "rp": 14.0,
+      "why": "hearth stone",
+      "x": 1037.061,
+      "y": -388.0
+    },
+    {
+      "name": "hearth_stone_11",
+      "owner": "B2",
+      "r": 14.0,
+      "rp": 10.0,
+      "why": "hearth stone",
+      "x": 999.907,
+      "y": -429.907
+    },
+    {
+      "name": "chock_stone_12",
+      "owner": "B2",
+      "r": 9.0,
+      "rp": 5.0,
+      "why": "chock",
+      "x": 1078.286,
+      "y": -308.03
+    },
+    {
+      "name": "chock_stone_13",
+      "owner": "B2",
+      "r": 9.0,
+      "rp": 5.0,
+      "why": "chock",
+      "x": 1061.716,
+      "y": -369.868
+    },
+    {
+      "name": "hearth_stone_14",
+      "owner": "B2",
+      "r": 15.0,
+      "rp": 11.0,
+      "why": "hearth stone",
+      "x": 905.128,
+      "y": -485.742
+    },
+    {
+      "name": "hearth_stone_15",
+      "owner": "B2",
+      "r": 19.0,
+      "rp": 15.0,
+      "why": "hearth stone",
+      "x": 850.0,
+      "y": -497.0
+    },
+    {
+      "name": "hearth_stone_16",
+      "owner": "B2",
+      "r": 22.0,
+      "rp": 18.0,
+      "why": "hearth stone",
+      "x": 793.06,
+      "y": -492.504
+    },
+    {
+      "name": "hearth_stone_17",
+      "owner": "B2",
+      "r": 18.0,
+      "rp": 14.0,
+      "why": "hearth stone",
+      "x": 742.0,
+      "y": -467.061
+    },
+    {
+      "name": "hearth_stone_18",
+      "owner": "B2",
+      "r": 14.0,
+      "rp": 10.0,
+      "why": "hearth stone",
+      "x": 700.093,
+      "y": -429.907
+    },
+    {
+      "name": "chock_stone_19",
+      "owner": "B2",
+      "r": 9.0,
+      "rp": 5.0,
+      "why": "chock",
+      "x": 821.97,
+      "y": -508.286
+    },
+    {
+      "name": "chock_stone_20",
+      "owner": "B2",
+      "r": 9.0,
+      "rp": 5.0,
+      "why": "chock",
+      "x": 760.132,
+      "y": -491.716
+    },
+    {
+      "name": "hearth_stone_21",
+      "owner": "B2",
+      "r": 15.0,
+      "rp": 11.0,
+      "why": "hearth stone",
+      "x": 644.258,
+      "y": -335.128
+    },
+    {
+      "name": "hearth_stone_22",
+      "owner": "B2",
+      "r": 19.0,
+      "rp": 15.0,
+      "why": "hearth stone",
+      "x": 633.0,
+      "y": -280.0
+    },
+    {
+      "name": "hearth_stone_23",
+      "owner": "B2",
+      "r": 22.0,
+      "rp": 18.0,
+      "why": "hearth stone",
+      "x": 637.496,
+      "y": -223.06
+    },
+    {
+      "name": "hearth_stone_24",
+      "owner": "B2",
+      "r": 18.0,
+      "rp": 14.0,
+      "why": "hearth stone",
+      "x": 662.939,
+      "y": -172.0
+    },
+    {
+      "name": "hearth_stone_25",
+      "owner": "B2",
+      "r": 14.0,
+      "rp": 10.0,
+      "why": "hearth stone",
+      "x": 700.093,
+      "y": -130.093
+    },
+    {
+      "name": "chock_stone_26",
+      "owner": "B2",
+      "r": 9.0,
+      "rp": 5.0,
+      "why": "chock",
+      "x": 621.714,
+      "y": -251.97
+    },
+    {
+      "name": "chock_stone_27",
+      "owner": "B2",
+      "r": 9.0,
+      "rp": 5.0,
+      "why": "chock",
+      "x": 638.284,
+      "y": -190.132
+    },
+    {
+      "name": "bench_log_00",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)",
+      "x": 1127.879,
+      "y": -382.699
+    },
+    {
+      "name": "bench_log_01",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)",
+      "x": 1122.323,
+      "y": -392.321
+    },
+    {
+      "name": "bench_log_02",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)",
+      "x": 1116.768,
+      "y": -401.944
+    },
+    {
+      "name": "bench_log_03",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)",
+      "x": 1111.212,
+      "y": -411.566
+    },
+    {
+      "name": "bench_log_04",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)",
+      "x": 1105.657,
+      "y": -421.189
+    },
+    {
+      "name": "bench_log_05",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)",
+      "x": 1100.101,
+      "y": -430.811
+    },
+    {
+      "name": "bench_log_06",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)",
+      "x": 1094.546,
+      "y": -440.434
+    },
+    {
+      "name": "bench_log_07",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)",
+      "x": 1088.99,
+      "y": -450.056
+    },
+    {
+      "name": "bench_log_08",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)",
+      "x": 1083.435,
+      "y": -459.679
+    },
+    {
+      "name": "bench_log_09",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.1 m (coverage: sqrt(r^2 - (pitch/2)^2) = 5.0 >= rp 3.5)",
+      "x": 1077.879,
+      "y": -469.301
+    },
+    {
+      "name": "log_north_00",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.4 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.9 >= rp 3.5)",
+      "x": 947.359,
+      "y": -31.369
+    },
+    {
+      "name": "log_north_01",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.4 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.9 >= rp 3.5)",
+      "x": 957.256,
+      "y": -37.083
+    },
+    {
+      "name": "log_north_02",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.4 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.9 >= rp 3.5)",
+      "x": 967.154,
+      "y": -42.798
+    },
+    {
+      "name": "log_north_03",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.4 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.9 >= rp 3.5)",
+      "x": 977.051,
+      "y": -48.512
+    },
+    {
+      "name": "log_north_04",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.4 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.9 >= rp 3.5)",
+      "x": 986.949,
+      "y": -54.226
+    },
+    {
+      "name": "log_north_05",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.4 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.9 >= rp 3.5)",
+      "x": 996.846,
+      "y": -59.94
+    },
+    {
+      "name": "log_north_06",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.4 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.9 >= rp 3.5)",
+      "x": 1006.744,
+      "y": -65.655
+    },
+    {
+      "name": "log_north_07",
+      "owner": "B4",
+      "r": 7.5,
+      "rp": 3.5,
+      "why": "log chain, pitch 11.4 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.9 >= rp 3.5)",
+      "x": 1016.641,
+      "y": -71.369
+    },
+    {
+      "name": "log_south_00",
+      "owner": "B4",
+      "r": 7.25,
+      "rp": 3.25,
+      "why": "log chain, pitch 11.7 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.3 >= rp 3.25)",
+      "x": 748.311,
+      "y": -526.131
+    },
+    {
+      "name": "log_south_01",
+      "owner": "B4",
+      "r": 7.25,
+      "rp": 3.25,
+      "why": "log chain, pitch 11.7 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.3 >= rp 3.25)",
+      "x": 738.207,
+      "y": -520.298
+    },
+    {
+      "name": "log_south_02",
+      "owner": "B4",
+      "r": 7.25,
+      "rp": 3.25,
+      "why": "log chain, pitch 11.7 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.3 >= rp 3.25)",
+      "x": 728.104,
+      "y": -514.464
+    },
+    {
+      "name": "log_south_03",
+      "owner": "B4",
+      "r": 7.25,
+      "rp": 3.25,
+      "why": "log chain, pitch 11.7 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.3 >= rp 3.25)",
+      "x": 718.0,
+      "y": -508.631
+    },
+    {
+      "name": "log_south_04",
+      "owner": "B4",
+      "r": 7.25,
+      "rp": 3.25,
+      "why": "log chain, pitch 11.7 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.3 >= rp 3.25)",
+      "x": 707.896,
+      "y": -502.798
+    },
+    {
+      "name": "log_south_05",
+      "owner": "B4",
+      "r": 7.25,
+      "rp": 3.25,
+      "why": "log chain, pitch 11.7 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.3 >= rp 3.25)",
+      "x": 697.793,
+      "y": -496.964
+    },
+    {
+      "name": "log_south_06",
+      "owner": "B4",
+      "r": 7.25,
+      "rp": 3.25,
+      "why": "log chain, pitch 11.7 m (coverage: sqrt(r^2 - (pitch/2)^2) = 4.3 >= rp 3.25)",
+      "x": 687.689,
+      "y": -491.131
+    },
+    {
+      "name": "leaner_log_r294",
+      "owner": "B4",
+      "r": 7.0,
+      "rp": 3.0,
+      "why": "leaner foot (underside < 2.5 m)",
+      "x": 850.0,
+      "y": -574.0
+    },
+    {
+      "name": "leaner_log_r286",
+      "owner": "B4",
+      "r": 7.0,
+      "rp": 3.0,
+      "why": "leaner foot (underside < 2.5 m)",
+      "x": 850.0,
+      "y": -566.0
+    },
+    {
+      "name": "leaner_log_r278",
+      "owner": "B4",
+      "r": 7.0,
+      "rp": 3.0,
+      "why": "leaner foot (underside < 2.5 m)",
+      "x": 850.0,
+      "y": -558.2
+    },
+    {
+      "name": "tripod_foot_0",
+      "owner": "B4",
+      "r": 4.0,
+      "rp": 1.3,
+      "why": "2.5 m pole",
+      "x": 1052.836,
+      "y": -32.866
+    },
+    {
+      "name": "tripod_foot_1",
+      "owner": "B4",
+      "r": 4.0,
+      "rp": 1.3,
+      "why": "2.5 m pole",
+      "x": 1052.836,
+      "y": -67.508
+    },
+    {
+      "name": "tripod_foot_2",
+      "owner": "B4",
+      "r": 4.0,
+      "rp": 1.3,
+      "why": "2.5 m pole",
+      "x": 1022.836,
+      "y": -50.187
+    },
+    {
+      "name": "enamel_pot",
+      "owner": "B4",
+      "r": 11.0,
+      "rp": 7.0,
+      "why": "prop",
+      "x": 902.094,
+      "y": -575.442
+    },
+    {
+      "name": "trail_sign",
+      "owner": "B4",
+      "r": 4.5,
+      "rp": 0.5,
+      "why": "prop",
+      "x": 979.938,
+      "y": -519.059
+    },
+    {
+      "name": "trail_cairn_0",
+      "owner": "B4",
+      "r": 5.5,
+      "rp": 1.5,
+      "why": "prop",
+      "x": 982.062,
+      "y": -494.738
+    },
+    {
+      "name": "trail_cairn_1",
+      "owner": "B4",
+      "r": 5.5,
+      "rp": 1.5,
+      "why": "prop",
+      "x": 1277.169,
+      "y": -1115.865
+    },
+    {
+      "name": "lantern_post_0",
+      "owner": "B4",
+      "r": 4.3,
+      "rp": 0.3,
+      "why": "prop",
+      "x": 916.258,
+      "y": -32.723
+    },
+    {
+      "name": "lantern_post_1",
+      "owner": "B4",
+      "r": 4.3,
+      "rp": 0.3,
+      "why": "prop",
+      "x": 1097.277,
+      "y": -346.258
+    },
+    {
+      "name": "lantern_post_2",
+      "owner": "B4",
+      "r": 4.3,
+      "rp": 0.3,
+      "why": "prop",
+      "x": 783.742,
+      "y": -527.277
+    },
+    {
+      "name": "lantern_post_3",
+      "owner": "B4",
+      "r": 4.3,
+      "rp": 0.3,
+      "why": "prop",
+      "x": 602.723,
+      "y": -213.742
+    }
+  ],
+  "runtime_contract": {
+    "arena_rows": 46,
+    "call": "hotPotatoRegisterObstacles",
+    "cap_needed": 128,
+    "cap_now": 64,
+    "fields": [
+      "x",
+      "y",
+      "r",
+      "rp"
+    ],
+    "level_rows": 67,
+    "note": "a call REPLACES the set and a 65th entry refuses the WHOLE list, so 46 + 67 needs runtime ask #8 (OBSTACLE_CAP 64 -> 128); the 18-row fallback is layout.registry_fallback and is carried below for B5 to choose.",
+    "r_range": [
+      0.5,
+      30.0
+    ],
+    "rp_rule": "rp <= r",
+    "total": 113
+  },
+  "source": "design v4 \u00a77.3 R9 (layout.registry_rows)"
+}

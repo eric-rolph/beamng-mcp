@@ -1,0 +1,50 @@
+{
+  "blender": "4.5.4 LTS",
+  "geometry": {
+    "canopy_base_z": 2.5,
+    "canopy_r": 2.0,
+    "canopy_top_z": 8.5,
+    "rock_scale": [
+      1.2,
+      0.9,
+      0.7
+    ],
+    "trunk_h": 3.0,
+    "trunk_r": 0.25
+  },
+  "level_id": "ericrolph_hot_potato_arena",
+  "shapes": {
+    "rock": {
+      "file": "ericrolph_hot_potato_arena_rock.dae",
+      "materials": [
+        "ericrolph_hot_potato_arena_stone"
+      ],
+      "node_parents": {
+        "Colmesh-1": "start01",
+        "base00": null,
+        "ericrolph_hot_potato_arena_rock_a4": "start01",
+        "start01": "base00"
+      },
+      "sha256": "f18784412402e272d35d9ee32f0f5b9a5b81029ac061d4a4874837d9e262e662",
+      "size": 20093,
+      "triangles": 100
+    },
+    "tree": {
+      "file": "ericrolph_hot_potato_arena_tree.dae",
+      "materials": [
+        "ericrolph_hot_potato_arena_bark",
+        "ericrolph_hot_potato_arena_canopy"
+      ],
+      "node_parents": {
+        "Colmesh-1": "start01",
+        "base00": null,
+        "ericrolph_hot_potato_arena_tree_a200": "start01",
+        "ericrolph_hot_potato_arena_tree_a4": "start01",
+        "start01": "base00"
+      },
+      "sha256": "9a05648fba68ebeb3e87c2383eb37ddb93455d8896b281e1adea8cfe20db1521",
+      "size": 34214,
+      "triangles": 210
+    }
+  }
+}

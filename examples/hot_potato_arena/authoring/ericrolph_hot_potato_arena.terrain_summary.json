@@ -1,0 +1,1221 @@
+{
+  "source_hash": "0680eca31337f4ba",
+  "constants": {
+    "N": 2048,
+    "SQUARE": 1.0,
+    "POSITION": [
+      -174.0,
+      -1304.0,
+      0.0
+    ],
+    "MAX_HEIGHT": 320.0,
+    "FLAT_R": 210.0,
+    "CLEAR_R": 350.0,
+    "LANE_CLEAR_R": 420.0,
+    "LAKE_BEARING": 306.0,
+    "SUNSET_LANE": 330.0,
+    "LAKE_LEVEL": 98.0,
+    "LAKE_SHELF_Z": 98.5,
+    "LAKE_FLOOR": 86.0,
+    "CREST_HALF_W": 40.0,
+    "BACKSLOPE": 0.12,
+    "TRACK_R": 248.0
+  },
+  "flat_disc_nodes": 138505,
+  "flat_disc_unique_u": [
+    20480
+  ],
+  "z_min": 85.95703125,
+  "z_max": 276.982421875,
+  "u_max": 56726,
+  "coverage_pct": {
+    "hearth": 2.2938013076782227,
+    "ash": 0.8994817733764648,
+    "scorch": 1.4181137084960938,
+    "trail": 0.6954193115234375,
+    "meadow": 8.733844757080078,
+    "forest_floor": 68.95589828491211,
+    "scree": 2.156496047973633,
+    "rock": 9.347009658813477,
+    "shore": 0.8701801300048828,
+    "lakebed": 2.9705286026000977,
+    "alpine": 1.659226417541504
+  },
+  "crest": [
+    {
+      "bearing": 0.0,
+      "rim_r": 934.0,
+      "H": 165.07511338584555,
+      "crest_r": 953.0,
+      "crest_z": 264.736328125,
+      "grade_in_pct": 35.15625,
+      "grade_out_pct": -8.7890625,
+      "built_max_grade_change_per_m_mm": 53.7109375,
+      "analytic_crest_r": 958.4144178650563,
+      "analytic_crest_z_rel": 161.2332785936542,
+      "analytic_max_d2_mm": 7.539428254290215,
+      "analytic_onset_max_d2_mm": 4.982395480259916
+    },
+    {
+      "bearing": 30.0,
+      "rim_r": 968.0243725791229,
+      "H": 174.54866816445195,
+      "crest_r": 991.0243725791229,
+      "crest_z": 275.67275249804453,
+      "grade_in_pct": 26.382080110414563,
+      "grade_out_pct": -8.818937547596306,
+      "built_max_grade_change_per_m_mm": 18.16830219121357,
+      "analytic_crest_r": 989.6925683332684,
+      "analytic_crest_z_rel": 170.81816789794718,
+      "analytic_max_d2_mm": 6.755054476826672,
+      "analytic_onset_max_d2_mm": 3.9866553935155036
+    },
+    {
+      "bearing": 60.0,
+      "rim_r": 994.7115365195484,
+      "H": 173.48000501346837,
+      "crest_r": 1020.7115365195484,
+      "crest_z": 273.3622286225735,
+      "grade_in_pct": 24.713424589481292,
+      "grade_out_pct": -11.39948697096429,
+      "built_max_grade_change_per_m_mm": 57.354203840361606,
+      "analytic_crest_r": 1016.2652474201884,
+      "analytic_crest_z_rel": 169.80173094260016,
+      "analytic_max_d2_mm": 6.442108534940871,
+      "analytic_onset_max_d2_mm": 3.6617739535746985
+    },
+    {
+      "bearing": 90.0,
+      "rim_r": 877.4656156311187,
+      "H": 164.27475751821999,
+      "crest_r": 900.4656156311187,
+      "crest_z": 263.8134765625,
+      "grade_in_pct": 27.37732848523251,
+      "grade_out_pct": -10.7421875,
+      "built_max_grade_change_per_m_mm": 28.702285437958608,
+      "analytic_crest_r": 901.0032966537849,
+      "analytic_crest_z_rel": 160.47397505827004,
+      "analytic_max_d2_mm": 7.23458814826472,
+      "analytic_onset_max_d2_mm": 4.6361353524955184
+    },
+    {
+      "bearing": 120.0,
+      "rim_r": 847.3191942669733,
+      "H": 118.28901920686175,
+      "crest_r": 869.3191942669733,
+      "crest_z": 218.12599713498258,
+      "grade_in_pct": 27.087838995933566,
+      "grade_out_pct": -11.409192091693399,
+      "built_max_grade_change_per_m_mm": 48.652682113043966,
+      "analytic_crest_r": 867.0000147685506,
+      "analytic_crest_z_rel": 114.71928795020943,
+      "analytic_max_d2_mm": 5.884793470613658,
+      "analytic_onset_max_d2_mm": 3.6356849151040205
+    },
+    {
+      "bearing": 150.0,
+      "rim_r": 946.2302349929873,
+      "H": 43.449496413503425,
+      "crest_r": 938.2302349929873,
+      "crest_z": 145.06658408881847,
+      "grade_in_pct": 8.613963348690845,
+      "grade_out_pct": -5.722475344722966,
+      "built_max_grade_change_per_m_mm": 49.18849012014448,
+      "analytic_crest_r": 944.0004283098584,
+      "analytic_crest_z_rel": 41.20258024891438,
+      "analytic_max_d2_mm": 2.839657564337017,
+      "analytic_onset_max_d2_mm": 1.026591740779681
+    },
+    {
+      "bearing": 180.0,
+      "rim_r": 929.6076911892864,
+      "H": 94.79669069467431,
+      "crest_r": 924.6076911892864,
+      "crest_z": 194.55356071895926,
+      "grade_in_pct": 18.851411713518473,
+      "grade_out_pct": -10.933744536481527,
+      "built_max_grade_change_per_m_mm": 79.06386587967518,
+      "analytic_crest_r": 943.0518321177165,
+      "analytic_crest_z_rel": 91.60330468714311,
+      "analytic_max_d2_mm": 4.507021382750054,
+      "analytic_onset_max_d2_mm": 2.3338226489675318
+    },
+    {
+      "bearing": 210.0,
+      "rim_r": 1012.0013903342949,
+      "H": 123.57619785437157,
+      "crest_r": 1033.001390334295,
+      "crest_z": 224.86318223047243,
+      "grade_in_pct": 18.36673101434485,
+      "grade_out_pct": -17.961609657743338,
+      "built_max_grade_change_per_m_mm": 67.96805973792175,
+      "analytic_crest_r": 1027.2609044116057,
+      "analytic_crest_z_rel": 120.24126480768483,
+      "analytic_max_d2_mm": 4.936735925454627,
+      "analytic_onset_max_d2_mm": 2.5211961852531495
+    },
+    {
+      "bearing": 240.0,
+      "rim_r": 925.7629188556342,
+      "H": 125.49672412748869,
+      "crest_r": 943.7629188556342,
+      "crest_z": 226.50158175177367,
+      "grade_in_pct": 26.36232621982799,
+      "grade_out_pct": -8.292540308212892,
+      "built_max_grade_change_per_m_mm": 44.32070361437468,
+      "analytic_crest_r": 944.5473978326143,
+      "analytic_crest_z_rel": 121.94957076961128,
+      "analytic_max_d2_mm": 5.777167196583832,
+      "analytic_onset_max_d2_mm": 3.421157082589943
+    },
+    {
+      "bearing": 270.0,
+      "rim_r": 934.0,
+      "H": 114.10127322531417,
+      "crest_r": 959.0,
+      "crest_z": 213.16894531250003,
+      "grade_in_pct": 33.20312499999716,
+      "grade_out_pct": -8.30078125,
+      "built_max_grade_change_per_m_mm": 48.82812499994316,
+      "analytic_crest_r": 956.4539529086186,
+      "analytic_crest_z_rel": 110.33188091427147,
+      "analytic_max_d2_mm": 7.025795205663599,
+      "analytic_onset_max_d2_mm": 5.130526772079147
+    },
+    {
+      "bearing": 300.0,
+      "rim_r": 950.328172082166,
+      "H": 77.78734053745774,
+      "crest_r": 975.328172082166,
+      "crest_z": 174.53503906854118,
+      "grade_in_pct": 43.834177708765765,
+      "grade_out_pct": -8.021583608530136,
+      "built_max_grade_change_per_m_mm": 28.448659983439484,
+      "analytic_crest_r": 977.5154430185557,
+      "analytic_crest_z_rel": 73.7658359546943,
+      "analytic_max_d2_mm": 9.737028531832781,
+      "analytic_onset_max_d2_mm": 9.737028531832781
+    },
+    {
+      "bearing": 330.0,
+      "rim_r": 885.4073104497037,
+      "H": 118.49477100455782,
+      "crest_r": 916.4073104497037,
+      "crest_z": 214.11372739746736,
+      "grade_in_pct": 40.07806609566842,
+      "grade_out_pct": -10.142109026216417,
+      "built_max_grade_change_per_m_mm": 41.29743361940541,
+      "analytic_crest_r": 913.9973619489976,
+      "analytic_crest_z_rel": 114.34612333389111,
+      "analytic_max_d2_mm": 11.09660899774667,
+      "analytic_onset_max_d2_mm": 10.974701322679081
+    },
+    {
+      "bearing": 152.5,
+      "rim_r": 939.9510671783199,
+      "H": 43.11111215967952,
+      "crest_r": 936.9510671783199,
+      "crest_z": 143.26081071712753,
+      "grade_in_pct": 13.089798558016241,
+      "grade_out_pct": -14.47066530543566,
+      "built_max_grade_change_per_m_mm": 43.08725649099188,
+      "analytic_crest_r": 937.0006641318432,
+      "analytic_crest_z_rel": 40.86109688170732,
+      "analytic_max_d2_mm": 2.842461265423424,
+      "analytic_onset_max_d2_mm": 1.0343549764117999
+    }
+  ],
+  "analytic_sweep": {
+    "step_deg": 1.0,
+    "global_max_mm": 15.608538933602034,
+    "at_bearing": 319.0,
+    "at_r": 772.6293015334193,
+    "where": "onset fillet",
+    "bearings_over_20mm": 0,
+    "trail_bearings_max_mm": 3.0980079378011283,
+    "worst5": [
+      {
+        "bearing": 319.0,
+        "max_mm": 15.608538933602034,
+        "r": 772.6293015334193,
+        "onset": 731.6293015334193,
+        "rim": 887.3596304979442,
+        "H": 94.30626257874923,
+        "span": 155.73032896452492,
+        "where": "onset fillet"
+      },
+      {
+        "bearing": 320.0,
+        "max_mm": 15.595482487507972,
+        "r": 766.8325130620353,
+        "onset": 725.8325130620353,
+        "rim": 883.9032726563073,
+        "H": 96.28767253318007,
+        "span": 158.07075959427198,
+        "where": "onset fillet"
+      },
+      {
+        "bearing": 318.0,
+        "max_mm": 15.516626858755878,
+        "r": 778.0763878650444,
+        "onset": 737.0763878650444,
+        "rim": 891.2574924093198,
+        "H": 92.4016290687214,
+        "span": 154.1811045442754,
+        "where": "onset fillet"
+      },
+      {
+        "bearing": 321.0,
+        "max_mm": 15.472895332021785,
+        "r": 760.7043717012353,
+        "onset": 719.7043717012353,
+        "rim": 880.9638024930738,
+        "H": 98.33772473537331,
+        "span": 161.25943079183844,
+        "where": "onset fillet"
+      },
+      {
+        "bearing": 317.0,
+        "max_mm": 15.32936385788819,
+        "r": 783.1563479051308,
+        "onset": 742.1563479051308,
+        "rim": 895.5154736093239,
+        "H": 90.58165010479297,
+        "span": 153.35912570419305,
+        "where": "onset fillet"
+      }
+    ]
+  },
+  "lane_runouts": [
+    {
+      "lane": 60.0,
+      "z_350": 102.39799263342067,
+      "z_420": 108.1987895334586,
+      "rise_m": 5.800796900037923,
+      "grade_mean_pct": 8.28685271433989,
+      "grade_max_pct": 18.771231694613277,
+      "grade_at_420_pct": 18.771231694613277,
+      "stop_m_from_30": 65,
+      "tree_line_m": 70.0,
+      "first_tree_r": 420.0,
+      "stops_before_trees": true,
+      "speed_at_tree_line_kmh": 0.0
+    },
+    {
+      "lane": 150.0,
+      "z_350": 102.40234375,
+      "z_420": 104.04089856594325,
+      "rise_m": 1.6385548159432517,
+      "grade_mean_pct": 2.3407925942046455,
+      "grade_max_pct": 5.303665303330263,
+      "grade_at_420_pct": 5.303665303330263,
+      "stop_m_from_30": 70,
+      "tree_line_m": 70.0,
+      "first_tree_r": 420.0,
+      "stops_before_trees": true,
+      "speed_at_tree_line_kmh": 0.0
+    },
+    {
+      "lane": 240.0,
+      "z_350": 102.29003906250001,
+      "z_420": 103.18509128854808,
+      "rise_m": 0.8950522260480653,
+      "grade_mean_pct": 1.2786460372115218,
+      "grade_max_pct": 6.881140688813048,
+      "grade_at_420_pct": 6.881140688813048,
+      "stop_m_from_30": 71,
+      "tree_line_m": 70.0,
+      "first_tree_r": 420.0,
+      "stops_before_trees": false,
+      "speed_at_tree_line_kmh": 12.058159735680269
+    },
+    {
+      "lane": 330.0,
+      "z_350": 99.96200089184136,
+      "z_420": 99.96319013270961,
+      "rise_m": 0.0011892408682570021,
+      "grade_mean_pct": 0.0016989155260814315,
+      "grade_max_pct": 0.3095579083094435,
+      "grade_at_420_pct": 0.0802602052786483,
+      "stop_m_from_30": 73,
+      "tree_line_m": 70.0,
+      "first_tree_r": 592.0,
+      "stops_before_trees": true,
+      "speed_at_tree_line_kmh": 19.305087555884672
+    }
+  ],
+  "track_z": [
+    99.5703125,
+    100.517578125
+  ],
+  "track_grade_max_pct": 2.44140625,
+  "trail_len_m": 875,
+  "trail_z_top": 143.26327176964756,
+  "trail_crest_m": 744,
+  "trail_grade_max_pct": 11.400794037749051,
+  "trail_grade_change_max_mm": 7.017147231437093,
+  "trail_nodes": [
+    {
+      "index": 0,
+      "x": 974.0,
+      "y": -494.774,
+      "kind": "end",
+      "width": 6.0,
+      "m_along": 0.0,
+      "z": 100.435
+    },
+    {
+      "index": 1,
+      "x": 980.25,
+      "y": -505.6,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 12.5,
+      "z": 100.712
+    },
+    {
+      "index": 2,
+      "x": 986.5,
+      "y": -516.425,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 25.0,
+      "z": 101.02
+    },
+    {
+      "index": 3,
+      "x": 992.75,
+      "y": -527.25,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 37.5,
+      "z": 101.341
+    },
+    {
+      "index": 4,
+      "x": 999.0,
+      "y": -538.076,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 50.0,
+      "z": 101.652
+    },
+    {
+      "index": 5,
+      "x": 1005.25,
+      "y": -548.901,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 62.5,
+      "z": 101.934
+    },
+    {
+      "index": 6,
+      "x": 1011.5,
+      "y": -559.726,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 75.0,
+      "z": 102.166
+    },
+    {
+      "index": 7,
+      "x": 1017.75,
+      "y": -570.552,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 87.5,
+      "z": 102.328
+    },
+    {
+      "index": 8,
+      "x": 1024.0,
+      "y": -581.377,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 100.0,
+      "z": 102.397
+    },
+    {
+      "index": 9,
+      "x": 1030.25,
+      "y": -592.202,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 112.5,
+      "z": 102.408
+    },
+    {
+      "index": 10,
+      "x": 1036.5,
+      "y": -603.027,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 125.0,
+      "z": 102.488
+    },
+    {
+      "index": 11,
+      "x": 1042.75,
+      "y": -613.853,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 137.5,
+      "z": 102.691
+    },
+    {
+      "index": 12,
+      "x": 1049.0,
+      "y": -624.678,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 150.0,
+      "z": 103.052
+    },
+    {
+      "index": 13,
+      "x": 1055.25,
+      "y": -635.503,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 162.5,
+      "z": 103.566
+    },
+    {
+      "index": 14,
+      "x": 1063.073,
+      "y": -645.187,
+      "kind": "arc",
+      "width": 6.0,
+      "m_along": 174.9,
+      "z": 104.191
+    },
+    {
+      "index": 15,
+      "x": 1073.24,
+      "y": -652.435,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 187.4,
+      "z": 104.843
+    },
+    {
+      "index": 16,
+      "x": 1083.684,
+      "y": -659.302,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 199.9,
+      "z": 105.492
+    },
+    {
+      "index": 17,
+      "x": 1094.129,
+      "y": -666.169,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 212.4,
+      "z": 106.095
+    },
+    {
+      "index": 18,
+      "x": 1104.574,
+      "y": -673.035,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 224.9,
+      "z": 106.738
+    },
+    {
+      "index": 19,
+      "x": 1115.019,
+      "y": -679.902,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 237.4,
+      "z": 107.438
+    },
+    {
+      "index": 20,
+      "x": 1125.464,
+      "y": -686.769,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 249.9,
+      "z": 108.19
+    },
+    {
+      "index": 21,
+      "x": 1135.909,
+      "y": -693.636,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 262.4,
+      "z": 109.001
+    },
+    {
+      "index": 22,
+      "x": 1146.354,
+      "y": -700.503,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 274.9,
+      "z": 109.871
+    },
+    {
+      "index": 23,
+      "x": 1156.799,
+      "y": -707.37,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 287.4,
+      "z": 110.8
+    },
+    {
+      "index": 24,
+      "x": 1167.244,
+      "y": -714.237,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 299.9,
+      "z": 111.794
+    },
+    {
+      "index": 25,
+      "x": 1177.622,
+      "y": -721.199,
+      "kind": "arc",
+      "width": 6.0,
+      "m_along": 312.4,
+      "z": 112.844
+    },
+    {
+      "index": 26,
+      "x": 1186.167,
+      "y": -730.253,
+      "kind": "arc",
+      "width": 6.0,
+      "m_along": 324.9,
+      "z": 113.866
+    },
+    {
+      "index": 27,
+      "x": 1191.525,
+      "y": -741.491,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 337.3,
+      "z": 114.711
+    },
+    {
+      "index": 28,
+      "x": 1195.295,
+      "y": -753.409,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 349.8,
+      "z": 115.455
+    },
+    {
+      "index": 29,
+      "x": 1199.065,
+      "y": -765.327,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 362.3,
+      "z": 116.215
+    },
+    {
+      "index": 30,
+      "x": 1202.835,
+      "y": -777.245,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 374.8,
+      "z": 116.987
+    },
+    {
+      "index": 31,
+      "x": 1206.605,
+      "y": -789.163,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 387.3,
+      "z": 117.777
+    },
+    {
+      "index": 32,
+      "x": 1210.374,
+      "y": -801.081,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 399.8,
+      "z": 118.581
+    },
+    {
+      "index": 33,
+      "x": 1214.144,
+      "y": -812.999,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 412.3,
+      "z": 119.402
+    },
+    {
+      "index": 34,
+      "x": 1217.914,
+      "y": -824.917,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 424.8,
+      "z": 120.243
+    },
+    {
+      "index": 35,
+      "x": 1221.684,
+      "y": -836.835,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 437.3,
+      "z": 121.099
+    },
+    {
+      "index": 36,
+      "x": 1225.454,
+      "y": -848.753,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 449.8,
+      "z": 121.974
+    },
+    {
+      "index": 37,
+      "x": 1229.178,
+      "y": -860.684,
+      "kind": "arc",
+      "width": 6.0,
+      "m_along": 462.3,
+      "z": 122.865
+    },
+    {
+      "index": 38,
+      "x": 1230.438,
+      "y": -873.069,
+      "kind": "arc",
+      "width": 6.0,
+      "m_along": 474.8,
+      "z": 123.602
+    },
+    {
+      "index": 39,
+      "x": 1229.034,
+      "y": -885.489,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 487.3,
+      "z": 124.177
+    },
+    {
+      "index": 40,
+      "x": 1227.543,
+      "y": -897.899,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 499.8,
+      "z": 124.806
+    },
+    {
+      "index": 41,
+      "x": 1226.052,
+      "y": -910.31,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 512.3,
+      "z": 125.497
+    },
+    {
+      "index": 42,
+      "x": 1224.561,
+      "y": -922.721,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 524.8,
+      "z": 126.251
+    },
+    {
+      "index": 43,
+      "x": 1223.07,
+      "y": -935.132,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 537.3,
+      "z": 127.069
+    },
+    {
+      "index": 44,
+      "x": 1221.579,
+      "y": -947.542,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 549.8,
+      "z": 127.954
+    },
+    {
+      "index": 45,
+      "x": 1220.088,
+      "y": -959.953,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 562.3,
+      "z": 128.905
+    },
+    {
+      "index": 46,
+      "x": 1218.597,
+      "y": -972.364,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 574.8,
+      "z": 129.922
+    },
+    {
+      "index": 47,
+      "x": 1217.106,
+      "y": -984.774,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 587.3,
+      "z": 131.007
+    },
+    {
+      "index": 48,
+      "x": 1215.614,
+      "y": -997.185,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 599.8,
+      "z": 132.161
+    },
+    {
+      "index": 49,
+      "x": 1214.123,
+      "y": -1009.596,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 612.3,
+      "z": 133.383
+    },
+    {
+      "index": 50,
+      "x": 1212.632,
+      "y": -1022.007,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 624.8,
+      "z": 134.672
+    },
+    {
+      "index": 51,
+      "x": 1211.553,
+      "y": -1034.447,
+      "kind": "arc",
+      "width": 6.0,
+      "m_along": 637.3,
+      "z": 136.037
+    },
+    {
+      "index": 52,
+      "x": 1213.779,
+      "y": -1046.695,
+      "kind": "arc",
+      "width": 6.0,
+      "m_along": 649.7,
+      "z": 137.421
+    },
+    {
+      "index": 53,
+      "x": 1219.663,
+      "y": -1057.666,
+      "kind": "arc",
+      "width": 6.0,
+      "m_along": 662.2,
+      "z": 138.659
+    },
+    {
+      "index": 54,
+      "x": 1228.551,
+      "y": -1066.405,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 674.6,
+      "z": 139.642
+    },
+    {
+      "index": 55,
+      "x": 1238.168,
+      "y": -1074.389,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 687.1,
+      "z": 140.562
+    },
+    {
+      "index": 56,
+      "x": 1247.786,
+      "y": -1082.374,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 699.6,
+      "z": 141.511
+    },
+    {
+      "index": 57,
+      "x": 1257.403,
+      "y": -1090.358,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 712.1,
+      "z": 142.361
+    },
+    {
+      "index": 58,
+      "x": 1267.021,
+      "y": -1098.343,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 724.6,
+      "z": 142.933
+    },
+    {
+      "index": 59,
+      "x": 1276.639,
+      "y": -1106.327,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 737.1,
+      "z": 143.226
+    },
+    {
+      "index": 60,
+      "x": 1286.256,
+      "y": -1114.312,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 749.6,
+      "z": 143.227
+    },
+    {
+      "index": 61,
+      "x": 1295.874,
+      "y": -1122.296,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 762.1,
+      "z": 142.93
+    },
+    {
+      "index": 62,
+      "x": 1305.492,
+      "y": -1130.28,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 774.6,
+      "z": 142.324
+    },
+    {
+      "index": 63,
+      "x": 1315.109,
+      "y": -1138.265,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 787.1,
+      "z": 141.401
+    },
+    {
+      "index": 64,
+      "x": 1324.727,
+      "y": -1146.249,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 799.6,
+      "z": 140.18
+    },
+    {
+      "index": 65,
+      "x": 1334.335,
+      "y": -1154.245,
+      "kind": "arc",
+      "width": 6.0,
+      "m_along": 812.1,
+      "z": 138.904
+    },
+    {
+      "index": 66,
+      "x": 1343.393,
+      "y": -1162.857,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 824.6,
+      "z": 137.577
+    },
+    {
+      "index": 67,
+      "x": 1352.412,
+      "y": -1171.512,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 837.1,
+      "z": 136.248
+    },
+    {
+      "index": 68,
+      "x": 1361.431,
+      "y": -1180.167,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 849.6,
+      "z": 134.921
+    },
+    {
+      "index": 69,
+      "x": 1370.45,
+      "y": -1188.822,
+      "kind": "straight",
+      "width": 6.0,
+      "m_along": 862.1,
+      "z": 133.597
+    },
+    {
+      "index": 70,
+      "x": 1380.0,
+      "y": -1197.987,
+      "kind": "end",
+      "width": 6.0,
+      "m_along": 875.4,
+      "z": 132.199
+    }
+  ],
+  "trail_spline_check": {
+    "nodes": 71,
+    "reference_step_m": 0.1,
+    "node_spacing_max_m": 13.235990603564971,
+    "node_polyline_dev_max_m": 0.48862170877648325,
+    "spline_dev_max_m": 0.16730278554120784,
+    "spline_dev_cr_to_ref_m": 0.1659543842026398,
+    "spline_dev_ref_to_cr_m": 0.16730278554120784,
+    "spline_vs_polyline_dev_max_m": 4.812828604884278,
+    "spline_len_m": 875.6590629524536,
+    "spline_grade_max_pct": 11.402881794771247,
+    "spline_dgrade_max_mm": 6.58285515341106,
+    "spline_cells_over_law": 0,
+    "rounded_vs_polyline_dev_max_m": 4.865454939170697,
+    "rounded_vs_polyline_apex_max_m": 4.8726716327203645
+  },
+  "trail_corner_deviations": [
+    {
+      "wp": 1,
+      "deflection_deg": 26.677623601637514,
+      "arc_off_corner_m": 1.1090052282798002
+    },
+    {
+      "wp": 2,
+      "deflection_deg": 39.12487517993776,
+      "arc_off_corner_m": 2.4503546805824605
+    },
+    {
+      "wp": 3,
+      "deflection_deg": 24.403760360604316,
+      "arc_off_corner_m": 0.9245276800465163
+    },
+    {
+      "wp": 4,
+      "deflection_deg": 57.15204867831999,
+      "arc_off_corner_m": 5.548582097418109
+    },
+    {
+      "wp": 5,
+      "deflection_deg": 4.121639889757096,
+      "arc_off_corner_m": 0.025888029340581653
+    }
+  ],
+  "relief": [
+    {
+      "zone": "graded apron r 210-350 (all bearings)",
+      "cells": 492520,
+      "max_mm": 9.765625,
+      "p99_mm": 4.8828125,
+      "violations": 0,
+      "twist_max_mm": 9.765625
+    },
+    {
+      "zone": "track band |r - 248| <= 4",
+      "cells": 24904,
+      "max_mm": 9.765625,
+      "p99_mm": 4.8828125,
+      "violations": 0,
+      "twist_max_mm": 4.8828125
+    },
+    {
+      "zone": "trail corridor |d| <= 3 m about the ROUNDED centreline, r > 252, TRAIL ONLY (the drivable width; whole length incl. the crest)",
+      "cells": 10464,
+      "max_mm": 9.765625,
+      "p99_mm": 4.8828125,
+      "violations": 0,
+      "twist_max_mm": 9.765625
+    },
+    {
+      "zone": "trail corridor |d| <= 4 m (covers any spline within 1 m of the centreline)",
+      "cells": 13986,
+      "max_mm": 9.765625,
+      "p99_mm": 4.8828125,
+      "violations": 0,
+      "twist_max_mm": 9.765625
+    },
+    {
+      "zone": "trail corridor |d| <= 6 m (the painted verges)",
+      "cells": 21016,
+      "max_mm": 9.765625,
+      "p99_mm": 4.8828125,
+      "violations": 0,
+      "twist_max_mm": 9.765625
+    },
+    {
+      "zone": "trail corridor |d| <= 9 m (the noise-free margin; off-road)",
+      "cells": 31626,
+      "max_mm": 43.9453125,
+      "p99_mm": 9.765625,
+      "violations": 79,
+      "twist_max_mm": 58.59375
+    },
+    {
+      "zone": "lane runouts r 350-420 within +-15 deg of a lane",
+      "cells": 113984,
+      "max_mm": 14.6484375,
+      "p99_mm": 9.765625,
+      "violations": 0,
+      "twist_max_mm": 9.765625
+    },
+    {
+      "zone": "lane runouts r 350-420 incl. the +-22 deg feathers",
+      "cells": 165584,
+      "max_mm": 14.6484375,
+      "p99_mm": 9.765625,
+      "violations": 0,
+      "twist_max_mm": 9.765625
+    },
+    {
+      "zone": "sunset-lane sightline band r 210-350, +-15 deg",
+      "cells": 41138,
+      "max_mm": 9.765625,
+      "p99_mm": 4.8828125,
+      "violations": 0,
+      "twist_max_mm": 4.8828125
+    },
+    {
+      "zone": "everything r <= 350",
+      "cells": 769530,
+      "max_mm": 9.765625,
+      "p99_mm": 4.8828125,
+      "violations": 0,
+      "twist_max_mm": 9.765625
+    },
+    {
+      "zone": "forest floor r 350-850 (not drivable by contract)",
+      "cells": 3769968,
+      "max_mm": 195.3125,
+      "p99_mm": 14.6484375,
+      "violations": 19205,
+      "twist_max_mm": 68.359375
+    },
+    {
+      "zone": "crest band |r - rim| <= 60 (not drivable except the trail)",
+      "cells": 1408244,
+      "max_mm": 244.140625,
+      "p99_mm": 29.296875,
+      "violations": 20254,
+      "twist_max_mm": 83.0078125
+    }
+  ],
+  "min_z_outside_lake_e1_25": 98.8671875,
+  "min_z_outside_lake_e1_0": 98.5009765625,
+  "lake_ha": 12.4593,
+  "lake_depth_max": 12.04296875,
+  "lake_centre": [
+    413.13082303752833,
+    37.40403623793537
+  ],
+  "waterline_e": 0.9333064603056329,
+  "lake_visibility": {
+    "summary": {
+      "water_points": 1947,
+      "eye_positions": 90,
+      "eyes_seeing_ge_25pct": 1.0,
+      "median_visible_fraction": 0.7740112994350283,
+      "min_visible_fraction": 0.7149460708782742
+    },
+    "eyes": [
+      {
+        "eye": "S1 camera (lane mouth r 199, roof +2.4)",
+        "x": 750.5,
+        "y": -107.7,
+        "z": 102.4,
+        "visible_fraction": 0.906522855675398,
+        "nearest_visible_m": 207.82264898347916
+      },
+      {
+        "eye": "driver at the glacis toe r 113",
+        "x": 793.5,
+        "y": -182.1,
+        "z": 101.2,
+        "visible_fraction": 0.7267591165896251,
+        "nearest_visible_m": 299.3715583665499
+      },
+      {
+        "eye": "driver on the pan crest r 91.4 (z 105.5 + 1.2)",
+        "x": 804.3,
+        "y": -200.8,
+        "z": 106.7,
+        "visible_fraction": 0.9522342064714946,
+        "nearest_visible_m": 289.18894271074373
+      },
+      {
+        "eye": "driver r 200 lane+0",
+        "x": 750.0,
+        "y": -106.8,
+        "z": 101.2,
+        "visible_fraction": 0.8233179250128403,
+        "nearest_visible_m": 217.2792671761014
+      }
+    ]
+  },
+  "spawns": [
+    {
+      "name": "_spawn_trailhead",
+      "x": 978.0,
+      "y": -501.7,
+      "z": 100.609,
+      "facing_deg": 330.0,
+      "layer": "trail",
+      "note": "trail m 8 (r ~256), facing the pan"
+    },
+    {
+      "name": "_spawn_lakeshore",
+      "x": 466.72,
+      "y": -155.47,
+      "z": 98.929,
+      "facing_deg": 288.0,
+      "layer": "shore",
+      "note": "bearing 288, r 403, on the shore band 3 m back from where the ground is 0.8 m over the water, facing the water"
+    },
+    {
+      "name": "_spawn_firewood_gap",
+      "x": 1281.64,
+      "y": -1110.48,
+      "z": 143.263,
+      "facing_deg": 330.0,
+      "layer": "trail",
+      "note": "trail m 744 = the saddle crest (z 143.3), facing the pan; inside the basin by construction"
+    }
+  ],
+  "plantable_ha": 309.2226
+}

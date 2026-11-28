@@ -456,3 +456,56 @@ extensions = {
     assert final_stats.sync_mode == "authority"
     assert final_stats.carrier in (2, 3)
     assert final_stats.options_writable is True
+
+
+def test_mp_lookups_never_trip_the_extension_autoloader():
+    """`extensions.<name>` on an UNLOADED extension is not a nil read.
+
+    The engine's extensions table (lua/common/extensions.lua) answers a miss
+    through its __index: it calls load(name), which logs
+    `E extension unavailable: "MPCoreNetwork"` and returns nil. The runtime
+    asks for the BeamMP session every frame, so single player logged that
+    error twice a frame (measured 2026-09-01). Loaded extensions are raw
+    fields of the table AND globals, so rawget is the silent read.
+    """
+    spec = _load_python(HOT_ROOT / "spec.py", "hot_potato_beammp_spec_rawget")
+    behavior = spec.LUA_BEHAVIOR
+    adapter = ADAPTER_PATH.read_text(encoding="utf-8")
+    for text in (behavior, adapter):
+        assert 'rawget(extensions, "MPCoreNetwork")' in text
+        assert 'rawget(extensions, "MPVehicleGE")' in text
+        assert "extensions.MPCoreNetwork" not in text
+        assert "extensions.MPVehicleGE" not in text
+
+    logic = _load_python(
+        REPO_ROOT / "tests" / "test_hot_potato_logic.py",
+        "hot_potato_logic_for_autoloader",
+    )
+    lua = lupa.LuaRuntime(unpack_returned_tuples=True)
+    state = lua.execute(logic.STUBS)
+    lua.globals().HOT_MP_HARNESS = state
+    lua.execute(
+        r"""
+local H = HOT_MP_HARNESS
+H.autoloadMisses = {}
+-- The engine's own shape: a miss on the extensions table tries to LOAD the
+-- extension (and logs an error). Record every miss instead.
+extensions = setmetatable({}, {
+  __index = function(_, key)
+    H.autoloadMisses[#H.autoloadMisses + 1] = tostring(key)
+    return nil
+  end,
+})
+"""
+    )
+    module = lua.execute(RUNTIME_PATH.read_text(encoding="utf-8"))
+    state.addVehicle(1, "ericrolph_hot_potato", 0, 0, 0, 15, 2, 15.6)
+    state.addVehicle(2, "pickup", 0, 0, 0, 0.95, 2.3, 0.75)
+    module.registerProp(1)
+    _tick(state, module, seconds=0.05, steps=40)
+
+    assert module.getSystemState(1).behavior_stats.sync_mode == "standalone"
+    misses = [
+        key for key in state.autoloadMisses.values() if key in ("MPCoreNetwork", "MPVehicleGE")
+    ]
+    assert misses == [], f"BeamMP lookups tripped the autoloader: {misses[:4]}"

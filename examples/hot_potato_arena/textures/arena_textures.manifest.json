@@ -1,0 +1,59 @@
+{
+  "_rim_layout": {
+    "band_r0": 90.0,
+    "band_r1": 93.0,
+    "crest_r": 91.4,
+    "name": "THE GATEWAY SKILLET",
+    "plate_h_m": 4.0,
+    "plate_w_m": 8.0,
+    "tile_u_m": 5.7
+  },
+  "ericrolph_hot_potato_arena_butter": {
+    "baseColorMap": "ericrolph_hot_potato_arena_butter.color.png",
+    "family": "arena_butter",
+    "normalMap": "ericrolph_hot_potato_arena_butter.normal.png",
+    "roughnessMap": "ericrolph_hot_potato_arena_butter_roughness.data.png",
+    "size": 512,
+    "srgb": true
+  },
+  "ericrolph_hot_potato_arena_cast_iron": {
+    "baseColorMap": "ericrolph_hot_potato_arena_cast_iron.color.png",
+    "family": "cast_iron",
+    "normalMap": "ericrolph_hot_potato_arena_cast_iron.normal.png",
+    "roughnessMap": "ericrolph_hot_potato_arena_cast_iron_roughness.data.png",
+    "size": 1024,
+    "srgb": true
+  },
+  "ericrolph_hot_potato_arena_handle_wood": {
+    "baseColorMap": "ericrolph_hot_potato_arena_handle_wood.color.png",
+    "family": "arena_handle_wood",
+    "normalMap": "ericrolph_hot_potato_arena_handle_wood.normal.png",
+    "roughnessMap": "ericrolph_hot_potato_arena_handle_wood_roughness.data.png",
+    "size": 1024,
+    "srgb": true
+  },
+  "ericrolph_hot_potato_arena_rim": {
+    "baseColorMap": "ericrolph_hot_potato_arena_rim.color.png",
+    "family": "arena_rim",
+    "normalMap": "ericrolph_hot_potato_arena_rim.normal.png",
+    "roughnessMap": "ericrolph_hot_potato_arena_rim_roughness.data.png",
+    "size": 1024,
+    "srgb": true
+  },
+  "ericrolph_hot_potato_arena_salt": {
+    "baseColorMap": "ericrolph_hot_potato_arena_salt.color.png",
+    "family": "arena_salt",
+    "normalMap": "ericrolph_hot_potato_arena_salt.normal.png",
+    "roughnessMap": "ericrolph_hot_potato_arena_salt_roughness.data.png",
+    "size": 512,
+    "srgb": true
+  },
+  "ericrolph_hot_potato_arena_skillet_steel": {
+    "baseColorMap": "ericrolph_hot_potato_arena_skillet_steel.color.png",
+    "family": "steel_worn",
+    "normalMap": "ericrolph_hot_potato_arena_skillet_steel.normal.png",
+    "roughnessMap": "ericrolph_hot_potato_arena_skillet_steel_roughness.data.png",
+    "size": 1024,
+    "srgb": true
+  }
+}

@@ -1,0 +1,506 @@
+{
+ "cc0_overlay_sources": {
+  "burned_ground_01": "char / ash: the crust albedo's base and the soot overlays",
+  "dry_ground_rocks": "the ash-drift and scorch decal grain",
+  "namaqualand_boulder_06": "the rock_face_01 slot's detail donor: high-frequency colour/normal/AO grain and the roughness channel, because rock_07's own is a constant 0.2979",
+  "rock_face": "the hearth slab micro-structure under the soot and scorch decals",
+  "snow_02": "the crust's fine grain (inverted) and the salt scatter decal"
+ },
+ "files": {
+  "art/decal/ericrolph_hot_potato_arena_t_dcl_atlas_b.color.png": {
+   "bytes": 568203,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "055881e94be1660ab3be7a050f757af8c81cea9b33896854ad199421b6f9ff6b"
+  },
+  "art/decal/ericrolph_hot_potato_arena_t_dcl_atlas_nm.normal.png": {
+   "bytes": 287009,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "87b74f7a7000e1eae3629f2a572fab384bac46df36039d6b25fce18e1cb5b4f5"
+  },
+  "art/decal/ericrolph_hot_potato_arena_t_dcl_atlas_o.data.png": {
+   "bytes": 284301,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "762a74ede64e35790e03b7bd1151d1bac0e75f1ff80e05186917f75e4d8cc40a"
+  },
+  "art/decal/ericrolph_hot_potato_arena_t_dcl_atlas_r.data.png": {
+   "bytes": 57342,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "21ff05a9c76b68d606f64d4950d690f59c0d4f73b44c90dc2ced522cbce0b38c"
+  },
+  "art/decal/ericrolph_hot_potato_arena_t_dcl_ember_b.color.png": {
+   "bytes": 193623,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "cdaf4e865bcb319f11acd9964a50e90217b6043ca570a3d575c851285e5353a4"
+  },
+  "art/decal/ericrolph_hot_potato_arena_t_dcl_ember_e.color.png": {
+   "bytes": 283401,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "e1bb6e32a72dafa33fe54af7f4f7d4d7f558ec752814cacaea6abcf52ac68686"
+  },
+  "art/decal/ericrolph_hot_potato_arena_t_dcl_ember_nm.normal.png": {
+   "bytes": 222023,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "3ac5e93389fa63c5ddffff564456bd829a4f6f55357d4061542feaa45d29aac2"
+  },
+  "art/decal/ericrolph_hot_potato_arena_t_dcl_ember_o.data.png": {
+   "bytes": 97459,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "6d68f2fac73548af68df9c58798507f404a266f8b3b64d4bffcc82efdee3c546"
+  },
+  "art/decal/ericrolph_hot_potato_arena_t_dcl_ember_r.data.png": {
+   "bytes": 81169,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "579c475136b9a6c4252c49caee8a327394edacc3855f9d69c9f066423c0546ad"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_ember_crust_b.color.png": {
+   "bytes": 4660232,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "42c2dde0f1687e5569d2859ccddef20eb7be6c75d5d555ba716718e1f29ff01a"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_ember_crust_e.color.png": {
+   "bytes": 1936360,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "abd7a3486a601422ac6837f8e7411a83f3010b2c1f59878615e6d16cc3a89f3f"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_ember_crust_nm.normal.png": {
+   "bytes": 6686129,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "a0fd1b2df1d22beb1fe98c8f280875e3e6d99dd38ad0ecbc0c61c12eef98ade7"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_ember_crust_r.data.png": {
+   "bytes": 473186,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "e3fc8ca91d82dca9f480f1d73a6d61c5ed339cff63d600e12aab7994a8a69f54"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_boulder_01_ao.data.png": {
+   "bytes": 525254,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "70e0d0252a8886b96b87a1141964d5eb3a7b5e6b8abff48843ef2619f75bfeb8"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_boulder_01_b.color.png": {
+   "bytes": 7618560,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "9c211e07a35108710565ff3cda14018ea484a31d7087e862b88477d1e87caadd"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_boulder_01_nm.normal.png": {
+   "bytes": 8682018,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "d420da5c32349ad8706de81e580cec93fa5a85a7ef7b4a91970eab64bc08ec91"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_boulder_01_r.data.png": {
+   "bytes": 407374,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "684a2293549f38f84bf572311d775677dbd6ef745efd63e1c15868b2fe08b896"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_02_ao.data.png": {
+   "bytes": 593855,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "3ceca2bdedf283ce401c7daba36e2cc7ee123311aef939313836eb3295847641"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_02_b.color.png": {
+   "bytes": 8215701,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "f9302e05d866d624a69a97c6f60213c624133967067f3ae94c0da6b4106574b6"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_02_nm.normal.png": {
+   "bytes": 7582348,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "fbef27c640205d30091265fba6379356e78c4e729bb6d34033dd0d736b5c6603"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_02_r.data.png": {
+   "bytes": 588602,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "c589075a93a0a579fe61fae56fa66c72dc094e28b747d1f91a52b63657fab548"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_03_ao.data.png": {
+   "bytes": 463373,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "a7e4a8eb938090aac3cc213e160f90d45ea99556fc8b2fdce0f85d6e95f06691"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_03_b.color.png": {
+   "bytes": 7129693,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "48c47081c3fc2a891bed6d469ecefb718ddad187f21fbfaff271be9bb3aae8f1"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_03_nm.normal.png": {
+   "bytes": 5802545,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "e3424d5f93c86783fe795529e19575a33bf500c5564214c893a05aece0b41ce6"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_03_r.data.png": {
+   "bytes": 534089,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "eaf9e9ac2435e2384bd4305653af5b13adff784cc8b55feaa3c61023559ad71d"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_04_ao.data.png": {
+   "bytes": 488503,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "f95cb34a08b88b401202fd4bdfcbaeebbc8ac9b5ade1c3c1e99d941dcd176bfa"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_04_b.color.png": {
+   "bytes": 6928753,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "56407da304f6c320eda5fd916f7fc15a2995010c31e692751422cc0c54f3daaf"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_04_nm.normal.png": {
+   "bytes": 6072436,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "c66d30077eaa79290df9358c087f021870861ec6924f483457c90776e226768c"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_04_r.data.png": {
+   "bytes": 438794,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "8fa2d72ec7b4124064b344870877e4c510cbd6e313e8768d3a997046a52ff279"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_05_ao.data.png": {
+   "bytes": 575859,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "edb6f0f02c284be9328ed7aa91f3180357796e804103f6a21dcbc9177eaff844"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_05_b.color.png": {
+   "bytes": 6971243,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "762a934e549c8ebecd830c801cc3ba80022e34d29da88598337361e84c4da2fa"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_05_nm.normal.png": {
+   "bytes": 7594928,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "4e04ec233854b398f6936b25d0b2bf568b89485c1f0b04f8de65af656396c3b0"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_05_r.data.png": {
+   "bytes": 503418,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "89810799e666bdbef175e7cced034a8167a187901e59d3d72b55ce400d56560d"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_rock_face_01_ao.data.png": {
+   "bytes": 568280,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "2fbbfd30c474b746fab8a0d77c79a036cea2ae53fd9d8fe1b3c1abb85e6a97ac"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_rock_face_01_b.color.png": {
+   "bytes": 8170360,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "79437b4c711c6f319bb755997a71f81b431c5909378fc7aa5767112816cec18f"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_rock_face_01_nm.normal.png": {
+   "bytes": 7800596,
+   "px": [
+    2048,
+    2048
+   ],
+   "sha256": "7c855abd19bb78d5419bcc96645d74a9ad48622c1a265d74e39bb35f28be80c8"
+  },
+  "art/shapes/hearth/ericrolph_hot_potato_arena_rock_hero_rock_face_01_r.data.png": {
+   "bytes": 612872,
+   "px": [
+    1024,
+    1024
+   ],
+   "sha256": "d984d02c10716ff61433336d647cee4986e1bfb95c75e991b80ab018f8416148"
+  },
+  "art/shapes/particles/ericrolph_hot_potato_arena_particle_glow.png": {
+   "bytes": 5563,
+   "px": [
+    128,
+    128
+   ],
+   "sha256": "5794ae3336a1a7b0d4c4ff7348ccffea0154854359db7eec5ecac8fe75f0192c"
+  },
+  "art/shapes/particles/ericrolph_hot_potato_arena_particle_spark.png": {
+   "bytes": 2339,
+   "px": [
+    64,
+    64
+   ],
+   "sha256": "6c832e668d2e34024ba34c0bb920badb9e0056f303eae21ad1a9d1be3e17578c"
+  },
+  "art/shapes/particles/ericrolph_hot_potato_arena_particle_wisp.png": {
+   "bytes": 4220,
+   "px": [
+    128,
+    128
+   ],
+   "sha256": "174028e460c0e35f49521012bf2108e15a055949f929603f5d431f0be4d4c8e8"
+  }
+ },
+ "level_id": "ericrolph_hot_potato_arena",
+ "notes": {
+  "crust": {
+   "albedo_linear_mean": 0.010365,
+   "albedo_mean_rgb": [
+    0.10598,
+    0.08758,
+    0.07925
+   ],
+   "albedo_red_excess_mean": 0.02257,
+   "ash_fraction": 0.22857,
+   "ash_mean": 0.23642,
+   "b0_reference_plate": {
+    "albedo_linear_mean": 0.00549,
+    "albedo_srgb_mean": 0.0585,
+    "emissive_fraction_over_half": 0.325,
+    "emissive_map_mean": 0.3098,
+    "source": "critic r3 verify_b0_vs_b2_plate.json, from B0's own shipped bytes"
+   },
+   "bank_mean": 0.77224,
+   "dead_fraction": 0.18674,
+   "domain_warped": true,
+   "emissive_core_fraction": 0.28273,
+   "emissive_core_p99": 0.46295,
+   "emissive_mask_fraction_over_half": 0.01269,
+   "emissive_mean": 0.08013,
+   "emissive_p99": 0.51672,
+   "facet_sides": [
+    4,
+    7
+   ],
+   "halo_mean": 0.01813,
+   "heat_mean": 0.54273,
+   "lump_span_convention": "one tile is 23.000 m radially (u) by 24.544 m tangentially (v); the band published is the LONG axis, so the design's 0.3-1.2 m holds on both",
+   "lump_span_m": [
+    0.323,
+    1.169
+   ],
+   "lump_span_m_u_axis": [
+    0.303,
+    1.095
+   ],
+   "pile_layers": [
+    [
+     21,
+     0.56,
+     1.0
+    ],
+    [
+     32,
+     0.54,
+     0.88
+    ],
+    [
+     49,
+     0.52,
+     0.74
+    ],
+    [
+     76,
+     0.5,
+     0.58
+    ]
+   ],
+   "radial_axis": "u (image columns) = radius 176 -> 199 m, one tile across the plate",
+   "roughness_p05_p95": [
+    0.5251,
+    0.9337
+   ],
+   "roughness_px": 1024,
+   "warp_cell_limit": 0.45,
+   "warp_cells": 0.4
+  },
+  "decals": {
+   "atlas_px": 2048,
+   "cell_px": 512,
+   "cells_used": {
+    "dcl_ash_drift": [
+     1,
+     0
+    ],
+    "dcl_butter_smear": [
+     3,
+     2
+    ],
+    "dcl_grease_ring": [
+     2,
+     1
+    ],
+    "dcl_needle_litter": [
+     1,
+     1
+    ],
+    "dcl_salt_scatter": [
+     2,
+     2
+    ],
+    "dcl_scorch_bloom": [
+     3,
+     1
+    ],
+    "dcl_scorch_streak": [
+     2,
+     0
+    ],
+    "dcl_seasoning_flake": [
+     1,
+     2
+    ],
+    "dcl_skid_arc": [
+     0,
+     1
+    ],
+    "dcl_soot_splash": [
+     3,
+     0
+    ],
+    "dcl_tyre_scuff": [
+     0,
+     2
+    ]
+   },
+   "ember_core_fraction": 0.39549,
+   "ember_px": 1024,
+   "flipped_once": true,
+   "grid": 4,
+   "mean_opacity": {
+    "dcl_ash_drift": 0.10163,
+    "dcl_butter_smear": 0.10298,
+    "dcl_grease_ring": 0.10208,
+    "dcl_needle_litter": 0.08515,
+    "dcl_salt_scatter": 0.05946,
+    "dcl_scorch_bloom": 0.08302,
+    "dcl_scorch_streak": 0.15052,
+    "dcl_seasoning_flake": 0.05534,
+    "dcl_skid_arc": 0.2396,
+    "dcl_soot_splash": 0.09907,
+    "dcl_tyre_scuff": 0.11605
+   }
+  },
+  "particles": {
+   "glow": {
+    "alpha_max": 1.0,
+    "alpha_mean": 0.210316,
+    "alpha_min": 0.0,
+    "bbox_fill": 0.8287,
+    "bbox_fill_half": 0.16,
+    "border_alpha_max": 0.0,
+    "note": "the bed's breath: a broad soft dome with a ragged rim, alpha 0 at the edge",
+    "px": 128
+   },
+   "spark": {
+    "alpha_max": 1.0,
+    "alpha_mean": 0.168525,
+    "alpha_min": 0.0,
+    "bbox_fill": 0.8611,
+    "bbox_fill_half": 0.1344,
+    "border_alpha_max": 0.0,
+    "note": "a hot coal fleck: a small white-hot core with a short radial tail",
+    "px": 64
+   },
+   "wisp": {
+    "alpha_max": 1.0,
+    "alpha_mean": 0.237698,
+    "alpha_min": 0.0,
+    "bbox_fill": 0.8158,
+    "bbox_fill_half": 0.183,
+    "border_alpha_max": 0.0,
+    "note": "a warm-grey steam puff, ragged rim, alpha 0 at the edge",
+    "px": 128
+   }
+  }
+ },
+ "seed": 1213482328,
+ "total_bytes": 110712013
+}

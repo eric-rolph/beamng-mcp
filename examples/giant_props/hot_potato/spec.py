@@ -363,28 +363,36 @@ EFFECTS = {
 }
 
 # v2.7: very light steam off the landed mash chunks ("perhaps very light
-# steam to come off the chunks?"). TWO BNGP_20 wisps per chunk — the same
+# steam to come off the chunks?"). ONE BNGP_20 wisp per chunk — the same
 # measured soft, short, see-through puff the potato's crown smoke uses
 # (peak particle alpha 0.199, 50 ms ejection; the lightest steam voice in
-# the managed set). One wisp per chunk was "functionally invisible at
-# 85 m" (v2.7 critic round), so each chunk carries a pair, posed at
-# wavering offsets on the crown for a fuller, living column while staying
-# the light voice the brief asked for. They ship inactive at the chunks'
-# under-plaza homes; stepMash activates and poses them onto a chunk only
-# while it sits landed and steaming, and shuts them off when it melts.
+# the managed set). The critic round briefly doubled these to a pair per
+# chunk for an 85 m screenshot, and the player then asked to "tone down
+# the steam" at play distance (v2.7.1) — one wavering wisp on the crown is
+# the shipped voice. They ship inactive at the chunks' under-plaza homes;
+# stepMash activates and poses them onto a chunk only while it sits landed
+# and steaming, and shuts them off when it melts.
 for _steam_index, _steam_home in enumerate(MASH_HOMES, start=1):
-    for _steam_slot in ("mash_steam_", "mash_steam_b"):
-        EFFECTS[f"{_steam_slot}{_steam_index}"] = {
-            "emitter": "BNGP_20",
-            "position": list(_steam_home),
-            "direction": [0.0, 0.0, 1.0],
-        }
+    EFFECTS[f"mash_steam_{_steam_index}"] = {
+        "emitter": "BNGP_20",
+        "position": list(_steam_home),
+        "direction": [0.0, 0.0, 1.0],
+    }
 
 BEHAVIOR = {
     "camera_distance": 46.0,
     # --- the potato ------------------------------------------------------
     "potato_home": list(POTATO_HOME),
     "pad_center": [0.0, 0.0, 0.0],
+    # Where the arch legs meet the plaza (authored frame, X = span axis).
+    # The AI's chase/flee pursuit and the slot-traffic return both drive
+    # straight lines, and a line at pad_center from beyond either foot
+    # passes exactly THROUGH that foot — the runtime's dodge reflex
+    # (v26.stepDodge) needs the two keep-out posts to steer around.
+    "arch_feet": [
+        [-round(ARCH_HALF_SPAN, 3), 0.0, 0.0],
+        [round(ARCH_HALF_SPAN, 3), 0.0, 0.0],
+    ],
     "spin_rate": 0.55,
     "bob_amplitude": 0.16,
     "bob_rate": 2.3,
@@ -584,8 +592,18 @@ BEHAVIOR = {
     # most. Only game members are pulled — any vehicle (the player
     # included) seen inside the ring during a live round joins for that
     # round; bystanders beyond the line are never touched.
+    #
+    # v2.7.1, from live play ("it doesn't seem as if the magnetic system is
+    # working"): a FLAT pull loses to tire grip — static friction holds a
+    # parked car against ~0.9 g of sideways drag, so the original 0.6 g
+    # horizontal well was physically real and perceptually absent. The well
+    # now hangs ABOVE the arena center (hoisted 0.6x the car's range, a
+    # ~31 degree elevation), so half the pull unloads the tires while the
+    # rest drags the car home — the tractor-beam feel — and the default is
+    # 1.2 g: sin(31)*1.2 = 0.62 g of lift leaves the car grounded but
+    # light, and cos(31)*1.2 = 1.03 g of drag beats the grip that remains.
     "arena_magnet_enabled": True,
-    "arena_magnet_g": 0.6,
+    "arena_magnet_g": 1.2,
     # --- damage (v2.6, "to make it more arcade like") --------------------
     # "normal": stock BeamNG consequences. "tires_safe": tires cannot pop
     # (wheel and pressure-group beams armored, beamstate.deflateTire
@@ -648,7 +666,7 @@ local REQUIRED = {
   "whistle_enabled", "whistle_volume",
   "ai_enabled", "ai_aggression", "ai_speed_kmh",
   "arena_enabled", "arena_radius_m", "arena_halo_enabled",
-  "arena_magnet_enabled", "arena_magnet_g",
+  "arena_magnet_enabled", "arena_magnet_g", "arch_feet",
   "damage_mode", "transfer_shield_seconds",
   "beacon_enabled", "glow_ramp_enabled",
   "beacon_pulse_seconds",
@@ -679,6 +697,7 @@ local OPTION_RANGE = {
   fuse_min_seconds = {5, 600}, fuse_max_seconds = {5, 900},
   grace_seconds = {0, 30},
   camp_burn_multiplier = {1, 5}, camp_speed_kmh = {0, 120},
+  oob_burn_multiplier = {1, 5},
   show_countdown = "bool",
   game_mode = "enum", hoard_target_points = {10, 2000},
   transfer_mode = "enum", touch_margin = {0, 6}, radius_m = {1, 60},
@@ -704,7 +723,7 @@ local OPTION_RANGE = {
   ai_enabled = "bool", ai_aggression = {0.3, 2}, ai_speed_kmh = {20, 200},
   arena_enabled = "bool", arena_radius_m = {20, 500},
   arena_halo_enabled = "bool",
-  arena_magnet_enabled = "bool", arena_magnet_g = {0.1, 2.5},
+  arena_magnet_enabled = "bool", arena_magnet_g = {0.1, 3.0},
   damage_mode = "enum", transfer_shield_seconds = {0, 10},
   beacon_enabled = "bool", glow_ramp_enabled = "bool",
   bounce_enabled = "bool", bounce_amplitude_m = {0, 1.5},
@@ -960,6 +979,13 @@ end
 
 local function seedOptions()
   for key, value in pairs(B) do OPT[key] = value end
+  -- B is the Blender handoff's tunables block, so an option added after
+  -- the last Blender run has no entry there and would seed as nil. Its
+  -- shipped default lives here instead: no new B key, no Blender stage,
+  -- and `build.py prop` alone ships it — the tunables law's own preferred
+  -- path. (v2.13: the out-of-bounds fuse burn, default 1.0 = OFF, so an
+  -- existing player's game is untouched until a scenario turns it on.)
+  if OPT.oob_burn_multiplier == nil then OPT.oob_burn_multiplier = 1.0 end
 end
 
 local function coerceOption(key, value)
@@ -1235,7 +1261,75 @@ local function explodedPhysics(vehicle)
   return reach > OPT.safety_extent_max
 end
 
-local function roster(state)
+-- The v2.6+ helper table, declared here (not at its comment block below)
+-- because roster() needs it as an upvalue for the subject filter. See the
+-- 200-local law at that block; this is the same single table.
+local v26 = {}
+
+-- The subject filter (v2.8, arena ask #3 — from the scenario's live
+-- smoke: 12 cardboard boxes and 4 barrels spawned as breakable scenery
+-- read as `field = 22`, a box could receive the potato, be chased by the
+-- AI and be detonated). The stock game's own classification: every
+-- vehicle model carries `Type` from its info.json ("Car", "Truck",
+-- "Prop", "Trailer", ... — cardboard_box and barrels ship Type = "Prop").
+-- The runtime reads the model name with vehicle:getJBeamFilename() (the
+-- GE vehicle object's method; traffic reads the same name as obj.jbeam)
+-- and asks `core_vehicles.getModel(name).model.Type`; traffic refuses to
+-- drive anything whose type is not in its allow-list
+-- (lua/ge/extensions/gameplay/traffic/vehicle.lua:29-34) and the traffic
+-- editor tests `.model.Type == "Prop"` outright
+-- (lua/ge/extensions/editor/trafficManager.lua:1948). getModel returns {}
+-- for a key it does not know (core/vehicles.lua:759-764) and stamps
+-- Type = "Unknown" when the info file has none (core/vehicles.lua:843-844).
+-- This filter excludes ONLY the SCENERY_TYPES below (case-insensitive:
+-- Prop, and Trailer — a hitched trailer sits permanently inside its tow
+-- car's pass range and can neither drive nor be conscripted) and fails
+-- OPEN everywhere else — no core_vehicles, no model, no Type, "Unknown",
+-- "Heavy Machinery", a throwing lookup: eligible. A real car must never
+-- be failed closed; a box that slips through on a bad frame is the
+-- lesser evil.
+--
+-- The cache is keyed by id AND model, and the model is re-read every
+-- roster pass: the engine REUSES the vehicle object on replace
+-- (core/vehicles.lua:1716-1765 — vehsToReuse, replaceOtherVehicle on the
+-- same object, then the onVehicleReplaced hook, which this framework
+-- does not subscribe), so a player who Tabs into a box and picks a car
+-- from the selector gets a car with the box's id. An id-only cache
+-- failed exactly that car closed for the rest of the session (critic
+-- round 3). getJBeamFilename is one C call per vehicle per pass, the
+-- same class as the getId the loop already pays; getModel runs once per
+-- (id, model). The entry is dropped in onSubjectGone and the table wiped
+-- on init/reset.
+v26.SCENERY_TYPES = {prop = true, trailer = true}
+
+function v26.isPropVehicle(state, id, vehicle)
+  local b = state.behavior
+  b.propKind = b.propKind or {}
+  local okName, model = pcall(function() return vehicle:getJBeamFilename() end)
+  if not okName or type(model) ~= "string" or model == "" then return false end
+  local cached = b.propKind[id]
+  if cached and cached.model == model then return cached.prop end
+  local verdict = false
+  -- The on-foot player: stock `unicycle` (walking mode) ships
+  -- Type = "Prop", and the game's traffic code special-cases it to
+  -- 'player' (traffic/vehicle.lua:31) for exactly this reason. Mirror
+  -- it: the walking player stays in the game, as before v2.8.
+  if model ~= "unicycle" then
+    local api = rawget(_G, "core_vehicles")
+    if type(api) == "table" and type(api.getModel) == "function" then
+      local okInfo, info = pcall(api.getModel, model)
+      local kind = okInfo and type(info) == "table"
+        and type(info.model) == "table" and info.model.Type
+      if type(kind) == "string" and v26.SCENERY_TYPES[string.lower(kind)] then
+        verdict = true
+      end
+    end
+  end
+  b.propKind[id] = {model = model, prop = verdict}
+  return verdict
+end
+
+local function roster(state, includeProps)
   -- getAllVehicles() is ground truth. Trigger-set bookkeeping made a parked
   -- car invisible for minutes in the car wash rounds, and cost this mod its
   -- entire pickup path in v1.
@@ -1243,18 +1337,30 @@ local function roster(state)
   local ok, all = pcall(getAllVehicles)
   if not ok or type(all) ~= "table" then return found end
   local b = state.behavior
+  local props = 0
   for _, vehicle in ipairs(all) do
     local okId, id = pcall(function() return vehicle:getId() end)
     if okId and integer(id) and eligibleSubject(id) then
-      if b.seen[id] == nil then b.seen[id] = b.now end
-      -- b.out is PER-ROUND elimination (cleared by endRound); b.quarantined
-      -- is exploded-node physics and outlives rounds (cleared on prop
-      -- init/reset only).
-      if not b.out[id] and not (b.quarantined and b.quarantined[id]) then
-        found[#found + 1] = {id = id, vehicle = vehicle}
+      -- Prop-type vehicles (v2.8) are scenery: never a subject, never
+      -- seen, never conscripted — unless the caller asks for the whole
+      -- field, which only the blast shockwave does (it shoves anything).
+      if v26.isPropVehicle(state, id, vehicle) then
+        props = props + 1
+        if includeProps then
+          found[#found + 1] = {id = id, vehicle = vehicle}
+        end
+      else
+        if b.seen[id] == nil then b.seen[id] = b.now end
+        -- b.out is PER-ROUND elimination (cleared by endRound); b.quarantined
+        -- is exploded-node physics and outlives rounds (cleared on prop
+        -- init/reset only).
+        if not b.out[id] and not (b.quarantined and b.quarantined[id]) then
+          found[#found + 1] = {id = id, vehicle = vehicle}
+        end
       end
     end
   end
+  b.propsExcluded = props
   return found
 end
 
@@ -1291,7 +1397,8 @@ end
 -- lives in b.armorApplied ({id -> "full"|"tires"|"none"}); the command is
 -- idempotent, so a resend is always safe.
 -- --------------------------------------------------------------------------
-local v26 = {}
+-- (`local v26 = {}` itself is declared above roster(), which needs it as
+-- an upvalue for the v2.8 subject filter. Same table, same law.)
 
 -- BeamMP synchronization lives in one table local because this generated
 -- main chunk is already pressed against Lua's 200-local ceiling. The
@@ -1305,11 +1412,14 @@ Sync.PROTOCOL = 1
 Sync.GAME = "hot_potato"
 Sync.PUBLISH_SECONDS = 0.20
 
+-- rawget only: `extensions.<name>` for an unloaded name falls into the
+-- extensions table's __index, which tries to LOAD it and logs
+-- "extension unavailable" on every miss - twice a frame in single player.
+-- Loaded extensions are raw fields of that table and globals (engine
+-- lua/common/extensions.lua registers both), so rawget sees them.
 function Sync.network()
-  if extensions and extensions.MPCoreNetwork then
-    return extensions.MPCoreNetwork
-  end
-  return rawget(_G, "MPCoreNetwork")
+  local core = extensions and rawget(extensions, "MPCoreNetwork")
+  return core or rawget(_G, "MPCoreNetwork")
 end
 
 function Sync.isMPSession()
@@ -1320,8 +1430,8 @@ function Sync.isMPSession()
 end
 
 function Sync.vehicles()
-  if extensions and extensions.MPVehicleGE then return extensions.MPVehicleGE end
-  return rawget(_G, "MPVehicleGE")
+  local api = extensions and rawget(extensions, "MPVehicleGE")
+  return api or rawget(_G, "MPVehicleGE")
 end
 
 function Sync.sidForGameId(gameId)
@@ -1423,9 +1533,13 @@ end
 -- halo simply is not there. 48 segments, 7 m tall, alpha 22/255.
 function v26.drawArenaHalo(state)
   local b = state.behavior
-  if not (OPT.arena_enabled and OPT.arena_halo_enabled) then return end
+  if not OPT.arena_enabled then return end
   if b.phase ~= "live" and b.phase ~= "boom" then return end
   if not debugDrawer then return end
+  -- The magnet's grip is drawn even when the halo wall is toggled off —
+  -- an invisible force that moves your car must always show its hand.
+  v26.drawMagnetTethers(state)
+  if not OPT.arena_halo_enabled then return end
   pcall(function()
     local centre = toWorldPoint(state, B.pad_center)
     local radius = OPT.arena_radius_m
@@ -1443,6 +1557,46 @@ function v26.drawArenaHalo(state)
       debugDrawer:drawTriSolid(hi1, lo1, lo0, tint)
       debugDrawer:drawTriSolid(hi0, lo0, hi1, tint)
       debugDrawer:drawTriSolid(lo1, hi1, lo0, tint)
+    end
+  end)
+end
+
+-- The tether made visible (v2.7.1, from live play: "it doesn't seem as if
+-- the magnetic system is working"). While a well holds a car, a marching
+-- line of amber beads arcs from the car back toward the ring, so the pull
+-- reads as a mechanism instead of a mystery drag. Immediate-mode with the
+-- halo; beads march homeward with b.now so the direction of the force is
+-- legible at a glance.
+function v26.drawMagnetTethers(state)
+  local b = state.behavior
+  if not (b.magnetApplied and debugDrawer) then return end
+  pcall(function()
+    local centre = toWorldPoint(state, B.pad_center)
+    for id in pairs(b.magnetApplied) do
+      local vehicle = exactVehicle(id)
+      if vehicle then
+        local ok, pos = pcall(function() return vehicle:getPosition() end)
+        if ok and finiteVector3(pos) then
+          local dx, dy = centre.x - pos.x, centre.y - pos.y
+          local span = math.sqrt(dx * dx + dy * dy)
+          if span > 1.0 then
+            local nx, ny = dx / span, dy / span
+            -- Reach only to the ring's edge, not the arch: the beads say
+            -- "back inside", not "into the monument".
+            local reach = math.max(6.0, span - OPT.arena_radius_m * 0.9)
+            local phase = (b.now * 1.6) % 1.0
+            for k = 0, 5 do
+              local t = (k + phase) / 6.0
+              local bead = vec3(
+                pos.x + nx * reach * t,
+                pos.y + ny * reach * t,
+                pos.z + 1.1 + math.sin(t * math.pi) * 1.6)
+              debugDrawer:drawSphere(bead, 0.55 - 0.35 * t,
+                ColorF(1.0, 0.62, 0.18, 0.55 * (1.0 - t * 0.6)))
+            end
+          end
+        end
+      end
     end
   end)
 end
@@ -1797,6 +1951,16 @@ local function publishStats(state)
     carrier_sid = carrierSid or "",
     fuse_remaining = remaining,
     field = b.fieldPeak or 0,
+    -- v2.8: Prop-type vehicles the roster refused this frame, so a live
+    -- gate can assert field == real cars.
+    props_excluded = b.propsExcluded or 0,
+    -- v2.13: the carrier is outside the ring and its fuse is burning fast.
+    oob = b.oob == true,
+    -- v2.15: the multiplier actually applied to the fuse this frame, and
+    -- the clock delta it rode on — so a gate can read the rate instead of
+    -- inferring it from wall time it does not control.
+    fuse_burn = b.fuseBurn or 1.0,
+    clock_delta = b.lastDelta or 0,
     eliminated = b.outCount or 0,
     transfers = b.transfers or 0,
     mode = OPT.transfer_mode,
@@ -1845,6 +2009,10 @@ local function publishStats(state)
   LAST.fw_stage = b.fw and b.fw.stage or ""
   LAST.transfers = b.transfers or 0
   LAST.field = b.fieldPeak or 0
+  LAST.props_excluded = b.propsExcluded or 0
+  -- v2.13: the HUD's own answer to "why is my fuse racing?"
+  LAST.oob = b.oob == true
+  LAST.fuse_burn = b.fuseBurn or 1.0
   LAST.mode = OPT.transfer_mode
   LAST.game_mode = OPT.game_mode
   LAST.wins_to_champion = OPT.wins_to_champion
@@ -1907,10 +2075,12 @@ local function endRound(state)
   b.carrierSid = nil
   b.fuseEnds = nil
   b.silenced = false
+  b.oob = nil
   b.sputtered = false
   b.out = {}
   b.outCount = 0
   b.fieldPeak = 0
+  b.lastPasser = nil
   b.pairFrom, b.pairTo, b.pairSeparated = nil, nil, true
   parkPotato(state)
   Sync.publish(state, true)
@@ -1932,9 +2102,11 @@ local function beginReturn(state, fromPos)
   state.zones.carrier_watch = nil
   b.fuseEnds = nil
   b.silenced = false
+  b.oob = nil
   b.out = {}
   b.outCount = 0
   b.fieldPeak = 0
+  b.lastPasser = nil
   b.pairFrom, b.pairTo, b.pairSeparated = nil, nil, true
   b.sputtered = false
   silenceTick(state)
@@ -2458,23 +2630,23 @@ local function stepMash(state)
           if chunk.steam then
             chunk.steam = nil
             setEffectActive(state, "mash_steam_" .. i, false)
-            setEffectActive(state, "mash_steam_b" .. i, false)
           end
           setPartPose(state, "mash_" .. i, vec3(0, 0, 0), quat(0, 0, 0, 1))
         end
       end
       if not chunk.gone then
         live = true
-        -- Very light steam off the dollop (v2.7): a PAIR of wisps switch
-        -- on when the chunk lands, waver across its crown while it sits
-        -- cooking and melts, and die with it (one wisp was functionally
-        -- invisible at play distance — the critic round). Gated by the
-        -- same smoke toggle as the potato's own wisp.
+        -- Very light steam off the dollop (v2.7): ONE wisp switches on
+        -- when the chunk lands, wavers across its crown while it sits
+        -- cooking and melts, and dies with it. The critic round doubled
+        -- these for an 85 m screenshot; the player then asked to "tone
+        -- down the steam" at play distance (v2.7.1), so the single wisp
+        -- is the shipped voice. Gated by the same smoke toggle as the
+        -- potato's own wisp.
         local wantSteam = chunk.landed == true and OPT.smoke_enabled == true
         if wantSteam ~= (chunk.steam == true) then
           chunk.steam = wantSteam
           setEffectActive(state, "mash_steam_" .. i, wantSteam)
-          setEffectActive(state, "mash_steam_b" .. i, wantSteam)
         end
         if wantSteam then
           local crown = (B.mash_radii and B.mash_radii[i]) or 0.5
@@ -2483,10 +2655,6 @@ local function stepMash(state)
             chunk.pos.x + math.sin(waver) * crown * 0.35,
             chunk.pos.y + math.cos(waver * 0.8) * crown * 0.35,
             chunk.pos.z + crown * 0.6))
-          poseEffectAt(state, "mash_steam_b" .. i, vec3(
-            chunk.pos.x - math.sin(waver * 1.1) * crown * 0.4,
-            chunk.pos.y - math.cos(waver * 0.7) * crown * 0.4,
-            chunk.pos.z + crown * 0.5))
         end
         -- The splatter ring (critic round: "chunks sit on untouched
         -- clean tile like they were placed by hand"): a deterministic
@@ -2568,12 +2736,16 @@ local function giveTo(state, vehicle, reason, passSpeed)
   b.heldSince = b.now
   b.transfers = (b.transfers or 0) + 1
   b.silenced = false
+  b.oob = nil
   -- A fresh hot window re-excites the steam: the whistle restarts at peak
   -- for the new carrier (driveWhistle moves the loop by id on the next cue
   -- tick), and the sputter re-arms.
   b.sputtered = false
   b.hopStart = nil
   if previous and previous ~= id then
+    -- The last passer is the round's dodger-in-waiting (v2.7.1): if the
+    -- potato blows on the car they handed it to, THEY won the round.
+    b.lastPasser = previous
     -- Anti-tag-back: the passer is immune for a window, AND the pair must
     -- physically separate before the potato may come back (see sweepForPass).
     b.immune[previous] = b.now + OPT.tagback_immunity_seconds
@@ -2708,9 +2880,11 @@ local function detonate(state, vehicle)
   -- The area shockwave (v2.3): bystanders inside blast_radius_m get a
   -- radial shove with linear falloff — a uniform cluster velocity add, so
   -- it moves cars without straining a single beam. The victim is excluded
-  -- (roster already dropped it via b.out; it gets the real launch).
+  -- (roster already dropped it via b.out; it gets the real launch). The
+  -- whole field is asked for (v2.8): the wave shoves scenery props too —
+  -- the arena scatters its pantry stacks with the boom on purpose.
   if OPT.blast_push_mps > 0 and OPT.blast_radius_m > 0 then
-    for _, entry in ipairs(roster(state)) do
+    for _, entry in ipairs(roster(state, true)) do
       if entry.id ~= id then
         local position = entry.vehicle:getPosition()
         if finiteVector3(position) then
@@ -3025,6 +3199,9 @@ local function aiRelease(state)
   end
   b.aiApplied = nil
   b.aiReturning = nil
+  b.aiDodging = nil
+  b.dodgeAim = nil
+  b.dodgeStuck = nil
   b.aiTuning = nil
 end
 
@@ -3120,7 +3297,14 @@ local function stepAI(state)
         end
         if b.aiApplied[id] ~= role then
           b.aiApplied[id] = role
-          if role == "return" then
+          if b.aiDodging and b.aiDodging[id] then
+            -- A dodge owns the wheel (v2.10). Recording the role without
+            -- sending it stops the 0.8 s role sweep from stomping a
+            -- side-step mid-manoeuvre — a re-aimed chase/flee points the
+            -- car straight back at the pillar it is going around. The
+            -- dodge release wipes b.aiApplied[id], so the next sweep
+            -- re-sends this exact role.
+          elseif role == "return" then
             b.aiReturning[id] = true
             v26.sendReturn(state, entry.vehicle)
           else
@@ -3170,8 +3354,418 @@ function v26.stepAiReturn(state)
   if (b.aiReturnNext or 0) > b.now then return end
   b.aiReturnNext = b.now + 0.25
   for id in pairs(b.aiReturning) do
-    local vehicle = exactVehicle(id)
-    if vehicle then v26.sendReturn(state, vehicle) end
+    -- A car mid-dodge is steering around an arch foot; feeding it the
+    -- straight-home target here would aim it back at the pillar.
+    if not (b.aiDodging and b.aiDodging[id]) then
+      local vehicle = exactVehicle(id)
+      if vehicle then v26.sendReturn(state, vehicle) end
+    end
+  end
+end
+
+-- ==========================================================================
+-- The pillar dodge (v2.7.1, from live play: "AI vehicles seem to crash
+-- into the arch often"). Every steering mode this mod uses drives a
+-- straight line — chase/flee beeline at their target and the containment
+-- return aims dead at pad_center, which from beyond either arch foot runs
+-- exactly THROUGH that foot. The engine's own avoidCars can't help: it
+-- models obstacles as car-sized boxes and the arch is one giant OBB whose
+-- center floats midair between the legs.
+--
+-- The reflex: 4x a second, ray each commanded car's velocity ahead; if the
+-- line passes within the keep-out of an arch foot (B.arch_feet), override
+-- with a one-shot slotTrafficTarget abeam the foot on the side the car
+-- already favors. While dodging, the return heartbeat holds off; when the
+-- ray clears, the role is re-armed by wiping b.aiApplied[id] so the next
+-- role sweep re-sends chase/flee/return.
+-- ==========================================================================
+
+v26.DODGE_KEEPOUT = 6.5  -- foot half-side 2.06 + car half-width + margin
+v26.FOOT_RADIUS = 2.06   -- the foot's PHYSICAL half-side (see SCENERY note)
+
+-- Registered obstacles (v2.8, the arena hooks): a scenario that builds
+-- pillars, towers and jambs around the arch hands the dodge reflex their
+-- world-space keep-out posts through hotPotatoRegisterObstacles — the
+-- same {x, y, r} shape the arch feet reduce to, merged into the same ray
+-- sweep. The set lives on v26 (hooks have no prop handle), survives rounds
+-- and prop resets like the fireworks request does, and is cleared at
+-- teardown so a dead scenario's posts never haunt the next session. A
+-- call REPLACES the whole set; only nil or an EMPTY table clears it.
+-- Anything else is refused whole (false, one warning, no throw, prior
+-- set untouched): a bad entry, more than OBSTACLE_CAP entries, or a
+-- table that is not a dense 1-based array — a lone {x, y, r} post passed
+-- without its wrapping braces, a decoded list with a null hole, a keyed
+-- table. ipairs walks those as "no entries", and accepting that as a
+-- clear would send the AI through everything the scenario built while
+-- the scenario reads success. Posts are 2-D: any z is ignored. x, y and
+-- r must be Lua numbers (the string "6.5" is refused), finite, with r in
+-- [OBSTACLE_R_MIN, OBSTACLE_R_MAX].
+-- The cap (v2.16, ask #8 from the standalone level): 64 held the arena's
+-- own 46 posts; a level that keeps the arena and registers its outside
+-- solids in the same replacing call needs 46 + 67 = 113 rows, so the cap
+-- is 128. Its job is unchanged (refusing malformed and runaway lists),
+-- and the sweep is a linear pass over what is REGISTERED, so the per-
+-- frame cost follows the count, not the cap.
+v26.OBSTACLE_CAP = 128
+v26.OBSTACLE_R_MIN = 0.5
+v26.OBSTACLE_R_MAX = 30.0
+-- The two radii (v2.15, from G12): a post carries a KEEP-OUT radius `r`
+-- and, optionally, the solid's PHYSICAL radius `rp`. They answer different
+-- questions and G12 proved conflating them costs contacts both ways:
+--   * `r` is the avoidance corridor — how wide a berth a MOVING car should
+--     give. The steering dodge uses r, and that was always correct.
+--   * `rp` is how big the thing actually IS (measured 1.2-2.1 m for the
+--     arena's pillars against a 6.5 m keep-out). The pin reflex uses rp,
+--     because "am I grinding against this" is a question about the solid,
+--     not about the corridor. Sizing the pin envelope on r inflated it to
+--     a 9.4 m disc around all 42 posts and shoved cars off course in open
+--     ground: contacts 17 -> 51.
+-- `rp` is OPTIONAL and defaults to `r`, so every caller written before this
+-- round behaves exactly as it did.
+v26.OBSTACLE_RP_MIN = 0.1
+v26.obstacles = nil
+
+function v26.finiteNumber(value)
+  return type(value) == "number" and value == value
+    and value > -math.huge and value < math.huge
+end
+
+function v26.registerObstacles(list)
+  if list == nil then
+    v26.obstacles = nil
+    return true
+  end
+  if type(list) ~= "table" then
+    log("W", LOG_TAG, "hotPotatoRegisterObstacles: expected a list, got "
+      .. type(list))
+    return false
+  end
+  local accepted = {}
+  local scanned = 0
+  for index, entry in ipairs(list) do
+    scanned = scanned + 1
+    if scanned > v26.OBSTACLE_CAP then
+      log("W", LOG_TAG, "hotPotatoRegisterObstacles: refused, more than "
+        .. v26.OBSTACLE_CAP .. " entries")
+      return false
+    end
+    local ok = type(entry) == "table"
+      and v26.finiteNumber(entry.x) and v26.finiteNumber(entry.y)
+      and v26.finiteNumber(entry.r)
+      and entry.r >= v26.OBSTACLE_R_MIN and entry.r <= v26.OBSTACLE_R_MAX
+    if not ok then
+      log("W", LOG_TAG, "hotPotatoRegisterObstacles: rejected entry "
+        .. index .. " (need numeric x, y and r in [" .. v26.OBSTACLE_R_MIN
+        .. ", " .. v26.OBSTACLE_R_MAX .. "])")
+      return false
+    end
+    -- rp: the SOLID's physical radius (v2.15), optional and defaulting to
+    -- r. It must never exceed the keep-out it sits inside.
+    local physical = entry.rp
+    if physical ~= nil then
+      if not v26.finiteNumber(physical)
+        or physical < v26.OBSTACLE_RP_MIN or physical > entry.r then
+        log("W", LOG_TAG, "hotPotatoRegisterObstacles: rejected entry "
+          .. index .. " (rp must be a number in [" .. v26.OBSTACLE_RP_MIN
+          .. ", r]; it is the solid's physical radius, not the keep-out)")
+        return false
+      end
+    end
+    accepted[scanned] =
+      {x = entry.x, y = entry.y, r = entry.r, rp = physical or entry.r}
+  end
+  -- Dense-array check: every key the table holds must be one ipairs
+  -- visited, or the walk above silently skipped something.
+  local keys = 0
+  for _ in pairs(list) do keys = keys + 1 end
+  if keys ~= scanned then
+    log("W", LOG_TAG, "hotPotatoRegisterObstacles: expected a dense array "
+      .. "of {x, y, r}, got " .. keys .. " keys for " .. scanned .. " entries")
+    return false
+  end
+  v26.obstacles = scanned > 0 and accepted or nil
+  return true
+end
+
+-- A copy, so a caller inspecting the set can never edit the live one.
+function v26.obstacleReport()
+  local entries = {}
+  for i, post in ipairs(v26.obstacles or {}) do
+    entries[i] = {x = post.x, y = post.y, r = post.r, rp = post.rp or post.r}
+  end
+  return {count = #entries, entries = entries}
+end
+
+-- The keep-out census one dodge sweep rays against: the arch feet
+-- (prop-local, converted here) plus whatever the scenario registered.
+function v26.dodgePosts(state)
+  local posts = {}
+  if B.arch_feet then
+    for f = 1, #B.arch_feet do
+      local foot = toWorldPoint(state, B.arch_feet[f])
+      -- The foot's own solid is the 2.06 m half-side the keep-out was
+      -- derived from (v2.7.1); the keep-out itself is the corridor.
+      posts[#posts + 1] =
+        {x = foot.x, y = foot.y, r = v26.DODGE_KEEPOUT, rp = v26.FOOT_RADIUS}
+    end
+  end
+  for _, post in ipairs(v26.obstacles or {}) do
+    posts[#posts + 1] = post
+  end
+  return posts
+end
+
+-- v2.10, from the arena's G3/G7.3 gates: 25 obstacle contacts with all 42
+-- posts registered and confirmed present. Registration was never the
+-- problem; the AVOIDANCE was, in three ways this rewrite fixes.
+--
+--  1. IT NEVER COMMITTED. The v2.7.1 sweep recomputed the side-step from
+--     the car's CURRENT heading every 0.25 s and released the moment the
+--     ray no longer clipped the post. So: aim off the post, heading now
+--     clears, dodge releases, the role sweep re-aims the beeline at the
+--     carrier — through the post — and 0.25 s later the dodge fires
+--     again. A 4 Hz limit cycle that oscillates around the obstacle while
+--     closing on it, which is exactly "repeat strikes". The aim point is
+--     now LATCHED in world space at the moment of commitment and held
+--     until the car is genuinely past the post.
+--  2. THE AVOIDANCE ANGLE SHRANK WITH RANGE. The target was the car's own
+--     heading plus a FIXED (r + 3) m of lateral offset, placed 8 m beyond
+--     the post. Detected at 37 m (17 m/s x 2.2 s), that is a 12-degree
+--     deviation — far too shallow to leave a 6.5 m corridor, and the car
+--     re-entered it as soon as the dodge released. The aim point is now
+--     computed FROM THE POST (abeam it, r + clearance), so the commanded
+--     deviation is whatever it takes to pass the obstacle at range.
+--  3. THE CORRIDOR IGNORED SPEED. A car at 17 m/s needs more room than
+--     one at 5 m/s; the trigger corridor now grows with speed.
+-- The role-sweep stomp is fixed in stepAI (a dodging car's role is
+-- recorded, not re-sent).
+v26.DODGE_CLEARANCE = 4.0     -- metres outside the keep-out to aim for
+v26.DODGE_SPEED_GUARD = 0.35  -- extra corridor per m/s of closing speed
+v26.DODGE_GUARD_MAX = 6.0
+
+-- v2.12, from G10's D-8: with the dangerous strikes gone (zero contacts
+-- above 2.7 m/s), what was left is the opposite failure — 23 contacts at
+-- two grinders by three cars over 145 s, EVERY one at <= 2.7 m/s, median
+-- 0.7 m/s, at fixed positions. Cars pinned against a pillar, grinding in
+-- place. The dodge cannot help them because it rays the VELOCITY vector
+-- and a pinned car has none: `speed > 3.0` gates it out. (That floor is
+-- v2.7.1's own and predates the arena work — it is not the magnet's
+-- slope gate, which is a different constant in a different function.)
+-- A stationary car needs a different reflex: not "steer around what you
+-- are about to hit" but "back away from what you are already touching".
+-- Latched like the dodge so it commits, and time-boxed so it can never
+-- hold the wheel for good.
+-- v2.14, from G11: the v2.12 reflex NEVER ARMED. Its envelope was a flat
+-- 1.5 m measured from the car's REFERENCE POINT to the keep-out edge, and
+-- the twelve grinding events sat at 1.85-2.02 m of that clearance — just
+-- outside a constant chosen without reference to either the post or the
+-- car. (And not the case v2.12 predicted: the log shows zero cars within
+-- 6.5 m, nearest 12.2 m, so nothing was pinning them there.)
+--
+-- The measurement is the fix. A ref node is roughly a car's centre, and a
+-- 4.4-4.8 m car carries ~2.5 m of circumscribed half-extent, so a ref-node
+-- clearance of 1.9 m is a BODY already ~0.6 m inside the keep-out — a
+-- clearance that reads safe while the contact is real. So the envelope is
+-- now measured to the car's nearest extent and expressed in the two
+-- quantities that actually define the encounter: the post's own authored
+-- keep-out (6.5 m for pillars and towers, 8.0 m for handle corners and
+-- jamb faces) and the car's cached extents. The only constant left is a
+-- small margin. Open-ground creeping still cannot arm it: a car dawdling
+-- tens of metres from every post has an extent gap of tens of metres.
+v26.DODGE_STUCK_SPEED = 3.0      -- m/s: at or under the dodge's own floor
+v26.DODGE_STUCK_MARGIN = 0.5     -- m of body clearance that still counts pinned
+v26.DODGE_STUCK_SECONDS = 1.5    -- how long before it is a pin, not a pause
+v26.DODGE_ESCAPE_SECONDS = 6.0   -- hard ceiling on one escape
+
+function v26.stepDodge(state)
+  local b = state.behavior
+  if not (OPT.ai_enabled and b.aiApplied and (B.arch_feet or v26.obstacles)) then
+    return
+  end
+  if (b.dodgeNext or 0) > b.now then return end
+  b.dodgeNext = b.now + 0.25
+  b.aiDodging = b.aiDodging or {}
+  b.dodgeAim = b.dodgeAim or {}
+  b.dodgeStuck = b.dodgeStuck or {}
+  local posts = v26.dodgePosts(state)
+  for id, role in pairs(b.aiApplied) do
+    if role ~= "stop" then
+      local vehicle = exactVehicle(id)
+      local okP, pos = false, nil
+      local okV, vel = false, nil
+      if vehicle then
+        okP, pos = pcall(function() return vehicle:getPosition() end)
+        okV, vel = pcall(function() return vehicle:getVelocity() end)
+      end
+      local dodged = false
+      if okP and okV and finiteVector3(pos) and finiteVector3(vel) then
+        local speed = math.sqrt(vel.x * vel.x + vel.y * vel.y)
+        local aim = b.dodgeAim[id]
+        if aim then
+          -- Hold the latched manoeuvre until the car is genuinely past the
+          -- post: behind it, or clear of its corridor by a real margin.
+          local rx, ry = aim.postX - pos.x, aim.postY - pos.y
+          local range = math.sqrt(rx * rx + ry * ry)
+          -- Past it (behind the heading the car committed on) or opening
+          -- the range on it (turned away and leaving): either way the
+          -- manoeuvre is done. Anything else HOLDS the latched aim.
+          -- An ESCAPE is range-only (a pinned car is by definition still
+          -- beside the post, so "behind" would release it instantly) and
+          -- time-boxed, so a car that cannot get clear is handed back to
+          -- its game role rather than steered at a wall forever.
+          local behind = (not aim.escape)
+            and (rx * aim.dirx + ry * aim.diry) < 0
+          local expired = aim.until_ ~= nil and b.now > aim.until_
+          if behind or expired or range > aim.far then
+            b.dodgeAim[id] = nil
+            aim = nil
+          else
+            aiCommand(vehicle, string.format(
+              "pcall(function() ai.setSlotTrafficTarget(%.1f, %.1f, %.1f, %.1f) end)",
+              aim.tx, aim.ty, pos.z, OPT.ai_speed_kmh / 3.6))
+            b.aiDodging[id] = true
+            dodged = true
+          end
+        end
+        -- The pin escape (v2.12) runs BEFORE the ray, because the ray is
+        -- blind to a car that is not moving.
+        if not dodged and speed <= v26.DODGE_STUCK_SPEED then
+          -- The car's own reach: the circumscribed plan radius of the
+          -- cached spawn extents (one OOBB read per car per session), so
+          -- the gap below is body-to-keep-out, not ref-node-to-keep-out.
+          local extents = subjectExtents(state, vehicle)
+          local reach = math.sqrt(extents.hx * extents.hx + extents.hy * extents.hy)
+          -- The pin asks about the SOLID, not the corridor: post.rp (which
+          -- defaults to post.r when a caller does not measure it).
+          local pinned, pinnedGap = nil, nil
+          for p = 1, #posts do
+            local post = posts[p]
+            local rx, ry = pos.x - post.x, pos.y - post.y
+            local solid = post.rp or post.r
+            local gap = math.sqrt(rx * rx + ry * ry) - solid - reach
+            if not pinnedGap or gap < pinnedGap then
+              pinned, pinnedGap = post, gap
+            end
+          end
+          if pinned and pinnedGap < v26.DODGE_STUCK_MARGIN then
+            b.dodgeStuck[id] = (b.dodgeStuck[id] or 0) + 0.25
+            if b.dodgeStuck[id] >= v26.DODGE_STUCK_SECONDS then
+              -- Straight back out the way it came in: a point on the far
+              -- side of the car from the post, well outside the keep-out.
+              local ax, ay = pos.x - pinned.x, pos.y - pinned.y
+              local reach = math.sqrt(ax * ax + ay * ay)
+              if reach < 0.01 then ax, ay, reach = 1.0, 0.0, 1.0 end
+              local ux, uy = ax / reach, ay / reach
+              -- Back out clear of the SOLID plus the clearance, not clear
+              -- of the whole avoidance corridor: a 1.5 m pillar does not
+              -- need a 16.5 m retreat, and over-long escapes are what
+              -- pushed cars off course in open ground.
+              local out = (pinned.rp or pinned.r) + v26.DODGE_CLEARANCE + 6.0
+              b.dodgeStuck[id] = nil
+              b.dodgeAim[id] = {
+                tx = pinned.x + ux * out, ty = pinned.y + uy * out,
+                postX = pinned.x, postY = pinned.y,
+                dirx = ux, diry = uy,
+                far = out, escape = true,
+                until_ = b.now + v26.DODGE_ESCAPE_SECONDS,
+              }
+              aiCommand(vehicle, string.format(
+                "pcall(function() ai.setSlotTrafficTarget(%.1f, %.1f, %.1f, %.1f) end)",
+                b.dodgeAim[id].tx, b.dodgeAim[id].ty, pos.z,
+                OPT.ai_speed_kmh / 3.6))
+              b.aiDodging[id] = true
+              dodged = true
+            end
+          else
+            b.dodgeStuck[id] = nil
+          end
+        elseif speed > v26.DODGE_STUCK_SPEED then
+          b.dodgeStuck[id] = nil
+        end
+        if not dodged and speed > 3.0 then
+          local dirx, diry = vel.x / speed, vel.y / speed
+          local lookahead = math.max(14.0, speed * 2.2)
+          local guard = math.min(v26.DODGE_GUARD_MAX,
+            speed * v26.DODGE_SPEED_GUARD)
+          -- The NEAREST threatening post along the ray owns the dodge: a
+          -- far pillar must never steer a car into the near one.
+          local hit, hitAlong, hitCross = nil, nil, nil
+          for p = 1, #posts do
+            local post = posts[p]
+            local rx, ry = post.x - pos.x, post.y - pos.y
+            local along = rx * dirx + ry * diry
+            if along > -post.r and along < lookahead then
+              -- Perpendicular miss distance of the post from the heading.
+              local cross = dirx * ry - diry * rx
+              if math.abs(cross) < post.r + guard
+                and (not hit or along < hitAlong) then
+                hit, hitAlong, hitCross = post, along, cross
+              end
+            end
+          end
+          if hit then
+            -- Post to the left (cross > 0): pass it on the right, and vice
+            -- versa — always widen the miss the car already has. A car
+            -- already inside the keep-out (cross ~ 0) breaks the tie the
+            -- same way rather than aiming straight at it.
+            -- Which side to pass on. The car's own favoured side wins
+            -- unless that aim point lands inside ANOTHER registered post:
+            -- a wall registered as a string of beads is exactly that case,
+            -- and stepping abeam one bead can aim straight at its
+            -- neighbour. Score both sides by the room they actually leave.
+            local offset = hit.r + v26.DODGE_CLEARANCE
+            local hrx, hry = hit.x - pos.x, hit.y - pos.y
+            local hitRange = math.sqrt(hrx * hrx + hry * hry)
+            local side = hitCross > 0 and -1.0 or 1.0
+            local bestRoom = nil
+            for _, trySide in ipairs({side, -side}) do
+              local qx, qy = -diry * trySide, dirx * trySide
+              local ax = hit.x + qx * offset + dirx * 6.0
+              local ay = hit.y + qy * offset + diry * 6.0
+              local room = math.huge
+              for q = 1, #posts do
+                local other = posts[q]
+                if other ~= hit then
+                  local ox, oy = ax - other.x, ay - other.y
+                  local clear = math.sqrt(ox * ox + oy * oy) - other.r
+                  if clear < room then room = clear end
+                end
+              end
+              -- The favoured side is tried first and keeps ties, so a lone
+              -- post behaves exactly as before.
+              if bestRoom == nil or room > bestRoom + 0.5 then
+                bestRoom, side = room, trySide
+              end
+            end
+            -- Aim ABEAM THE POST, not off the car's own nose: the
+            -- deviation is then whatever passing the obstacle demands,
+            -- at any range.
+            local px, py = -diry * side, dirx * side
+            local tx = hit.x + px * offset + dirx * 6.0
+            local ty = hit.y + py * offset + diry * 6.0
+            b.dodgeAim[id] = {
+              tx = tx, ty = ty,
+              postX = hit.x, postY = hit.y,
+              dirx = dirx, diry = diry,
+              far = hitRange + 8.0,
+            }
+            aiCommand(vehicle, string.format(
+              "pcall(function() ai.setSlotTrafficTarget(%.1f, %.1f, %.1f, %.1f) end)",
+              tx, ty, pos.z, OPT.ai_speed_kmh / 3.6))
+            b.aiDodging[id] = true
+            dodged = true
+          end
+        end
+      end
+      if not dodged and b.aiDodging[id] then
+        -- Clear of the pillar: hand the car back to its game role on the
+        -- next sweep (slotTraffic overrode the mode, so a re-send is due).
+        b.aiDodging[id] = nil
+        b.dodgeAim[id] = nil
+        b.dodgeStuck[id] = nil
+        b.aiApplied[id] = nil
+      end
+    end
   end
 end
 
@@ -3187,15 +3781,233 @@ end
 
 v26.G = 6.674e-11
 
-function v26.sendMagnet(state, vehicle, distance)
+-- v2.9, from the arena's G2 crest-ram gate. The v2.7.1 well is a STEP of
+-- constant gees at a FIXED 31 degrees of elevation, and both halves break
+-- at ram speed:
+--
+--   * the hoist removes 0.515 x dial of the car's weight, so at the 1.2 g
+--     default the tires carry 38% load. A car that crosses the crest at
+--     110 km/h arrives already rotating, and with almost no tire load
+--     nothing damps it: the live gate measured a roll past 78 degrees
+--     (min up-vector z 0.20) DURING the haul. The taper below keeps the
+--     full v2.7.1 hoist while the car is slow — that is the braked-hulk
+--     tractor beam, measured and kept — and flattens the pull toward a
+--     drag as speed rises, so a fast car keeps its weight and its tires.
+--   * the grab is instantaneous. A 1.2 g step onto a car doing 30 m/s is
+--     an impulse; MAGNET_RAMP_SECONDS eases it in instead.
+--
+-- The lift cap is the design's own ceiling argument (arena design v3
+-- section 4.4: lift >= 1 g means the wheels leave the ground) turned into
+-- a guard: whatever the host dials, the well never lifts more than
+-- MAGNET_LIFT_CAP_G. It bites by LOWERING the well, never by weakening
+-- the haul — the horizontal pull is what brings the car home. At the
+-- shipped 1.2 g default the cap is slack (0.617 g of lift needs 0.65),
+-- so nothing about the shipped feel changes below 1.27 g.
+v26.MAGNET_HOIST = 0.6
+v26.MAGNET_HOIST_MIN = 0.25   -- of the hoist, at ram speed
+v26.MAGNET_SLOW_MPS = 10.0    -- ~36 km/h: full v2.7.1 hoist
+v26.MAGNET_FAST_MPS = 28.0    -- ~101 km/h: fully tapered
+v26.MAGNET_LIFT_CAP_G = 0.65
+v26.MAGNET_RAMP_SECONDS = 0.6
+v26.MAGNET_RAMP_FLOOR = 0.15
+-- A round that ends with a member still outside used to ABANDON it there
+-- (every well dropped the frame the phase left "live", membership wiped,
+-- and no later round can draft a car that is not inside the ring). The
+-- haul now finishes across the round end, bounded — the well still never
+-- outlives the mod, the toggle, or the prop.
+v26.MAGNET_GRACE_SECONDS = 20.0
+
+-- The hoist actually used: the v2.7.1 0.6 tapered by speed, then lowered
+-- if it would lift more than the cap allows at these gees.
+function v26.magnetHoist(gees, speed, grade)
+  local span = v26.MAGNET_FAST_MPS - v26.MAGNET_SLOW_MPS
+  local t = clampNumber(((speed or 0) - v26.MAGNET_SLOW_MPS) / span, 0.0, 1.0)
+  local hoist = v26.MAGNET_HOIST * (1.0 - t * (1.0 - v26.MAGNET_HOIST_MIN))
+  -- On a cross-slope the tires need WEIGHT, not lift (v2.11): the hoist is
+  -- exactly what strips the load that resists a trip, so it fades out as
+  -- the grade rises and the well presses instead of lifting. Grade 0
+  -- leaves the shipped hoist untouched.
+  local slope = grade or 0.0
+  if slope > 0.0 then
+    hoist = hoist * clampNumber(1.0 - slope / v26.SLOPE_FLAT_AT, 0.0, 1.0)
+  end
+  -- lift = gees * sin(atan(hoist)) = gees * hoist / sqrt(1 + hoist^2).
+  local share = v26.MAGNET_LIFT_CAP_G / math.max(gees, 0.0001)
+  if share < 1.0 then
+    local capped = share / math.sqrt(1.0 - share * share)
+    if capped < hoist then hoist = capped end
+  end
+  return hoist
+end
+
+-- v2.10, from the arena's G3 adversarial orbit: 4 of 6 excursions never
+-- came back and the cars ROLLED (up-vector z 0.03-0.32) at BOTH the 1.2 g
+-- default and the 2.0 g escalation — and the roll is what prevented the
+-- re-entry, so it is one defect, not two.
+--
+-- Why the v2.9 lift cap did not cover it: the well is a body force through
+-- the centre of mass, resisted by the tires at the ground. Whenever the
+-- tires can hold that force instead of sliding, the pair becomes a
+-- ROLLOVER COUPLE — pull x CG height against weight x half-track. A
+-- ballistic crest exit never rolls because the car is airborne or sliding
+-- (nothing to react against, which is why G8.1 came home at uz 0.81-0.86);
+-- a POWERED, STEERED orbit is the opposite case — the driver is holding
+-- grip and cornering, and the well's inward pull adds to that same lateral
+-- budget until the car tips.
+--
+-- So the cap is on the LATERAL share of the pull: the component across the
+-- car's own direction of travel. A pull aligned with (or opposing) travel
+-- is a shove, not a tip — the braked hulk and the crest ram are both that
+-- case and are untouched. The budget is the classic static rollover
+-- threshold, half-track / CG height, scaled by the weight the car still
+-- has after the well's lift, and then taken at MAGNET_TIP_MARGIN so the
+-- well never spends the whole of it: the driver's own cornering has to
+-- live in that budget too.
+v26.MAGNET_TIP_RATIO = 1.2     -- half-track / CG height, conservative
+v26.MAGNET_TIP_MARGIN = 0.6    -- share of the budget the well may take
+v26.MAGNET_TIP_SPEED = 8.0     -- m/s below which no orbit can be sustained
+
+-- v2.11, from G9: the flat solve above is CORRECT and was proven live (an
+-- orbit at 29.9 m/s held up-vector 0.88 at both dials and never rolled).
+-- But 9 of 10 remaining rolls happened on the 30 % GLACIS CROSS-SLOPE at
+-- 6.3-20.7 m/s — low-speed sideways drag across a fall line, which is a
+-- trip ramp, not an orbit. Two things break there:
+--   * the flat couple assumes the only thing holding the car down is its
+--     full weight. On a slope the normal load is only cos(theta) of it,
+--     and gravity's own in-plane component sin(theta) is ALREADY spending
+--     the tipping budget before the well adds anything. So the allowance
+--     becomes RATIO*MARGIN*cos(theta) - sin(theta), which collapses fast:
+--     at a 30 % grade it is 0.403 against 0.72 on the flat.
+--   * the speed gate. No orbit is sustainable below 8 m/s, but a trip
+--     needs only 6 m/s of sideways drag, so on a slope the cap has to bind
+--     much lower.
+-- And the hoist is backwards on a slope: lift is exactly what strips the
+-- load that resists tipping, so the hoist fades out as the grade rises —
+-- on a cross-slope the well presses rather than lifts.
+--
+-- Rejected, with the reason on the record: pulling the car ALONG the fall
+-- line instead. On the OUTER glacis (design v3 section 3.1: r 91.4->113,
+-- z 6.5->0, and G9 measured ground z 101.0->100.0 across r 99->111)
+-- downhill points OUTWARD — away from the arena. Steering the well down
+-- the fall line would drive a strayed car further out, which is the
+-- opposite of containment. The fall line is used to READ the danger, not
+-- to aim the pull.
+v26.MAGNET_TIP_SPEED_SLOPE = 3.0  -- m/s: a trip needs far less than an orbit
+v26.MAGNET_TIP_FLOOR = 0.15       -- gees: never abandon a car, never zero
+v26.SLOPE_GATE = 0.08             -- grade above which a surface is a slope
+v26.SLOPE_FLAT_AT = 0.30          -- grade at which the hoist is fully gone
+v26.SLOPE_MAX = 0.60
+v26.SLOPE_SAMPLE_R = 2.5
+v26.SLOPE_TTL = 0.5
+
+-- The grade (rise/run) of the ground under a hauled car, from three
+-- downward castRayStatic probes: the plane through the hits gives the
+-- surface normal. Prefab statics — which is what an arena is — get their
+-- collision at level load and ARE ray-visible; runtime-spawned TSStatics
+-- never are (AGENTS.md), and neither are vehicles, so this reads terrain
+-- and map geometry only, which is exactly what a trip ramp is made of.
+-- Cached per car for SLOPE_TTL: the ground under a car changes slowly and
+-- this only ever runs for cars the magnet is actually hauling (0-2 of
+-- them), so it is a handful of rays a second. Fails OPEN to flat — the
+-- shipped behaviour — if the export is missing or any probe misses.
+function v26.groundGrade(state, id, position)
+  local b = state.behavior
+  b.slopeCache = b.slopeCache or {}
+  local entry = b.slopeCache[id]
+  if entry and (entry.at + v26.SLOPE_TTL) > b.now then return entry.grade end
+  local grade = 0.0
+  if type(castRayStatic) == "function" then
+    local hits, count = {}, 0
+    for i = 0, 2 do
+      local angle = i * (math.pi * 2.0 / 3.0)
+      local sx = position.x + math.cos(angle) * v26.SLOPE_SAMPLE_R
+      local sy = position.y + math.sin(angle) * v26.SLOPE_SAMPLE_R
+      local top = position.z + 4.0
+      local ok, hit = pcall(castRayStatic, vec3(sx, sy, top), vec3(0, 0, -1), 14.0)
+      if ok and type(hit) == "number" and hit == hit and hit < 14.0 then
+        count = count + 1
+        hits[count] = {x = sx, y = sy, z = top - hit}
+      end
+    end
+    if count == 3 then
+      local ax, ay, az = hits[2].x - hits[1].x, hits[2].y - hits[1].y, hits[2].z - hits[1].z
+      local bx, by, bz = hits[3].x - hits[1].x, hits[3].y - hits[1].y, hits[3].z - hits[1].z
+      local nx = ay * bz - az * by
+      local ny = az * bx - ax * bz
+      local nz = ax * by - ay * bx
+      local horizontal = math.sqrt(nx * nx + ny * ny)
+      if math.abs(nz) > 0.0001 then
+        grade = clampNumber(horizontal / math.abs(nz), 0.0, v26.SLOPE_MAX)
+      end
+    end
+  end
+  b.slopeCache[id] = {at = b.now, grade = grade}
+  return grade
+end
+
+-- The gees this car may be pulled at without the well itself rolling it.
+-- `share` is |sin| of the angle between travel and the pull: 0 straight
+-- along or against it, 1 fully across it.
+function v26.magnetTipLimit(gees, hoist, speed, share, grade)
+  local slope = grade or 0.0
+  -- A trip on a fall line needs far less speed than an orbit does.
+  local gate = slope > v26.SLOPE_GATE
+    and v26.MAGNET_TIP_SPEED_SLOPE or v26.MAGNET_TIP_SPEED
+  if (speed or 0) < gate then return gees end
+  local lateral = math.abs(share or 0)
+  if lateral < 0.05 then return gees end
+  local reach = math.sqrt(1.0 + hoist * hoist)
+  local cos, sin = 1.0 / reach, hoist / reach
+  -- Solve the budget for the gees it allows rather than scaling against
+  -- the UNCAPPED lift: the lift shrinks with the pull, so scaling
+  -- overshoots and — measured — made a HIGHER dial pull a tangential car
+  -- LESS than a lower one. Want g*cos*lateral <= R*M*(1 - g*sin), i.e.
+  -- g <= R*M / (cos*lateral + R*M*sin). Monotone, and exact at the line.
+  local budget = v26.MAGNET_TIP_RATIO * v26.MAGNET_TIP_MARGIN
+  -- The slope spends the budget before the well does: the normal load is
+  -- only cos(theta) of the weight, and gravity's in-plane sin(theta) is
+  -- already pulling the car down the fall line. At grade 0 both terms
+  -- reduce to the flat solve exactly, so apron behaviour cannot move.
+  local slopeReach = math.sqrt(1.0 + slope * slope)
+  local allowance = budget * (1.0 / slopeReach) - (slope / slopeReach)
+  if allowance <= 0.0 then
+    -- Steeper than any lateral drag can be held: pull only gently, never
+    -- nothing (fail-open — a car that cannot be hauled must still be
+    -- coaxed home, and must never be left undriveable).
+    return math.min(gees, v26.MAGNET_TIP_FLOOR)
+  end
+  local limit = allowance / (cos * lateral + budget * sin)
+  if limit >= gees then return gees end
+  return math.max(limit, math.min(gees, v26.MAGNET_TIP_FLOOR))
+end
+
+-- Ease the grab in: a step of full gees onto a car at speed is an impulse.
+function v26.magnetRamp(state, id)
+  local b = state.behavior
+  local since = b.magnetSince and b.magnetSince[id]
+  if not since then return 1.0 end
+  return clampNumber((b.now - since) / v26.MAGNET_RAMP_SECONDS,
+    v26.MAGNET_RAMP_FLOOR, 1.0)
+end
+
+function v26.sendMagnet(state, vehicle, distance, hoistFraction, gees)
   local centre = toWorldPoint(state, B.pad_center)
-  -- Constant-force tether: mass = a * d^2 / G with a = arena_magnet_g in
-  -- gees at the car's CURRENT range, so the pull never fades with escape
-  -- distance the way raw planet gravity would.
-  local mass = OPT.arena_magnet_g * 9.81 * distance * distance / v26.G
+  -- Constant-force tether: mass = a * r^2 / G with a = arena_magnet_g in
+  -- gees at the car's CURRENT range to the well, so the pull never fades
+  -- with escape distance the way raw planet gravity would.
+  --
+  -- The well hangs ABOVE the center (v2.7.1): hoisted 0.6x the horizontal
+  -- range (~31 degrees up). A flat pull spent itself fighting tire grip —
+  -- ~0.9 g of static friction holds a parked car against any sideways-only
+  -- drag it can beat — so half the force now LIFTS (unloading the tires)
+  -- while the rest drags the car home. r is the true 3D reach to the
+  -- hoisted well, so the requested gees arrive exactly.
+  local lift = distance * (hoistFraction or v26.MAGNET_HOIST)
+  local reach2 = distance * distance + lift * lift
+  local mass = (gees or OPT.arena_magnet_g) * 9.81 * reach2 / v26.G
   aiCommand(vehicle, string.format(
     "pcall(function() obj:setPlanets({%.1f, %.1f, %.1f, 10, %.5g}) end)",
-    centre.x, centre.y, centre.z, mass))
+    centre.x, centre.y, centre.z + lift, mass))
 end
 
 function v26.magnetClear(state, vehicle)
@@ -3207,6 +4019,9 @@ end
 -- must never outlive the game that placed it.
 function v26.magnetRelease(state)
   local b = state.behavior
+  b.magnetSince = nil
+  b.magnetGraceUntil = nil
+  b.slopeCache = nil
   if not b.magnetApplied then return end
   for id in pairs(b.magnetApplied) do
     local vehicle = exactVehicle(id)
@@ -3215,42 +4030,106 @@ function v26.magnetRelease(state)
   b.magnetApplied = nil
 end
 
+-- One car's tether for this pass: place or refresh the well, or lift it
+-- once the car is home. Returns true while the car is still being hauled.
+function v26.stepMagnetCar(state, id, vehicle, distance, send)
+  local b = state.behavior
+  if distance <= OPT.arena_radius_m * 0.9 then
+    -- Home: the well lifts WELL inside the line (90%), never at it, so the
+    -- boundary cannot chatter it on and off.
+    if b.magnetApplied[id] then
+      v26.magnetClear(state, vehicle)
+      b.magnetApplied[id] = nil
+      if b.magnetSince then b.magnetSince[id] = nil end
+    end
+    return false
+  end
+  if distance <= OPT.arena_radius_m then return b.magnetApplied[id] == true end
+  if not send then return true end
+  b.magnetSince = b.magnetSince or {}
+  if not b.magnetApplied[id] then b.magnetSince[id] = b.now end
+  local speed = 0
+  local lateral = 0
+  local grade = 0
+  local okP, position = pcall(function() return vehicle:getPosition() end)
+  local havePos = okP and finiteVector3(position)
+  if havePos then grade = v26.groundGrade(state, id, position) end
+  local okV, velocity = pcall(function() return vehicle:getVelocity() end)
+  if okV and finiteVector3(velocity) then
+    speed = math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y)
+    -- How much of the pull acts ACROSS the car's travel (the tipping
+    -- direction) rather than along it: |sin| between the two headings.
+    if speed > 0.5 and havePos then
+      local centre = toWorldPoint(state, B.pad_center)
+      local px, py = centre.x - position.x, centre.y - position.y
+      local plen = math.sqrt(px * px + py * py)
+      if plen > 0.5 then
+        local vx, vy = velocity.x / speed, velocity.y / speed
+        lateral = math.abs(vx * (py / plen) - vy * (px / plen))
+      end
+    end
+  end
+  local hoist = v26.magnetHoist(OPT.arena_magnet_g, speed, grade)
+  local gees = v26.magnetTipLimit(OPT.arena_magnet_g, hoist, speed, lateral, grade)
+    * v26.magnetRamp(state, id)
+  v26.sendMagnet(state, vehicle, distance, hoist, gees)
+  b.magnetApplied[id] = true
+  return true
+end
+
 function v26.stepMagnet(state)
   local b = state.behavior
-  if not (OPT.arena_enabled and b.phase == "live") then
+  local live = OPT.arena_enabled and b.phase == "live"
+  local held = b.magnetApplied and next(b.magnetApplied) ~= nil
+  -- The haul finishes across the round end (v2.9). Before this, the frame
+  -- the phase left "live" dropped every well AND wiped membership, so a
+  -- car still outside was abandoned there for good: no later round can
+  -- draft a car that is not inside the ring when it arms. The grace is
+  -- bounded, and every hard release path (toggle off, arena off, prop
+  -- init/reset/teardown) still fires immediately — a well must never
+  -- outlive the mod that placed it.
+  if live then
+    b.magnetGraceUntil = nil
+  elseif held and OPT.arena_enabled and OPT.arena_magnet_enabled then
+    b.magnetGraceUntil = b.magnetGraceUntil or (b.now + v26.MAGNET_GRACE_SECONDS)
+    if b.now >= b.magnetGraceUntil then
+      v26.magnetRelease(state)
+      b.arenaMembers = nil
+      return
+    end
+  else
     if b.magnetApplied then v26.magnetRelease(state) end
     -- Membership is per round: a fresh game re-drafts from whoever is
     -- inside the ring then.
     if b.phase ~= "live" then b.arenaMembers = nil end
     return
   end
-  if (b.magnetNext or 0) > b.now then return end
-  b.magnetNext = b.now + 0.5
   -- Membership rides the ARENA, not the magnet toggle: a host flipping the
   -- magnet on mid-round must still catch the car that is already outside.
   local magnetOn = OPT.arena_magnet_enabled
   if not magnetOn and b.magnetApplied then v26.magnetRelease(state) end
   b.arenaMembers = b.arenaMembers or {}
   b.magnetApplied = b.magnetApplied or {}
-  if b.carrier then b.arenaMembers[b.carrier] = true end
+  if live and b.carrier then b.arenaMembers[b.carrier] = true end
+  -- The well SEND is throttled to 0.25 s (the mass tracks a fast car's
+  -- range within a few percent at that rate), but MEMBERSHIP is sampled
+  -- every frame: a car crossing the ring at ram speed covers ~6 m between
+  -- two 0.25 s sweeps, and a crossing that no sweep happened to sample
+  -- from the inside left the car un-drafted and therefore un-haulable for
+  -- the rest of the round.
+  local send = (b.magnetNext or 0) <= b.now
+  if send then b.magnetNext = b.now + 0.25 end
   for _, entry in ipairs(roster(state)) do
     local id = entry.id
     local okPos, position = pcall(function() return entry.vehicle:getPosition() end)
     if okPos and finiteVector3(position) then
       local distance = v26.arenaDistance(state, position)
-      if distance <= OPT.arena_radius_m then
-        -- Inside the ring: a member for the rest of the round — the player
-        -- included, which is the difference from the AI-only steering…
-        b.arenaMembers[id] = true
-        -- …and the well lifts once the car is WELL inside (90%), not at
-        -- the line, so the boundary cannot chatter it on and off.
-        if b.magnetApplied[id] and distance <= OPT.arena_radius_m * 0.9 then
-          v26.magnetClear(state, entry.vehicle)
-          b.magnetApplied[id] = nil
-        end
-      elseif magnetOn and b.arenaMembers[id] then
-        v26.sendMagnet(state, entry.vehicle, distance)
-        b.magnetApplied[id] = true
+      -- Inside the ring during a live round: a member for the rest of it —
+      -- the player included, which is the difference from the AI-only
+      -- steering. A bystander never seen inside is never touched.
+      if live and distance <= OPT.arena_radius_m then b.arenaMembers[id] = true end
+      if magnetOn and b.arenaMembers[id] then
+        v26.stepMagnetCar(state, id, entry.vehicle, distance, send)
       end
     end
   end
@@ -3440,7 +4319,31 @@ local function stepRound(state, dtSim, dtReal)
       announce(state, "LAST CAR STANDING!", 4.0, "round_won",
         {subject_id = remaining[1].id})
     elseif #remaining >= 2 then
-      announce(state, "The potato returns to the arch...", 3.0)
+      -- The dodge win (v2.7.1, from live play: "I didn't see the confetti
+      -- or fireworks after not having the potato"). Before this, a boom
+      -- with two or more survivors celebrated NOBODY — the only paths to
+      -- celebrate() were last-car-standing and the champion crowning, so
+      -- ordinary classic rounds ended with a shrug. Classic hot potato has
+      -- a natural round winner: the last passer, who shed the potato onto
+      -- the victim just in time. They take the confetti, the fireworks and
+      -- a mark in the champion ledger. Hold modes (hoarder/protect) keep
+      -- their own win condition — there the boom is the carrier's tragedy,
+      -- not the passer's triumph. A round with no transfer (the carrier
+      -- picked it up and rode it down) still has no winner.
+      local dodger = nil
+      if OPT.game_mode ~= "hoarder" and OPT.game_mode ~= "protect"
+        and b.lastPasser then
+        for _, entry in ipairs(remaining) do
+          if entry.id == b.lastPasser then dodger = entry end
+        end
+      end
+      if dodger then
+        celebrate(state, dodger.vehicle)
+        announce(state, "PASSED IT JUST IN TIME!", 4.0, "round_won",
+          {subject_id = dodger.id})
+      else
+        announce(state, "The potato returns to the arch...", 3.0)
+      end
     end
     local liftoff = b.boomFrom or toWorldPoint(state, B.potato_home)
     local rate = b.fizzle and 1.2 or OPT.detonate_launch_mps * 0.5
@@ -3452,7 +4355,18 @@ local function stepRound(state, dtSim, dtReal)
   -- phase == "live"
   setEffectActive(state, "cheer", false)
   local carrier = exactVehicle(b.carrier)
-  if not carrier then
+  -- The carrier-lost path also covers a carrier that became SCENERY
+  -- (v2.8, critic round 4): the object still resolves after an in-place
+  -- replace, but roster() no longer lists it, and the last-car-standing
+  -- check below would read the shrunken field and crown the BOX — confetti
+  -- on a cardboard box and a round_won for its id in the persistent
+  -- ledger. isPropVehicle is cache-hot here (the roster pass just re-read
+  -- the model), so this is one table lookup a frame.
+  if not carrier or v26.isPropVehicle(state, b.carrier, carrier) then
+    if carrier then
+      announce(state, "Potato returning to the arch.", 2.5, "carrier_lost",
+        {subject_id = b.carrier, reason = "carrier_became_scenery"})
+    end
     beginReturn(state, b.potatoAt)
     return
   end
@@ -3475,17 +4389,66 @@ local function stepRound(state, dtSim, dtReal)
   -- The wisp rolls off the crown over the roof, not out of the belly.
   poseEffectAt(
     state, "fuse", vec3(anchor.x, anchor.y, anchor.z + SMOKE_RISE))
-  -- Anti-camping (v2.3): dawdling below camp_speed_kmh burns the shared
-  -- fuse camp_burn_multiplier times faster. lastDelta is the wall-clock
-  -- delta advanceClock actually applied this frame, so the extra burn is
-  -- honest seconds and freezes with the sim exactly like the fuse does.
-  if OPT.camp_burn_multiplier > 1.0 and b.fuseEnds then
+  -- The fuse penalties (v2.3 camping, v2.13 out-of-bounds). lastDelta is
+  -- the wall-clock delta advanceClock actually applied this frame, so the
+  -- extra burn is honest seconds and freezes with the sim exactly like the
+  -- fuse does.
+  --
+  -- The two combine with MAX, never a product: they are two answers to the
+  -- same question ("this carrier is not playing"), and multiplying them
+  -- would let a slow carrier outside the ring burn 9x and detonate almost
+  -- instantly — a punishment no player could read as a rule.
+  local burn = 1.0
+  -- Anti-camping (v2.3): dawdling below camp_speed_kmh burns faster.
+  if OPT.camp_burn_multiplier > 1.0 then
     local okV, velocity = pcall(function() return carrier:getVelocity() end)
     if okV and finiteVector3(velocity)
       and velocity:length() < OPT.camp_speed_kmh / 3.6 then
-      b.fuseEnds = b.fuseEnds
-        - (OPT.camp_burn_multiplier - 1.0) * (b.lastDelta or 0)
+      burn = OPT.camp_burn_multiplier
     end
+  end
+  -- Out of bounds (v2.13, the player's own words: "if the vehicle carrying
+  -- the potato goes out of bounds, the potato detonate timer accelerates
+  -- to 3x speed until they re-enter the arena"). It targets the CARRIER
+  -- only, which is exactly the exploit: a non-carrier outside the ring
+  -- already cannot receive (v2.6) and cannot score (v2.8), so only a
+  -- carrier can win by orbiting outside. Own position fetch, and the same
+  -- v26.insideArena every other consumer uses — with the arena disabled it
+  -- returns true, so this is byte-identical to before.
+  local outside = false
+  if OPT.oob_burn_multiplier > 1.0 then
+    local okPos, ringAt = pcall(function() return carrier:getPosition() end)
+    if okPos and finiteVector3(ringAt) and not v26.insideArena(state, ringAt) then
+      outside = true
+      if OPT.oob_burn_multiplier > burn then burn = OPT.oob_burn_multiplier end
+    end
+  end
+  -- Legibility (the v2.6 ledger's objection to this very mechanism was
+  -- "invisible punishment, illegible in play"): the HUD gets a flag in
+  -- both stats channels, and the transition is announced BOTH ways so the
+  -- player is told why the fuse is racing and when it stops.
+  if outside ~= (b.oob == true) then
+    b.oob = outside
+    if outside then
+      announce(state, "OUT OF BOUNDS - fuse burning "
+        .. string.format("%.3gx", OPT.oob_burn_multiplier) .. "!", 3.0,
+        "carrier_out_of_bounds", {subject_id = b.carrier})
+    else
+      announce(state, "Back in the arena.", 2.0, "carrier_back_in_bounds",
+        {subject_id = b.carrier})
+    end
+  end
+  -- Published so a gate never has to INFER the rate from two samples of a
+  -- clock it does not own (v2.15): remaining = fuseEnds - now, and both
+  -- terms move by the same b.lastDelta, so the fuse falls at exactly
+  -- `burn` x the mod's clock. A measured ratio between 1 and `burn` means
+  -- frames elapsed in the measurer's wall time where this line did not run
+  -- — the round left "live", or advanceClock zeroed its delta (L1060-1064:
+  -- a wall gap over 0.5 s, or dtSim == 0, freezes b.now AND b.lastDelta
+  -- together). It is never a partial application.
+  b.fuseBurn = burn
+  if burn > 1.0 and b.fuseEnds then
+    b.fuseEnds = b.fuseEnds - (burn - 1.0) * (b.lastDelta or 0)
   end
   -- Hoarder mode (v2.4): holding the potato IS the game — a point a
   -- second, first to the target takes the crown and the fireworks. The
@@ -3494,10 +4457,27 @@ local function stepRound(state, dtSim, dtReal)
   -- same held-seconds race, but the boom costs NOTHING — riding the fuse
   -- to the very end is the whole point, and the AI mob hunting you is the
   -- obstacle (detonate() halves hoarder scores only).
+  -- The arena gate on scoring (v2.8): the v2.6 law — a car outside the
+  -- circle is not part of the game — was enforced on the RECEIVING side
+  -- only, so an out-of-ring carrier scored a point a second uncontested
+  -- (nobody outside can reach it, nobody inside may take it). Accrual and
+  -- the crown now sit behind the transfer sweep's own predicate, on their
+  -- own position read: the crowned branch's fetch below only runs on the
+  -- crowning frame. With the arena off insideArena is always true and
+  -- every in-ring frame scores exactly as before. (On a genuine
+  -- getPosition failure carrierPose above throws first and the
+  -- framework's pcall aborts the frame, so nothing accrues either way;
+  -- this pcall is the belt to that brace, one closure a frame like the
+  -- camp-burn fetch.)
   if OPT.game_mode == "hoarder" or OPT.game_mode == "protect" then
     b.score = b.score or {}
-    b.score[b.carrier] = (b.score[b.carrier] or 0) + (b.lastDelta or 0)
-    if b.score[b.carrier] >= OPT.hoard_target_points then
+    local okRing, ringAt = pcall(function() return carrier:getPosition() end)
+    local scoring = okRing and finiteVector3(ringAt)
+      and v26.insideArena(state, ringAt)
+    if scoring then
+      b.score[b.carrier] = (b.score[b.carrier] or 0) + (b.lastDelta or 0)
+    end
+    if scoring and b.score[b.carrier] >= OPT.hoard_target_points then
       local crowned = b.carrier
       crownChampion(state, crowned, math.floor(b.score[crowned]))
       b.score = {}
@@ -3716,6 +4696,7 @@ function Sync.quietRound(state)
   b.fieldPeak = 0
   b.transfers = 0
   b.immune = {}
+  b.lastPasser = nil
   b.pairFrom, b.pairTo, b.pairSeparated = nil, nil, true
   state.zones.carrier_watch = nil
   setEffectActive(state, "blast", false)
@@ -4088,6 +5069,8 @@ behavior.init = function(state)
   b.outCount = 0
   b.quarantined = {}
   b.extents = {}
+  b.propKind = nil
+  b.propsExcluded = 0
   b.tickOn = nil
   b.tickLastSent = nil
   b.whistleOn = nil
@@ -4095,9 +5078,13 @@ behavior.init = function(state)
   b.sputtered = false
   b.aiApplied = nil
   b.aiReturning = nil
+  b.aiDodging = nil
+  b.dodgeAim = nil
+  b.dodgeStuck = nil
   b.aiTuning = nil
   b.aiNextSweep = 0
   b.aiReturnNext = 0
+  b.dodgeNext = 0
   b.armorApplied = nil
   b.shield = nil
   b.armorNext = 0
@@ -4107,6 +5094,7 @@ behavior.init = function(state)
   b.lastDelta = 0
   b.nextHush = 0
   b.silenced = false
+  b.oob = nil
   b.hopStart = nil
   b.glowLast = nil
   b.glowNext = nil
@@ -4123,6 +5111,7 @@ behavior.init = function(state)
   b.wins = {}
   b.score = {}
   b.names = {}
+  b.lastPasser = nil
   b.pairFrom, b.pairTo, b.pairSeparated = nil, nil, true
   b.ready = tunablesPresent(state)
   if not b.ready then return end
@@ -4133,7 +5122,6 @@ behavior.init = function(state)
   setEffectActive(state, "cheer", false)
   for i = 1, #(B.mash_homes or {}) do
     setEffectActive(state, "mash_steam_" .. i, false)
-    setEffectActive(state, "mash_steam_b" .. i, false)
   end
   parkMash(state)
   parkPotato(state)
@@ -4153,6 +5141,9 @@ behavior.cleanup = function(state, reason)
   aiRelease(state)
   v26.armorRelease(state)
   v26.magnetRelease(state)
+  -- The scenario's obstacle census dies with the prop (v2.8): the next
+  -- session's dodge sweep must not steer around a map that is gone.
+  v26.obstacles = nil
   Sync.unregister(state)
 end
 
@@ -4175,6 +5166,7 @@ behavior.onSubjectGone = function(state, vehicleId, reason)
   if not b.ready then return end
   b.seen[vehicleId] = nil
   b.extents[vehicleId] = nil
+  if b.propKind then b.propKind[vehicleId] = nil end
   if b.carrier ~= vehicleId then return end
   if not Sync.isAuthority(state) then
     b.carrier = nil
@@ -4231,6 +5223,9 @@ behavior.update = function(state, dtSim, dtReal)
     -- 0.5 s), and the armor sweep settles damage_mode and expired shields.
     stepAI(state)
     v26.stepAiReturn(state)
+    -- The pillar dodge outranks every straight-line steering order above
+    -- it: it must see the roles stepAI just applied.
+    v26.stepDodge(state)
     v26.stepArmor(state)
     -- The arena magnet rides under both (v2.7): a standing physics-side
     -- gravity well per strayed member, so it needs only the 0.5 s sweep.
@@ -4340,6 +5335,22 @@ behavior.hooks = {
     end
     v26.fwTest = tostring(name or "")
     return true
+  end,
+  -- The obstacle census (v2.8): a scenario registers the world-space
+  -- keep-out posts of whatever it built around the arch — a dense array
+  -- of {x, y, r} (metres; posts are 2-D and any z is ignored; x, y, r
+  -- must be finite Lua numbers, so the string "6.5" is refused; r in
+  -- [0.5, 30]; at most 128 entries) — and the dodge reflex rays against
+  -- them exactly as it does the arch feet. A call replaces the whole
+  -- set; nil or an empty table clears it; a bad entry, a 129th entry, or
+  -- a table that is not a dense array is refused whole: false, one
+  -- warning, prior set untouched. Parks on v26 like the fireworks
+  -- request: hooks have no prop handle, the sweep reads it each pass.
+  hotPotatoRegisterObstacles = function(list)
+    return v26.registerObstacles(list)
+  end,
+  hotPotatoGetObstacles = function()
+    return v26.obstacleReport()
   end,
   hotPotatoResetOptions = function()
     if not Sync.optionsWritable() then

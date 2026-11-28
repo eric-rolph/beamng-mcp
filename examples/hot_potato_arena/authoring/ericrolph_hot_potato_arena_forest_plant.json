@@ -1,0 +1,795 @@
+{
+  "bytes": 34058572,
+  "cover_elements": 1350000,
+  "datablocks": 54,
+  "design_total": 154686,
+  "files": {
+    "art/forest/managedItemData.json": {
+      "sha256": "3b56eac15ac798e29b441e57d149cd17c513a5aa1dd1f287f557608a930493a8",
+      "size": 37558
+    },
+    "art/shapes/deadwood/ericrolph_hot_potato_arena_deadwood.materials.json": {
+      "sha256": "132d74f3c72dc47aaf7d719e61edc6a3bf1575ac8e11913765ca7f6b05027bf0",
+      "size": 4161
+    },
+    "art/shapes/groundcover/ericrolph_hot_potato_arena_groundcover.materials.json": {
+      "sha256": "dcd38446852352ff6143d1cdb672ba264f710b1963a4b94806196c70a2bad76f",
+      "size": 9868
+    },
+    "art/shapes/rocks/ericrolph_hot_potato_arena_rocks.materials.json": {
+      "sha256": "cfcdb0bd28ec77347a35d9fc9c9b8bd9187c4e6137e9326cd3b9c8f9c46a1544",
+      "size": 5854
+    },
+    "art/shapes/trees/ericrolph_hot_potato_arena_trees.materials.json": {
+      "sha256": "81b359d362aec0e8acc9d68d1b2c9b42cbd1ad71475d60088dbbfcea76aada3e",
+      "size": 12316
+    },
+    "art/shapes/undergrowth/ericrolph_hot_potato_arena_undergrowth.materials.json": {
+      "sha256": "d8680c6b7f040b97dcf5ae89dcc86a05979189cb3006bdbf0cffecdb62881bba",
+      "size": 8403
+    },
+    "forest/ericrolph_hot_potato_arena_f_bark_debris.forest4.json": {
+      "sha256": "5a67ee644bb50dfe2232426275b4a366cc18474a72a0019c03b261da43c74c28",
+      "size": 132195
+    },
+    "forest/ericrolph_hot_potato_arena_f_boulder_forest_a.forest4.json": {
+      "sha256": "ecf287fc6db80354067c74a566d53f25d19cb17db1c6dfae8380471ee9e98e34",
+      "size": 320329
+    },
+    "forest/ericrolph_hot_potato_arena_f_boulder_forest_b.forest4.json": {
+      "sha256": "e21e3181e5f450cbadc129ab0dbf024b3559feddff8a2386d1516796e72462b4",
+      "size": 398565
+    },
+    "forest/ericrolph_hot_potato_arena_f_branch_pile.forest4.json": {
+      "sha256": "fb726bf33bcdc044cc2f267a59794ede356d185bb02a7171062d139161c6ddd6",
+      "size": 139809
+    },
+    "forest/ericrolph_hot_potato_arena_f_cliff_outcrop_a.forest4.json": {
+      "sha256": "38ce26dbb5e79299f312b6550af6d19bf69a39c33262b356782db6353b457b4e",
+      "size": 47965
+    },
+    "forest/ericrolph_hot_potato_arena_f_cliff_outcrop_b.forest4.json": {
+      "sha256": "ec0c262ca7102f6150f3e9732b56e3df9664a6936f7799713b20dce6fe38a0f9",
+      "size": 47823
+    },
+    "forest/ericrolph_hot_potato_arena_f_crag.forest4.json": {
+      "sha256": "2135e54097d77e67dc95a884fa989932b27548a695257cc67dca9e1bc7a29540",
+      "size": 5247
+    },
+    "forest/ericrolph_hot_potato_arena_f_driftwood.forest4.json": {
+      "sha256": "99567fefb16547ac49ee7ded3a81c02350663bdcecf57fa87781b68c584d8b7b",
+      "size": 19670
+    },
+    "forest/ericrolph_hot_potato_arena_f_dwarf_pine_alpine.forest4.json": {
+      "sha256": "3b142733a8dedbadc20cf0e4706cb0f8675b4612c517a97e7e3b1ba35a4b493c",
+      "size": 171406
+    },
+    "forest/ericrolph_hot_potato_arena_f_fallen_log_a.forest4.json": {
+      "sha256": "5d608de6b79d9db27f5ee9675f014c6b21d6ae1fece82d2ddfdb8b5a2e1eab72",
+      "size": 211709
+    },
+    "forest/ericrolph_hot_potato_arena_f_fallen_log_b.forest4.json": {
+      "sha256": "4a4496c5ed50cf70a76735bdf898aa7088ab785bbce004aff894725f53ced040",
+      "size": 228215
+    },
+    "forest/ericrolph_hot_potato_arena_f_fallen_log_c.forest4.json": {
+      "sha256": "711a3f4c1baf47daf2c7bba7bd33d481a7fbb5ec20f98678c1116604eb126d35",
+      "size": 226500
+    },
+    "forest/ericrolph_hot_potato_arena_f_fern_a.forest4.json": {
+      "sha256": "f5a3403b2f987c7a7aa509f1403611b09edce26073adfca5386e1d4806d0078d",
+      "size": 2551228
+    },
+    "forest/ericrolph_hot_potato_arena_f_fern_b.forest4.json": {
+      "sha256": "4e35a69937f7e005696d036af0a408aa74a8a219533f507228b2adef76ec5529",
+      "size": 2148092
+    },
+    "forest/ericrolph_hot_potato_arena_f_fir_mid_a.forest4.json": {
+      "sha256": "b5825eb402f633567c4bf66c63d8e74d02ae39fe4ab3f2f41b74b3e3ea4865f9",
+      "size": 972148
+    },
+    "forest/ericrolph_hot_potato_arena_f_fir_mid_b.forest4.json": {
+      "sha256": "6c95cee32cefcf39698e488c11e11da0eb4d9e43dc14d8fd0e9d3cfe274c19ac",
+      "size": 973607
+    },
+    "forest/ericrolph_hot_potato_arena_f_fir_sapling_a.forest4.json": {
+      "sha256": "0577957216f0d9e1b3549235cf27ad02e5368ac7358e00a48e040488217c32aa",
+      "size": 1162235
+    },
+    "forest/ericrolph_hot_potato_arena_f_fir_sapling_b.forest4.json": {
+      "sha256": "aa4bca73bf2117c5505a00aff5560b609c609d1e4a4f789b0a96aaa98a4df602",
+      "size": 1321099
+    },
+    "forest/ericrolph_hot_potato_arena_f_fir_tall_a.forest4.json": {
+      "sha256": "ccf546e046c2e147f6f8ba1cd110d4c140e2fee05f4ee9f5a3cc3b633aa63484",
+      "size": 739114
+    },
+    "forest/ericrolph_hot_potato_arena_f_fir_tall_b.forest4.json": {
+      "sha256": "a7e1254d3371d98a9b310c27ca403208771973e65ea8126e3c873ce448f9fecb",
+      "size": 740267
+    },
+    "forest/ericrolph_hot_potato_arena_f_fir_tall_c.forest4.json": {
+      "sha256": "50e09d22cf13b230994d6e58fd3f5e71e9442b8905301ee0c2bb9fb637defbb4",
+      "size": 739695
+    },
+    "forest/ericrolph_hot_potato_arena_f_lichen_boulder.forest4.json": {
+      "sha256": "5e1efc9a973fb1c732dca048c46f29f046cd274c5f55fd6b4dc95f11dcb5cb91",
+      "size": 100546
+    },
+    "forest/ericrolph_hot_potato_arena_f_mossy_rock_a.forest4.json": {
+      "sha256": "32bc7d83e1785a405f23f865fc6e426d3ae128773e5b44e335ad92c13f3a2441",
+      "size": 84458
+    },
+    "forest/ericrolph_hot_potato_arena_f_mossy_rock_b.forest4.json": {
+      "sha256": "68345d9449baee5c00b5316e13d587dae710e050cd443cbea7282b6d606a42ab",
+      "size": 127023
+    },
+    "forest/ericrolph_hot_potato_arena_f_mossy_rock_c.forest4.json": {
+      "sha256": "0c30b35e5404f9bed0bab6596273584103167d6cf3dec99c04d7eb4d22249339",
+      "size": 193599
+    },
+    "forest/ericrolph_hot_potato_arena_f_mossy_rock_d.forest4.json": {
+      "sha256": "d535822832cbd9125736ca8751d205860c08750550425fef8629003db302454b",
+      "size": 194226
+    },
+    "forest/ericrolph_hot_potato_arena_f_mossy_rock_e.forest4.json": {
+      "sha256": "456087b82bbf46d88dd4b006b2b9d6ad81b7262772990dece8dd8fe356204b42",
+      "size": 217475
+    },
+    "forest/ericrolph_hot_potato_arena_f_nq_boulder_02.forest4.json": {
+      "sha256": "0cb232a1bd0ebc8dfa698f12eb8b3e11ee31701feb57ee9e93040605021dae2d",
+      "size": 364122
+    },
+    "forest/ericrolph_hot_potato_arena_f_nq_boulder_03.forest4.json": {
+      "sha256": "ac7fd6ca99b58e34971a018bc2b7b436cd811ec194079c1dbeb55fd691e9ed35",
+      "size": 170093
+    },
+    "forest/ericrolph_hot_potato_arena_f_nq_boulder_04.forest4.json": {
+      "sha256": "260cbd8e9f31bb720fb4f8bfb823749207727bb13ba419c7531de258cf7162ee",
+      "size": 407753
+    },
+    "forest/ericrolph_hot_potato_arena_f_nq_boulder_05.forest4.json": {
+      "sha256": "28a5492cd9c809c6cc6dee3fd62f50ded5b8bc7bb600a96ca6ba0f5c48e78377",
+      "size": 169271
+    },
+    "forest/ericrolph_hot_potato_arena_f_nq_boulder_06.forest4.json": {
+      "sha256": "7217991195b7b212df02275f4fbfa449c178b172713e172cc778e4181414f85d",
+      "size": 364572
+    },
+    "forest/ericrolph_hot_potato_arena_f_pebble_cluster.forest4.json": {
+      "sha256": "648d3197b65acb7ee17ae92458972f0b2264777aba1fa20f21b41cfd77717901",
+      "size": 1551439
+    },
+    "forest/ericrolph_hot_potato_arena_f_pine_mid_a.forest4.json": {
+      "sha256": "dc77de55996098f19a92ad22bc5dc337ab8a81aac7de9704788d5fd32a5231f6",
+      "size": 1466458
+    },
+    "forest/ericrolph_hot_potato_arena_f_pine_mid_b.forest4.json": {
+      "sha256": "fe5491ce885fc2559ad518275e26b362e0fbeddd8337b9bd1c72d3543addc5e5",
+      "size": 1466094
+    },
+    "forest/ericrolph_hot_potato_arena_f_pine_sapling_a.forest4.json": {
+      "sha256": "3655f301868c3b9f29a71e2749aa94934d3878f3f7ad5c3a66015c275586b1a3",
+      "size": 1410137
+    },
+    "forest/ericrolph_hot_potato_arena_f_pine_sapling_b.forest4.json": {
+      "sha256": "b77d3ee8bc8dde700409f43f040ed64165e3378ba10762e0b6dade162241be94",
+      "size": 1445817
+    },
+    "forest/ericrolph_hot_potato_arena_f_pine_sapling_c.forest4.json": {
+      "sha256": "2ead6c25a8897766eaee48c202dcb5413f776f23652a6d6fdef347959866608a",
+      "size": 1483222
+    },
+    "forest/ericrolph_hot_potato_arena_f_pine_tall_a.forest4.json": {
+      "sha256": "6ce3d1088d4bce0e06d8bc48aa40ecc863137565ce2ffbfb2f071ace5f5edac7",
+      "size": 1108998
+    },
+    "forest/ericrolph_hot_potato_arena_f_pine_tall_b.forest4.json": {
+      "sha256": "8679a40c8205de4e9425d49cab7280977e3f23c009f25c9252333d9d46fe9755",
+      "size": 1114776
+    },
+    "forest/ericrolph_hot_potato_arena_f_pine_tall_c.forest4.json": {
+      "sha256": "cb812e26589504c5f7fc85775619a4a86c64fc6d5306d4b8ed1b9947bc034d9c",
+      "size": 1113317
+    },
+    "forest/ericrolph_hot_potato_arena_f_reed_clump.forest4.json": {
+      "sha256": "0d0aa13832c557ed3034383c99f529642edb19e583f0a111ea90ba7377d331aa",
+      "size": 39541
+    },
+    "forest/ericrolph_hot_potato_arena_f_root_cluster.forest4.json": {
+      "sha256": "8e285f3c6c42947e59ae73d0af52fc63e3c7ea1c456edc4775ba6f38d3dbf6c7",
+      "size": 105554
+    },
+    "forest/ericrolph_hot_potato_arena_f_scree_rock_a.forest4.json": {
+      "sha256": "e4a353deeb21215188b98c9ae6a39ec47f59caa37cb58cbb5fa5289bc693403c",
+      "size": 997446
+    },
+    "forest/ericrolph_hot_potato_arena_f_scree_rock_b.forest4.json": {
+      "sha256": "eb8a059e13232920c5bd2b27f015919301cd9225f233c3657429bae6de0279a5",
+      "size": 1602417
+    },
+    "forest/ericrolph_hot_potato_arena_f_shrub_01.forest4.json": {
+      "sha256": "20f871cc4dcc9e26c94b6044cef0bbdf5bfb2c4eab5bc73eb54b430b47b84d99",
+      "size": 921048
+    },
+    "forest/ericrolph_hot_potato_arena_f_shrub_02.forest4.json": {
+      "sha256": "0d969c3a4300465e56968cb9dca195f4b6ea73d10716b9803bef109e9960ce59",
+      "size": 167662
+    },
+    "forest/ericrolph_hot_potato_arena_f_shrub_03.forest4.json": {
+      "sha256": "54ef049e11dea7ac19b04e442fa8aa5bb271961e2f526137bfaea240866278c5",
+      "size": 1285032
+    },
+    "forest/ericrolph_hot_potato_arena_f_shrub_04.forest4.json": {
+      "sha256": "3043b40a90e552564d5e61af690d6e5feed77b80a151ed39b3dc0bcd737a7d3a",
+      "size": 307426
+    },
+    "forest/ericrolph_hot_potato_arena_f_snag_a.forest4.json": {
+      "sha256": "deb66e52d65ac7757b3a93503969be4cd6529d9a57846b01efcae95654898de9",
+      "size": 110875
+    },
+    "forest/ericrolph_hot_potato_arena_f_snag_b.forest4.json": {
+      "sha256": "c680e377d4caafbdae5f9a94d7cfdd290366713544dae6d3b9534db53f2335bd",
+      "size": 110918
+    },
+    "forest/ericrolph_hot_potato_arena_f_stump_a.forest4.json": {
+      "sha256": "af3ea3f7718d048e40555824094c307f272fea12aca071c297fa376faf1156bf",
+      "size": 173093
+    },
+    "forest/ericrolph_hot_potato_arena_f_stump_b.forest4.json": {
+      "sha256": "b714aa2081f205b63e340033960dfd31ebaaf33a40ea750844ceef0ebe490729",
+      "size": 178192
+    },
+    "forest/ericrolph_hot_potato_arena_f_windthrow_roots.forest4.json": {
+      "sha256": "e24b80b1b0f66c53608005229b523b5d4cf7e310d113e76cc4e48828a7d3a3c1",
+      "size": 107183
+    },
+    "main/MissionGroup/level_objects/vegetation/items.level.json": {
+      "sha256": "5810ffa6e9c7418023006fad3f38f0d6a105156523fb2f9dd4e571e117888413",
+      "size": 23711
+    }
+  },
+  "forest_seed": 1179603539,
+  "ground_covers": 17,
+  "instances_total": 154121,
+  "keep_out_proof": {
+    "instances": 154686,
+    "max_grade_at_an_instance": 0.92,
+    "min_radius_from_C_m": 350.01,
+    "rule_camera_clearance_size_aware": {
+      "families": [
+        "rock",
+        "deadwood"
+      ],
+      "height_convention": "forest_spec height_m = the design's size on the model's longest axis; z_extent = the shipped DAE's own vertical extent",
+      "instances_with_a_radius_over_6m": 22199,
+      "instances_with_a_radius_over_6m_by_dae_z_extent": 2923,
+      "k": 1.35,
+      "largest_radius_m": 63.65,
+      "min_margin_m": 0.105,
+      "violations": 0,
+      "worst_solid_height_over_distance": 0.635
+    },
+    "rule_camera_eye_6m": {
+      "min_distance_m": 6.1,
+      "violations": 0
+    },
+    "rule_clear_radius": {
+      "min_margin_m": 0.006,
+      "violations": 0
+    },
+    "rule_lake_e_1p05": {
+      "min_lake_e": 1.0502,
+      "violations": 0
+    },
+    "rule_lane_sectors_420m": {
+      "min_radius_inside_a_lane_sector_m": 420.06,
+      "violations": 0
+    },
+    "rule_no_instance_inside_a_solid_body": {
+      "before_by_host": {
+        "ericrolph_hot_potato_arena_f_boulder_forest_a": 358,
+        "ericrolph_hot_potato_arena_f_boulder_forest_b": 171,
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_a": 744,
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_b": 318,
+        "ericrolph_hot_potato_arena_f_crag": 386,
+        "ericrolph_hot_potato_arena_f_fallen_log_a": 144,
+        "ericrolph_hot_potato_arena_f_fallen_log_b": 12,
+        "ericrolph_hot_potato_arena_f_fallen_log_c": 108,
+        "ericrolph_hot_potato_arena_f_lichen_boulder": 47,
+        "ericrolph_hot_potato_arena_f_mossy_rock_a": 323,
+        "ericrolph_hot_potato_arena_f_mossy_rock_b": 194,
+        "ericrolph_hot_potato_arena_f_mossy_rock_c": 308,
+        "ericrolph_hot_potato_arena_f_mossy_rock_d": 284,
+        "ericrolph_hot_potato_arena_f_mossy_rock_e": 201,
+        "ericrolph_hot_potato_arena_f_nq_boulder_02": 414,
+        "ericrolph_hot_potato_arena_f_nq_boulder_03": 402,
+        "ericrolph_hot_potato_arena_f_nq_boulder_04": 645,
+        "ericrolph_hot_potato_arena_f_nq_boulder_05": 166,
+        "ericrolph_hot_potato_arena_f_nq_boulder_06": 221,
+        "ericrolph_hot_potato_arena_f_root_cluster": 118,
+        "ericrolph_hot_potato_arena_f_scree_rock_a": 283,
+        "ericrolph_hot_potato_arena_f_scree_rock_b": 54,
+        "ericrolph_hot_potato_arena_f_snag_a": 4,
+        "ericrolph_hot_potato_arena_f_snag_b": 1,
+        "ericrolph_hot_potato_arena_f_stump_a": 108,
+        "ericrolph_hot_potato_arena_f_stump_b": 74,
+        "ericrolph_hot_potato_arena_f_windthrow_roots": 27
+      },
+      "before_by_species": {
+        "ericrolph_hot_potato_arena_f_bark_debris": 58,
+        "ericrolph_hot_potato_arena_f_branch_pile": 82,
+        "ericrolph_hot_potato_arena_f_dwarf_pine_alpine": 249,
+        "ericrolph_hot_potato_arena_f_fern_a": 631,
+        "ericrolph_hot_potato_arena_f_fern_b": 511,
+        "ericrolph_hot_potato_arena_f_fir_mid_a": 193,
+        "ericrolph_hot_potato_arena_f_fir_mid_b": 200,
+        "ericrolph_hot_potato_arena_f_fir_sapling_a": 244,
+        "ericrolph_hot_potato_arena_f_fir_sapling_b": 387,
+        "ericrolph_hot_potato_arena_f_fir_tall_a": 145,
+        "ericrolph_hot_potato_arena_f_fir_tall_b": 151,
+        "ericrolph_hot_potato_arena_f_fir_tall_c": 138,
+        "ericrolph_hot_potato_arena_f_pine_mid_a": 284,
+        "ericrolph_hot_potato_arena_f_pine_mid_b": 296,
+        "ericrolph_hot_potato_arena_f_pine_sapling_a": 278,
+        "ericrolph_hot_potato_arena_f_pine_sapling_b": 297,
+        "ericrolph_hot_potato_arena_f_pine_sapling_c": 423,
+        "ericrolph_hot_potato_arena_f_pine_tall_a": 221,
+        "ericrolph_hot_potato_arena_f_pine_tall_b": 225,
+        "ericrolph_hot_potato_arena_f_pine_tall_c": 219,
+        "ericrolph_hot_potato_arena_f_shrub_01": 204,
+        "ericrolph_hot_potato_arena_f_shrub_02": 35,
+        "ericrolph_hot_potato_arena_f_shrub_03": 460,
+        "ericrolph_hot_potato_arena_f_shrub_04": 172
+      },
+      "lift_m": 0.3,
+      "moved_total": 16156,
+      "occupancy_cells": 48,
+      "occupancy_margin_cells": 1,
+      "pass_a_bodies_inside_a_bigger_body": 10041,
+      "pass_a_could_not_move": 0,
+      "pass_a_moved": 10041,
+      "pass_a_seconds": 193.4,
+      "pass_b_bodies_re_seated_late": 0,
+      "pass_b_could_not_move": 0,
+      "pass_b_inside_after_the_bodies_settled": 6115,
+      "pass_b_moved": 6115,
+      "rooted_inside_after": 0,
+      "seconds": 276.1,
+      "solid_bodies": 43506,
+      "solid_species": 29
+    },
+    "rule_r_262_everything": {
+      "limit": 262.0,
+      "violations": 0
+    },
+    "rule_road_corridor_9m": {
+      "limit_m": 9.0,
+      "min_distance_to_either_m": 9.008,
+      "min_distance_to_track_centreline_m": 102.006,
+      "min_distance_to_trail_centreline_m": 9.008,
+      "violations": 0
+    },
+    "rule_s1_sightline_cone": {
+      "violations": 0
+    },
+    "rule_spawn_12m": {
+      "min_distance_m": 12.01,
+      "violations": 0
+    }
+  },
+  "level_id": "ericrolph_hot_potato_arena",
+  "per_species": {
+    "ericrolph_hot_potato_arena_f_bark_debris": 657,
+    "ericrolph_hot_potato_arena_f_boulder_forest_a": 1554,
+    "ericrolph_hot_potato_arena_f_boulder_forest_b": 1933,
+    "ericrolph_hot_potato_arena_f_branch_pile": 695,
+    "ericrolph_hot_potato_arena_f_cliff_outcrop_a": 234,
+    "ericrolph_hot_potato_arena_f_cliff_outcrop_b": 233,
+    "ericrolph_hot_potato_arena_f_crag": 27,
+    "ericrolph_hot_potato_arena_f_driftwood": 100,
+    "ericrolph_hot_potato_arena_f_dwarf_pine_alpine": 690,
+    "ericrolph_hot_potato_arena_f_fallen_log_a": 1047,
+    "ericrolph_hot_potato_arena_f_fallen_log_b": 1129,
+    "ericrolph_hot_potato_arena_f_fallen_log_c": 1120,
+    "ericrolph_hot_potato_arena_f_fern_a": 13001,
+    "ericrolph_hot_potato_arena_f_fern_b": 10945,
+    "ericrolph_hot_potato_arena_f_fir_mid_a": 4040,
+    "ericrolph_hot_potato_arena_f_fir_mid_b": 4046,
+    "ericrolph_hot_potato_arena_f_fir_sapling_a": 4752,
+    "ericrolph_hot_potato_arena_f_fir_sapling_b": 5402,
+    "ericrolph_hot_potato_arena_f_fir_tall_a": 3059,
+    "ericrolph_hot_potato_arena_f_fir_tall_b": 3063,
+    "ericrolph_hot_potato_arena_f_fir_tall_c": 3062,
+    "ericrolph_hot_potato_arena_f_lichen_boulder": 493,
+    "ericrolph_hot_potato_arena_f_mossy_rock_a": 418,
+    "ericrolph_hot_potato_arena_f_mossy_rock_b": 628,
+    "ericrolph_hot_potato_arena_f_mossy_rock_c": 958,
+    "ericrolph_hot_potato_arena_f_mossy_rock_d": 961,
+    "ericrolph_hot_potato_arena_f_mossy_rock_e": 1077,
+    "ericrolph_hot_potato_arena_f_nq_boulder_02": 1793,
+    "ericrolph_hot_potato_arena_f_nq_boulder_03": 837,
+    "ericrolph_hot_potato_arena_f_nq_boulder_04": 2008,
+    "ericrolph_hot_potato_arena_f_nq_boulder_05": 833,
+    "ericrolph_hot_potato_arena_f_nq_boulder_06": 1795,
+    "ericrolph_hot_potato_arena_f_pebble_cluster": 7606,
+    "ericrolph_hot_potato_arena_f_pine_mid_a": 6069,
+    "ericrolph_hot_potato_arena_f_pine_mid_b": 6068,
+    "ericrolph_hot_potato_arena_f_pine_sapling_a": 5741,
+    "ericrolph_hot_potato_arena_f_pine_sapling_b": 5887,
+    "ericrolph_hot_potato_arena_f_pine_sapling_c": 6039,
+    "ericrolph_hot_potato_arena_f_pine_tall_a": 4571,
+    "ericrolph_hot_potato_arena_f_pine_tall_b": 4594,
+    "ericrolph_hot_potato_arena_f_pine_tall_c": 4589,
+    "ericrolph_hot_potato_arena_f_reed_clump": 200,
+    "ericrolph_hot_potato_arena_f_root_cluster": 522,
+    "ericrolph_hot_potato_arena_f_scree_rock_a": 4938,
+    "ericrolph_hot_potato_arena_f_scree_rock_b": 7932,
+    "ericrolph_hot_potato_arena_f_shrub_01": 4650,
+    "ericrolph_hot_potato_arena_f_shrub_02": 848,
+    "ericrolph_hot_potato_arena_f_shrub_03": 6486,
+    "ericrolph_hot_potato_arena_f_shrub_04": 1554,
+    "ericrolph_hot_potato_arena_f_snag_a": 467,
+    "ericrolph_hot_potato_arena_f_snag_b": 467,
+    "ericrolph_hot_potato_arena_f_stump_a": 878,
+    "ericrolph_hot_potato_arena_f_stump_b": 903,
+    "ericrolph_hot_potato_arena_f_windthrow_roots": 522
+  },
+  "per_zone": {
+    "alpine": {
+      "design_ha": 10,
+      "instances": 1790,
+      "measured_ha": 6.95,
+      "per_ha_design": 179,
+      "per_ha_measured": 257.6
+    },
+    "forest_core": {
+      "design_ha": 262,
+      "instances": 113970,
+      "measured_ha": 273.27,
+      "per_ha_design": 435,
+      "per_ha_measured": 417.1
+    },
+    "forest_edge": {
+      "design_ha": 24,
+      "instances": 10080,
+      "measured_ha": 6.03,
+      "per_ha_design": 420,
+      "per_ha_measured": 1671.5
+    },
+    "meadow": {
+      "design_ha": 38,
+      "instances": 1330,
+      "measured_ha": 8.87,
+      "per_ha_design": 35,
+      "per_ha_measured": 149.9
+    },
+    "scree_rock": {
+      "design_ha": 78,
+      "instances": 27066,
+      "measured_ha": 60.05,
+      "per_ha_design": 347,
+      "per_ha_measured": 450.7
+    },
+    "shore": {
+      "design_ha": 5,
+      "instances": 450,
+      "measured_ha": 1.11,
+      "per_ha_design": 90,
+      "per_ha_measured": 406.8
+    }
+  },
+  "placement": [
+    {
+      "category": "trees",
+      "mask_cells": 2732725,
+      "mask_ha": 273.27,
+      "max_grade": 0.55,
+      "min_spacing_m": 3.5,
+      "placed": 41920,
+      "wanted": 41920,
+      "zone": "forest_core"
+    },
+    {
+      "category": "saplings",
+      "mask_cells": 2732725,
+      "mask_ha": 273.27,
+      "max_grade": 0.6,
+      "min_spacing_m": 2.0,
+      "placed": 23580,
+      "wanted": 23580,
+      "zone": "forest_core"
+    },
+    {
+      "category": "shrubs_ferns",
+      "mask_cells": 2732725,
+      "mask_ha": 273.27,
+      "max_grade": 0.65,
+      "min_spacing_m": 1.5,
+      "placed": 31440,
+      "wanted": 31440,
+      "zone": "forest_core"
+    },
+    {
+      "category": "deadfall",
+      "mask_cells": 2732725,
+      "mask_ha": 273.27,
+      "max_grade": 0.55,
+      "min_spacing_m": 2.5,
+      "placed": 6550,
+      "wanted": 6550,
+      "zone": "forest_core"
+    },
+    {
+      "category": "rocks",
+      "mask_cells": 2732725,
+      "mask_ha": 273.27,
+      "max_grade": 1.2,
+      "min_spacing_m": 0.8,
+      "placed": 10480,
+      "wanted": 10480,
+      "zone": "forest_core"
+    },
+    {
+      "category": "trees",
+      "mask_cells": 60305,
+      "mask_ha": 6.03,
+      "max_grade": 0.55,
+      "min_spacing_m": 3.5,
+      "placed": 1440,
+      "wanted": 1440,
+      "zone": "forest_edge"
+    },
+    {
+      "category": "saplings",
+      "mask_cells": 60305,
+      "mask_ha": 6.03,
+      "max_grade": 0.6,
+      "min_spacing_m": 2.0,
+      "placed": 2880,
+      "wanted": 2880,
+      "zone": "forest_edge"
+    },
+    {
+      "category": "shrubs_ferns",
+      "mask_cells": 60305,
+      "mask_ha": 6.03,
+      "max_grade": 0.65,
+      "min_spacing_m": 1.5,
+      "placed": 4800,
+      "wanted": 4800,
+      "zone": "forest_edge"
+    },
+    {
+      "category": "deadfall",
+      "mask_cells": 60305,
+      "mask_ha": 6.03,
+      "max_grade": 0.55,
+      "min_spacing_m": 2.5,
+      "placed": 480,
+      "wanted": 480,
+      "zone": "forest_edge"
+    },
+    {
+      "category": "rocks",
+      "mask_cells": 60305,
+      "mask_ha": 6.03,
+      "max_grade": 1.2,
+      "min_spacing_m": 0.8,
+      "placed": 480,
+      "wanted": 480,
+      "zone": "forest_edge"
+    },
+    {
+      "category": "saplings",
+      "mask_cells": 88721,
+      "mask_ha": 8.87,
+      "max_grade": 0.6,
+      "min_spacing_m": 2.0,
+      "placed": 304,
+      "wanted": 304,
+      "zone": "meadow"
+    },
+    {
+      "category": "shrubs_ferns",
+      "mask_cells": 88721,
+      "mask_ha": 8.87,
+      "max_grade": 0.65,
+      "min_spacing_m": 1.5,
+      "placed": 570,
+      "wanted": 570,
+      "zone": "meadow"
+    },
+    {
+      "category": "deadfall",
+      "mask_cells": 88721,
+      "mask_ha": 8.87,
+      "max_grade": 0.55,
+      "min_spacing_m": 2.5,
+      "placed": 76,
+      "wanted": 76,
+      "zone": "meadow"
+    },
+    {
+      "category": "rocks",
+      "mask_cells": 88721,
+      "mask_ha": 8.87,
+      "max_grade": 1.2,
+      "min_spacing_m": 0.8,
+      "placed": 380,
+      "wanted": 380,
+      "zone": "meadow"
+    },
+    {
+      "category": "trees",
+      "mask_cells": 554273,
+      "mask_ha": 55.43,
+      "max_grade": 0.55,
+      "min_spacing_m": 3.5,
+      "placed": 936,
+      "wanted": 936,
+      "zone": "scree_rock"
+    },
+    {
+      "category": "saplings",
+      "mask_cells": 567171,
+      "mask_ha": 56.72,
+      "max_grade": 0.6,
+      "min_spacing_m": 2.0,
+      "placed": 1560,
+      "wanted": 1560,
+      "zone": "scree_rock"
+    },
+    {
+      "category": "shrubs_ferns",
+      "mask_cells": 576555,
+      "mask_ha": 57.66,
+      "max_grade": 0.65,
+      "min_spacing_m": 1.5,
+      "placed": 780,
+      "wanted": 780,
+      "zone": "scree_rock"
+    },
+    {
+      "category": "deadfall",
+      "mask_cells": 554273,
+      "mask_ha": 55.43,
+      "max_grade": 0.55,
+      "min_spacing_m": 2.5,
+      "placed": 390,
+      "wanted": 390,
+      "zone": "scree_rock"
+    },
+    {
+      "category": "rocks",
+      "mask_cells": 600506,
+      "mask_ha": 60.05,
+      "max_grade": 1.2,
+      "min_spacing_m": 0.8,
+      "placed": 23400,
+      "wanted": 23400,
+      "zone": "scree_rock"
+    },
+    {
+      "category": "saplings",
+      "mask_cells": 69481,
+      "mask_ha": 6.95,
+      "max_grade": 0.6,
+      "min_spacing_m": 2.0,
+      "placed": 300,
+      "wanted": 300,
+      "zone": "alpine"
+    },
+    {
+      "category": "shrubs_ferns",
+      "mask_cells": 69481,
+      "mask_ha": 6.95,
+      "max_grade": 0.65,
+      "min_spacing_m": 1.5,
+      "placed": 50,
+      "wanted": 50,
+      "zone": "alpine"
+    },
+    {
+      "category": "rocks",
+      "mask_cells": 69481,
+      "mask_ha": 6.95,
+      "max_grade": 1.2,
+      "min_spacing_m": 0.8,
+      "placed": 1440,
+      "wanted": 1440,
+      "zone": "alpine"
+    },
+    {
+      "category": "shrubs_ferns",
+      "mask_cells": 11063,
+      "mask_ha": 1.11,
+      "max_grade": 0.65,
+      "min_spacing_m": 1.5,
+      "placed": 200,
+      "wanted": 200,
+      "zone": "shore"
+    },
+    {
+      "category": "deadfall",
+      "mask_cells": 11063,
+      "mask_ha": 1.11,
+      "max_grade": 0.55,
+      "min_spacing_m": 2.5,
+      "placed": 100,
+      "wanted": 100,
+      "zone": "shore"
+    },
+    {
+      "category": "rocks",
+      "mask_cells": 11063,
+      "mask_ha": 1.11,
+      "max_grade": 1.2,
+      "min_spacing_m": 0.8,
+      "placed": 150,
+      "wanted": 150,
+      "zone": "shore"
+    }
+  ],
+  "seconds": 3.3,
+  "shelf_road_clearance": {
+    "by_species": {
+      "ericrolph_hot_potato_arena_f_bark_debris": 2,
+      "ericrolph_hot_potato_arena_f_boulder_forest_a": 9,
+      "ericrolph_hot_potato_arena_f_boulder_forest_b": 8,
+      "ericrolph_hot_potato_arena_f_branch_pile": 2,
+      "ericrolph_hot_potato_arena_f_cliff_outcrop_b": 1,
+      "ericrolph_hot_potato_arena_f_fallen_log_a": 1,
+      "ericrolph_hot_potato_arena_f_fallen_log_b": 5,
+      "ericrolph_hot_potato_arena_f_fern_a": 55,
+      "ericrolph_hot_potato_arena_f_fern_b": 59,
+      "ericrolph_hot_potato_arena_f_fir_mid_a": 21,
+      "ericrolph_hot_potato_arena_f_fir_mid_b": 15,
+      "ericrolph_hot_potato_arena_f_fir_sapling_a": 10,
+      "ericrolph_hot_potato_arena_f_fir_sapling_b": 28,
+      "ericrolph_hot_potato_arena_f_fir_tall_a": 15,
+      "ericrolph_hot_potato_arena_f_fir_tall_b": 11,
+      "ericrolph_hot_potato_arena_f_fir_tall_c": 12,
+      "ericrolph_hot_potato_arena_f_mossy_rock_a": 1,
+      "ericrolph_hot_potato_arena_f_mossy_rock_b": 1,
+      "ericrolph_hot_potato_arena_f_mossy_rock_c": 2,
+      "ericrolph_hot_potato_arena_f_mossy_rock_d": 2,
+      "ericrolph_hot_potato_arena_f_mossy_rock_e": 3,
+      "ericrolph_hot_potato_arena_f_nq_boulder_02": 6,
+      "ericrolph_hot_potato_arena_f_nq_boulder_03": 2,
+      "ericrolph_hot_potato_arena_f_nq_boulder_04": 1,
+      "ericrolph_hot_potato_arena_f_nq_boulder_05": 5,
+      "ericrolph_hot_potato_arena_f_nq_boulder_06": 4,
+      "ericrolph_hot_potato_arena_f_pebble_cluster": 12,
+      "ericrolph_hot_potato_arena_f_pine_mid_a": 23,
+      "ericrolph_hot_potato_arena_f_pine_mid_b": 23,
+      "ericrolph_hot_potato_arena_f_pine_sapling_a": 23,
+      "ericrolph_hot_potato_arena_f_pine_sapling_b": 26,
+      "ericrolph_hot_potato_arena_f_pine_sapling_c": 26,
+      "ericrolph_hot_potato_arena_f_pine_tall_a": 40,
+      "ericrolph_hot_potato_arena_f_pine_tall_b": 17,
+      "ericrolph_hot_potato_arena_f_pine_tall_c": 22,
+      "ericrolph_hot_potato_arena_f_root_cluster": 2,
+      "ericrolph_hot_potato_arena_f_scree_rock_a": 5,
+      "ericrolph_hot_potato_arena_f_scree_rock_b": 10,
+      "ericrolph_hot_potato_arena_f_shrub_01": 9,
+      "ericrolph_hot_potato_arena_f_shrub_03": 32,
+      "ericrolph_hot_potato_arena_f_shrub_04": 1,
+      "ericrolph_hot_potato_arena_f_snag_a": 1,
+      "ericrolph_hot_potato_arena_f_snag_b": 1,
+      "ericrolph_hot_potato_arena_f_stump_a": 4,
+      "ericrolph_hot_potato_arena_f_stump_b": 5,
+      "ericrolph_hot_potato_arena_f_windthrow_roots": 2
+    },
+    "removed_total": 565,
+    "rule": {
+      "amendment": "A6",
+      "below_base_m": 3.0,
+      "corridor": "approach DecalRoad + the MeshRoad at every survey station, as built",
+      "margin_m": 3.0,
+      "module": "examples/hot_potato_arena/level/shelf_road.py",
+      "reach_above_base_m": 45.0
+    }
+  },
+  "wind_emitters": 1
+}

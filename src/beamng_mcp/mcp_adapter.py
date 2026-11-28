@@ -13,7 +13,7 @@ from typing import Any, Literal, ParamSpec, TypeVar, cast
 from mcp.server.fastmcp import FastMCP
 from mcp.server.fastmcp.exceptions import ToolError
 from mcp.server.transport_security import TransportSecuritySettings
-from mcp.types import ToolAnnotations
+from mcp.types import ImageContent, TextContent, ToolAnnotations
 from pydantic import StrictBool
 from starlette.responses import JSONResponse
 
@@ -53,6 +53,15 @@ from .models import (
     VehicleInfo,
     VehicleSpawn,
     VehicleTeleport,
+)
+from .native_models import (
+    NativeCameraRequest,
+    NativeDisplayRequest,
+    NativeEditorRequest,
+    NativeInspection,
+    NativeSimulationRequest,
+    NativeTimeOfDay,
+    NativeVehicleRequest,
 )
 from .runtime import Runtime
 from .services.jbeam import MATERIAL_CATALOG_VERSION, MATERIAL_PRESETS
@@ -122,11 +131,16 @@ def create_mcp_server(
     mcp = FastMCP(
         "BeamNG MCP",
         instructions=(
-            "Control BeamNG through typed, loopback-only tools. Query status and "
-            "capabilities first. Use emergency_stop on stale perception, lost control, "
+            "For a running BeamNG game, call native_status then native_inspect; "
+            "these do not require simulator_connect or launch a second game. "
+            "Control BeamNG through typed, loopback-only tools. Query capabilities first. "
+            "Use emergency_stop on stale perception, lost control, "
             "or unexpected motion. Blender and BeamNG MCP are peer servers: use the "
             "evidence-bound softbody handoff instead of inventing JBeam coordinates. "
             "Persistent map saves, deletes, and mod installation require explicit confirmation."
+            " Use native_status and native_inspect to attach to BeamNG's built-in MCP without "
+            "launching a second game. Native camera/editor tools change only the current view "
+            "or selection. Poll native_screenshot after a pending capture."
         ),
         website_url="https://github.com/eric-rolph/beamng-mcp",
         host=settings.mcp.host,
@@ -137,6 +151,105 @@ def create_mcp_server(
         lifespan=lifespan,
         transport_security=transport_security,
     )
+
+    @mcp.tool(annotations=READ_ONLY)
+    @tool_guard
+    async def native_status() -> dict[str, Any]:
+        """Probe the official running-game MCP and report supported and missing actions."""
+        return await app_runtime.native.status()
+
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            readOnlyHint=True, destructiveHint=False, idempotentHint=False, openWorldHint=False
+        )
+    )
+    @tool_guard
+    async def native_inspect(request: NativeInspection) -> dict[str, Any]:
+        """Inspect the running game's scene, camera, performance, terrain, vehicles or editor.
+
+        Does not require simulator_connect. Logs consume an upstream diagnostic cursor;
+        instability events are preserved unless clear=true. Uses numeric engine vehicle IDs.
+        """
+        return await app_runtime.native.inspect(request)
+
+    @mcp.tool(annotations=ACTION)
+    @tool_guard
+    async def native_camera_control(request: NativeCameraRequest) -> dict[str, Any]:
+        """Set a bounded camera mode, orbit, or exact free-camera pose in the running game."""
+        return await app_runtime.native.inspect(request)
+
+    @mcp.tool(annotations=ACTION)
+    @tool_guard
+    async def native_editor_control(request: NativeEditorRequest) -> dict[str, Any]:
+        """Activate the editor, select objects, choose edit mode, or frame selection.
+
+        Does not create, transform, delete, or save scene objects.
+        """
+        return await app_runtime.native.inspect(request)
+
+    @mcp.tool(annotations=ACTION)
+    @tool_guard
+    async def native_display_control(request: NativeDisplayRequest) -> dict[str, Any]:
+        """Show/hide UI, display a message, or add/clear a bounded temporary debug shape.
+
+        Shape IDs are beamng_mcp_debug_0 through beamng_mcp_debug_31. Shapes expire
+        within 60 seconds. Clear requires an exact ID in the reserved namespace; no clear-all.
+        """
+        return await app_runtime.native.inspect(request)
+
+    @mcp.tool(annotations=ACTION)
+    @tool_guard
+    async def native_simulation_control(request: NativeSimulationRequest) -> dict[str, Any]:
+        """Pause, resume, step (1..1000 ticks), or set speed (0.01..4) in the running game.
+
+        Rejected while an autonomy transition or run is active. Does not require BeamNGpy.
+        """
+        return await app_runtime.while_autonomy_inactive(
+            "change native simulation state", lambda: app_runtime.native.inspect(request)
+        )
+
+    @mcp.tool(annotations=ACTION)
+    @tool_guard
+    async def native_vehicle_control(request: NativeVehicleRequest) -> dict[str, Any]:
+        """Add a vehicle, teleport/repair one, or recover one to its last road.
+
+        Uses numeric IDs from get_vehicles; rejected during autonomy. Spawn always adds,
+        never replaces, and accepts model/config keys only (no paths), with a 32-vehicle cap.
+        set_position uses the game's safe teleport: clearance may adjust the requested pose.
+        Inspect the resulting pose before relying on placement. Recovery also repairs damage.
+        Commands may complete asynchronously; poll get_vehicles/get_position, do not retry.
+        """
+        return await app_runtime.while_autonomy_inactive(
+            "change native vehicles", lambda: app_runtime.native.inspect(request)
+        )
+
+    @mcp.tool(annotations=ACTION)
+    @tool_guard
+    async def native_environment_control(request: NativeTimeOfDay) -> dict[str, Any]:
+        """Set current lighting time (0..1), playback, and optional day length (1..86400s).
+
+        Does not save the level. Rejected while autonomy is running or transitioning.
+        """
+        return await app_runtime.while_autonomy_inactive(
+            "change native lighting", lambda: app_runtime.native.inspect(request)
+        )
+
+    @mcp.tool(annotations=ACTION)
+    @tool_guard
+    async def native_screenshot(scale: float = 0.4) -> list[ImageContent | TextContent]:
+        """Capture the running game's viewport as an inline image. If pending, call again.
+
+        scale must be 0.05..1. This creates a screenshot in the game's MCP screenshot folder;
+        it does not expose arbitrary file reads. The upstream pending capture is shared
+        across clients, so this is a visual inspection tool, not an attested sensor frame.
+        """
+        result = await app_runtime.native.screenshot(scale)
+        return [
+            ImageContent.model_validate(item)
+            if item["type"] == "image"
+            else TextContent.model_validate(item)
+            for item in result
+        ]
 
     @mcp.tool(annotations=READ_ONLY)
     @tool_guard

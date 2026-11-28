@@ -25,6 +25,7 @@ classifiers = [
 dependencies = [
   "anyio>=4.8,<5",
   "beamngpy>=1.35.1,<1.36",
+  "httpx>=0.28,<1",
   "mcp[cli]>=1.28.1,<2",
   "numpy>=1.26,<3",
   "pillow>=11.3,<13",
@@ -86,6 +87,12 @@ explicit = true
 packages = ["src/beamng_mcp"]
 
 [tool.hatch.build.targets.sdist]
+# Local game builds and previous multi-gigabyte map archives are reproducible
+# outputs, not Python source-distribution inputs. Keep the authoring sources.
+exclude = [
+  "/examples/hot_potato_arena/dist_level",
+  "/examples/hot_potato_arena/mod",
+]
 include = [
   "/src",
   "/tests",
@@ -121,6 +128,9 @@ target-version = "py311"
 # of cosmetic findings, so ruff (lint AND format) skips the pack tree; the
 # server (src/) and the shared test suite stay fully linted.
 extend-exclude = ["examples/giant_props"]
+# Excludes apply even when a path is named on the command line, so a stray
+# "ruff format <vendored file>" can never rewrite bytes a lock pins.
+force-exclude = true
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "ASYNC", "S", "RUF"]
@@ -130,6 +140,29 @@ ignore = ["S101"]
 # S314: the suite parses XML (Collada DAEs, materials) that this repository
 # itself generated moments earlier - there is no untrusted XML input here.
 "tests/**/*.py" = ["S101", "S105", "S106", "S314"]
+# terrain_model.py is VENDORED BYTE-FOR-BYTE from the frozen Hot Potato level design
+# spec (scratchpad level_round/spec_frozen/terrain_model.py, sha256 36f275eeb9c292c0...,
+# recorded in examples/hot_potato_arena/authoring/level_design_v4.lock.json). It is the
+# executable half of the specification: reformatting it would break the byte-identity a
+# critic re-verifies against the frozen copy, so it is linted only for real defects.
+# S324 is the design's sha1 CACHE KEY (never a security digest).
+"examples/hot_potato_arena/level/terrain_model.py" = [
+  "E501",
+  "B007",
+  "B905",
+  "F841",
+  "RUF005",
+  "RUF007",
+  "RUF046",
+  "RUF059",
+  "S324",
+  "UP034",
+]
+
+[tool.ruff.format]
+# Same reason as the per-file-ignore above: the vendored design model must stay
+# byte-identical to the frozen spec copy the critic diffs it against.
+exclude = ["examples/hot_potato_arena/level/terrain_model.py"]
 
 [tool.mypy]
 python_version = "3.13"

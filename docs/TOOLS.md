@@ -1,5 +1,36 @@
 # Tool Catalog
 
+## Official running-game MCP
+
+These tools attach to `[native_mcp].url` without `simulator_connect`. Use numeric engine IDs.
+
+| Tool | Purpose |
+| --- | --- |
+| `native_status` | Probe the official server, list reviewed actions and any upstream gaps |
+| `native_inspect(request)` | Discriminated, bounded read requests for scene, vehicle, terrain, camera, editor and diagnostics |
+| `native_camera_control(request)` | Camera mode, orbit and exact free-camera pose |
+| `native_editor_control(request)` | Activate editor, select/clear objects, choose edit mode and frame selection |
+| `native_simulation_control(request)` | Pause/resume, 1–1000 physics ticks or time scale 0.01–4; interlocked against autonomy |
+| `native_screenshot(scale)` | Inline image or pending text; poll again after pending, scale 0.05–1 |
+| `native_display_control(request)` | Explicit UI visibility, bounded messages, and 32 namespaced debug-shape slots with maximum 60-second lifetime |
+| `native_vehicle_control(request)` | Add-only spawn (model/config keys, at most 32 live vehicles), safe teleport/repair, or recover an explicit vehicle ID; interlocked against autonomy |
+| `native_environment_control(request)` | Current lighting time, playback and bounded day length; interlocked against autonomy; no level save |
+
+No native generic tool-name/arguments escape hatch is exposed. Unknown fields, nonfinite
+geometry, ambiguous object selectors and oversized responses are rejected. Camera rotations
+must be unit quaternions. The native server's screenshot slot and diagnostic buffers are
+shared across clients; screenshots are inspection evidence, not attested autonomy sensor frames.
+Logs consume the shared cursor. `get_instability` preserves events by default (`clear=false`).
+Vehicle IDs are checked against the live vehicle list before mutations. Another client can still
+change the scene between engine calls; there is no cross-client lock. Native removal/reset/reload
+are not exposed because upstream deletion accepts arbitrary scene IDs and reset/reload implicitly
+target the current player. Spawn never replaces a vehicle. Teleport uses engine safe placement,
+which may adjust clearance and repairs damage; inspect the resulting pose. Spawn/recovery can
+complete asynchronously: poll state, do not repeat a mutation after an uncertain response.
+See [official parity](OFFICIAL_MCP_PARITY.md) for the complete audited feature inventory.
+
+## Original control and authoring tools
+
 All normal results are structured. Expected operational failures are returned as MCP tool errors
 with actionable text. Read-only/destructive/idempotent hints are metadata for clients, not security
 controls; the server still enforces gates itself.

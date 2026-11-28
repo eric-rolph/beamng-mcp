@@ -1,0 +1,865 @@
+{
+ "bb_property": "BB::DIM=128\nBB::EQUATOR_STEPS=32\nBB::INCLUDE_POLES=0",
+ "colmesh_budget_by_source": {
+  "boulder_01": 2000,
+  "namaqualand_boulder_02": 2000,
+  "namaqualand_boulder_03": 2000,
+  "namaqualand_boulder_04": 2000,
+  "namaqualand_boulder_05": 600,
+  "rock_face_01": 4000
+ },
+ "colmesh_tris": 240,
+ "crust": {
+  "file": "ericrolph_hot_potato_arena_h_ember_crust.dae",
+  "grid": [
+   20,
+   24
+  ],
+  "instances": 24,
+  "lump_band_m": [
+   0.02,
+   0.35
+  ],
+  "material": "ericrolph_hot_potato_arena_ember_crust",
+  "materials": [
+   "ericrolph_hot_potato_arena_ember_crust"
+  ],
+  "node_tris": {
+   "base00": 960,
+   "ericrolph_hot_potato_arena_h_ember_crust_a1": 960,
+   "nulldetail1": 0,
+   "start01": 960
+  },
+  "r": [
+   176.0,
+   199.0
+  ],
+  "relative": "art/shapes/hearth/ericrolph_hot_potato_arena_h_ember_crust.dae",
+  "sector_deg": 15.0,
+  "sha256": "8a941cf80f95e671c2dfb4809bd9df8ed8d54fda46d7caa8a85a86e36d480963",
+  "size": 124435,
+  "uv_tiles": {
+   "mm_per_texel": [
+    11.2305,
+    11.9842
+   ],
+   "radial": 1.0,
+   "tangential": 2.0,
+   "tile_m": [
+    23.0,
+    24.5437
+   ]
+  }
+ },
+ "details": [
+  [
+   900,
+   6000
+  ],
+  [
+   400,
+   2000
+  ],
+  [
+   150,
+   600
+  ]
+ ],
+ "level_id": "ericrolph_hot_potato_arena",
+ "nulldetail": 4,
+ "shape_dir": "art/shapes/hearth",
+ "solid_route_by_source": {
+  "namaqualand_boulder_02": "voxel",
+  "namaqualand_boulder_03": "voxel",
+  "namaqualand_boulder_05": "voxel",
+  "rock_face_01": "voxel"
+ },
+ "solid_seed": 1213354822,
+ "soot": {
+  "dae_floor": 0.4509804,
+  "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear so the DAE carries the DESIGN multiplier itself (r2). FLOAT_COLOR exports NO colour input at all in Blender 4.5.4 -- see bake_soot's docstring and b2/r2/vc_probe2.py.",
+  "floor": 0.45,
+  "method": "vertex colour (COLOR), material vertColor true",
+  "top_m": 6.0
+ },
+ "stones": {
+  "boulder_01": {
+   "asset": "boulder_01",
+   "cc0_source": "cc0_cache/boulder_01/boulder_01_2k.gltf",
+   "cc0_source_folder": "boulder_01",
+   "colmesh_budget": 2000,
+   "colmesh_kind": "decimated_solid",
+   "colmesh_solid": {
+    "boundary": 0,
+    "chi": 2,
+    "kind": "decimated_solid",
+    "nonmanifold": 0,
+    "solid": true,
+    "tris": 1970,
+    "volume_m3": 0.1523
+   },
+   "derivation": "weld_islands + seal_shell (closed scan); collider = decimated copy of the finest visual, convex hull only as a fallback",
+   "design_height_m": 21.0,
+   "detail_solid": {
+    "ericrolph_hot_potato_arena_h_boulder_01_a150": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 590,
+     "volume_m3": 0.1509
+    },
+    "ericrolph_hot_potato_arena_h_boulder_01_a400": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 1970,
+     "volume_m3": 0.1525
+    },
+    "ericrolph_hot_potato_arena_h_boulder_01_a900": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 5910,
+     "volume_m3": 0.1527
+    }
+   },
+   "file": "ericrolph_hot_potato_arena_h_boulder_01.dae",
+   "height_stretch": {
+    "after_m": 21.0,
+    "before_m": 16.453,
+    "buried_below_foot_m": -0.0,
+    "factor": 1.276345,
+    "measured_from": "bounding box"
+   },
+   "import_solid": {},
+   "import_solid_route": null,
+   "material": "ericrolph_hot_potato_arena_rock_hero_boulder_01",
+   "materials": [
+    "ericrolph_hot_potato_arena_rock_hero_boulder_01"
+   ],
+   "node_tris": {
+    "Colmesh_ericrolph_hot_potato_arena_h_boulder_01-1": 1970,
+    "base00": 10440,
+    "bb_autobillboard25": 0,
+    "ericrolph_hot_potato_arena_h_boulder_01_a150": 590,
+    "ericrolph_hot_potato_arena_h_boulder_01_a400": 1970,
+    "ericrolph_hot_potato_arena_h_boulder_01_a900": 5910,
+    "nulldetail4": 0,
+    "start01": 10440
+   },
+   "relative": "art/shapes/hearth/ericrolph_hot_potato_arena_h_boulder_01.dae",
+   "sha256": "02a4290b04e0e7d91bbaa9f46129172b6b1d192ba371c9efa3120ace19304727",
+   "size": 2154017,
+   "soot": {
+    "ericrolph_hot_potato_arena_h_boulder_01_a150": {
+     "ash_local_z": 0.05,
+     "dae_max": 1.0,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 1.0,
+     "min": 0.45
+    },
+    "ericrolph_hot_potato_arena_h_boulder_01_a400": {
+     "ash_local_z": 0.05,
+     "dae_max": 1.0,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 1.0,
+     "min": 0.45
+    },
+    "ericrolph_hot_potato_arena_h_boulder_01_a900": {
+     "ash_local_z": 0.05,
+     "dae_max": 1.0,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 1.0,
+     "min": 0.45
+    }
+   },
+   "soot_in_the_dae": {
+    "arrays": 6,
+    "max": 1.0,
+    "min": 0.45098,
+    "values": 25410
+   },
+   "unit_dimensions": {
+    "x": 0.695029,
+    "y": 1.0,
+    "z": 0.7
+   },
+   "vertex_colour_semantic": 3,
+   "world": {
+    "count": 4,
+    "diam": 30.0,
+    "height": 21.0,
+    "sink": 1.5
+   },
+   "world_bbox_height_m": 21.0,
+   "world_height_m": 21.0
+  },
+  "namaqualand_boulder_02": {
+   "asset": "namaqualand_boulder_02",
+   "cc0_source": "cc0_cache/namaqualand_boulder_02/namaqualand_boulder_02_2k.gltf",
+   "cc0_source_folder": "namaqualand_boulder_02",
+   "colmesh_budget": 2000,
+   "colmesh_kind": "decimated_solid",
+   "colmesh_solid": {
+    "boundary": 0,
+    "chi": 2,
+    "kind": "decimated_solid",
+    "nonmanifold": 0,
+    "solid": true,
+    "tris": 1970,
+    "volume_m3": 0.121
+   },
+   "derivation": "weld_islands + seal_shell (closed scan); collider = decimated copy of the finest visual, convex hull only as a fallback",
+   "design_height_m": 14.0,
+   "detail_solid": {
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_02_a150": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 590,
+     "volume_m3": 0.1207
+    },
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_02_a400": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 1970,
+     "volume_m3": 0.1212
+    },
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_02_a900": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 5910,
+     "volume_m3": 0.1212
+    }
+   },
+   "file": "ericrolph_hot_potato_arena_h_namaqualand_boulder_02.dae",
+   "height_stretch": {
+    "after_m": 14.0,
+    "before_m": 6.91,
+    "buried_below_foot_m": -0.0,
+    "factor": 2.025943,
+    "measured_from": "bounding box"
+   },
+   "import_solid": {
+    "boundary": 0,
+    "chi": 2,
+    "chi_after_closing": 2,
+    "closing_voxels": 9.0,
+    "crumbs_dropped": 0,
+    "kind": "voxel",
+    "nonmanifold": 0,
+    "scan": {
+     "boundary": 6,
+     "chi": -6,
+     "nonmanifold": 5,
+     "tris": 96725,
+     "volume_m3": 49.4811
+    },
+    "shells_kept": 1,
+    "tris": 124964,
+    "volume_m3": 55.7707,
+    "voxel_m": 0.05
+   },
+   "import_solid_route": "voxel",
+   "material": "ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_02",
+   "materials": [
+    "ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_02"
+   ],
+   "node_tris": {
+    "Colmesh_ericrolph_hot_potato_arena_h_namaqualand_boulder_02-1": 1970,
+    "base00": 10440,
+    "bb_autobillboard25": 0,
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_02_a150": 590,
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_02_a400": 1970,
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_02_a900": 5910,
+    "nulldetail4": 0,
+    "start01": 10440
+   },
+   "relative": "art/shapes/hearth/ericrolph_hot_potato_arena_h_namaqualand_boulder_02.dae",
+   "sha256": "35c54096adf785c0ff4f1702e2d1b76b9181607fdfa93793a2682b6c96f319c6",
+   "size": 2307780,
+   "soot": {
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_02_a150": {
+     "ash_local_z": 0.075,
+     "dae_max": 1.0,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 1.0,
+     "min": 0.45
+    },
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_02_a400": {
+     "ash_local_z": 0.075,
+     "dae_max": 1.0,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 1.0,
+     "min": 0.45
+    },
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_02_a900": {
+     "ash_local_z": 0.075,
+     "dae_max": 1.0,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 1.0,
+     "min": 0.45
+    }
+   },
+   "soot_in_the_dae": {
+    "arrays": 6,
+    "max": 1.0,
+    "min": 0.45098,
+    "values": 25410
+   },
+   "unit_dimensions": {
+    "x": 1.0,
+    "y": 0.487859,
+    "z": 0.7
+   },
+   "vertex_colour_semantic": 3,
+   "world": {
+    "count": 4,
+    "diam": 20.0,
+    "height": 14.0,
+    "sink": 1.5
+   },
+   "world_bbox_height_m": 14.0,
+   "world_height_m": 14.0
+  },
+  "namaqualand_boulder_03": {
+   "asset": "namaqualand_boulder_03",
+   "cc0_source": "cc0_cache/namaqualand_boulder_03/namaqualand_boulder_03_2k.gltf",
+   "cc0_source_folder": "namaqualand_boulder_03",
+   "colmesh_budget": 2000,
+   "colmesh_kind": "decimated_solid",
+   "colmesh_solid": {
+    "boundary": 0,
+    "chi": 2,
+    "kind": "decimated_solid",
+    "nonmanifold": 0,
+    "solid": true,
+    "tris": 1970,
+    "volume_m3": 0.216
+   },
+   "derivation": "weld_islands + seal_shell (closed scan); collider = decimated copy of the finest visual, convex hull only as a fallback",
+   "design_height_m": 19.0,
+   "detail_solid": {
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_03_a150": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 590,
+     "volume_m3": 0.2155
+    },
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_03_a400": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 1970,
+     "volume_m3": 0.2161
+    },
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_03_a900": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 5910,
+     "volume_m3": 0.2162
+    }
+   },
+   "file": "ericrolph_hot_potato_arena_h_namaqualand_boulder_03.dae",
+   "height_stretch": {
+    "after_m": 19.0,
+    "before_m": 13.432,
+    "buried_below_foot_m": -0.0,
+    "factor": 1.414497,
+    "measured_from": "bounding box"
+   },
+   "import_solid": {
+    "boundary": 0,
+    "chi": 2,
+    "chi_after_closing": 2,
+    "closing_voxels": 0.0,
+    "crumbs_dropped": 0,
+    "kind": "voxel",
+    "nonmanifold": 0,
+    "scan": {
+     "boundary": 0,
+     "chi": 1,
+     "nonmanifold": 2,
+     "tris": 64824,
+     "volume_m3": 152.2995
+    },
+    "shells_kept": 1,
+    "tris": 197384,
+    "volume_m3": 152.3795,
+    "voxel_m": 0.05
+   },
+   "import_solid_route": "voxel",
+   "material": "ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_03",
+   "materials": [
+    "ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_03"
+   ],
+   "node_tris": {
+    "Colmesh_ericrolph_hot_potato_arena_h_namaqualand_boulder_03-1": 1970,
+    "base00": 10440,
+    "bb_autobillboard25": 0,
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_03_a150": 590,
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_03_a400": 1970,
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_03_a900": 5910,
+    "nulldetail4": 0,
+    "start01": 10440
+   },
+   "relative": "art/shapes/hearth/ericrolph_hot_potato_arena_h_namaqualand_boulder_03.dae",
+   "sha256": "017352c727a23346708e0c3680639240aebb95f7d5719931f9d93dcccd572770",
+   "size": 2299124,
+   "soot": {
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_03_a150": {
+     "ash_local_z": 0.05357,
+     "dae_max": 1.0,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 1.0,
+     "min": 0.45
+    },
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_03_a400": {
+     "ash_local_z": 0.05357,
+     "dae_max": 1.0,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 1.0,
+     "min": 0.45
+    },
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_03_a900": {
+     "ash_local_z": 0.05357,
+     "dae_max": 1.0,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 1.0,
+     "min": 0.45
+    }
+   },
+   "soot_in_the_dae": {
+    "arrays": 6,
+    "max": 1.0,
+    "min": 0.45098,
+    "values": 25410
+   },
+   "unit_dimensions": {
+    "x": 0.783695,
+    "y": 1.0,
+    "z": 0.678571
+   },
+   "vertex_colour_semantic": 3,
+   "world": {
+    "count": 4,
+    "diam": 28.0,
+    "height": 19.0,
+    "sink": 1.5
+   },
+   "world_bbox_height_m": 19.0,
+   "world_height_m": 19.0
+  },
+  "namaqualand_boulder_04": {
+   "asset": "namaqualand_boulder_04",
+   "cc0_source": "cc0_cache/namaqualand_boulder_04/namaqualand_boulder_04_2k.gltf",
+   "cc0_source_folder": "namaqualand_boulder_04",
+   "colmesh_budget": 2000,
+   "colmesh_kind": "decimated_solid",
+   "colmesh_solid": {
+    "boundary": 0,
+    "chi": 2,
+    "kind": "decimated_solid",
+    "nonmanifold": 0,
+    "solid": true,
+    "tris": 1970,
+    "volume_m3": 0.2809
+   },
+   "derivation": "weld_islands + seal_shell (closed scan); collider = decimated copy of the finest visual, convex hull only as a fallback",
+   "design_height_m": 15.0,
+   "detail_solid": {
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_04_a150": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 590,
+     "volume_m3": 0.2792
+    },
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_04_a400": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 1970,
+     "volume_m3": 0.2808
+    },
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_04_a900": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 5910,
+     "volume_m3": 0.2811
+    }
+   },
+   "file": "ericrolph_hot_potato_arena_h_namaqualand_boulder_04.dae",
+   "height_stretch": {
+    "after_m": 15.0,
+    "before_m": 16.577,
+    "buried_below_foot_m": -0.0,
+    "factor": 0.904859,
+    "measured_from": "bounding box"
+   },
+   "import_solid": {},
+   "import_solid_route": null,
+   "material": "ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_04",
+   "materials": [
+    "ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_04"
+   ],
+   "node_tris": {
+    "Colmesh_ericrolph_hot_potato_arena_h_namaqualand_boulder_04-1": 1970,
+    "base00": 10440,
+    "bb_autobillboard25": 0,
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_04_a150": 590,
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_04_a400": 1970,
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_04_a900": 5910,
+    "nulldetail4": 0,
+    "start01": 10440
+   },
+   "relative": "art/shapes/hearth/ericrolph_hot_potato_arena_h_namaqualand_boulder_04.dae",
+   "sha256": "24b7ff193b61ab91cd0e96c70afdd8b41aafd2426b302ac1617638f2c45973a3",
+   "size": 2157215,
+   "soot": {
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_04_a150": {
+     "ash_local_z": 0.06818,
+     "dae_max": 1.0,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 1.0,
+     "min": 0.45
+    },
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_04_a400": {
+     "ash_local_z": 0.06818,
+     "dae_max": 1.0,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 1.0,
+     "min": 0.45
+    },
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_04_a900": {
+     "ash_local_z": 0.06818,
+     "dae_max": 1.0,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 1.0,
+     "min": 0.45
+    }
+   },
+   "soot_in_the_dae": {
+    "arrays": 6,
+    "max": 1.0,
+    "min": 0.45098,
+    "values": 25410
+   },
+   "unit_dimensions": {
+    "x": 1.0,
+    "y": 0.989798,
+    "z": 0.681818
+   },
+   "vertex_colour_semantic": 3,
+   "world": {
+    "count": 4,
+    "diam": 22.0,
+    "height": 15.0,
+    "sink": 1.5
+   },
+   "world_bbox_height_m": 15.0,
+   "world_height_m": 15.0
+  },
+  "namaqualand_boulder_05": {
+   "asset": "namaqualand_boulder_05",
+   "cc0_source": "cc0_cache/namaqualand_boulder_05/namaqualand_boulder_05_2k.gltf",
+   "cc0_source_folder": "namaqualand_boulder_05",
+   "colmesh_budget": 600,
+   "colmesh_kind": "decimated_solid",
+   "colmesh_solid": {
+    "boundary": 0,
+    "chi": 2,
+    "kind": "decimated_solid",
+    "nonmanifold": 0,
+    "solid": true,
+    "tris": 590,
+    "volume_m3": 0.1505
+   },
+   "derivation": "weld_islands + seal_shell (closed scan); collider = decimated copy of the finest visual, convex hull only as a fallback",
+   "design_height_m": 6.5,
+   "detail_solid": {
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_05_a150": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 590,
+     "volume_m3": 0.1507
+    },
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_05_a400": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 1970,
+     "volume_m3": 0.1512
+    },
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_05_a900": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 5910,
+     "volume_m3": 0.1514
+    }
+   },
+   "file": "ericrolph_hot_potato_arena_h_namaqualand_boulder_05.dae",
+   "height_stretch": {
+    "after_m": 6.5,
+    "before_m": 3.92,
+    "buried_below_foot_m": -0.0,
+    "factor": 1.658311,
+    "measured_from": "bounding box"
+   },
+   "import_solid": {
+    "boundary": 0,
+    "chi": 2,
+    "chi_after_closing": 2,
+    "closing_voxels": 0.0,
+    "crumbs_dropped": 0,
+    "kind": "voxel",
+    "nonmanifold": 0,
+    "scan": {
+     "boundary": 1,
+     "chi": 2,
+     "nonmanifold": 2,
+     "tris": 89609,
+     "volume_m3": 90.3382
+    },
+    "shells_kept": 1,
+    "tris": 145412,
+    "volume_m3": 90.5686,
+    "voxel_m": 0.05
+   },
+   "import_solid_route": "voxel",
+   "material": "ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_05",
+   "materials": [
+    "ericrolph_hot_potato_arena_rock_hero_namaqualand_boulder_05"
+   ],
+   "node_tris": {
+    "Colmesh_ericrolph_hot_potato_arena_h_namaqualand_boulder_05-1": 590,
+    "base00": 9060,
+    "bb_autobillboard25": 0,
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_05_a150": 590,
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_05_a400": 1970,
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_05_a900": 5910,
+    "nulldetail4": 0,
+    "start01": 9060
+   },
+   "relative": "art/shapes/hearth/ericrolph_hot_potato_arena_h_namaqualand_boulder_05.dae",
+   "sha256": "196d0fb432e805288208b4b171a00b9919121e58a929f61a243c2e3de2a80256",
+   "size": 2124629,
+   "soot": {
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_05_a150": {
+     "ash_local_z": 0.08,
+     "dae_max": 0.9960784,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 0.9958,
+     "min": 0.45
+    },
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_05_a400": {
+     "ash_local_z": 0.08,
+     "dae_max": 0.9960784,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 0.9959,
+     "min": 0.45
+    },
+    "ericrolph_hot_potato_arena_h_namaqualand_boulder_05_a900": {
+     "ash_local_z": 0.08,
+     "dae_max": 0.9960784,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 0.9962,
+     "min": 0.45
+    }
+   },
+   "soot_in_the_dae": {
+    "arrays": 6,
+    "max": 0.99608,
+    "min": 0.45098,
+    "values": 25410
+   },
+   "unit_dimensions": {
+    "x": 1.0,
+    "y": 0.547381,
+    "z": 0.65
+   },
+   "vertex_colour_semantic": 3,
+   "world": {
+    "count": 8,
+    "diam": 10.0,
+    "height": 6.5,
+    "sink": 0.8
+   },
+   "world_bbox_height_m": 6.5,
+   "world_height_m": 6.5
+  },
+  "rock_face_01": {
+   "asset": "rock_face_01",
+   "cc0_source": "cc0_cache/rock_07/rock_07_2k.gltf",
+   "cc0_source_folder": "rock_07",
+   "colmesh_budget": 4000,
+   "colmesh_kind": "decimated_solid",
+   "colmesh_solid": {
+    "boundary": 0,
+    "chi": 2,
+    "kind": "decimated_solid",
+    "nonmanifold": 0,
+    "solid": true,
+    "tris": 3940,
+    "volume_m3": 0.1947
+   },
+   "derivation": "weld_islands + seal_shell (closed scan); collider = decimated copy of the finest visual, convex hull only as a fallback",
+   "design_height_m": 26.0,
+   "detail_solid": {
+    "ericrolph_hot_potato_arena_h_rock_face_01_a150": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 590,
+     "volume_m3": 0.1904
+    },
+    "ericrolph_hot_potato_arena_h_rock_face_01_a400": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 1970,
+     "volume_m3": 0.193
+    },
+    "ericrolph_hot_potato_arena_h_rock_face_01_a900": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "solid": true,
+     "tris": 5910,
+     "volume_m3": 0.1947
+    }
+   },
+   "file": "ericrolph_hot_potato_arena_h_rock_face_01.dae",
+   "height_stretch": {
+    "after_m": 26.0,
+    "before_m": 16.137,
+    "buried_below_foot_m": -0.0,
+    "factor": 1.611163,
+    "measured_from": "bounding box"
+   },
+   "import_solid": {
+    "boundary": 0,
+    "chi": 2,
+    "chi_after_closing": 2,
+    "closing_voxels": 0.0,
+    "crumbs_dropped": 0,
+    "kind": "voxel",
+    "nonmanifold": 0,
+    "scan": {
+     "boundary": 0,
+     "chi": 2,
+     "nonmanifold": 0,
+     "tris": 14844,
+     "volume_m3": 122.0202
+    },
+    "shells_kept": 1,
+    "tris": 160844,
+    "volume_m3": 122.0314,
+    "voxel_m": 0.05
+   },
+   "import_solid_route": "voxel",
+   "material": "ericrolph_hot_potato_arena_rock_hero_rock_face_01",
+   "materials": [
+    "ericrolph_hot_potato_arena_rock_hero_rock_face_01"
+   ],
+   "node_tris": {
+    "Colmesh_ericrolph_hot_potato_arena_h_rock_face_01-1": 3940,
+    "base00": 12410,
+    "bb_autobillboard25": 0,
+    "ericrolph_hot_potato_arena_h_rock_face_01_a150": 590,
+    "ericrolph_hot_potato_arena_h_rock_face_01_a400": 1970,
+    "ericrolph_hot_potato_arena_h_rock_face_01_a900": 5910,
+    "nulldetail4": 0,
+    "start01": 12410
+   },
+   "relative": "art/shapes/hearth/ericrolph_hot_potato_arena_h_rock_face_01.dae",
+   "sha256": "ce30acf25eb0c60cec89d1befeb5d16da25ba63f3f0ed62b178154c41af52d75",
+   "size": 2560131,
+   "soot": {
+    "ericrolph_hot_potato_arena_h_rock_face_01_a150": {
+     "ash_local_z": 0.04167,
+     "dae_max": 1.0,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 1.0,
+     "min": 0.45
+    },
+    "ericrolph_hot_potato_arena_h_rock_face_01_a400": {
+     "ash_local_z": 0.04167,
+     "dae_max": 1.0,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 1.0,
+     "min": 0.45
+    },
+    "ericrolph_hot_potato_arena_h_rock_face_01_a900": {
+     "ash_local_z": 0.04167,
+     "dae_max": 1.0,
+     "dae_min": 0.4509804,
+     "encoding": "BYTE_COLOR pre-compensated with srgb_to_linear (r2)",
+     "max": 1.0,
+     "min": 0.45
+    }
+   },
+   "soot_in_the_dae": {
+    "arrays": 6,
+    "max": 1.0,
+    "min": 0.45098,
+    "values": 25410
+   },
+   "unit_dimensions": {
+    "x": 0.52638,
+    "y": 1.0,
+    "z": 0.722222
+   },
+   "vertex_colour_semantic": 3,
+   "world": {
+    "count": 4,
+    "diam": 36.0,
+    "height": 26.0,
+    "sink": 1.5
+   },
+   "world_bbox_height_m": 26.0,
+   "world_height_m": 26.0
+  }
+ }
+}

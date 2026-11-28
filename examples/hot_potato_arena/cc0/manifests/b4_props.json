@@ -1,0 +1,51 @@
+[
+  {
+    "asset": "rough_wood",
+    "maps": [
+      "Diffuse",
+      "nor_gl",
+      "Rough",
+      "AO"
+    ],
+    "res": "2k",
+    "fmt": "jpg"
+  },
+  {
+    "asset": "weathered_planks",
+    "maps": [
+      "Diffuse",
+      "nor_gl",
+      "Rough",
+      "AO"
+    ],
+    "res": "2k",
+    "fmt": "jpg"
+  },
+  {
+    "asset": "metal_plate_02",
+    "maps": [
+      "Diffuse",
+      "nor_gl",
+      "Rough",
+      "AO"
+    ],
+    "res": "2k",
+    "fmt": "jpg"
+  },
+  {
+    "asset": "rust_coarse_01",
+    "maps": [
+      "Diffuse",
+      "nor_gl",
+      "Rough",
+      "AO"
+    ],
+    "res": "2k",
+    "fmt": "jpg"
+  },
+  {
+    "asset": "pot_enamel_01",
+    "file": "gltf",
+    "res": "2k"
+  }
+]

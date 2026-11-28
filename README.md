@@ -36,12 +36,45 @@ never placed inside the 10–30 Hz steering/braking loop.
 BeamNGpy's official support contract is for BeamNG.tech. Retail Drive support is useful, but this
 repository labels it honestly as experimental. The pinned compatibility baseline is BeamNGpy
 1.35.1 with BeamNG 0.38. That pin is the VALIDATED baseline, not the engine currently installed
-on the development machine, which reports `0.39.4.0 build 20972`; the release matrix has not been
-re-run against it. See the version-provenance table in `AGENTS.md`.
+on the development machine. The November 7, 2026 audit observed retail `0.40.5.0.302427`:
+its native MCP works, but its missing `tech_techCore` prevents the legacy BeamNGpy launch gate
+from connecting. Do not infer full 0.40 compatibility from the historical 0.38 matrix.
+
+### Official in-game MCP integration
+
+For a running game, start with `native_status`, then `native_inspect`. Enable the official
+server under **Options > Advanced > Enable MCP server**. Its default endpoint is
+`http://127.0.0.1:29292/mcp`; override `[native_mcp].url` if the game selected another port.
+This path does not need `simulator_connect`, a Tech license, or the custom Lua bridge.
+
+Nine typed tools cover 53 reviewed official actions: scene/vehicle/terrain inspection, camera
+poses, inline screenshots, performance/VRAM diagnostics, editor selection, and bounded physics
+pause/resume/step/speed, additive vehicle spawn, teleport/recovery, lighting, UI visibility/messages,
+and expiring debug shapes. Existing mod and
+soft-body authoring workflows remain available offline.
+The native integration does not forward arbitrary Lua/JavaScript, unrestricted file operations,
+or unguarded scene mutations. See [the full comparison and limitations](docs/OFFICIAL_MCP_PARITY.md).
+
+Register this checkout with Codex/ChatGPT desktop using its installed entry point:
+
+```powershell
+codex mcp add beamng -- C:/absolute/path/beamng-mcp/.venv/Scripts/beamng-mcp.exe serve --transport stdio
+```
+
+Check the running game's connection without launching or changing it:
+
+```powershell
+beamng-mcp native-check --json
+```
+
+This checks the native catalog and three state queries. It returns exit code 1 when unavailable
+or missing supported actions; it does not certify legacy BeamNGpy, sensors, or every mutation.
+Existing chats may need an app restart to refresh their tool catalog; the configured stdio entry
+point can also be used immediately through a standard MCP client.
 
 ## What is included
 
-- 57 typed MCP tools across simulator, scenario, traffic, environment, vehicle, sensor, map, Lua,
+- 66 typed MCP tools across simulator, scenario, traffic, environment, vehicle, sensor, map, Lua,
   mod, soft-body authoring, job, and autonomous-driving domains.
 - Read-only MCP resources for status, vehicles, jobs, autonomy, and the soft-body authoring
   contract, plus guided workflow prompts.

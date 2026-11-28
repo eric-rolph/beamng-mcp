@@ -30,6 +30,41 @@ class MCPSettings(BaseModel):
         return self
 
 
+class NativeMCPSettings(BaseModel):
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
+
+    enabled: bool = True
+    url: str = "http://127.0.0.1:29292/mcp"
+    timeout_seconds: float = Field(default=10, gt=0, le=60)
+    max_response_bytes: int = Field(default=8_388_608, ge=4096, le=16_777_216)
+
+    @field_validator("url")
+    @classmethod
+    def only_native_loopback(cls, value: str) -> str:
+        try:
+            parsed = urlsplit(value)
+            port = parsed.port
+        except ValueError as exc:
+            raise ValueError("Invalid official MCP URL") from exc
+        if (
+            value != value.strip()
+            or parsed.scheme != "http"
+            or parsed.hostname not in {"127.0.0.1", "::1"}
+            or parsed.username is not None
+            or parsed.password is not None
+            or port is None
+            or not 1 <= port <= 65535
+            or parsed.path != "/mcp"
+            or "?" in value
+            or "#" in value
+        ):
+            raise ValueError(
+                "Official MCP URL must be http://127.0.0.1:PORT/mcp or http://[::1]:PORT/mcp"
+            )
+        host = f"[{parsed.hostname}]" if parsed.hostname == "::1" else parsed.hostname
+        return f"http://{host}:{port}/mcp"
+
+
 class BeamNGSettings(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -148,6 +183,7 @@ class Settings(BaseModel):
     beamng: BeamNGSettings = Field(default_factory=BeamNGSettings)
     blender: BlenderSettings = Field(default_factory=BlenderSettings)
     lua: LuaSettings = Field(default_factory=LuaSettings)
+    native_mcp: NativeMCPSettings = Field(default_factory=NativeMCPSettings)
     workspace: WorkspaceSettings = Field(default_factory=WorkspaceSettings)
     vision: VisionSettings = Field(default_factory=VisionSettings)
 

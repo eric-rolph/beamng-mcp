@@ -41,8 +41,11 @@ local function notifyTransport(connected, arena, reason, gameId)
   return ok
 end
 
+-- rawget only: indexing extensions.<name> for an unloaded extension makes
+-- the engine try to load it and log "extension unavailable" on every miss.
 local function network()
-  return extensions and extensions.MPCoreNetwork or rawget(_G, "MPCoreNetwork")
+  local core = extensions and rawget(extensions, "MPCoreNetwork")
+  return core or rawget(_G, "MPCoreNetwork")
 end
 
 local function isMPSession()
@@ -53,7 +56,8 @@ local function isMPSession()
 end
 
 local function vehicleApi()
-  return extensions and extensions.MPVehicleGE or rawget(_G, "MPVehicleGE")
+  local api = extensions and rawget(extensions, "MPVehicleGE")
+  return api or rawget(_G, "MPVehicleGE")
 end
 
 local function serverVehicleId(gameId)

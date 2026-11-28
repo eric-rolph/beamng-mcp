@@ -180,7 +180,7 @@ def _tick_probe(bng: BeamNGpy, scene_name: str, slot: str) -> bool | None:
         f"local subject = scenetree.findObject({scene_name!r}); "
         "if subject then subject:queueLuaCommand("
         '[[local S = rawget(_G, "ericrolph_hot_potato_tick") '
-        'obj:queueGameEngineLua("rawset(_G, \'hp_probe_' + slot + '\', " '
+        "obj:queueGameEngineLua(\"rawset(_G, 'hp_probe_" + slot + "', \" "
         '.. tostring(S ~= nil and S.on == true) .. ")")]]) end; '
         "return jsonEncode({ok = true})",
     )
@@ -347,12 +347,8 @@ def test_hot_potato_round_transfer_detonation_and_teardown(tmp_path: Path) -> No
             )
             carrier = Vehicle(CARRIER_NAME, "etk800", license="TUBER")
             rammer = Vehicle(RAMMER_NAME, "etk800", license="TAGGER")
-            scenario.add_vehicle(
-                carrier, pos=(60.0, 60.0, 20.0), rot_quat=(0, 0, 0, 1), cling=True
-            )
-            scenario.add_vehicle(
-                rammer, pos=(60.0, 80.0, 20.0), rot_quat=(0, 0, 0, 1), cling=True
-            )
+            scenario.add_vehicle(carrier, pos=(60.0, 60.0, 20.0), rot_quat=(0, 0, 0, 1), cling=True)
+            scenario.add_vehicle(rammer, pos=(60.0, 80.0, 20.0), rot_quat=(0, 0, 0, 1), cling=True)
             scenario.make(bng)
             bng.control.pause()
             bng.scenario.load(scenario, precompile_shaders=False)
@@ -380,9 +376,7 @@ def test_hot_potato_round_transfer_detonation_and_teardown(tmp_path: Path) -> No
             # and an origin glyph there, and they photobomb every medallion
             # beauty shot (critic round, 2026-08-29).
             prop = Vehicle(PROP_NAME, MOD_ID, license="POTATO")
-            spawned = bng.vehicles.spawn(
-                prop, (90.0, -90.0, surface_z), (0, 0, 0, 1), False, True
-            )
+            spawned = bng.vehicles.spawn(prop, (90.0, -90.0, surface_z), (0, 0, 0, 1), False, True)
             assert spawned is True
 
             state: dict[str, Any] = {}
@@ -552,7 +546,6 @@ def test_hot_potato_round_transfer_detonation_and_teardown(tmp_path: Path) -> No
             assert layouts.get("layout_type") == "freeroam", layouts
             assert layouts.get("has_tuner") is True, layouts
 
-
             # --- pickup: drive onto the medallion ---------------------------
             pad_world = (origin[0], origin[1], origin[2] + 0.6)
             carrier.teleport(pos=pad_world, rot_quat=(0, 0, 0, 1), reset=True)
@@ -569,10 +562,7 @@ def test_hot_potato_round_transfer_detonation_and_teardown(tmp_path: Path) -> No
 
             def _live_with_stable_carrier() -> bool:
                 stats = _stats(bng)
-                live = (
-                    stats.get("phase") == "live"
-                    and int(stats.get("carrier") or -1) >= 0
-                )
+                live = stats.get("phase") == "live" and int(stats.get("carrier") or -1) >= 0
                 if live and stable.get("carrier") == stats.get("carrier"):
                     stable["stats"] = stats
                     return True
@@ -600,13 +590,13 @@ def test_hot_potato_round_transfer_detonation_and_teardown(tmp_path: Path) -> No
             # design; show_countdown is the party-host override).
             hud = _lua_json(
                 bng,
-                f"return jsonEncode(extensions[{RUNTIME_EXTENSION!r}]"
-                ".hotPotatoGetStats())",
+                f"return jsonEncode(extensions[{RUNTIME_EXTENSION!r}].hotPotatoGetStats())",
             )
             assert hud.get("phase") == "live", hud
             assert int(hud.get("carrier", -1)) == int(first_stats.get("carrier")), hud
             assert float(hud.get("countdown", 0)) == -1, {
-                "detail": "the hidden fuse leaked to the HUD", "hud": hud,
+                "detail": "the hidden fuse leaked to the HUD",
+                "hud": hud,
             }
             answer = _lua_json(
                 bng,
@@ -618,8 +608,7 @@ def test_hot_potato_round_transfer_detonation_and_teardown(tmp_path: Path) -> No
             bng.control.step(STEPS_PER_CALL, wait=True)
             hud = _lua_json(
                 bng,
-                f"return jsonEncode(extensions[{RUNTIME_EXTENSION!r}]"
-                ".hotPotatoGetStats())",
+                f"return jsonEncode(extensions[{RUNTIME_EXTENSION!r}].hotPotatoGetStats())",
             )
             assert float(hud.get("countdown", -1)) > 0, {
                 "detail": "show_countdown=true published no fuse seconds",
@@ -629,14 +618,38 @@ def test_hot_potato_round_transfer_detonation_and_teardown(tmp_path: Path) -> No
             # The carried potato, photographed.
             _screenshot(
                 bng,
-                (float(carrier_probe["x"]) + 9.0, float(carrier_probe["y"]) + 9.0,
-                 float(carrier_probe["z"]) + 4.0),
-                (float(carrier_probe["x"]), float(carrier_probe["y"]),
-                 float(carrier_probe["z"]) + 2.0),
+                (
+                    float(carrier_probe["x"]) + 9.0,
+                    float(carrier_probe["y"]) + 9.0,
+                    float(carrier_probe["z"]) + 4.0,
+                ),
+                (
+                    float(carrier_probe["x"]),
+                    float(carrier_probe["y"]),
+                    float(carrier_probe["z"]) + 2.0,
+                ),
                 shot_names[4],
             )
 
             # --- transfer: a real ram over the impact threshold -------------
+            # The fuse the RAM arms must outlast the magnet drag segment
+            # below (teleport out, slide home, restore — ~10 s of sim), so
+            # the next window is fattened to ~35 s first; the fast-round
+            # values come back right after the drag proof. The armed fuse
+            # snapshots the options at giveTo, so the restore cannot
+            # shorten a window already burning.
+            for key, value in (
+                ("fuse_base_seconds", 35),
+                ("fuse_min_seconds", 30),
+                ("fuse_max_seconds", 40),
+            ):
+                answer = _lua_json(
+                    bng,
+                    f"local ok = extensions[{RUNTIME_EXTENSION!r}]"
+                    f".hotPotatoSetOption('{key}', {value}); "
+                    "return jsonEncode({ok = ok == true})",
+                )
+                assert answer == {"ok": True}, key
             carrier_probe = _vehicle_probe(bng, CARRIER_NAME)
             ram_start = (
                 float(carrier_probe["x"]),
@@ -657,10 +670,16 @@ def test_hot_potato_round_transfer_detonation_and_teardown(tmp_path: Path) -> No
             )
             _screenshot(
                 bng,
-                (float(carrier_probe["x"]) + 15.0, float(carrier_probe["y"]) + 20.0,
-                 float(carrier_probe["z"]) + 6.0),
-                (float(carrier_probe["x"]), float(carrier_probe["y"]) + 8.0,
-                 float(carrier_probe["z"]) + 1.5),
+                (
+                    float(carrier_probe["x"]) + 15.0,
+                    float(carrier_probe["y"]) + 20.0,
+                    float(carrier_probe["z"]) + 6.0,
+                ),
+                (
+                    float(carrier_probe["x"]),
+                    float(carrier_probe["y"]) + 8.0,
+                    float(carrier_probe["z"]) + 1.5,
+                ),
                 shot_names[5],
             )
 
@@ -681,11 +700,78 @@ def test_hot_potato_round_transfer_detonation_and_teardown(tmp_path: Path) -> No
                 "the passer's VM is still ticking after the handoff"
             )
 
+            # --- the MAGNET, proven on real physics (v2.7.1) ----------------
+            # "It doesn't seem as if the magnetic system is working": the
+            # v2.7 well was real and imperceptible — a flat 0.6 g pull loses
+            # to tire grip, which holds a parked car against ~0.9 g of
+            # sideways drag. The well now hangs above the pad (~31 degrees
+            # of elevation) at 1.2 g, so the pull unloads the tires while it
+            # drags. The lupa gates pin the command law; only the engine can
+            # prove the pull MOVES a car. So: AI steering off (nothing else
+            # may help), the passer teleported 120 m out with the parking
+            # brake ON, and the well alone must haul the braked hulk
+            # measurably back toward the ring.
+            answer = _lua_json(
+                bng,
+                f"local ok = extensions[{RUNTIME_EXTENSION!r}]"
+                ".hotPotatoSetOption('ai_enabled', false); "
+                "return jsonEncode({ok = ok == true})",
+            )
+            assert answer == {"ok": True}
+            # The drag car comes back to a spot INSIDE the ring but well
+            # separated from the parked rammer: the 120 m trip satisfies the
+            # tag-back separation rule, so parking it back bumper-to-bumper
+            # would legally hand the potato straight back (measured: the
+            # first v2.7.1 run boomed carrier 2302, the passer, because the
+            # restore re-docked the pair).
+            park_spot = (origin[0] - 22.0, origin[1] + 16.0, origin[2] + 0.5)
+            drag_start = (origin[0], origin[1] + 120.0, origin[2] + 0.5)
+            carrier.teleport(pos=drag_start, rot_quat=(0, 0, 0, 1), reset=True)
+            carrier.control(parkingbrake=1.0, throttle=0.0, brake=0.0)
+
+            def _drag_range() -> float:
+                probe = _vehicle_probe(bng, CARRIER_NAME)
+                if not probe.get("ok"):
+                    return 1e9
+                dx = float(probe["x"]) - origin[0]
+                dy = float(probe["y"]) - origin[1]
+                return (dx * dx + dy * dy) ** 0.5
+
+            _step_until(
+                bng,
+                lambda: _drag_range() < 112.0,
+                calls=40,
+                note="the magnet never dragged the braked car toward the ring",
+            )
+            carrier.teleport(pos=park_spot, rot_quat=(0, 0, 0, 1), reset=True)
+            carrier.control(parkingbrake=0.0, throttle=0.0, brake=0.0)
+            # ai_enabled STAYS off for the rest of the run: the 120 m drag
+            # trip satisfied the tag-back separation rule, so a re-armed AI
+            # carrier legally hunts the passer down and hands the potato
+            # BACK before the fuse blows (measured: runs 1–3 of v2.7.1 all
+            # boomed carrier 2302, the passer, with the AI re-enabled here).
+            # Nothing downstream asserts AI behaviour; the sentinel settings
+            # file is removed in cleanup.
+            for key, value in (
+                ("fuse_base_seconds", 18),
+                ("fuse_min_seconds", 15),
+                ("fuse_max_seconds", 20),
+            ):
+                answer = _lua_json(
+                    bng,
+                    f"local ok = extensions[{RUNTIME_EXTENSION!r}]"
+                    f".hotPotatoSetOption('{key}', {value}); "
+                    "return jsonEncode({ok = ok == true})",
+                )
+                assert answer == {"ok": True}, key
+
             # --- fuse to zero: the CURRENT carrier detonates ----------------
+            # 260 calls: the fattened ~35 s window minus what the drag
+            # segment burned, with slack.
             _step_until(
                 bng,
                 lambda: _stats(bng).get("phase") == "boom",
-                calls=220,
+                calls=260,
                 note="the shortened fuse never detonated",
             )
             boom_stats = _stats(bng)
@@ -708,7 +794,8 @@ def test_hot_potato_round_transfer_detonation_and_teardown(tmp_path: Path) -> No
                         # the boom is still over the blast anchor — where the
                         # mash rains down (v2.4 money shot).
                         blast_anchor = (
-                            float(sample["x"]), float(sample["y"]),
+                            float(sample["x"]),
+                            float(sample["y"]),
                             float(sample["z"]),
                         )
             assert peak_speed > 6.0, {
@@ -751,10 +838,12 @@ def test_hot_potato_round_transfer_detonation_and_teardown(tmp_path: Path) -> No
             if boom_probe.get("ok"):
                 _screenshot(
                     bng,
-                    (float(boom_probe["x"]) + 11.0, float(boom_probe["y"]) - 11.0,
-                     float(boom_probe["z"]) + 5.0),
-                    (float(boom_probe["x"]), float(boom_probe["y"]),
-                     float(boom_probe["z"]) + 2.0),
+                    (
+                        float(boom_probe["x"]) + 11.0,
+                        float(boom_probe["y"]) - 11.0,
+                        float(boom_probe["z"]) + 5.0,
+                    ),
+                    (float(boom_probe["x"]), float(boom_probe["y"]), float(boom_probe["z"]) + 2.0),
                     shot_names[6],
                 )
 
@@ -766,8 +855,7 @@ def test_hot_potato_round_transfer_detonation_and_teardown(tmp_path: Path) -> No
                 bng.control.step(STEPS_PER_CALL * 4, wait=True)
                 _screenshot(
                     bng,
-                    (blast_anchor[0] + 9.0, blast_anchor[1] - 9.0,
-                     blast_anchor[2] + 4.5),
+                    (blast_anchor[0] + 9.0, blast_anchor[1] - 9.0, blast_anchor[2] + 4.5),
                     (blast_anchor[0], blast_anchor[1], blast_anchor[2] + 0.5),
                     shot_names[7],
                 )
@@ -782,6 +870,18 @@ def test_hot_potato_round_transfer_detonation_and_teardown(tmp_path: Path) -> No
                 calls=160,
                 note="the boom never handed over to the return flight",
             )
+            # --- the DODGE WIN (v2.7.1): fireworks with NO test button ------
+            # "I didn't see the confetti or fireworks after not having the
+            # potato": before this round a boom with two or more survivors
+            # celebrated nobody. The ram transfer above made the first
+            # carrier this round's LAST PASSER, so the settle must crown
+            # them on its own — the show is already in the sky by the time
+            # the return flight starts.
+            natural = _stats(bng)
+            assert natural.get("fw_stage", "") != "", {
+                "detail": "the boom settled without the dodge win's fireworks",
+                "stats": natural,
+            }
             _step_until(
                 bng,
                 lambda: _stats(bng).get("phase") == "idle",
@@ -834,8 +934,10 @@ def test_hot_potato_round_transfer_detonation_and_teardown(tmp_path: Path) -> No
             rammer.teleport(pos=pad_world, rot_quat=(0, 0, 0, 1), reset=True)
             _step_until(
                 bng,
-                lambda: _stats(bng).get("phase") == "live"
-                and int(_stats(bng).get("carrier", -1)) == rammer_id,
+                lambda: (
+                    _stats(bng).get("phase") == "live"
+                    and int(_stats(bng).get("carrier", -1)) == rammer_id
+                ),
                 calls=40,
                 note="a detonated car could not start the next round — the "
                 "single-player lockout is back",

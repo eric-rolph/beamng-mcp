@@ -1,0 +1,15 @@
+{
+  "frozen_at": "2026-09-05",
+  "source": "level_round/design (v4)",
+  "files": {
+    "budget.py": "b411f130b2fe5e59",
+    "layout.json": "455b24452f2ad335",
+    "layout.py": "de2d2de8bcb654f5",
+    "level_design_v4.md": "72e8203504a237b5",
+    "qb_lines.py": "9f033d47784d0e43",
+    "tables.py": "cc33b201136b4d70",
+    "terrain_model.py": "36f275eeb9c292c0",
+    "terrain_preview.png": "92f7bacf1f1f460c",
+    "terrain_summary.json": "1fe1d1a9fdc8767c"
+  }
+}

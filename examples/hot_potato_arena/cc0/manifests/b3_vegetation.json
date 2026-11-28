@@ -1,0 +1,327 @@
+[
+  {
+    "asset": "pine_bark",
+    "maps": [
+      "Diffuse",
+      "nor_gl",
+      "Rough",
+      "AO"
+    ],
+    "res": "2k",
+    "fmt": "jpg"
+  },
+  {
+    "asset": "bark_brown_02",
+    "maps": [
+      "Diffuse",
+      "nor_gl",
+      "Rough",
+      "AO"
+    ],
+    "res": "2k",
+    "fmt": "jpg"
+  },
+  {
+    "asset": "knotted_pine_bark",
+    "maps": [
+      "Diffuse",
+      "nor_gl",
+      "Rough",
+      "AO"
+    ],
+    "res": "2k",
+    "fmt": "jpg"
+  },
+  {
+    "asset": "forest_leaves_04",
+    "maps": [
+      "Diffuse",
+      "nor_gl",
+      "Rough",
+      "AO"
+    ],
+    "res": "2k",
+    "fmt": "jpg"
+  },
+  {
+    "asset": "leafy_grass",
+    "maps": [
+      "Diffuse",
+      "nor_gl",
+      "Rough",
+      "AO"
+    ],
+    "res": "2k",
+    "fmt": "jpg"
+  },
+  {
+    "asset": "sparse_grass",
+    "maps": [
+      "Diffuse",
+      "nor_gl",
+      "Rough",
+      "AO"
+    ],
+    "res": "2k",
+    "fmt": "jpg"
+  },
+  {
+    "asset": "pine_tree_01",
+    "maps": [
+      "twig_diff",
+      "twig_alpha"
+    ],
+    "res": "2k",
+    "fmt": "png"
+  },
+  {
+    "asset": "pine_tree_01",
+    "maps": [
+      "twig_nor_gl",
+      "twig_rough",
+      "twig_ao"
+    ],
+    "res": "2k",
+    "fmt": "jpg"
+  },
+  {
+    "asset": "fir_tree_01",
+    "maps": [
+      "twig_diff",
+      "twig_alpha"
+    ],
+    "res": "2k",
+    "fmt": "png"
+  },
+  {
+    "asset": "fir_tree_01",
+    "maps": [
+      "twig_nor_gl",
+      "twig_rough",
+      "twig_ao"
+    ],
+    "res": "2k",
+    "fmt": "jpg"
+  },
+  {
+    "asset": "pine_sapling_medium",
+    "maps": [
+      "twig_diff",
+      "twig_alpha"
+    ],
+    "res": "2k",
+    "fmt": "png"
+  },
+  {
+    "asset": "pine_sapling_medium",
+    "maps": [
+      "twig_nor_gl",
+      "twig_rough",
+      "twig_ao"
+    ],
+    "res": "2k",
+    "fmt": "jpg"
+  },
+  {
+    "asset": "fir_sapling_medium",
+    "maps": [
+      "twigs_diff",
+      "twigs_alpha"
+    ],
+    "res": "2k",
+    "fmt": "png"
+  },
+  {
+    "asset": "fir_sapling_medium",
+    "maps": [
+      "twigs_nor_gl",
+      "twigs_rough",
+      "twigs_ao"
+    ],
+    "res": "2k",
+    "fmt": "jpg"
+  },
+  {
+    "asset": "boulder_01",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "rock_face_01",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "rock_face_02",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "namaqualand_boulder_02",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "namaqualand_boulder_03",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "namaqualand_boulder_04",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "namaqualand_boulder_05",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "namaqualand_boulder_06",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "rock_moss_set_01",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "rock_moss_set_02",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "mountainside",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "rock_07",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "rock_09",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "stone_01",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "dead_tree_trunk",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "dead_tree_trunk_02",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "tree_stump_01",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "tree_stump_02",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "pine_roots",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "root_cluster_01",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "bark_debris_01",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "dry_branches_medium_01",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "shrub_01",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "shrub_02",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "shrub_03",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "shrub_04",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "fern_02",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "grass_medium_01",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "grass_medium_02",
+    "file": "gltf",
+    "res": "2k"
+  },
+  {
+    "asset": "pine_sapling_small",
+    "maps": [
+      "twig_diff",
+      "twig_alpha"
+    ],
+    "res": "2k",
+    "fmt": "png"
+  },
+  {
+    "asset": "pine_sapling_small",
+    "maps": [
+      "twig_nor_gl",
+      "twig_rough",
+      "twig_ao"
+    ],
+    "res": "2k",
+    "fmt": "jpg"
+  },
+  {
+    "asset": "fir_sapling",
+    "maps": [
+      "twigs_diff",
+      "twigs_alpha"
+    ],
+    "res": "2k",
+    "fmt": "png"
+  },
+  {
+    "asset": "fir_sapling",
+    "maps": [
+      "twigs_nor_gl",
+      "twigs_rough",
+      "twigs_ao"
+    ],
+    "res": "2k",
+    "fmt": "jpg"
+  }
+]

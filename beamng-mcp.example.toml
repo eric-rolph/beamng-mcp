@@ -57,3 +57,10 @@ input_height = 360
 max_gpu_memory_mb = 4096
 # model = "nvidia/segformer-b0-finetuned-cityscapes-512-1024"
 # onnx_path = "models/drivable-area.onnx"
+[native_mcp]
+# Official MCP: enable it under BeamNG Options > Advanced.
+# Attaches to the running game independently of the BeamNGpy/Lua connections.
+enabled = true
+url = "http://127.0.0.1:29292/mcp"
+timeout_seconds = 10
+max_response_bytes = 8388608

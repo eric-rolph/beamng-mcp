@@ -367,12 +367,17 @@ async def test_mcp_capability_gauntlet_tracer_scenario(tmp_path: Path) -> None:
                 try:
                     registered = await session.list_tools()
                     registered_tool_names = [tool.name for tool in registered.tools]
-                    assert len(registered_tool_names) == len(set(registered_tool_names)) == 57
+                    assert len(registered_tool_names) == len(set(registered_tool_names)) == 66
                     capabilities = _structured(await session.call_tool("capabilities_get", {}))
                     assert capabilities["mode"] == "offline"
-                    assert len(capabilities["tools"]) == len(set(capabilities["tools"])) == 57
+                    assert len(capabilities["tools"]) == len(set(capabilities["tools"])) == 66
                     assert set(capabilities["tools"]) == set(registered_tool_names)
                     declared_tools = set(registered_tool_names)
+                    # Native MCP is a separate transport; its protocol/error/image surface
+                    # is exercised in test_native_mcp.py and its live gate separately.
+                    from beamng_mcp.adapters.native_mcp import NATIVE_TOOL_NAMES
+
+                    declared_tools -= set(NATIVE_TOOL_NAMES)
 
                     resources = await session.list_resources()
                     assert {str(resource.uri) for resource in resources.resources} == {

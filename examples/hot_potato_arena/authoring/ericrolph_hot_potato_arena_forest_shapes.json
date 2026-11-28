@@ -1,0 +1,6745 @@
+{
+  "bb_dim": 128,
+  "blender": "4.5.4 LTS",
+  "collada_decimals": 5,
+  "covers": {
+    "gcs_ash_lump_a": {
+      "bb_dim": null,
+      "budgets": {
+        "100": 100
+      },
+      "colmesh_tris": 8,
+      "details": {
+        "100": 100
+      },
+      "file": "ericrolph_hot_potato_arena_gcs_ash_lump_a.dae",
+      "key": "gcs_ash_lump_a",
+      "materials": [
+        "ericrolph_hot_potato_arena_gcs_ash"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_gcs_ash_lump_a-1": 8,
+        "base00": 108,
+        "ericrolph_hot_potato_arena_gcs_ash_lump_a_a100": 100,
+        "nulldetail2": 0,
+        "start01": 108
+      },
+      "nulldetail": 2,
+      "relative": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_ash_lump_a.dae",
+      "sha256": "90e1c84c4d5ce974133c7f722e64477a8158ff36aa858c0832465693c1b77b1c",
+      "size": 21098
+    },
+    "gcs_ash_lump_b": {
+      "bb_dim": null,
+      "budgets": {
+        "100": 100
+      },
+      "colmesh_tris": 8,
+      "details": {
+        "100": 100
+      },
+      "file": "ericrolph_hot_potato_arena_gcs_ash_lump_b.dae",
+      "key": "gcs_ash_lump_b",
+      "materials": [
+        "ericrolph_hot_potato_arena_gcs_ash"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_gcs_ash_lump_b-1": 8,
+        "base00": 108,
+        "ericrolph_hot_potato_arena_gcs_ash_lump_b_a100": 100,
+        "nulldetail2": 0,
+        "start01": 108
+      },
+      "nulldetail": 2,
+      "relative": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_ash_lump_b.dae",
+      "sha256": "987c3f0b05498753addc07e4e91689f4c36fffa345558e2fe4965133ae13b7e1",
+      "size": 21094
+    },
+    "gcs_bark_chip": {
+      "bb_dim": null,
+      "budgets": {
+        "100": 60
+      },
+      "colmesh_tris": 8,
+      "details": {
+        "100": 60
+      },
+      "file": "ericrolph_hot_potato_arena_gcs_bark_chip.dae",
+      "key": "gcs_bark_chip",
+      "materials": [
+        "ericrolph_hot_potato_arena_gcs_debris"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_gcs_bark_chip-1": 8,
+        "base00": 68,
+        "ericrolph_hot_potato_arena_gcs_bark_chip_a100": 60,
+        "nulldetail2": 0,
+        "start01": 68
+      },
+      "nulldetail": 2,
+      "relative": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_bark_chip.dae",
+      "sha256": "c4bee0404bf6b9267eb93892eab491615a238f5713ea922ce05e19f6c27ec77d",
+      "size": 18729
+    },
+    "gcs_cinder": {
+      "bb_dim": null,
+      "budgets": {
+        "100": 80
+      },
+      "colmesh_tris": 8,
+      "details": {
+        "100": 80
+      },
+      "file": "ericrolph_hot_potato_arena_gcs_cinder.dae",
+      "key": "gcs_cinder",
+      "materials": [
+        "ericrolph_hot_potato_arena_gcs_ash"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_gcs_cinder-1": 8,
+        "base00": 88,
+        "ericrolph_hot_potato_arena_gcs_cinder_a100": 80,
+        "nulldetail2": 0,
+        "start01": 88
+      },
+      "nulldetail": 2,
+      "relative": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_cinder.dae",
+      "sha256": "4977e1c3e06275f8d3fdd505f1c251f8be6862e16e38710582e873d47dcbdcc3",
+      "size": 18624
+    },
+    "gcs_cone": {
+      "bb_dim": null,
+      "budgets": {
+        "100": 80
+      },
+      "colmesh_tris": 8,
+      "details": {
+        "100": 80
+      },
+      "file": "ericrolph_hot_potato_arena_gcs_cone.dae",
+      "key": "gcs_cone",
+      "materials": [
+        "ericrolph_hot_potato_arena_gcs_debris"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_gcs_cone-1": 8,
+        "base00": 88,
+        "ericrolph_hot_potato_arena_gcs_cone_a100": 80,
+        "nulldetail2": 0,
+        "start01": 88
+      },
+      "nulldetail": 2,
+      "relative": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_cone.dae",
+      "sha256": "5fb538fd416d865afc8627214d00c299b9efad75a85553325cc7b997ab2ac5f9",
+      "size": 18861
+    },
+    "gcs_pebble_a": {
+      "bb_dim": null,
+      "budgets": {
+        "120": 120
+      },
+      "colmesh_tris": 6,
+      "details": {
+        "120": 118
+      },
+      "file": "ericrolph_hot_potato_arena_gcs_pebble_a.dae",
+      "key": "gcs_pebble_a",
+      "materials": [
+        "ericrolph_hot_potato_arena_gcs_pebble"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_gcs_pebble_a-1": 6,
+        "base00": 124,
+        "ericrolph_hot_potato_arena_gcs_pebble_a_a120": 118,
+        "nulldetail2": 0,
+        "start01": 124
+      },
+      "nulldetail": 2,
+      "relative": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_pebble_a.dae",
+      "sha256": "0e50c82d204d39feabdbbaedb1084a604f489cd4fb26ecee13376acd7dd54d5d",
+      "size": 36325
+    },
+    "gcs_pebble_b": {
+      "bb_dim": null,
+      "budgets": {
+        "120": 120
+      },
+      "colmesh_tris": 6,
+      "details": {
+        "120": 118
+      },
+      "file": "ericrolph_hot_potato_arena_gcs_pebble_b.dae",
+      "key": "gcs_pebble_b",
+      "materials": [
+        "ericrolph_hot_potato_arena_gcs_pebble"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_gcs_pebble_b-1": 6,
+        "base00": 124,
+        "ericrolph_hot_potato_arena_gcs_pebble_b_a120": 118,
+        "nulldetail2": 0,
+        "start01": 124
+      },
+      "nulldetail": 2,
+      "relative": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_pebble_b.dae",
+      "sha256": "c38411144ada4bda80357781101ca74e8a07bdfe9f18ebdf1fb1dabd8bb267fa",
+      "size": 21560
+    },
+    "gcs_pebble_c": {
+      "bb_dim": null,
+      "budgets": {
+        "120": 120
+      },
+      "colmesh_tris": 6,
+      "details": {
+        "120": 118
+      },
+      "file": "ericrolph_hot_potato_arena_gcs_pebble_c.dae",
+      "key": "gcs_pebble_c",
+      "materials": [
+        "ericrolph_hot_potato_arena_gcs_pebble"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_gcs_pebble_c-1": 6,
+        "base00": 124,
+        "ericrolph_hot_potato_arena_gcs_pebble_c_a120": 118,
+        "nulldetail2": 0,
+        "start01": 124
+      },
+      "nulldetail": 2,
+      "relative": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_pebble_c.dae",
+      "sha256": "c6ab6df3488dcfee89e30caaac56b3557a68f9806d2b9714d284a74c01cadf13",
+      "size": 21477
+    },
+    "gcs_twig": {
+      "bb_dim": null,
+      "budgets": {
+        "100": 60
+      },
+      "colmesh_tris": 8,
+      "details": {
+        "100": 60
+      },
+      "file": "ericrolph_hot_potato_arena_gcs_twig.dae",
+      "key": "gcs_twig",
+      "materials": [
+        "ericrolph_hot_potato_arena_gcs_debris"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_gcs_twig-1": 8,
+        "base00": 68,
+        "ericrolph_hot_potato_arena_gcs_twig_a100": 60,
+        "nulldetail2": 0,
+        "start01": 68
+      },
+      "nulldetail": 2,
+      "relative": "art/shapes/groundcover/ericrolph_hot_potato_arena_gcs_twig.dae",
+      "sha256": "0a95bcbd62cfeee06fdf8193bb9f05f214ea0454811c91017ff9cc8467cfae5e",
+      "size": 18528
+    }
+  },
+  "dae_count": 63,
+  "level_id": "ericrolph_hot_potato_arena",
+  "merged_into_an_existing_manifest": [
+    "cliff_outcrop_a",
+    "cliff_outcrop_b",
+    "crag",
+    "shrub_01",
+    "shrub_02",
+    "shrub_03",
+    "shrub_04"
+  ],
+  "one_process_per_shape": true,
+  "seconds": 131.6,
+  "shape_seed": 1414677829,
+  "species": {
+    "bark_debris": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 160,
+        "300": 500
+      },
+      "colmesh_bbox": null,
+      "colmesh_kind": null,
+      "colmesh_tris": 0,
+      "details": {
+        "100": 160,
+        "300": 190
+      },
+      "file": "ericrolph_hot_potato_arena_f_bark_debris.dae",
+      "height_m": 2.4,
+      "import_part": {
+        "imported_objects": 4,
+        "kept_polys": 193406,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "bark_debris_01",
+          "fill": 0.0702,
+          "hull": "support_1024",
+          "reference": "joined",
+          "solidity": 0.1336,
+          "tris": 193406,
+          "verts": 115901
+        }
+      },
+      "import_solid": {},
+      "key": "bark_debris",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_deadwood"
+      ],
+      "node_tris": {
+        "base00": 350,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_bark_debris_a100": 160,
+        "ericrolph_hot_potato_arena_f_bark_debris_a300": 190,
+        "nulldetail6": 0,
+        "start01": 350
+      },
+      "nulldetail": 6,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_bark_debris_a100": [
+          14,
+          0.1316
+        ],
+        "ericrolph_hot_potato_arena_f_bark_debris_a300": [
+          8,
+          0.075
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_bark_debris_a100": [],
+        "ericrolph_hot_potato_arena_f_bark_debris_a300": []
+      },
+      "relative": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_bark_debris.dae",
+      "sha256": "aba17fb14b63fd2842718f3d43197a47a2611aa637f97bd111aa9498e234ad32",
+      "shape_bbox": {
+        "max": [
+          1.15603,
+          0.50659,
+          0.23174
+        ],
+        "min": [
+          -1.1891,
+          -0.6314,
+          0.03001
+        ]
+      },
+      "size": 56151,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_bark_debris_a100": {
+          "boundary": 14,
+          "chi": 33,
+          "nonmanifold": 78,
+          "recapped": true,
+          "solid": false,
+          "tris": 160,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.008416,
+            "share_off_3x": 0.4899
+          },
+          "volume_m3": 0.1294
+        },
+        "ericrolph_hot_potato_arena_f_bark_debris_a300": {
+          "boundary": 8,
+          "chi": 38,
+          "nonmanifold": 78,
+          "recapped": true,
+          "solid": false,
+          "tris": 190,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.007492,
+            "share_off_3x": 0.4146
+          },
+          "volume_m3": 0.1029
+        }
+      }
+    },
+    "boulder_forest_a": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 240,
+        "250": 700,
+        "600": 2000
+      },
+      "colmesh_bbox": {
+        "max": [
+          1.57261,
+          2.27325,
+          2.4837
+        ],
+        "min": [
+          -1.57756,
+          -2.28585,
+          0.06623
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 294,
+        "volume_m3": 11.4093
+      },
+      "colmesh_tris": 294,
+      "details": {
+        "100": 236,
+        "250": 688,
+        "600": 1970
+      },
+      "file": "ericrolph_hot_potato_arena_f_boulder_forest_a.dae",
+      "height_m": 4.6,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 66122,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "boulder_01",
+          "fill": 0.3061,
+          "hull": "support_1024",
+          "reference": "largest_part",
+          "solidity": 0.7157,
+          "tris": 66122,
+          "verts": 33063
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "tris": 65790,
+          "volume_m3": 11.6575
+        },
+        "shells_kept": 1,
+        "tris": 218452,
+        "volume_m3": 11.683,
+        "voxel_m": 0.023
+      },
+      "key": "boulder_forest_a",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_boulder"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_boulder_forest_a-1": 294,
+        "base00": 3188,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_boulder_forest_a_a100": 236,
+        "ericrolph_hot_potato_arena_f_boulder_forest_a_a250": 688,
+        "ericrolph_hot_potato_arena_f_boulder_forest_a_a600": 1970,
+        "nulldetail4": 0,
+        "start01": 3188
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_boulder_forest_a_a100": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_boulder_forest_a_a250": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_boulder_forest_a_a600": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_boulder_forest_a_a100": [],
+        "ericrolph_hot_potato_arena_f_boulder_forest_a_a250": [],
+        "ericrolph_hot_potato_arena_f_boulder_forest_a_a600": []
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_boulder_forest_a.dae",
+      "sha256": "8735f8ab4ad8de53cd73fc937ea1e20433150b3644112f1687083676e1ffc52b",
+      "shape_bbox": {
+        "max": [
+          1.60929,
+          2.29416,
+          2.52205
+        ],
+        "min": [
+          -1.59552,
+          -2.29426,
+          0.00638
+        ]
+      },
+      "size": 409031,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_boulder_forest_a_a100": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 236,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.011763,
+            "share_off_3x": 0.0589
+          },
+          "volume_m3": 11.402
+        },
+        "ericrolph_hot_potato_arena_f_boulder_forest_a_a250": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 688,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.014914,
+            "share_off_3x": 0.0537
+          },
+          "volume_m3": 11.6296
+        },
+        "ericrolph_hot_potato_arena_f_boulder_forest_a_a600": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1970,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.016469,
+            "share_off_3x": 0.0242
+          },
+          "volume_m3": 11.6798
+        }
+      }
+    },
+    "boulder_forest_b": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 240,
+        "250": 700,
+        "600": 2000
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.76147,
+          1.1012,
+          1.17912
+        ],
+        "min": [
+          -0.73972,
+          -1.07719,
+          0.02219
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 294,
+        "volume_m3": 1.2417
+      },
+      "colmesh_tris": 294,
+      "details": {
+        "100": 236,
+        "250": 688,
+        "600": 1968
+      },
+      "file": "ericrolph_hot_potato_arena_f_boulder_forest_b.dae",
+      "height_m": 2.2,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 66122,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "boulder_01",
+          "fill": 0.3061,
+          "hull": "support_1024",
+          "reference": "largest_part",
+          "solidity": 0.7157,
+          "tris": 66122,
+          "verts": 33063
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "tris": 65794,
+          "volume_m3": 1.2753
+        },
+        "shells_kept": 1,
+        "tris": 218452,
+        "volume_m3": 1.2781,
+        "voxel_m": 0.011
+      },
+      "key": "boulder_forest_b",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_boulder"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_boulder_forest_b-1": 294,
+        "base00": 3186,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_boulder_forest_b_a100": 236,
+        "ericrolph_hot_potato_arena_f_boulder_forest_b_a250": 688,
+        "ericrolph_hot_potato_arena_f_boulder_forest_b_a600": 1968,
+        "nulldetail4": 0,
+        "start01": 3186
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_boulder_forest_b_a100": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_boulder_forest_b_a250": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_boulder_forest_b_a600": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_boulder_forest_b_a100": [],
+        "ericrolph_hot_potato_arena_f_boulder_forest_b_a250": [],
+        "ericrolph_hot_potato_arena_f_boulder_forest_b_a600": []
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_boulder_forest_b.dae",
+      "sha256": "a883787117af790d7b00336cfbe9bae55f7230d763f2a1bdf2aecfd76cafe61c",
+      "shape_bbox": {
+        "max": [
+          0.76308,
+          1.09721,
+          1.20911
+        ],
+        "min": [
+          -0.76966,
+          -1.09725,
+          0.00299
+        ]
+      },
+      "size": 409439,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_boulder_forest_b_a100": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 236,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.050663,
+            "share_off_3x": 0.0665
+          },
+          "volume_m3": 1.244
+        },
+        "ericrolph_hot_potato_arena_f_boulder_forest_b_a250": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 688,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.064353,
+            "share_off_3x": 0.0625
+          },
+          "volume_m3": 1.2702
+        },
+        "ericrolph_hot_potato_arena_f_boulder_forest_b_a600": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1968,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.071582,
+            "share_off_3x": 0.0234
+          },
+          "volume_m3": 1.2773
+        }
+      }
+    },
+    "branch_pile": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 160,
+        "300": 500
+      },
+      "colmesh_bbox": null,
+      "colmesh_kind": null,
+      "colmesh_tris": 0,
+      "details": {
+        "100": 157,
+        "300": 491
+      },
+      "file": "ericrolph_hot_potato_arena_f_branch_pile.dae",
+      "height_m": 3.2,
+      "import_part": {
+        "imported_objects": 3,
+        "kept_polys": 16803,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "dry_branches_medium_01",
+          "fill": 0.0099,
+          "hull": "support_1024",
+          "reference": "joined",
+          "solidity": 0.0295,
+          "tris": 16803,
+          "verts": 11386
+        }
+      },
+      "import_solid": {},
+      "key": "branch_pile",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_deadwood"
+      ],
+      "node_tris": {
+        "base00": 648,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_branch_pile_a100": 157,
+        "ericrolph_hot_potato_arena_f_branch_pile_a300": 491,
+        "nulldetail6": 0,
+        "start01": 648
+      },
+      "nulldetail": 6,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_branch_pile_a100": [
+          2,
+          0.02
+        ],
+        "ericrolph_hot_potato_arena_f_branch_pile_a300": [
+          2,
+          0.02
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_branch_pile_a100": [],
+        "ericrolph_hot_potato_arena_f_branch_pile_a300": []
+      },
+      "relative": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_branch_pile.dae",
+      "sha256": "308a2eb9d8f227f357ff6b724c8d8a89934a3f686447f77e4ab8ed60ed667a5b",
+      "shape_bbox": {
+        "max": [
+          1.29609,
+          1.59416,
+          0.79938
+        ],
+        "min": [
+          -1.29431,
+          -1.57528,
+          0.02598
+        ]
+      },
+      "size": 78507,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_branch_pile_a100": {
+          "boundary": 2,
+          "chi": 5,
+          "nonmanifold": 1,
+          "recapped": true,
+          "solid": false,
+          "tris": 157,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.163371,
+            "share_off_3x": 0.1288
+          },
+          "volume_m3": 0.0445
+        },
+        "ericrolph_hot_potato_arena_f_branch_pile_a300": {
+          "boundary": 2,
+          "chi": 5,
+          "nonmanifold": 1,
+          "recapped": true,
+          "solid": false,
+          "tris": 491,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.183391,
+            "share_off_3x": 0.0495
+          },
+          "volume_m3": 0.0674
+        }
+      }
+    },
+    "cliff_outcrop_a": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 600,
+        "300": 2600,
+        "700": 9000
+      },
+      "colmesh_bbox": {
+        "max": [
+          11.78401,
+          13.5157,
+          15.75738
+        ],
+        "min": [
+          -11.65769,
+          -13.46551,
+          -1.49173
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 0,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 2560,
+        "volume_m3": 5229.0812
+      },
+      "colmesh_tris": 2560,
+      "details": {
+        "100": 590,
+        "300": 2560,
+        "700": 8864
+      },
+      "file": "ericrolph_hot_potato_arena_f_cliff_outcrop_a.dae",
+      "height_m": 21.0,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 20174,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "rock_face_01",
+          "fill": 0.0579,
+          "hull": "support_1024",
+          "reference": "joined",
+          "solidity": 0.1283,
+          "tris": 20174,
+          "verts": 11106
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "boundary_edges": 634,
+        "chi": 0,
+        "chi_after_closing": 0,
+        "closing_voxels": 16.0,
+        "crumbs_dropped": 22,
+        "depth_m": 10.576643119752406,
+        "footprint_cells": 19862,
+        "front_faces": 39088,
+        "grid": [
+          181,
+          130
+        ],
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "sampled_cells": 19285,
+        "scan": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "tris": 103536,
+          "volume_m3": 5078.3493
+        },
+        "scan_foot_z": -0.1456630378961563,
+        "shells_kept": 1,
+        "skirt_rows": 20,
+        "step_m": 0.1175081200824209,
+        "tris": 342548,
+        "underside_sink_m": 0.423,
+        "volume_m3": 5314.6625,
+        "voxel_m": 0.1354
+      },
+      "key": "cliff_outcrop_a",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_cliff"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_cliff_outcrop_a-1": 2560,
+        "base00": 14574,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_a_a100": 590,
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_a_a300": 2560,
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_a_a700": 8864,
+        "nulldetail4": 0,
+        "start01": 14574
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_a_a100": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_a_a300": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_a_a700": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_a_a100": [
+          {
+            "amplitude_m": 1.3363,
+            "moved": 14,
+            "plane_m2": 83.222,
+            "share": 0.0361
+          },
+          {
+            "amplitude_m": 1.3363,
+            "moved": 16,
+            "plane_m2": 76.451,
+            "share": 0.0332
+          },
+          {
+            "amplitude_m": 1.3363,
+            "moved": 10,
+            "plane_m2": 69.675,
+            "share": 0.0303
+          },
+          {
+            "amplitude_m": 1.3363,
+            "moved": 12,
+            "plane_m2": 55.042,
+            "share": 0.0239
+          },
+          {
+            "amplitude_m": 1.3363,
+            "moved": 8,
+            "plane_m2": 43.093,
+            "share": 0.0186
+          },
+          {
+            "amplitude_m": 1.3363,
+            "moved": 9,
+            "plane_m2": 41.99,
+            "share": 0.0182
+          },
+          {
+            "amplitude_m": 1.3363,
+            "moved": 10,
+            "plane_m2": 36.525,
+            "share": 0.0158
+          },
+          {
+            "amplitude_m": 1.3363,
+            "moved": 6,
+            "plane_m2": 35.03,
+            "share": 0.015
+          },
+          {
+            "amplitude_m": 1.3363,
+            "moved": 7,
+            "plane_m2": 31.418,
+            "share": 0.0135
+          },
+          {
+            "amplitude_m": 1.3363,
+            "moved": 8,
+            "plane_m2": 36.214,
+            "share": 0.0156
+          },
+          {
+            "amplitude_m": 1.3363,
+            "moved": 9,
+            "plane_m2": 31.003,
+            "share": 0.0133
+          },
+          {
+            "amplitude_m": 1.3363,
+            "moved": 7,
+            "plane_m2": 30.531,
+            "share": 0.0131
+          },
+          {
+            "amplitude_m": 1.3363,
+            "moved": 5,
+            "plane_m2": 27.475,
+            "share": 0.0118
+          },
+          {
+            "amplitude_m": 1.3363,
+            "moved": 7,
+            "plane_m2": 24.761,
+            "share": 0.0107
+          },
+          {
+            "amplitude_m": 1.3363,
+            "moved": 9,
+            "plane_m2": 28.217,
+            "share": 0.0121
+          },
+          {
+            "amplitude_m": 1.3363,
+            "moved": 4,
+            "plane_m2": 23.598,
+            "share": 0.0102
+          }
+        ],
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_a_a300": [
+          {
+            "amplitude_m": 0.8968,
+            "moved": 39,
+            "plane_m2": 60.913,
+            "share": 0.0262
+          },
+          {
+            "amplitude_m": 1.0209,
+            "moved": 28,
+            "plane_m2": 56.394,
+            "share": 0.0241
+          },
+          {
+            "amplitude_m": 0.8768,
+            "moved": 42,
+            "plane_m2": 41.596,
+            "share": 0.0177
+          },
+          {
+            "amplitude_m": 0.8558,
+            "moved": 17,
+            "plane_m2": 29.716,
+            "share": 0.0126
+          },
+          {
+            "amplitude_m": 0.8458,
+            "moved": 27,
+            "plane_m2": 25.158,
+            "share": 0.0107
+          },
+          {
+            "amplitude_m": 0.8347,
+            "moved": 19,
+            "plane_m2": 22.619,
+            "share": 0.0096
+          }
+        ],
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_a_a700": [
+          {
+            "amplitude_m": 0.4823,
+            "moved": 114,
+            "plane_m2": 52.864,
+            "share": 0.0227
+          },
+          {
+            "amplitude_m": 0.5315,
+            "moved": 75,
+            "plane_m2": 48.149,
+            "share": 0.0206
+          },
+          {
+            "amplitude_m": 0.4653,
+            "moved": 89,
+            "plane_m2": 42.178,
+            "share": 0.018
+          },
+          {
+            "amplitude_m": 0.5265,
+            "moved": 63,
+            "plane_m2": 25.499,
+            "share": 0.0108
+          },
+          {
+            "amplitude_m": 0.5362,
+            "moved": 41,
+            "plane_m2": 22.552,
+            "share": 0.0095
+          },
+          {
+            "amplitude_m": 0.5154,
+            "moved": 62,
+            "plane_m2": 22.994,
+            "share": 0.0097
+          },
+          {
+            "amplitude_m": 0.4066,
+            "moved": 76,
+            "plane_m2": 21.022,
+            "share": 0.0089
+          },
+          {
+            "amplitude_m": 0.4627,
+            "moved": 45,
+            "plane_m2": 20.271,
+            "share": 0.0085
+          }
+        ]
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_cliff_outcrop_a.dae",
+      "sha256": "e4c2877c51bf83abf1ad98b622cd772ab553cecadc90b51bff8ce9d6377aa7f5",
+      "shape_bbox": {
+        "max": [
+          11.77087,
+          13.49494,
+          15.76913
+        ],
+        "min": [
+          -11.79509,
+          -13.47534,
+          -1.49173
+        ]
+      },
+      "size": 1923342,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_a_a100": {
+          "boundary": 0,
+          "chi": 0,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 590,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.000179,
+            "share_off_3x": 0.6899
+          },
+          "volume_m3": 4915.9409
+        },
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_a_a300": {
+          "boundary": 0,
+          "chi": 0,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 2560,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.000338,
+            "share_off_3x": 0.5276
+          },
+          "volume_m3": 5158.6305
+        },
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_a_a700": {
+          "boundary": 0,
+          "chi": 0,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 8864,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.000535,
+            "share_off_3x": 0.2474
+          },
+          "volume_m3": 5233.1404
+        }
+      }
+    },
+    "cliff_outcrop_b": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 600,
+        "300": 2600,
+        "700": 9000
+      },
+      "colmesh_bbox": {
+        "max": [
+          9.11303,
+          9.94895,
+          14.31683
+        ],
+        "min": [
+          -9.13456,
+          -9.95271,
+          -0.95462
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 2560,
+        "volume_m3": 2433.8164
+      },
+      "colmesh_tris": 2560,
+      "details": {
+        "100": 590,
+        "300": 2560,
+        "700": 8864
+      },
+      "file": "ericrolph_hot_potato_arena_f_cliff_outcrop_b.dae",
+      "height_m": 15.0,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 29566,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "rock_face_02",
+          "fill": 0.1651,
+          "hull": "support_1024",
+          "reference": "joined",
+          "solidity": 0.4419,
+          "tris": 29566,
+          "verts": 16396
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "boundary_edges": 716,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 12.0,
+        "crumbs_dropped": 1,
+        "depth_m": 8.889684063196183,
+        "footprint_cells": 22335,
+        "front_faces": 43952,
+        "grid": [
+          181,
+          152
+        ],
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "sampled_cells": 21700,
+        "scan": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "tris": 185280,
+          "volume_m3": 2398.1028
+        },
+        "scan_foot_z": -0.7724596261978149,
+        "shells_kept": 1,
+        "skirt_rows": 68,
+        "step_m": 0.09081229890445038,
+        "tris": 312708,
+        "underside_sink_m": 0.3269,
+        "volume_m3": 2450.0023,
+        "voxel_m": 0.1002
+      },
+      "key": "cliff_outcrop_b",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_cliff"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_cliff_outcrop_b-1": 2560,
+        "base00": 14574,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_b_a100": 590,
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_b_a300": 2560,
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_b_a700": 8864,
+        "nulldetail4": 0,
+        "start01": 14574
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_b_a100": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_b_a300": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_b_a700": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_b_a100": [
+          {
+            "amplitude_m": 0.9878,
+            "moved": 13,
+            "plane_m2": 35.153,
+            "share": 0.0305
+          },
+          {
+            "amplitude_m": 0.9878,
+            "moved": 11,
+            "plane_m2": 32.429,
+            "share": 0.0282
+          },
+          {
+            "amplitude_m": 0.9878,
+            "moved": 11,
+            "plane_m2": 29.217,
+            "share": 0.0253
+          },
+          {
+            "amplitude_m": 0.9878,
+            "moved": 11,
+            "plane_m2": 22.205,
+            "share": 0.0193
+          }
+        ],
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_b_a300": [
+          {
+            "amplitude_m": 0.535,
+            "moved": 63,
+            "plane_m2": 32.525,
+            "share": 0.0282
+          },
+          {
+            "amplitude_m": 0.5786,
+            "moved": 37,
+            "plane_m2": 24.455,
+            "share": 0.0211
+          }
+        ],
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_b_a700": [
+          {
+            "amplitude_m": 0.3,
+            "moved": 135,
+            "plane_m2": 27.749,
+            "share": 0.0241
+          },
+          {
+            "amplitude_m": 0.3059,
+            "moved": 127,
+            "plane_m2": 25.054,
+            "share": 0.0217
+          },
+          {
+            "amplitude_m": 0.3581,
+            "moved": 88,
+            "plane_m2": 22.547,
+            "share": 0.0194
+          }
+        ]
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_cliff_outcrop_b.dae",
+      "sha256": "47d4f7394c7dae8e866763780d4b557fff1b55cdacde0cc77fade731caf59dde",
+      "shape_bbox": {
+        "max": [
+          9.13525,
+          9.95526,
+          14.31537
+        ],
+        "min": [
+          -9.12703,
+          -9.94395,
+          -0.95462
+        ]
+      },
+      "size": 1922902,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_b_a100": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 590,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.000718,
+            "share_off_3x": 0.3175
+          },
+          "volume_m3": 2362.8978
+        },
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_b_a300": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 2560,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.001055,
+            "share_off_3x": 0.2222
+          },
+          "volume_m3": 2427.072
+        },
+        "ericrolph_hot_potato_arena_f_cliff_outcrop_b_a700": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 8864,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.001375,
+            "share_off_3x": 0.1759
+          },
+          "volume_m3": 2436.6121
+        }
+      }
+    },
+    "crag": {
+      "bb_dim": 128,
+      "budgets": {
+        "150": 1600,
+        "400": 2000,
+        "900": 6000
+      },
+      "colmesh_bbox": {
+        "max": [
+          22.00663,
+          23.2501,
+          42.20084
+        ],
+        "min": [
+          -21.9187,
+          -23.05253,
+          -2.45184
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 3940,
+        "volume_m3": 56158.1164
+      },
+      "colmesh_tris": 3940,
+      "details": {
+        "150": 1576,
+        "400": 1970,
+        "900": 5910
+      },
+      "file": "ericrolph_hot_potato_arena_f_crag.dae",
+      "height_m": 41.0,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 153472,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "mountainside",
+          "fill": 0.1374,
+          "hull": "support_1024",
+          "reference": "joined",
+          "solidity": 0.3481,
+          "tris": 153472,
+          "verts": 80238
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "boundary_edges": 768,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 12.0,
+        "crumbs_dropped": 4,
+        "depth_m": 26.650000193715098,
+        "footprint_cells": 28905,
+        "front_faces": 57040,
+        "grid": [
+          178,
+          181
+        ],
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "sampled_cells": 28154,
+        "scan": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "tris": 238496,
+          "volume_m3": 55744.2101
+        },
+        "scan_foot_z": -0.7784960865974426,
+        "shells_kept": 1,
+        "skirt_rows": 81,
+        "step_m": 0.22777777943346236,
+        "tris": 424868,
+        "underside_sink_m": 0.82,
+        "volume_m3": 56958.7515,
+        "voxel_m": 0.2334
+      },
+      "key": "crag",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_crag"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_crag-1": 3940,
+        "base00": 13396,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_crag_a150": 1576,
+        "ericrolph_hot_potato_arena_f_crag_a400": 1970,
+        "ericrolph_hot_potato_arena_f_crag_a900": 5910,
+        "nulldetail4": 0,
+        "start01": 13396
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_crag_a150": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_crag_a400": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_crag_a900": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_crag_a150": [
+          {
+            "amplitude_m": 2.1234,
+            "moved": 25,
+            "plane_m2": 243.937,
+            "share": 0.0277
+          },
+          {
+            "amplitude_m": 2.0344,
+            "moved": 24,
+            "plane_m2": 179.131,
+            "share": 0.0203
+          },
+          {
+            "amplitude_m": 1.8938,
+            "moved": 24,
+            "plane_m2": 155.235,
+            "share": 0.0175
+          },
+          {
+            "amplitude_m": 1.9255,
+            "moved": 23,
+            "plane_m2": 160.477,
+            "share": 0.0181
+          },
+          {
+            "amplitude_m": 2.0909,
+            "moved": 18,
+            "plane_m2": 130.094,
+            "share": 0.0146
+          },
+          {
+            "amplitude_m": 2.1932,
+            "moved": 10,
+            "plane_m2": 104.094,
+            "share": 0.0117
+          },
+          {
+            "amplitude_m": 2.2441,
+            "moved": 13,
+            "plane_m2": 95.365,
+            "share": 0.0107
+          },
+          {
+            "amplitude_m": 2.0024,
+            "moved": 11,
+            "plane_m2": 86.769,
+            "share": 0.0097
+          },
+          {
+            "amplitude_m": 2.2913,
+            "moved": 11,
+            "plane_m2": 71.008,
+            "share": 0.008
+          },
+          {
+            "amplitude_m": 2.0109,
+            "moved": 10,
+            "plane_m2": 65.634,
+            "share": 0.0074
+          },
+          {
+            "amplitude_m": 2.0625,
+            "moved": 11,
+            "plane_m2": 57.54,
+            "share": 0.0064
+          },
+          {
+            "amplitude_m": 1.9828,
+            "moved": 8,
+            "plane_m2": 53.178,
+            "share": 0.006
+          },
+          {
+            "amplitude_m": 1.7162,
+            "moved": 10,
+            "plane_m2": 47.807,
+            "share": 0.0054
+          },
+          {
+            "amplitude_m": 2.1002,
+            "moved": 7,
+            "plane_m2": 47.728,
+            "share": 0.0053
+          },
+          {
+            "amplitude_m": 1.8609,
+            "moved": 9,
+            "plane_m2": 46.838,
+            "share": 0.0052
+          },
+          {
+            "amplitude_m": 2.0483,
+            "moved": 10,
+            "plane_m2": 45.398,
+            "share": 0.0051
+          }
+        ],
+        "ericrolph_hot_potato_arena_f_crag_a400": [
+          {
+            "amplitude_m": 1.9049,
+            "moved": 30,
+            "plane_m2": 206.131,
+            "share": 0.0234
+          },
+          {
+            "amplitude_m": 1.986,
+            "moved": 24,
+            "plane_m2": 149.372,
+            "share": 0.0169
+          },
+          {
+            "amplitude_m": 1.8558,
+            "moved": 23,
+            "plane_m2": 139.741,
+            "share": 0.0158
+          },
+          {
+            "amplitude_m": 1.6958,
+            "moved": 26,
+            "plane_m2": 124.463,
+            "share": 0.014
+          },
+          {
+            "amplitude_m": 1.8339,
+            "moved": 21,
+            "plane_m2": 118.277,
+            "share": 0.0133
+          },
+          {
+            "amplitude_m": 1.734,
+            "moved": 15,
+            "plane_m2": 81.34,
+            "share": 0.0091
+          },
+          {
+            "amplitude_m": 1.8176,
+            "moved": 19,
+            "plane_m2": 80.431,
+            "share": 0.009
+          },
+          {
+            "amplitude_m": 1.6792,
+            "moved": 17,
+            "plane_m2": 76.281,
+            "share": 0.0085
+          },
+          {
+            "amplitude_m": 1.6632,
+            "moved": 19,
+            "plane_m2": 67.349,
+            "share": 0.0075
+          },
+          {
+            "amplitude_m": 1.9238,
+            "moved": 9,
+            "plane_m2": 60.071,
+            "share": 0.0067
+          },
+          {
+            "amplitude_m": 1.7676,
+            "moved": 10,
+            "plane_m2": 50.712,
+            "share": 0.0056
+          },
+          {
+            "amplitude_m": 2.1374,
+            "moved": 8,
+            "plane_m2": 49.434,
+            "share": 0.0055
+          },
+          {
+            "amplitude_m": 1.8907,
+            "moved": 9,
+            "plane_m2": 48.351,
+            "share": 0.0054
+          },
+          {
+            "amplitude_m": 1.8809,
+            "moved": 9,
+            "plane_m2": 47.849,
+            "share": 0.0053
+          },
+          {
+            "amplitude_m": 1.8618,
+            "moved": 12,
+            "plane_m2": 46.885,
+            "share": 0.0052
+          },
+          {
+            "amplitude_m": 1.7986,
+            "moved": 7,
+            "plane_m2": 43.756,
+            "share": 0.0049
+          }
+        ],
+        "ericrolph_hot_potato_arena_f_crag_a900": [
+          {
+            "amplitude_m": 1.096,
+            "moved": 63,
+            "plane_m2": 152.733,
+            "share": 0.0173
+          },
+          {
+            "amplitude_m": 1.1078,
+            "moved": 43,
+            "plane_m2": 112.884,
+            "share": 0.0128
+          },
+          {
+            "amplitude_m": 0.9824,
+            "moved": 60,
+            "plane_m2": 107.036,
+            "share": 0.0121
+          },
+          {
+            "amplitude_m": 1.0745,
+            "moved": 47,
+            "plane_m2": 99.939,
+            "share": 0.0113
+          },
+          {
+            "amplitude_m": 1.0277,
+            "moved": 55,
+            "plane_m2": 91.422,
+            "share": 0.0103
+          },
+          {
+            "amplitude_m": 1.086,
+            "moved": 40,
+            "plane_m2": 86.144,
+            "share": 0.0097
+          },
+          {
+            "amplitude_m": 1.0945,
+            "moved": 28,
+            "plane_m2": 64.814,
+            "share": 0.0073
+          },
+          {
+            "amplitude_m": 1.0341,
+            "moved": 32,
+            "plane_m2": 46.288,
+            "share": 0.0052
+          },
+          {
+            "amplitude_m": 1.0821,
+            "moved": 19,
+            "plane_m2": 41.181,
+            "share": 0.0046
+          },
+          {
+            "amplitude_m": 0.9168,
+            "moved": 36,
+            "plane_m2": 38.653,
+            "share": 0.0043
+          },
+          {
+            "amplitude_m": 1.0884,
+            "moved": 23,
+            "plane_m2": 38.454,
+            "share": 0.0043
+          },
+          {
+            "amplitude_m": 1.0035,
+            "moved": 26,
+            "plane_m2": 38.138,
+            "share": 0.0043
+          },
+          {
+            "amplitude_m": 0.9988,
+            "moved": 20,
+            "plane_m2": 37.781,
+            "share": 0.0042
+          },
+          {
+            "amplitude_m": 0.997,
+            "moved": 21,
+            "plane_m2": 37.648,
+            "share": 0.0042
+          },
+          {
+            "amplitude_m": 0.945,
+            "moved": 31,
+            "plane_m2": 36.233,
+            "share": 0.004
+          },
+          {
+            "amplitude_m": 1.148,
+            "moved": 17,
+            "plane_m2": 35.654,
+            "share": 0.004
+          }
+        ]
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_crag.dae",
+      "sha256": "f020f3afa96017a359ea79aa684697100e0e8c5b84790e672e64c1252accb5d7",
+      "shape_bbox": {
+        "max": [
+          22.00721,
+          23.2501,
+          42.20792
+        ],
+        "min": [
+          -21.9187,
+          -23.12884,
+          -2.45184
+        ]
+      },
+      "size": 1762085,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_crag_a150": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1576,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.000105,
+            "share_off_3x": 0.2535
+          },
+          "volume_m3": 54717.3176
+        },
+        "ericrolph_hot_potato_arena_f_crag_a400": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1970,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.000106,
+            "share_off_3x": 0.2471
+          },
+          "volume_m3": 55597.9105
+        },
+        "ericrolph_hot_potato_arena_f_crag_a900": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 5910,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.00014,
+            "share_off_3x": 0.1977
+          },
+          "volume_m3": 56162.9163
+        }
+      }
+    },
+    "driftwood": {
+      "bb_dim": 128,
+      "budgets": {
+        "200": 350,
+        "500": 900
+      },
+      "colmesh_bbox": {
+        "max": [
+          2.97747,
+          0.62157,
+          1.51081
+        ],
+        "min": [
+          -2.96542,
+          -0.65999,
+          0.04815
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 156,
+        "volume_m3": 1.0777
+      },
+      "colmesh_tris": 156,
+      "details": {
+        "200": 344,
+        "500": 886
+      },
+      "file": "ericrolph_hot_potato_arena_f_driftwood.dae",
+      "height_m": 6.0,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 83128,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "dead_tree_trunk_02",
+          "fill": 0.129,
+          "hull": "support_1024",
+          "reference": "joined",
+          "solidity": 0.2583,
+          "tris": 83128,
+          "verts": 46112
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 6,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 152,
+          "chi": -20,
+          "nonmanifold": 148,
+          "tris": 62992,
+          "volume_m3": 1.1269
+        },
+        "shells_kept": 1,
+        "tris": 37972,
+        "volume_m3": 1.1361,
+        "voxel_m": 0.03
+      },
+      "key": "driftwood",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_deadwood"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_driftwood-1": 156,
+        "base00": 1386,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_driftwood_a200": 344,
+        "ericrolph_hot_potato_arena_f_driftwood_a500": 886,
+        "nulldetail6": 0,
+        "start01": 1386
+      },
+      "nulldetail": 6,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_driftwood_a200": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_driftwood_a500": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_driftwood_a200": [],
+        "ericrolph_hot_potato_arena_f_driftwood_a500": []
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_driftwood.dae",
+      "sha256": "151abc6949f7fa613326407566483553f8e446f7d2279545bae1aed91644bce5",
+      "shape_bbox": {
+        "max": [
+          2.97783,
+          0.66541,
+          1.54058
+        ],
+        "min": [
+          -2.98504,
+          -0.66745,
+          0.00589
+        ]
+      },
+      "size": 179994,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_driftwood_a200": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 344,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.036613,
+            "share_off_3x": 0.1694
+          },
+          "volume_m3": 1.1077
+        },
+        "ericrolph_hot_potato_arena_f_driftwood_a500": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 886,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.043943,
+            "share_off_3x": 0.1406
+          },
+          "volume_m3": 1.1231
+        }
+      }
+    },
+    "dwarf_pine_alpine": {
+      "bb_dim": 128,
+      "budgets": {
+        "150": 852,
+        "400": 1300
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.06,
+          0.05706,
+          2.7
+        ],
+        "min": [
+          -0.04854,
+          -0.05706,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 10,
+      "details": {
+        "150": 852,
+        "400": 1300
+      },
+      "file": "ericrolph_hot_potato_arena_f_dwarf_pine_alpine.dae",
+      "height_m": 3.0,
+      "import_part": null,
+      "import_solid": null,
+      "key": "dwarf_pine_alpine",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_branches",
+        "ericrolph_hot_potato_arena_f_dwarf_pine",
+        "ericrolph_hot_potato_arena_f_pine_bark"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_dwarf_pine_alpine-1": 10,
+        "base00": 2162,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_dwarf_pine_alpine_a150": 852,
+        "ericrolph_hot_potato_arena_f_dwarf_pine_alpine_a400": 1300,
+        "nulldetail6": 0,
+        "start01": 2162
+      },
+      "nulldetail": 6,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_dwarf_pine_alpine.dae",
+      "sha256": "d9e16e354b1505b6935171ec77fa829165108c06e92db0fffe51f2db666132fb",
+      "shape_bbox": {
+        "max": [
+          1.3525,
+          1.55803,
+          3.30648
+        ],
+        "min": [
+          -1.43247,
+          -1.24197,
+          -0.16633
+        ]
+      },
+      "size": 357352,
+      "solid": {}
+    },
+    "fallen_log_a": {
+      "bb_dim": 128,
+      "budgets": {
+        "200": 500,
+        "500": 1200,
+        "80": 180
+      },
+      "colmesh_bbox": {
+        "max": [
+          5.31794,
+          0.47526,
+          0.96943
+        ],
+        "min": [
+          -5.29954,
+          -0.46541,
+          0.01042
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 156,
+        "volume_m3": 3.3609
+      },
+      "colmesh_tris": 156,
+      "details": {
+        "200": 492,
+        "500": 1182,
+        "80": 176
+      },
+      "file": "ericrolph_hot_potato_arena_f_fallen_log_a.dae",
+      "height_m": 10.7,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 101802,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "dead_tree_trunk",
+          "fill": 0.3995,
+          "hull": "support_1024",
+          "reference": "joined",
+          "solidity": 0.6747,
+          "tris": 101802,
+          "verts": 52593
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 2,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 105,
+          "chi": -2,
+          "nonmanifold": 169,
+          "tris": 95453,
+          "volume_m3": 3.5341
+        },
+        "shells_kept": 1,
+        "tris": 21388,
+        "volume_m3": 3.5225,
+        "voxel_m": 0.0535
+      },
+      "key": "fallen_log_a",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_deadwood"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_fallen_log_a-1": 156,
+        "base00": 2006,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_fallen_log_a_a200": 492,
+        "ericrolph_hot_potato_arena_f_fallen_log_a_a500": 1182,
+        "ericrolph_hot_potato_arena_f_fallen_log_a_a80": 176,
+        "nulldetail6": 0,
+        "start01": 2006
+      },
+      "nulldetail": 6,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_fallen_log_a_a200": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_fallen_log_a_a500": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_fallen_log_a_a80": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_fallen_log_a_a200": [],
+        "ericrolph_hot_potato_arena_f_fallen_log_a_a500": [],
+        "ericrolph_hot_potato_arena_f_fallen_log_a_a80": []
+      },
+      "relative": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_fallen_log_a.dae",
+      "sha256": "231f177fd017876c0ccd2dde8b28661864af85d06af9ae6dc3d5ab150d35214f",
+      "shape_bbox": {
+        "max": [
+          5.32145,
+          0.47761,
+          0.9607
+        ],
+        "min": [
+          -5.31817,
+          -0.47894,
+          -0.0069
+        ]
+      },
+      "size": 260129,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_fallen_log_a_a200": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 492,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.024484,
+            "share_off_3x": 0.1203
+          },
+          "volume_m3": 3.4853
+        },
+        "ericrolph_hot_potato_arena_f_fallen_log_a_a500": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1182,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.027614,
+            "share_off_3x": 0.0765
+          },
+          "volume_m3": 3.5092
+        },
+        "ericrolph_hot_potato_arena_f_fallen_log_a_a80": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 176,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.019073,
+            "share_off_3x": 0.1755
+          },
+          "volume_m3": 3.3949
+        }
+      }
+    },
+    "fallen_log_b": {
+      "bb_dim": 128,
+      "budgets": {
+        "200": 500,
+        "500": 1200,
+        "80": 180
+      },
+      "colmesh_bbox": {
+        "max": [
+          4.00683,
+          0.8272,
+          2.03784
+        ],
+        "min": [
+          -3.97213,
+          -0.89433,
+          0.02108
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 156,
+        "volume_m3": 2.5219
+      },
+      "colmesh_tris": 156,
+      "details": {
+        "200": 492,
+        "500": 1182,
+        "80": 176
+      },
+      "file": "ericrolph_hot_potato_arena_f_fallen_log_b.dae",
+      "height_m": 8.1,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 83128,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "dead_tree_trunk_02",
+          "fill": 0.129,
+          "hull": "support_1024",
+          "reference": "joined",
+          "solidity": 0.2583,
+          "tris": 83128,
+          "verts": 46112
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 4,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 158,
+          "chi": -21,
+          "nonmanifold": 161,
+          "tris": 63011,
+          "volume_m3": 2.7734
+        },
+        "shells_kept": 1,
+        "tris": 38000,
+        "volume_m3": 2.7953,
+        "voxel_m": 0.0405
+      },
+      "key": "fallen_log_b",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_deadwood"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_fallen_log_b-1": 156,
+        "base00": 2006,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_fallen_log_b_a200": 492,
+        "ericrolph_hot_potato_arena_f_fallen_log_b_a500": 1182,
+        "ericrolph_hot_potato_arena_f_fallen_log_b_a80": 176,
+        "nulldetail6": 0,
+        "start01": 2006
+      },
+      "nulldetail": 6,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_fallen_log_b_a200": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_fallen_log_b_a500": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_fallen_log_b_a80": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_fallen_log_b_a200": [],
+        "ericrolph_hot_potato_arena_f_fallen_log_b_a500": [],
+        "ericrolph_hot_potato_arena_f_fallen_log_b_a80": []
+      },
+      "relative": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_fallen_log_b.dae",
+      "sha256": "8d9e6dab2d07884cd04cbc37bc63b3715cf02546e647197c9be180b3be97b8dd",
+      "shape_bbox": {
+        "max": [
+          4.0187,
+          0.90073,
+          2.07917
+        ],
+        "min": [
+          -4.02334,
+          -0.89831,
+          0.00906
+        ]
+      },
+      "size": 260153,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_fallen_log_b_a200": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 492,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.021959,
+            "share_off_3x": 0.1364
+          },
+          "volume_m3": 2.7422
+        },
+        "ericrolph_hot_potato_arena_f_fallen_log_b_a500": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1182,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.02463,
+            "share_off_3x": 0.1112
+          },
+          "volume_m3": 2.7766
+        },
+        "ericrolph_hot_potato_arena_f_fallen_log_b_a80": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 176,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.015615,
+            "share_off_3x": 0.1712
+          },
+          "volume_m3": 2.6261
+        }
+      }
+    },
+    "fallen_log_c": {
+      "bb_dim": 128,
+      "budgets": {
+        "200": 500,
+        "500": 1200,
+        "80": 180
+      },
+      "colmesh_bbox": {
+        "max": [
+          3.76604,
+          0.34074,
+          0.69395
+        ],
+        "min": [
+          -3.78052,
+          -0.33705,
+          -0.00204
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 156,
+        "volume_m3": 1.2065
+      },
+      "colmesh_tris": 156,
+      "details": {
+        "200": 492,
+        "500": 1182,
+        "80": 176
+      },
+      "file": "ericrolph_hot_potato_arena_f_fallen_log_c.dae",
+      "height_m": 7.6,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 101802,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "dead_tree_trunk",
+          "fill": 0.3995,
+          "hull": "support_1024",
+          "reference": "joined",
+          "solidity": 0.6747,
+          "tris": 101802,
+          "verts": 52593
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 3,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 104,
+          "chi": -2,
+          "nonmanifold": 170,
+          "tris": 95459,
+          "volume_m3": 1.2663
+        },
+        "shells_kept": 1,
+        "tris": 21360,
+        "volume_m3": 1.2621,
+        "voxel_m": 0.038
+      },
+      "key": "fallen_log_c",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_deadwood"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_fallen_log_c-1": 156,
+        "base00": 2006,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_fallen_log_c_a200": 492,
+        "ericrolph_hot_potato_arena_f_fallen_log_c_a500": 1182,
+        "ericrolph_hot_potato_arena_f_fallen_log_c_a80": 176,
+        "nulldetail6": 0,
+        "start01": 2006
+      },
+      "nulldetail": 6,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_fallen_log_c_a200": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_fallen_log_c_a500": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_fallen_log_c_a80": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_fallen_log_c_a200": [],
+        "ericrolph_hot_potato_arena_f_fallen_log_c_a500": [],
+        "ericrolph_hot_potato_arena_f_fallen_log_c_a80": []
+      },
+      "relative": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_fallen_log_c.dae",
+      "sha256": "4159b8d285a871117cdfce7e418d46e862162c1b1703c75834145144f75e763a",
+      "shape_bbox": {
+        "max": [
+          3.77739,
+          0.33924,
+          0.68671
+        ],
+        "min": [
+          -3.77972,
+          -0.3433,
+          -0.0049
+        ]
+      },
+      "size": 259964,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_fallen_log_c_a200": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 492,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.048065,
+            "share_off_3x": 0.1073
+          },
+          "volume_m3": 1.2473
+        },
+        "ericrolph_hot_potato_arena_f_fallen_log_c_a500": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1182,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.053769,
+            "share_off_3x": 0.0762
+          },
+          "volume_m3": 1.2573
+        },
+        "ericrolph_hot_potato_arena_f_fallen_log_c_a80": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 176,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.032249,
+            "share_off_3x": 0.1129
+          },
+          "volume_m3": 1.2245
+        }
+      }
+    },
+    "fern_a": {
+      "bb_dim": 128,
+      "budgets": {
+        "120": 282,
+        "300": 420
+      },
+      "colmesh_bbox": null,
+      "colmesh_kind": null,
+      "colmesh_tris": 0,
+      "details": {
+        "120": 282,
+        "300": 420
+      },
+      "file": "ericrolph_hot_potato_arena_f_fern_a.dae",
+      "height_m": 2.6,
+      "import_part": null,
+      "import_solid": null,
+      "key": "fern_a",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_fern"
+      ],
+      "node_tris": {
+        "base00": 702,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_fern_a_a120": 282,
+        "ericrolph_hot_potato_arena_f_fern_a_a300": 420,
+        "nulldetail6": 0,
+        "start01": 702
+      },
+      "nulldetail": 6,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_fern_a.dae",
+      "sha256": "bb47e92e97e5ed93f17bc5314f3c38a328c210a6189e27267574a98a8625f678",
+      "shape_bbox": {
+        "max": [
+          1.63736,
+          1.55092,
+          2.04046
+        ],
+        "min": [
+          -1.71712,
+          -1.29057,
+          -0.2456
+        ]
+      },
+      "size": 119558,
+      "solid": {}
+    },
+    "fern_b": {
+      "bb_dim": 128,
+      "budgets": {
+        "120": 282,
+        "300": 420
+      },
+      "colmesh_bbox": null,
+      "colmesh_kind": null,
+      "colmesh_tris": 0,
+      "details": {
+        "120": 282,
+        "300": 420
+      },
+      "file": "ericrolph_hot_potato_arena_f_fern_b.dae",
+      "height_m": 1.6,
+      "import_part": null,
+      "import_solid": null,
+      "key": "fern_b",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_fern"
+      ],
+      "node_tris": {
+        "base00": 702,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_fern_b_a120": 282,
+        "ericrolph_hot_potato_arena_f_fern_b_a300": 420,
+        "nulldetail6": 0,
+        "start01": 702
+      },
+      "nulldetail": 6,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_fern_b.dae",
+      "sha256": "4555603013d55f86409aa25ecbef9a4f0a1ea118b01afbaf4c900cab58afa384",
+      "shape_bbox": {
+        "max": [
+          1.12002,
+          1.05505,
+          1.51154
+        ],
+        "min": [
+          -1.05398,
+          -0.95031,
+          -0.35191
+        ]
+      },
+      "size": 119655,
+      "solid": {}
+    },
+    "fir_mid_a": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 2554,
+        "300": 3850,
+        "600": 4820
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.32,
+          0.30434,
+          14.4
+        ],
+        "min": [
+          -0.25889,
+          -0.30434,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 20,
+      "details": {
+        "100": 2554,
+        "300": 3850,
+        "600": 4820
+      },
+      "file": "ericrolph_hot_potato_arena_f_fir_mid_a.dae",
+      "height_m": 16.0,
+      "import_part": null,
+      "import_solid": null,
+      "key": "fir_mid_a",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_branches",
+        "ericrolph_hot_potato_arena_f_fir_bark",
+        "ericrolph_hot_potato_arena_f_fir_twig_a"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_fir_mid_a-1": 20,
+        "base00": 11244,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_fir_mid_a_a100": 2554,
+        "ericrolph_hot_potato_arena_f_fir_mid_a_a300": 3850,
+        "ericrolph_hot_potato_arena_f_fir_mid_a_a600": 4820,
+        "nulldetail8": 0,
+        "start01": 11244
+      },
+      "nulldetail": 8,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_mid_a.dae",
+      "sha256": "b54ef3e684db7b70f0b515163185a7478e1d7ca460138276e3b2470b7e54ad28",
+      "shape_bbox": {
+        "max": [
+          4.17307,
+          3.81065,
+          16.11775
+        ],
+        "min": [
+          -4.20107,
+          -4.05134,
+          0.0
+        ]
+      },
+      "size": 1780013,
+      "solid": {}
+    },
+    "fir_mid_b": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 2554,
+        "300": 3850,
+        "600": 4820
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.26,
+          0.24727,
+          11.7
+        ],
+        "min": [
+          -0.21034,
+          -0.24727,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 20,
+      "details": {
+        "100": 2554,
+        "300": 3850,
+        "600": 4820
+      },
+      "file": "ericrolph_hot_potato_arena_f_fir_mid_b.dae",
+      "height_m": 13.0,
+      "import_part": null,
+      "import_solid": null,
+      "key": "fir_mid_b",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_branches",
+        "ericrolph_hot_potato_arena_f_fir_bark",
+        "ericrolph_hot_potato_arena_f_fir_twig_b"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_fir_mid_b-1": 20,
+        "base00": 11244,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_fir_mid_b_a100": 2554,
+        "ericrolph_hot_potato_arena_f_fir_mid_b_a300": 3850,
+        "ericrolph_hot_potato_arena_f_fir_mid_b_a600": 4820,
+        "nulldetail8": 0,
+        "start01": 11244
+      },
+      "nulldetail": 8,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_mid_b.dae",
+      "sha256": "8c4da108ef64ca1a7d910e18ee43e99e361e0f5e4764090b7fec2f961a1283b4",
+      "shape_bbox": {
+        "max": [
+          3.00413,
+          3.4237,
+          13.0
+        ],
+        "min": [
+          -3.22767,
+          -3.00856,
+          0.0
+        ]
+      },
+      "size": 1780781,
+      "solid": {}
+    },
+    "fir_sapling_a": {
+      "bb_dim": 128,
+      "budgets": {
+        "150": 986,
+        "400": 1500
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.09,
+          0.07794,
+          4.05
+        ],
+        "min": [
+          -0.045,
+          -0.07794,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 12,
+      "details": {
+        "150": 986,
+        "400": 1500
+      },
+      "file": "ericrolph_hot_potato_arena_f_fir_sapling_a.dae",
+      "height_m": 4.5,
+      "import_part": null,
+      "import_solid": null,
+      "key": "fir_sapling_a",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_branches",
+        "ericrolph_hot_potato_arena_f_dwarf_pine",
+        "ericrolph_hot_potato_arena_f_pine_bark"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_fir_sapling_a-1": 12,
+        "base00": 2498,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_fir_sapling_a_a150": 986,
+        "ericrolph_hot_potato_arena_f_fir_sapling_a_a400": 1500,
+        "nulldetail6": 0,
+        "start01": 2498
+      },
+      "nulldetail": 6,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_sapling_a.dae",
+      "sha256": "4dfaed1f673f05d22fa33eb3e9935f6ee2de86d917bfed8af81c3748baaa7f83",
+      "shape_bbox": {
+        "max": [
+          1.52523,
+          1.69207,
+          4.69582
+        ],
+        "min": [
+          -1.6781,
+          -1.50459,
+          0.0
+        ]
+      },
+      "size": 397602,
+      "solid": {}
+    },
+    "fir_sapling_b": {
+      "bb_dim": 128,
+      "budgets": {
+        "150": 986,
+        "400": 1500
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.056,
+          0.0485,
+          2.52
+        ],
+        "min": [
+          -0.028,
+          -0.0485,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 12,
+      "details": {
+        "150": 986,
+        "400": 1500
+      },
+      "file": "ericrolph_hot_potato_arena_f_fir_sapling_b.dae",
+      "height_m": 2.8,
+      "import_part": null,
+      "import_solid": null,
+      "key": "fir_sapling_b",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_branches",
+        "ericrolph_hot_potato_arena_f_dwarf_pine",
+        "ericrolph_hot_potato_arena_f_pine_bark"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_fir_sapling_b-1": 12,
+        "base00": 2498,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_fir_sapling_b_a150": 986,
+        "ericrolph_hot_potato_arena_f_fir_sapling_b_a400": 1500,
+        "nulldetail6": 0,
+        "start01": 2498
+      },
+      "nulldetail": 6,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_sapling_b.dae",
+      "sha256": "981f9311103e2e60dbc057ac0a710e2279159f9f78d3539b2e1116e92f25ff21",
+      "shape_bbox": {
+        "max": [
+          1.59307,
+          1.48027,
+          2.9668
+        ],
+        "min": [
+          -1.122,
+          -1.32656,
+          -0.02025
+        ]
+      },
+      "size": 411638,
+      "solid": {}
+    },
+    "fir_tall_a": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 4550,
+        "300": 5800,
+        "600": 8200
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.52,
+          0.45033,
+          23.4
+        ],
+        "min": [
+          -0.52,
+          -0.45033,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 24,
+      "details": {
+        "100": 4550,
+        "300": 5800,
+        "600": 8200
+      },
+      "file": "ericrolph_hot_potato_arena_f_fir_tall_a.dae",
+      "height_m": 26.0,
+      "import_part": null,
+      "import_solid": null,
+      "key": "fir_tall_a",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_branches",
+        "ericrolph_hot_potato_arena_f_fir_bark",
+        "ericrolph_hot_potato_arena_f_fir_twig_a"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_fir_tall_a-1": 24,
+        "base00": 18574,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_fir_tall_a_a100": 4550,
+        "ericrolph_hot_potato_arena_f_fir_tall_a_a300": 5800,
+        "ericrolph_hot_potato_arena_f_fir_tall_a_a600": 8200,
+        "nulldetail8": 0,
+        "start01": 18574
+      },
+      "nulldetail": 8,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_tall_a.dae",
+      "sha256": "619f5fbe00211bbcd1238c3ab157a8320be7b49d9dde0f8049990e9b09269eeb",
+      "shape_bbox": {
+        "max": [
+          5.8162,
+          5.12532,
+          26.0
+        ],
+        "min": [
+          -5.70103,
+          -5.88337,
+          0.0
+        ]
+      },
+      "size": 3072029,
+      "solid": {}
+    },
+    "fir_tall_b": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 4550,
+        "300": 5800,
+        "600": 8200
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.48,
+          0.41569,
+          21.6
+        ],
+        "min": [
+          -0.48,
+          -0.41569,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 24,
+      "details": {
+        "100": 4550,
+        "300": 5800,
+        "600": 8200
+      },
+      "file": "ericrolph_hot_potato_arena_f_fir_tall_b.dae",
+      "height_m": 24.0,
+      "import_part": null,
+      "import_solid": null,
+      "key": "fir_tall_b",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_branches",
+        "ericrolph_hot_potato_arena_f_fir_bark",
+        "ericrolph_hot_potato_arena_f_fir_twig_b"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_fir_tall_b-1": 24,
+        "base00": 18574,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_fir_tall_b_a100": 4550,
+        "ericrolph_hot_potato_arena_f_fir_tall_b_a300": 5800,
+        "ericrolph_hot_potato_arena_f_fir_tall_b_a600": 8200,
+        "nulldetail8": 0,
+        "start01": 18574
+      },
+      "nulldetail": 8,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_tall_b.dae",
+      "sha256": "e1c591d06ff7da17a441a3fc14cb007cb732ebe4993ce551ed6d9a9f2632af7c",
+      "shape_bbox": {
+        "max": [
+          6.43836,
+          5.18262,
+          24.0
+        ],
+        "min": [
+          -5.86073,
+          -6.16167,
+          0.0
+        ]
+      },
+      "size": 3077077,
+      "solid": {}
+    },
+    "fir_tall_c": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 4550,
+        "300": 5800,
+        "600": 8200
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.44,
+          0.38105,
+          19.8
+        ],
+        "min": [
+          -0.44,
+          -0.38105,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 24,
+      "details": {
+        "100": 4550,
+        "300": 5800,
+        "600": 8200
+      },
+      "file": "ericrolph_hot_potato_arena_f_fir_tall_c.dae",
+      "height_m": 22.0,
+      "import_part": null,
+      "import_solid": null,
+      "key": "fir_tall_c",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_branches",
+        "ericrolph_hot_potato_arena_f_fir_bark",
+        "ericrolph_hot_potato_arena_f_fir_twig_a"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_fir_tall_c-1": 24,
+        "base00": 18574,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_fir_tall_c_a100": 4550,
+        "ericrolph_hot_potato_arena_f_fir_tall_c_a300": 5800,
+        "ericrolph_hot_potato_arena_f_fir_tall_c_a600": 8200,
+        "nulldetail8": 0,
+        "start01": 18574
+      },
+      "nulldetail": 8,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_fir_tall_c.dae",
+      "sha256": "e7c69fc868960c8c4400294122ac316b4bf6fdc2d1c3029fba532948d3925bc5",
+      "shape_bbox": {
+        "max": [
+          4.57911,
+          4.89258,
+          22.0
+        ],
+        "min": [
+          -4.88867,
+          -4.89944,
+          0.0
+        ]
+      },
+      "size": 3087140,
+      "solid": {}
+    },
+    "lichen_boulder": {
+      "bb_dim": 128,
+      "budgets": {
+        "200": 500,
+        "500": 1500,
+        "80": 180
+      },
+      "colmesh_bbox": {
+        "max": [
+          3.26332,
+          4.0289,
+          3.07285
+        ],
+        "min": [
+          -3.29825,
+          -4.00336,
+          0.00394
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 294,
+        "volume_m3": 38.586
+      },
+      "colmesh_tris": 294,
+      "details": {
+        "200": 492,
+        "500": 1476,
+        "80": 176
+      },
+      "file": "ericrolph_hot_potato_arena_f_lichen_boulder.dae",
+      "height_m": 8.0,
+      "import_part": {
+        "imported_objects": 6,
+        "kept_polys": 10996,
+        "part_index": 2,
+        "part_source": "objects",
+        "source_reading": {
+          "asset": "rock_moss_set_01",
+          "fill": 0.3426,
+          "hull": "support_1024",
+          "reference": "largest_part",
+          "solidity": 0.8456,
+          "tris": 10996,
+          "verts": 5470
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 2,
+          "chi": -22,
+          "nonmanifold": 8,
+          "tris": 10988,
+          "volume_m3": 38.9995
+        },
+        "shells_kept": 1,
+        "tris": 138792,
+        "volume_m3": 39.0207,
+        "voxel_m": 0.04
+      },
+      "key": "lichen_boulder",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_mossy"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_lichen_boulder-1": 294,
+        "base00": 2438,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_lichen_boulder_a200": 492,
+        "ericrolph_hot_potato_arena_f_lichen_boulder_a500": 1476,
+        "ericrolph_hot_potato_arena_f_lichen_boulder_a80": 176,
+        "nulldetail4": 0,
+        "start01": 2438
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_lichen_boulder_a200": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_lichen_boulder_a500": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_lichen_boulder_a80": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_lichen_boulder_a200": [],
+        "ericrolph_hot_potato_arena_f_lichen_boulder_a500": [],
+        "ericrolph_hot_potato_arena_f_lichen_boulder_a80": []
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_lichen_boulder.dae",
+      "sha256": "c84169a0720a619646110704cf236b5ec01224566115d4f7aee889ab7086dd49",
+      "shape_bbox": {
+        "max": [
+          3.24629,
+          3.97803,
+          3.09429
+        ],
+        "min": [
+          -3.24527,
+          -3.99652,
+          0.00066
+        ]
+      },
+      "size": 314555,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_lichen_boulder_a200": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 492,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.0008,
+            "share_off_3x": 0.0656
+          },
+          "volume_m3": 38.8891
+        },
+        "ericrolph_hot_potato_arena_f_lichen_boulder_a500": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1476,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.000835,
+            "share_off_3x": 0.046
+          },
+          "volume_m3": 38.9575
+        },
+        "ericrolph_hot_potato_arena_f_lichen_boulder_a80": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 176,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.000757,
+            "share_off_3x": 0.1264
+          },
+          "volume_m3": 38.4212
+        }
+      }
+    },
+    "mossy_rock_a": {
+      "bb_dim": 128,
+      "budgets": {
+        "200": 500,
+        "500": 1500,
+        "80": 180
+      },
+      "colmesh_bbox": {
+        "max": [
+          3.62694,
+          5.98661,
+          4.86524
+        ],
+        "min": [
+          -3.67217,
+          -6.03092,
+          -0.02471
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 294,
+        "volume_m3": 169.2301
+      },
+      "colmesh_tris": 294,
+      "details": {
+        "200": 492,
+        "500": 1476,
+        "80": 176
+      },
+      "file": "ericrolph_hot_potato_arena_f_mossy_rock_a.dae",
+      "height_m": 12.0,
+      "import_part": {
+        "imported_objects": 6,
+        "kept_polys": 16548,
+        "part_index": 0,
+        "part_source": "objects",
+        "source_reading": {
+          "asset": "rock_moss_set_01",
+          "fill": 0.4158,
+          "hull": "support_1024",
+          "reference": "largest_part",
+          "solidity": 0.8647,
+          "tris": 16548,
+          "verts": 8276
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "tris": 16548,
+          "volume_m3": 171.7215
+        },
+        "shells_kept": 1,
+        "tris": 151744,
+        "volume_m3": 171.6967,
+        "voxel_m": 0.06
+      },
+      "key": "mossy_rock_a",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_mossy"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_mossy_rock_a-1": 294,
+        "base00": 2438,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_mossy_rock_a_a200": 492,
+        "ericrolph_hot_potato_arena_f_mossy_rock_a_a500": 1476,
+        "ericrolph_hot_potato_arena_f_mossy_rock_a_a80": 176,
+        "nulldetail4": 0,
+        "start01": 2438
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_mossy_rock_a_a200": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_mossy_rock_a_a500": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_mossy_rock_a_a80": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_mossy_rock_a_a200": [],
+        "ericrolph_hot_potato_arena_f_mossy_rock_a_a500": [],
+        "ericrolph_hot_potato_arena_f_mossy_rock_a_a80": []
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_mossy_rock_a.dae",
+      "sha256": "815602301fce49cb8ec72915a36e213d84bf6ddfd39a1f08597d10c5575b9f45",
+      "shape_bbox": {
+        "max": [
+          3.63273,
+          5.99025,
+          4.8307
+        ],
+        "min": [
+          -3.6254,
+          -6.01022,
+          -0.01652
+        ]
+      },
+      "size": 314611,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_mossy_rock_a_a200": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 492,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.00033,
+            "share_off_3x": 0.0111
+          },
+          "volume_m3": 170.5821
+        },
+        "ericrolph_hot_potato_arena_f_mossy_rock_a_a500": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1476,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.000337,
+            "share_off_3x": 0.0031
+          },
+          "volume_m3": 171.3434
+        },
+        "ericrolph_hot_potato_arena_f_mossy_rock_a_a80": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 176,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.000322,
+            "share_off_3x": 0.0173
+          },
+          "volume_m3": 168.8314
+        }
+      }
+    },
+    "mossy_rock_b": {
+      "bb_dim": 128,
+      "budgets": {
+        "200": 500,
+        "500": 1500,
+        "80": 180
+      },
+      "colmesh_bbox": {
+        "max": [
+          2.35467,
+          3.48172,
+          3.03284
+        ],
+        "min": [
+          -2.30663,
+          -3.49452,
+          -0.04322
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 294,
+        "volume_m3": 30.9622
+      },
+      "colmesh_tris": 294,
+      "details": {
+        "200": 492,
+        "500": 1476,
+        "80": 176
+      },
+      "file": "ericrolph_hot_potato_arena_f_mossy_rock_b.dae",
+      "height_m": 7.0,
+      "import_part": {
+        "imported_objects": 6,
+        "kept_polys": 11000,
+        "part_index": 1,
+        "part_source": "objects",
+        "source_reading": {
+          "asset": "rock_moss_set_01",
+          "fill": 0.2953,
+          "hull": "support_1024",
+          "reference": "largest_part",
+          "solidity": 0.7651,
+          "tris": 11000,
+          "verts": 5502
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "tris": 11000,
+          "volume_m3": 31.4431
+        },
+        "shells_kept": 1,
+        "tris": 168572,
+        "volume_m3": 31.4662,
+        "voxel_m": 0.035
+      },
+      "key": "mossy_rock_b",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_mossy"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_mossy_rock_b-1": 294,
+        "base00": 2438,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_mossy_rock_b_a200": 492,
+        "ericrolph_hot_potato_arena_f_mossy_rock_b_a500": 1476,
+        "ericrolph_hot_potato_arena_f_mossy_rock_b_a80": 176,
+        "nulldetail4": 0,
+        "start01": 2438
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_mossy_rock_b_a200": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_mossy_rock_b_a500": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_mossy_rock_b_a80": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_mossy_rock_b_a200": [],
+        "ericrolph_hot_potato_arena_f_mossy_rock_b_a500": [],
+        "ericrolph_hot_potato_arena_f_mossy_rock_b_a80": []
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_mossy_rock_b.dae",
+      "sha256": "cfaf6f20f79a81d22348eb84be3c3efa727a2f5641d43731915f13079da81e51",
+      "shape_bbox": {
+        "max": [
+          2.31969,
+          3.47347,
+          3.06011
+        ],
+        "min": [
+          -2.33022,
+          -3.50005,
+          -0.01551
+        ]
+      },
+      "size": 314451,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_mossy_rock_b_a200": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 492,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.000897,
+            "share_off_3x": 0.0473
+          },
+          "volume_m3": 31.1743
+        },
+        "ericrolph_hot_potato_arena_f_mossy_rock_b_a500": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1476,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.000941,
+            "share_off_3x": 0.0309
+          },
+          "volume_m3": 31.4131
+        },
+        "ericrolph_hot_potato_arena_f_mossy_rock_b_a80": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 176,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.000765,
+            "share_off_3x": 0.0479
+          },
+          "volume_m3": 30.7519
+        }
+      }
+    },
+    "mossy_rock_c": {
+      "bb_dim": 128,
+      "budgets": {
+        "200": 500,
+        "500": 1500,
+        "80": 180
+      },
+      "colmesh_bbox": {
+        "max": [
+          2.04372,
+          2.50414,
+          1.94643
+        ],
+        "min": [
+          -2.03957,
+          -2.50195,
+          0.00291
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 294,
+        "volume_m3": 9.4142
+      },
+      "colmesh_tris": 294,
+      "details": {
+        "200": 492,
+        "500": 1476,
+        "80": 176
+      },
+      "file": "ericrolph_hot_potato_arena_f_mossy_rock_c.dae",
+      "height_m": 5.0,
+      "import_part": {
+        "imported_objects": 6,
+        "kept_polys": 10996,
+        "part_index": 2,
+        "part_source": "objects",
+        "source_reading": {
+          "asset": "rock_moss_set_01",
+          "fill": 0.3426,
+          "hull": "support_1024",
+          "reference": "largest_part",
+          "solidity": 0.8456,
+          "tris": 10996,
+          "verts": 5470
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 2,
+          "chi": -22,
+          "nonmanifold": 8,
+          "tris": 10988,
+          "volume_m3": 9.5213
+        },
+        "shells_kept": 1,
+        "tris": 138792,
+        "volume_m3": 9.5266,
+        "voxel_m": 0.025
+      },
+      "key": "mossy_rock_c",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_mossy"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_mossy_rock_c-1": 294,
+        "base00": 2438,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_mossy_rock_c_a200": 492,
+        "ericrolph_hot_potato_arena_f_mossy_rock_c_a500": 1476,
+        "ericrolph_hot_potato_arena_f_mossy_rock_c_a80": 176,
+        "nulldetail4": 0,
+        "start01": 2438
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_mossy_rock_c_a200": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_mossy_rock_c_a500": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_mossy_rock_c_a80": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_mossy_rock_c_a200": [],
+        "ericrolph_hot_potato_arena_f_mossy_rock_c_a500": [],
+        "ericrolph_hot_potato_arena_f_mossy_rock_c_a80": []
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_mossy_rock_c.dae",
+      "sha256": "a6b64d5319bcfb1781f4126e67f5515bacc25df603dec66579b0d46c6683e418",
+      "shape_bbox": {
+        "max": [
+          2.02829,
+          2.49394,
+          1.93569
+        ],
+        "min": [
+          -2.02893,
+          -2.49783,
+          -0.00038
+        ]
+      },
+      "size": 314414,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_mossy_rock_c_a200": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 492,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.002081,
+            "share_off_3x": 0.0483
+          },
+          "volume_m3": 9.4904
+        },
+        "ericrolph_hot_potato_arena_f_mossy_rock_c_a500": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1476,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.002138,
+            "share_off_3x": 0.0371
+          },
+          "volume_m3": 9.5098
+        },
+        "ericrolph_hot_potato_arena_f_mossy_rock_c_a80": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 176,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.001909,
+            "share_off_3x": 0.0542
+          },
+          "volume_m3": 9.3783
+        }
+      }
+    },
+    "mossy_rock_d": {
+      "bb_dim": 128,
+      "budgets": {
+        "200": 500,
+        "500": 1500,
+        "80": 180
+      },
+      "colmesh_bbox": {
+        "max": [
+          1.99392,
+          1.42443,
+          1.75207
+        ],
+        "min": [
+          -2.00253,
+          -1.4339,
+          -0.01851
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 294,
+        "volume_m3": 10.5296
+      },
+      "colmesh_tris": 294,
+      "details": {
+        "200": 492,
+        "500": 1476,
+        "80": 176
+      },
+      "file": "ericrolph_hot_potato_arena_f_mossy_rock_d.dae",
+      "height_m": 4.0,
+      "import_part": {
+        "imported_objects": 7,
+        "kept_polys": 9826,
+        "part_index": 0,
+        "part_source": "objects",
+        "source_reading": {
+          "asset": "rock_moss_set_02",
+          "fill": 0.5053,
+          "hull": "support_1024",
+          "reference": "largest_part",
+          "solidity": 0.8943,
+          "tris": 9826,
+          "verts": 4912
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 1,
+          "chi": 1,
+          "nonmanifold": 3,
+          "tris": 9821,
+          "volume_m3": 10.628
+        },
+        "shells_kept": 1,
+        "tris": 197332,
+        "volume_m3": 10.6267,
+        "voxel_m": 0.02
+      },
+      "key": "mossy_rock_d",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_mossy"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_mossy_rock_d-1": 294,
+        "base00": 2438,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_mossy_rock_d_a200": 492,
+        "ericrolph_hot_potato_arena_f_mossy_rock_d_a500": 1476,
+        "ericrolph_hot_potato_arena_f_mossy_rock_d_a80": 176,
+        "nulldetail4": 0,
+        "start01": 2438
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_mossy_rock_d_a200": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_mossy_rock_d_a500": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_mossy_rock_d_a80": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_mossy_rock_d_a200": [],
+        "ericrolph_hot_potato_arena_f_mossy_rock_d_a500": [],
+        "ericrolph_hot_potato_arena_f_mossy_rock_d_a80": []
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_mossy_rock_d.dae",
+      "sha256": "4665bedcd7e02d639320e04f9370bc4538e031c4c5e0693ceff5c219a9f38735",
+      "shape_bbox": {
+        "max": [
+          1.99975,
+          1.43322,
+          1.759
+        ],
+        "min": [
+          -1.99594,
+          -1.43448,
+          0.00121
+        ]
+      },
+      "size": 314413,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_mossy_rock_d_a200": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 492,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.001866,
+            "share_off_3x": 0.0123
+          },
+          "volume_m3": 10.5799
+        },
+        "ericrolph_hot_potato_arena_f_mossy_rock_d_a500": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1476,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.001921,
+            "share_off_3x": 0.0056
+          },
+          "volume_m3": 10.6181
+        },
+        "ericrolph_hot_potato_arena_f_mossy_rock_d_a80": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 176,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.001772,
+            "share_off_3x": 0.0332
+          },
+          "volume_m3": 10.5172
+        }
+      }
+    },
+    "mossy_rock_e": {
+      "bb_dim": 128,
+      "budgets": {
+        "200": 500,
+        "500": 1500,
+        "80": 180
+      },
+      "colmesh_bbox": {
+        "max": [
+          1.50152,
+          1.20839,
+          1.29272
+        ],
+        "min": [
+          -1.49101,
+          -1.20391,
+          0.00235
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 294,
+        "volume_m3": 4.2438
+      },
+      "colmesh_tris": 294,
+      "details": {
+        "200": 492,
+        "500": 1476,
+        "80": 176
+      },
+      "file": "ericrolph_hot_potato_arena_f_mossy_rock_e.dae",
+      "height_m": 3.0,
+      "import_part": {
+        "imported_objects": 7,
+        "kept_polys": 8000,
+        "part_index": 1,
+        "part_source": "objects",
+        "source_reading": {
+          "asset": "rock_moss_set_02",
+          "fill": 0.4024,
+          "hull": "support_1024",
+          "reference": "largest_part",
+          "solidity": 0.8413,
+          "tris": 8000,
+          "verts": 4002
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "tris": 8000,
+          "volume_m3": 4.2914
+        },
+        "shells_kept": 1,
+        "tris": 216692,
+        "volume_m3": 4.2939,
+        "voxel_m": 0.015
+      },
+      "key": "mossy_rock_e",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_mossy"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_mossy_rock_e-1": 294,
+        "base00": 2438,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_mossy_rock_e_a200": 492,
+        "ericrolph_hot_potato_arena_f_mossy_rock_e_a500": 1476,
+        "ericrolph_hot_potato_arena_f_mossy_rock_e_a80": 176,
+        "nulldetail4": 0,
+        "start01": 2438
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_mossy_rock_e_a200": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_mossy_rock_e_a500": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_mossy_rock_e_a80": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_mossy_rock_e_a200": [],
+        "ericrolph_hot_potato_arena_f_mossy_rock_e_a500": [],
+        "ericrolph_hot_potato_arena_f_mossy_rock_e_a80": [
+          {
+            "amplitude_m": 0.15,
+            "moved": 13,
+            "plane_m2": 2.081,
+            "share": 0.126
+          }
+        ]
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_mossy_rock_e.dae",
+      "sha256": "c3c729ccc9a27ae331ab8e637c13e3998b127e5f02f59edc0e15b01b2de5ad86",
+      "shape_bbox": {
+        "max": [
+          1.50683,
+          1.21597,
+          1.30996
+        ],
+        "min": [
+          -1.50678,
+          -1.2232,
+          -0.00373
+        ]
+      },
+      "size": 314048,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_mossy_rock_e_a200": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 492,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.003859,
+            "share_off_3x": 0.0111
+          },
+          "volume_m3": 4.2664
+        },
+        "ericrolph_hot_potato_arena_f_mossy_rock_e_a500": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1476,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.003877,
+            "share_off_3x": 0.0067
+          },
+          "volume_m3": 4.2854
+        },
+        "ericrolph_hot_potato_arena_f_mossy_rock_e_a80": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 176,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.003834,
+            "share_off_3x": 0.0178
+          },
+          "volume_m3": 4.0444
+        }
+      }
+    },
+    "nq_boulder_02": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 240,
+        "250": 700,
+        "600": 2000
+      },
+      "colmesh_bbox": {
+        "max": [
+          3.69122,
+          1.81515,
+          2.58114
+        ],
+        "min": [
+          -3.70976,
+          -1.81839,
+          0.03832
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 294,
+        "volume_m3": 24.1399
+      },
+      "colmesh_tris": 294,
+      "details": {
+        "100": 236,
+        "250": 688,
+        "600": 1970
+      },
+      "file": "ericrolph_hot_potato_arena_f_nq_boulder_02.dae",
+      "height_m": 7.6,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 97964,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "namaqualand_boulder_02",
+          "fill": 0.2809,
+          "hull": "support_1024",
+          "reference": "largest_part",
+          "solidity": 0.5529,
+          "tris": 97964,
+          "verts": 49173
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 9.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 6,
+          "chi": -6,
+          "nonmanifold": 5,
+          "tris": 96725,
+          "volume_m3": 21.7207
+        },
+        "shells_kept": 1,
+        "tris": 124968,
+        "volume_m3": 24.4821,
+        "voxel_m": 0.038
+      },
+      "key": "nq_boulder_02",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_namaqualand"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_nq_boulder_02-1": 294,
+        "base00": 3188,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_nq_boulder_02_a100": 236,
+        "ericrolph_hot_potato_arena_f_nq_boulder_02_a250": 688,
+        "ericrolph_hot_potato_arena_f_nq_boulder_02_a600": 1970,
+        "nulldetail4": 0,
+        "start01": 3188
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_nq_boulder_02_a100": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_nq_boulder_02_a250": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_nq_boulder_02_a600": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_nq_boulder_02_a100": [],
+        "ericrolph_hot_potato_arena_f_nq_boulder_02_a250": [],
+        "ericrolph_hot_potato_arena_f_nq_boulder_02_a600": []
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_nq_boulder_02.dae",
+      "sha256": "b4145d3323a98a17ea7b800fbbbc1455db05029af944c9977d7192b8b3e851c6",
+      "shape_bbox": {
+        "max": [
+          3.71831,
+          1.81779,
+          2.57045
+        ],
+        "min": [
+          -3.72547,
+          -1.81493,
+          0.00745
+        ]
+      },
+      "size": 411243,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_nq_boulder_02_a100": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 236,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.004106,
+            "share_off_3x": 0.2307
+          },
+          "volume_m3": 24.1597
+        },
+        "ericrolph_hot_potato_arena_f_nq_boulder_02_a250": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 688,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.004745,
+            "share_off_3x": 0.1857
+          },
+          "volume_m3": 24.4239
+        },
+        "ericrolph_hot_potato_arena_f_nq_boulder_02_a600": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1970,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.006274,
+            "share_off_3x": 0.1509
+          },
+          "volume_m3": 24.4658
+        }
+      }
+    },
+    "nq_boulder_03": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 240,
+        "250": 700,
+        "600": 2000
+      },
+      "colmesh_bbox": {
+        "max": [
+          2.40885,
+          3.08834,
+          2.91767
+        ],
+        "min": [
+          -2.3728,
+          -3.05451,
+          -0.00859
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 294,
+        "volume_m3": 34.314
+      },
+      "colmesh_tris": 294,
+      "details": {
+        "100": 236,
+        "250": 688,
+        "600": 1970
+      },
+      "file": "ericrolph_hot_potato_arena_f_nq_boulder_03.dae",
+      "height_m": 6.1,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 64826,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "namaqualand_boulder_03",
+          "fill": 0.3761,
+          "hull": "support_1024",
+          "reference": "largest_part",
+          "solidity": 0.8667,
+          "tris": 64826,
+          "verts": 32414
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 0,
+          "chi": 1,
+          "nonmanifold": 2,
+          "tris": 64824,
+          "volume_m3": 34.5691
+        },
+        "shells_kept": 1,
+        "tris": 197384,
+        "volume_m3": 34.5873,
+        "voxel_m": 0.0305
+      },
+      "key": "nq_boulder_03",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_namaqualand"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_nq_boulder_03-1": 294,
+        "base00": 3188,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_nq_boulder_03_a100": 236,
+        "ericrolph_hot_potato_arena_f_nq_boulder_03_a250": 688,
+        "ericrolph_hot_potato_arena_f_nq_boulder_03_a600": 1970,
+        "nulldetail4": 0,
+        "start01": 3188
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_nq_boulder_03_a100": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_nq_boulder_03_a250": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_nq_boulder_03_a600": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_nq_boulder_03_a100": [],
+        "ericrolph_hot_potato_arena_f_nq_boulder_03_a250": [],
+        "ericrolph_hot_potato_arena_f_nq_boulder_03_a600": []
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_nq_boulder_03.dae",
+      "sha256": "ab43dc35fa859536493352bff182701c811adf91a311411b99fd4da4c110e612",
+      "shape_bbox": {
+        "max": [
+          2.39697,
+          3.04734,
+          2.92547
+        ],
+        "min": [
+          -2.38053,
+          -3.05673,
+          -0.00554
+        ]
+      },
+      "size": 409171,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_nq_boulder_03_a100": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 236,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.009418,
+            "share_off_3x": 0.0189
+          },
+          "volume_m3": 34.2814
+        },
+        "ericrolph_hot_potato_arena_f_nq_boulder_03_a250": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 688,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.00963,
+            "share_off_3x": 0.0172
+          },
+          "volume_m3": 34.4783
+        },
+        "ericrolph_hot_potato_arena_f_nq_boulder_03_a600": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1970,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.009644,
+            "share_off_3x": 0.0131
+          },
+          "volume_m3": 34.5591
+        }
+      }
+    },
+    "nq_boulder_04": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 240,
+        "250": 700,
+        "600": 2000
+      },
+      "colmesh_bbox": {
+        "max": [
+          3.17679,
+          3.01804,
+          4.69771
+        ],
+        "min": [
+          -3.14984,
+          -3.10827,
+          0.05066
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 294,
+        "volume_m3": 76.9836
+      },
+      "colmesh_tris": 294,
+      "details": {
+        "100": 236,
+        "250": 688,
+        "600": 1970
+      },
+      "file": "ericrolph_hot_potato_arena_f_nq_boulder_04.dae",
+      "height_m": 6.3,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 59066,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "namaqualand_boulder_04",
+          "fill": 0.3345,
+          "hull": "support_1024",
+          "reference": "largest_part",
+          "solidity": 0.8914,
+          "tris": 59066,
+          "verts": 29535
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "tris": 59066,
+          "volume_m3": 77.7294
+        },
+        "shells_kept": 1,
+        "tris": 318132,
+        "volume_m3": 77.7884,
+        "voxel_m": 0.0315
+      },
+      "key": "nq_boulder_04",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_namaqualand"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_nq_boulder_04-1": 294,
+        "base00": 3188,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_nq_boulder_04_a100": 236,
+        "ericrolph_hot_potato_arena_f_nq_boulder_04_a250": 688,
+        "ericrolph_hot_potato_arena_f_nq_boulder_04_a600": 1970,
+        "nulldetail4": 0,
+        "start01": 3188
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_nq_boulder_04_a100": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_nq_boulder_04_a250": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_nq_boulder_04_a600": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_nq_boulder_04_a100": [],
+        "ericrolph_hot_potato_arena_f_nq_boulder_04_a250": [],
+        "ericrolph_hot_potato_arena_f_nq_boulder_04_a600": []
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_nq_boulder_04.dae",
+      "sha256": "53c4f7a9e9df99a373cb16a996f507dec649dd8d8d08ff6e2b3cc8b134220013",
+      "shape_bbox": {
+        "max": [
+          3.14805,
+          3.12857,
+          4.73434
+        ],
+        "min": [
+          -3.1322,
+          -3.1098,
+          0.01391
+        ]
+      },
+      "size": 409565,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_nq_boulder_04_a100": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 236,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.005415,
+            "share_off_3x": 0.016
+          },
+          "volume_m3": 76.7483
+        },
+        "ericrolph_hot_potato_arena_f_nq_boulder_04_a250": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 688,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.005525,
+            "share_off_3x": 0.018
+          },
+          "volume_m3": 77.4933
+        },
+        "ericrolph_hot_potato_arena_f_nq_boulder_04_a600": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1970,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.005574,
+            "share_off_3x": 0.0119
+          },
+          "volume_m3": 77.6797
+        }
+      }
+    },
+    "nq_boulder_05": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 240,
+        "250": 700,
+        "600": 2000
+      },
+      "colmesh_bbox": {
+        "max": [
+          2.6717,
+          1.46593,
+          2.09972
+        ],
+        "min": [
+          -2.70402,
+          -1.47715,
+          -0.02449
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 294,
+        "volume_m3": 14.0658
+      },
+      "colmesh_tris": 294,
+      "details": {
+        "100": 236,
+        "250": 688,
+        "600": 1970
+      },
+      "file": "ericrolph_hot_potato_arena_f_nq_boulder_05.dae",
+      "height_m": 5.4,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 89618,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "namaqualand_boulder_05",
+          "fill": 0.4474,
+          "hull": "support_1024",
+          "reference": "largest_part",
+          "solidity": 0.8703,
+          "tris": 89618,
+          "verts": 44811
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 1,
+          "chi": 2,
+          "nonmanifold": 2,
+          "tris": 89609,
+          "volume_m3": 14.225
+        },
+        "shells_kept": 1,
+        "tris": 145412,
+        "volume_m3": 14.2613,
+        "voxel_m": 0.027
+      },
+      "key": "nq_boulder_05",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_namaqualand"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_nq_boulder_05-1": 294,
+        "base00": 3188,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_nq_boulder_05_a100": 236,
+        "ericrolph_hot_potato_arena_f_nq_boulder_05_a250": 688,
+        "ericrolph_hot_potato_arena_f_nq_boulder_05_a600": 1970,
+        "nulldetail4": 0,
+        "start01": 3188
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_nq_boulder_05_a100": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_nq_boulder_05_a250": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_nq_boulder_05_a600": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_nq_boulder_05_a100": [],
+        "ericrolph_hot_potato_arena_f_nq_boulder_05_a250": [],
+        "ericrolph_hot_potato_arena_f_nq_boulder_05_a600": []
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_nq_boulder_05.dae",
+      "sha256": "42b91459ec04a3a3c920e44a5c2f68b1ad0d881d7ca52211276d0d9167b300a5",
+      "shape_bbox": {
+        "max": [
+          2.70178,
+          1.46543,
+          2.11609
+        ],
+        "min": [
+          -2.70593,
+          -1.47558,
+          0.00282
+        ]
+      },
+      "size": 409520,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_nq_boulder_05_a100": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 236,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.014404,
+            "share_off_3x": 0.0405
+          },
+          "volume_m3": 14.0297
+        },
+        "ericrolph_hot_potato_arena_f_nq_boulder_05_a250": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 688,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.015283,
+            "share_off_3x": 0.0252
+          },
+          "volume_m3": 14.1933
+        },
+        "ericrolph_hot_potato_arena_f_nq_boulder_05_a600": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1970,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.015735,
+            "share_off_3x": 0.0231
+          },
+          "volume_m3": 14.2412
+        }
+      }
+    },
+    "nq_boulder_06": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 240,
+        "250": 700,
+        "600": 2000
+      },
+      "colmesh_bbox": {
+        "max": [
+          1.65129,
+          3.01267,
+          3.18085
+        ],
+        "min": [
+          -1.64323,
+          -2.99399,
+          0.03973
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 294,
+        "volume_m3": 30.5233
+      },
+      "colmesh_tris": 294,
+      "details": {
+        "100": 236,
+        "250": 688,
+        "600": 1970
+      },
+      "file": "ericrolph_hot_potato_arena_f_nq_boulder_06.dae",
+      "height_m": 6.0,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 109114,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "namaqualand_boulder_06",
+          "fill": 0.4367,
+          "hull": "support_1024",
+          "reference": "largest_part",
+          "solidity": 0.8965,
+          "tris": 109114,
+          "verts": 54559
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 4,
+          "chi": 2,
+          "nonmanifold": 2,
+          "tris": 108466,
+          "volume_m3": 31.0085
+        },
+        "shells_kept": 1,
+        "tris": 188080,
+        "volume_m3": 31.0509,
+        "voxel_m": 0.03
+      },
+      "key": "nq_boulder_06",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_namaqualand"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_nq_boulder_06-1": 294,
+        "base00": 3188,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_nq_boulder_06_a100": 236,
+        "ericrolph_hot_potato_arena_f_nq_boulder_06_a250": 688,
+        "ericrolph_hot_potato_arena_f_nq_boulder_06_a600": 1970,
+        "nulldetail4": 0,
+        "start01": 3188
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_nq_boulder_06_a100": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_nq_boulder_06_a250": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_nq_boulder_06_a600": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_nq_boulder_06_a100": [],
+        "ericrolph_hot_potato_arena_f_nq_boulder_06_a250": [],
+        "ericrolph_hot_potato_arena_f_nq_boulder_06_a600": []
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_nq_boulder_06.dae",
+      "sha256": "fc63feef80d4debf5765d06fc5e233de0a1a3227f7f9f3ae151536264c23fe88",
+      "shape_bbox": {
+        "max": [
+          1.67165,
+          3.00326,
+          3.21136
+        ],
+        "min": [
+          -1.65668,
+          -2.98032,
+          0.00234
+        ]
+      },
+      "size": 409394,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_nq_boulder_06_a100": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 236,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.01111,
+            "share_off_3x": 0.0265
+          },
+          "volume_m3": 30.6129
+        },
+        "ericrolph_hot_potato_arena_f_nq_boulder_06_a250": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 688,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.011818,
+            "share_off_3x": 0.0295
+          },
+          "volume_m3": 30.9253
+        },
+        "ericrolph_hot_potato_arena_f_nq_boulder_06_a600": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1970,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.011972,
+            "share_off_3x": 0.0163
+          },
+          "volume_m3": 31.0113
+        }
+      }
+    },
+    "pebble_cluster": {
+      "bb_dim": 128,
+      "budgets": {
+        "150": 200,
+        "400": 600
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.27939,
+          0.53319,
+          0.23778
+        ],
+        "min": [
+          -0.26858,
+          -0.53714,
+          0.01458
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 78,
+        "volume_m3": 0.0535
+      },
+      "colmesh_tris": 78,
+      "details": {
+        "150": 196,
+        "400": 590
+      },
+      "file": "ericrolph_hot_potato_arena_f_pebble_cluster.dae",
+      "height_m": 1.1,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 12416,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "rock_09",
+          "fill": 0.3468,
+          "hull": "support_1024",
+          "reference": "joined",
+          "solidity": 0.778,
+          "tris": 12416,
+          "verts": 6628
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "tris": 12416,
+          "volume_m3": 0.0596
+        },
+        "shells_kept": 1,
+        "tris": 110808,
+        "volume_m3": 0.0596,
+        "voxel_m": 0.0055
+      },
+      "key": "pebble_cluster",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_scree"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_pebble_cluster-1": 78,
+        "base00": 864,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_pebble_cluster_a150": 196,
+        "ericrolph_hot_potato_arena_f_pebble_cluster_a400": 590,
+        "nulldetail4": 0,
+        "start01": 864
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_pebble_cluster_a150": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_pebble_cluster_a400": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_pebble_cluster_a150": [
+          {
+            "amplitude_m": 0.0554,
+            "moved": 28,
+            "plane_m2": 0.254,
+            "share": 0.21
+          }
+        ],
+        "ericrolph_hot_potato_arena_f_pebble_cluster_a400": [
+          {
+            "amplitude_m": 0.0393,
+            "moved": 69,
+            "plane_m2": 0.235,
+            "share": 0.1922
+          }
+        ]
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_pebble_cluster.dae",
+      "sha256": "7ecce22b92dda09aab721d544d6d42fd38c3079ba6bb1921c8a0552a2e903121",
+      "shape_bbox": {
+        "max": [
+          0.28362,
+          0.5486,
+          0.2529
+        ],
+        "min": [
+          -0.28454,
+          -0.5494,
+          -0.0064
+        ]
+      },
+      "size": 116030,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_pebble_cluster_a150": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 196,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.395495,
+            "share_off_3x": 0.0298
+          },
+          "volume_m3": 0.0537
+        },
+        "ericrolph_hot_potato_arena_f_pebble_cluster_a400": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 590,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.404778,
+            "share_off_3x": 0.0218
+          },
+          "volume_m3": 0.0554
+        }
+      }
+    },
+    "pine_mid_a": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 3000,
+        "300": 4110,
+        "600": 5590
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.36,
+          0.34238,
+          16.2
+        ],
+        "min": [
+          -0.29125,
+          -0.34238,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 20,
+      "details": {
+        "100": 3000,
+        "300": 4110,
+        "600": 5590
+      },
+      "file": "ericrolph_hot_potato_arena_f_pine_mid_a.dae",
+      "height_m": 18.0,
+      "import_part": null,
+      "import_solid": null,
+      "key": "pine_mid_a",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_branches",
+        "ericrolph_hot_potato_arena_f_pine_bark",
+        "ericrolph_hot_potato_arena_f_pine_twig_a"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_pine_mid_a-1": 20,
+        "base00": 12720,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_pine_mid_a_a100": 3000,
+        "ericrolph_hot_potato_arena_f_pine_mid_a_a300": 4110,
+        "ericrolph_hot_potato_arena_f_pine_mid_a_a600": 5590,
+        "nulldetail8": 0,
+        "start01": 12720
+      },
+      "nulldetail": 8,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_mid_a.dae",
+      "sha256": "9a8b8d21f59de0be19e2d5484796dd184c651992893952e092202d1773177113",
+      "shape_bbox": {
+        "max": [
+          5.31856,
+          5.34258,
+          18.89924
+        ],
+        "min": [
+          -6.12093,
+          -4.99392,
+          0.0
+        ]
+      },
+      "size": 2053711,
+      "solid": {}
+    },
+    "pine_mid_b": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 3000,
+        "300": 4110,
+        "600": 5590
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.3,
+          0.28532,
+          13.5
+        ],
+        "min": [
+          -0.24271,
+          -0.28532,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 20,
+      "details": {
+        "100": 3000,
+        "300": 4110,
+        "600": 5590
+      },
+      "file": "ericrolph_hot_potato_arena_f_pine_mid_b.dae",
+      "height_m": 15.0,
+      "import_part": null,
+      "import_solid": null,
+      "key": "pine_mid_b",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_branches",
+        "ericrolph_hot_potato_arena_f_pine_bark",
+        "ericrolph_hot_potato_arena_f_pine_twig_b"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_pine_mid_b-1": 20,
+        "base00": 12720,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_pine_mid_b_a100": 3000,
+        "ericrolph_hot_potato_arena_f_pine_mid_b_a300": 4110,
+        "ericrolph_hot_potato_arena_f_pine_mid_b_a600": 5590,
+        "nulldetail8": 0,
+        "start01": 12720
+      },
+      "nulldetail": 8,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_mid_b.dae",
+      "sha256": "b9407e7d2263ee2512731f14325c62ac5df1f1f7162a0404162d64c0f0cba2e8",
+      "shape_bbox": {
+        "max": [
+          4.71768,
+          4.86864,
+          16.67559
+        ],
+        "min": [
+          -4.79881,
+          -5.94029,
+          0.0
+        ]
+      },
+      "size": 2071696,
+      "solid": {}
+    },
+    "pine_sapling_a": {
+      "bb_dim": 128,
+      "budgets": {
+        "150": 1052,
+        "400": 1600
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.1,
+          0.0866,
+          4.5
+        ],
+        "min": [
+          -0.05,
+          -0.0866,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 12,
+      "details": {
+        "150": 1052,
+        "400": 1600
+      },
+      "file": "ericrolph_hot_potato_arena_f_pine_sapling_a.dae",
+      "height_m": 5.0,
+      "import_part": null,
+      "import_solid": null,
+      "key": "pine_sapling_a",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_branches",
+        "ericrolph_hot_potato_arena_f_pine_bark",
+        "ericrolph_hot_potato_arena_f_sapling_twig"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_pine_sapling_a-1": 12,
+        "base00": 2664,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_pine_sapling_a_a150": 1052,
+        "ericrolph_hot_potato_arena_f_pine_sapling_a_a400": 1600,
+        "nulldetail6": 0,
+        "start01": 2664
+      },
+      "nulldetail": 6,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_sapling_a.dae",
+      "sha256": "d8a463488bd4819853c1edd2e89a4d391048f92d28bc90b925adb60ded4c8e30",
+      "shape_bbox": {
+        "max": [
+          1.97447,
+          1.90266,
+          5.19952
+        ],
+        "min": [
+          -1.90398,
+          -1.79829,
+          -0.02846
+        ]
+      },
+      "size": 427670,
+      "solid": {}
+    },
+    "pine_sapling_b": {
+      "bb_dim": 128,
+      "budgets": {
+        "150": 1052,
+        "400": 1600
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.07,
+          0.06062,
+          3.15
+        ],
+        "min": [
+          -0.035,
+          -0.06062,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 12,
+      "details": {
+        "150": 1052,
+        "400": 1600
+      },
+      "file": "ericrolph_hot_potato_arena_f_pine_sapling_b.dae",
+      "height_m": 3.5,
+      "import_part": null,
+      "import_solid": null,
+      "key": "pine_sapling_b",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_branches",
+        "ericrolph_hot_potato_arena_f_pine_bark",
+        "ericrolph_hot_potato_arena_f_sapling_twig"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_pine_sapling_b-1": 12,
+        "base00": 2664,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_pine_sapling_b_a150": 1052,
+        "ericrolph_hot_potato_arena_f_pine_sapling_b_a400": 1600,
+        "nulldetail6": 0,
+        "start01": 2664
+      },
+      "nulldetail": 6,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_sapling_b.dae",
+      "sha256": "3256aff8abbf2f6cef542ecfaa717887c109af30cf80df121f7e1181e1ca5519",
+      "shape_bbox": {
+        "max": [
+          1.39822,
+          1.65844,
+          3.68864
+        ],
+        "min": [
+          -1.46088,
+          -1.22429,
+          0.0
+        ]
+      },
+      "size": 439368,
+      "solid": {}
+    },
+    "pine_sapling_c": {
+      "bb_dim": 128,
+      "budgets": {
+        "150": 1052,
+        "400": 1600
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.044,
+          0.03811,
+          1.98
+        ],
+        "min": [
+          -0.022,
+          -0.03811,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 12,
+      "details": {
+        "150": 1052,
+        "400": 1600
+      },
+      "file": "ericrolph_hot_potato_arena_f_pine_sapling_c.dae",
+      "height_m": 2.2,
+      "import_part": null,
+      "import_solid": null,
+      "key": "pine_sapling_c",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_branches",
+        "ericrolph_hot_potato_arena_f_pine_bark",
+        "ericrolph_hot_potato_arena_f_sapling_twig"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_pine_sapling_c-1": 12,
+        "base00": 2664,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_pine_sapling_c_a150": 1052,
+        "ericrolph_hot_potato_arena_f_pine_sapling_c_a400": 1600,
+        "nulldetail6": 0,
+        "start01": 2664
+      },
+      "nulldetail": 6,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_sapling_c.dae",
+      "sha256": "335f11b5c5ad1f63498fa7cd47372036f7c487c3c4c2d492035e1d5ff44e7ed6",
+      "shape_bbox": {
+        "max": [
+          1.35775,
+          1.25655,
+          2.26092
+        ],
+        "min": [
+          -0.97725,
+          -1.01909,
+          -0.09208
+        ]
+      },
+      "size": 420427,
+      "solid": {}
+    },
+    "pine_tall_a": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 6800,
+        "300": 9600,
+        "600": 13000
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.56,
+          0.48497,
+          25.2
+        ],
+        "min": [
+          -0.56,
+          -0.48497,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 24,
+      "details": {
+        "100": 6800,
+        "300": 9600,
+        "600": 13000
+      },
+      "file": "ericrolph_hot_potato_arena_f_pine_tall_a.dae",
+      "height_m": 28.0,
+      "import_part": null,
+      "import_solid": null,
+      "key": "pine_tall_a",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_branches",
+        "ericrolph_hot_potato_arena_f_pine_bark",
+        "ericrolph_hot_potato_arena_f_pine_twig_a"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_pine_tall_a-1": 24,
+        "base00": 29424,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_pine_tall_a_a100": 6800,
+        "ericrolph_hot_potato_arena_f_pine_tall_a_a300": 9600,
+        "ericrolph_hot_potato_arena_f_pine_tall_a_a600": 13000,
+        "nulldetail8": 0,
+        "start01": 29424
+      },
+      "nulldetail": 8,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_tall_a.dae",
+      "sha256": "0a04ae7e221eadff6d9500f16703ec8f245f2abea898be997c5425ae2e97c88f",
+      "shape_bbox": {
+        "max": [
+          9.73576,
+          9.368,
+          30.30131
+        ],
+        "min": [
+          -9.80615,
+          -8.26124,
+          0.0
+        ]
+      },
+      "size": 4941179,
+      "solid": {}
+    },
+    "pine_tall_b": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 6800,
+        "300": 9600,
+        "600": 13000
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.6,
+          0.51962,
+          27.0
+        ],
+        "min": [
+          -0.6,
+          -0.51962,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 24,
+      "details": {
+        "100": 6800,
+        "300": 9600,
+        "600": 13000
+      },
+      "file": "ericrolph_hot_potato_arena_f_pine_tall_b.dae",
+      "height_m": 30.0,
+      "import_part": null,
+      "import_solid": null,
+      "key": "pine_tall_b",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_branches",
+        "ericrolph_hot_potato_arena_f_pine_bark",
+        "ericrolph_hot_potato_arena_f_pine_twig_b"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_pine_tall_b-1": 24,
+        "base00": 29424,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_pine_tall_b_a100": 6800,
+        "ericrolph_hot_potato_arena_f_pine_tall_b_a300": 9600,
+        "ericrolph_hot_potato_arena_f_pine_tall_b_a600": 13000,
+        "nulldetail8": 0,
+        "start01": 29424
+      },
+      "nulldetail": 8,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_tall_b.dae",
+      "sha256": "dc42b55add1a1353ea3ab397bfb25ca09f46b9a1e637c791337a269b76c4082e",
+      "shape_bbox": {
+        "max": [
+          8.96487,
+          9.22212,
+          33.9704
+        ],
+        "min": [
+          -9.87208,
+          -10.21019,
+          0.0
+        ]
+      },
+      "size": 4924422,
+      "solid": {}
+    },
+    "pine_tall_c": {
+      "bb_dim": 128,
+      "budgets": {
+        "100": 6800,
+        "300": 9600,
+        "600": 13000
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.52,
+          0.45033,
+          23.4
+        ],
+        "min": [
+          -0.52,
+          -0.45033,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 24,
+      "details": {
+        "100": 6800,
+        "300": 9600,
+        "600": 13000
+      },
+      "file": "ericrolph_hot_potato_arena_f_pine_tall_c.dae",
+      "height_m": 26.0,
+      "import_part": null,
+      "import_solid": null,
+      "key": "pine_tall_c",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_branches",
+        "ericrolph_hot_potato_arena_f_pine_bark",
+        "ericrolph_hot_potato_arena_f_pine_twig_a"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_pine_tall_c-1": 24,
+        "base00": 29424,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_pine_tall_c_a100": 6800,
+        "ericrolph_hot_potato_arena_f_pine_tall_c_a300": 9600,
+        "ericrolph_hot_potato_arena_f_pine_tall_c_a600": 13000,
+        "nulldetail8": 0,
+        "start01": 29424
+      },
+      "nulldetail": 8,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_pine_tall_c.dae",
+      "sha256": "fd4aa4ca46b3f4cdd80451b39692a8a60678c1a03f30ff927d9499577b596207",
+      "shape_bbox": {
+        "max": [
+          8.93152,
+          7.22988,
+          28.40349
+        ],
+        "min": [
+          -8.32647,
+          -8.20398,
+          0.0
+        ]
+      },
+      "size": 4963272,
+      "solid": {}
+    },
+    "reed_clump": {
+      "bb_dim": 128,
+      "budgets": {
+        "200": 160,
+        "80": 108
+      },
+      "colmesh_bbox": null,
+      "colmesh_kind": null,
+      "colmesh_tris": 0,
+      "details": {
+        "200": 160,
+        "80": 108
+      },
+      "file": "ericrolph_hot_potato_arena_f_reed_clump.dae",
+      "height_m": 2.0,
+      "import_part": null,
+      "import_solid": null,
+      "key": "reed_clump",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_reed"
+      ],
+      "node_tris": {
+        "base00": 268,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_reed_clump_a200": 160,
+        "ericrolph_hot_potato_arena_f_reed_clump_a80": 108,
+        "nulldetail6": 0,
+        "start01": 268
+      },
+      "nulldetail": 6,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_reed_clump.dae",
+      "sha256": "5021745e09a52c56b82b996156966733ccde3562dbede85781246cacf55f3d19",
+      "shape_bbox": {
+        "max": [
+          0.55938,
+          0.56818,
+          2.16324
+        ],
+        "min": [
+          -0.56995,
+          -0.54423,
+          0.05903
+        ]
+      },
+      "size": 50613,
+      "solid": {}
+    },
+    "root_cluster": {
+      "bb_dim": 128,
+      "budgets": {
+        "200": 400,
+        "500": 1000
+      },
+      "colmesh_bbox": {
+        "max": [
+          2.93353,
+          1.95573,
+          2.22041
+        ],
+        "min": [
+          -3.04514,
+          -1.98201,
+          -0.00258
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 156,
+        "volume_m3": 6.763
+      },
+      "colmesh_tris": 156,
+      "details": {
+        "200": 394,
+        "500": 984
+      },
+      "file": "ericrolph_hot_potato_arena_f_root_cluster.dae",
+      "height_m": 6.2,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 225261,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "root_cluster_01",
+          "fill": 0.115,
+          "hull": "support_1024",
+          "reference": "joined",
+          "solidity": 0.3001,
+          "tris": 225261,
+          "verts": 117551
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 4.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 282,
+          "chi": -184,
+          "nonmanifold": 567,
+          "tris": 441416,
+          "volume_m3": -11.2293
+        },
+        "shells_kept": 1,
+        "tris": 145424,
+        "volume_m3": 7.0519,
+        "voxel_m": 0.0312
+      },
+      "key": "root_cluster",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_deadwood"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_root_cluster-1": 156,
+        "base00": 1534,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_root_cluster_a200": 394,
+        "ericrolph_hot_potato_arena_f_root_cluster_a500": 984,
+        "nulldetail6": 0,
+        "start01": 1534
+      },
+      "nulldetail": 6,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_root_cluster_a200": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_root_cluster_a500": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_root_cluster_a200": [],
+        "ericrolph_hot_potato_arena_f_root_cluster_a500": []
+      },
+      "relative": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_root_cluster.dae",
+      "sha256": "d1c7c06875b8b5fca20f770ae2d59a715c3c1e7439ff29837c215fec769c1bdb",
+      "shape_bbox": {
+        "max": [
+          3.06756,
+          1.97763,
+          2.25181
+        ],
+        "min": [
+          -3.05621,
+          -1.99435,
+          0.006
+        ]
+      },
+      "size": 200676,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_root_cluster_a200": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 394,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.006464,
+            "share_off_3x": 0.415
+          },
+          "volume_m3": 6.9573
+        },
+        "ericrolph_hot_potato_arena_f_root_cluster_a500": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 984,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.009068,
+            "share_off_3x": 0.2752
+          },
+          "volume_m3": 7.0198
+        }
+      }
+    },
+    "scree_rock_a": {
+      "bb_dim": 128,
+      "budgets": {
+        "150": 420,
+        "400": 1600
+      },
+      "colmesh_bbox": {
+        "max": [
+          1.65248,
+          3.20245,
+          2.84732
+        ],
+        "min": [
+          -1.68893,
+          -3.19155,
+          0.03448
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 156,
+        "volume_m3": 30.7883
+      },
+      "colmesh_tris": 156,
+      "details": {
+        "150": 412,
+        "400": 1576
+      },
+      "file": "ericrolph_hot_potato_arena_f_scree_rock_a.dae",
+      "height_m": 6.4,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 14844,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "rock_07",
+          "fill": 0.4689,
+          "hull": "support_1024",
+          "reference": "largest_part",
+          "solidity": 0.9092,
+          "tris": 14844,
+          "verts": 7424
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "tris": 14844,
+          "volume_m3": 31.9869
+        },
+        "shells_kept": 1,
+        "tris": 160844,
+        "volume_m3": 31.9898,
+        "voxel_m": 0.032
+      },
+      "key": "scree_rock_a",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_scree"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_scree_rock_a-1": 156,
+        "base00": 2144,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_scree_rock_a_a150": 412,
+        "ericrolph_hot_potato_arena_f_scree_rock_a_a400": 1576,
+        "nulldetail4": 0,
+        "start01": 2144
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_scree_rock_a_a150": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_scree_rock_a_a400": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_scree_rock_a_a150": [
+          {
+            "amplitude_m": 0.3172,
+            "moved": 22,
+            "plane_m2": 8.17,
+            "share": 0.1314
+          },
+          {
+            "amplitude_m": 0.2816,
+            "moved": 32,
+            "plane_m2": 6.433,
+            "share": 0.104
+          }
+        ],
+        "ericrolph_hot_potato_arena_f_scree_rock_a_a400": [
+          {
+            "amplitude_m": 0.2017,
+            "moved": 64,
+            "plane_m2": 6.935,
+            "share": 0.1109
+          }
+        ]
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_scree_rock_a.dae",
+      "sha256": "b8d5402710f23f9c04ca55339ade23b039a48017904e70c26d28d7d6cd3cf624",
+      "shape_bbox": {
+        "max": [
+          1.69034,
+          3.19745,
+          2.86191
+        ],
+        "min": [
+          -1.67597,
+          -3.19419,
+          0.00297
+        ]
+      },
+      "size": 276894,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_scree_rock_a_a150": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 412,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.0076,
+            "share_off_3x": 0.0057
+          },
+          "volume_m3": 29.757
+        },
+        "ericrolph_hot_potato_arena_f_scree_rock_a_a400": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 1576,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.00781,
+            "share_off_3x": 0.0079
+          },
+          "volume_m3": 31.3653
+        }
+      }
+    },
+    "scree_rock_b": {
+      "bb_dim": 128,
+      "budgets": {
+        "150": 200,
+        "400": 600
+      },
+      "colmesh_bbox": {
+        "max": [
+          1.03542,
+          0.61544,
+          1.06334
+        ],
+        "min": [
+          -1.0382,
+          -0.62764,
+          -0.00922
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 118,
+        "volume_m3": 0.9354
+      },
+      "colmesh_tris": 118,
+      "details": {
+        "150": 196,
+        "400": 590
+      },
+      "file": "ericrolph_hot_potato_arena_f_scree_rock_b.dae",
+      "height_m": 2.2,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 53520,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "stone_01",
+          "fill": 0.2932,
+          "hull": "support_1024",
+          "reference": "largest_part",
+          "solidity": 0.6678,
+          "tris": 53520,
+          "verts": 26762
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 0.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "tris": 53436,
+          "volume_m3": 0.9717
+        },
+        "shells_kept": 1,
+        "tris": 175484,
+        "volume_m3": 0.9731,
+        "voxel_m": 0.011
+      },
+      "key": "scree_rock_b",
+      "materials": [
+        "ericrolph_hot_potato_arena_r_scree"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_scree_rock_b-1": 118,
+        "base00": 904,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_scree_rock_b_a150": 196,
+        "ericrolph_hot_potato_arena_f_scree_rock_b_a400": 590,
+        "nulldetail4": 0,
+        "start01": 904
+      },
+      "nulldetail": 4,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_scree_rock_b_a150": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_scree_rock_b_a400": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_scree_rock_b_a150": [],
+        "ericrolph_hot_potato_arena_f_scree_rock_b_a400": []
+      },
+      "relative": "art/shapes/rocks/ericrolph_hot_potato_arena_f_scree_rock_b.dae",
+      "sha256": "8ca3e801ff67072fd925cdeb5f94fe36cb7bf85452df38132aaa8a4844a46df4",
+      "shape_bbox": {
+        "max": [
+          1.10147,
+          0.66503,
+          1.0754
+        ],
+        "min": [
+          -1.11187,
+          -0.65329,
+          0.00626
+        ]
+      },
+      "size": 120711,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_scree_rock_b_a150": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 196,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.081519,
+            "share_off_3x": 0.0163
+          },
+          "volume_m3": 0.9546
+        },
+        "ericrolph_hot_potato_arena_f_scree_rock_b_a400": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 590,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.085611,
+            "share_off_3x": 0.0124
+          },
+          "volume_m3": 0.9666
+        }
+      }
+    },
+    "shrub_01": {
+      "bb_dim": 128,
+      "budgets": {
+        "120": 468,
+        "300": 700,
+        "40": 320
+      },
+      "colmesh_bbox": null,
+      "colmesh_kind": null,
+      "colmesh_tris": 0,
+      "details": {
+        "120": 468,
+        "300": 700,
+        "40": 320
+      },
+      "file": "ericrolph_hot_potato_arena_f_shrub_01.dae",
+      "height_m": 2.6,
+      "import_part": null,
+      "import_solid": null,
+      "key": "shrub_01",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_knotted_bark",
+        "ericrolph_hot_potato_arena_f_shrub_leaf_01"
+      ],
+      "node_tris": {
+        "base00": 1488,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_shrub_01_a120": 468,
+        "ericrolph_hot_potato_arena_f_shrub_01_a300": 700,
+        "ericrolph_hot_potato_arena_f_shrub_01_a40": 320,
+        "nulldetail6": 0,
+        "start01": 1488
+      },
+      "nulldetail": 6,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_01.dae",
+      "sha256": "e8c3f9b8b263014b6106856bbf592bffbcfb75ff9d5afdb278baa66b8e01b547",
+      "shape_bbox": {
+        "max": [
+          1.38509,
+          1.34039,
+          2.86436
+        ],
+        "min": [
+          -1.17543,
+          -1.30127,
+          0.0
+        ]
+      },
+      "size": 248037,
+      "solid": {}
+    },
+    "shrub_02": {
+      "bb_dim": 128,
+      "budgets": {
+        "120": 468,
+        "300": 700,
+        "40": 320
+      },
+      "colmesh_bbox": null,
+      "colmesh_kind": null,
+      "colmesh_tris": 0,
+      "details": {
+        "120": 468,
+        "300": 700,
+        "40": 320
+      },
+      "file": "ericrolph_hot_potato_arena_f_shrub_02.dae",
+      "height_m": 5.3,
+      "import_part": null,
+      "import_solid": null,
+      "key": "shrub_02",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_knotted_bark",
+        "ericrolph_hot_potato_arena_f_shrub_leaf_02"
+      ],
+      "node_tris": {
+        "base00": 1488,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_shrub_02_a120": 468,
+        "ericrolph_hot_potato_arena_f_shrub_02_a300": 700,
+        "ericrolph_hot_potato_arena_f_shrub_02_a40": 320,
+        "nulldetail6": 0,
+        "start01": 1488
+      },
+      "nulldetail": 6,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_02.dae",
+      "sha256": "eb56d75a902d54fbd7a7a52dabec4f9ded1cac6b3ef01447058e12f1a86349a3",
+      "shape_bbox": {
+        "max": [
+          2.71844,
+          2.58358,
+          5.51923
+        ],
+        "min": [
+          -2.35393,
+          -2.48549,
+          0.0
+        ]
+      },
+      "size": 247989,
+      "solid": {}
+    },
+    "shrub_03": {
+      "bb_dim": 128,
+      "budgets": {
+        "120": 468,
+        "300": 700,
+        "40": 320
+      },
+      "colmesh_bbox": null,
+      "colmesh_kind": null,
+      "colmesh_tris": 0,
+      "details": {
+        "120": 468,
+        "300": 700,
+        "40": 320
+      },
+      "file": "ericrolph_hot_potato_arena_f_shrub_03.dae",
+      "height_m": 2.0,
+      "import_part": null,
+      "import_solid": null,
+      "key": "shrub_03",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_knotted_bark",
+        "ericrolph_hot_potato_arena_f_shrub_leaf_03"
+      ],
+      "node_tris": {
+        "base00": 1488,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_shrub_03_a120": 468,
+        "ericrolph_hot_potato_arena_f_shrub_03_a300": 700,
+        "ericrolph_hot_potato_arena_f_shrub_03_a40": 320,
+        "nulldetail6": 0,
+        "start01": 1488
+      },
+      "nulldetail": 6,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_03.dae",
+      "sha256": "4aa823dcf70c670ce9d7346e5f7f75a0a474fbf70d815502e921e3f991d11d8f",
+      "shape_bbox": {
+        "max": [
+          1.18697,
+          1.16244,
+          2.22347
+        ],
+        "min": [
+          -0.99744,
+          -1.1227,
+          0.0
+        ]
+      },
+      "size": 247904,
+      "solid": {}
+    },
+    "shrub_04": {
+      "bb_dim": 128,
+      "budgets": {
+        "120": 468,
+        "300": 700,
+        "40": 320
+      },
+      "colmesh_bbox": null,
+      "colmesh_kind": null,
+      "colmesh_tris": 0,
+      "details": {
+        "120": 468,
+        "300": 700,
+        "40": 320
+      },
+      "file": "ericrolph_hot_potato_arena_f_shrub_04.dae",
+      "height_m": 2.2,
+      "import_part": null,
+      "import_solid": null,
+      "key": "shrub_04",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_knotted_bark",
+        "ericrolph_hot_potato_arena_f_shrub_leaf_04"
+      ],
+      "node_tris": {
+        "base00": 1488,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_shrub_04_a120": 468,
+        "ericrolph_hot_potato_arena_f_shrub_04_a300": 700,
+        "ericrolph_hot_potato_arena_f_shrub_04_a40": 320,
+        "nulldetail6": 0,
+        "start01": 1488
+      },
+      "nulldetail": 6,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/undergrowth/ericrolph_hot_potato_arena_f_shrub_04.dae",
+      "sha256": "8e11769fc854c000611849f30338cc23ead4ac23c67791518e4c0b4ee3efe2c1",
+      "shape_bbox": {
+        "max": [
+          1.25803,
+          1.17605,
+          2.48376
+        ],
+        "min": [
+          -1.02142,
+          -1.12543,
+          0.0
+        ]
+      },
+      "size": 247999,
+      "solid": {}
+    },
+    "snag_a": {
+      "bb_dim": 128,
+      "budgets": {
+        "200": 300,
+        "500": 700
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.36,
+          0.36,
+          16.2
+        ],
+        "min": [
+          -0.36,
+          -0.36,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 16,
+      "details": {
+        "200": 300,
+        "500": 700
+      },
+      "file": "ericrolph_hot_potato_arena_f_snag_a.dae",
+      "height_m": 18.0,
+      "import_part": null,
+      "import_solid": null,
+      "key": "snag_a",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_knotted_bark"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_snag_a-1": 16,
+        "base00": 1016,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_snag_a_a200": 300,
+        "ericrolph_hot_potato_arena_f_snag_a_a500": 700,
+        "nulldetail6": 0,
+        "start01": 1016
+      },
+      "nulldetail": 6,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_snag_a.dae",
+      "sha256": "66bfa76246b9253c8f53778f43b7a28d876be3ce48416a5a50d63aa035aa27f7",
+      "shape_bbox": {
+        "max": [
+          3.05706,
+          1.13857,
+          16.56
+        ],
+        "min": [
+          -1.8018,
+          -0.47933,
+          0.0
+        ]
+      },
+      "size": 135165,
+      "solid": {}
+    },
+    "snag_b": {
+      "bb_dim": 128,
+      "budgets": {
+        "200": 300,
+        "500": 700
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.24,
+          0.24,
+          10.8
+        ],
+        "min": [
+          -0.24,
+          -0.24,
+          0.0
+        ]
+      },
+      "colmesh_kind": null,
+      "colmesh_tris": 16,
+      "details": {
+        "200": 300,
+        "500": 700
+      },
+      "file": "ericrolph_hot_potato_arena_f_snag_b.dae",
+      "height_m": 12.0,
+      "import_part": null,
+      "import_solid": null,
+      "key": "snag_b",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_knotted_bark"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_snag_b-1": 16,
+        "base00": 1016,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_snag_b_a200": 300,
+        "ericrolph_hot_potato_arena_f_snag_b_a500": 700,
+        "nulldetail6": 0,
+        "start01": 1016
+      },
+      "nulldetail": 6,
+      "open_shell": {},
+      "planes_broken": {},
+      "relative": "art/shapes/trees/ericrolph_hot_potato_arena_f_snag_b.dae",
+      "sha256": "b0b1e2f68bbb9b7b4a39ddf0fa3d757df898281d2b67219ffc4355f4e1fa7000",
+      "shape_bbox": {
+        "max": [
+          1.28848,
+          0.37557,
+          11.04
+        ],
+        "min": [
+          -0.336,
+          -1.38557,
+          0.0
+        ]
+      },
+      "size": 135060,
+      "solid": {}
+    },
+    "stump_a": {
+      "bb_dim": 128,
+      "budgets": {
+        "150": 300,
+        "400": 800
+      },
+      "colmesh_bbox": {
+        "max": [
+          0.98126,
+          1.14951,
+          0.81592
+        ],
+        "min": [
+          -1.00731,
+          -1.12686,
+          0.02154
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 98,
+        "volume_m3": 1.1778
+      },
+      "colmesh_tris": 98,
+      "details": {
+        "150": 294,
+        "400": 788
+      },
+      "file": "ericrolph_hot_potato_arena_f_stump_a.dae",
+      "height_m": 2.3,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 41046,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "tree_stump_01",
+          "fill": 0.2184,
+          "hull": "support_1024",
+          "reference": "joined",
+          "solidity": 0.5486,
+          "tris": 41046,
+          "verts": 22472
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 6.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 0,
+          "chi": 0,
+          "nonmanifold": 1,
+          "tris": 42438,
+          "volume_m3": 1.1873
+        },
+        "shells_kept": 1,
+        "tris": 204768,
+        "volume_m3": 1.2151,
+        "voxel_m": 0.0117
+      },
+      "key": "stump_a",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_deadwood"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_stump_a-1": 98,
+        "base00": 1180,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_stump_a_a150": 294,
+        "ericrolph_hot_potato_arena_f_stump_a_a400": 788,
+        "nulldetail6": 0,
+        "start01": 1180
+      },
+      "nulldetail": 6,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_stump_a_a150": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_stump_a_a400": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_stump_a_a150": [
+          {
+            "amplitude_m": 0.1127,
+            "moved": 45,
+            "plane_m2": 1.422,
+            "share": 0.1444
+          }
+        ],
+        "ericrolph_hot_potato_arena_f_stump_a_a400": []
+      },
+      "relative": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_stump_a.dae",
+      "sha256": "440b3e19bd135376560068b40ab5ed4598140a08a08ed436760bf30ba4e50969",
+      "shape_bbox": {
+        "max": [
+          1.01275,
+          1.13178,
+          0.83251
+        ],
+        "min": [
+          -1.01187,
+          -1.1243,
+          -0.00223
+        ]
+      },
+      "size": 156457,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_stump_a_a150": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 294,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.056586,
+            "share_off_3x": 0.2366
+          },
+          "volume_m3": 1.098
+        },
+        "ericrolph_hot_potato_arena_f_stump_a_a400": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 788,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.07601,
+            "share_off_3x": 0.2002
+          },
+          "volume_m3": 1.2118
+        }
+      }
+    },
+    "stump_b": {
+      "bb_dim": 128,
+      "budgets": {
+        "150": 300,
+        "400": 800
+      },
+      "colmesh_bbox": {
+        "max": [
+          1.00162,
+          0.92217,
+          0.71894
+        ],
+        "min": [
+          -1.02817,
+          -0.9216,
+          0.03126
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 98,
+        "volume_m3": 0.8312
+      },
+      "colmesh_tris": 98,
+      "details": {
+        "150": 294,
+        "400": 788
+      },
+      "file": "ericrolph_hot_potato_arena_f_stump_b.dae",
+      "height_m": 2.1,
+      "import_part": {
+        "imported_objects": 1,
+        "kept_polys": 62345,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "tree_stump_02",
+          "fill": 0.192,
+          "hull": "support_1024",
+          "reference": "joined",
+          "solidity": 0.5404,
+          "tris": 62345,
+          "verts": 33119
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 6.0,
+        "crumbs_dropped": 0,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 0,
+          "chi": -1,
+          "nonmanifold": 2,
+          "tris": 63844,
+          "volume_m3": 0.8394
+        },
+        "shells_kept": 1,
+        "tris": 194292,
+        "volume_m3": 0.8555,
+        "voxel_m": 0.0106
+      },
+      "key": "stump_b",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_deadwood"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_stump_b-1": 98,
+        "base00": 1180,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_stump_b_a150": 294,
+        "ericrolph_hot_potato_arena_f_stump_b_a400": 788,
+        "nulldetail6": 0,
+        "start01": 1180
+      },
+      "nulldetail": 6,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_stump_b_a150": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_stump_b_a400": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_stump_b_a150": [],
+        "ericrolph_hot_potato_arena_f_stump_b_a400": []
+      },
+      "relative": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_stump_b.dae",
+      "sha256": "1f93f893bf1b32cab7613fd3dda3cc0a0f38cca7375f17427e46c8dadd0b88b1",
+      "shape_bbox": {
+        "max": [
+          1.03694,
+          0.94739,
+          0.71588
+        ],
+        "min": [
+          -1.03858,
+          -0.94157,
+          0.00885
+        ]
+      },
+      "size": 156825,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_stump_b_a150": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 294,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.097008,
+            "share_off_3x": 0.2164
+          },
+          "volume_m3": 0.8522
+        },
+        "ericrolph_hot_potato_arena_f_stump_b_a400": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 788,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.111773,
+            "share_off_3x": 0.2027
+          },
+          "volume_m3": 0.8529
+        }
+      }
+    },
+    "windthrow_roots": {
+      "bb_dim": 128,
+      "budgets": {
+        "200": 900,
+        "500": 3000
+      },
+      "colmesh_bbox": {
+        "max": [
+          1.80805,
+          1.05153,
+          0.40467
+        ],
+        "min": [
+          -1.80421,
+          -1.08691,
+          0.04646
+        ]
+      },
+      "colmesh_kind": {
+        "boundary": 0,
+        "chi": 2,
+        "kind": "decimated_solid",
+        "nonmanifold": 0,
+        "solid": true,
+        "tris": 156,
+        "volume_m3": 0.4706
+      },
+      "colmesh_tris": 156,
+      "details": {
+        "200": 886,
+        "500": 2954
+      },
+      "file": "ericrolph_hot_potato_arena_f_windthrow_roots.dae",
+      "height_m": 4.3,
+      "import_part": {
+        "imported_objects": 2,
+        "kept_polys": 162693,
+        "part_index": null,
+        "part_source": "loose",
+        "source_reading": {
+          "asset": "pine_roots",
+          "fill": 0.106,
+          "hull": "support_1024",
+          "reference": "joined",
+          "solidity": 0.2104,
+          "tris": 162693,
+          "verts": 86788
+        }
+      },
+      "import_solid": {
+        "boundary": 0,
+        "chi": 2,
+        "chi_after_closing": 2,
+        "closing_voxels": 16.0,
+        "crumbs_dropped": 17,
+        "kind": "voxel",
+        "nonmanifold": 0,
+        "scan": {
+          "boundary": 31,
+          "chi": -63,
+          "nonmanifold": 65,
+          "tris": 163511,
+          "volume_m3": 0.6857
+        },
+        "shells_kept": 1,
+        "tris": 75480,
+        "volume_m3": 0.5463,
+        "voxel_m": 0.0215
+      },
+      "key": "windthrow_roots",
+      "materials": [
+        "ericrolph_hot_potato_arena_f_deadwood"
+      ],
+      "node_tris": {
+        "Colmesh_ericrolph_hot_potato_arena_f_windthrow_roots-1": 156,
+        "base00": 3996,
+        "bb_autobillboard25": 0,
+        "ericrolph_hot_potato_arena_f_windthrow_roots_a200": 886,
+        "ericrolph_hot_potato_arena_f_windthrow_roots_a500": 2954,
+        "nulldetail6": 0,
+        "start01": 3996
+      },
+      "nulldetail": 6,
+      "open_shell": {
+        "ericrolph_hot_potato_arena_f_windthrow_roots_a200": [
+          0,
+          0.0
+        ],
+        "ericrolph_hot_potato_arena_f_windthrow_roots_a500": [
+          0,
+          0.0
+        ]
+      },
+      "planes_broken": {
+        "ericrolph_hot_potato_arena_f_windthrow_roots_a200": [
+          {
+            "amplitude_m": 0.1351,
+            "moved": 93,
+            "plane_m2": 2.568,
+            "share": 0.1935
+          }
+        ],
+        "ericrolph_hot_potato_arena_f_windthrow_roots_a500": [
+          {
+            "amplitude_m": 0.0728,
+            "moved": 258,
+            "plane_m2": 2.167,
+            "share": 0.1622
+          }
+        ]
+      },
+      "relative": "art/shapes/deadwood/ericrolph_hot_potato_arena_f_windthrow_roots.dae",
+      "sha256": "2c0948c071fb6fd1198b1f9675c189deb426390a1c7a0c88092104fe73b7edb4",
+      "shape_bbox": {
+        "max": [
+          1.86254,
+          1.13227,
+          0.43689
+        ],
+        "min": [
+          -1.85585,
+          -1.13132,
+          0.00408
+        ]
+      },
+      "size": 521900,
+      "solid": {
+        "ericrolph_hot_potato_arena_f_windthrow_roots_a200": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 886,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.02864,
+            "share_off_3x": 0.4171
+          },
+          "volume_m3": 0.3213
+        },
+        "ericrolph_hot_potato_arena_f_windthrow_roots_a500": {
+          "boundary": 0,
+          "chi": 2,
+          "nonmanifold": 0,
+          "solid": true,
+          "tris": 2954,
+          "uv_stretch": {
+            "median_uv_per_m2": 0.042791,
+            "share_off_3x": 0.2513
+          },
+          "volume_m3": 0.4118
+        }
+      }
+    }
+  }
+}

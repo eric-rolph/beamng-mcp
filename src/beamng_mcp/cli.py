@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 import ctypes
 import importlib
 import importlib.metadata
@@ -17,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from . import __version__
+from .adapters.native_mcp import NativeMCPClient
 from .autodetect import detect_installation
 from .config import Settings
 from .errors import BeamNGMCPError, ConfigurationError
@@ -45,6 +47,12 @@ def _parser() -> argparse.ArgumentParser:
     )
     doctor.add_argument("--config", type=Path)
     doctor.add_argument("--json", action="store_true", dest="as_json")
+
+    native_check = subparsers.add_parser(
+        "native-check", help="probe the running game's native MCP without launching or changing it"
+    )
+    native_check.add_argument("--config", type=Path)
+    native_check.add_argument("--json", action="store_true", dest="as_json")
 
     install = subparsers.add_parser(
         "install-lua", help="install/update the authenticated GELua bridge"
@@ -135,6 +143,16 @@ def _doctor(args: argparse.Namespace) -> int:
             "token_configured": token is not None,
             "url": settings.lua.url,
         },
+        "native_mcp": {
+            "enabled": settings.native_mcp.enabled,
+            "url": settings.native_mcp.url,
+            "probed": False,
+            "workflow": "Use native_status then native_inspect for an already running game",
+            "beamngpy_note": (
+                "Retail builds without tech_techCore cannot launch with BeamNGpy; "
+                "native MCP does not require that extension"
+            ),
+        },
         "gpu": gpu,
         "vision_runtime": vision_runtime,
         "softbody_authoring": {
@@ -185,6 +203,21 @@ def _doctor(args: argparse.Namespace) -> int:
         )
         print(f"BeamNGpy {report['beamngpy']} / MCP SDK {report['mcp_sdk']}")
     return 0 if installation.executable is not None else 1
+
+
+def _native_check(args: argparse.Namespace) -> int:
+    report = asyncio.run(NativeMCPClient(_load(args.config).native_mcp).health())
+    if args.as_json:
+        print(json.dumps(report, indent=2))
+    elif report["ready"]:
+        print(
+            f"Native MCP ready: {len(report['catalog']['supported_actions'])} actions; "
+            f"{len(report['checks'])} read-only checks in {report['elapsed_seconds']}s. "
+            "Legacy BeamNGpy and mutating actions were not tested."
+        )
+    else:
+        print(f"Native MCP not ready: {report.get('error', 'probe failed')}")
+    return 0 if report["ready"] else 1
 
 
 def _install(args: argparse.Namespace) -> int:
@@ -368,6 +401,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _serve(args)
         if args.command == "doctor":
             return _doctor(args)
+        if args.command == "native-check":
+            return _native_check(args)
         if args.command == "install-lua":
             return _install(args)
         if args.command == "validate-mod":

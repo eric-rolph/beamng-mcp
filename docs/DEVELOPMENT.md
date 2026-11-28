@@ -64,6 +64,33 @@ options as the exporter.
 
 ## Simulator integration tests
 
+### Native MCP on current retail builds
+
+`beamng-mcp native-check --json` performs three read-only queries plus catalog validation against
+the configured running game. It does not launch a game or test legacy BeamNGpy.
+
+For the full native action gauntlet, configure the three `BEAMNG_MCP_TEST_BEAMNG_*` paths below,
+using a sentinel-marked test root, then run **serially**:
+
+```powershell
+$env:BEAMNG_MCP_TEST_NATIVE = "1"
+# Optional durable JSON report (and sibling JPEG):
+$env:BEAMNG_MCP_TEST_NATIVE_REPORT = "C:\absolute\test-output\native-live.json"
+uv run pytest -q tests/test_native_mcp_live.py
+```
+
+This Windows test creates a unique child profile under the locked test root, launches its own
+offscreen D3D12 process on a reserved random port, and verifies the engine's active user path
+before any mutation. Fixture setup uses a fixed upstream Lua read of `FS:getUserPath()` and loads
+stock Utah; neither unrestricted operation becomes a public tool. It exercises every reviewed
+native action through the official MCP client, with read-back checks for physics, camera, editor,
+lighting, and additive vehicle spawn. A 240-second watchdog and `finally` cleanup stop only the
+owned process. The root lock stays outside the launched `current/` folder because engine upgrades
+can relocate that folder. No user's running game is attached, no level is saved, and no real profile
+is used. Test profiles and evidence remain for review.
+
+### Legacy BeamNGpy and custom bridge
+
 Do not run BeamNG in shared CI. Local integration must use a dedicated active user folder containing
 the `.beamng-mcp-test-user` sentinel described in [Setup](SETUP.md). Set explicit installation,
 binary, and active-user paths:

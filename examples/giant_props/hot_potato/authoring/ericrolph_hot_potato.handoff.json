@@ -3561,84 +3561,6 @@
           4.5,
           -30.0
         ]
-      },
-      "mash_steam_b1": {
-        "direction": [
-          0.0,
-          0.0,
-          1.0
-        ],
-        "emitter": "BNGP_20",
-        "position": [
-          -3.0,
-          -3.0,
-          -30.0
-        ]
-      },
-      "mash_steam_b2": {
-        "direction": [
-          0.0,
-          0.0,
-          1.0
-        ],
-        "emitter": "BNGP_20",
-        "position": [
-          3.0,
-          -3.0,
-          -30.0
-        ]
-      },
-      "mash_steam_b3": {
-        "direction": [
-          0.0,
-          0.0,
-          1.0
-        ],
-        "emitter": "BNGP_20",
-        "position": [
-          -3.0,
-          3.0,
-          -30.0
-        ]
-      },
-      "mash_steam_b4": {
-        "direction": [
-          0.0,
-          0.0,
-          1.0
-        ],
-        "emitter": "BNGP_20",
-        "position": [
-          3.0,
-          3.0,
-          -30.0
-        ]
-      },
-      "mash_steam_b5": {
-        "direction": [
-          0.0,
-          0.0,
-          1.0
-        ],
-        "emitter": "BNGP_20",
-        "position": [
-          0.0,
-          -4.5,
-          -30.0
-        ]
-      },
-      "mash_steam_b6": {
-        "direction": [
-          0.0,
-          0.0,
-          1.0
-        ],
-        "emitter": "BNGP_20",
-        "position": [
-          0.0,
-          4.5,
-          -30.0
-        ]
       }
     },
     "triggers": {
@@ -3660,10 +3582,22 @@
       "ai_aggression": 1.0,
       "ai_enabled": false,
       "ai_speed_kmh": 90.0,
+      "arch_feet": [
+        [
+          -22.801,
+          0.0,
+          0.0
+        ],
+        [
+          22.801,
+          0.0,
+          0.0
+        ]
+      ],
       "arena_enabled": true,
       "arena_halo_enabled": true,
       "arena_magnet_enabled": true,
-      "arena_magnet_g": 0.6,
+      "arena_magnet_g": 1.2,
       "arena_radius_m": 91.4,
       "attach_sink": 0.16,
       "attach_wobble": 0.06,
@@ -6555,7 +6489,7 @@
         -3.0,
         -30.0
       ],
-      "sha256": "9c7f2d6f9445b603ac1dfa63538758abdf1d400fcb4c83970b13549dee845c90",
+      "sha256": "11e6df2f77f7aa379b48ab731b5e109ab79ea025614c0f5cf6f81e7a905928c2",
       "size": 2689449
     },
     {
@@ -6569,7 +6503,7 @@
         -3.0,
         -30.0
       ],
-      "sha256": "55f10ddac787ad1737eed0de46d62b7081929dd3610abaed4217290cd339cd6a",
+      "sha256": "80cd39cce449765d23bd67814160a447ecf8a51e781f083639546a96c26ac609",
       "size": 2693862
     },
     {
@@ -6583,7 +6517,7 @@
         3.0,
         -30.0
       ],
-      "sha256": "ee7cc2980fbaa613932ff7302876dcbf1d2fd0c2858a65ce2c8976d50397f9c7",
+      "sha256": "019c700b63426856ca48d16c016d363283272b696e2e8d9b963495b9ec492806",
       "size": 2691048
     },
     {
@@ -6597,7 +6531,7 @@
         3.0,
         -30.0
       ],
-      "sha256": "c71f10a961671659d0f97cfb30a135cbe3b2a88961994ca0c83d275ce764dc58",
+      "sha256": "855cb1e08bce91b4a0cdc3049ba0a13ea7ba6127ca76d983f471ff33135aba75",
       "size": 1807248
     },
     {
@@ -6611,7 +6545,7 @@
         -4.5,
         -30.0
       ],
-      "sha256": "31dce141cc068bb1ce769abb64a2c5f0786b3bc7c3f5988a42e6fd525039e85d",
+      "sha256": "52dd03c06c64394111df831d32688e6c7bc2217ff42dcc1f14e036a204fbed91",
       "size": 3717596
     },
     {
@@ -6625,7 +6559,7 @@
         4.5,
         -30.0
       ],
-      "sha256": "34e6c11eabb71958d8c4d6df3d3613cf48ca7ba20ae883a7bc86040f911d455d",
+      "sha256": "ad6014ec40298a45ae153ac08efc39e1066aad84a1cd1ac807953be6102b2f7d",
       "size": 1808079
     },
     {
@@ -6639,7 +6573,7 @@
         0.0,
         5.6
       ],
-      "sha256": "35b5da6c934ba57fd2b5b0f99fdce9ca7d398e4b3fb832b5b395dbccac4f9796",
+      "sha256": "bb8b96659906969b312cf62c7c40a74cea4a035d107377f5b0d71d2b8324be6b",
       "size": 1806986
     }
   ],
@@ -7164,7 +7098,7 @@
       "ericrolph_hot_potato_plinth_concrete"
     ],
     "path": "vehicles/ericrolph_hot_potato/ericrolph_hot_potato.dae",
-    "sha256": "74b3b71f8d838753096d4e342f6e01a22ac710a72fd32e50755fc9ef30c85c39",
-    "size": 626004
+    "sha256": "b54a02a530874645b11117d9b981e011b540e6a66387a3c87e1414322bed380f",
+    "size": 625990
   }
 }
